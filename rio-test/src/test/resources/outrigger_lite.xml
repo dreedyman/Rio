@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE opstring PUBLIC "-/RIO//DTD" "http://www.rio-project.org/dtd/rio_opstring.dtd">
+<opstring>
+    <OperationalString Name="Space">
+        <Groups>
+            <Group>${user.name}</Group>
+        </Groups>
+
+        <Resources id="outrigger-dl">
+            <JAR>outrigger-dl.jar</JAR>
+            <JAR>jsk-dl.jar</JAR>
+            <JAR>rio-dl.jar</JAR>
+        </Resources>
+
+        <Resources id="outrigger-impl">
+            <JAR>outrigger.jar</JAR>
+        </Resources>
+
+        <ServiceBean Name="Result Space">
+            <Interfaces>
+                <Interface>net.jini.space.JavaSpace05</Interface>
+                <Resources ref="outrigger-dl"/>
+            </Interfaces>
+
+            <ImplementationClass Name="com.sun.jini.outrigger.TransientOutriggerImpl">
+                <Resources ref="outrigger-impl"/>
+            </ImplementationClass>
+
+            <Maintain>1</Maintain>
+
+            <MaxPerMachine>1</MaxPerMachine>
+
+            <Configuration>
+                import net.jini.jrmp.JrmpExporter;
+                com.sun.jini.outrigger {
+                    serverExporter = new JrmpExporter();
+                }
+            </Configuration>
+        </ServiceBean>
+
+        <ServiceBean Name="Task Space">
+            <Interfaces>
+                <Interface>net.jini.space.JavaSpace05</Interface>
+                <Resources ref="outrigger-dl"/>
+            </Interfaces>
+
+            <ImplementationClass Name="com.sun.jini.outrigger.TransientOutriggerImpl">
+                <Resources ref="outrigger-impl"/>
+            </ImplementationClass>
+
+            <Association Name="Result Space" Type="opposed"/>
+            
+            <Maintain>1</Maintain>
+
+            <MaxPerMachine>1</MaxPerMachine>
+
+            <Configuration>
+                import net.jini.jrmp.JrmpExporter;
+                com.sun.jini.outrigger {
+                    serverExporter = new JrmpExporter();
+                }
+            </Configuration>
+            
+        </ServiceBean>
+    </OperationalString>
+</opstring>

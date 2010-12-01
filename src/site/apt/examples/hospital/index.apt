@@ -1,0 +1,69 @@
+ ------
+ Hospital Example
+ ------
+
+Hospital Example
+
+ This example combines Rio and Drools through the use of the Gnostic service.
+ This example demonstrates the use of associations, association based dependency
+ injection, watches, and the incorporation of rules to manage SLA behavior.
+
+ You interact with a user interface to admit patients to the hospital. You can
+ admit them one by one, or several at a time.  The Hospital has a rule
+ <<<(DoctorRule.drl)>>> that when a Doctor has more than 3 patients, an ON CALL
+ Doctor is changed to ON DUTY.
+
+ As patients are admitted they are assigned beds. Each bed has a pulse and a
+ temperature monitor. There is a rule that monitors a patient's pulse
+ <<<(PatientAlert.drl)>>>. If a patient's pulse falls below 50, a patient
+ alert is sent out.
+
+[../../images/workflow.png]
+
+ [[1]] The Master creates a <<<WorkflowEntry>>>, and write the <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.NEW>>> to the JavaSpace.
+
+ [[2]] The "New Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.NEW>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.PENDING>>> to the JavaSpace.
+
+ [[3]] The "Pending Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.PENDING>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.OPEN>>> to the JavaSpace.
+
+ [[4]] The "Open Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.OPEN>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.CLOSED>>> to the JavaSpace.
+
+ [[5]] The Master then takes the completed workflow by taking the <<<WorkflowEntry>>>, with it's <<<State>>> set to <<<State.CLOSED>>> from the JavaSpace.
+
+ []
+
+ Each worker is configured in the OperationalString process the correct entry.
+
+* Building the example
+
+ The Hospital example is a multi-module Maven project, with the following
+ structure (just inter-project dependencies are shown):
+
+[../../images/hospital-project.png]
+
+ The example produces the following artifacts:
+
+*-----------------------+-------------+
+| <<Artifact>>          | <<Description>>
+*-----------------------+-------------+
+| hospital-service-2.0.jar      | Artifact containing service implementation classes
+*-----------------------+-------------+
+| hospital-rule-2.0.jar      | Artifact containing service rules resources
+*-----------------------+-------------+
+| hospital-api-2.0.jar   | Artifact that contains classes required for a client to invoke methods on the hospital services
+*-----------------------+-------------+
+| hospital-ui-2.0.jar   | Artifact that contains classes required for a user interface to the hospital
+*-----------------------+-------------+
+| hospital-2.0.oar      | The OperationalString archive, contains the configuration artifacts used to deploy the hospital application
+*-----------------------+-------------+
+
+ Running <<<mvn install>>> will result in the execution of integration tests that use
+ the Rio test infrastructure
+
+* Running the example
+
+ Look {{{running.html}here}} for information on running the example
+
+
+ The example also provides test cases that use the Rio test infrastructure
+ to create and invoke methods on the Hospital application. 

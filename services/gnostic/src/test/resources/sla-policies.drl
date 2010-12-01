@@ -1,0 +1,90 @@
+package org.rioproject.sla;
+
+import org.rioproject.core.ServiceElement;
+import org.rioproject.event.RemoteServiceEvent;
+import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.monitor.ProvisionFailureEvent;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+declare RemoteServiceEvent
+    @role(event)
+    @timestamp(date)
+end
+
+declare ProvisionMonitorEvent
+    @role(event)
+    @timestamp(date)
+end
+
+declare ProvisionFailureEvent
+    @role(event)
+    @timestamp(date)
+end
+/*
+
+rule "show all remote events"
+when
+    $event : RemoteServiceEvent() from entry-point "provision-events-stream"
+then
+    Logger.getLogger("org.rioproject.gnostic.Gnostic").info("Found monitor event: " + $event);
+end
+
+rule "show all provisioning events"
+when
+    $event : ProvisionMonitorEvent() from entry-point "provision-events-stream"
+then
+    Logger.getLogger("org.rioproject.gnostic.Gnostic").info("Found monitor event: " + $event);
+end
+*/
+
+rule "Notify on Deploy"
+when
+    event : ProvisionMonitorEvent(action == ProvisionMonitorEvent.Action.OPSTRING_DEPLOYED)
+        from entry-point "provision-events-stream"
+then
+    String opStringName = event.getOperationalStringName();
+    Logger.getLogger("org.rioproject.gnostic.Gnostic")
+            .info("\n\n["+opStringName+"] deployment has been submitted\n\n");
+end
+
+rule "Notify on Provision Failure"
+when
+    event : ProvisionFailureEvent() from entry-point "provision-events-stream"
+then
+    String opStringName = event.getServiceElement().getOperationalStringName();
+    String serviceName = event.getServiceElement().getName();
+    Logger.getLogger("org.rioproject.gnostic.Gnostic")
+            .info("\n\nProvisionFailureEvent: Service ["+opStringName+"/"+serviceName+"] failed to be deployed\n\n");
+end
+
+rule "Notify on Provision Success After Failure"
+when
+    pfe : ProvisionFailureEvent($oName : serviceElement.operationalStringName,
+                                $sName : serviceElement.name)
+        over window:time( 1m )
+        from entry-point "provision-events-stream"
+
+
+    provisioned : ArrayList() from collect(ProvisionMonitorEvent(action == ProvisionMonitorEvent.Action.SERVICE_PROVISIONED,
+                                                            operationalStringName == $oName,
+                                                            serviceElement.name == $sName)
+        from entry-point "provision-events-stream")
+    /*
+    event : ProvisionMonitorEvent(action == ProvisionMonitorEvent.SERVICE_PROVISIONED,
+                                       operationalStringName == $oName,
+                                       serviceElement.name == $sName,
+                                       date after[45s,*] pfe.date)
+         over window:time( 1m )
+         from entry-point "provision-events-stream"
+
+    */
+    eval (pfe!=null && provisioned.size()==0)
+
+then
+    String opStringName = pfe.getServiceElement().getOperationalStringName();
+    String serviceName = pfe.getServiceElement().getName();
+
+    Logger.getLogger("org.rioproject.gnostic.Gnostic")
+            .info("\n\n["+opStringName+"/"+serviceName+"] service not instantiated within 45 seconds of receiving ProvisionFailureEvent\n\n");
+end

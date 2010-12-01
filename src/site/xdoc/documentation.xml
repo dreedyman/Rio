@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+
+    <body>
+        <section name="API Documentation">
+            <p>
+                <h4>API</h4>
+            </p>
+            <p>
+                <a href="apidocs/index.html" target="_blank">Browse JavaDocs</a>.
+            </p>
+            <p>
+            <p>
+                <h4>Guides</h4>
+            </p>
+
+                Please check the
+                <a href="http://wiki.rio-project.org" target="_blank">Rio Wiki
+                </a>
+                for developer and user guides
+            </p>
+
+        </section>
+
+    </body>
+</document>

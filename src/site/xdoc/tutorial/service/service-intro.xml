@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Service Tutorial">
+            <p>
+                This tutorial describes how to create, develop and deploy a simple Hello World
+                application using Rio.
+            </p>
+            <div class="section"><h3>Introduction</h3></div>
+                Rio provides a dynamic service oriented architecture, allowing the
+                development, deployment and management of services through the network.
+                Rio provides the ability to develop POJO based services, Spring supported
+                deployment as well as using the Rio Service Bean approach.
+            
+            <p>
+                Service Beans provide a simple component model defining lifecycle semantics
+                of a dynamic service (start, init, advertise, unadvertise, stop, destroy).
+                The fundamental premise is for the infrastructure to provide an easy to use
+                programming model, whole maintaining access to lower level APIs such as
+                Watches, Associations and Remote Events.
+            </p>
+
+            <p>
+                The POJO approach leverages the Service Bean model, allowing POJOs to
+                be developed and deployed without using any Rio infrastructure code.
+                Our example in this section uses a simple Hello World Plain Old Java Object (POJO).
+                The bean is dynamically made available as a distributed service by Rio, allowing
+                the bean to be accessed remotely, with built-in management, fault detection
+                and automated deployment.
+            </p>
+
+            <p>
+                This example will also use a test client, showing how the service can be tested
+                and invoked.
+            </p>
+            <div class="section"><h3>Project Creation</h3></div>
+            <p>
+                This tutorial uses the <a href="">Rio Maven Archetype</a> to create a project.
+            </p>
+            <ol>
+                <li>Open a terminal window</li>
+                <li>Run the following command:
+<div class="source">
+                <pre>
+mvn archetype:generate
+-DarchetypeGroupId=org.rioproject
+-DarchetypeArtifactId=rio-archetype
+-DarchetypeRepository=http://www.rio-project.org/maven2
+-DarchetypeVersion=4.1</pre>
+            </div> </li>
+                <li>
+                    When prompted for the service, enter <tt>Hello</tt>. Provide appropriate
+                    values for the artifactId, groupId, version and package name.
+                </li>
+                <li>When complete <tt>cd</tt> into the newly created project</li>
+            </ol>
+
+            <div id="tipbox">
+                <img src="../../images/check.gif"/>
+                Maven also comes pre-packaged with plugins for getting up and running
+                with your favorite IDE. Try using
+                <a href="http://maven.apache.org/plugins/maven-idea-plugin/usage.html">mvn idea:idea</a> or
+                <a href="http://maven.apache.org/guides/mini/guide-ide-eclipse.html">mvn eclipse:eclipse</a> 
+                for each respective editor.
+            </div>
+
+            <p>
+                <p>The Rio Maven Archetype generates a fully functional multi-module Maven project
+                    for you with the following structure:</p>
+            </p>
+            <p><img src="../../images/generated-module-structure.png"/></p>
+            <p>The following items are generated</p>
+            <ul>
+                <li>The pom.xml</li>
+                <li>hello-api/pom.xml</li>
+                <li>hello-api/src/main/java/<i>package</i>/hello/Hello.java (interface)</li>
+                <li>hello-service/src/main/java/<i>package</i>/hello/HelloImpl.java (implementation)</li>
+                <li>hello-service/src/test/java/<i>package</i>/hello/ITAbstractHelloTest.java (used as a base class for service testing)</li>
+                <li>hello-service/src/test/java/<i>package</i>/hello/ITHelloTest.java (uses a StaticCybernode for testing your service)</li>
+                <li>hello-service/src/test/java/<i>package</i>/hello/ITHelloDeployTest.java (starts Rio services and deploys your service for testing)</li>
+                <li>hello-service/src/test/conf/test-config.groovy</li>
+                <li>src/main/opstring/artifactId.groovy (OperationalString)</li>
+            </ul>
+
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                The <i>package</i> name is replaced with the value you provided when
+                prompted by the Rio Maven Archetype.
+            </div>
+
+            <p>
+                If you'd like to add a smart proxy to your service, add another module to the project as follows:
+            </p>
+            <p><img src="../../images/module-structure-with-proxy.png"/></p>
+             <div id="infobox">
+                <img src="../../images/information.gif"/>
+                Make sure to adjust the service's module dependency to depend on the proxy, not the api.
+            </div>
+
+            <div class="section"><h3>Service Interface and Implementation</h3></div>
+
+            <p>Open up the generated Hello.java interface. You'll see the interface is quite simple:</p>
+
+<pre name="code" class="java">
+import java.rmi.RemoteException;
+    
+public interface Hello {
+
+}</pre>
+
+
+            <p>Add the following to the interface:</p>
+
+<pre name="code" class="java">
+import java.rmi.RemoteException;
+    
+public interface Hello {
+    String hello(String message) throws RemoteException;
+}</pre>
+
+            <br/><br/>
+            
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                Note the declaration of <tt>java.rmi.RemoteException</tt> for the
+                hello method. This is required to distinguish that the method
+                invocation is <i>remote-able</i>. Why is this important? For one, the
+                distinction between local invocation vs. remote invocation is a
+                distinction that should not be papered over.<br/><br/>
+                When developing a system composed of distributed services,
+                the developer (and deployer) need to be aware of the semantics
+                of remote invocations. Masking that a method may be local or
+                remote can have adverse side-effects in the deployment of
+                enterprise-wide systems, since such issues of partial failure
+                and latency are not formal considerations of the designers
+                and developers.<br/><br/>
+                Rio provides great utility here, especially in the context of
+                Associations, however, the enforcement of declaring throws
+                <tt>RemoteException</tt> for methods that are to be invoked remotely
+                is a requirement when developing services with Rio.
+            </div>
+
+            <p>
+                The implementation of the bean for the Hello interface is equally as simple.
+                You'll need to implement the <tt>hello</tt> method:</p>
+
+<pre name="code" class="java">
+public class HelloImpl implements Hello {
+    int visitorNumber = 1;
+
+    public String hello(String message) {
+        System.out.println("Client says hello : "+message);
+        return("Hello visitor : "+visitorNumber++);
+    }
+}</pre>
+
+            <div class="section"><h3>Testcases</h3></div>
+            <p>
+                The Rio Maven Archetype generates 3 test classes:
+                <ul>
+                    <li>hello-service/src/test/java/<i>package</i>/hello/ITAbstractHelloTest.java (used as a base class for service testing)</li>
+                    <li>hello-service/src/test/java/<i>package</i>/hello/ITHelloTest.java (uses a StaticCybernode for testing your service)</li>
+                    <li>hello-service/src/test/java/<i>package</i>/hello/ITHelloDeployTest.java (starts Rio services and deploys your service for testing)</li>
+                </ul>
+            </p>
+            <p>Open up the generated ITAbstractHelloTest.java class. Modify the
+                <tt>testService</tt> method as follows:</p>
+
+<pre name="code" class="java">
+void testService(Hello service) {
+    Assert.assertNotNull(service);
+    /* Add your testing code here ...*/
+    Throwable thrown = null;
+    try {
+        for(int i=1; i&lt;10; i++) {
+	        String result = service.hello("Test Client");
+            Assert.assertEquals("Hello visitor : "+i, result);
+        }
+    } catch(Throwable t) {
+	    thrown = t;
+    }
+    Assert.assertNull(thrown);
+}
+</pre>
+            
+
+            <div class="section"><h3>Build and Deploy</h3></div>
+            <p>
+                Once you've made those modifications, the example can be run during the
+                integration-test lifecycle phase of the project (see the declaration of the
+                <a href="http://mojo.codehaus.org/failsafe-maven-plugin/">failsafe-maven-plugin</a> in the pom),
+                or by deploying the example to a running Rio system.
+            </p>
+            <p>
+                To deploy the example to a running Rio system:
+            </p>
+            <p>
+                Note: Make sure your project is built. If you run <tt>mvn install</tt>,
+                your project will be built, packaged tested and installed to your
+                local repository. The integration tests include starting Rio services
+                and deploying the application. If you want to skip the tests and
+                just deploy the project, run <tt>mvn install -Dmaven.test.skip</tt>
+                and follow the steps below.
+            </p>
+            <ol>
+                <li>Make sure Rio services are running</li>
+                <ul>
+                    <li>Run either:</li>
+                    <ul>
+                        <li>Start all services in the same JVM:
+                            <a href="../../start-all-mojo.html"><tt>mvn rio:start-all</tt></a> </li>
+                        <li>To start a Cybernode and a Provision Monitor in their own JVMs:
+                            <a href="../../start-cybernode-mojo.html"><tt>mvn rio:start-cybernode</tt></a> 
+                            and <a href="../../start-monitor-mojo.html"><tt>rio:start-monitor</tt></a></li>
+                    </ul>
+                </ul>
+                <li>Deploy the example</li>
+                <ul>
+                    <li><a href="../../deploy-mojo.html"><tt>mvn rio:deploy</tt></a></li>
+                </ul>
+                <li>View the deployed example</li>
+                <ul>
+                    <li><a href="../../ui-mojo.html"><tt>mvn rio:ui</tt></a></li>
+                </ul>
+            </ol>
+
+            <img src="../../images/hello-service-deployed.png"/>    
+        </section>
+    </body>
+    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
+    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
+    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

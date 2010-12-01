@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Using Watches and SLAs with External Services">
+            <p>
+                As outlined in the <a href="tutorial/service-exec/service-exec-intro.html">Service Exec Tutorial</a>,
+                the Rio execution framework provides the ability to encapsulate
+                the control and monitoring of external services. Service control
+                adapters represent applications/services, adding network wide visibility
+                and control. Using this approach, we can attach monitoring,
+                metering and SLA control to existing applications.
+            </p>
+            <p>
+                This section discusses how to declaratively attach SLA behavior
+                in an opstring for an external service.
+            </p>
+            <p>
+                For this example we will use the Tomcat deployment
+                (as described in the <a href="examples/tomcat/index.html">Tomcat example</a>).
+            </p>
+<pre name="code" class="java:nocontrols">
+import org.rioproject.config.Constants
+
+deployment(name: 'Tomcat Deploy') {
+    /* Configuration for the discovery group that the service should join.
+     * This first checks if the org.rioproject.groups property is set, if not
+     * the user name is used */
+    groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                              System.getProperty('user.name'))
+
+    serviceExec(name: 'Tomcat') {
+
+        /*
+         * This declaration will remove the downloaded Tomcat distribution
+         * when the Tomcat service is terminated (undeployed and/or
+         * administratively stopped using Rio).
+         *
+         * If you want to keep the installed software (rather than overwrite
+         * it each time), modify the declaration below to include:
+         *
+         * overwrite: 'no', removeOnDestroy: false
+         */
+        software(name: 'Tomcat', version: '6.0.16', removeOnDestroy: true) {
+            install source: 'https://elastic-grid.s3.amazonaws.com/tomcat/apache-tomcat-6.0.16.zip',
+                    target: '${RIO_HOME}/system/external/tomcat',
+                    unarchive: true
+            postInstall(removeOnCompletion: false) {
+                execute command: '/bin/chmod +x ${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
+            }
+        }
+
+        execute(inDirectory: 'bin', command: 'catalina.sh run') {
+            environment {
+                property name: "CATALINA_OPTS", value: "-Dcom.sun.management.jmxremote"
+            }
+        }
+
+        sla(id:'ThreadPool', high: 100) {
+            policy type: 'notify'
+            monitor name: 'Thread Pool',
+                    objectName: "Catalina:name=http-8080,type=ThreadPool",
+                    attribute: 'currentThreadsBusy', period: 5000
+        }
+
+
+        maintain 1
+    }
+}    
+</pre>
+            <p>
+                The opstring above declares that Rio activate an instance of Tomcat.
+                If the software does not exist on the target compute resource it will
+                be installed, and upon service removal, the installed artifacts removed.
+            </p>
+            <p>
+                From an SLA perspective, Rio will use the
+                <a href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">JMX Attach API</a>
+                to connect to the co-located JVM, and query the Thread Pool attribute
+                every 5 seconds.
+            </p>
+            <p>
+                If the Thread Pool exceeds 100, a SLAThresholdEvent is sent to all
+                subscribed consumers. To include different behavior, the policy type
+                can be changed to scaling or even relocation (sometimes a relocating
+                policy handler only makes sense given what you are observing, disk
+                space may make sense in that case).
+            </p>
+            <div id="infobox">
+                <img src="images/information.gif"/>
+                If the external service is a Java Virtual Machine, this utility
+                will try to attach to the Java Virtual Machine using the JMX Attach API.
+                This is only possible using Java 6 or greater. If the runtime is Java 5,
+                external service utilization monitoring is not provided.
+            </div>
+
+            <div class="section"><h3>Next</h3></div>
+            <a href="watches-sla-system.html">System Watches</a> >
+        </section>
+    </body>
+    <script type="text/javascript" src="highlighter/shCore.js"></script>
+    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
+    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.rioproject</groupId>
+    <artifactId>main</artifactId>
+    <version>4.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Rio Project</name>
+    <description>Rio Project</description>
+    <inceptionYear>2006</inceptionYear>
+    <url>http://rio-project.org</url>
+
+    <licenses>
+        <license>
+            <name>Apache Software License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Rio Project</name>
+        <url>http://www.rio-project.org</url>
+    </organization>
+
+    <issueManagement>
+        <system>JIRA</system>
+        <url>http://jira.rio-project.org</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:svn:https://rio.dev.java.net/svn/rio/trunk --username
+            guest
+        </connection>
+        <developerConnection>scm:svn:https://rio.dev.java.net/svn/rio/trunk
+            --username username
+        </developerConnection>
+        <url>https://rio.dev.java.net/source/browse/rio/trunk/</url>
+    </scm>
+
+    <ciManagement>
+        <system>teamcity</system>
+        <url>http://ci.rio-project.org</url>
+    </ciManagement>
+
+    <reporting>
+        <excludeDefaults>true</excludeDefaults>
+        <plugins>        
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <inherited>false</inherited>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!--
+                            <report>dependencies</report>
+                            <report>dependency-convergence</report>
+                             -->
+                            <report>dependency-management</report>
+                            <!--
+                            <report>plugin-management</report>
+                            -->
+                            <report>modules</report>
+                            <report>cim</report>
+                            <report>issue-tracking</report>
+                            <report>mailing-list</report>
+                            <report>license</report>
+                            <report>project-team</report>
+                            <report>scm</report>
+                            <report>index</report>
+                            <!--<report>findbugs</report>-->
+                        </reports>
+                        <configuration>
+                            <aggregate>true</aggregate>
+                        </configuration>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.5</version>
+                <inherited>false</inherited>
+                <configuration><aggregate>true</aggregate></configuration>
+                <reportSets>
+                    <reportSet>
+                        <id>aggregate</id>
+                        <configuration>
+                            <links>
+                                <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
+                                <link>https://hudson.apache.org/hudson/view/River/job/River-trunk/javadoc/api/index.html</link>
+                            </links>
+                            <detectLinks>true</detectLinks>
+                            <breakiterator>true</breakiterator>
+                            <top><![CDATA[<h2>Rio Project ${pom.version} API Documentation</h2>]]></top>
+                            <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
+                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.cybernode.ui:org.rioproject.monitor.ui:org.rioproject.tools.ui:org.rioproject.tools.discovery</excludePackageNames>
+                        </configuration>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <!--
+            <plugin>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <inherited>false</inherited>
+                <configuration>
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+            -->
+        </plugins>
+    </reporting>
+
+    <mailingLists>
+        <mailingList>
+            <name>Rio User List</name>
+            <archive>http://groups.google.com/group/rio-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>Rio Developer List</name>
+            <archive>http://groups.google.com/group/rio-dev</archive>
+        </mailingList>
+        <mailingList>
+            <name>Rio Commits List</name>
+            <archive>
+                https://rio.dev.java.net/servlets/SearchList?listName=commits
+            </archive>
+        </mailingList>
+    </mailingLists>
+
+    <developers>
+        <developer>
+            <id>dreedy</id>
+            <name>Dennis Reedy</name>
+            <email>dennis.reedy@gmail.com</email>
+            <roles>
+                <role>Project Owner</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
+            <id>jeje</id>
+            <name>Jerome Bernard</name>
+            <email>jerome.bernard@elastic-grid.com</email>
+            <organization>Elastic Grid</organization>
+            <organizationUrl>http://www.elastic-grid.com</organizationUrl>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+
+    </developers>
+
+    <distributionManagement>
+        <repository>
+            <id>rio</id>
+            <name>Rio Repository</name>
+            <url>scp://www.rio-project.org/var/www/maven2</url>
+        </repository>        
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>rio</id>
+            <url>http://www.rio-project.org/maven2</url>
+        </repository>
+    </repositories>
+
+    <!-- Needed if you are building Rio for the first time -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>rio</id>
+            <url>http://www.rio-project.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>net.jini</groupId>
+                <artifactId>start</artifactId>
+                <version>2.1</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>net.jini</groupId>
+                <artifactId>jsk-lib</artifactId>
+                <version>2.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.jini</groupId>
+                <artifactId>jsk-dl</artifactId>
+                <version>2.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.jini</groupId>
+                <artifactId>jsk-platform</artifactId>
+                <version>2.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.jini</groupId>
+                <artifactId>reggie</artifactId>
+                <version>2.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.jini</groupId>
+                <artifactId>reggie</artifactId>
+                <version>2.1</version>
+                <classifier>dl</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>net.jini.lookup</groupId>
+                <artifactId>serviceui</artifactId>
+                <version>2.1</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>net.jini.lookup</groupId>
+                <artifactId>jmx-lookup</artifactId>
+                <version>2.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>2.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hyperic</groupId>
+                <artifactId>sigar-dist</artifactId>
+                <version>${hyperic.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>1.7.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy.maven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.0</version>
+            </dependency>
+           
+        </dependencies>
+
+    </dependencyManagement>
+
+    <build>
+        <!--
+        <directory>target</directory>
+        <outputDirectory>target/classes</outputDirectory>
+        <finalName>${artifactId}-${version}</finalName>
+        <testOutputDirectory>target/test-classes</testOutputDirectory>
+        -->
+        <plugins>
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>2.0.1</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <locales>en</locales>
+                    <outputDirectory>${basedir}/docs</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <optimize>true</optimize>
+                    <encoding>UTF-8</encoding>
+                    <meminitial>128m</meminitial>
+                    <maxmem>1024m</maxmem>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <modules>
+        <module>plugins/maven-rio-plugin</module>
+        <module>plugins/rio-archetype</module>
+        <module>boot</module>
+        <module>rio</module>
+        <module>resolver</module>
+        <module>webster</module>
+        <module>services</module>
+        <module>tools</module>
+        <module>rio-test</module>
+        <module>examples</module>
+        <module>distribution</module>
+  </modules>
+
+    <properties>
+        <rio.version>4.1-SNAPSHOT</rio.version>
+        <hyperic.version>1.6.3.82</hyperic.version>
+        <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
+        <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>
+    </properties>
+    
+</project>

@@ -1,0 +1,160 @@
+<assembly>
+    <!-- We dont use the <id> element to avoid the extension to the directory
+         and zip name -->
+    <formats>
+        <format>dir</format>
+        <!--<format>zip</format>-->
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        
+        <fileSet>
+            <directory>${basedir}/..</directory>
+            <includes>
+                <include>LICENSE</include>
+                <include>NOTICE</include>
+                <include>index.html</include>
+            </includes>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+
+        <!-- bin directory -->
+        <fileSet>
+            <directory>${basedir}/../bin</directory>
+            <includes>
+                <include>*</include>
+            </includes>
+            <filtered>true</filtered>
+            <fileMode>0755</fileMode>
+            <outputDirectory>/bin</outputDirectory>
+        </fileSet>
+
+        <!-- docs directory -->
+        <fileSet>
+            <directory>${basedir}/../docs</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <!--<filtered>true</filtered>
+            <fileMode>0644</fileMode>-->
+            <outputDirectory>/docs</outputDirectory>
+        </fileSet>
+
+        <!-- examples zip -->
+        <fileSet>
+            <directory>${basedir}/target/staging/examples</directory>
+            <includes>
+                <include>examples.zip</include>
+            </includes>
+            <!--<filtered>true</filtered>
+            <fileMode>0644</fileMode>-->
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+
+        <!-- policy directory -->
+        <fileSet>
+            <directory>${basedir}/../policy</directory>
+            <includes>
+                <include>policy.all</include>
+            </includes>
+            <filtered>true</filtered>
+            <fileMode>0644</fileMode>
+            <outputDirectory>/policy</outputDirectory>
+        </fileSet>
+
+        <!-- service configs -->
+        <fileSet>
+            <directory>${basedir}/../services/src/main/conf</directory>
+            <outputDirectory>/config</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <!-- Hyperic -->
+        <fileSet>
+            <!-- WHY DOESNT settings.localRepository WORK HERE??? -->
+            <directory>${user.home}/.m2/repository/org/hyperic/sigar-dist/${hyperic.version}/sigar-dist-${hyperic.version}/hyperic-sigar-1.6.3/sigar-bin/lib</directory>
+            <fileMode>0644</fileMode>
+            <outputDirectory>/lib/hyperic</outputDirectory>
+            <excludes>
+                <exclude>junit.jar</exclude>
+                <exclude>log4j.jar</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- tool configs -->
+        <fileSet>
+            <directory>${basedir}/../tools/src/main/conf</directory>
+            <outputDirectory>/config</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <filtered>true</filtered>
+            <useDefaultExcludes>true</useDefaultExcludes>
+        </fileSet>
+
+    </fileSets>
+
+    <dependencySets>
+        <!-- The lib directory are service implementation jars and their transitive requirements -->
+        <dependencySet>            
+            <excludes>                
+                <exclude>net.jini:jsk-dl</exclude>
+                <exclude>junit:junit</exclude>
+                <exclude>ant:*</exclude>
+                <exclude>jline:*</exclude>
+                <exclude>org.codehaus.izpack:*</exclude>
+                <exclude>*:oar</exclude>
+                <exclude>*:zip</exclude>
+            </excludes>
+            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+
+        <!-- Get jsk-dl.jar and put into the lib-dl directory -->
+        <dependencySet>
+            <includes>
+                <include>net.jini:jsk-dl</include>
+            </includes>
+            <outputDirectory>lib-dl</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+
+        <!-- The rest of the service download (-dl) jars go into the lib-dl directory -->
+        <dependencySet>
+            <useStrictFiltering>true</useStrictFiltering>
+            <includes>
+                <include>com.sun.jini:reggie:jar:dl</include>
+                <include>org.rioproject:cybernode:jar:dl</include>
+                <include>org.rioproject:monitor:jar:dl</include>
+                <include>org.rioproject:rio:jar:dl</include>
+                <!--<include>org.rioproject:gnostic:jar:dl</include>-->
+            </includes>
+            <outputDirectory>lib-dl</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}-dl.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+
+        <!-- We also put the service user interface (-ui) jars on the download directory -->
+        <dependencySet>
+            <useStrictFiltering>true</useStrictFiltering>
+            <includes>
+                <include>org.rioproject:cybernode:jar:ui</include>
+            </includes>
+            <outputDirectory>lib-dl</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}-ui.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+
+        <dependencySet>
+            <useStrictFiltering>true</useStrictFiltering>
+            <includes>
+                <include>org.rioproject:rio:jar:ui</include>
+            </includes>
+            <outputDirectory>lib-dl</outputDirectory>
+            <outputFileNameMapping>watch-ui.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+
+    </dependencySets>
+
+</assembly>

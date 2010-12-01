@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Service Exec Introduction">
+            <p>
+                Rio provides a framework for the development and deployment of dynamic services.
+                But what about existing technologies? Can Rio be used to deploy and manage exiting
+                (external) technologies? The short answer is yes.
+            </p>
+            <p>
+                The Rio execution framework provides the ability to encapsulate the control
+                and monitoring of external services. Service control adapters represent
+                applications/services, adding network wide visibility and control. Using
+                this approach, we can attach monitoring, metering and SLA control to
+                existing applications. The illustration below shows the notional
+                relationship of external services.
+            </p>
+            
+            <br/><br/>
+            <img src="../../images/rio-sca-exec.png"/>
+            <br/><br/>
+
+            <p>
+                The following sections will provide detail on:
+            </p>
+            <ul>
+                <li>How to declare the external service to be activated &amp; monitored</li>
+                <li>Data Staging</li>
+                <li>How Rio determines what is available to the Cybernode</li>
+                <li>Persistent Provisioning; how to dynamically install software then activate it </li>
+            </ul>
+
+            <p>
+                <img src="../../images/next_arrow.png" align="middle"/> You can also jump right to the provided
+                <a href="../../examples/tomcat/index.html">Tomcat example</a> as a reference.
+            </p>
+            <br/>
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                The Rio Service Exec framework is currently available for POSIX based systems only.
+            </div>
+
+            <div class="section"><h3>Next</h3></div>
+            <a href="service-exec-service-element.html"> How to declare the external service</a> >
+        </section>
+    </body>
+</document>

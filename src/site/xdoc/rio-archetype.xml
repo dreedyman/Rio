@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Rio Archetype">
+                Rio provides a custom Maven archetype for creating a Rio
+                project.
+                An
+                <a href="http://maven.apache.org/plugins/maven-archetype-plugin/index.html">
+                    archetype
+                </a>
+                is a Maven 2 form of a project template. You can create an empty
+                shell of your project quickly.
+
+
+            <div class="section">
+                <h3>Using the Rio Archetype</h3>
+            </div>
+            <p>The Rio archetype allows you to create a Rio application in
+                seconds.
+            </p>
+            <p>If you don't have Maven, you can get it
+                <a class="externalLink"
+                   href="http://maven.apache.org/">here</a>. Install
+                it and then invoke:
+            </p>
+            <div class="source">
+                <pre>
+mvn archetype:generate
+-DarchetypeGroupId=org.rioproject
+-DarchetypeArtifactId=rio-archetype
+-DarchetypeRepository=http://www.rio-project.org/maven2
+-DarchetypeVersion=4.1</pre>
+            </div>
+
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                Make sure it is all typed as a single line. It's been formatted
+                here for readability.
+            </div>
+
+            <p>
+                Or, you can simply run:
+            </p>
+            <div class="source">
+                <pre>RIO_HOME/bin/rio create-project</pre>
+            </div>
+
+            <div id="infobox">
+                <img src="images/information.gif"/>
+                If this is the first time you do this, you'll see a large number
+                of download messages.
+            </div>
+            <br/>
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                Make sure you have the RIO_HOME environment variable set.
+            </div>
+
+            <p>
+                You will be prompted to enter the artifactId, service to create
+                (this will be the classname of the service interface), the
+                groupId,
+                version and package name. The following output shows the
+                interaction:
+            </p>
+
+            <div class="source">
+                <pre>
+[INFO]
+------------------------------------------------------------------------
+[INFO] Building Maven Default Project
+[INFO] task-segment: [archetype:generate] (aggregator-style)
+[INFO]
+------------------------------------------------------------------------
+[INFO] Preparing archetype:generate
+[INFO] No goals needed for project - skipping
+[INFO] Setting property: classpath.resource.loader.class => 'org.codehaus.plexus.velocity.ContextClassLoaderResourceLoader'.
+[INFO] Setting property: velocimacro.messages.on => 'false'.
+[INFO] Setting property: resource.loader => 'classpath'.
+[INFO] Setting property: resource.manager.logwhenfound => 'false'.
+[INFO] [archetype:generate {execution: default-cli}]
+[INFO] Generating project in Interactive mode
+[INFO] Archetype defined by properties
+Define value for artifactId: : myexample
+Define value for service: : Hello
+Define value for groupId: : example
+Define value for version: 1.0-SNAPSHOT: :
+Define value for package: example: : com.foo.example
+Confirm properties configuration:
+artifactId: myexample
+service: Hello
+groupId: example
+artifactId: myexample
+version: 1.0-SNAPSHOT
+package: com.foo.example
+Y: :
+[INFO]
+------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO]
+------------------------------------------------------------------------
+[INFO] Total time: 39 seconds
+[INFO] Finished at: Wed Jan 06 17:40:02 EST 2010
+[INFO] Final Memory: 13M/80M
+[INFO]
+------------------------------------------------------------------------</pre>
+            </div>
+
+            <p>
+                Simply 'cd' into your newly created project directory and
+                type 'mvn install' and the service will be built, packaged,
+                tested and installed.
+            </p>
+
+            <div class="section">
+                <h3>Generated Project Features</h3>
+            </div>
+            <p>The generated Maven project is a multi-module project with the following structure:</p>
+            <p><img src="images/generated-project-structure.png"/></p>
+
+            <p>The project has the following items generated:</p>
+            <ul>
+                <li>The pom.xml</li>
+                <li><i>artifactId</i>-api/pom.xml</li>
+                <li><i>artifactId</i>-api/src/main/java/<i>package</i>/<i>artifactId</i>/<i>Service</i>.java (interface)</li>
+                <li><i>artifactId</i>-service/src/main/java/<i>package</i>/<i>artifactId</i>/<i>Service</i>Impl.java (implementation)</li>
+                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/ITAbstract<i>Service</i>Test.java (used as a base class for service testing)</li>
+                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/IT<i>Service</i>Test.java (uses a StaticCybernode for testing your service)</li>
+                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/IT<i>Service</i>DeployTest.java (starts Rio services and deploys your service for testing)</li>
+                <li><i>artifactId</i>-service/src/test/conf/test-config.groovy</li>
+                <li>src/main/opstring/artifactId.groovy (OperationalString)</li>
+            </ul>
+
+            <div id="infobox">
+                <img src="images/information.gif"/>
+                The <i>package</i>, <i>artifactId</i> and <i>Service</i> items are replaced with the values you provide when
+                prompted by the Rio Maven Archetype.
+            </div>
+            <div class="section">
+                <h3>IDE Integration</h3>
+            </div>
+
+            <p>
+                Maven also comes pre-packaged with plugins for getting up and running
+                with your favorite IDE. Try using
+                <a href="http://maven.apache.org/plugins/maven-idea-plugin/usage.html">mvn idea:idea</a> or
+                <a href="http://maven.apache.org/guides/mini/guide-ide-eclipse.html">mvn eclipse:eclipse</a>
+                for each respective editor. 
+            </p>
+        </section>
+
+    </body>
+</document>

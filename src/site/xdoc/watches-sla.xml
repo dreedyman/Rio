@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <head>
+        <script type="text/javascript" src="syntaxHighlighter/shCore.js"></script>
+        <script type="text/javascript" src="syntaxHighlighter/shBrushGroovy.js"></script>
+        <script type="text/javascript" src="syntaxHighlighter/shBrushJava.js"></script>
+
+        <link href="syntaxHighlighter/shCore.css" rel="stylesheet" type="text/css"/>
+        <link href="syntaxHighlighter/shThemeDefault.css" rel="stylesheet" type="text/css"/>
+
+        <script type="text/javascript">
+            SyntaxHighlighter.all()
+        </script>
+    </head>
+    <body>
+        <section name="Watches and SLAs">
+            <p>
+                In this section we will discuss how to use Watches and SLAs. If
+                you want to skip ahead to sub topics, the links follow directly.
+                The remainder of this page touches on the basics and fundamentals
+                of Watches and SLAs.
+            </p>
+            <ul>
+                <li><a href="watches-sla-dynamic.html">Watches and SLAs with Dynamic Services</a></li>
+                <li><a href="watches-sla-external.html">Watches and SLAs with External Services</a></li>
+                <li><a href="watches-sla-system.html">System Watches</a></li>
+            </ul>
+
+            <div class="section"><h3>Watch Basics</h3>
+                <p>
+                    The Rio Watch framework provides mechanisms to collect and
+                    analyze programmer defined metrics defined in a distributed
+                    application. This framework may be used to instrument services
+                    developed under the Rio Architecture and to monitor performance
+                    and other measurable aspects of distributed operational strings
+                    of execution using this architecture.
+                </p>
+                <p>
+                    The approach outlined in this document provides the basis for
+                    recording a measurement of a metric. Recording can be done
+                    either locally within a JVM or remotely across different JVM's.
+                    Depending on the type of metric being observed (watched),
+                    the type of watch differs:
+                </p>
+                <ul>
+                    <li>A <b>GaugeWatch</b> provides a mechanism to record values that
+                        can go up and down, and can be positive or negative.</li>
+                    <li>A <b>CounterWatch</b> provides a mechanism to count a monotonically
+                        increasing non-negative value of an arbitrary occurrence of
+                        something over time.</li>
+                    <li>A <b>StopWatch</b> is a Watch for capturing elapsed time.</li>
+                </ul>
+                <p>
+                    Each of these watches extend from ThresholdWatch, which contains
+                    ThresholdValues, which in turn can have SLAs attached to them
+                    providing specific SLAPolicyHandlers approaches
+                </p>
+                <p>
+                    Watches record Calculable objects that contain the value of
+                    the metric being observed and the time when the metric was
+                    captured. These objects are stored in a WatchDataSource. The
+                    WatchDataSource can be transient or persistent, and provides
+                    a repository for given watch instance Calculables.
+                </p>
+                <p>
+                    While the Watch framework is generic in that it can collect
+                    any kind of metric, a common use will be to measure application
+                    response times. It is useful to analyze this type of measurement
+                    to understand the Watchable Framework.
+                </p>
+            </div>
+
+            <div class="section"><h3>SLA Fundamentals</h3>
+                <p>
+                    Using the policy mechanisms available in Rio, services can have
+                    SLAs attached to them, ensuring operational criteria is met.
+                    The dynamic service's operational behavior can be monitored
+                    and dynamically scale it's environment up &amp; down based on
+                    declarative attributes. Generically speaking, we think of
+                    these as Behavioral Policies. 
+                </p>
+                <img src="images/sla.png"/>
+                <p>
+                    Rio provides support to observe and watch system and
+                    application defined metrics. The approach is based on a
+                    sensor-effector pattern. Data is observed from applications,
+                    OS, hardware, etc ... and measured against declared thresholds.
+                </p>
+            </div>
+
+            <div class="section"><h3>SLA Policy Handlers</h3>
+                <p>
+                    Policy enforcement can happen locally, distributed or hierarchically.
+                    Policy enforcement is handled by SLA Policy Handlers. SLA Policy Handlers
+                    provide if-then-else logic required to deal with the problem set they
+                    know about, are associated to Watches, and are notified of out-of-bound
+                    conditions. Rio provides three different SLA Policy Handlers:
+                </p>
+                <ul>
+                    <li><b>SLAPolicyHandler</b><br/>
+                        A SLAPolicyHandler handles thresholds for a ThresholdWatch,
+                        registering to a ThresholdManager. If a threshold is crossed
+                        (breached or cleared), the SLAPolicyHandler will fire a
+                        SLAThresholdEvent. The SLAPolicyHandler should be extended
+                        to provide logic on how to process specific policy (if-then-else logic)
+                        on how to manage SLA Thresholds produced by ThresholdWatch
+                        instantiations.
+                    </li>
+                    <li><b>ScalingPolicyHandler</b><br/>
+                        The ScalingPolicyHandler extends the SLAPolicyHandler,
+                        and will increment and optionally decrement instances of
+                        the ServiceBean it is associated to based on limits set
+                        for the SLA. Service allocation happens based on declared
+                        service requirements.
+                    </li>
+                    <li><b>RelocationPolicyHandler</b><br/>
+                        The Relocation Policy Handler also extends the
+                        SLAPolicyHandler, and based on configured attributes will
+                        work with the Provision Monitor to relocate the service
+                        instance to a more appropriate compute resource based on
+                        the service's declared attributes. Relocation does not
+                        directly deal with service state, service state is managed
+                        by the service itself. 
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section"><h3>Next</h3></div>
+            <a href="watches-sla-dynamic.html">Using Watches and SLAs with Dynamic Services</a> >
+        </section>
+    </body>
+</document>

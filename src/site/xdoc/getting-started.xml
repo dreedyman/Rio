@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Getting Started</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Where to Start?">
+            <div class="section"><h3>Release Information</h3></div>
+            <p>
+                Rio is distributed under the <a href="license.html">Apache License, version 2.0</a>.
+            </p>
+            <p>
+                Rio requires JDK 1.6.x or greater.
+            </p>
+
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                Although not required, setting the JAVA_HOME environment
+                variable to point to the home of a Java 6 (or later) installation
+                is always a good idea.
+            </div>
+            <p>
+                Rio is distributed with dependencies. Dependencies are additional
+                software required for running Rio. Note that each of these libraries
+                is subject to the respective license; check the respective project
+                distribution/website before using any of them in your own environment.
+            </p>
+            <p>
+                The distribution includes the following third party technology: Apache River 2.1.1 (Jini),
+                CGLIB 2.1_3, Hyperic SIGAR, Commons Compress 1.0, Groovy and the
+                Prefuse Visualization Toolkit.
+            </p>
+
+            <div id="infobox">
+                <img src="images/information.gif"/>
+                Hyperic SIGAR is licensed under the GPL with a FLOSS license exception,
+                allowing it to be included with the Rio Apache License v2 distribution.
+                If for some reason the GPL cannot be used with your distribution of Rio,
+                remove the <tt>RIO_HOME/lib/hyperic directory</tt>.
+            </div>
+
+            <div class="section"><h3>Installing</h3></div>
+            <p>
+                To install Rio on Linux or OS/X, unzip the distribution package
+                to the desired installation directory. For example, to install into <tt>/opt</tt>:
+            </p>
+            <p>
+                <tt>unzip rio-4.1.zip -d /opt</tt>
+            </p>
+            <p>This creates a directory called <tt>rio-4.1</tt> under <tt>/opt</tt></p>
+
+            <p>
+                To install Rio on Windows, unzip the distribution package to the
+                desired installation directory. You should use a zip application such
+                as 7zip, not the built-in folder decompression. Note that both Windows
+                and Java 5 have some issues with long file names and file paths, as
+                well as with spaces in directory names. We recommend installing into a
+                directory of your chosen drive, and ensuring that directory names do not
+                have spaces (like C:\Program Files).
+            </p>
+            <div class="section"><h3>Examining the distribution</h3></div>
+
+            <p>
+                Once you have unzipped the distribution, you will have a
+                rio-4.1 directory containing the following items:
+            </p>
+            <ul>
+                <li><b>bin</b> - The directory that contains command to start Rio services</li>
+                <li><b>config</b> - Directory that contains configuration for Rio services and platform</li>
+                <li><b>deploy</b> - The default deploy directory used to serve deployed application resources.</li>
+                <li><b>docs</b> - The directory that contains API documentation, and other documentation</li>
+                <li><b>examples</b> - Contains examples of how to develop and deploy applications using Rio</li>
+                <li><b>lib</b> - The directory where the JAR files are located.</li>
+                <li><b>lib-dl</b> - The directory where the client (download) JAR files are located.</li>
+                <li><b>logs</b> - This directory contains log files for Rio</li>
+                <li><b>policy</b> - The directory that contains a policy file</li>
+                <li><b>src</b> - Source code for Rio</li>
+            </ul>
+
+            <div class="section"><h3>Developing Services</h3></div>
+
+            <p>
+                You can look at the examples provided, as well as checking put the following tutorials:
+            </p>
+            <ul>
+                <li><a href="tutorial/service/service-intro.html">Service tutorial</a></li>
+                <li><a href="tutorial/service-exec/service-exec-intro.html">Service exec tutorial</a></li>
+            </ul>
+
+            <div class="section"><h3>Examples</h3>
+                <p>
+                    Please make sure to examine the examples provided. An overview of all the examples
+                    can be found <a href="examples/index.html">here</a>.</p>
+            </div>
+
+            <div class="section"><h3>Project Creation</h3>
+                <p>You can create a Rio project in seconds using the
+                <a href="rio-archetype.html">Rio Archetype</a>. Simply run:
+                </p>
+                <div class="source">
+                    <pre>RIO_HOME/bin/rio create-project</pre>
+                </div>
+                <p>
+                    You will be prompted to enter the artifactId, service to
+                    create (this will be the classname of the service interface),
+                    the groupId, version and package name.
+                </p>
+            </div>
+
+            <div class="section"><h3>Starting Rio</h3>
+                <p>
+                    The <tt>RIO_HOME/bin</tt> directory contains starter script
+                    (and .cmd) files to start Services and Utilities provided by Rio.
+                </p>
+
+                <div id="infobox">
+                    <img src="images/information.gif"/>
+                    Note, you should make sure that you set the <tt>RIO_HOME</tt>
+                    environment variable to point to the directory that you have
+                    installed the Rio distribution.
+                </div>
+
+                <p>
+                    The <tt>rio</tt> script is the the command and control utility
+                    for starting Rio services and the Rio command line interface.
+                    All of the other scripts are wrappers around the <tt>rio</tt>
+                    script. The convention for starting services using the <tt>rio</tt>
+                    scripts is as follows:
+                </p>
+                <ul>
+                    <li><tt>rio start</tt> <i>service-starter</i></li>
+                </ul>
+
+                <p>
+                    For example:
+                </p>
+                <ul>
+                    <li><tt>rio start cybernode</tt><br/>
+                        <p>Will use the <tt>config/start-cybernode.groovy</tt> file</p>
+                    </li>
+                    <li><tt> rio start all</tt><br/>
+                        <p>Will use the <tt>config/start-all.groovy</tt> file</p>
+                    </li>
+                </ul>
+
+                <p>The following scripts are shortcuts for starting the basic services in Rio:</p>
+                <ul>
+                    <li><b>cybernode</b> - Starts a Cybernode and a Webster on an anonymous port</li>
+                    <li><b>monitor</b> - Starts a Provision Monitor, a transient Jini Lookup service
+                        and a Webster on port 9010</li>
+                    <li><b>webster</b> - Starts a Webster on port 9010</li>
+                    <li><b>startall</b> - Starts a Webster on port 9010, a Cybernode,
+                        Provision Monitor and a transient Jini Lookup Service</li>
+                </ul>
+                <p>
+                    By just running <tt>rio</tt>, you will be put into the interactive command line shell:
+                </p>
+                <div class="source">
+<pre>Welcome to the Rio Interactive Shell Program. You can interact
+with the Rio using the following commands :
+
+list     http     deploy   destroy  dir
+help     pwd      jconsole redeploy set
+undeploy cd       ls       stats
+
+For help on any of these commands type help [command].
+To leave this program type quit
+
+rio&gt; _</pre>
+                </div>
+            </div>        
+        </section>
+    </body>
+</document>

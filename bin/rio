@@ -1,0 +1,175 @@
+#!/bin/sh
+#
+# This script provides the command and control utility for starting
+# Rio services and the Rio command line interface.
+
+scriptDir="$(dirname $0)"
+scriptName=`basename "$0"`
+scriptPath="$scriptDir/$scriptName"
+command_line=$*
+
+if [ "$1" = "start" ]; then
+    start=1
+    shift
+    command_line=$*
+elif [ "$1" = "create-project" ]; then
+    project=1
+    shift
+    command_line=$*
+elif [ "$1" = "restart" ]; then
+    start=1
+    shift
+    pid=$1
+    shift
+    echo "Killing $pid"
+    kill -9 $pid
+fi
+
+# Set local variables
+if [ -z "$RIO_HOME" ] ; then
+  RIO_HOME="$scriptDir/.."
+fi
+
+# Convert to absolute path
+RIO_HOME=$(cd "$RIO_HOME" && pwd)
+
+RIO_LIB=$RIO_HOME/lib
+
+# Check for JAVA_HOME
+if [ -z "$JAVA_HOME" ] ; then
+    JAVACMD=java
+else
+    JAVACMD="$JAVA_HOME/bin/java"
+fi
+
+# Function to find a file
+getStarterConfig() {
+    service="$1"
+    if [ -f "$RIO_HOME/config/start-$service.groovy" ] ; then
+	    starterConfig="$RIO_HOME/config/start-$service.groovy"
+	    case $starterConfig in
+	    *activatable*)
+	        starterConfig="$RIO_HOME/config/activatable.groovy $starterConfig"
+	    esac
+    else
+	    echo "Cannot locate expected service starter file [start-$service.groovy] in [$RIO_HOME/config], exiting"
+	    exit 1
+    fi
+}
+
+cygwin=
+case $OS in
+    Windows*)
+        cygwin=1
+esac
+
+# Check to see if path conversion is needed
+toNative() {
+    # Check for Cygwin
+    case $OS in
+        Windows*)
+           toWindows "$@";;
+           *) echo $* ;;
+    esac
+}
+
+# Cygwin utility to convert path if running under windows
+toWindows() {
+    cygpath -pw "$@"
+}
+
+
+#DEBUG=-Dorg.rioproject.tools.webster.debug
+#NETWORK=-Djava.rmi.server.hostname=130.0.0.1
+if [ -z "$NET_ADDR" ] ; then
+    NETWORK="-Djava.rmi.server.hostname="`hostname`
+else
+  NETWORK="-Djava.rmi.server.hostname="$NET_ADDR
+fi
+#echo $NETWORK
+
+if [ -z "$JAVA_MEM_OPTIONS" ] ; then
+    JAVA_MEM_OPTIONS="-Xms8m -Xmx256m"
+fi
+
+if [ -z "$JAVA_RMI_OPTIONS" ] ; then
+  #  JAVA_RMI_OPTIONS="-Dsun.rmi.transport.tcp.handshakeTimeout=180000"
+    JAVA_RMI_OPTIONS=""
+fi
+
+if [ -z "$JAVA_GC_OPTIONS" ] ; then
+    JAVA_GC_OPTIONS="-XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m"
+fi
+
+# If the command is to start the Rio services, invoke the ServiceStarter
+# Otherwise invoke the CLI
+if [ "$start" = "1" ]; then
+    if [ -z "$RIO_NATIVE_DIR" ] ; then
+        RIO_NATIVE_DIR="$(toNative $RIO_LIB/native)"
+    fi
+    
+    if [ -d $RIO_NATIVE_DIR ]; then
+        # Check for running on OS/X
+        opSys=`uname -s`
+        if [ $opSys = "Darwin" ] ; then
+            export DYLD_LIBRARY_PATH=$RIO_NATIVE_DIR:$DYLD_LIBRARY_PATH
+            libpath="-Djava.library.path=$DYLD_LIBRARY_PATH"
+        else
+            if [ "$cygwin" = "1" ] ; then
+                libpath="-Djava.library.path=$RIO_NATIVE_DIR"
+            else
+                export LD_LIBRARY_PATH=$RIO_NATIVE_DIR:$LD_LIBRARY_PATH
+                libpath="-Djava.library.path=$RIO_NATIVE_DIR"
+            fi
+        fi
+        USER_OPTS="-DRIO_NATIVE_DIR=$RIO_NATIVE_DIR $USER_OPTS"
+    fi
+    classpath="-cp $(toNative $RIO_LIB/boot.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar)"
+    agentpath="-javaagent:$(toNative $RIO_LIB/boot.jar)"
+    launchTarget=com.sun.jini.start.ServiceStarter
+    if [ -z "$1" ] ; then
+        echo "A service to start is required, exiting"
+        exit 1
+    else
+        starter_arg=$1
+        getStarterConfig $1
+        echo "starter config [$starterConfig]"
+        shift
+        command_line=$*
+    fi
+    ARGS="$starter_arg $command_line"
+    ""$JAVACMD"" -server $JAVA_MEM_OPTIONS $JAVA_RMI_OPTIONS $JAVA_GC_OPTIONS \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -XX:OnOutOfMemoryError="$RIO_HOME/bin/rio restart %p $service" \
+        -XX:HeapDumpPath=$RIO_HOME/logs \
+        $classpath $agentpath $libpath $RIO_OPTS \
+        -Djava.security.policy=$RIO_HOME/policy/policy.all \
+        -Dcom.sun.jini.jeri.tcp.useNIO=true \
+        -DRIO_HOME=$RIO_HOME \
+        -Dorg.rioproject.home=$RIO_HOME \
+        -DRIO_LOG_DIR=$RIO_HOME/logs/ \
+        -Drio.script.mainClass="$launchTarget" \
+        $USER_OPTS \
+        $NETWORK $DEBUG $launchTarget $starterConfig $command_line
+elif [ "$project" = "1" ] ;then
+    echo "Create project"
+    mvn archetype:generate \
+    -DarchetypeGroupId=org.rioproject \
+    -DarchetypeArtifactId=rio-archetype \
+    -DarchetypeRepository=http://www.rio-project.org/maven2 \
+    -DarchetypeVersion=4.1-SNAPSHOT    
+else
+    # Set system properties
+    PROPS="-DRIO_HOME=$RIO_HOME"
+    #cliExt="$RIO_HOME/config/rio-cli.groovy"
+    cliExt="$RIO_HOME/config/tools.groovy"
+    launchTarget=org.rioproject.tools.cli.CLI
+    classpath="-cp $(toNative $RIO_LIB/rio-cli.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar)"
+    "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
+        -Djava.security.policy=$RIO_HOME/policy/policy.all \
+        $PROPS \
+        $NETWORK \
+        $DEBUG \
+        $USER_OPTS \
+        $launchTarget $cliExt $command_line
+fi

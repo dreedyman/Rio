@@ -1,0 +1,18 @@
+<userInput>
+	
+	<panel order="0" layout="center">
+		<field type="title" txt="Integration with Jini" id="description.jini.title"/>
+		<field type="search" variable="JINI_HOME">
+			<description
+				align="left"
+				txt="Please select the directory where Jini is installed:"
+				id="description.jini.header"/>
+			<spec txt="Jini installation directory:" checkfilename="lib-dl/jsk-dl.jar"
+				type="directory" result="directory" id="description.jini.directory">
+> 				<choice value="${user.home}/jini2_1" os="unix" />
+				<choice value="C:\jini2_1" os="windows" />
+			</spec>
+		</field>
+	</panel>
+	
+</userInput>

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="OperationalString">
+            <p>
+                The OperationalString is the unit of deployment in Rio. It
+                contains definitions that provide context on how to provision,
+                manage, monitor and instantiate services through the network. An
+                OperationalString is created by using either XML or through the use 
+                of a Groovy DSL.  This section will walk you through the details of the
+                OperationalString.
+            </p>
+            <div id="infobox">
+                <img src="../images/information.gif"/>
+                Why the name OperationalString? The name comes from creating a
+                string (collection) of services that execute in an operational
+                context. The OperationalString is sometimes referred to as an
+                opstring as well.
+            </div>
+            <p>
+                The image below depicts the sections of an
+                OperationalString. We will drill into each of these sections
+                and explain the elements that make them up.
+            </p>
+
+            <img src="../images/opstring.png"/>
+
+            <p>
+                The OperationalString contains service declarations. Each enclosing
+                <tt>service</tt> declaration defines instantiation properties, associations (what other
+                services this service is associated to), service SLA policies
+                (scalability, etc ...), initialization parameters and
+                configuration.
+            </p>
+            <p>
+                The <tt>spring</tt> element is a way to easily declare the deployment and
+                activation of a Spring application using Rio. Using the Spring
+                bean, a Spring application can be dynamically deployed and
+                managed using Rio.
+            </p>
+            <p>
+                The <tt>serviceExec</tt> element provides the declarative support
+                needed to encapsulate the control and monitoring of external
+                services. Service control adapters represent applications/services,
+                adding network wide visibility and control. Using this approach,
+                we can attach monitoring, metering and SLA control to existing applications.
+            </p>
+
+            <p>
+                The OperationalString is also a reflexive entity. This means the
+                OperationalString can include other OperationalStrings, creating
+                a composite (nested) deployment. With this approach a single
+                deployment can include multiple OperationalStrings.
+            </p>
+
+            <div id="tipbox">
+                <img src="../images/check.gif"/>
+                It is generally a good idea to split your services along
+                functional roles. Create an opstring that contains application
+                specific services, and also an opstring includes infrastructure
+                services. Link them together using the include declaration.
+            </div>
+            <p>
+                Each of the links below will illustrate the syntax diagrams for the sections of the
+                OperationalString.
+            </p>
+            <ul>
+                <li><a href="#Service_Discovery">Service Discovery</a> </li>
+                <li><a href="#Service_Instantiation">Service Instantiation</a> </li>
+                <li><a href="#Service_Associations">Service Associations</a> </li>
+                <li><a href="#Service_SLA">Service SLA Behavior</a> </li>
+                <li><a href="#Service_Rules_Declaration">Service Rules Declaration</a> </li>
+                <li><a href="#Service_Configuration">Service Configuration</a> </li>
+                <li><a href="#Service_Provisioning">Service Provisioning &amp; Staged Data</a> </li>
+            </ul>
+
+            <p>
+                This <a href="./rio_dsl.txt">link</a> will display a context free
+                grammar representation of the Rio DSL, using EBNF to document the
+                Rio DSL syntax. The syntax diagrams below have been generated from the
+                referenced EBNF.
+            </p>
+
+             <p>
+                 Notation:
+             </p>
+            <table>
+                <tr>
+                    <th>Item</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Non-terminals</td>
+                    <td>Are highlighted and displayed as plain text, as in
+                        <span
+                            style="color: rgb(153, 51, 153); font-weight: bold;">service-header.</span></td>
+                </tr>
+                <tr>
+                    <td>Terminals</td>
+                    <td>Are quoted and highlighted in green, for example
+                        <span style="color: rgb(0, 153, 0); font-weight: bold;">'deployment'</span>
+                        is a Rio DSL element.</td>
+                </tr>
+                <tr>
+                    <td>|</td>
+                    <td>Denotes alternatives.</td>
+                </tr>
+                <tr>
+                    <td>( )</td>
+                    <td>(parenthesis) are used to denote grouping.</td>
+                </tr>
+                <tr>
+                    <td>?</td>
+                    <td>Denotes the optional appearance of a symbol or group of symbols.</td>
+                </tr>
+                <tr>
+                    <td>*</td>
+                    <td>You can optionally append a list of one or more non-terminals.</td>
+                </tr>
+                <tr>
+                    <td>;</td>
+                    <td>Is used to denote the end of each production.</td>
+                </tr>
+            </table>
+            <br/>
+
+            <br/>
+            <big><b>Deployment</b></big><br/>
+            <br/>
+            <img src="../images/opstring/opstring.jpg"/><br/>
+
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">opstring_body</span></tt>
+            <img src="../images/opstring/opstring_body.jpg"/><br/>
+            <img src="../images/opstring/include.jpg"/><br/>
+
+            <br/>
+            <hr/>
+            <a name="Service_Discovery">
+            <big><b>Service Discovery</b></big>
+            </a>
+            <br/>
+
+            <br/>
+            <img src="../images/opstring/groups.jpg"/><br/>
+            <img src="../images/opstring/locators.jpg"/><br/>
+
+            <br/>
+            <hr/>
+            <a name="Service_Instantiation">
+            <big><b>Service Instantiation</b></big>
+            </a>
+            <br/>
+            <br/>
+            <img src="../images/opstring/artifact.jpg"/><br/>
+            <img src="../images/opstring/resources.jpg"/><br/>
+            <img src="../images/opstring/codebase.jpg"/><br/>
+            <img src="../images/opstring/service.jpg"/><br/>
+            <img src="../images/opstring/spring.jpg"/><br/>
+            <img src="../images/opstring/service_exec.jpg"/><br/>
+            <img src="../images/opstring/rules.jpg"/><br/>
+            <img src="../images/opstring/execute.jpg"/><br/>
+            <img src="../images/opstring/property.jpg"/><br/>
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">service_header</span></tt><br/>
+            <img src="../images/opstring/service_header.jpg"/><br/>
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">instantiation_attrs</span></tt><br/>
+            <img src="../images/opstring/instantiation_attrs.jpg"/><br/>
+            <img src="../images/opstring/implementation.jpg"/><br/>
+            <img src="../images/opstring/interfaces.jpg"/><br/>
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">common</span></tt><br/>
+            <img src="../images/opstring/common.jpg"/><br/>
+            <img src="../images/opstring/sharedComponent.jpg"/><br/>
+
+            <br/>
+            <hr/>
+            <a name="Service_Associations">
+            <big><b>Service Associations</b></big>
+            </a>
+            <br/>
+            <br/>
+            <img src="../images/opstring/associations.jpg"/><br/>
+            <img src="../images/opstring/association.jpg"/><br/>
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">association_management</span></tt><br/>
+            <img src="../images/opstring/association_management.jpg"/><br/>
+            <img src="../images/opstring/proxyType.jpg"/><br/>
+            <img src="../images/opstring/strategy.jpg"/><br/>
+            <img src="../images/opstring/inject.jpg"/><br/>
+            <img src="../images/opstring/filter.jpg"/><br/>
+            <img src="../images/opstring/serviceDiscoveryTimeout.jpg"/><br/>
+
+            <br/>
+            <hr/>
+            <a name="Service_SLA">
+            <big><b>Service SLA Behavior</b></big>
+            </a>
+            <br/>
+            <br/>
+            <img src="../images/opstring/sla.jpg"/><br/>
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">sla_policy</span></tt><br/>
+            <img src="../images/opstring/sla_policy.jpg"/><br/>
+            <tt><span style="color: rgb(153, 51, 153); font-weight: bold;">declarative_monitor</span></tt><br/>
+            <img src="../images/opstring/declarative_monitor.jpg"/><br/>
+            
+            <br/>
+            <hr/>
+            <a name="Service_Rules_Declaration">
+            <big><b>Service Rules Declaration</b></big>
+            </a>
+            <br/>
+            <br/>
+            <img src="../images/opstring/rule.jpg"/><br/>
+            <img src="../images/opstring/serviceFeed.jpg"/><br/>
+
+
+            <br/>
+            <hr/>
+            <a name="Service_Configuration">
+            <big><b>Service Configuration</b></big>
+            </a>
+            <br/>
+            <br/>
+            <img src="../images/opstring/maxPerMachine.jpg"/><br/>
+            <img src="../images/opstring/configuration.jpg"/><br/>
+            <img src="../images/opstring/parameters.jpg"/><br/>
+            <img src="../images/opstring/parameter.jpg"/><br/>
+            <img src="../images/opstring/logging.jpg"/><br/>
+            <img src="../images/opstring/logger.jpg"/><br/>
+
+            <br/>
+            <hr/>
+            <a name="Service_Provisioning">
+            <big><b>Service Provisioning &amp; Staged Data</b></big>
+            </a>
+            <br/>
+            <br/>
+            <img src="../images/opstring/cluster.jpg"/><br/>
+            <img src="../images/opstring/system_requirements.jpg"/><br/>
+            <img src="../images/opstring/diskspace.jpg"/><br/>
+            <img src="../images/opstring/memory.jpg"/><br/>
+            <img src="../images/opstring/utilization.jpg"/><br/>
+            <img src="../images/opstring/software.jpg"/><br/>
+            <img src="../images/opstring/platformRequirement.jpg"/><br/>
+            <img src="../images/opstring/install.jpg"/><br/>
+            <img src="../images/opstring/postInstall.jpg"/><br/>
+            <img src="../images/opstring/data.jpg"/><br/>
+
+        </section>
+    </body>
+</document>

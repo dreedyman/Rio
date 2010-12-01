@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Rio Resolver">
+            <p>
+                Rio provides the ability to deploy and provision service
+                artifacts and their dependencies. The resolution of artifacts is
+                done from configured repositories, and becomes a natural
+                extension of the build, test and deploy lifecycle.
+            </p>
+            <p>
+                As Rio deploys services, service artifacts and dependencies are
+                automatically provisioned and installed on compute resources
+                that meet declared requirements of services being deployed.
+            </p>
+            <img src="images/resolver.png"/>
+            <p>
+                Rio addresses the issue of duplicating dependency management
+                configuration between the development and deployment phases by
+                ensuring that the versioned components that have been used in
+                development, test and qualification are seamlessly carried over.
+            </p>
+            <div class="section"><h3>Support</h3></div>
+            <p>
+                The Rio Resolver currently resolves artifacts using configured
+                Maven 2 repositories. Using the declaration(s) found in Maven
+                POMs and settings. The Rio Resolver is not provided by Maven, the Rio
+                Resolver simply uses Maven repositories to obtain declared
+                artifacts and dependencies.
+            </p>
+
+            <p>
+                Why not use Maven to resolve artifacts and dependencies for
+                service provisioning?
+            </p>
+            <p>
+                We want to abstract the underlying dependency
+                resolution implementation in order to give the flexibility to
+                potentially support other repository based dependency management
+                approaches. <br/><br/>
+                In the future we may seek to provide support for
+                <a href="http://ant.apache.org/ivy/">Ivy</a> or the
+                <a href="http://www.osgi.org/Repository/HomePage">OSGi Bundle Repository</a>.
+                Providing an abstraction on top of the concrete dependency management
+                solutions gives us flexibility going forward.
+            </p>
+
+            <div class="section"><h3>Artifact Declaration</h3></div>
+            <p>
+                Artifacts are referenced in abstract terms
+                (<tt>groupId:artifactId:[classifier:]version</tt>), rather than a (logical) file
+                path. This is the big difference with the use
+                of artifacts in opstrings with Rio. Previously, you declared jars as
+                resources for both the interface and service implementation classes. With the
+                introduction of artifact declaration in opstrings, you now just declare the
+                <tt>groupId:artifactId:[classifier:]version</tt> instead.
+            </p>
+            <p>
+                The benefits here are that the declared artifact, it's dependencies
+                and any transitive dependencies are resolved. If the machine the Monitor or
+                Cybernode is executing on does not have the required jars available, they will be
+                provisioned. Its that simple.
+            </p>
+
+            <p>
+                Declaring artifacts in opstrings follows the same conventions
+                that Maven uses. Take a look at the example below:
+            </p>
+
+            <img src="images/artifact-declaration.png"/>
+
+            <p>
+                The keyword <tt>artifact</tt> in the DSL (or <tt>Artifact</tt> in an XML document)
+                triggers artifact resolution. You cannot have both artifact resolution and
+                resource declarations in the same opstring.
+            </p>
+
+            <p>
+                You can also include other opstrings using an artifact. This allows
+                external services to be included in the activation of your application.
+            </p>
+
+            <img src="images/artifact-oar-include.png"/>
+
+            <p>
+                The included artifact is resolved from configured repositories.
+                The artifact must have a <tt>.oar</tt> extension. Once located,
+                the resolved OAR is included in the deployment and subsequent
+                management of the declared service(s).
+            </p>
+            <br/>
+            <div id="infobox">
+                <img src="images/information.gif"/>
+                OAR artifact inclusion is only supported with Groovy based opstrings.
+            </div>
+            <br/>
+            <div class="section"><h3>Artifact Resolution</h3></div>
+            <p>
+                Artifacts and dependencies are resolved from repositories. The Rio
+                resolver obtains repository configuration from POMs and from
+                your <tt>settings.xml</tt>.  When service artifacts are being resolved,
+                repository configurations are lazily obtained, appending configured
+                repository definitions from POMs (if declared), and filtering them
+                against any declared mirror declarations in <tt>settings.xml</tt>.
+                Maven central is always included last.
+            </p>
+
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                It is generally a good idea that the &lt;repositories&gt;
+                section be removed from POMs, and repositories be specified only in
+                settings.xml. This makes for cleaner and predictable
+                deployments.
+            </div>
+
+            <p>
+                By translating <tt>groupId:artifactId:[classifier:]version</tt> to
+                <tt>groupId/artifactId/version</tt> we can derive the location of
+                the artifact and download it to the (configured) local repository.
+                If there are issues with the message digests not matching, the
+                retrieval of the artifact is retried. If there are still issues with
+                the message digests not matching, the Rio Resolver will not provision
+                the artifact. In Maven terms, this follows a <tt>checksumPolicy</tt>
+                set to <tt>fail</tt>.
+            </p>
+                        
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                We highly recommend the use of a repository manager.
+            </div>
+
+            <div class="section"><h4>Automatic Dependency Exclusions</h4></div>
+
+                Dependency scope is used to limit the transitivity of a dependency, and also
+                to affect the resolved classpath for a service. The following scopes are
+                automatically excluded:
+                <ul>
+                    <li>
+                        <b>test</b><br/>
+                        This scope indicates that the dependency is not required
+                        for normal use of the application, and is only available
+                        for the test compilation and execution phases.
+                    </li>
+                    <li>
+                        <b>provided</b><br/>
+                        Indicates you expect the dependency to be provided at runtime.
+                    </li>
+                    <li>
+                        <b>system</b><br/>
+                        Indicates you have to provide the dependency. The artifact is always
+                        available and is not looked up in a repository.
+                    </li>
+                    <li>
+                        <b>optional</b><br/>
+                        Although not a dependency <i>scope</i>, dependencies declared
+                        as optional are automatically excluded.
+                    </li>
+                </ul>            
+
+            <div class="section"><h3>Limitations</h3></div>
+            The Rio Resolver is not a replacement for Maven artifact resolution. It does
+            not do all the things that an embedded Maven resolver would provide. The
+            current known limitations are as follows:
+            <ul>
+                <li>
+                    No wagon support. The Rio resolver only provides simple HTTP
+                    based downloading of artifacts.
+                </li>
+                <li>
+                    No <tt>settings.xml</tt> proxy configuration support.
+                </li>
+                <li>
+                    Profiles declared in <tt>settings.xml</tt> only have activation support
+                    if they are configured to have <tt>activeByDefault</tt> set to <tt>true</tt>,
+                    or if activation is triggered by a system property being set.
+                </li>
+                <li>
+                    No support for <b>import</b> scope. This scope is only used on a
+                    dependency of type pom in the <tt>&lt;dependencyManagement&gt;</tt>
+                    section. It indicates that the specified POM should be replaced
+                    with the dependencies in that POM's
+                    <tt>&lt;dependencyManagement&gt;</tt> section.
+                </li>
+            </ul>
+        </section>
+    </body>
+ </document>

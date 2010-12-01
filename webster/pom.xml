@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>main</artifactId>
+        <groupId>org.rioproject</groupId>
+        <version>4.1-SNAPSHOT</version>
+    </parent>
+    <groupId>org.rioproject</groupId>
+    <artifactId>webster</artifactId>
+    <name>Module :: Webster</name>
+    <packaging>classdepandjar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>rio</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rio-plugin</artifactId>
+                <extensions>true</extensions>
+
+                <configuration>
+                    <createJar>
+                        <ins>
+                            <in>org.rioproject</in>
+                            <in>com.sun.jini.start</in>
+                        </ins>
+                        <manifest>
+                            <Main-Class>org.rioproject.tools.webster.Webster</Main-Class>
+                            <Implementation-Title>Rio Project</Implementation-Title>
+                            <Implementation-Version>${version}</Implementation-Version>
+                            <Rio-Version>${version}</Rio-Version>
+                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                        </manifest>
+                        <topclasses>
+                            <topclass>org.rioproject.tools.webster.Webster</topclass>
+                            <topclass>org.rioproject.tools.webster.InternalWebster</topclass>
+                            <topclass>com.sun.jini.start.LifeCycle</topclass>
+                        </topclasses>
+
+                    </createJar>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+        </plugins>
+    </build>
+
+</project>

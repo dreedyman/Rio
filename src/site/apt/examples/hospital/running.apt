@@ -1,0 +1,36 @@
+ ------
+ Running Hospital Example
+ ------
+
+Running Hospital
+
+ The Hospital example can be run during the integration-test lifecycle phase of the
+ project (see the declaration of the failsafe-maven-plugin in the pom), or
+ by deploying the example to a running Rio system.
+
+ To deploy the example to a running Rio system:
+
+   [[1]] Make sure Rio services are running
+
+         * Run either:
+
+              * Start all services in the same JVM: <<<{{{../../start-all-mojo.html}mvn rio:start-all}}>>>
+
+              * To start a Cybernode and a Provision Monitor in their own JVMs:
+              <<<{{{../../start-cybernode-mojo.html}mvn rio:start-cybernode}}
+              {{{../../start-monitor-mojo.html}rio:start-monitor}}>>>
+
+
+   [[2]] Deploy the example
+
+         * <<<{{{../../deploy-mojo.html}mvn rio:deploy}}>>>
+
+
+   [[3]] View the deployed example
+
+         * <<<{{{../../ui-mojo.html}mvn rio:ui}}>>>
+
+    []
+
+[../../images/hospital-deployed.png]
+   

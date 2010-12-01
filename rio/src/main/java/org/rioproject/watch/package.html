@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title></title>
+</head>
+<body>
+Provides mechanisms to collect and analyze programmer defined metrics
+defined in a distributed application. This framework may be used to
+instrument services developed under the Rio Architecture and to monitor
+performance and other measurable aspects of distributed operational
+strings of execution using this architecture.<br>
+<br>
+The approach outlined in this document provides the basis for recording
+a measurement of a metric. Recording can be done either locally within
+a JVM or remotely across different JVM&#8217;s. Depending on the type
+of metric being observed (watched), the type of watch differs:<br>
+<ul>
+  <li>A {@link org.rioproject.watch.CounterWatch} provides a mechanism to
+count a monotonically increasing non-negative value of an arbitrary
+occurance of something over time</li>
+  <li>A {@link org.rioproject.watch.GaugeWatch} provides a mechanism to
+record values that can go up and down, and can be positive or negative.</li>
+  <li>A {@link org.rioproject.watch.StopWatch} is a Watch for capturing
+elapsed time</li>
+</ul>
+Each of these watches extend from {@link
+org.rioproject.watch.ThresholdWatch}, which contains {@link
+org.rioproject.watch.ThresholdValues}, which in turn can have {@link
+org.rioproject.sla.SLA}s attached to them providing specific {@link
+org.rioproject.sla.SLAPolicyHandler}s approaches.<br>
+<br>
+Watches record {@link org.rioproject.watch.Calculable} objects which
+contain the value of the metric being observed and the time when the
+metric was captured. These object sre stored in a {@link
+org.rioproject.watch.WatchDataSource}. The WatchDataSource can be
+transient or persistent, and provides a repository for given watch
+instance Calculables.<br>
+<br>
+While the Watch framework is generic in that it can collect any kind of
+metric, a common use will be to measure application response times. It
+is useful to analyze this type of measurement to understand the
+Watchable Framework.&nbsp; <br>
+<br>
+Within an application, a bounded unit of work can be measured for
+execution time. Because, the Service Bean and Service Container model
+is inherently distributed, this bounded unit of work may be local to
+one Java Virtual Machine or span multiple Java Virtual Machines. (If
+end points are distributed some mechanism for clock synchronization is
+required. Clock synchronization is beyond the scope of this document.) <br>
+<br>
+<span style="font-weight: bold;">Local Watches</span><br>
+<br>
+The simplest case is to measure response time within a local Java
+Virtual Machine. The main steps in measuring these response time
+metrics are:&nbsp;&nbsp;&nbsp; <br>
+<ol>
+  <li>Create the StopWatch which:</li>
+  <ul>
+    <li>Creates a local instance of a WatchDataSource</li>
+    <li>Associates the WatchDataSource to the StopWatch</li>
+  </ul>
+  <li>Register the WatchDataSource with the WatchDataSourceRegistry.
+This allows the WatchDataSource to be discovered by remote clients</li>
+  <li>Start the timing</li>
+  <li>Stop the timing which:</li>
+  <ul>
+    <li>Calculates the elapsed time</li>
+    <li>Creates a Calculable object</li>
+    <li>Adds the Calculable object to the WatchDataSource</li>
+  </ul>
+  <li>Repeat Steps #3 and #4 as necessary</li>
+  <li>Examine the results</li>
+</ol>
+The &#8220;StopWatch&#8221; class is essentially a utility class used for capturing
+this elapsed execution time. A Calculable record is created and then
+stored in the WatchDataSource. The getValue method of the Calculable
+interface returns a double value which represents the milliseconds of
+elapsed time for this measurement. <br>
+<br>
+<span style="font-weight: bold;">Remote Watches </span><br>
+The next case is to measure response time within a local Java Virtual
+Machine, but post the results to a remote WatchDataSource. This kind of
+pattern is useful when the desired outcome is a common collection of
+metrics from various services or from numerous instances of the same
+service. The main steps in measuring these response time metrics
+are:&nbsp; <br>
+&nbsp;<br>
+<ol>
+  <li>Find the remote WatchDataSource</li>
+  <li>Associate the WatchDataSource with the StopWatch</li>
+  <li>Start the timing</li>
+  <li>Stop the timing which:</li>
+  <ul>
+    <li>Calculates the elapsed time</li>
+    <li>Creates a Calculable object</li>
+    <li>Adds the Calculable object to the WatchDataSource</li>
+  </ul>
+  <li>Repeat Steps #3 and #4 as necessary</li>
+  <li>Examine the results</li>
+</ol>
+The primary difference here is that the WatchDataSource is first
+located using the Jini Lookup Service. Once located, the constructor
+for the StopWatch is invoked passing the reference to the remote
+WatchDataSource. Once the StopWatch has been created in this way, the
+rest of the processing steps are the same as the local case. <br>
+<br>
+</body>
+</html>

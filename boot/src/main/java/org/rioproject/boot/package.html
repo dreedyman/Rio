@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Boot Environment Configuration</title>
+</head>
+<body>
+Provides utilities to bootstrap and initialize the Rio operational
+environment. Rio uses the Jini&#8482; Technology
+Configuration
+approach to define the platform and components to create and
+initialize. This package document persents the following information:<br>
+<ul>
+  <li><a href="#ClassLoader_hierarchy">Understanding the classpath</a></li>
+  <li><a href="#Configuring_Boot_Attributes">Configuring Boot Attributes</a></li>
+</ul>
+<br>
+<big><span style="font-weight: bold;">Classpath</span><br
+ style="font-weight: bold;">
+</big>
+When Rio starts, the classpath is set the to the
+following: <span style="font-family: monospace;">boot.jar</span>
+(which has a Class-Path manifest entry to <span
+ style="font-family: monospace;">start.jar</span>) and <span
+ style="font-family: monospace;">start.jar</span> (which has a
+Class-Path manifest entry to <span style="font-family: monospace;">jsk-platform.jar</span>).
+The remaining jars are dynamically loaded by the CommonClassLoader
+based on the <a href="#platformDir">platform configuration</a>. The <a
+ href="#Default_Platform_Configuration">default platform configuration</a>
+is loaded as a resource fro boot.jar (META-INF/platform.xml) declares
+the following:<br>
+<br>
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; font-weight: bold;">JARs<br>
+      </td>
+      <td style="vertical-align: top; font-weight: bold;">Location
+Loaded From<br>
+      </td>
+      <td style="vertical-align: top; font-weight: bold;">Description<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">rio.jar<br>
+      </td>
+      <td style="vertical-align: top;">${RIO_HOME}/lib<br>
+      </td>
+      <td style="vertical-align: top;">Rio core technology platform
+classes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">platform-capabilities.jar<br>
+      </td>
+      <td style="vertical-align: top;">${RIO_HOME}/lib</td>
+      <td style="vertical-align: top;">Platform capability classes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">jsk-lib.jar<br>
+      </td>
+      <td style="vertical-align: top;">${JINI_LIB}<br>
+      </td>
+      <td style="vertical-align: top;">The Jini 2.1 technology required
+platform classes. More information on Jini technology can be found <a
+ href="http://www.jini.org" target="_blank">here</a><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+Additional jars can be added to the platform by working with the
+Platform configuration. Platform configuration files are used as
+follows:<br>
+<ul>
+  <li>Provides attributes for creating {@link
+org.rioproject.system.capability.PlatformCapability} classes and
+declaring
+what jars will be common across all service classloaders. If jars are
+common they are loaded by the CommonClassLoader, and are in the
+classpath of all child class loaders. By default Rio and Jini
+technology jars are commonacross all service classloaders.</li>
+  <li>For platform capabilities that are not loaded by the common
+classloader, services that declare that dependency will have the
+capability loaded by the service's classloader.</li>
+  <li>Provides a manifest of the platform jars that can be loaded.</li>
+</ul>
+Platform configuration files are loaded when Rio starts. The contents
+of the org.rioproject.boot.platformDir directory will be scanned at
+startup time. Each .xml file will be parsed for &lt;platform&gt;
+declarations.<br>
+<br>
+It is important to understand the class loader hierarchy. The approach
+is to enable a platform oriented framework conducive towards creating a
+layered product. The resulting capabilities allow the declaration of
+JARs that are added to a CommonClassLoader, making the classes
+accessible by all ClassLoader instances that delegate to the
+CommonClassLoader. In this fashion a platform can be declared,
+initialized and made available.<br>
+&nbsp;<br>
+<a name="ClassLoader_hierarchy"></a>The ClassLoader hierarchy when
+starting Rio is as follows:<br>
+<br>
+<table style="text-align: left; width: 50%;" border="0" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">
+      <pre>                  AppCL<br>&nbsp;&nbsp;                  |<br>            CommonClassLoader (http:// URLs of common JARs)<br>                    +<br>        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |<br>                    +<br>            +-------+-------+----...---+<br>            |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |<br>        Service-1CL&nbsp;&nbsp; Service-2CL&nbsp; Service-nCL<br>        </pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<span style="font-weight: bold;">AppCL</span> - Contains the main()
+class of the container. Main-Class in
+manifest points to <span style="font-family: monospace;">com.sun.jini.start.ServiceStarter</span><br>
+Classpath:&nbsp; boot.jar, start.jar, jsk-platform.jar<br>
+Codebase: none<br>
+<br>
+<span style="font-weight: bold;">CommonClassLoader</span> - Contains
+the common Rio and
+Jini technology classes (and other declared common platform JARs) to be
+made available to its children.<br>
+Classpath: Common JARs such as rio.jar<br>
+Codebase: Context dependent. The codebase returned is the codebase of
+the specific child CL that is the current context of the request.<br>
+<br>
+<span style="font-weight: bold;">Service-nCL</span> - Contains the
+service specific implementation classes.<br>
+Classpath: serviceImpl.jar<br>
+Codebase: "serviceX-dl.jar rio-dl.jar jsk-lib-dl.jar"<br>
+<br>
+<br>
+<big style="font-weight: bold;"><big><a
+ name="Configuring_Boot_Attributes"></a>Configuring Boot Attributes</big></big><br>
+The Rio boot environment supports the following
+configuration
+entries; where
+each configuration entry name is associated with the component name <span
+ style="font-family: monospace;">org.rioproject.boot</span><code></code><br>
+<ul>
+  <br>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;"><a
+ name="platformDir"></a>platformDir</span>
+    <table style="text-align: left; width: 100%;" border="0"
+ cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
+          </td>
+          <td style="vertical-align: top;">String</td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;"><span
+ style="font-family: monospace;">${RIO_HOME}${/}config${/}platform</span><br>
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">The platformDir property
+is scanned at system startup time. For each file ending in .xml, the
+file is parsed for Platform Configuration declarations. The platform
+element contains capability declarations that document the qualitative
+capabilities a compute resource will advertise and make available for
+services to use.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">createShutdownHook</span><br
+ style="font-weight: bold; font-family: courier new,courier,monospace;">
+    <table style="text-align: left; width: 100%;" border="0"
+ cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
+          </td>
+          <td style="vertical-align: top;">{@link java.lang.Boolean}<br>
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;">true</td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">Creates a shutdown hook.
+This will result in the registration of a virtual-machine shutdown
+hook. The shutdown hook will provide an orderly shutdown of&nbsp; all
+ServiceBean instances the Cybernode has instantiated by calling the
+ServiceBean's destroy method </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">verifyMulticast</span>
+    <table style="text-align: left; width: 100%;" border="0"
+ cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
+          </td>
+          <td style="vertical-align: top;">{@link java.lang.Boolean} </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;">false<span
+ style="font-weight: bold;"><br>
+          </span></td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">Determines if a Multicast
+socket can be created and a Request announcement can be sent. Note
+that it is still possible that multicast does not work outside the host<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<big><big><span style="font-weight: bold;"><a
+ name="Default_Platform_Configuration"></a>Default Platform
+Configuration</span></big></big><br>
+The 'platform' defines the support and technology that Rio core
+services (Cybernode &amp; Provisioner) include as part of their
+environment. Configuring the platform involves working with the
+RIO_HOME/config/platform directory.<br>
+<br>
+This directory contains platform configuration files. The Platform
+configuration file is used as follows:<br>
+<br>
+<ul>
+  <li>Provides attributes for creating PlatformCapability classes and
+declaring what jars will be common across all service classloaders. If
+jars are common they are loaded by the CommonClassLoader, and are in
+the classpath of all child class loaders. By default Rio and Jini
+technology jars are common across all service classloaders. For
+platform capabilities that are not loaded by the common classloader,
+services that declare that dependency will have the capability loaded
+by the service's classloader, providing a level of isolation from other
+services.<br>
+    <br>
+  </li>
+  <li>Provides a manifest of the platform jars that can be loaded.</li>
+</ul>
+<br>
+Platform configuration files are loaded when Rio starts. The contents
+of this directory will be scanned at startup time. Each .xml file will
+be parsed for &lt;platform&gt; declarations.<br>
+<br>
+The default platform configuration is included in the boot.jar file and
+defines the core jars required for Rio. It's content is as follows:<br>
+<span style="font-family: monospace;"><br>
+</span>
+<table
+ style="text-align: left; width: 100%; margin-left: auto; margin-right: auto;"
+ border="0" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;"><span
+ style="font-family: monospace;">&lt;?xml version="1.0"
+encoding="UTF-8"?&gt;</span><br style="font-family: monospace;">
+      <span style="font-family: monospace;">&lt;!--</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;Default platform
+configuration</span><br style="font-family: monospace;">
+      <span style="font-family: monospace;">--&gt;</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&lt;platform&gt;</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; &lt;!--</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; Rio jars
+to load into the common classloader.</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; --&gt;</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+&lt;capability name="Rio"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+class="org.rioproject.system.capability.software.RioSupport"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+common="yes"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;version&gt;4.0
+M2&lt;/version&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;classpath&gt;${RIO_HOME}/lib/rio.jar&lt;/classpath&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/capability&gt;<br>
+      <br>
+&nbsp;&nbsp;&nbsp; &lt;!--<br>
+&nbsp;&nbsp;&nbsp; River (Jini) jars to load into the common
+classloader.<br>
+&nbsp;&nbsp;&nbsp; --&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;capability name="River" common="yes"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;version&gt;2.1.1&lt;/version&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;manufacturer&gt;Apache
+Software Foundation&lt;/manufacturer&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;classpath&gt;${JINI_HOME}/lib/jsk-lib.jar&lt;/classpath&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/capability&gt;</span><span
+ style="font-family: monospace;"></span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </span><br style="font-family: monospace;">
+      <span style="font-family: monospace;">&lt;/platform&gt;</span></td>
+    </tr>
+  </tbody>
+</table>
+<span style="font-family: monospace;"><br>
+</span><span style="font-family: monospace;"></span><br>
+</body>
+</html>

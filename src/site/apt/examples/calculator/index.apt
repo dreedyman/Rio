@@ -1,0 +1,45 @@
+ ------
+ Calculator Example
+ ------
+
+Calculator Example
+
+ This example demonstrates a simple Calculator application that is composed
+ of POJO services for each calculator function (add, subtract, multiply and divide).
+
+ Each calculator function is a deployable service, and the Calculator has a
+ declared association to each service. The Calculator service becomes 'whole'
+ when it discovers it's required services. The Calculator is a good example on
+ the use of associations and how association based dependency injection can be used.
+
+[../../images/calculator.png]  
+
+* Building the example
+
+ The Calculator example is a multi-module Maven project, with the following
+ structure (just inter-project dependencies are shown):
+
+[../../images/calculator-project.png]
+
+ The example produces the following artifacts:
+
+*-----------------------+-------------+
+| <<Artifact>>          | <<Description>>
+*-----------------------+-------------+
+| calculator-service-2.0.jar    | Artifact containing service implementation classes
+*-----------------------+-------------+
+| calculator-api-2.0.jar | Artifact containing classes required for a client to invoke methods on each of the calculator services
+*-----------------------+-------------+
+| calculator-2.0.oar    | The OperationalString archive, contains the configuration artifacts used to deploy the Calculator application
+*-----------------------+-------------+
+
+ Running <<<mvn install>>> will result in the execution of integration tests that use
+ the Rio test infrastructure
+
+* Running the example
+
+ Look {{{running.html}here}} for information on running the example
+
+
+ The example also provides a test client that uses the Rio test infrastructure
+ to create and invoke methods on the Calculator service. 

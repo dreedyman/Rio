@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# This script is a wrapper around the "rio" script, and provides the command
+# line instruction to start the Rio Provision Monitor
+
+scriptDir="$(dirname $0)"
+
+if [ -z "$RIO_HOME" ]; then
+    export RIO_HOME=$scriptDir/..
+fi
+$RIO_HOME/bin/rio start monitor $*

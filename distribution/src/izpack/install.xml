@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+
+<!-- 
+Rio installation file.
+-->
+<installation version="1.0">
+
+	<!-- 
+	The info section.
+	The meaning of the tags should be natural ...
+	-->
+	<info>
+		<appname>Rio</appname>
+		<appversion>${pom.version}</appversion>
+		<authors>
+			<author name="Dennis Reedy (Asarian Technologies, LLC.)" email="dennis.reedy@gmail.com"/>
+		</authors>
+		<url>http://www.rio-project.org</url>
+		<javaversion>1.6</javaversion>
+		<webdir>http://www.rio-project.org/download</webdir>
+	</info>
+
+	<variables>
+		<variable name="DesktopShortcutCheckboxEnabled" value="true"/>
+	</variables>
+
+	<!-- 
+	The gui preferences indication.
+	Sets the installer window to 640x480. It will not be able to change the size.
+	-->
+	<guiprefs width="640" height="480" resizable="no"/>
+
+	<!-- 
+	The locale section.
+	-->
+	<locale>
+		<langpack iso3="eng"/>
+		<langpack iso3="fra"/>
+		<langpack iso3="spa"/>
+		<langpack iso3="deu"/>
+		<langpack iso3="cat"/>
+		<langpack iso3="chn"/>
+		<langpack iso3="cze"/>
+		<langpack iso3="dan"/>       
+		<langpack iso3="fin"/>
+		<langpack iso3="hun"/>
+		<langpack iso3="ita"/>
+		<langpack iso3="jpn"/>
+		<langpack iso3="mys"/>
+		<langpack iso3="ned"/>
+		<langpack iso3="nor"/>
+		<langpack iso3="pol"/>
+		<langpack iso3="por"/>
+		<langpack iso3="rom"/>
+		<langpack iso3="rus"/>
+		<langpack iso3="scg"/>
+		<langpack iso3="svk"/>
+		<langpack iso3="swe"/>
+		<langpack iso3="ukr"/>
+	</locale>
+
+	<native type="izpack" name="ShellLink.dll"/>
+
+	<!-- 
+	The resources section.
+	The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.
+	-->
+	<resources>
+		<res id="HTMLInfoPanel.info" src="../../rio-${pom.version}/NOTICE"/>
+		<res id="LicencePanel.licence" src="../../rio-${pom.version}/LICENSE"/>
+        <res id="TargetPanel.dir.windows" src="windows-install-path.txt"/>
+		<res id="installer.langsel.img" src="../../../src/izpack/rio.png"/>
+		<res id="shortcutSpec.xml" src="shortcutSpec.xml"/>
+		<res id="userInputSpec.xml" src="userInputSpec.xml"/>
+		<res id="userInputLang.xml_eng" src="userInputLang.xml_eng"/>
+		<res id="userInputLang.xml_fra" src="userInputLang.xml_fra"/>
+	</resources>
+
+	<!-- 
+	The panels section.
+	We indicate here which panels we want to use. The order will be respected.
+	-->
+	<panels>
+		<panel classname="HelloPanel"/>
+		<!--panel classname="HTMLInfoPanel"/-->
+		<panel classname="LicencePanel"/>
+		<panel classname="TargetPanel"/>
+		<!--panel classname="InstallationGroupPanel"/-->
+		<panel classname="PacksPanel"/>
+		<!--panel classname="UserInputPanel"/-->
+		<panel classname="SummaryPanel"/>
+		<panel classname="InstallPanel"/>
+		<panel classname="ShortcutPanel"/>
+		<panel classname="SimpleFinishPanel"/>
+	</panels>
+
+	<!-- 
+	The packs section.
+	We specify here our packs.
+	-->
+	<packs>
+		<pack name="Rio Core" installGroups="All,Rio Core" required="yes">
+			<description>Rio core distribution</description>
+			<fileset dir="../../rio-${pom.version}" targetdir="$INSTALL_PATH" defaultexcludes="yes">
+                <include name="bin/*.cmd" os="windows"/>
+                <include name="bin/cybernode" os="unix"/>
+                <include name="bin/monitor" os="unix"/>
+                <include name="bin/rio" os="unix"/>
+                <include name="bin/rio-ui" os="unix"/>
+				<include name="bin/startall" os="unix"/>
+				<include name="bin/webster" os="unix"/>
+				<include name="config/**/*"/>
+				<include name="deploy/readme.txt"/>
+				<include name="policy/**/*"/>
+				<include name="lib/**/*"/>
+				<include name="lib-dl/**/*"/>
+				<include name="logs/readme.txt"/>
+				<include name="NOTICE"/>
+				<include name="LICENSE"/>
+				<include name="index.html"/> 
+			</fileset>
+            <executable targetfile="$INSTALL_PATH/bin/cybernode" os="unix"/>
+            <executable targetfile="$INSTALL_PATH/bin/monitor" os="unix"/>
+            <executable targetfile="$INSTALL_PATH/bin/rio" os="unix"/>
+            <executable targetfile="$INSTALL_PATH/bin/rio-ui" os="unix"/>
+			<executable targetfile="$INSTALL_PATH/bin/startall" os="unix"/>
+			<executable targetfile="$INSTALL_PATH/bin/webster" os="unix"/>
+		</pack>
+		<pack name="Rio Docs" installGroups="All,Rio Core" required="no">
+			<description>Rio Documentation</description>
+			<fileset dir="../../../../docs" targetdir="$INSTALL_PATH/docs" defaultexcludes="yes"/>
+		</pack>
+        <!--
+		<pack name="Rio Sources" installGroups="All,Rio Core" required="no">
+			<description>Rio Sources</description>
+			<file src="src.zip" targetdir="$INSTALL_PATH"/>
+		</pack>
+		-->
+		<pack name="Rio Examples" installGroups="All,Rio Examples" required="no">
+			<description>Rio Examples</description>
+			<fileset dir="../examples" targetdir="$INSTALL_PATH" defaultexcludes="yes">
+                <include name="examples.zip"/>
+            </fileset>
+		</pack>
+	</packs>
+
+</installation>

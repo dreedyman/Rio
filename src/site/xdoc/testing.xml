@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Testing Services">
+            <p>
+                This document provides information for Unit Testing and Integration Testing
+                of your services using Rio. Rio provides classes to assist in the setup and
+                execution of services for either testing approach. Rio itself has test cases
+                that use the integration testing framework built on JUnit. We will review this
+                framework in this section.
+            </p>
+            <p>
+                Rio provides integration testing, allowing the integration testing
+                of your services together; with or without the the instantiation of
+                Rio infrastructure services. This section will discuss both options.
+            </p>
+            <div class="section"><h3>Unit Testing</h3>
+                <p>
+                    Unit testing services using Rio can be done using one of many testing
+                    frameworks. The examples provided with Rio use
+                    <a href="http://www.junit.org/">JUnit</a> and the
+                    <a href="http://maven.apache.org/plugins/maven-failsafe-plugin/">Failsafe Maven plugin</a>. The
+                    goal going into this is to unit test your service without having to
+                    instantiate the Rio infrastructure services (Provision Monitor, Cybernode, Lookup).
+                </p>
+                <p>
+                    The example below illustrates how an opstring composed of multiple
+                    services that use associations can be tested. In this scenario, the
+                    Calculator service has the Addition, Subtraction, Multiply and Divide
+                    services injected into it. All of these services are created and
+                    injected as they would be in an actual Rio deployment, but in
+                    our scenario they are bootstrapped locally.
+                </p>
+                <p>
+                    This occurs because Rio provides an extension for a local <tt>LookupCache</tt>
+                    to be used, one that is wired into the lifecycle events of a service being
+                    instantiated by a Cybernode.
+                </p>
+            </div>
+<pre name="code" class="java:nocontrols">
+/**
+ * Example testing the Calculator service and it's required services from the
+ * OperationalString
+ */
+@RunWith(Parameterized.class)
+public class ITCalculatorTest extends ITAbstractCalculatorTest {
+    String opstring;
+    Calculator calculator;
+
+    @Parameterized.Parameters
+    public static Collection&lt;Object[]&gt; data() {
+        String opstring = System.getProperty("opstring");
+        Assert.assertNotNull("no opstring given", opstring);
+        return Arrays.asList(new Object[][] {{ opstring }});
+    }
+
+    public ITCalculatorTest(String opstring) {
+        this.opstring = opstring;
+    }
+
+    @Before
+    public void setupCalculator() throws Exception {
+        StaticCybernode cybernode = new StaticCybernode();
+        Map&lt;String, Object&gt; map = cybernode.activate(new File(opstring));
+        for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+            String beanName = entry.getKey();
+            Object beanImpl = entry.getValue();
+            if (beanName.equals("Calculator"))
+                calculator = (Calculator) beanImpl;
+        }
+    }
+
+    @Test
+    public void testBean() throws RemoteException {
+        testService(calculator);
+    }
+
+}
+</pre>
+            <p>
+                In the <tt>setupCalculator()</tt> method, the
+                <a href="apidocs/org/rioproject/cybernode/StaticCybernode.html"><tt>org.rioproject.cybernode.StaticCybernode</tt></a> is created and passed
+                the opstring provided as a property when
+                <a href="http://maven.apache.org/plugins/maven-failsafe-plugin/examples/system-properties.html">configuring the Failsafe plugin</a>.
+            </p>
+            <p>
+                The <tt>StaticCybernode</tt> instantiates the service(s) declared
+                in the opstring, and returns a <tt>java.util.Map</tt> composed of
+                key value pairs mapping to the ServiceBean names, and each respective
+                service implementation.
+            </p>
+            <p>
+                In order to used the returned service implementation, you must cast it accordingly.
+            </p>
+
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                <tt>StaticCybernode.activate()</tt> can instantiate all the services
+                in your opstring or just specific services. If you want to create
+                specific services, pass in the name (as found in the opstring) for
+                the service(s) you want.
+            </div>
+
+            <p>
+                The corresponding opstring for the Calculator example is shown below. Note the association declarations.
+            </p>
+<pre name="code" class="java:nocontrols">
+import org.rioproject.config.Constants
+
+deployment(name:'Calculator') {
+    groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                              System.getProperty('user.name'))
+
+    artifact id:'service', 'org.rioproject.examples:calculator:1.0'
+    artifact id:'service-dl', 'org.rioproject.examples:calculator:dl:1.0'
+
+    service(name: 'Calculator') {
+        interfaces {
+            classes 'org.rioproject.examples.calculator.Calculator'
+            artifact ref:'service-dl'
+        }
+        implementation(class:'org.rioproject.examples.calculator.service.CalculatorImpl') {
+            artifact ref:'service'
+        }
+        associations {
+            ['Add', 'Subtract', 'Multiply', 'Divide'].each { s ->
+                association name:"$s", type:'requires', property:"${s.toLowerCase()}"
+            }
+        }
+        maintain 1
+    }
+
+    ['Add', 'Subtract', 'Multiply', 'Divide'].each { s ->
+        service(name: s) {
+            interfaces {
+                classes "org.rioproject.examples.calculator.$s"
+                artifact ref:'service-dl'
+            }
+            implementation(class: "org.rioproject.examples.calculator.service.${s}Impl") {
+                artifact ref:'service'
+            }
+            maintain 1
+        }
+    }
+}
+
+</pre>
+
+            <div id="infobox">
+                <img src="images/information.gif"/>
+                It is important to remember that the <tt>StaticCybernode</tt> utility
+                requires that all necessary classes (and resources) are in the classpath
+                of the JVM in order to activate the service bean(s). Although the opstring(s)
+                may have resources/artifacts defined, all classes must be in the classpath of
+                the JVM.
+            </div>
+
+            <div class="section"><h3>Integration Testing Using Rio Infrastructure Services</h3>
+                <p>
+                    The Rio test infrastructure provides a way to bootstrap core Rio infrastructure
+                    services (Provision Monitor, Cybernode, Lookup Service, Webster) as part of your
+                    integration test case. The test infrastructure is built on JUnit 4.5+, and is what
+                    Rio itself uses as part of it's supplied project tests.
+                </p>
+                <p>
+                    When writing a JUnit test case, your test case code needs to simply use the following annotation:
+                </p>
+            </div>
+<pre name="code" class="java:nocontrols">
+@RunWith(RioTestRunner.class)
+public class MyTest {
+...
+}    
+</pre>
+            <p>
+                The <tt>org.rioproject.test.RioTestRunnner</tt> class is a custom extension of
+                <a href="http://junit.sourceforge.net/javadoc/org/junit/runners/BlockJUnit4ClassRunner.html">
+                <tt>org.junit.runners.BlockJUnit4ClassRunner</tt></a> that provides the functionality
+                of the Rio Test Framework to standard JUnit 4.5+ tests.
+            </p>
+            <p>
+                The <tt>RioTestRunnner</tt> also provides support for the following annotations:
+            </p>
+            <p>
+                <b>@SetTestRunner</b><br/>
+                 Defines the property to invoke to set the TestManager. The TestManager will be
+                injected by the <tt>RioTestRunner</tt> <b>prior</b> to test case method invocation.
+            </p>
+<pre name="code" class="java:nocontrols">
+public class MyTest {
+    @SetTestManager
+    static TestManager testManager;
+
+    @BeforeClass
+    public static setup() {
+        Assert.assertNotNull(testManager);
+        testManager.startReggie();
+    }
+
+    @Test
+    public void testIt() {
+        ...
+    }
+
+    ...
+}
+</pre>
+            <p>
+                The <tt>@SetTestManager</tt> annotation can be applied at either the method or field level.
+            </p>
+            <p>
+                <b>@IfPropertySet</b><br/>
+                Annotation to indicate that a test is to be run if a specific property is set.
+            </p>
+<pre name="code" class="java:nocontrols">
+@IfPropertySet(name="run.long.test", value="true")
+@Test
+public void testSomethingThatTakesALongTime() {
+    ...
+}
+</pre>
+            <p>
+                The <tt>@IfPropertySet</tt> annotation can be applied at either the class or method level.
+            </p>
+
+            <div class="section"><h3>Configuring The Test Manager</h3>
+                <p>
+                    The Rio Test Manager is a Groovy class that requires a configuration file in order to
+                    initialize and run. By default the configuration file is loaded as a resource
+                    using reasonable defaults. The default configuration that ships with Rio is included below:
+                </p>
+            </div>
+<pre name="code" class="java:nocontrols">
+manager {
+    execClassPath =
+        '${RIO_HOME}${/}lib${/}boot.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+
+    inheritOptions = true
+
+    jvmOptions = '''
+        -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts
+        -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
+        -DRIO_HOME=${RIO_HOME} -Dorg.rioproject.groups=${org.rioproject.groups}'''
+
+    mainClass = 'com.sun.jini.start.ServiceStarter'
+
+    /* The ${service} token will be replaced by the name of the starter file.
+     * For start-reggie the service name will be reggie, for start-monitor the
+     * service name will be monitor, etc ... */
+    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                                       System.getProperty('user.name'))
+    String logDir = '/tmp/logs/rio/'
+    String opSys = System.getProperty('os.name')
+    if(opSys.startsWith("Windows"))
+        logDir = '${java.io.tmpdir}/logs/rio/'
+    log = logDir + logExt + '/${service}.log'
+
+    /*
+    * Remove any previously created service log files
+    */
+    cleanLogs = true
+
+    monitorStarter = '${RIO_HOME}/config/start-monitor.groovy'
+    cybernodeStarter = '${RIO_HOME}/config/start-cybernode.groovy'
+}
+</pre>
+            <p>
+                The configuration file can be overridden by setting the following system property:
+            </p>
+            <p>
+                <b>-Dorg.riproject.test.manager.config=path-to-config-file</b>
+            </p>
+            <p>
+                The properties of the TestManager configuration file are documented below:
+            </p>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Property</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>execClassPath</td>
+                        <td>The classpath to use to start the core Rio services</td>
+                    </tr>
+                    <tr>
+                        <td>inheritOptions</td>
+                        <td>If set, and set to true, the options (input arguments) to
+                            the JVM will be inherited from the enclosing process that
+                            has created the TestManager. If this property is set to true,
+                            input arguments of the enclosing process will be used to exec
+                            service JVMs created by the Rio TestManager, and will also
+                            override any settings declared in the jvmOptions property below.</td>
+                    </tr>
+                     <tr>
+                        <td>jvmOptions</td>
+                        <td>Options and arguments to use when starting the JVM. For more
+                            details on JVM options, check
+                            <a href="http://java.sun.com/javase/technologies/hotspot/vmoptions.jsp">here</a></td>
+                    </tr>
+                    <tr>
+                        <td>log</td>
+                        <td>Where to create a log for the service being started. The <i>service</i>
+                            token will be replaced by the name of the starter file. For start-monitor
+                            the service name will be monitor, etc ..</td>
+                    </tr>
+                    <tr>
+                        <td>cleanLogs</td>
+                        <td>The classpath to use to start the core Rio services</td>
+                    </tr>
+                    <tr>
+                        <td>mainClass</td>
+                        <td>The classpath to use to start the core Rio services</td>
+                    </tr>
+                    <tr>
+                        <td>monitorStarter</td>
+                        <td>The configuration file used to start the Provision Monitor.</td>
+                    </tr>
+                    <tr>
+                        <td>cybernodeStarter</td>
+                        <td>The configuration file used to start a Cybernode.</td>
+                    </tr>
+                    <tr>
+                        <td>config</td>
+                        <td>Optional configuration file that the RioTestRunner will use to confgure underlying utilities. </td>
+                    </tr>
+                    <tr>
+                        <td>harvesterOpString</td>
+                        <td>The opsting the harvest utility will use. The harvest
+                            utility is deployed to all CYbernodes and is used to collect
+                            (harvest) configured artifacts. You can read more about
+                            harvesting <a href="">here</a>. </td>
+                    </tr>
+                    <tr>
+                        <td>harvestDir</td>
+                        <td>The directory to save harvested artifacts. </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section"><h3>Test Configuration</h3>
+                <p>
+                    The Rio testing infrastructure is set up to use a Groovy
+                    configuration file to run and configure your test classes. The following snippet illustrates the elements involved:
+                </p>
+            </div>
+<pre name="code" class="java:nocontrols">
+ITCalculatorDeployTest {
+    groups = "Calculator"
+    /* Comma separated locator names */
+    //locators = "10.0.1.4:9160, 10.0.1.6:32189"
+    //testManager = new org.rioproject.test.TestManager(true)
+    numCybernodes = 1
+    numMonitors = 1
+    opstring = 'src/main/conf/calculator.groovy'
+    autoDeploy = true
+    //harvest = true
+    //timeout
+}
+</pre>
+            <p>
+                The enclosing element of the configuration must be the class name
+                of the test class sans the package name. This allows the Rio
+                testing infrastructure to locate the configuration for the test class.
+            </p>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Property</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>groups</td>
+                        <td>Lookup discovery group(s) to use when creating discovery management for the test case.</td>
+                    </tr>
+                    <tr>
+                        <td>locators</td>
+                        <td>Lookup locator(s) to use when creating discovery management for the test case.</td>
+                    </tr>
+                    <tr>
+                        <td>testManager</td>
+                        <td>Optionally decare the TestManager to use. If not declared a new
+                            <tt>org.rioproject.test.TestManager(true)</tt> is created.</td>
+                    </tr><tr>
+                        <td>numCybernodes</td>
+                        <td>Optional number of Cybernodes the test infrastructure should create </td>
+                    </tr>
+                    <tr>
+                        <td>numMonitors</td>
+                        <td>Optional number of Provision Monitors the test infrastructure should create.</td>
+                    </tr>
+                    <tr>
+                        <td>opstring</td>
+                        <td>The OperationalString associated with the test case.</td>
+                    </tr>
+                    <tr>
+                        <td>autoDeploy</td>
+                        <td>Whether to automatically deploy the associated opstring (above) when the test case is started.</td>
+                    </tr>
+                    <tr>
+                        <td>harvest</td>
+                        <td>Whether to harvest artifacts at the end of the test classes execution (run with all after class statements).</td>
+                    </tr>
+                    <tr>
+                        <td>timeout</td>
+                        <td>The default timeout (per test method and in millis) to use for test case execution.
+                            <div id="infobox">
+                                <img src="images/information.gif"/>
+                                If JUnit's @Test(timeout="xxx") is used, JUnit's declaration takes precedence.
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </body>
+    <script type="text/javascript" src="highlighter/shCore.js"></script>
+    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
+    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

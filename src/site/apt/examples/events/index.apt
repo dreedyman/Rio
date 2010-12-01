@@ -1,0 +1,45 @@
+ ------
+ Events Example
+ ------
+
+Events Example
+
+ This example demonstrates the use of the Rio event framework to subscribe to
+ and be notified of events. Both services in this example are implemented as beans,
+ client access to the example is done using either a CLI or through a Service UI.
+ The use of customized proxies is also shown in this example, as well as the use of
+ Watches. The Service UI can be viewed by using a service-UI compatible browser,
+ such as the Rio UI. 
+
+* Building the example
+
+ The Events example is a multi-module Maven project, with the following
+ structure (just inter-project dependencies are shown):
+
+[../../images/events-project.png]
+
+ The example produces the following artifacts:
+
+*-----------------------+-------------+
+| <<Artifact>>          | <<Description>>
+*-----------------------+-------------+
+| events-service-2.0.jar    | Artifact containing service implementation classes
+*-----------------------+-------------+
+| events-api-2.0.jar | Artifact containing classes required for a client to invoke methods on the service as well as register for and receive notification of events.
+*-----------------------+-------------+
+| events-proxy-2.0.jar | Artifact containing classes containing the smart proxy support for the service.
+*-----------------------+-------------+
+| events-ui-2.0.jar | Artifact used as the service user interface jar. Contains classes required to create a service-specific swing panel (viewable using the Rio UI).
+*-----------------------+-------------+
+| events-2.0.oar    | The OperationalString archive, contains the configuration artifacts used to deploy the SpringBean application
+*-----------------------+-------------+
+
+ Running <<<mvn install>>> will result in the execution of integration tests that use
+ the Rio test infrastructure
+
+* Running the example
+
+  Look {{{running.html}here}} for information on running the example
+ 
+ The example also provides a test client that uses the Rio test infrastructure
+ to create and invoke methods on the SpringBean service. 

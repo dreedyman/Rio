@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Service Exec Element">
+            <p>
+                The Service control adapter required to activate and monitor an
+                existing service is nothing more then a POJO that encapsulates the
+                logic needed to create the necessary infrastructure components required
+                to activate and monitor the existing service element.
+            </p>
+            <p>
+                The easiest way to bootstrap this is to use the <tt>serviceExec</tt>
+                element in the Rio OperationalString. The <tt>serviceExec</tt> element
+                indicates that a service is to be created using the exec framework,
+                that is created as and managed as an external process. The targeted
+                service to be exec'd will be  allocated to available compute resources
+                based in the capability to match the operational &amp; platform
+                requirements to available compute resource (Cybernode) capabilities.
+            </p>
+
+            <p>
+                We will use the <a href="../../../examples/tomcat.index.html">Tomcat example</a> as a reference,
+                and discuss the example's OperationalString to demonstrate the <tt>serviceExec</tt>
+                element for the dynamic deployment of a Tomcat instance.
+            </p>
+            
+            <div id="tipbox">
+                <img src="../../images/check.gif"/>
+                The OperationalString can be composed in both XML and using a Groovy based DSL.
+                This example and discussion uses Groovy.
+            </div>
+            <p></p>
+
+<pre name="code" class="java:nocontrols">
+deployment(name: 'Tomcat Deploy') {
+    groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                              System.getProperty('user.name'))
+    serviceExec(name: 'Tomcat') {
+        software(name: 'Tomcat', version: '6.0.16')
+        execute(inDirectory: 'bin', command: 'catalina.sh run') {
+            environment {
+                property name: "CATALINA_OPTS", value: "-Dcom.sun.management.jmxremote"
+            }
+        }
+        maintain 1
+    }
+}</pre>
+
+            
+            <p>
+                The important parts of the declaration are outlined below:
+            </p>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><b>Element</b></td>
+                        <td><b>Description</b></td>
+                    </tr>
+                    <tr>
+                        <td>groups</td>
+                        <td>The discovery group(s) the deployed service will use for joining the
+                            network. This declaration will first check if the
+                            <tt>-Dorg.rioproject.groups</tt> has been set, if not the user name is
+                            used</td>
+                    </tr>
+                    <tr>
+                        <td>serviceExec</td>
+                        <td>The is the element that describes the external service to
+                            be created and managed. In our case it is Tomcat. </td>
+                    </tr>
+                    <tr>
+                        <td>software</td>
+                        <td>This element describes a requirement that Tomcat be
+                            available as an installed component. If Tomcat is not
+                            found the service (Tomcat) will not be created. As we move
+                            through this example we will be able to dynamically install
+                            and configure Tomcat. For this declaration, Tomcat must be installed. </td>
+                    </tr>
+                    <tr>
+                        <td>execute</td>
+                        <td>This element describes the command to exec, and any input
+                            arguments. As you can see it completely straight forward.
+                            The command (catalina.sh) location  is constructed based
+                            on the derived location of the installed (and/or available)
+                            Tomcat component. Additionally, the <tt>CATALINA_OPTS</tt>
+                            environment variable is declared, allowing Tomcat to be
+                            started enabling remote JMX monitoring. 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>maintain</td>
+                        <td>This indicates how many instances of Tomcat to maintain.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section"><h3>Next</h3></div>
+            <a href="service-exec-provisioning.html">Persistent Provisioning and Data Staging</a> >
+        </section>
+    </body>
+    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
+    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
+    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

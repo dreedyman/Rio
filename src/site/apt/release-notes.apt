@@ -1,0 +1,80 @@
+ ------
+Release Notes
+ ------
+Dennis Reedy
+ ------
+1 January 2010
+ ------
+
+Release Notes
+
+  The Rio team would like to announce the release of Rio 4.1.
+
+  Rio 4.1 is {{{download.html}available for download}}
+
+* 4.1 Release Notes
+
+ The full list of changes can be found in our {{{http://jira.rio-project.org}issue management system}}, and is reproduced below.
+    
+** Bug
+
+     * {{{http://jira.rio-project.org/browse/RIO-175}RIO-175}} - If JAVA_HOME contains spaces in the directory name
+
+     * {{{http://jira.rio-project.org/browse/RIO-189}RIO-189}} - rio.cmd doesn't handle paths containing spaces
+
+     * {{{http://jira.rio-project.org/browse/RIO-221}RIO-221}} - Test framework should warn if missing service starter configuration
+
+     * {{{http://jira.rio-project.org/browse/RIO-226}RIO-226}} - If executing in test mode, include dependencies scoped with test
+
+     * {{{http://jira.rio-project.org/browse/RIO-227}RIO-227}} - Artifacts with &lt;type&gt; other then jar
+
+     * {{{http://jira.rio-project.org/browse/RIO-228}RIO-228}} - Unable to debug service when loading with opstring
+
+     * {{{http://jira.rio-project.org/browse/RIO-229}RIO-229}} - The start-cybernode.groovy doesn't take in to consideration if the local maven repo is placed at a non-default location
+
+     * {{{http://jira.rio-project.org/browse/RIO-230}RIO-230}} - Service tutorial needs to include step to run mvn install
+
+     * {{{http://jira.rio-project.org/browse/RIO-231}RIO-231}} - Creating default platform on
+
+     * {{{http://jira.rio-project.org/browse/RIO-232}RIO-232}} - Support Archiva produced checksum files
+
+
+     []
+    
+** Improvement
+
+     * {{{http://jira.rio-project.org/browse/RIO-88}RIO-88}} -  Add ProvisionFailureEvent notifications to UI
+
+     * {{{http://jira.rio-project.org/browse/RIO-220}RIO-220}} - Excessive WARNINGs in log when no sigar available
+
+     * {{{http://jira.rio-project.org/browse/RIO-222}RIO-222}} - Add create-project option to rio script(s)
+
+     * {{{http://jira.rio-project.org/browse/RIO-223}RIO-223}} - Consider writing example on use of Associations by service clients
+
+     * {{{http://jira.rio-project.org/browse/RIO-233}RIO-233}} - DSL software element needs to include support for all attributes instead of just name and version
+
+
+     []
+    
+**  New Feature
+
+     * {{{http://jira.rio-project.org/browse/RIO-206}RIO-206}} - Provide better integration with Maven
+
+     []
+    
+** Task
+
+    * {{{http://jira.rio-project.org/browse/RIO-224}RIO-224}} -  Use enum in ProvisionMonitorEvent
+
+     []
+
+
+* Release notes for previous versions
+
+     * {{{http://jira.rio-project.org/secure/ReleaseNote.jspa?version=10011&styleName=Html&projectId=10000&Create=Create}4.0 M3}}
+
+     * {{{http://jira.rio-project.org/secure/ReleaseNote.jspa?version=10011&styleName=Html&projectId=10000&Create=Create}4.0 M2}}
+
+     * {{{http://jira.rio-project.org/secure/ReleaseNote.jspa?version=10010&styleName=Html&projectId=10000&Create=Create}4.0 M1}}
+
+     []

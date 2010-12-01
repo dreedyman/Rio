@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<!--
+ Generates a Rio release
+-->
+<project name="Release" default="release" basedir=".">
+    <property name="release.archive" value="${release.archive}"/>
+    <property name="version" value="${dist.version}"/>
+    <property name="release.dir" value="${basedir}/target"/>
+    <property name="staging.dir" value="${release.dir}/staging"/>
+    <property environment="env"/>
+
+    <target name="clean">
+        <delete includeEmptyDirs="true" verbose="true" failonerror="false">
+            <fileset file="${release.dir}/${release.archive}.zip"/>
+            <fileset file="${release.dir}/${release.archive}.zip.md5"/>
+            <!--<fileset dir="${staging.dir}"/>-->
+        </delete>
+    </target>
+    
+    <target name="release" depends="clean">        
+
+        <echo message="Building Rio Release Archive [${release.dir}/${release.archive}.zip] ...."/>
+
+        <tar destfile="${release.dir}/${release.archive}.tar" >
+            
+            <tarfileset dir="${release.dir}/rio-${version}"
+                        prefix="rio-${version}">
+                <include name="NOTICE"/>
+                <include name="LICENSE"/>
+                <include name="index.html"/>
+                <include name="config/**"/>
+                <include name="docs/**"/>
+                <include name="lib/**"/>
+                <include name="lib-dl/**"/>
+                <include name="lib/hyperic/**"/>
+                <include name="policy/**"/>
+                <include name="examples.zip"/>
+            </tarfileset>
+
+            <tarfileset dir="${release.dir}/rio-${version}/bin"
+                        prefix="rio-${version}/bin" mode="755">
+                <include name="**"/>
+            </tarfileset>
+                        
+        </tar>
+
+        <zip destfile="${release.dir}/${release.archive}.zip">
+            <tarfileset src="${release.dir}/${release.archive}.tar"/>
+        </zip>
+        <delete file="${release.dir}/${release.archive}.tar"/>
+
+
+        <echo message="Generate checksum files ..."/>
+        <checksum file="${release.dir}/${release.archive}.zip"
+                  algorithm="MD5" fileext=".md5"/>
+
+        <echo message="Completed Rio release build ${version}"/>
+    </target>
+
+</project>

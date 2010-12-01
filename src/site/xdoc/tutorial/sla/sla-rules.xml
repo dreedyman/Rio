@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="SLA Rules Tutorial">
+            <p>
+                This tutorial describes how to use <a href="http://www.jboss.org/drools">Drools</a> and the Gnostic
+                service for rule based SLA Management. The tutorial is composed of the following sections:
+            </p>
+            <p>
+                <ul>
+                    <li><a href="#Introduction">Introduction</a></li>
+                    <li><a href="#Gnostic">How Gnostic fits into the system</a></li>
+                    <li><a href="#Configuring_Gnostic">Configuring Gnostic</a></li>
+                </ul>
+
+            </p>
+            <a name="Introduction">
+            <h3>Introduction</h3>
+            </a>
+            As introduced in the <a href="../../watches-sla.html">Watches &amp; SLAs</a> document,
+            Rio provides mechanisms to collect and analyze programmer defined
+            metrics defined in a distributed application.
+            
+            <p>
+                Using this support, services can have
+                SLAs attached to them, ensuring operational criteria is met. The
+                dynamic service's operational behavior can be monitored to
+                dynamically scale it's environment up &amp; down based on
+                declarative attributes, be relocated, or trigger specific response(s)
+                based on observed stimulus. 
+            </p>
+
+            <p>
+                The diagram below shows the architecture used to provide the support
+                for observed system and application defined metrics. The approach is
+                based on a sensor-effector pattern. Data is observed from applications,
+                OS, hardware, etc ... and feed into SLA Management and Policy Enforcement.
+            </p>
+            <p>
+                <img src="../../images/sla.png"/>
+            </p>
+
+            <p>
+                Where the SLA Rule approach fits in is in Policy Enforcement.
+                Rio provides a service called Gnostic, that provides a distributed
+                point that coalesces metrics collected by services to a Complex Event
+                Processing (CEP) engine. The CEP that the Gnostic service currently
+                provides support for is
+                <a href="http://www.jboss.org/drools/drools-fusion.html">Drools Fusion</a>.
+            </p>
+
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                Why Gnostic? Gnostic comes from one of the Greek words for knowledge, or <i>Gnosis</i>
+            </div>
+            <p>
+                The CEP provides a way to add events collected from observed system
+                and application defined metrics, and accumulate temporal knowledge
+                that rules are then executed on. Rule execution results in actions taken
+                based on the conditions that are met.
+            </p>
+            <p>
+                A rule is structured as follows:
+            <div id="sourcebox">
+                <pre>
+rule "name"
+
+when
+    &lt;conditions&gt;
+then
+    &lt;actions&gt;;</pre>
+            </div>
+            </p>
+            <p>
+                The rule structure above specifies that when a particular set of conditions occur,
+                specified in the Left Hand Side (LHS), then do what is specified as a list of
+                actions in the Right Hand Side (RHS).
+            </p>
+
+            <p>
+                An example of a rule (taken from the Hospital example) follows:
+<pre name="code" class="java:nocontrols">
+declare CalculablePatient
+    @role(event)
+    @timestamp(date)
+end
+
+rule "Patient Alert Rule"
+when
+    $p : CalculablePatient(id == "pulse", value &lt; 50) from entry-point "calculables-stream"
+then
+    Patient p = $p.getPatient();
+    Doctor d = p.getDoctor();
+    d.patientAlert(p);
+end</pre>
+
+            </p>
+            <p>
+                In the rule above, every patient has a pulse. There is a &quot;pulse&quot; watch
+                created that monitors each patient's pulse. The <tt>CalculablePatient</tt> event
+                contains the pulse value, and the <tt>Patient</tt> object. If the pulse drops
+                below 50, the patient's Doctor is notified.
+            </p>
+            <p>
+                The LHS deals with determining if a patient's pulse drops below 50. If
+                this condition is met, the RHS executes, notifying the Doctor.
+            </p>
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                Note that this is not a tutorial for writing Drools rules.
+                Please refer to available documentation for
+                <a href="http://www.jboss.org/drools/documentation">Drools Expert</a> and
+                <a href="http://www.jboss.org/drools/documentation">Drools Fusion</a>.
+            </div>
+            <p>
+                So why do this using a rule and not programmatically? Good question :)
+            </p>
+            <ul>
+                <li>Previous versions of Rio provided SLA Policy Handlers that have been
+                    developed empirically, exist in code, and are wired directly to watches.
+                    Using a rules approach we can add declarative rules to the system
+                    offering a wider range of functionality and behavior.</li>
+                <li>The SLA Rules approach separates data and logic in a cleaner way. The logic
+                    is in the rules, can be added to a running system easily, changed,
+                    removed, etc ...</li>
+            </ul>
+
+            <a name="Gnostic">
+            <h3>How Gnostic fits into the system</h3>
+            </a>
+            <p>
+                The Gnostic is a service that is dynamically deployed, just like any other
+                service you need to have running. The Gnostic is configured as part of
+                your opstring (deployment) configuration, and you wire up the Gnostic with
+                service feeds, that direct metrics from the service to Gnostic, where the
+                events are added to the Gnostic's CEP as temporal data.
+            </p>
+            <p>
+                <img src="../../images/gnostic-service.png"/>
+            </p>
+
+            <p>
+                Once the rule executes, the RHS can perform actions on services or ask Rio to
+                increment or decrement service instances, relocate services,
+                deploy additional services, or act directly on your services.
+            </p>
+            <p>
+                Each rule has a <tt>global
+                <a href="../../apidocs/org/rioproject/gnostic/DeployedServiceContext.html">org.rioproject.gnostic.DeployedServiceContext</a></tt> set,
+                providing context on deployed services. The <tt>DeployedServiceContext</tt> class
+                provides the support for the RHS of the rule to interface with Rio, and/or obtain
+                a proxy for an associated service enabling the RHS to invoke methods on specific
+                service instances.
+            </p>
+            <p>
+                The example below is from the  <a href="../../examples/hospital/index.html">Hospital example</a>.
+                It shows a rule that checks if there are enough Beds in the Hospital. If the number of Beds is 0,
+                the <tt>DeployedServiceContext</tt> is used to increment (scale), the number of available Beds.
+            </p>
+<pre name="code" class="java:nocontrols">
+global org.rioproject.gnostic.DeployedServiceContext context;
+
+declare Calculable
+    @role(event)
+    @timestamp(date)
+end
+
+rule "Available Bed Rule"
+when
+    $beds : Calculable(id == "availableBeds", value == 0) from entry-point "calculables-stream"
+then
+    context.increment("Beds", "Hospital");
+end
+</pre>
+            <a name="Configuring_Gnostic">
+            <h3>Configuring Gnostic</h3>
+            </a>
+            <p>
+                An extension to the Rio DSL allows the inline declaration of rules
+                and the required attributes needed to load, create and provide the
+                necessary inputs for the rule(s) to operate.
+            </p>
+            <p>
+                The syntax diagram for the rules declaration is shown here:
+            </p>
+            <p>
+                <img src="../../images/opstring/rules.jpg"/><br/>
+                <img src="../../images/opstring/rule.jpg"/><br/>
+                <img src="../../images/opstring/serviceFeed.jpg"/><br/>
+            </p>
+            <p>
+                The <b><font color="#4AA02C"><tt>rules</tt></font></b> declaration results in the creation of a
+                Gnostic service configured with <b><font color="#4AA02C"><tt>rule</tt></font></b> elements.
+                Each <b><font color="#4AA02C"><tt>rule</tt></font></b> has a:
+            </p>
+            <ul>
+                <li><b><font color="#4AA02C"><tt>resource</tt></font></b><br/>
+                    The name of the rule file (resource). If the resource name does
+                    not include an extension, the <tt>.drl</tt> extension is added. The
+                    resource name may also include either <tt>file:</tt> or <tt>http</tt>.
+                    If the resource name starts with either of these prefixes, the
+                    appropriate file or URL resource will be created. If the resource
+                    does not start with <tt>file:</tt> or <tt>http</tt>, the resource will
+                    be loaded as a classpath resource.
+                </li>
+                <li><b><font color="#4AA02C"><tt>ruleClassPath</tt></font></b><br/>
+                    The <tt>ruleClassPath</tt> is added to a rule declaration if the rule has
+                    domain specific requirements that include either rule resources
+                    (see above), model classes that interact with the rule, or require
+                    interactions with (domain specific) services. The ruleClassPath is
+                    either an artifact (groupId:artifactId:version), or a comma
+                    separated list of jars.
+                </li>
+                <li><b><font color="#4AA02C"><tt>serviceFeed</tt></font></b><br/>
+                    The <tt>serviceFeed</tt> declares the name of the service
+                    (and optionally the opstring name) to associate to. Once bound, the
+                    Gnostic registers for notifications of
+                    <a href="../../apidocs/org/rioproject/watch/Calculable.html"><tt>Calculable</tt></a>s
+                    being added to the service's
+                    <a href="../../apidocs/org/rioproject/watch/WatchDataSource.html"><tt>WatchDataSource</tt></a> as a
+                    <a href="../../apidocs/org/rioproject/watch/WatchDataReplicator.html"><tt>WatchDataReplicator</tt></a>
+                    for each named watch. Watch names are provided as a comma separated list.
+                </li>
+            </ul>
+            <p>
+                An example follows:
+            </p>
+<pre name="code" class="java:nocontrols">
+rules {
+    rule {
+        resource 'DoctorRule, PatientAlert, AvailableBedRule'
+        ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.0'
+        serviceFeed(name: "Doctors") {
+            watches "numPatients"
+        }
+        serviceFeed(name: "Beds") {
+            watches "pulse"
+        }
+        serviceFeed(name: "Admission") {
+            watches "availableBeds"
+        }
+    }
+}
+</pre>
+            <h4>Feeds from system watches</h4>
+            <p>
+                For declaring <tt>serviceFeed</tt> watch names that are to be bound to system oriented
+                watches like JVM Memory, CPU utilization, the following constants can be used:
+            </p>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Constant</th>
+                        <th>Explanation</th>
+                    </tr>
+                    <tr>
+                        <td><tt>SystemWatchID.SYSTEM_CPU</tt></td>
+                        <td>A watch that observes CPU utilization for a compute resource.</td>
+                    </tr>
+                    <tr>
+                        <td><tt>SystemWatchID.PROC_CPU</tt></td>
+                        <td>A watch that observes CPU utilization for the process (JVM) the service is running in.</td>
+                    </tr>
+                    <tr>
+                        <td><tt>SystemWatchID.DISK_SPACE</tt></td>
+                        <td>A watch that observes diskspace utilization for a compute resource.</td>
+                    </tr>
+                    <tr>
+                        <td><tt>SystemWatchID.SYSTEM_MEMORY</tt></td>
+                        <td>A watch that observes system memory utilization for a compute resource.</td>
+                    </tr>
+                    <tr>
+                        <td><tt>SystemWatchID.JVM_MEMORY</tt></td>
+                        <td>A watch that observes memory utilization for the process (JVM) the service is running in.</td>
+                    </tr>
+                    <tr>
+                        <td><tt>SystemWatchID.JVM_PERM_GEN</tt></td>
+                        <td>A watch that observes memory the permanent generation utilization for the process (JVM) the service is running in.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Example</h4>
+            <p>
+                <a href="../../examples/hospital/index.html">Check out the Hospital example</a> &gt;
+            </p>
+        </section>
+    </body>
+    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
+    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
+    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

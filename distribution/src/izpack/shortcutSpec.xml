@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<shortcuts>
+	<skipIfNotSupported/>
+	<programGroup defaultName="Rio" location="applications"/>
+
+    <shortcut
+		name="Start Rio Monitor Service"
+		target="$INSTALL_PATH\bin\rio.cmd"
+		workingDirectory="$INSTALL_PATH\bin"
+        commandLine="start monitor"
+		description="This starts Rio monitor service"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no"/>
+
+    <shortcut
+		name="Start Rio Cybernode Service"
+		target="$INSTALL_PATH\bin\rio.cmd"
+        commandLine="start cybernode"
+		workingDirectory="$INSTALL_PATH\bin"
+		description="This starts Rio cybernode service"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no"/>
+
+	<shortcut
+		name="Start All Rio Services"
+		target="$INSTALL_PATH\bin\startall.cmd"
+		workingDirectory="$INSTALL_PATH\bin"
+		description="This starts all services of Rio"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no"/>
+
+	<shortcut
+		name="Rio UI"
+		target="$INSTALL_PATH\bin\rio-ui.cmd"
+		workingDirectory="$INSTALL_PATH\bin"
+		description="This starts the Rio UI"
+		initialState="noShow"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no"/>
+
+	<shortcut
+		name="Documentation"
+		target="$INSTALL_PATH\docs\index.html"
+		commandline=""
+		description="Rio Documentation"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no">
+		<createForPack name="Rio Docs"/>
+	</shortcut>
+
+	<shortcut
+		name="API Documentation"
+		target="$INSTALL_PATH\docs\apidocs\index.html"
+		commandline=""
+		description="Rio API Documentation"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no">
+		<createForPack name="Rio Docs"/>
+	</shortcut>
+
+	<shortcut
+		name="Uninstall Rio"
+		target="$INSTALL_PATH\Uninstaller\uninstaller.jar"
+		commandline=""
+		description="Uninstalls Rio"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no"
+		iconFile="%SystemRoot%\system32\SHELL32.dll"
+		iconIndex="31"/>
+
+</shortcuts>

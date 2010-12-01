@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Tomcat Example">
+            <p>
+               The Tomcat example demonstrates how to activate and manage an existing (external)
+                technology using the Rio exec framework. In this example, Tomcat is installed,
+                deployed and started. The environment is set allowing Tomcat to be managed by JMX.
+            </p>
+
+            <p>
+                The example also shows how a declarative watch can be used to monitor JMX managed
+                attributes, and set thresholds for manage-able Tomcat attributes.
+                Our example shows how the MBean for the thread pool that handles
+                incoming Web requests can be observed.
+            </p>
+
+
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                The Rio Service Exec framework is currently available for POSIX based systems only
+            </div>
+            <p>
+                Our example will create a Service Control Adapter (SCA) to activate
+                and monitor a Tomcat instance. The example requires no coding, just
+                configuration of the OperationalString.
+            </p>
+
+            <div id="tipbox">
+                <img src="../../images/check.gif"/>
+                The OperationalString can be composed in both XML and using a Groovy based DSL. This example uses Groovy.
+            </div>
+
+            <div class="section"><h3>Building the example</h3>
+                The Tomcat example is built as a Maven project, and uses the
+                Maven Rio Plugin to produce a single artifact; the Operational String Archive (OAR).
+            <p>
+                Running <tt>mvn install</tt> will result in the execution of an
+                integration test that uses the Rio test infrastructure, where
+                Tomcat will be provisioned, extracted and started.
+            </p>
+            </div>
+            <div class="section"><h3>Running the example</h3>
+                Look <a href="running.html">here</a> for information on running the example
+            </div>
+        </section>
+    </body>
+</document>

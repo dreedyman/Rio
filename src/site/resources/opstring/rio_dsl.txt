@@ -1,0 +1,160 @@
+grammar rio_dsl;
+
+opstring             : 'deployment' '(' 'name:' name (',' 'debug:' (true | false) )? ')' '{'
+                            opstring_body
+                        '}' ;
+
+opstring_body       :	  codebase? groups? locators? (artifact | resources)? include? common? service* spring* service_exec* ;
+
+include              : 'include' identifier ;
+
+groups               : 'groups' name (',' name)* ;
+
+locators             : 'locators' (ip_address | host_name) (',' (ip_address | host_name))* ;
+
+service              : 'service' '(' service_header ')' '{'
+                               instantiation_attrs
+                               sla?
+                           '}' ;
+
+spring               : 'spring' '(' service_header',' 'config:'name ')' '{'
+                               instantiation_attrs
+                               sla?
+                           '}' ;
+
+service_exec         : 'serviceExec' '(' service_header ')' '{'
+                               instantiation_attrs
+                               sla?
+                               execute
+                           '}' ;
+                           
+execute               :	'execute' '(' 'command:' name (',' 'inDirectory:' name ')')?  ('{'
+                                   'environment' '{' property '}'
+                               '}')? ;
+                               
+service_header       : 'name:' name 
+                           (',' 'fork:' (yes | no ))?
+                           (',' 'type:'  (('fixed') | ('dynamic'))  )?
+                           (',' 'jvmArgs:' args )?
+                           (',' 'environment:' args )? ;
+
+artifact             : 'artifact' (('id:' name) | ('ref:' name))? identifier? ;
+
+resources            : 'resources' (('id:' name) | ('ref:' name))? jar? (',' jar)* ;
+
+codebase             : 'codebase' identifier ;
+
+instantiation_attrs  : interfaces? implementation data?  
+                       common?
+                       'maintain' digit
+                       ('comment' identifier)?
+                       maxPerMachine? ;
+
+implementation       : 'implementation' '(' 'class:' class_name ')' '{'
+                               (resources | artifact) 
+                               sharedComponent?
+                           '}' ;
+
+interfaces           : 'interfaces' '{'
+                               'classes' class_name (',' class_name)*
+                               (resources | artifact)
+                           '}' ;
+  
+common               : logging? associations? association? parameters? configuration? system_requirements? cluster? ;
+
+sharedComponent      : 'sharedComponent' '(' 'class:' class_name ')' '{'
+                               (resources | artifact)       
+                           '}' ;
+
+associations         : 'associations' '{' association (',' association )* '}' ;
+
+association          : 'association' '(' 'type:'  (('uses') | ('requires') | ('colocated') | ('opposed') | ('isolated'))  ',' 
+                                         'name:' name (',' 'serviceType:' class_name)? (',' 'property:' name)? ')' ( '{'
+                               association_management                               
+                           '}' )? ;
+
+association_management  : 'management' 'proxy:' class_name (',' proxyType)?  (',' strategy)? (',' inject)? (',' filter)?
+                           (',' serviceDiscoveryTimeout)? ;
+
+proxyType              :  'proxyType:' (('jdk')|('cglib')) ;
+
+strategy               :  'strategy:' class_name ;
+
+inject                 :  'inject:' (('lazy') | ('eager')) ;
+
+/* see AssociationMatchFilter javadoc */
+filter                 :  'filter:' class_name ;
+	
+serviceDiscoveryTimeout:	'serviceDiscoveryTimeout:' digit ',' 
+                           'units:' (('milliseconds') | ('seconds') | ('minutes') | ('hours') | ('days') );
+
+sla                  : 'sla' '(' 'id:' identifier (',' 'low:' digit)? (',' 'high:' digit )? ')' '{'
+                               sla_policy declarative_monitor?
+                           '}' ;
+
+sla_policy           : 'policy' 'type:' (('scaling') | ('relocation') | ('notify')) (',' 'max:' digit)? ( ',' 'lowerDampener:' digit)? (',' 'upperDampener:' digit)?;  
+
+declarative_monitor  :	'monitor' 'name:' name ',' 'property:' name ',' 'period:' digit ;
+                         
+maxPerMachine        : 'maxPerMachine' digit (',' 'type:' (('physical') | ('virtual')) )? ;
+	 
+configuration        : 'configuration' '(' (  'file:' ('classpath:')? name | inline_configuration )? ')' ;
+
+parameters           : 'parameters' '{' parameter parameter* '}' ;
+
+parameter            : 'parameter' 'name:' identifier ',' 'value:' identifier ;
+
+property             : 'property' 'name:' identifier ',' 'value:' identifier ;
+
+logging              : 'logging' '{' logger '}' ;
+
+logger               : 'logger' class_or_package (',' handler_class_name)? ',' (('SEVERE') | ('WARNING') | ('INFO') | ('CONFIG') | 
+                                                      ('FINE') | ('FINER') | ('FINEST') | ('ALL') | ('OFF'))  ;
+
+cluster              : 'cluster' (host_name | wildcard_ip_address) (',' (host_name | wildcard_ip_address))* ;
+
+platformRequirement  : 'platformRequirement' '(' 'name:' name (',' 'type:' class_name)? (',' 'version:' identifier)? ')' ;
+
+system_requirements  : 'systemRequirements' ( 'ref:' name  | ( ( '(' 'id:' name ')' )? '{'
+                              software* platformRequirement* utilization* memory? diskspace? '}' ) )? ;
+
+software             : 'software' '(' 'name:' name (',' 'version:' name)? (',' 'removeOnDestroy:' (true | false) )? (',' 'classpathresource:' (true | false) )? ')'  '{'
+                               install postInstall?                               
+                           '}' ;
+                           
+install             :	'install' 'source:' identifier ',' 'target:' identifier (',' 'unarchive:' (true | false) )? ;                           
+                           
+postInstall         :	 'postInstall' '(' 'removeOnCompletion:' (true | false) ')' '{'
+                                     'execute' 'command:' identifier
+                          '}';                           
+                           
+utilization          :	'utilization:' 'id:' (('CPU') | ('Memory' )) ',' 'high:' digit ( ',' 'low:'digit)?   ;
+
+diskspace            :	'diskspace' ('available:' digit)? ( ','? 'capacity:' digit)? ;
+
+memory               :	'memory' ('available:' digit)? ( ','? 'capacity:' digit)? ;
+
+data                 : 'data' 'source:' identifier ',' 'target:' identifier (',' 'unarchive:' (true | false) )? (',' 'perms:' identifier )? ;
+
+host_name            : string_literal | ('.' string_literal)*  ;
+ip_address           : digit '.' digit '.' digit '.' digit ;
+wildcard_ip_address  : digit '.' ('*'|digit) ( ( '.' ( '*'| digit) )? ( '.'('*'| digit))?)? ;
+handler_class_name   : class_name;
+class_name           : class_or_package ;
+class_or_package     : ID;
+
+inline_configuration : string_literal ;
+args                 : string_literal ;
+
+true 	             : 'true';
+false 	             : 'false';
+yes                  : 'yes' ;
+no                   : 'no' ; 
+
+jar                  : name'.jar' ;	
+identifier           : name ;
+name                 : string_literal ;
+string_literal       : '"'ID'"';
+digit                : ('0'..'9')* ;                        
+ID                   : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
+

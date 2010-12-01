@@ -1,0 +1,56 @@
+ ------
+Rio Examples
+ ------
+Dennis Reedy
+ ------
+6 November 2009
+ ------
+
+Examples
+
+ Examples in this directory provide an introduction towards developing and
+ deploying services using Rio. The following examples are included in the
+ distribution:
+
+ * {{{calculator/index.html}Calculator}}
+
+   This example demonstrates a simple Calculator application, composed of
+   POJO services for each Calculator service (add, subtract, mulitple, divide).
+   This example shows the use of associations and how association based dependency
+   injection is used.
+
+ * {{{events/index.html}Events}}
+
+   This example demonstrates the use of the Rio event framework to subscribe to
+   and be notified of events. Both services in this example are implemented as
+   simple beans. The use of Watches is also shown in this example. The watch
+   data collected can be viewed by using Rio UI (rio-ui.jar).
+
+ * {{{hospital/index.html}Hospital}}
+
+   This example combines Rio and Drools through the use of the Gnostic service.
+   This example demonstrates the use of associations, association based dependency
+   injection, watches, and the incorporation of rules to manage SLA behavior.
+
+ * {{{springbean/index.html}Spring}}
+
+   This example demonstrates a simple Spring application. Rio provides the
+   capability to build dynamic applications using Spring. You can wire up your
+   beans using Spring, and use Rio to turn a Spring bean into a dynamic service,
+   with built-in management, fault detection and automated deployment.
+
+ * {{{tomcat/index.html}Tomcat}}
+
+   This example demonstrates how to activate and manage an existing technology
+   using the Rio exec framework. In this example, Tomcat is installed, deployed
+   and started. The environment is set allowing Tomcat to be managed by JMX. A
+   declarative watch is also added, allowing us to observe metrics from available
+   mbeans.
+
+ * {{{workflow/index.html}Workflow}}
+
+   This example demonstrates a simple application which uses a JavaSpace to
+   process a workflow. The workflow is determined by setting states in an Entry.
+   The workflow itself is based on an enumerated Java class, with states of NEW,
+   OPEN, PENDING and CLOSED. Geneic worker instances are configured to process
+   Entry types that match a specific template corresponding to a workflow state.

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Running Tomcat Example">
+            <p>
+                The Tomcat example can be run during the integration-test lifecycle phase of the project
+                (see the declaration of the failsafe-maven-plugin in the pom), or by deploying
+                the example to a running Rio system.                
+            </p>
+            <p>
+                To deploy the example to a running Rio system:
+            </p>
+            <ol>
+                <li>Make sure Rio services are running</li>
+                <ul>
+                    <li>Run either:</li>
+                    <ul>
+                        <li>Start all services in the same JVM:
+                            <a href="../../start-all-mojo.html"><tt>mvn rio:start-all</tt></a> </li>
+                        <li>To start a Cybernode and a Provision Monitor in their own JVMs:
+                            <a href="../../start-cybernode-mojo.html"><tt>mvn rio:start-cybernode</tt></a> 
+                            and <a href="../../start-monitor-mojo.html"><tt>rio:start-monitor</tt></a></li>
+                    </ul>
+                </ul>
+                <li>Deploy the example</li>
+                <ul>
+                    <li><a href="../../deploy-mojo.html"><tt>mvn rio:deploy</tt></a></li>
+                </ul>
+                <li>View the deployed example</li>
+                <ul>
+                    <li><a href="../../ui-mojo.html"><tt>mvn rio:ui</tt></a></li>
+                </ul>
+            </ol>
+            <p>
+                Tomcat will be provisioned, extracted and started and you will see the following in the Rio UI:
+            </p>
+            
+            <img src="../../images/tomcat-provisioned.png"/>
+        </section>
+    </body>
+</document>

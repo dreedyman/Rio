@@ -1,0 +1,37 @@
+ ------
+Contributing
+ ------
+Dennis Reedy
+ ------
+2 February 2009
+ ------
+
+Guide to helping with Rio
+
+  As with any open source project, there are several ways you can help:
+
+  * Join the {{{https://rio.dev.java.net/servlets/ProjectMailingListList}mailing list}} and answer other user's questions
+
+  * Report bugs, feature requests and other issues in the {{{issue-tracking.html}issue tracking}} system.
+
+  * Build Rio for yourself, in order to fix bugs.
+
+  * Help with the documentation by pointing out areas that are lacking or unclear,
+  and if you are so inclined, submitting patches to correct it. You can quickly
+  contribute rough thoughts to the wiki, or you can volunteer to help collate
+  and organise information that is already there.
+
+  Your participation in the community is much appreciated!
+
+Why Would I Want to Help?
+
+  There are several reasons these are good things.
+
+  * By answering other people's questions, you can learn more for yourself
+
+  * By submitting your own fixes, they get incorporated faster
+
+  * By reporting issues, you ensure that bugs don't get missed, or forgotten
+
+  * You are giving back to a community that has given you software for free
+

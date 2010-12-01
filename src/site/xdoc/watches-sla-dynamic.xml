@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Using Watches and SLAs with Dynamic Services">
+            <p>
+                Lets first start out by directly using Watches in a service.
+                The service that we will use will not extend ServiceBeanAdapter
+                (although you may choose to), just implement it's own interface.
+            </p>
+<pre name="code" class="java:nocontrols">
+public class EchoService implements RemoteEcho {
+    private StopWatch time;
+
+    public void setServiceBeanContext(ServiceBeanContext context) {
+        meanTime = new StopWatch("time");
+        context.getWatchRegistry().register(time);
+        delegate = new RemoteEchoImpl();
+    }
+
+    public String echo(String message) {
+        time.startTiming();
+        String result = delegate.echo(message);
+        time.stopTiming();
+        return result;
+    }
+}
+</pre>
+            <p>
+                In the above example, the time is a StopWatch. The StopWatch is a
+                Watch for capturing elapsed time. Each time the echo method is invoked,
+                the time watch records how long it took to invoke the delegate. Wiring
+                up this Watch to an SLA is done as follows (opstring snippet):
+            </p>
+<pre name="code" class="java:nocontrols:nogutter">
+sla(id:'time', high: 1000) {
+    policy(type:'notify)
+}
+</pre>
+            <p>
+                Rio uses the id of the Watch to wire it to the SLA. In this case
+                the 'time' Watch is wired to the declared 'time' SLA. The 'time'
+                SLA send a SLAThresholdEvent if the elapsed time to invoke the
+                delegate takes more then 1 second.
+            </p>
+            <p>
+                The SLA is not always tied to the SLA ID attribute for matching
+                up to a Watch. By declaring the Monitor element within the scope
+                of the SLA element, a Watch will be dynamically added, using the
+                declared attributes to obtain the information needed to observe
+                the declared SLA thresholds. The SLA will be associated to the
+                name of the Monitor (which is a Watch). This is illustrated here:
+            </p>
+<pre name="code" class="java:nocontrols">
+public class EchoService implements RemoteEcho {
+    private StopWatch time;
+    private long time;
+
+    public long getLastTime() {
+        return time;
+    }
+
+    public String echo(String message) {
+        long t0 = System.currentTimeMillis();
+        String result = delegate.echo(message);
+        time = System.currentTimeMillis()-t0;
+        return result;
+    }
+}
+</pre>
+            <p>
+                In the above example, no Rio code is required. You wire up the SLA
+                based on the declaration in the opstring. Wiring up this Watch to
+                an SLA uses a variant of the declaration above:
+            </p>
+<pre name="code" class="java:nocontrols:nogutter">
+sla(id:'time', high: 1000) {
+    policy(type:'notify)
+    monitor(name: 'time', property: 'lastTime', period: 5000)
+}
+</pre>
+            <p>
+                The <tt>monitor</tt> declaration tells the Rio runtime to create
+                and register watch with the name of "time", reading the <tt>getLastTime</tt>
+                method every 5 seconds. (note: If the Watch already exists in the
+                bean's <tt>WatchRegistry</tt>, the watch will not be added). The
+                bean must declare a Java bean getter method that has as it's
+                return type one of the following:
+            </p>
+            <p>
+                Supported primitive types: <tt>int.class, long.class, float.class,
+                double.class</tt>
+            </p>
+            <p>
+                Supported types: <tt>Integer.class, Long.class, Float.class, Double.class</tt>
+            </p>
+
+            <div class="section"><h3>Next</h3></div>
+            <a href="watches-sla-external.html">Using Watches and SLAs with External Services</a> >
+        </section>
+    </body>
+    <script type="text/javascript" src="highlighter/shCore.js"></script>
+    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
+    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

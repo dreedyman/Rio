@@ -1,0 +1,197 @@
+ ------
+ Using Ant
+ ------
+ Dennis Reedy
+ ------
+ 8 December 2009
+ ------
+
+Using Ant
+
+ Although the recommended project setup is to use Maven, this document reviews
+ the basic approach towards using Ant to build your services. This document is
+ organized as follows:
+
+ * {{Project Setup}}
+
+ * {{Building Jars}}
+
+ * {{Deploying}}
+
+ [] 
+
+
+ You need to be familiar with using Ant, this discussion does not include a tutorial
+ on how to use Ant, just the bits you'll need to develop your service(s).
+
+ An Ant example is provided with the Rio distribution. Please unzip <<<RIO_HOME/examples/ant-example.zip>>> to
+ follow along with this discussion.
+
+* {Project Setup}
+
+ Building and automating your development using Ant is straightforward. Choosing to use
+ Ant requires that you should adhere to some basic conventions in setting up your
+ project. We recommend that you have the following directory structure:
+
++-----+
+<project-root>
+    |
+    |-- build.xml
+    |
+    +-- src--+
+    |        |
+    |        +-- main --+
+    |        |          |
+    |        |          +-- conf        (put opstrings here)
+    |        |          |
+    |        |          +-- java        (your service code)
+    |        |          |
+    |        |          +-- resources   (artifacts that get included into your jar files)
+    |        |
+    |        +-- test --+
+    |                   |
+    |                   +-- conf        (test specific opstrings here if needed)
+    |                   |
+    |                   +-- java        (test clients)
+    |                   |
+    |                   +-- resources   (any resources your test client code requires)
+    |
+    +-- lib
++-----+
+
+ We choose to follow the Maven conventions for project layout simply because it is
+ consistent and understandable. If you would like to use a different layout, you are
+ more then welcome. This is just our recommendation. 
+
+
+* {Building Jars}
+
+ The recommended way to deploy your service(s) is to package them into JAR file(s).
+ Building services that are to be deployed and used in a distributed architecture
+ ideally require at least two artifacts:
+
+ * Backend implementation jar(s) containing the all the classes and resources the
+   service implementation requires.
+
+ * Client jar(s) containing just the classes the client needs to interact with
+   the backend service. These jars should not include the service's backend
+   implementation classes, just the classes required to access the service implementation.
+
+ []
+
+ 
+ The convention for these JAR files are as follows:
+
+*---------------------+-------------------------------------------------------------+
+| <<JAR File>>        | <<Description>>
+*---------------------+-------------------------------------------------------------+
+| <service-impl>.jar  | This is the <<implementation>> jar for the service. The implementation jar contains all classes that the backend service requires to be instantiated. The implementation jar(s) will make up the classpath for the service. For the example, the jar is called bean.jar.
+*---------------------+-------------------------------------------------------------+
+| <service-dl>.jar    | The -dl suffix is the naming convention used to indicate that this jar is the <<download>> jar. The download jar contains the classes that clients need to access the service. Additionally, the download jar is typically a subset of the classes in the implementation jar. Note that a download jar is required if the invoking client only knows about the interface the service you have developed (as opposed to knowing about any custom proxies and other service-specific support). In this case the client will most likely need to utilize Java's dynamic classloading capabilities, loading the requisite classes from the service's codebase. For the example, the jar is called bean-dl.jar.
+*---------------------+-------------------------------------------------------------+
+
+ Building the implementation JAR is straight forward. We can just use Ant's
+ built-in <<<jar>>> task to accomplish this:
+
++-----+
+<target name="impl-jar" depends="compile">
+    <jar destfile="${lib}/bean.jar"
+         basedir="${classes}"
+         includes="bean/**"/>
+</target>
++-----+
+
+ All of the classes in the <<<bean>>> package are included in the <<<bean.jar>>> file.
+
+ Building the download (client) JAR is equally as simple, if we can easily obtain the
+ specific dependencies that a class or interface has. If we know in advance that we
+ only need to include a certain set of classes, then we can easily use Ant's
+ built-in <<<jar>>> task to accomplish this.
+
++-----+
+<target name="download-jar" depends="compile">
+    <jar destfile="${lib}/bean-dl.jar"
+         basedir="${classes}"
+         includes="**/Hello.class"/>
+</target>
++-----+
+
+ If we have a more complex example (not shown in the example), we can use the
+ {{{https://classdepandjar.dev.java.net}Classdepandjar utility}}. Classdepandjar is a
+ sub-project of Rio, and provides an Ant task that will create a jar file from the list of
+ classes generated by the ClassDep tool that is part of the River (Jini) technology.
+ In particular it:
+
+ * Searches and extracts classes directly from jar files that are specified in the
+   classpath attribute. Thus it is not necessary to unjar libraries in order to include elements (classes).
+
+ * Creates a Jar file directly; it is not an extension of the Ant Jar task.
+
+ * Provides support for the inclusion of preferred list
+
+ * Additional elements can be included in the jar file by using nested Fileset elements.
+
+ []
+
+ An example follows, using the <<<download-jar>>> target:
+
++-----+
+<target name="download-jar" depends="compile">
+    <classdepandjar jarfile="${lib}/service-dl.jar">
+        <classpath refid="project.classpath"/>
+        <in name="com.foo"/>
+        <topclass name="com.foo.Hello"/>
+        <topclass name="com.foo.service.HelloProxy"/>
+    </classdepandjar>
+</target>
++-----+
+
+ The key elements here are:
+
+*-----------------+-----------------------------------------------------------+
+| <<Element>>     | <<Description>>
+*-----------------+-----------------------------------------------------------+
+| classdepandjar  | The ant task found in the classdepandjar.jar utility
+*-----------------+-----------------------------------------------------------+
+| classpath       | The project's classpath; where to resolve dependencies from
+*-----------------+-----------------------------------------------------------+
+| in              | The package name(s) to include "in" the jar
+*-----------------+-----------------------------------------------------------+
+| topclass        | The fully qualified classnames to resolve dependencies for
+*-----------------+-----------------------------------------------------------+
+
+ <<Note>>: The ClassdepandJar utility must be included as an Ant taskdef in order for it to work.
+
++-----+
+<taskdef name="classdepandjar"
+         classname="org.jini.rio.tools.ant.ClassDepAndJarTask">
+    <classpath location="${rio.lib}/tools/classdepandjar.jar"/>
+</taskdef>
++-----+
+
+* {Deploying}
+
+ Now that you've built your service you'll want to deploy it. The first step is
+ look at the <<install>> target to your <<<build.xml>>>:
+
++-----+
+<target name="install"
+        depends="jars"
+        description="Installs the jars into the deploy directory">
+    <copy todir="${deploy.dir}/${name}">
+        <fileset dir="${basedir}">
+            <patternset refid="resources"/>
+        </fileset>
+    </copy>
+</target>
++-----+
+
+ This target copies artifacts from the build to the local deploy directory.
+ This enables the service code to be served-up for instantiation.
+
+ Deploying the service involves running the necessary Rio infrastructure services.
+ In order to start Rio, run the following command: <<rio start all>> in your <<<RIO_HOME/bin>>>
+ directory.
+
+ Once complete, run <<<ant deploy>>>. This target uses a <<macrodef>> created
+ in the <<common-settings.xml>> file included in the provided example.

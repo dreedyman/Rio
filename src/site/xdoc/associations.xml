@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Associations">
+            <p>
+                Associations are a way to declare that a service uses
+                (has an association to) another service. Associations define a
+                usage model for services in and across architectures/deployments.
+                Associations can be used either at deployment time to assist in
+                how a service gets created in the context of the service(s) it is
+                associated to, or to wire-up distributed services, injected
+                service references into the declaring service.
+            </p>
+            <p>
+                For example, a service can declare that it is to be colocated
+                with an associated service, and the service will be created in
+                the same Cybernode as it's associated service. A service can
+                also declare that it is opposed to another service, or isolated
+                from an associated service. The former will ensure the service
+                is not in the same Cybernode, the latter will ensure the associated
+                service is on a different physical machine.
+            </p>
+            <p>
+                An associated service may also be injected. When association
+                injection occurs the injected service is actually a generated
+                dynamic proxy. The dynamic proxy is used as a way to manage a
+                collection of discovered services. This changed the earlier
+                association injection approach where the declared setter method
+                was invoked each time a service was discovered. The previous
+                approach would also inject a null if all associated services were
+                removed. With the dynamic proxy approach you will only be injected
+                once. The underlying dynamic proxy is updated as services are
+                discovered, removed.
+            </p>
+            <p>
+                The following sections are included below:
+            </p>
+            <ul>
+                <li><a href="#Association_Types">Association Types</a></li>
+                <li><a href="#Declaring_Associations">Declaring Associations</a></li>
+                <li><a href="#Association_Injection">Association Injection</a></li>
+                <li><a href="#Service_Selection_Strategies">Service Selection Strategies</a></li>
+                <li><a href="#Proxy_Failure_Modes">Proxy Failure Modes</a></li>
+                <li><a href="#Using_Association_client">Using Association framework from a client</a></li>
+            </ul>
+
+            <div class="section"><h3><a name="Association_Types">Association Types</a></h3>
+                <p>
+                    Associations take the following forms:
+                </p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>Association Type</th>
+                            <th>Explanation</th>
+                        </tr>
+                        <tr>
+                            <td>Uses</td>
+                            <td>A weak association relationship where if A uses B exists then, then B may be present for A.</td>
+                        </tr>
+                        <tr>
+                            <td>Requires</td>
+                            <td>A stronger association relationship where if A requires B exists then B must be present for A. With a type of requires, service lifecycle is considered. Since B must be present for A, A will not be made publicly available (advertised) until B is available. If the associated service connection is broken (as determined by the associated service's Fault Detection Handler) and the Association type is Requires, the service will be unadvertised.</td>
+                        </tr>
+                        <tr>
+                            <td>Colocated</td>
+                            <td>An association that requires that A be colocated with B, that they be created in the same JVM (Cybernode). If B does not exist, or cannot be located, A shall not be created without B. If either A or B is forked or exec'd, they will be colocated on the same physical machine, created by the same Cybernode.</td>
+                        </tr>
+                        <tr>
+                            <td>Opposed</td>
+                            <td>An association which requires that A exist in a different JVM then B.</td>
+                        </tr>
+                        <tr>
+                            <td>Isolated</td>
+                            <td>An association which requires that A exist in a different physical machine then B.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section"><h3><a name="Declaring_Associations">Declaring Associations</a></h3>
+
+                <div class="section"><h3>Scope</h3>
+                    <p>
+                        Association declaration scope is either globally or service
+                        specific. Declaring an association whose enclosing parent is a
+                        service (using groovy) or ServiceBean (using xml) scopes it as
+                        service specific. If declared outside of these elements the
+                        association is global, meaning all services in the opstring
+                        will have that association.
+                    </p>
+                </div>
+                <div class="section"><h3>Examples</h3>
+                    <ul>
+                        <li>
+                            Declaring an association to a service within the opstring:
+<br/>
+<pre name="code" class="java:nocontrols:nogutter">
+    association(type: 'uses', name: 'Foo', property: 'foo')
+</pre>
+                            <p>
+                                The declaration above declares that the service with the name
+                                of 'Foo' be injected using the 'setFoo' setter into your service.
+                            </p>
+                            <br/><br/>
+                        </li>
+                        <li>Declaring an association that matches a service based on the
+                            service's exported proxy type and name:
+<br/>
+<pre name="code" class="java:nocontrols:nogutter">
+    association(type: 'uses', name: 'Foo', property: 'foo', serviceType: 'example.Foo')
+</pre>
+                            <p>
+                                The declaration above is similar to the previous declaration,
+                                except it will discover service(s) that are available on the
+                                network that are not declared in your opstring, and match the
+                                service's exported proxy type and name.
+                            </p>
+                            <br/><br/>
+                        </li>
+                        <li>
+                            Declaring an association that matches a service based on the
+                            service's exported proxy type, and does not match on the service's name:
+<br/>
+<pre name="code" class="java:nocontrols:nogutter">
+    association(type: 'uses', name: 'Foo', property: 'foo',
+        serviceType: 'example.Foo', matchOnName: false)
+</pre>
+                            <p>
+                                The declaration above is similar to the previous declaration, e
+                                xcept it will discover service(s) that are available on the network
+                                that are not declared in your opstring, and match the service's
+                                exported proxy.
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section"><h3><a name="Association_Injection">Association Injection</a></h3>
+                <p>
+                    If associations have been declared with the 'property'
+                    attribute, discovered services will be injected into your
+                    service using an IoC approach. Based on the setter method's
+                    signature, the injection type differs.
+                </p>
+                <p>
+                    If the setter method simply declares that the service type be injected:
+                </p>
+<pre name="code" class="java:nocontrols:nogutter">
+public void setFoo(Foo foo) {
+    this.foo = foo;
+}
+</pre>
+                <p>
+                    The proxy that is injected will be a dynamic proxy. Details on the
+                    dynamic proxy options can be found below in the <b>Service Selection Strategies</b> section.
+                </p>
+                <div id="infobox">
+                    <img src="images/information.gif"/>
+                    If you are using a dynamic proxy and would like to get the 'raw' proxy,
+                    the <tt>AssociationProxyUtil.getService()</tt> method can be used.
+                </div>
+                <p>
+                    A setter method can also be declared to give you control over the collection of services:
+                </p>
+
+<pre name="code" class="java:nocontrols:nogutter">
+public void setFoos(Iterable&lt;Foo&gt; foos) {
+    this.foos = foos;
+}
+</pre>
+
+                <p>
+                    Then when you need to access a discovered service in your code, you can simply iterate over the collection:
+                </p>
+
+<pre name="code" class="java:nocontrols:nogutter">
+for(Foo foo : foos) {
+    // do something with a Foo
+}
+</pre>
+
+                <p>
+                    You can also have the Association itself injected:
+                </p>
+
+<pre name="code" class="java:nocontrols:nogutter">
+public void setFooAssociation(Association&lt;Foo&gt; foo) {
+    this.foo = foo;
+}
+</pre>
+
+                <p>
+                    Armed with the <a href="apidocs/org/rioproject/associations/Association.html">Association</a>
+                    class, you can interact with the
+                    collection of discovered services as you wish.
+                </p>
+                <p>
+                    The <a href="apidocs/org/rioproject/associations/Association.html">Association</a>
+                    class also provides the support to obtain a <tt>Future</tt>, through the
+                    <a href="apidocs/org/rioproject/associations/Association.html#getServiceFuture()">Association.getServiceFuture()</a>
+                    method. You may choose to use this approach when declaring an association to be injected with the
+                    an attribute of <tt>inject: 'lazy'</tt>
+                    
+                </p>
+            </div>
+
+            <div class="section"><h3><a name="Service_Selection_Strategies">Service Selection Strategies</a></h3></div>
+                <p>
+                    All association proxies have a service selection strategy. The
+                    service selection strategy provides a way to determine how services
+                    in the collection of discovered services are invoked. The current
+                    service selection strategies are fail-over, round-robin and
+                    utilization (note all service selection strategies will also prefer
+                    local services over remote services).
+                </p>
+
+                <ul>
+                    <li>The <b>Fail-Over</b> strategy will invoke the first service
+                        in it's collection for each method invocation until that
+                        service is no longer reachable. If the associated service
+                        is unavailable, the fail-over strategy invokes the next
+                        service in it's list.
+                    </li>
+                    <li>The <b>Round Robin</b> strategy alternates selection of
+                        services from the association, alternating the selection
+                        of associated services using a round-robin approach.
+                    </li>
+                    <li>The <b>Utilization</b> strategy is a round-robin selector
+                        that selects services running on compute resources whose
+                        system resources are not depleted. System resource depletion
+                        is determined by <tt>org.rioproject.system.MeasuredResource</tt>
+                        provided as part of the <tt>org.rioproject.system.ComputeResourceUtilization</tt>
+                        object returned as part of the deployment map. If any of a Cybernode's
+                        resources are depleted, the service hosted in that Cybernode will not
+                        be invoked. This is of particular use in cases where out of memory
+                        conditions may occur. Using the utilization strategy a service running
+                        in a memory constrained Cybernode will not be invoked until the JVM
+                        performs garbage collection and memory is reclaimed.
+                    </li>
+                </ul>
+                <p>
+                    An example of the declaration is as follows:
+                </p>
+<pre name="code" class="java:nocontrols:nogutter">
+association(type: 'uses', name: 'Foo', property: 'foo') {
+    management strategy: Utilization.name
+}
+</pre>
+
+                <p>
+                    Associations can be injected in a lazy or eager mode. Lazy
+                    injection is the default, and injection occurs when a service
+                    is discovered. Eager injection occurs immediately, even if
+                    there are no discovered services.
+                </p>
+                
+
+            <div class="section"><h3><a name="Proxy_Failure_Modes">Proxy Failure Modes</a></h3>
+                <p>
+                    Associations must also deal with proxy failure modes. In a
+                    typical distributed environment, if there are no discovered
+                    (available) services and a remote method invocation is attempted
+                    on a service, a RemoteException is thrown. This seems to make
+                    sense, although a better approach may be in order. Perhaps the
+                    dynamic proxy can either wait until a service is discovered to
+                    make the invocation, or provide at least a retry or timeout. It
+                    would seem that the invoking client would need to do this in any
+                    case, and from a coding point of view this behavior would be in
+                    the generated proxy, not in the application code. The difference
+                    here is in a fail-fast approach, service invocation will fail in
+                    an immediate and visible way, allowing the caller to be notified
+                    immediately that something is wrong. In our context here, we would
+                    not immediately raise the RemoteException (at least not right away),
+                    we would go onto the next service. We would fail-fast if there are
+                    no services available. In association terminology, the association
+                    would be broken.
+                </p>
+                <p>
+                    With a fail-safe approach, we would want to constrain the
+                    notification that no services are available (as opposed to
+                    failing fast by throwing a RemoteException) in a managed
+                    way having the association proxy retry for a certain period
+                    of time. In this case the fail-safe mode would have the
+                    caller blocking on the service's remote method invocation
+                    until a service becomes available, or until the retry logic
+                    exhausts itself. If the retries are exhausted and there are
+                    still no available services, a RemoteException will be thrown.
+                </p>
+                <p>
+                    The following snippet shows the declaration of an association
+                    that allows for a fail-safe approach by controlling the time
+                    the generated association proxy will wait for a service to
+                    become available:
+                </p>
+
+<pre name="code" class="java:nocontrols:nogutter">
+association(type: 'uses', name: 'Foo', property: 'foo') {
+    management strategy: Utilization.name
+    serviceDiscoveryTimeout: 5
+}
+</pre>
+
+                <p>
+                    As a default there is no service discovery timeout. This means
+                    that your association proxy (by default) is injected lazily
+                    when the associated service(s) are discovered. If there are
+                    associated services are removed, and there are no associated
+                    services, then the association proxy will "fail-fast".
+                </p>
+                <p>
+                    If you configure that the association proxy is injected eagerly,
+                    that is immediately upon service creation, you really need to
+                    consider declaring a service discovery timeout.
+                </p>
+                <p>
+                    Regardless of the injection style (lazy or eager), you can
+                    control how the association proxy handles the association
+                    broken scenario (no associated services discovered) by
+                    configuring the service discovery element.
+                </p>
+            </div>
+
+            <div class="section"><h3><a name="Using_Association_client">Using Association framework from a client</a></h3>
+                <p>
+                    The Association framework can also assist in the development of
+                    clients that need to discover services. Using Associations from
+                    a client provides the same benefits of service-oriented associations:
+                </p>
+                <ul>
+                    <li>Use of concurrent utilities, using a Future to address asynchronous service discovery</li>
+                    <li>Proxy architecture providing support for Association strategies</li>
+                    <li>Less code to master and write</li>
+                </ul>
+                <p>From a client perspective, you need to do the following:</p>
+                <ol>
+                    <li>Setup your <a href="apidocs/org/rioproject/associations/AssociationDecriptor.html">AssociationDescriptor</a>s</li>
+                    <li>Create the <a href="apidocs/org/rioproject/associations/AssociationManagement.html">AssociationManagement</a> object</li>
+                    <li>Add the AssociationDescriptor, and get the <a href="apidocs/org/rioproject/associations/Association.html">Association</a> object</li>
+                    <li>Using the Association, <a href="apidocs/org/rioproject/associations/Association.html#getServiceFuture()">get the Future for the service</a></li>
+                </ol>
+                <p>
+                    For discussion purposes, lets reference the test case included in
+                    the <a href="examples/calculator/index.html">Calculator example</a>.
+                    The test class name is <tt>ITCalculatorClientTest</tt>. Lets refer to
+                    the <tt>setup()</tt> method:
+                </p>
+<pre name="code" class="java:firstline[44]">
+/*
+ * Call the static create method providing the service name, service
+ * interface class and discovery group name(s). Note the the returned
+ * AssociationDescriptor can be modified for additional options as well.
+ */
+ AssociationDescriptor descriptor = AssociationDescriptor.create("Calculator",
+                                                                  Calculator.class,
+                                                                  testManager.getGroups());
+  /* Create association management and get the Future. */
+  AssociationManagement aMgr = new AssociationMgmt();
+  Association&lt;Calculator&gt; association = aMgr.addAssociationDescriptor(descriptor);
+  future = association.getServiceFuture();
+</pre>
+                <p>
+                    The test method simply uses the returned future to get the Calculator service:
+                </p>
+<pre name="code" class="java:firstline[62]">
+Calculator service = future.get();
+Assert.assertNotNull(service);
+testService(service);
+</pre>
+                <p>
+                    Running the test successfully requires that the <tt>Calculator</tt>
+                    service is obtained.
+                </p>
+            </div>
+        </section>
+    </body>
+    <script type="text/javascript" src="highlighter/shCore.js"></script>
+    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
+    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

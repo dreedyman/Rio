@@ -1,0 +1,53 @@
+ ------
+ Plugin Intro
+ ------
+ Dennis Reedy
+ ------
+ 5 November 2009
+ ------
+
+Rio Maven Plugin
+
+ The Rio Maven Plugin allows the user to easily build and deploy services with Rio when using Maven.
+
+* Goals Overview
+
+ The Rio plugin has the following goals:
+
+ * {{{classdepandjar-mojo.html}rio:classdepandjar}} Runs the ClassDepAndJarTask utility for a module.
+
+ * {{{deploy-mojo.html}rio:deploy}} Deploys a Rio OpString.
+
+ * {{{oar-mojo.html}rio:oar}} Creates an OAR (Operational String Archive).
+
+ * {{{start-all-mojo.html}rio:start-all}} Starts a Cybernode and a Provision Monitor.
+
+ * {{{start-cybernode-mojo.html}rio:start-cybernode}} Starts a Cybernode.
+
+ * {{{start-monitor-mojo.html}rio:start-monitor}} Starts a Provision Monitor.
+
+ * {{{stop-mojo.html}rio:stop}} Stops all running Rio services.
+
+ * {{{ui-mojo.html}rio:ui}} Starts the Rio UI.
+
+ * {{{undeploy-mojo.html}rio:undeploy}} Undeploys a Rio OpString.
+
+ []
+ 
+ For detailed information on the plugin's goals, please go to the {{{plugin-info.html}plugin goals documentation}} page.
+
+* Usage
+
+ Instructions on how to use the Rio Plugin can be found on the {{{plugin-usage.html}usge page}}.
+
+ In case you still have questions regarding the plugin's usage, please feel free
+ to contact the {{{mailto:users@rio.dev.java.net}user}} mailing list. The posts to the
+ {{{mailto:users@rio.dev.java.net}mailing list}} are archived and could already
+ contain the answer to your question as part of an older thread. Hence, it is also
+ worth {{{https://rio.dev.java.net/servlets/SearchList?listName=users&by=date}browsing/searching}}
+ the mail archive. Last but not least, users occasionally contribute additional examples, tips or
+ errata to the {{{http://wiki.rio-project.org/display/rug/Rio+Users+Guide}wiki}} page.
+
+ If you feel like the plugin is missing a feature or has a defect, you can fill
+ a feature request or bug report in our {{{http://jira.rio-project.org/}issue tracker}}.
+ When creating a new issue, please provide a comprehensive description of your concern.

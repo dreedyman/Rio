@@ -1,0 +1,39 @@
+ ------
+ SpringBean Example
+ ------
+
+SpringBean Example
+
+ This example demonstrates a simple Spring application. Rio provides the capability
+ to build dynamic applications using Spring. You can wire up your beans using Spring,
+ and use Rio to turn a Spring bean into a dynamic service, with built-in management,
+ fault detection and automated deployment.
+
+* Building the example
+
+ The SpringBean example is a multi-module Maven project, with the following
+ structure (just inter-project dependencies are shown):
+
+[../../images/springbean-project.png]
+
+ The example produces the following artifacts:
+
+*-----------------------+-------------+
+| <<Artifact>>          | <<Description>>
+*-----------------------+-------------+
+| springbean-service-2.0.jar    | Artifact containing service implementation classes
+*-----------------------+-------------+
+| springbean-api-2.0.jar | Artifact containing classes required for a client to invoke methods on the Hello services
+*-----------------------+-------------+
+| springbean-2.0.oar    | The OperationalString archive, contains the configuration artifacts used to deploy the SpringBean application
+*-----------------------+-------------+
+
+ Running <<<mvn install>>> will result in the execution of integration tests that use
+ the Rio test infrastructure
+
+* Running the example
+
+  Look {{{running.html}here}} for information on running the example
+ 
+ The example also provides a test client that uses the Rio test infrastructure
+ to create and invoke methods on the SpringBean service. 

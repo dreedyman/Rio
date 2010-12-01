@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>main</artifactId>
+        <groupId>org.rioproject</groupId>
+        <version>4.1-SNAPSHOT</version>
+    </parent>
+    <groupId>org.rioproject</groupId>
+    <artifactId>rio</artifactId>
+    <name>Module :: Rio Core</name>
+    <packaging>classdepandjar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>boot</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-compress</artifactId>
+        </dependency>
+
+		<dependency>
+		    <groupId>net.jini.lookup</groupId>
+		    <artifactId>jmx-lookup</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+		<dependency>
+		    <groupId>net.jini.lookup</groupId>
+		    <artifactId>serviceui</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.jini</groupId>
+            <artifactId>jsk-lib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.jini</groupId>
+            <artifactId>jsk-dl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.jini</groupId>
+            <artifactId>jsk-platform</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+	    <plugins>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rio-plugin</artifactId>
+                <version>${pom.version}</version>
+                <extensions>true</extensions>
+
+                <configuration>
+                    <createJars>
+                        <createJar>
+                            <ins>
+                                <in>org.rioproject</in>
+                                <in>com.artima</in>
+                                <in>net.jini.lookup.ui</in>
+                                <in>net.jini.lookup.entry</in>
+                                <in>edu.emory.mathcs.backport.java.util.concurrent</in>
+                            </ins>
+                            <outs>
+                                <out>org.rioproject.boot</out>
+                            </outs>
+                            <skips>
+                                <skip>net.jini.lookup.entry.Comment</skip>
+                                <skip>net.jini.lookup.entry.Name</skip>
+                                <skip>net.jini.lookup.entry.ServiceControlled</skip>
+                                <skip>net.jini.lookup.entry.ServiceType</skip>
+                                <skip>net.jini.lookup.entry.Status</skip>
+                                <skip>net.jini.lookup.entry.StatusType</skip>
+                            </skips>
+
+                            <topclasses>
+                                <topclass>${project.build.outputDirectory}</topclass>
+                            </topclasses>
+
+                            <manifest>
+                                <Implementation-Title>Rio Project</Implementation-Title>
+                                <Implementation-Version>${version}</Implementation-Version>
+                                <Rio-Version>${version}</Rio-Version>
+                                <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                                <Class-Path>jsk-lib.jar jsk-platform.jar</Class-Path>
+                            </manifest>
+                        </createJar>
+
+                        <createJar>
+                            <includeResources>false</includeResources>
+                            <classifier>dl</classifier>
+                            <preferredlist>${basedir}/src/main/resources/META-INF/PREFERRED.LIST</preferredlist>
+                            <ins>
+                                <in>org.rioproject</in>
+                                <in>com.artima</in>
+                                <in>net.jini.lookup.ui</in>
+                                <in>net.jini.lookup.entry</in>
+                            </ins>
+                            <skips>
+                                <skip>net.jini.lookup.entry.Comment</skip>
+                                <skip>net.jini.lookup.entry.Name</skip>
+                                <skip>net.jini.lookup.entry.ServiceControlled</skip>
+                                <skip>net.jini.lookup.entry.ServiceType</skip>
+                                <skip>net.jini.lookup.entry.Status</skip>
+                                <skip>net.jini.lookup.entry.StatusType</skip>
+                            </skips>
+                            <topclasses>
+                                <topclass>org.rioproject.bean.BeanDelegator</topclass>
+                                <topclass>org.rioproject.core.provision.ProvisionManager</topclass>                                
+                                <topclass>org.rioproject.log.LoggerConfig</topclass>
+                                <topclass>org.rioproject.log.ServiceLogEvent</topclass>
+                                <topclass>org.rioproject.opstring.OpString</topclass>
+                                <topclass>org.rioproject.system.ComputeResourceAdmin</topclass>
+                                <topclass>org.rioproject.sla.SLAThresholdEvent</topclass>
+                                <topclass>org.rioproject.resources.servicecore.AbstractProxy</topclass>
+                                <topclass>org.rioproject.resources.servicecore.ServiceAdminProxy</topclass>
+                                <topclass>org.rioproject.resources.servicecore.Service</topclass>
+                                <topclass>org.rioproject.resources.servicecore.ServiceAdmin</topclass>
+                                <topclass>org.rioproject.resources.serviceui.UIComponentFactory</topclass>
+                                <topclass>org.rioproject.resources.serviceui.UIDialogFactory</topclass>
+                                <topclass>org.rioproject.resources.serviceui.UIFrameFactory</topclass>
+                                <topclass>org.rioproject.resources.serviceui.UIWindowFactory</topclass>
+                                <topclass>${project.build.outputDirectory}/org/rioproject/entry</topclass>
+                                <topclass>${project.build.outputDirectory}/org/rioproject/system/capability</topclass>
+
+                                <!-- Service UI classes to include -->
+                                <topclass>net.jini.lookup.ui.AboutUI</topclass>
+                                <topclass>net.jini.lookup.ui.AdminUI</topclass>
+                                <topclass>net.jini.lookup.ui.MainUI</topclass>
+                                <topclass>net.jini.lookup.ui.attribute.UIFactoryTypes</topclass>
+
+                                <!-- JMX Entry classes to include -->
+                                <topclass>net.jini.lookup.entry.Host</topclass>
+                                <topclass>net.jini.lookup.entry.jmx.JMXProperty</topclass>
+                                <topclass>net.jini.lookup.entry.jmx.JMXProtocolType</topclass>
+                            </topclasses>
+
+                            <manifest>
+                                <Implementation-Title>Rio Project</Implementation-Title>
+                                <Implementation-Version>${version}</Implementation-Version>
+                                <Rio-Version>${version}</Rio-Version>
+                                <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                            </manifest>
+                        </createJar>
+                        
+                        <createJar>
+                            <jarname>watch-${version}</jarname>
+                            <includeResources>false</includeResources>
+                            <classifier>ui</classifier>
+                            <ins>
+                                <in>org.rioproject</in>                                
+                            </ins>
+
+                            <topclasses>
+                                <topclass>org.rioproject.watch.AccumulatorViewer</topclass>
+                                <topclass>org.rioproject.watch.CounterCalculableView</topclass>
+                                <topclass>org.rioproject.watch.DefaultCalculableView</topclass>
+                                <topclass>org.rioproject.system.measurable.cpu.CalculableCPU</topclass>
+                                <topclass>org.rioproject.system.measurable.cpu.CalculableCPUView</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableSystemMemoryView</topclass>
+                                <topclass>org.rioproject.system.measurable.disk.CalculableDiskSpace</topclass>
+                                <topclass>org.rioproject.system.measurable.disk.CalculableDiskSpaceView</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableMemory</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableMemoryView</topclass>
+                                <topclass>org.rioproject.watch.ResponseTimeCalculableView</topclass>
+                                <topclass>org.rioproject.watch.ThresholdCalculableView</topclass>
+                            </topclasses>
+
+                        </createJar>
+                        
+                    </createJars>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <locales>en</locales>
+                    <outputDirectory>${basedir}/target/site</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.groovy.maven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generateStubs</goal>
+                            <goal>compile</goal>
+                            <goal>generateTestStubs</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+        </plugins>
+    </build>
+
+    <!--<reporting>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+                <!--<reportSets>-->
+                    <!--<reportSet>-->
+                        <!--<reports>-->
+                            <!--<report>dependencies</report>-->
+                            <!--<report>cim</report>-->
+                            <!--<report>issue-tracking</report>-->
+                            <!--<report>mailing-list</report>-->
+                            <!--<report>license</report>-->
+                            <!--<report>project-team</report>-->
+                            <!--<report>scm</report>-->
+                            <!--<report>index</report>-->
+                            <!--<report>findbugs</report>-->
+                        <!--</reports>-->
+                    <!--</reportSet>-->
+                <!--</reportSets>-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+                <!--<version>2.5</version>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</reporting>-->
+
+</project>

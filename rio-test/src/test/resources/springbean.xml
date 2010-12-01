@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE opstring PUBLIC "-/RIO//DTD" "http://www.rio-project.org/dtd/rio_opstring.dtd">
+<opstring>
+    <OperationalString Name="Hello World Example">
+        <Groups>
+            <Group>rio</Group>
+        </Groups>
+
+        <!--
+        Declare attributes for the Spring example. The spring bean
+        configuration will be loaded as a classpath resource from the
+        service's classpath, declared by the JARs of the Implementation class
+        -->
+        <SpringBean Name="Hello" config="hello-spring.xml">
+
+            <Interfaces>
+                <Interface>springbean.Hello</Interface>
+                <Resources>
+                    <JAR>springbean/lib/springbean-dl.jar</JAR>
+                </Resources>
+            </Interfaces>
+
+            <ImplementationClass Name="springbean.service.HelloImpl">
+                <Resources>
+                    <JAR>springbean/lib/springbean.jar</JAR>
+                </Resources>
+            </ImplementationClass>
+                        
+            <Maintain>1</Maintain>
+        </SpringBean>
+    </OperationalString>
+</opstring>
+
+

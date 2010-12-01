@@ -1,0 +1,113 @@
+<!DOCTYPE opstring PUBLIC "-/RIO//DTD"
+    "http://www.rio-project.org/dtd/rio_opstring.dtd">
+<opstring>
+    <OperationalString Name='Sim'>
+        <Groups>
+            <Group>${user.name}</Group>
+        </Groups>
+
+        <Association Name='Result Space'
+                     Type='uses'
+                     Interface='net.jini.space.JavaSpace05'
+                     MatchOnName='yes'>
+            <Management Proxy='net.gomez.provider.space.SpaceProxy'
+                        Strategy='org.rioproject.associations.strategy.Utilization'/>
+        </Association>
+        <Resources id="impl.jars">
+            <JAR>lib/gomez/worker.jar</JAR>
+            <JAR>lib/arl/arl-authenticator-impl.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice.jar</JAR>
+            <JAR>lib/arl/arl-geometryservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-resources.jar</JAR>
+            <JAR>lib/arl/arl-sl.jar</JAR>
+            <JAR>lib/arl/arl-support.jar</JAR>
+            <JAR>lib/arl/arl-tasks.jar</JAR>
+            <JAR>lib/arl/arl-vlservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-vlservice.jar</JAR>
+            <JAR>lib/log4j-1.2.11.jar</JAR>
+            <JAR>lib/antlr-2.7.5H3.jar</JAR>
+        </Resources>
+
+        <Resources id="client.jars">
+            <JAR>lib/gomez/worker-dl.jar</JAR>
+            <JAR>lib/arl/arl-authenticator-dl.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice-dl.jar</JAR>
+            <JAR>lib/arl/arl-sl-dl.jar</JAR>
+            <JAR>lib/arl/arl-tasks.jar</JAR>
+            <JAR>lib/arl/arl-vlservice-dl.jar</JAR>
+        </Resources>
+        <Resources id='outrigger-dl'>
+            <JAR>outrigger-dl.jar</JAR>
+            <JAR>jsk-dl.jar</JAR>
+            <JAR>rio-dl.jar</JAR>
+        </Resources>
+        <Resources id='outrigger-impl'>
+            <JAR>outrigger.jar</JAR>
+        </Resources>
+
+        <ServiceBean Name='Job Monitor' Fork='yes'>
+            <Interfaces>
+                <Interface>net.gomez.jobmonitor.JobMonitor</Interface>
+                <Resources ref='client.jars' />
+                <Resources>
+                    <JAR>lib/arl/arl-support.jar</JAR>
+                    <JAR>lib/arl/arl-brlcadservice-dl.jar</JAR>
+                </Resources>
+            </Interfaces>
+            <ImplementationClass Name='net.gomez.jobmonitor.JobMonitorImpl'>
+                <Resources ref='impl.jars' />
+            </ImplementationClass>
+            <Maintain>1</Maintain>
+            <Association Name='Task Space' Type='uses' Property='taskSpace' MatchOnName='yes'>
+                <Management Proxy='net.gomez.provider.space.SpaceProxy' Strategy='org.rioproject.associations.strategy.Utilization' />
+            </Association>
+        </ServiceBean>
+
+        <ServiceBean Name='RaytraceService' Fork='yes'>
+            <Interfaces>
+                <Interface>net.gomez.raytraceservice.RaytraceService</Interface>               
+                <Resources>
+                    <JAR>lib/arl/arl-support.jar</JAR>
+                    <JAR>lib/arl/arl-brlcadservice-dl.jar</JAR>
+                </Resources>
+                 <Resources ref='client.jars'/>
+            </Interfaces>
+            <ImplementationClass Name='mil.army.muves.brlcadservice.impl.BrlcadServiceImpl'>
+                <Resources ref='impl.jars'/>
+                <Resources>
+                    <JAR>lib/arl/arl-support.jar</JAR>
+                </Resources>
+            </ImplementationClass>
+            <SystemRequirements>
+                <SystemComponent Name='NativeLibrarySupport'>
+                    <Attribute Name='Name' Value='LinuxBrlcadServer'/>
+                    <SoftwareLoad RemoveOnDestroy='yes' ClasspathResource='yes'>
+                        <Download InstallRoot='brlcadserverlibs'
+                                  Unarchive='yes'
+                                  Source=''>
+                            <Location>
+                                http://128.63.32.54:9010/lib/arl/brlcadserverlibs.zip
+                            </Location>
+                        </Download>
+                    </SoftwareLoad>
+                </SystemComponent>
+            </SystemRequirements>
+            <Configuration>
+                import mil.army.muves.brlcadservice.datatypes.BRLCADEntry;
+                RaytraceService {
+                BRLCADEntry = new BRLCADEntry("t62.g", "component");
+                }
+            </Configuration>
+            <Logging>
+                <Logger Name='mil.army.muves.brlcadservice' Level='INFO'>
+                    <Handler ClassName='java.util.logging.ConsoleHandler'
+                             Level='INFO'/>
+                </Logger>
+            </Logging>
+            <Maintain>1</Maintain>
+            <MaxPerMachine type='physical'>1</MaxPerMachine>
+            <Comment>BrlcadService</Comment>
+        </ServiceBean>
+    </OperationalString>
+</opstring>

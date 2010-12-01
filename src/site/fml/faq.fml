@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright 2004, 2005 The Apache Software Foundation
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<faqs title="Rio FAQ">
+
+    <part id="compared to">
+        <title>General</title>
+        <faq id="osgi">
+            <question>How does Rio relate to OSGi?</question>
+            <answer>
+                <p>
+                    OSGi provides a service architecture for services that are
+                    in the same process address space. Rio, based on Jini
+                    technology, provides a service architecture for
+                    distributed systems. Rio is a technology that provides
+                    SLA based management for distributed systems, providing a
+                    policy based approach for fault detection
+                    and recovery, scalability and dynamic deployment.
+                    OSGi provides a micro-kernel architecture, Rio and Jini
+                    provide technology that makes Java services accessible
+                    through the network.
+                </p>
+                <p>
+                    Going forward, there are plans to provide support in Rio to
+                    make in-process service discovery and communication delegate
+                    to OSGi, as well as make the Cybernode and Provisioner OSGi
+                    services.
+                </p>
+                <p>
+                    <a href="http://www.artima.com/weblogs/viewpost.jsp?thread=202304">
+                        Here is a link to an excellent article</a> summarizing the discussion.
+
+                </p>
+            </answer>
+        </faq>
+        <faq id="sca">
+            <question>How does Rio relate to SCA?</question>
+            <answer>
+                From <a href="http://www.osoa.org/display/Main/Service+Component+Architecture+Home">Service Component Architecture Home</a>
+                <p>
+                    <i>Service Component Architecture (SCA) is a set of
+                        specifications which describe a model for building
+                        applications and systems using a Service-Oriented
+                        Architecture. SCA extends and complements prior approaches
+                        to implementing services, and SCA builds on open standards
+                        such as Web services.</i>
+                </p>
+                <p>
+                    At a high level, there may seem to be some similarities to
+                    the SCA approach and Rio. For one, the compositional nature
+                    of the approach.
+                    <p>
+                        Rio provides an
+                        <b>OperationalString</b>. The OperationalString
+                        represents a collection of
+                        application and/or infrastructure software services that
+                        when put together provide a coarse-grained service,
+                        typically distributed through the network. The
+                        OperationalString is the unit of deployment in Rio.
+                    </p>
+                    <p>
+                        Service <i>wiring</i> is accomplished by declaring
+                        service <b><i>associations</i></b>. Associations
+                        are a way to declare that a service uses (has an
+                        association to) another service.
+                        Associations can be used at deployment time to
+                        assist in how a service get created in the context
+                        of the service(s) it is associated to, as well as
+                        used to inject associated service references.
+                    </p>
+                    <p>
+                        With SCA, the assembly model deals with the
+                        aggregation of components and the linking of
+                        components using composites. The wiring of services
+                        occurs declaritively, and is indepedant of the
+                        implementation language.
+                    </p>
+
+                    <p>
+                        The differences really focus on the fact that Rio provides
+                        SLA based management for distributed systems, providing a
+                        policy based approach for fault detection and recovery,
+                        scalability and dynamic deployment for Java
+                        technology based systems. Although use of Rio incorporates
+                        heterogeneous language
+                        support, the primary development and deployment model at
+                        this time centers around Java.
+                    </p>
+                </p>
+            </answer>
+        </faq>
+    </part>
+
+    <part id="opstring">
+        <title>Operational String</title>
+
+        <faq id="why-groovy?">
+            <question>Why use Groovy for the OperationalString?</question>
+            <answer>
+                <p>
+                    We chose to extend the language support for the OperationalString
+                    to Groovy simply because XML is so pedantic and limited in scope. We
+                    found that using a scripting language offers great utility, and
+                    provides a powerful way to declare the configuration elements that the
+                    OperationalString requires.
+                </p>
+                <p>
+                    Extending Groovy using a Domain Specific Language (DSL) focused on
+                    the deployment of services through the network seems natural. Yes
+                    there is an issue of IDE support of the language elements, and we
+                    hope to have better support and documentation for this in the future.
+                </p>
+                <p>
+                    From a technical standpoint, we are actually still using XML though.
+                    XML is used as the pivot language when opstrings get parsed. Using
+                    this approach, we may be able to offer support for other languages, perhaps Ruby, or ...
+                </p>
+            </answer>
+        </faq>
+
+    </part>
+    
+
+</faqs>

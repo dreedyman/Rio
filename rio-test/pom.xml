@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>main</artifactId>
+        <groupId>org.rioproject</groupId>
+        <version>4.1-SNAPSHOT</version>
+    </parent>
+    <groupId>org.rioproject</groupId>
+    <artifactId>rio-test</artifactId>
+    <name>Module :: Rio Test Infrastructure</name>
+    <packaging>jar</packaging>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>rio</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>rio-cli</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>webster</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>cybernode</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+        </dependency>
+
+    </dependencies>    
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Implementation-Title>Rio Project
+                            </Implementation-Title>
+                            <Implementation-Version>${project.version}
+                            </Implementation-Version>
+                            <Rio-Version>${project.version}</Rio-Version>
+                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                            <Class-Path>rio.jar</Class-Path>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>failsafe-maven-plugin</artifactId>
+                <version>2.4.3-alpha-1</version>
+                <configuration>
+                    <forkMode>always</forkMode>
+
+                    <systemProperties>
+                        <property>
+                            <name>RIO_HOME</name>
+                            <value>${basedir}/../distribution/target/rio-${version}</value>
+                        </property>
+                        <property>
+                            <name>RIO_TEST_HOME</name>
+                            <value>${basedir}</value>
+                        </property>
+                        <property>
+                            <name>org.rioproject.test.manager.config</name>
+                            <value>${basedir}/src/test/conf/manager-config.groovy</value>
+                        </property>
+                        <property>
+                            <name>org.rioproject.test.config</name>
+                            <value>${basedir}/src/test/conf/test-config.groovy</value>
+                        </property>
+                    </systemProperties>
+
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+
+                    <excludes>
+                        <exclude>**/*$*</exclude>
+                        <exclude>**/ThresholdWatchTest.java</exclude>
+                        <exclude>**/WatchTest.java</exclude>
+                    </excludes>
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>            
+            
+            <plugin>
+                <groupId>org.codehaus.groovy.maven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generateStubs</goal>
+                            <goal>compile</goal>
+                            <goal>generateTestStubs</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+    <!--
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.4.3-alpha-1</version>
+                <configuration>
+                    <outputName>test-report</outputName>
+                    <outputDirectory>${basedir}/target/test-report</outputDirectory>
+                    <reportsDirectories>
+                        <reportsDirectory>${basedir}/target/surefire-reports</reportsDirectory>
+                        <reportsDirectory>${basedir}/target/failsafe-reports</reportsDirectory>
+                    </reportsDirectories>
+                </configuration>
+
+            </plugin>
+        </plugins>
+    </reporting>
+    -->
+</project>

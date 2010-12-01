@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Webster</title>
+</head>
+<body>
+Provides a lightweight embeddable HTTP server. <br>
+<ol>
+  <li>A HTTP server called Webster, which can serve code from multiple
+codebases. Webster can be started as its own process, or as a resident
+Object&nbsp; within a service or other utility<br>
+    <br>
+  </li>
+  <li>A utility for client applications to start an <span
+ style="font-style: italic;">internal</span> Webster, setting the
+Webster root to the location the class was loaded from, and appending a
+provided export JAR as the export codebase for the JVM. This tool
+should only be called by Jini client entities that require their export
+codebase to be set and arent clever enough to have the location of
+where Webster should serve code from</li>
+</ol>
+<br>
+<big>Configuring Webster<br>
+</big>The following environment variables used to control Webster are
+as follows:<span style="font-family: monospace;"></span><br>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">org.rioproject.tools.webster.port</span>
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;">0<br>
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">Sets the port for webster to
+use. The default is 0, which results in an anonymous port being
+created. If an anonymous port is created the getPort() method can be
+used to return the value of the port.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">org.rioproject.tools.webster.root</span><br
+ style="font-weight: bold; font-family: courier new,courier,monospace;">
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;">System.getProperty(user.home)
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">The Root directory to serve
+code from. Webster supports multiple root directories which are
+separated by a <code>;</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">org.rioproject.tools.webster.interface</span><br
+ style="font-weight: bold; font-family: courier new,courier,monospace;">
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;">The address returned from
+InetAddress.getLocalHost()<br>
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">The TCP/IP address which
+Webster should bind to. This is helpful on a machine which has more
+then one Network Interface Card (NIC)<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">org.rioproject.tools.webster.maxThreads</span><br
+ style="font-weight: bold; font-family: courier new,courier,monospace;">
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;">50<br>
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">Webster
+uses a Pool of Threads to handle incoming requests. This value is used
+to create the maximum amount of Threads in the ThreadPool</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+</body>
+</html>

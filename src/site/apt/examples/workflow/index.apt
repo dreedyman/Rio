@@ -1,0 +1,57 @@
+ ------
+ Workflow Example
+ ------
+
+Workflow Example
+
+ This example demonstrates a simple application which uses a JavaSpace to process
+ a workflow. The workflow is determined by setting states in an Entry. The workflow
+ itself is based on an enumerated Java class, with states of NEW, OPEN, PENDING
+ and CLOSED. Generic worker instances are configured to process Entry types that
+ match a specific template corresponding to a workflow state.
+
+[../../images/workflow.png]
+
+ [[1]] The Master creates a <<<WorkflowEntry>>>, and write the <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.NEW>>> to the JavaSpace.
+
+ [[2]] The "New Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.NEW>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.PENDING>>> to the JavaSpace.
+
+ [[3]] The "Pending Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.PENDING>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.OPEN>>> to the JavaSpace.
+
+ [[4]] The "Open Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.OPEN>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.CLOSED>>> to the JavaSpace.
+
+ [[5]] The Master then takes the completed workflow by taking the <<<WorkflowEntry>>>, with it's <<<State>>> set to <<<State.CLOSED>>> from the JavaSpace.
+
+ []
+
+ Each worker is configured in the OperationalString process the correct entry.
+
+* Building the example
+
+ The Workflow example is a multi-module Maven project, with the following
+ structure (just inter-project dependencies are shown):
+
+[../../images/workflow-project.png]
+
+ The example produces the following artifacts:
+
+*-----------------------+-------------+
+| <<Artifact>>          | <<Description>>
+*-----------------------+-------------+
+| workflow-service-2.0.jar      | Artifact containing service implementation classes
+*-----------------------+-------------+
+| workflow-api-2.0.jar   | Artifact that contains classes required for a client to invoke methods on the workflow services
+*-----------------------+-------------+
+| workflow-2.0.oar      | The OperationalString archive, contains the configuration artifacts used to deploy the workflow application
+*-----------------------+-------------+
+
+ Running <<<mvn install>>> will result in the execution of integration tests that use
+ the Rio test infrastructure
+
+* Running the example
+
+ Look {{{running.html}here}} for information on running the example
+
+
+ The example also provides test cases that use the Rio test infrastructure
+ to create and invoke methods on the Workflow application. 

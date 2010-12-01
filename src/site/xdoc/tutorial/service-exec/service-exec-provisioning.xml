@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Welcome to the Rio Project</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Data Staging and Persistent Provisioning">
+            <p>
+                Persistent Provisioning and data staging allows Rio to provision
+                software or data a service needs prior to instantiation. This allows
+                software to be dynamically installed, and raw data or application
+                components to be installed for a service. The installation is also
+                typically removed when the service terminates. It is possible to keep
+                the installed software (or data) resident on the compute resource the
+                Cybernode represents. 
+            </p>
+            
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                Persistent Provisioning and data staging are currently available for POSIX based systems only.
+            </div>
+
+            <div class="section"><h3>Persistent Provisioning</h3></div>
+            <p>
+                Building on the previous example, we will add persistent provisioning declaration for Tomcat.
+                This will allow us to install Tomcat if it is not found on a targeted compute resource.:
+            </p>
+
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                The following is a snippet of the Groovy document, showing just the relevant
+                <tt>serviceExec</tt> element modifications.
+            </div>
+            <p></p>
+<pre name="code" class="java:nocontrols">
+deployment(name: 'Tomcat Deploy') {
+    groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                              System.getProperty('user.name'))
+    serviceExec(name: 'Tomcat') {
+         software(name: 'Tomcat', version: '6.0.16', removeOnDestroy: true) {
+            install source: 'https://elastic-grid.s3.amazonaws.com/tomcat/apache-tomcat-6.0.16.zip',
+                    target: '${RIO_HOME}/system/external/tomcat',
+                    unarchive: true
+            postInstall(removeOnCompletion: false) {
+                execute command: '/bin/chmod +x ${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
+            }
+        }
+
+        ...
+    }
+}</pre>
+
+            <p>
+              The table below outlines the addition of the following elements:
+            </p>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td><b>Element</b></td>
+                        <td><b>Description</b></td>
+                    </tr>
+                    <tr>
+                        <td>install</td>
+                        <td>The install element declares  software that needs to be installed, if the software
+                            is not provided by the compute resource the Cybernode represents. The element provides
+                            an attribute allowing the declaration of whether the software should be removed when the
+                            service is destroyed.<br/><br/>
+                            The <u>removeOnDestroy</u> attribute specifies whether the software should
+                            be removed when the service is terminated (destroyed). The default is true.<br/><br/>
+                            The <u>install</u> element also declares the source, target, and whether to unarchive
+                            the download (default is to not unarchive it)</td>
+                    </tr>
+                    <tr>
+                        <td>postInstall</td>
+                        <td>The postInstall element is an optional element, and it allows the ability to perform
+                            tasks or commands on the downloaded (and optionally unarchived) software. In this
+                            deployment the postInstall declaration has an embedded <tt>execute</tt> element,
+                            instructing Rio to <tt>chmod</tt> a file in the distribution, giving it execute
+                            permissions. </td>
+                    </tr>                    
+                </tbody>
+            </table>
+            <br/><br/>
+            
+            <div id="tipbox">
+                <img src="../../images/check.gif"/>
+                If you want to keep the installed software (rather than overwrite it each time),
+                modify the software declaration  to include: <br>
+                <tt>overwrite: 'no', removeOnDestroy: false</tt></br>.
+            </div>
+
+            <div class="section"><h3>Data Staging</h3></div>
+            <p>
+                Although the <a href="../../examples/tomcat/index.html">Tomcat example</a> does not
+                include data staging as part of it's functionality, lets show how the example may be
+                modified to include the installation of a WAR as part of Tomcat bootstrapping.
+            </p>
+            <div id="infobox">
+                <img src="../../images/information.gif"/>
+                As in the previous example, this following Groovy snippet is shown for the
+                relevant elements.
+            </div>
+            <p></p>
+
+<pre name="code" class="java:nocontrols">
+deployment(name: 'Tomcat Deploy') {
+    ...
+    data source: 'https://elastic-grid.s3.amazonaws.com/tomcat/sample.war',
+         target: '${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/webapps',
+         unarchive: true, perms: 'ugo+rwx'
+    ...
+    }
+}</pre>
+
+
+            <p>
+                The data element provides the way to download and install data for the service.
+                In this case, the data is a WAR (Web Application Archive).
+            </p>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td><b>Attribute</b></td>
+                        <td><b>Description</b></td>
+                        <td><b>Default</b></td>
+                    </tr>
+                    <tr>
+                        <td>perms</td>
+                        <td>Optional permissions to set on the staged data. The
+                            permissions need to be in the form of what the <tt>chmod</tt>
+                            command uses.</td>
+                        <td>n/a</td>
+                    </tr>
+                    <tr>
+                        <td>overwrite</td>
+                        <td>If set to "yes", overwrite a file at the target
+                            download location with the same name.</td>
+                        <td>true</td>
+                    </tr>
+                    <tr>
+                        <td>removeOnDestroy</td>
+                        <td>If set to true, remove the file(s) upon service destruction.</td>
+                        <td>true</td>
+                    </tr>
+                    <tr>
+                        <td>unarchive</td>
+                        <td>If set to true, unarchive the download.</td>
+                        <td>false</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>
+                <img src="../../images/next_arrow.png" align="middle"/> Try the provided
+                <a href="../../examples/tomcat/index.html">Tomcat example</a>.
+            </p>
+        </section>
+    </body>
+
+    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
+    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
+    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" language="javascript">
+        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+    </script>
+</document>

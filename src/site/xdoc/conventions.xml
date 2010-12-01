@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <body>
+        <section name="Conventions">
+            <p>
+                This document describes conventions for developers
+                that create distributed services using Rio and Maven. Using
+                conventions for the development of services makes it easier to deploy
+                and use services. The following conventions are discussed:
+
+                <ul>
+                    <li>Project modules</li>
+                    <li>Project files</li>
+                </ul>
+            </p>
+            
+            <h3>Project Modules</h3>
+            <p>
+                In a nutshell, a service development project should be built as
+                multi-module Maven project, that reflects the basic architectural
+                elements of a distributed service. Given a service artifactId name
+                of hello, the service project is composed of the following modules:
+            </p>
+            <ul>
+                <li><b>hello-api</b><br/>
+                The hello-api module contains all the classes (interfaces and other classes)
+                that is needed to communicate with the service
+                </li>
+                <li><b><i>hello-proxy</i></b><br/>
+                The hello-proxy module (optional), depends on the hello-api module, and provides smart proxy support
+                </li>
+                <li><b>hello-service</b><br/>
+                The hello-service module, depends on the hello-api module (or hello-proxy module if used) provides the backend service implementation.
+                </li>
+                <li><b><i>hello-rule</i></b><br/>
+                The hello-rule module (optional), depends on the hello-api module and provides support for rules associated with the service.
+                </li>
+                <li><b><i>hello-ui</i></b><br/>
+                The hello-ui module (optional), depends on the hello-api module and provides support for a service user interface.
+                </li>
+            </ul>
+            <p>
+                In it's simplest form, the module hierarchy structure is as follows:
+            </p>
+            <p>
+                <img src="images/generated-module-structure.png"/>
+            </p>
+            <p>
+                Adding a smart proxy to the mix, the module hierarchy structure is as follows:
+            </p>
+            <p>
+                <img src="images/module-structure-with-proxy.png"/>
+            </p>
+            <p>
+                Following this pattern, you can add additional modules outlined above.
+            </p>
+
+            <h3>Project Files</h3>
+            <p>
+                The directory and file layout for the multi-module Maven project
+                is as you would expect. Using the example <tt>hello</tt> service from
+                above, we would have
+            </p>
+            <div class="source">
+                <pre>
+hello
+|-- pom.xml
+`-- src
+    |-- main
+    |   `-- opstring
+    |       `-- hello.groovy
+    |
+    |-- hello-api
+    |   |-- pom.xml
+    |   `-- src
+    |       `-- main
+    |           `-- java
+    |
+    `-- hello-service
+        |-- pom.xml
+        `-- src
+            |-- main
+            |   |-- java
+            |   `-- resources
+            |
+            `-- test
+                |-- conf
+                `-- java
+
+                </pre>
+            </div>
+            <p>
+                Notes:
+                <ul>
+                    <li>The operational string (opstring) file is in the
+                        parent <tt>hello</tt> project, in the <tt>src/main/opstring</tt> directory.</li>
+                    <li>The <tt>hello</tt> module typically produces an OAR file as an artifact using the
+                        <a href="oar-mojo.html" >Rio Maven Plugin.</a></li>
+                    <li>Configuration files for the service should be put into the
+                        <tt>hello-service</tt> module, in the <tt>src/main/resources</tt> directory.
+                        The configuration can then be loaded as a classpath resource.</li>
+                    <li>Integration testing is performed in the <tt>hello-service</tt> module.</li>
+                    <li>Test case configuration is found in the <tt>hello-service</tt> module,
+                    in the <tt>src/test/conf</tt> directory.</li>
+                </ul>
+            </p>
+        </section>
+    </body>
+ </document>

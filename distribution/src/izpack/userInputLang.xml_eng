@@ -1,0 +1,5 @@
+<langpack>
+	<str id="description.jini.title" txt="Integration with Jini"/>
+	<str id="description.jini.header" txt="Please select the directory where Jini is installed:"/>
+	<str id="description.jini.directory" txt="Jini installation directory:"/>
+</langpack>

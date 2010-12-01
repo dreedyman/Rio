@@ -1,0 +1,32 @@
+ ------
+Getting Help
+ ------
+Dennis Reedy
+ ------
+2 February 2009
+ ------
+
+Getting Help
+
+  So something didn't work as you expected it to? You think that Rio is broken. What should you do?
+
+  Here's a list of actions that you can take:
+
+* Ask on the user list
+
+  Our community is very helpful, just ask it the right way. Subscribe to the users-list and describe your
+  problem there. Don't expect to get an answer right away. Sometimes it might take a couple of days.
+
+* Check out the wiki
+
+  Users occasionally contribute additional examples, tips or errata to the
+  {{{http://wiki.rio-project.org/}wiki}} page. If you do solve your issue(s), feel free to add your own
+  content on the wiki as well.
+   
+* Submit an issue
+
+  If it turns out that there is indeed something wrong with Rio, you should report it to our
+  issue management system {{{http://jira.rio-project.org}JIRA}}.
+
+  You will need to create an account in JIRA. This is so that we can communicate with you while we work together
+  on the issue. Go to the sign up form to create an account if you don't already have one.
