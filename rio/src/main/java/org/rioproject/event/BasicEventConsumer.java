@@ -112,6 +112,19 @@ public class BasicEventConsumer
     }
 
     /**
+     * Create a BasicEventConsumer with a RemoteServiceEventListener
+     *
+     * @param listener The RemoteServiceEventListener
+     *
+     * @throws Exception If the BasicEventConsumer cannot be created
+     */
+    public BasicEventConsumer(RemoteServiceEventListener listener)
+    throws Exception {
+        this(null, listener, null, null);
+    }
+
+
+    /**
      * Create a BasicEventConsumer with an EventDescriptor
      *
      * @param edTemplate The EventDescriptor template
