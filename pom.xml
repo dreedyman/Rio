@@ -30,19 +30,17 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:https://rio.dev.java.net/svn/rio/trunk --username
-            guest
+        <connection>scm:https://github.com/dreedyman/Rio
         </connection>
-        <developerConnection>scm:svn:https://rio.dev.java.net/svn/rio/trunk
-            --username username
+        <developerConnection>scm:https://github.com/dreedyman/Rio
         </developerConnection>
-        <url>https://rio.dev.java.net/source/browse/rio/trunk/</url>
+        <url>https://github.com/dreedyman/Rio</url>
     </scm>
 
-    <ciManagement>
+    <!--<ciManagement>
         <system>teamcity</system>
         <url>http://ci.rio-project.org</url>
-    </ciManagement>
+    </ciManagement>-->
 
     <reporting>
         <excludeDefaults>true</excludeDefaults>
@@ -294,8 +292,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                     <optimize>true</optimize>
                     <encoding>UTF-8</encoding>
                     <meminitial>128m</meminitial>
