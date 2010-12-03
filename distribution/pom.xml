@@ -132,7 +132,7 @@
     
     <properties>
         <staging.dir>${project.build.directory}/staging</staging.dir>
-        <izpack-release>4.3.0-SNAPSHOT</izpack-release>
+        <izpack-release>4.3.2</izpack-release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
