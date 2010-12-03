@@ -33,7 +33,7 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class RioAboutBox extends JDialog {
-    public RioAboutBox(JFrame frame) {
+    public RioAboutBox(final JFrame frame) {
         super(frame,
               frame.getTitle().equals("")?"Rio Project":frame.getTitle(),
               true);
@@ -61,7 +61,7 @@ public class RioAboutBox extends JDialog {
         ImageIcon rioIcon=null;
         try {
             if(aboutIcon==null)
-                aboutIcon = "org/rioproject/tools/ui/images/rio.jpg";
+                aboutIcon = "org/rioproject/tools/ui/images/rio.png";
             URL url = cl.getResource(aboutIcon);
             if(url != null)
                 rioIcon = new ImageIcon(url);
@@ -131,6 +131,7 @@ public class RioAboutBox extends JDialog {
         JButton ok = new JButton("OK");
         ok.addActionListener(new ActionListener() {
                                  public void actionPerformed(ActionEvent e) {
+                                     System.out.println(getSize());
                                      dispose();
                                  }
                              });
@@ -139,8 +140,8 @@ public class RioAboutBox extends JDialog {
         Container contentPane = getContentPane();
         contentPane.add(substrate, BorderLayout.CENTER);
         contentPane.add(okPanel, BorderLayout.SOUTH);
-        int width=220;
-        int height=290;        
+        int width=316;
+        int height=259;
         setSize(new Dimension(width, height));
         setResizable(false);
         setLocationRelativeTo(frame);
