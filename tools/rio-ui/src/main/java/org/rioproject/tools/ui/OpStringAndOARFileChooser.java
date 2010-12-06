@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright 2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.rioproject.tools.ui;
 
 import org.rioproject.resolver.Artifact;
+import org.rioproject.system.OperatingSystemType;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -66,7 +67,12 @@ public class OpStringAndOARFileChooser {
         String approveButtonToolTip = "Deploy the selected OperationalString";
 
         dialog = new JDialog(frame, title, true);
-        dialog.setSize(new Dimension(635, 387));
+        Dimension d;
+        if(OperatingSystemType.isMac())
+            d = new Dimension(635, 387);
+        else
+            d = new Dimension(635, 440);
+        dialog.setSize(d);
 
         JPanel panel = new JPanel();
         panel.setLayout(new  BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -227,6 +233,7 @@ public class OpStringAndOARFileChooser {
     }
     
     private class ArtifactFieldListener implements DocumentListener {
+        JButton deployButton;
 
         public void insertUpdate(DocumentEvent event) {
             handle(event);
@@ -238,12 +245,12 @@ public class OpStringAndOARFileChooser {
 
         public void changedUpdate(DocumentEvent event) {
             /* no-op */
-            System.out.println("===> changedUpdate()");
         }
 
         private void handle(DocumentEvent event) {
             Document doc = event.getDocument();
-            JButton deployButton = getDeployButton(chooser);
+            if(deployButton==null)
+                deployButton = getDeployButton(chooser);
             if(deployButton!=null) {
                 if(doc.getLength()>0) {
                     if(!deployButton.isEnabled())
@@ -258,15 +265,22 @@ public class OpStringAndOARFileChooser {
 
     private JButton getDeployButton(Container c) {
         JButton b = null;
-        for(int i=0; i< c.getComponentCount(); i++) {
-            Component comp = c.getComponent(i);
-            if(comp instanceof JButton && ((JButton)comp).getText().equals("Deploy")) {
-                b = (JButton)comp;
-                break;
-            } else if (comp instanceof Container) {
-                b = getDeployButton((Container)comp);
-                if(b!=null)
-                    break;
+        if(c!=null) {
+            for(int i=0; i< c.getComponentCount(); i++) {
+                Component comp = c.getComponent(i);
+                if(comp!=null) {
+                    if(comp instanceof JButton) {
+                        String label = ((JButton)comp).getText();
+                        if(label!=null && label.equals("Deploy")) {
+                            b = (JButton)comp;
+                            break;
+                        }
+                    } else if (comp instanceof Container) {
+                        b = getDeployButton((Container)comp);
+                        if(b!=null)
+                            break;
+                    }
+                }
             }
         }
         return b;
