@@ -20,7 +20,7 @@ goto endOfJavaHome
 set JAVACMD=java.exe
 :endOfJavaHome
 
-if "%JAVA_MEM_OPTIONS%" == "" set JAVA_MEM_OPTIONS="-XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m"
+if "%JAVA_MEM_OPTIONS%" == "" set JAVA_MEM_OPTIONS="-XX:MaxPermSize=256m"
 
 rem Parse command line
 if "%1"=="" goto interactive
