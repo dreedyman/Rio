@@ -45,6 +45,7 @@ public class OpStringAndOARFileChooser {
     private JTextField artifactField;
     private enum LastFocused {artifactField, other}
     private LastFocused lastFocused;
+    private JButton deployButton;
 
     /**
      * Create a OpStringAndOARFileChooser
@@ -63,15 +64,14 @@ public class OpStringAndOARFileChooser {
             chooser = new JFileChooser(path);
 
         String title = "Deploy OperationalString";
-        String approveButtonText = "Deploy";
-        String approveButtonToolTip = "Deploy the selected OperationalString";
+        String approveButtonToolTip = "Deploy the selected OperationalString or OperationalString artifact";
 
         dialog = new JDialog(frame, title, true);
         Dimension d;
         if(OperatingSystemType.isMac())
-            d = new Dimension(635, 387);
-        else
             d = new Dimension(635, 440);
+        else
+            d = new Dimension(635, 497);
         dialog.setSize(d);
 
         JPanel panel = new JPanel();
@@ -91,6 +91,7 @@ public class OpStringAndOARFileChooser {
         artifactPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         l.setAlignmentX(Component.LEFT_ALIGNMENT);
         chooser.setAlignmentX(Component.LEFT_ALIGNMENT);
+        chooser.setControlButtonsAreShown(false);
 
         panel.add(l);
         panel.add(Box.createVerticalStrut(4));
@@ -100,9 +101,20 @@ public class OpStringAndOARFileChooser {
         contentPane.add(panel, BorderLayout.CENTER);
 
         listener =  new ChooserListener();
-        chooser.addActionListener(listener);
-        chooser.setApproveButtonText(approveButtonText);
-        chooser.setApproveButtonToolTipText(approveButtonToolTip);
+
+        JPanel buttons = new JPanel();
+        buttons.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        deployButton = new JButton("Deploy");
+        deployButton.setToolTipText(approveButtonToolTip);
+        deployButton.addActionListener(listener);
+
+        JButton cancel = new JButton("Cancel");
+        cancel.setToolTipText("Cancel the Deploy dialog");
+        cancel.addActionListener(listener);
+        buttons.add(deployButton);
+        buttons.add(cancel);
+
+        contentPane.add(buttons, BorderLayout.SOUTH);
 
         final ImageIcon groovy = getImageIcon(getImageToLoad("groovy.png"));
         final ImageIcon xml = getImageIcon(getImageToLoad("xml.png"));
@@ -133,13 +145,14 @@ public class OpStringAndOARFileChooser {
                 return "Rio OperationalString files";
             }
         });
+        deployButton.setEnabled(false);
         artifactField.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent event) {
                 lastFocused = LastFocused.artifactField;
                 if(artifactField.getText().length()>0) {
-                    JButton b = getDeployButton(chooser);
-                    if(b!=null && !b.isEnabled())
-                        b.setEnabled(true);
+                    if(!deployButton.isEnabled()) {
+                        deployButton.setEnabled(true);
+                    }
                 }
             }
 
@@ -154,6 +167,7 @@ public class OpStringAndOARFileChooser {
         });
         if(lastArtifact!=null) {
             artifactField.setText(lastArtifact);
+            lastFocused = LastFocused.artifactField;
         }
     }
 
@@ -200,11 +214,11 @@ public class OpStringAndOARFileChooser {
         }
 
         public void actionPerformed(ActionEvent action) {
-            if (action.getActionCommand().equals("CancelSelection")) {
+            if (action.getActionCommand().equals("Cancel")) {
                 dialog.setVisible(false);
                 dialog.dispose();
             }
-            if (action.getActionCommand().equals("ApproveSelection")) {
+            if (action.getActionCommand().equals("Deploy")) {
                 boolean canApprove = true;
                 if(artifactHasBeenProvided()) {
                     String a = artifactField.getText();
@@ -233,7 +247,6 @@ public class OpStringAndOARFileChooser {
     }
     
     private class ArtifactFieldListener implements DocumentListener {
-        JButton deployButton;
 
         public void insertUpdate(DocumentEvent event) {
             handle(event);
@@ -249,41 +262,14 @@ public class OpStringAndOARFileChooser {
 
         private void handle(DocumentEvent event) {
             Document doc = event.getDocument();
-            if(deployButton==null)
-                deployButton = getDeployButton(chooser);
-            if(deployButton!=null) {
-                if(doc.getLength()>0) {
-                    if(!deployButton.isEnabled())
-                        deployButton.setEnabled(true);
-                } else {
-                    if(deployButton.isEnabled())
-                        deployButton.setEnabled(false);
-                }
+            if(doc.getLength()>0) {
+                if(!deployButton.isEnabled())
+                    deployButton.setEnabled(true);
+            } else {
+                if(deployButton.isEnabled())
+                    deployButton.setEnabled(false);
             }
         }
-    }
-
-    private JButton getDeployButton(Container c) {
-        JButton b = null;
-        if(c!=null) {
-            for(int i=0; i< c.getComponentCount(); i++) {
-                Component comp = c.getComponent(i);
-                if(comp!=null) {
-                    if(comp instanceof JButton) {
-                        String label = ((JButton)comp).getText();
-                        if(label!=null && label.equals("Deploy")) {
-                            b = (JButton)comp;
-                            break;
-                        }
-                    } else if (comp instanceof Container) {
-                        b = getDeployButton((Container)comp);
-                        if(b!=null)
-                            break;
-                    }
-                }
-            }
-        }
-        return b;
     }
 
     private ImageIcon getImageIcon(String location) {
