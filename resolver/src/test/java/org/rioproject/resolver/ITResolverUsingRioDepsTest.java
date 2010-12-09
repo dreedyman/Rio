@@ -32,7 +32,8 @@ public class ITResolverUsingRioDepsTest {
     public void testExcludeRioDeps() throws ResolverException, IOException {
         String[] classPath = getClassPath();
         Assert.assertTrue(classPath.length>0);
-        System.out.println("INCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
+        Assert.assertTrue(classPath.length==1);
+        System.out.println("EXCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
     }
 
     @Test
@@ -40,19 +41,27 @@ public class ITResolverUsingRioDepsTest {
         System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "true");
         String[] classPath = getClassPath();
         Assert.assertTrue(classPath.length>0);
-        System.out.println("INCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
-    }
-
-    @Test
-    public void testExcludingRioDeps() throws ResolverException, IOException {
-        System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "false");
-        String[] classPath = getClassPath();
-        Assert.assertTrue(classPath.length>0);
+        Assert.assertTrue(classPath.length==1);
         System.out.println("EXCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
     }
 
+    @Test
+    public void testIncludingRioDeps() throws ResolverException, IOException {
+        System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "false");
+        String[] classPath = getClassPath();
+        Assert.assertTrue(classPath.length>0);
+        boolean foundRio = false;
+        for(String jar : classPath) {
+            File f = new File(jar);
+            if(f.getName().startsWith("rio")) {
+                foundRio = true;
+                break;
+            }
+        }
+        Assert.assertTrue(foundRio);
+        System.out.println("INCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
+    }
 
-    
     private String[] getClassPath() throws ResolverException, IOException {
         File testRepo;
         Resolver r = ResolverHelper.getInstance();
