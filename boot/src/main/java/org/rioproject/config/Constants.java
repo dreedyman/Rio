@@ -29,11 +29,6 @@ public interface Constants {
      */
     static final String CODESERVER = BASE_COMPONENT+".codeserver";
     /**
-     * System property set indicating the addresses of repositories the
-     * Resolver will use
-     */
-    static final String REPOSITORIES = BASE_COMPONENT+".resolver.repositories";
-    /**
      * System property set when an RMI Registry is started
      */
     static final String REGISTRY_PORT = BASE_COMPONENT+".registryPort";
@@ -75,4 +70,11 @@ public interface Constants {
      * in.
      */
     static final String RIO_TEST_EXEC_DIR = BASE_COMPONENT+".test.exec.dir";
+    /**
+     * Property to indicate that the Rio Resolver should not include Rio artifacts 
+     * in the resolution of a classpath. If this property is set to &quot;false&quot;,
+     * the Resolver will not include the Rio platform (and it's dependencies) in
+     * generated classpaths.
+     */
+    static final String RESOLVER_PRUNE_PLATFORM = BASE_COMPONENT+".resolver.prune.platform";
 }

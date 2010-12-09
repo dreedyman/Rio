@@ -17,7 +17,8 @@ package org.rioproject.resolver.maven2.filters
 
 import org.rioproject.resolver.Dependency
 import java.util.logging.Logger
-import java.util.logging.Level;
+import java.util.logging.Level
+import org.rioproject.config.Constants;
 
 /**
  * Exclude platform classes, test, provided, system and optional,
@@ -43,34 +44,44 @@ class ExclusionFilter implements DependencyFilter {
                               "it is declared as \"excluded\" or \"optional\""
             return false
         }
+
         if(!allowTest && dep.scope.equals("test")) {
             if(logger.isLoggable(Level.FINEST))
                 logger.finest "Exclude ${dep.getGAV()}, declared with of ${dep.scope}"
             return false
         }
-        if(dep.scope.equals("test") || dep.scope.equals("provided") || dep.scope.equals("system")) {
+
+        if(dep.scope.equals("provided") || dep.scope.equals("system")) {
             if(logger.isLoggable(Level.FINEST))
                 logger.finest "Exclude ${dep.getGAV()}, declared with of ${dep.scope}"
             return false
         }
-        if(dep.groupId.equals("org.rioproject") && 
-           (dep.artifactId.equals("rio") || dep.artifactId.equals("rio-test"))) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest "Exclude ${dep.getGAV()}"
-            return false
+
+        String prunePlatformProperty = System.getProperty(Constants.RESOLVER_PRUNE_PLATFORM)
+        boolean prunePlatform = prunePlatformProperty==null?true: prunePlatformProperty.equals("true")
+
+        if(prunePlatform) {
+            if(dep.groupId.equals("org.rioproject") &&
+                    (dep.artifactId.equals("rio") || dep.artifactId.equals("rio-test"))) {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest "Exclude ${dep.getGAV()}"
+                return false
+            }
+            if(dep.groupId.equals("net.jini") ||
+                    dep.groupId.equals("org.codehaus.groovy") ||
+                    dep.groupId.equals("cglib")) {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest "Exclude ${dep.getGAV()}, it is in the platform"
+                return false;
+            }
         }
-        if(dep.groupId.equals("net.jini") ||
-           dep.groupId.equals("org.codehaus.groovy") ||
-           dep.groupId.equals("cglib")) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest "Exclude ${dep.getGAV()}, it is in the platform"
-            return false;
-        }
+
         if(dep.classifier && dep.classifier=="dl") {
             if(logger.isLoggable(Level.FINEST))
                 logger.finest "Exclude ${dep.getGAV()} with classifier of \"dl\""
             return false;
         }
+        
         return true
     }
 }

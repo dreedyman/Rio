@@ -144,11 +144,11 @@ class Artifact {
     public String toString() {
         final StringBuilder sb = new StringBuilder()
         sb.append("Artifact")
-        sb.append("{groupId='").append(groupId).append ('\'')
-        sb.append(", artifactId='").append(artifactId) . append ('\'')
-        sb.append(", version='").append(version) . append ('\'')
-        sb.append(", classifier='").append(classifier).append('\'')
-        sb.append('}') ;
+        sb.append("{ groupId='").append(groupId)
+        sb.append(", artifactId='").append(artifactId)
+        sb.append(", version='").append(version)
+        sb.append(", classifier='").append(classifier)
+        sb.append(' }') ;
         return sb.toString()
     }
 }

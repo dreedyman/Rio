@@ -47,7 +47,7 @@ public class PomParser {
         return parse(dep, dep.pomURL, filter)
     }
 
-    def parse(Artifact artifact, URL u, DependencyFilter filter) {
+    ResolutionResult parse(Artifact artifact, URL u, DependencyFilter filter) {
         if(u==null)
             return null
         ResolutionResult result = new ResolutionResult(artifact)
@@ -103,7 +103,7 @@ public class PomParser {
 
         getProperties(pom)
 
-        processParent(pom, artifact, filter, u)
+        processParent(pom, artifact, filter, u, result)
 
         /* Reset pom variables, parent processing may have changed them */
         setPomVars(pom)
@@ -140,6 +140,7 @@ public class PomParser {
 
             dependency.exclusions.exclusion.each { exclusion ->
                 String excludedArtifact = "${exclusion.groupId}:${exclusion.artifactId}"
+                //println "(1) EXCLUDE $excludedArtifact"
                 if(!excludes.contains(excludedArtifact))
                     excludes << excludedArtifact
             }
@@ -171,6 +172,12 @@ public class PomParser {
 
         pom.dependencies.dependency.each { dependency ->
             String type = dependency.type
+            dependency.exclusions.exclusion.each { exclusion ->
+                String excludedArtifact = "${exclusion.groupId}:${exclusion.artifactId}"
+                //println "(2) EXCLUDE $excludedArtifact"
+                if(!excludes.contains(excludedArtifact))
+                    excludes << excludedArtifact
+            }
             if(type.length()==0 || type.equals("jar")) {
                 String classifier = dependency.classifier
                 classifier = classifier.length()==0?null:classifier
@@ -230,6 +237,8 @@ public class PomParser {
 
                             }
                             result.dependencies.add(dep)
+                            if(dep.groupId.equals("junit") || dep.groupId.equals("jline") )
+                            //println "===> Added ${dep.getGAV()}, pom: $sPom"
                             processedDeps.add("${gid}:${depArtifactId}:${depVersion}")
                         }
                     }
@@ -269,7 +278,7 @@ public class PomParser {
         }
     }
 
-    def processParent(def pom, Artifact a, DependencyFilter filter, URL u) {
+    def processParent(def pom, Artifact a, DependencyFilter filter, URL u, ResolutionResult r) {
         if(pom.parent.size()>0) {
             String pPom = "${pom.parent.groupId}:${pom.parent.artifactId}:${pom.parent.version}"
             if(!processedPoms.containsKey(pPom)) {
@@ -294,7 +303,11 @@ public class PomParser {
                                                                               remoteRepositories)
                 }
                 parentArtifact.pomURL = parentPom
-                parse(parentArtifact, parentPom, filter)
+                ResolutionResult parentResult = parse(parentArtifact, parentPom, filter)
+                for(Dependency d : parentResult.dependencies) {
+                    if(!d.excluded)
+                        r.dependencies.add(d)
+                }
             }  else {
                 properties.putAll(processedPoms.get(pPom))
             }
