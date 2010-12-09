@@ -216,17 +216,17 @@
                     <plugin>
                         <groupId>org.codehaus.izpack</groupId>
                         <artifactId>izpack-maven-plugin</artifactId>
-                        <configuration>
+                        <version>1.0-alpha-5</version>
+                        <!--<configuration>
                             <izpackBasedir>${staging.dir}/izpack</izpackBasedir>
                             <customPanelDirectory>${staging.dir}/izpack</customPanelDirectory>
-                        </configuration>
+                        </configuration>-->
                         <executions>
                             <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>izpack</goal>
-                                </goals>
+                                <phase>package</phase>                                
                                 <configuration>
+                                    <izpackBasedir>${staging.dir}/izpack</izpackBasedir>
+                                    <customPanelDirectory>${staging.dir}/izpack</customPanelDirectory>
                                     <installerFile>${project.build.directory}/rio-${pom.version}-installer.jar</installerFile>
                                 </configuration>
                             </execution>
