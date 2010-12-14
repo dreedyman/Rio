@@ -22,8 +22,6 @@ import java.util.GregorianCalendar;
 import java.util.Random;
 
 public class Patient implements Serializable {
-    public enum Status {AT_RISK, STABLE}
-    private Status status;
     private Doctor doctor;
     private PatientInfo patientInfo;
     private Bed bed;
@@ -46,21 +44,7 @@ public class Patient implements Serializable {
 
     public PatientInfo getPatientInfo() {
         return patientInfo;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Status getStatus() {
-        if(status==null)
-            status = Status.STABLE;
-        return status;
-    }
-
-    public int getStatusAsOrdinal() {
-        return getStatus().ordinal();
-    }
+    }    
 
     public Doctor getDoctor() {
         return doctor;

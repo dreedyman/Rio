@@ -30,5 +30,4 @@ public interface Doctor {
     void assignPatient(Patient p) throws IOException;
     void removePatient(Patient p) throws IOException;
     List<Patient> getPatients() throws IOException;
-    void updatePatient(Patient p) throws IOException;
 }

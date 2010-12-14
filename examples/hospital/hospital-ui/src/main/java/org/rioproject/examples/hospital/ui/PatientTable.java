@@ -86,6 +86,7 @@ public class PatientTable extends JPanel {
                 popup.show(e.getComponent(), e.getX(), e.getY());
             }
         });
+        
         setPreferredSize(new Dimension(500, 100));
         add("Center", new JScrollPane(patientTable));
     }
@@ -105,7 +106,7 @@ public class PatientTable extends JPanel {
 
     int getNumPatients() {
         return patientModel.getRowCount();
-    }
+    }    
 
     class PatientModel extends AbstractTableModel {
         private final java.util.List<Patient> patients = new ArrayList<Patient>();
@@ -163,7 +164,7 @@ public class PatientTable extends JPanel {
         Patient getPatient(int row) {
             return patients.get(row);
         }
-
+        
         int addPatient(Patient p) {
             int row = -1;
             synchronized(patients) {

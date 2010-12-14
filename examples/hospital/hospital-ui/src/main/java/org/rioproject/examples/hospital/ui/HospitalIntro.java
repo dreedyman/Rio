@@ -46,9 +46,7 @@ public class HospitalIntro extends JPanel {
                   "larger scale event that will admit multiple patients.\n");
         sb.append("<h3>Patient Monitoring</h3>\n");
         sb.append("As patients are admitted they are assigned beds. Each bed has a pulse " +
-                  "and a temperature monitor. There is a rule that monitors a patient's pulse " +
-                  "(PatientAlert.drl). If a patient's pulse falls below 50, a " +
-                  "patient alert is sent out. This will be visible in the UI.\n");
+                  "and a temperature monitor. \n");
         sb.append("<h3>Available Beds</h3>\n");
         sb.append("As patients are assigned beds, if the number of available beds is 0, " +
                   "more beds are allocated (AvailableBedRule.drl).");

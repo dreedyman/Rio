@@ -212,10 +212,6 @@ public class HospitalUI extends JFrame {
     private void terminate() {
         bedAssignmentCheckingPool.shutdownNow();
         patientStats.shutdown();
-        System.out.println("Left Divider: " + leftSplitPane.getDividerLocation());
-        System.out.println("Inner Right Divider: " + innerRightSplitPane.getDividerLocation());
-        System.out.println("Right Divider: " + rightSplitPane.getDividerLocation());
-        System.out.println("Size: " + this.getSize());
     }
 
     private void wireUpProvisionMonitorEventListener(Object o) throws Exception {

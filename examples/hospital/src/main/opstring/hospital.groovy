@@ -5,9 +5,9 @@ deployment(name: 'Hospital') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    logging {
+    /*logging {
         logger 'org.rioproject.gnostic.drools', Level.FINEST
-    }
+    }*/
 
     artifact id: 'service', 'org.rioproject.examples.hospital:hospital-service:2.0'
     artifact id: 'service-dl', 'org.rioproject.examples.hospital:hospital-api:2.0'
@@ -64,31 +64,15 @@ deployment(name: 'Hospital') {
 
     rules {
         rule {
-            resource 'DoctorRule, AvailableBedRule, PatientAlert'
+            resource 'DoctorRule, AvailableBedRule'
             ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.0'
             serviceFeed(name: "Doctors") {
                 watches "numPatients"
             }
             serviceFeed(name: "Admission") {
                 watches "availableBeds"
-            }
-            serviceFeed(name: "Beds") {
-                watches "pulse"
             }
         }
-        /*rule {
-            resource 'DoctorRule, PatientAlert, AvailableBedRule'
-            ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.0'
-            serviceFeed(name: "Doctors") {
-                watches "numPatients"
-            }
-            serviceFeed(name: "Beds") {
-                watches "pulse"
-            }
-            serviceFeed(name: "Admission") {
-                watches "availableBeds"
-            }
-        }*/
     }
 }
 

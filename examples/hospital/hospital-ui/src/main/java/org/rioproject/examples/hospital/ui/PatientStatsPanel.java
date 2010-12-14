@@ -24,6 +24,7 @@ import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
+import org.rioproject.examples.hospital.CalculablePatient;
 import org.rioproject.examples.hospital.Patient;
 import org.rioproject.resources.servicecore.Service;
 import org.rioproject.watch.Calculable;
@@ -31,6 +32,7 @@ import org.rioproject.watch.WatchDataSource;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -45,7 +47,7 @@ public class PatientStatsPanel extends JPanel {
 	private TimeSeries temperatureTimeSeries = new TimeSeries("Temperature", FixedMillisecond.class);
     private ScheduledExecutorService scheduler;
     private Service service;
-    private Calculable lastPulse;
+    private CalculablePatient lastPulse;
     private Calculable lastTemperature;
     private static final long MINUTE=60*1000;
     private JLabel patientLabel;
@@ -79,7 +81,7 @@ public class PatientStatsPanel extends JPanel {
         else
             return "<html><body><h3>Patient Stats for "+p.getPatientInfo().getName()+"</h3></body></html>";
     }
-
+    
     void setPatient(Patient p) {
         if(p==null) {
             pulseTimeSeries.clear();
@@ -93,7 +95,7 @@ public class PatientStatsPanel extends JPanel {
             pulseTimeSeries.clear();
             WatchDataSource pulse = service.fetch("pulse");
             for(Calculable c : pulse.getCalculable()) {
-                lastPulse = c;
+                lastPulse = (CalculablePatient)c;
                 pulseTimeSeries.addOrUpdate(new FixedMillisecond(c.getWhen()), c.getValue());
             }
         } catch (RemoteException e) {
@@ -122,17 +124,17 @@ public class PatientStatsPanel extends JPanel {
     }
 
     class FeederTask implements Runnable {
-
+        
         public void run() {
             Service s = getService();
             if(s!=null) {
                 try {
-                    Calculable c = checkAdd(s, "pulse", lastPulse);
+                    CalculablePatient c = checkAdd(s, "pulse", lastPulse);
                     if(c!=null) {
                         lastPulse = c;
                         pulseTimeSeries.addOrUpdate(new FixedMillisecond(c.getWhen()), c.getValue());
                     }
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 try {
@@ -147,10 +149,10 @@ public class PatientStatsPanel extends JPanel {
             }
         }
 
-        private Calculable checkAdd(Service s, String watch, Calculable lastOne) throws
+        private CalculablePatient checkAdd(Service s, String watch, Calculable lastOne) throws
                                                                               RemoteException {
             WatchDataSource wds = s.fetch(watch);
-            Calculable c = wds.getLastCalculable();
+            CalculablePatient c = (CalculablePatient)wds.getLastCalculable();
             Date lastMeasurement = new Date(lastOne.getWhen());
             Date currentMeasurement = new Date(c.getWhen());
             return currentMeasurement.after(lastMeasurement)?c:null;

@@ -22,6 +22,5 @@ public interface Bed {
     Patient getPatient() throws IOException;
     void setPatient(Patient patient) throws IOException;
     Patient removePatient() throws IOException;
-    void updatePatient(Patient patient) throws IOException;
 }
 

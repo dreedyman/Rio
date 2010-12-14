@@ -99,15 +99,5 @@ public class DoctorImpl implements Doctor {
         }
         return p;
     }
-
-    public void updatePatient(Patient patient) {
-        synchronized(patients) {
-            for(Patient p : patients) {
-                if(patient.equals(p)) {
-                    p.setStatus(patient.getStatus());
-                    break;
-                }
-            }
-        }
-    }
+    
 }

@@ -75,46 +75,6 @@ public class ITHospitalDeployTest {
     }
 
     @Test
-    public void testPatientAlerts() {
-        Throwable thrown = null;
-        List<Patient> presidents = first8Presidents();
-        Patient patient = null;
-        try {
-            patient = hospital.admit(presidents.get(0));
-        } catch (Exception e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull("Should not have thrown an exception", thrown);
-        Assert.assertNotNull("Should not have a null Patient", patient);
-        long t0 = System.currentTimeMillis();
-        boolean atRisk = false;
-        try {
-            atRisk = waitForPatientStatus(patient, Patient.Status.AT_RISK);
-        } catch (Exception e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull("Should not have thrown an exception", thrown);
-        long t1 = System.currentTimeMillis();
-        System.out.println("===> Waited ("+(double)(t1-t0)+") millis for Patient to be AT_RISK: "+atRisk);
-        Assert.assertTrue("Patient should be AT_RISK", atRisk);
-
-        boolean stable = false;
-        t0 = System.currentTimeMillis();
-        try {
-            stable = waitForPatientStatus(patient, Patient.Status.STABLE);
-        } catch (Exception e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull("Should not have thrown an exception", thrown);
-        t1 = System.currentTimeMillis();
-        System.out.println("===> Waited ("+(double)(t1-t0)+") millis for Patient to be STABLE: "+stable);
-        /* Assert.assertTrue("Patient should be STABLE", stable); */
-    }
-
-    @Test
     public void testDeployment() {
         Throwable thrown = null;
         try {
@@ -258,31 +218,5 @@ public class ITHospitalDeployTest {
 
     private Patient create(String name, Calendar cal) {
         return new Patient(new Patient.PatientInfo(name, "Male", cal.getTime()));
-    }
-
-    private boolean waitForPatientStatus(Patient patient, Patient.Status status) throws IOException {
-        int iterations = 120;
-        boolean hasStatus = false;
-        for(int i=0; i<iterations; i++) {
-            for(Patient p : patient.getDoctor().getPatients()) {
-                if(patient.equals(p)) {
-                    if(p.getStatus().equals(status)) {
-                        hasStatus = true;
-                        break;
-                    }
-                }
-            }
-
-            if(!hasStatus) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                break;
-            }
-        }
-        return hasStatus;
     }
 }

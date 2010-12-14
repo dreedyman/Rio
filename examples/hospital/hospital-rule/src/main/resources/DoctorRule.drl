@@ -18,14 +18,5 @@ when
     $count : Calculable(id == "numPatients", value > 3) from entry-point "calculables-stream"
 then
     List<Doctor> doctors = context.getServices("Doctors", Doctor.class);
-    for(Doctor d : doctors) {
-        try {
-            if(d.getStatus().equals(Status.ON_CALL)) {
-                d.onDuty();
-                break;
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
+    RuleServiceHelper.doctorNotify(doctors);
 end
