@@ -240,6 +240,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
     public void destroy() {
         if(logger.isLoggable(Level.FINE))
             logger.log(Level.FINE, "ProvisionMonitor: destroy() notification");
+        /* stop the provisioner */
+        if(provisioner!=null)
+            provisioner.terminate();
         /* Cleanup opStringManagers */
         if(opStringManagers != null) {
             for(OpStringManager opMgr : getOpStringManagers()) {
@@ -253,9 +256,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
             getWatchRegistry().deregister(provisionWatch);
         if(taskTimer!=null)
             taskTimer.cancel();
-        /* stop the provisioner */
-        if(provisioner!=null)
-            provisioner.terminate();
         /* stop the provisionMonitorPeer */
         if(provisionMonitorPeer!=null)
             provisionMonitorPeer.terminate();

@@ -4,7 +4,7 @@
 
 Hospital Example
 
- This example combines Rio and Drools through the use of the Gnostic service.
+ This example combines Rio and {{{http://www.jboss.org/drools/drools-fusion.html}Drools Fusion}} through the use of the Gnostic service.
  This example demonstrates the use of associations, association based dependency
  injection, watches, and the incorporation of rules to manage SLA behavior.
 
@@ -13,26 +13,11 @@ Hospital Example
  <<<(DoctorRule.drl)>>> that when a Doctor has more than 3 patients, an ON CALL
  Doctor is changed to ON DUTY.
 
- As patients are admitted they are assigned beds. Each bed has a pulse and a
- temperature monitor. There is a rule that monitors a patient's pulse
- <<<(PatientAlert.drl)>>>. If a patient's pulse falls below 50, a patient
- alert is sent out.
+ If the number of patients being admitted exceeds the amount of available beds, beds are dynamically scaled
+ (each Bed is a dynamic service) to meet the needs of the Hospital. The rule that scales beds is found in
+ <<<AvailableBedRule.drl>>>.
 
-[../../images/workflow.png]
-
- [[1]] The Master creates a <<<WorkflowEntry>>>, and write the <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.NEW>>> to the JavaSpace.
-
- [[2]] The "New Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.NEW>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.PENDING>>> to the JavaSpace.
-
- [[3]] The "Pending Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.PENDING>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.OPEN>>> to the JavaSpace.
-
- [[4]] The "Open Worker" is configured to take a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.OPEN>>>, and write a <<<WorkflowEntry>>> with it's <<<State>>> set to <<<State.CLOSED>>> to the JavaSpace.
-
- [[5]] The Master then takes the completed workflow by taking the <<<WorkflowEntry>>>, with it's <<<State>>> set to <<<State.CLOSED>>> from the JavaSpace.
-
- []
-
- Each worker is configured in the OperationalString process the correct entry.
+ Check out how to use the {{{hospital-video}user interface}} provided with the example. 
 
 * Building the example
 

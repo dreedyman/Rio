@@ -207,6 +207,11 @@ public class CybernodeImpl extends ServiceBeanAdapter
         bootstrap((String[])data.get());
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+    }
+
     /**
      * Override destroy to ensure that any JSBs are shutdown as well
      */
@@ -241,7 +246,7 @@ public class CybernodeImpl extends ServiceBeanAdapter
         }
         logger.log(Level.INFO,
                    context.getServiceElement().getName()+
-                   ": destroy() notification");        
+                   ": destroy() notification");
         /* Stop the timer */
         if(taskTimer!=null)
             taskTimer.cancel();
@@ -250,10 +255,10 @@ public class CybernodeImpl extends ServiceBeanAdapter
         /* Terminate the ServiceStatementManager */
         if(serviceStatementManager!=null)
             serviceStatementManager.terminate();
+
         /* Close down all WatchDataSource instances, unexporting them from
          * the runtime */
         destroyWatches();
-
         /* Unregister all PlatformCapability instances */
         if(computeResource!=null) {
             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
@@ -269,7 +274,6 @@ public class CybernodeImpl extends ServiceBeanAdapter
                 }
             }
         }
-
         /* Terminate the DiscoveryManagementPool */
         DiscoveryManagementPool discoPool =
             DiscoveryManagementPool.getInstance();
@@ -280,11 +284,13 @@ public class CybernodeImpl extends ServiceBeanAdapter
         ServiceBeanManager serviceBeanManager  = context.getServiceBeanManager();
         if(serviceBeanManager!=null) {
             DiscardManager discardMgr = serviceBeanManager.getDiscardManager();
-            if(discardMgr!=null)
+            if(discardMgr!=null) {
                 discardMgr.discard();
+            }
         } else {
-            if(lifeCycle!=null)
+            if(lifeCycle!=null) {
                 lifeCycle.unregister(this);
+            }
         }
         container = null;
     }

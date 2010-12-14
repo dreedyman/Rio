@@ -477,7 +477,11 @@ public class DiscoveryManagementPool {
          * Terminate all LookupDiscoveryManager instances
          */
         void terminate() {
-            for(DiscoveryManagement dm : pool) {
+            SharedDiscoveryManager[] dms;
+            synchronized(pool) {
+                dms = pool.toArray(new SharedDiscoveryManager[pool.size()]);                
+            }
+            for(DiscoveryManagement dm : dms) {
                 dm.terminate();
             }
             pool.clear();
@@ -489,31 +493,33 @@ public class DiscoveryManagementPool {
          */
         LookupDiscoveryManager getLookupDiscoveryManager(String[] groupsToMatch,
                                                          LookupLocator[] locatorsToMatch) {
+            SharedDiscoveryManager[] dms;
             synchronized(pool) {
-                for(LookupDiscoveryManager ldm : pool) {
-                    String[] groups = ldm.getGroups();
-                    /* If both are set to ALL_GROUPS we have a match */
-                    if(groupsToMatch == LookupDiscovery.ALL_GROUPS &&
-                       groups == LookupDiscovery.ALL_GROUPS) {
+                dms = pool.toArray(new SharedDiscoveryManager[pool.size()]);
+            }
+            for(LookupDiscoveryManager ldm : dms) {
+                String[] groups = ldm.getGroups();
+                /* If both are set to ALL_GROUPS we have a match */
+                if(groupsToMatch == LookupDiscovery.ALL_GROUPS &&
+                        groups == LookupDiscovery.ALL_GROUPS) {
+                    if(matchLocators(locatorsToMatch, ldm)) {
+                        return(ldm);
+                    }
+                }
+                /* If one or the other is set to ALL_GROUPS keep looking */
+                if(groupsToMatch == LookupDiscovery.ALL_GROUPS ||
+                        groups == LookupDiscovery.ALL_GROUPS)
+                    continue;
+                /* If both have the same "set", check for equivalence */
+                if(groupsToMatch.length == groups.length) {
+                    int matches=0;
+                    for(int i=0; i<groupsToMatch.length; i++) {
+                        if(groupsToMatch[i].equals(groups[i]))
+                            matches++;
+                    }
+                    if(matches==groupsToMatch.length) {
                         if(matchLocators(locatorsToMatch, ldm)) {
                             return(ldm);
-                        }
-                    }
-                    /* If one or the other is set to ALL_GROUPS keep looking */
-                    if(groupsToMatch == LookupDiscovery.ALL_GROUPS ||
-                       groups == LookupDiscovery.ALL_GROUPS)
-                        continue;
-                    /* If both have the same "set", check for equivalence */
-                    if(groupsToMatch.length == groups.length) {
-                        int matches=0;
-                        for(int i=0; i<groupsToMatch.length; i++) {
-                            if(groupsToMatch[i].equals(groups[i]))
-                                matches++;
-                        }
-                        if(matches==groupsToMatch.length) {
-                            if(matchLocators(locatorsToMatch, ldm)) {
-                                return(ldm);
-                            }
                         }
                     }
                 }

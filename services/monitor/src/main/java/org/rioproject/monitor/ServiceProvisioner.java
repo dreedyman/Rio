@@ -112,6 +112,8 @@ public class ServiceProvisioner {
     /** Logger for provision requests */
     static final Logger provisionLogger =
         Logger.getLogger(ProvisionMonitorImpl.LOGGER+".provision");
+    private boolean terminating = false;
+    private boolean terminated = false;
 
     /**
      * Create a ServiceProvisioner
@@ -181,9 +183,11 @@ public class ServiceProvisioner {
      * Clean up all resources
      */
     void terminate() {
+        terminating = true;
         landlord.stop(true);
         provisioningPool.shutdownNow();
         provisionFailurePool.shutdownNow();
+        terminated = true;
     }
 
     /**
@@ -454,6 +458,10 @@ public class ServiceProvisioner {
     private void dispatch(ProvisionRequest request,
                           ServiceResource resource,
                           long index) {
+        if(terminating || terminated) {
+            logger.info("Request to dispatch "+request.sElem.getName()+" ignored, utility has terminated");
+            return;
+        }
         try {
             if(resource != null) {
                 inProcess.add(request.sElem);
