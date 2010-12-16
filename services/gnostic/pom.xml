@@ -63,11 +63,6 @@
         </dependency>
 
         <!-- Rio dependencies -->
-        <dependency>
-            <groupId>org.rioproject</groupId>
-            <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -172,16 +167,6 @@
                             <value>${basedir}/src/test/conf/manager-config.groovy</value>
                         </property>
                     </systemProperties>
-                    <!--
-                    <excludes>
-                        <exclude>**/ITScanner*</exclude>
-                        <exclude>**/ITNotification*</exclude>
-                        <exclude>**/ITScaling*</exclude>
-                        <exclude>**/ITSystem*</exclude>
-                        <exclude>**/ITSLA*</exclude>
-                        <exclude>**/ITMonitorRulesTest*</exclude>
-                    </excludes>
-                    -->
                 </configuration>
                 <executions>
                     <execution>
