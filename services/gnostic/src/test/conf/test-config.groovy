@@ -23,20 +23,12 @@ ITMonitorRulesTest {
     autoDeploy = true
 }
 
-ITForkedSpaceUtilizationTest {
-    numCybernodes = 1
-    numMonitors = 1
-    groups = "ITForkedSpaceUtilizationTest"
-    opstring = 'src/test/conf/testforkedspace.groovy'
-    autoDeploy = true
-}
-
 ITSpaceUtilizationTest {
     numCybernodes = 1
     numMonitors = 1
     groups = "ITSpaceUtilizationTest"
-    opstring = 'src/test/conf/testspace.groovy'
-    autoDeploy = true
+    //opstring = 'src/test/conf/testspace.groovy'
+    //autoDeploy = true
 }
 
 ITSystemUtilizationTest {

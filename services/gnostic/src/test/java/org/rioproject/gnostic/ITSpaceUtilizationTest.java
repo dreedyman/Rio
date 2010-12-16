@@ -15,10 +15,13 @@
  */
 package org.rioproject.gnostic;
 
+import net.jini.core.lookup.ServiceItem;
 import net.jini.space.JavaSpace;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -29,7 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * Test forked space access
+ * Test forked space access and embedded spaces access
  */
 @RunWith (RioTestRunner.class)
 public class ITSpaceUtilizationTest {
@@ -39,18 +42,37 @@ public class ITSpaceUtilizationTest {
 
     @Test
     public void verifyGettingMetricsFromDeployedSpaceWorks() {
-        doTest(testManager);
+        Assert.assertNotNull(testManager);
+        File opstring = new File("src/test/conf/testspace.groovy");
+        Assert.assertTrue(opstring.exists());
+        doTest(testManager, opstring);
     }
 
-    void doTest(TestManager testManager) {
+    @Test
+    public void verifyGettingMetricsFromDeployedForkedSpaceWorks() {
         Assert.assertNotNull(testManager);
+        File opstring = new File("src/test/conf/testforkedspace.groovy");
+        Assert.assertTrue(opstring.exists());
+        doTest(testManager, opstring);
+    }
+
+    @After
+    public void undeploy() {
+        ServiceItem[] items = testManager.getServiceItems(ProvisionMonitor.class);
+        Assert.assertTrue(items.length>0);
+        testManager.undeployAll((ProvisionMonitor)items[0].service);
+    }
+
+    void doTest(TestManager testManager, File opstring) {
+        Assert.assertNotNull(testManager);
+        testManager.deploy(opstring);
         Gnostic g = (Gnostic)testManager.waitForService(Gnostic.class);
-        Util.waitForRule(g, "SpaceUtilization");
-        testManager.waitForService(JavaSpace.class);
         File file = new File(System.getProperty("java.io.tmpdir"), getOutputFileName());
         if(file.exists())
             if(file.delete())
                 System.out.println("Removed "+file.getName()+", start with clean slate");
+        Util.waitForRule(g, "SpaceUtilization");
+        testManager.waitForService(JavaSpace.class);        
         file.deleteOnExit();
         long waited = 0;
         long duration = 1000;

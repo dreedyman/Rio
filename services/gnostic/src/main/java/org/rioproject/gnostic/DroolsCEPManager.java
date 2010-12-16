@@ -47,6 +47,7 @@ public class DroolsCEPManager implements CEPSession {
         Logger.getLogger(DroolsCEPManager.class.getName());
     private Logger droolsLogger =
         Logger.getLogger("org.rioproject.gnostic.drools");
+    private boolean initialized = false;
 
     public DroolsCEPManager(DeployedServiceContext context,
                             KnowledgeAgent kAgent) {
@@ -62,75 +63,104 @@ public class DroolsCEPManager implements CEPSession {
 
     public void initialize(List<ServiceHandle> serviceHandles,
                            RuleMap ruleMap,
-                           ClassLoader loader) throws IOException {
-        Map<Resource, ResourceType> resources = new HashMap<Resource, ResourceType>();
-        RuleMap.RuleDefinition ruleDef = ruleMap.getRuleDefinition();
+                           ClassLoader loader) {
+        try {
+            Map<Resource, ResourceType> resources = new HashMap<Resource, ResourceType>();
+            RuleMap.RuleDefinition ruleDef = ruleMap.getRuleDefinition();
 
-        List<String> rules = new ArrayList<String>();
-        boolean classPathResource = false;
-        for (String rule : BootUtil.toArray(ruleDef.getResource(), " ,")) {
-            logger.info("PROCESSING: " + rule);
-            if (rule.startsWith("http")) {
-                resources.put(ResourceFactory.newUrlResource(rule),
-                              ResourceType.DRL);
-            } else if (rule.startsWith("file:")) {
-                rule = rule.substring(5, rule.length());
-                if (!rule.endsWith(".drl"))
-                    rule = rule + ".drl";
-                rules.add("file:"+rule);
-                if (isBuiltInRule(rule)) {
-                    for (Resource r : generateRule(rule, true, serviceHandles))
-                        resources.put(r, ResourceType.DRL);
-                } else {                    
-                    resources.put(ResourceFactory.newFileResource(rule),
+            List<String> rules = new ArrayList<String>();
+            boolean classPathResource = false;
+            for (String rule : BootUtil.toArray(ruleDef.getResource(), " ,")) {
+                logger.info("PROCESSING: " + rule);
+                if (rule.startsWith("http")) {
+                    resources.put(ResourceFactory.newUrlResource(rule),
                                   ResourceType.DRL);
-                }
-            } else {
-                if (!rule.endsWith(".drl"))
-                    rule = rule + ".drl";
-                if (isBuiltInRule(rule)) {
-                    for (Resource r : generateRule(rule, false, serviceHandles))
-                        resources.put(r, ResourceType.DRL);
+                } else if (rule.startsWith("file:")) {
+                    rule = rule.substring(5, rule.length());
+                    if (!rule.endsWith(".drl"))
+                        rule = rule + ".drl";
+                    rules.add("file:"+rule);
+                    if (isBuiltInRule(rule)) {
+                        for (Resource r : generateRule(rule, true, serviceHandles))
+                            resources.put(r, ResourceType.DRL);
+                    } else {
+                        resources.put(ResourceFactory.newFileResource(rule),
+                                      ResourceType.DRL);
+                    }
                 } else {
-                    classPathResource = true;
-                    rules.add(rule);
-                    resources.put(ResourceFactory.newClassPathResource(rule),
-                                  ResourceType.DRL);
+                    if (!rule.endsWith(".drl"))
+                        rule = rule + ".drl";
+                    if (isBuiltInRule(rule)) {
+                        for (Resource r : generateRule(rule, false, serviceHandles))
+                            resources.put(r, ResourceType.DRL);
+                    } else {
+                        classPathResource = true;
+                        rules.add(rule);
+                        resources.put(ResourceFactory.newClassPathResource(rule),
+                                      ResourceType.DRL);
+                    }
                 }
             }
+
+            if(!classPathResource) {
+                try {
+                    generateAndApplyChangeSet(rules);
+                } catch (IOException e) {
+                    StringBuilder sb = new StringBuilder();
+                    for(String rule : rules) {
+                        if(sb.length()>0)
+                            sb.append(", ");
+                        sb.append(rule);
+                    }
+                    logger.log(Level.WARNING, "Unable to provide change-set support for the rules "+sb.toString(), e);
+                }
+            }
+
+            /* Create the Drools StatefulKnowledgeSession */
+            try {
+                session = DroolsFactory.createStatefulSession(kAgent.getKnowledgeBase(),
+                                                              //kBase,
+                                                              resources,
+                                                              loader);
+            } catch (Throwable t) {
+                logger.log(Level.WARNING,
+                           "While creating StatefulKnowledgeSession for "+ruleMap,
+                           t);
+            }
+            if (session == null) {
+                throw new IllegalStateException(
+                        "Could not create StatefulKnowledgeSession for "+ruleMap);
+            }
+            if(session.getGlobal("context")==null)
+                session.setGlobal("context", context);
+
+            // log all Drools activity
+            if(droolsLogger.isLoggable(Level.FINEST))
+                KnowledgeRuntimeLoggerFactory.newConsoleLogger(session);
+
+            stream = session.getWorkingMemoryEntryPoint(Constants.CALCULABLES_STREAM);
+        } finally {
+            initialized = true;
         }
-
-        if(!classPathResource)
-            generateAndApplyChangeSet(rules);
-
-        /* Create the Drools StatefulKnowledgeSession */
-        try {
-            session = DroolsFactory.createStatefulSession(kAgent.getKnowledgeBase(),
-                                                          //kBase,
-                                                          resources,
-                                                          loader);
-        } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       "While creating StatefulKnowledgeSession for "+ruleMap,
-                       t);
-        }
-        if (session == null) {
-            throw new IllegalStateException(
-                "Could not create StatefulKnowledgeSession for "+ruleMap);
-        }
-        if(session.getGlobal("context")==null)
-            session.setGlobal("context", context);
-
-        // log all Drools activity
-        if(droolsLogger.isLoggable(Level.FINEST))
-            KnowledgeRuntimeLoggerFactory.newConsoleLogger(session);
-
-        stream = session.getWorkingMemoryEntryPoint(Constants.CALCULABLES_STREAM);
     }
 
     public void insert(Calculable calculable) {
         if(calculable==null)
             return;
+        if(!initialized) {
+            while(!initialized) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    logger.log(Level.WARNING,
+                               "Waiting for "+getClass().getName()+" initialization interrupted",
+                               e);
+                }
+            }
+        }
+        if(stream==null)
+            throw new IllegalStateException("Could not insert calculable into CEP engine, " +
+                                            "the working memory entryPoint (stream) is null");
         if(logger.isLoggable(Level.FINER))
             logger.log(Level.FINER,
                        "Inserting ["+calculable.getClass().getName()+"], ["+calculable+"] into CEP engine");
@@ -240,6 +270,7 @@ public class DroolsCEPManager implements CEPSession {
             if(c!=null)
                 c.close();
         } catch (IOException e) {
+            /**/
         }
     }
 }

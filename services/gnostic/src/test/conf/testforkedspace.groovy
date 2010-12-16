@@ -25,9 +25,9 @@ deployment(name: 'Test Forked Space') {
     artifact id: 'outrigger-dl',   'com.sun.jini:outrigger:dl:2.1'
     artifact id: 'outrigger-impl', 'com.sun.jini:outrigger:2.1'
 
-//    logging {
-//        logger 'org.rioproject.gnostic', Level.FINER
-//    }
+    logging {
+        logger 'org.rioproject.gnostic', Level.FINER
+    }
         
     service(name: 'Space', fork:'yes') {
         interfaces {
