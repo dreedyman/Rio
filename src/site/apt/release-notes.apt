@@ -3,7 +3,7 @@ Release Notes
  ------
 Dennis Reedy
  ------
-1 January 2010
+20 December 2010
  ------
 
 Release Notes
@@ -18,58 +18,104 @@ Release Notes
     
 ** Bug
 
-     * {{{http://jira.rio-project.org/browse/RIO-175}RIO-175}} - If JAVA_HOME contains spaces in the directory name
+     * {{{http://jira.rio-project.org/browse/RIO-239}RIO-239}} - Syntax diagram for resources, artifact and association management incorrect
 
-     * {{{http://jira.rio-project.org/browse/RIO-189}RIO-189}} - rio.cmd doesn't handle paths containing spaces
+     * {{{http://jira.rio-project.org/browse/RIO-242}RIO-242}} - NPE in Utilization strategy when logging set to FINEST
 
-     * {{{http://jira.rio-project.org/browse/RIO-221}RIO-221}} - Test framework should warn if missing service starter configuration
+     * {{{http://jira.rio-project.org/browse/RIO-244}RIO-244}} - If groovy configuration has a MissPropertyException script error, throw ConfigurationException with cause of MissPropertyException
 
-     * {{{http://jira.rio-project.org/browse/RIO-226}RIO-226}} - If executing in test mode, include dependencies scoped with test
+     * {{{http://jira.rio-project.org/browse/RIO-266}RIO-266}} - Resolver returns wrong snapshot artifact name
 
-     * {{{http://jira.rio-project.org/browse/RIO-227}RIO-227}} - Artifacts with &lt;type&gt; other then jar
+     * {{{http://jira.rio-project.org/browse/RIO-268}RIO-268}} - DSL missing support for locators
 
-     * {{{http://jira.rio-project.org/browse/RIO-228}RIO-228}} - Unable to debug service when loading with opstring
+     * {{{http://jira.rio-project.org/browse/RIO-272}RIO-272}} - Unable to reload service that has a groovy configuration
 
-     * {{{http://jira.rio-project.org/browse/RIO-229}RIO-229}} - The start-cybernode.groovy doesn't take in to consideration if the local maven repo is placed at a non-default location
+     * {{{http://jira.rio-project.org/browse/RIO-275}RIO-275}} - Provide better management of PermGen
 
-     * {{{http://jira.rio-project.org/browse/RIO-230}RIO-230}} - Service tutorial needs to include step to run mvn install
+     * {{{http://jira.rio-project.org/browse/RIO-277}RIO-277}} - AssociationDescripor.setLocators() javadoc misleading
 
-     * {{{http://jira.rio-project.org/browse/RIO-231}RIO-231}} - Creating default platform on
+     * {{{http://jira.rio-project.org/browse/RIO-278}RIO-278}} - Rio Mojos should avoid being executed if they are not the root project
 
-     * {{{http://jira.rio-project.org/browse/RIO-232}RIO-232}} - Support Archiva produced checksum files
+     * {{{http://jira.rio-project.org/browse/RIO-280}RIO-280}} - Make sure oar is installed as a .oar when packaging type is not "oar"
 
+     * {{{http://jira.rio-project.org/browse/RIO-283}RIO-283}} - Resolver fails to replace ${pom.groupId} if part of a groupId declaration
+
+     * {{{http://jira.rio-project.org/browse/RIO-284}RIO-284}} - Maven modules need unique name to support development in Eclipse
+
+     * {{{http://jira.rio-project.org/browse/RIO-285}RIO-285}} - Rio deploy, undeploy and ui mojos do not provide support for setting groups
+
+     * {{{http://jira.rio-project.org/browse/RIO-287}RIO-287}} - POJO has createProxy called before setConfiguration
 
      []
     
 ** Improvement
 
-     * {{{http://jira.rio-project.org/browse/RIO-88}RIO-88}} -  Add ProvisionFailureEvent notifications to UI
+     * {{{http://jira.rio-project.org/browse/RIO-237}RIO-237}} - Refactor AssociationManagement
 
-     * {{{http://jira.rio-project.org/browse/RIO-220}RIO-220}} - Excessive WARNINGs in log when no sigar available
+     * {{{http://jira.rio-project.org/browse/RIO-238}RIO-238}} - Example should declare dependencyManagement for Rio version
 
-     * {{{http://jira.rio-project.org/browse/RIO-222}RIO-222}} - Add create-project option to rio script(s)
+     * {{{http://jira.rio-project.org/browse/RIO-245}RIO-245}} - Forked services should use a rolling FileHandler for logs
 
-     * {{{http://jira.rio-project.org/browse/RIO-223}RIO-223}} - Consider writing example on use of Associations by service clients
+     * {{{http://jira.rio-project.org/browse/RIO-246}RIO-246}} - Remove need for thread pool configuration in Cybernode
 
-     * {{{http://jira.rio-project.org/browse/RIO-233}RIO-233}} - DSL software element needs to include support for all attributes instead of just name and version
+     * {{{http://jira.rio-project.org/browse/RIO-257}RIO-257}} - Simplify Watchable and WatchRegistry
+
+     * {{{http://jira.rio-project.org/browse/RIO-259}RIO-259}} - StaticCybernode should not require RIO_HOME to be set
+
+     * {{{http://jira.rio-project.org/browse/RIO-263}RIO-263}} - Check if RIO_NATIVE_DIR is already set before processing it in rio script
+
+     * {{{http://jira.rio-project.org/browse/RIO-276}RIO-276}} - Add lifecycle annotations
+
+     * {{{http://jira.rio-project.org/browse/RIO-293}RIO-293}} - Add hotspot options for out of memory behavior
+
+     * {{{http://jira.rio-project.org/browse/RIO-294}RIO-294}} - Provide ability for Resolver to include Rio platform when generating classpath
 
 
      []
     
 **  New Feature
 
-     * {{{http://jira.rio-project.org/browse/RIO-206}RIO-206}} - Provide better integration with Maven
+     * {{{http://jira.rio-project.org/browse/RIO-234}RIO-234}} - Add Drools as a way to provide declarative policy enforcement for SLAs
+
+     * {{{http://jira.rio-project.org/browse/RIO-236}RIO-236}} - Use of Futures with Associations
+
+     * {{{http://jira.rio-project.org/browse/RIO-247}RIO-247}} - Log Handler that recognizes exceptions and sends remote events
+
+     * {{{http://jira.rio-project.org/browse/RIO-248}RIO-248}} - Rio UI should allow jconsole to be attached to forked service
+
+     * {{{http://jira.rio-project.org/browse/RIO-258}RIO-258}} - Add version numbers to ServiceInfo
+
+     * {{{http://jira.rio-project.org/browse/RIO-270}RIO-270}} - Add a method to the Cybernode interface for querying its enlistment state.
 
      []
     
 ** Task
 
-    * {{{http://jira.rio-project.org/browse/RIO-224}RIO-224}} -  Use enum in ProvisionMonitorEvent
+    * {{{http://jira.rio-project.org/browse/RIO-250}RIO-250}} - Remove obsolete OperationalString Service element
+
+    * {{{http://jira.rio-project.org/browse/RIO-291}RIO-291}} - Remove outdated Provision Monitor user interface
+
+    * {{{http://jira.rio-project.org/browse/RIO-292}RIO-292}} - Remove use of edu.emory.mathcs.backport.java.util.concurrent.TimeUnit
 
      []
 
+** Sub-task
+
+    * {{{http://jira.rio-project.org/browse/RIO-251}RIO-251}} - Add DSL extension for rules
+
+    * {{{http://jira.rio-project.org/browse/RIO-252}RIO-252}} - Create supporting Rule classes, allowing rule configurations to be associated with service element
+
+    * {{{http://jira.rio-project.org/browse/RIO-253}RIO-253}} - Create default rules, providing support for scaling
+
+    * {{{http://jira.rio-project.org/browse/RIO-254}RIO-254}} - Introduce new service to support Drools integration
+
+    * {{{http://jira.rio-project.org/browse/RIO-255}RIO-255}} - Create syntax diagrams for DSL rules extensions
+
+    * {{{http://jira.rio-project.org/browse/RIO-256}RIO-256}} - Allow system watches to be accessed by service scoped watch registry implementations
 
 * Release notes for previous versions
+
+     * {{{http://jira.rio-project.org/secure/ReleaseNote.jspa?version=10030&styleName=Text&projectId=10000&Create=Create}4.0}}
 
      * {{{http://jira.rio-project.org/secure/ReleaseNote.jspa?version=10011&styleName=Html&projectId=10000&Create=Create}4.0 M3}}
 
