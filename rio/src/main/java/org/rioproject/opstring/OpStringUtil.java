@@ -149,7 +149,6 @@ public class OpStringUtil {
                 sb.append(" (").append(export.getArtifact()).append("): ");
                 ResolverHelper.resolve(export, resolver, resolveFile, true);
                 didResolve = true;
-                //ResolverHelper.resolve(export, resolver, resolveFile, codebase, true);
             } else {
                 if(deployedAsArtifact) {
                     return;

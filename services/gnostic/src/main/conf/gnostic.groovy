@@ -4,8 +4,8 @@ import java.util.logging.Level
 deployment(name: 'Gnostic') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject:gnostic:4.1-SNAPSHOT'
-    artifact id: 'service-dl', 'org.rioproject:gnostic:dl:4.1-SNAPSHOT'
+    artifact id: 'service', 'org.rioproject:gnostic:4.1'
+    artifact id: 'service-dl', 'org.rioproject:gnostic:dl:4.1'
 
     logging {
         logger 'org.rioproject.gnostic', Level.FINE

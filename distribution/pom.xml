@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.1-SNAPSHOT</version>
+        <version>4.1</version>
     </parent>
     <artifactId>distribution</artifactId>
     <name>Rio Distribution</name>
@@ -217,16 +217,19 @@
                         <groupId>org.codehaus.izpack</groupId>
                         <artifactId>izpack-maven-plugin</artifactId>
                         <version>1.0-alpha-5</version>
-                        <!--<configuration>
+                        <configuration>
                             <izpackBasedir>${staging.dir}/izpack</izpackBasedir>
                             <customPanelDirectory>${staging.dir}/izpack</customPanelDirectory>
-                        </configuration>-->
+                        </configuration>
                         <executions>
                             <execution>
-                                <phase>package</phase>                                
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>izpack</goal>
+                                </goals>
                                 <configuration>
-                                    <izpackBasedir>${staging.dir}/izpack</izpackBasedir>
-                                    <customPanelDirectory>${staging.dir}/izpack</customPanelDirectory>
+                                    <!--<izpackBasedir>${staging.dir}/izpack</izpackBasedir>
+                                    <customPanelDirectory>${staging.dir}/izpack</customPanelDirectory>-->
                                     <installerFile>${project.build.directory}/rio-${pom.version}-installer.jar</installerFile>
                                 </configuration>
                             </execution>
@@ -275,7 +278,7 @@
                         <executions>                            
                             <execution>
                                 <id>zip-release</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>

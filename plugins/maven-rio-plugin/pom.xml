@@ -11,7 +11,7 @@
     <groupId>org.apache.maven.plugins</groupId>
     <packaging>maven-plugin</packaging>
     <name>Module :: Rio Maven Plugin</name>
-    <version>4.1-SNAPSHOT</version>
+    <version>4.1</version>
     <description>Maven 2 plugin for Rio</description>
     <inceptionYear>2007</inceptionYear>
     <prerequisites>

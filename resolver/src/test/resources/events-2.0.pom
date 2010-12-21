@@ -33,7 +33,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rio-plugin</artifactId>
-                <version>4.1-SNAPSHOT</version>
+                <version>4.1</version>
                 <extensions>true</extensions>
                 
                 <executions>

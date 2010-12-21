@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>4.1-SNAPSHOT</version>
+    <version>4.1</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -130,12 +130,6 @@
             <name>Rio Developer List</name>
             <archive>http://groups.google.com/group/rio-dev</archive>
         </mailingList>
-        <mailingList>
-            <name>Rio Commits List</name>
-            <archive>
-                https://rio.dev.java.net/servlets/SearchList?listName=commits
-            </archive>
-        </mailingList>
     </mailingLists>
 
     <developers>
@@ -148,18 +142,6 @@
             </roles>
             <timezone>-5</timezone>
         </developer>
-        <developer>
-            <id>jeje</id>
-            <name>Jerome Bernard</name>
-            <email>jerome.bernard@elastic-grid.com</email>
-            <organization>Elastic Grid</organization>
-            <organizationUrl>http://www.elastic-grid.com</organizationUrl>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-
     </developers>
 
     <distributionManagement>
@@ -282,7 +264,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>2.0.1</version>
+                <version>2.1.1</version>
                 <inherited>false</inherited>
                 <configuration>
                     <locales>en</locales>
@@ -324,7 +306,7 @@
   </modules>
 
     <properties>
-        <rio.version>4.1-SNAPSHOT</rio.version>
+        <rio.version>4.1</rio.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>
