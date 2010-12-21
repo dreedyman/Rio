@@ -295,8 +295,10 @@ rules {
     <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript" language="javascript">
+        //<![CDATA[
         dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
         dp.SyntaxHighlighter.BloggerMode();
         dp.SyntaxHighlighter.HighlightAll('code');
+        //]]>
     </script>
 </document>

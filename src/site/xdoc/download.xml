@@ -7,9 +7,7 @@
                 <a href="http://www.rio-project.org">Rio</a>
                 project site.
             </p>
-        </section>
 
-        <section>
             <h2>License and Dependencies</h2>
             <p>
                 Rio is distributed under the <a href="license.html"> Apache License, version 2.0</a>.
@@ -26,9 +24,7 @@
                 The MD5 link is an MD5 checksum file, used to ensure that the file
                 downloaded properly.
             </p>
-        </section>
 
-        <section>
             <h2>Download Rio 4.1</h2>
             <p>
                 Rio 4.1 is a recommended update.
@@ -45,15 +41,13 @@
                     <tr>
                         <td>Rio 4.1 (zip)</td>
                         <td><a href="http://www.rio-project.org/releases/rio-4.1.zip">Download</a></td>
-                        <td>17.6 MB</td>
+                        <td>18 MB</td>
                         <td><a href="http://www.rio-project.org/releases/rio-4.1.zip.md5">MD5</a></td>
-                        <td align="center">10/2010</td>
+                        <td align="center">12/2010</td>
                     </tr>
                 </tbody>
             </table>
-        </section>
 
-        <section>
             <h2>Rio Installer</h2>
 
             <p>
@@ -62,9 +56,7 @@
                 it also adds some useful shortcuts in the Windows menu.
                 <a href="http://www.rio-project.org/releases/rio-4.1-installer.jar">Download Rio 4.0 using the installer</a>
             </p>
-        </section>
 
-        <section>
             <h2>Previous Releases</h2>
 
             <table>

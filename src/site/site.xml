@@ -13,8 +13,10 @@
     <skin>
 		<groupId>org.rioproject</groupId>
 		<artifactId>maven-rio-skin</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.0</version>
 	</skin>
+
+
 
 	<body>        
         <menu name="Main">

@@ -50,7 +50,7 @@ Workflow Example
 
 * Running the example
 
- Look {{{running.html}here}} for information on running the example
+ Look {{{./running.html}here}} for information on running the example
 
 
  The example also provides test cases that use the Rio test infrastructure

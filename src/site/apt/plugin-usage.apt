@@ -6,23 +6,6 @@
  5 November 2009
  ------
 
-~~ Copyright 2007 The Apache Software Foundation.
-~~
-~~ Licensed under the Apache License, Version 2.0 (the "License");
-~~ you may not use this file except in compliance with the License.
-~~ You may obtain a copy of the License at
-~~
-~~      http://www.apache.org/licenses/LICENSE-2.0
-~~
-~~ Unless required by applicable law or agreed to in writing, software
-~~ distributed under the License is distributed on an "AS IS" BASIS,
-~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-~~ See the License for the specific language governing permissions and
-~~ limitations under the License.
-
-~~ NOTE: For help with the syntax of this file, see:
-~~ http://maven.apache.org/guides/mini/guide-apt-format.html
-
 Usage
 
  This page discusses the use of the Rio plugin and goes into detail on how to
@@ -31,23 +14,23 @@ Usage
  goals. Other goals of the plugin are fairly self explanatory. For the following
  goals, please refer to the goal specific documentation:
 
-  * {{{deploy-mojo.html}rio:deploy}}
+  * {{{./deploy-mojo.html}rio:deploy}}
 
-  * {{{undeploy-mojo.html}rio:undeploy}}
+  * {{{./undeploy-mojo.html}rio:undeploy}}
 
-  * {{{start-all-mojo.html}rio:start-all}}
+  * {{{./start-all-mojo.html}rio:start-all}}
 
-  * {{{start-cybernode-mojo.html}rio:start-cybernode}}
+  * {{{./start-cybernode-mojo.html}rio:start-cybernode}}
 
-  * {{{start-monitor-mojo.html}rio:start-monitor}}
+  * {{{./start-monitor-mojo.html}rio:start-monitor}}
 
-  * {{{stop-mojo.html}rio:stop}}
+  * {{{./stop-mojo.html}rio:stop}}
 
-  * {{{ui-mojo.html}rio:ui}}
+  * {{{./ui-mojo.html}rio:ui}}
  
 * Building a {Service}
 
- {{{classdepandjar-mojo.html}rio:classdepandjar}}
+ {{{./classdepandjar-mojo.html}rio:classdepandjar}}
 
  When building a service in a distributed environment, we want to build jars that
  account for the ability to instantiate a service implementation, and to account
