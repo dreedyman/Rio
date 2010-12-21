@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Rio Examples Index</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <section name="Rio Examples">
+            <p>
+                Examples in this directory provide an introduction towards developing and deploying
+                services using Rio. The following examples are included in the distribution:
+            </p>
+
+            <ul>
+
+                <li><a href="calculator/index.html">Calculator</a><br/>
+                    This example demonstrates a simple Calculator application, composed of
+                    POJO services for each Calculator service (add, subtract, mulitple, divide).
+                    This example shows the use of associations and how association based dependency
+                    injection is used.
+                </li><br/>
+
+                <li><a href="events/index.html">Events</a><br/>
+                    This example demonstrates the use of the Rio event framework to subscribe to
+                    and be notified of events. Both services in this example are implemented as
+                    simple beans. The use of Watches is also shown in this example. The watch
+                    data collected can be viewed by using Rio UI (rio-ui.jar).
+
+                </li><br/>
+                <li><a href="hospital/index.html">Hospital</a><br/>
+                    This example combines Rio and Drools through the use of the Gnostic service.
+                    This example demonstrates the use of associations, association based dependency
+                    injection, watches, and the incorporation of rules to manage SLA behavior.
+
+                </li><br/>
+                <li><a href="springbean/index.html">Spring</a><br/>
+                    This example demonstrates a simple Spring application. Rio provides the
+                    capability to build dynamic applications using Spring. You can wire up your
+                    beans using Spring, and use Rio to turn a Spring bean into a dynamic service,
+                    with built-in management, fault detection and automated deployment.
+                </li><br/>
+
+                <li><a href="tomcat/index.html">Tomcat</a><br/>
+                    This example demonstrates how to activate and manage an existing technology
+                    using the Rio exec framework. In this example, Tomcat is installed, deployed
+                    and started. The environment is set allowing Tomcat to be managed by JMX. A
+                    declarative watch is also added, allowing us to observe metrics from available
+                    mbeans.
+                </li><br/>
+
+                <li><a href="workflow/index.html">Workflow</a><br/>
+                    This example demonstrates a simple application which uses a JavaSpace to
+                    process a workflow. The workflow is determined by setting states in an Entry.
+                    The workflow itself is based on an enumerated Java class, with states of NEW,
+                    OPEN, PENDING and CLOSED. Geneic worker instances are configured to process
+                    Entry types that match a specific template corresponding to a workflow state.
+                </li><br/>
+            </ul>
+
+        </section>
+    </body>
+</document>
