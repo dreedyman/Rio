@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.1-SNAPSHOT</version>
+        <version>4.1</version>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>boot</artifactId>
