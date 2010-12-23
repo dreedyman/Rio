@@ -3,7 +3,7 @@
 
 def repo = "${System.getProperty('user.home')}/.m2/repository"
 cwd = System.getProperty('user.dir')
-def rioDist = "distribution/target/rio-4.1"
+def rioDist = "distribution/target/rio-4.2-SNAPSHOT"
 def distLib = "${cwd}/../${rioDist}/lib"
 def testClassDir = "${cwd}/target/test-classes"
 def testResourcesDir = "${cwd}/src/test/resources"

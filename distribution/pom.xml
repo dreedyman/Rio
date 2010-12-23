@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.1</version>
+        <version>4.2-SNAPSHOT</version>
     </parent>
     <artifactId>distribution</artifactId>
     <name>Rio Distribution</name>
@@ -92,6 +92,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.sun.jini</groupId>
+            <artifactId>reggie</artifactId>
+        </dependency>
+
+         <dependency>
             <groupId>com.sun.jini</groupId>
             <artifactId>reggie</artifactId>
             <classifier>dl</classifier>

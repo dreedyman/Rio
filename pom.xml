@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>4.1</version>
+    <version>4.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -306,7 +306,7 @@
   </modules>
 
     <properties>
-        <rio.version>4.1</rio.version>
+        <rio.version>4.2-SNAPSHOT</rio.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>

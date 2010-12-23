@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.1</version>
+        <version>4.2-SNAPSHOT</version>
     </parent>
     <packaging>pom</packaging>
     <groupId>org.rioproject</groupId>
@@ -26,22 +26,6 @@
             <version>${pom.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>${pom.groupId}</groupId>
-            <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${pom.groupId}</groupId>
-            <artifactId>resolver</artifactId>
-            <version>${pom.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.sun.jini</groupId>
-            <artifactId>reggie</artifactId>
-        </dependency>
 
     </dependencies>
 
