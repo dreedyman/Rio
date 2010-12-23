@@ -497,7 +497,7 @@ public class ServiceDescriptorUtil {
         for(String jar : jars) {
             if(sb.length()>0)
                 sb.append(File.pathSeparator);
-            sb.append(dir+File.separator+jar);
+            sb.append(dir).append(File.separator).append(jar);
         }
         return sb.toString();
     }
