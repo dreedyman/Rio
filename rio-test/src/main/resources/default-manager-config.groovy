@@ -26,7 +26,7 @@ manager {
     inheritOptions = true
 
     jvmOptions = '''
-        -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts
+        -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts
         -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -DRIO_HOME=${RIO_HOME} -Dorg.rioproject.groups=${org.rioproject.groups}'''
 
