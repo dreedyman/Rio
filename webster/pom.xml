@@ -15,10 +15,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
-            <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>boot</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

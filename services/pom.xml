@@ -22,11 +22,9 @@
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>
-            <artifactId>boot</artifactId>
+            <artifactId>rio</artifactId>
             <version>${pom.version}</version>
         </dependency>
-
-
     </dependencies>
 
       <repositories>

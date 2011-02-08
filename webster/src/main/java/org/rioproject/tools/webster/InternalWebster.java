@@ -65,21 +65,8 @@ public class InternalWebster {
             throw new RuntimeException("Cannot determine CodeSource");
         }
 
-        String sMaxThreads = 
-            System.getProperty("org.rioproject.tools.webster.maxThreads", 
-                               "10");
-        int maxThreads = 10;
-        try {
-            maxThreads = Integer.parseInt(sMaxThreads);
-        } catch(NumberFormatException e) {
-            logger.log(Level.WARNING, 
-                       "Bad Max Threads Number ["+sMaxThreads+"], "+
-                       "default to "+maxThreads, 
-                       e);
-        }
         String sPort =
-            System.getProperty("org.rioproject.tools.webster.port",
-                               "0");
+            System.getProperty("org.rioproject.tools.webster.port", "0");
         int port = 0;
         try {
             port = Integer.parseInt(sPort);
@@ -90,12 +77,7 @@ public class InternalWebster {
                        e);
         }
 
-        port = new Webster(port,
-                           parentPath,
-                           null,
-                           maxThreads).getPort();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Webster MaxThreads="+maxThreads);
+        port = new Webster(port, parentPath).getPort();
 
         if(logger.isLoggable(Level.FINE))
             logger.fine("Webster serving on port="+port);
