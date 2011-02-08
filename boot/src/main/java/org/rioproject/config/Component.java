@@ -18,8 +18,8 @@ package org.rioproject.config;
 import java.lang.annotation.*;
 
 /**
- * The Component annotation is used in a Groovy class to indicate what
- * configuration component the class is to be used for.
+ * The Component annotation is used to indicate what
+ * configuration component a class is to be used for.
  *
  * <p>The component identifies the object whose behavior will be configured
  * using the object returned. The value of component must be a
