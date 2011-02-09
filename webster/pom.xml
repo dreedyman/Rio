@@ -73,7 +73,56 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
+             <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.7.2</version>
+                <configuration>
+                    <forkMode>always</forkMode>
+                    <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <argLine>-DRIO_TEST_ATTACH</argLine>
+                    -->
+                    <systemPropertyVariables>
+                        <java.security.policy>../policy/policy.all</java.security.policy>
+                        <WEBSTER_JAR>${project.build.directory}/webster-${project.version}.jar
+                        </WEBSTER_JAR>
+                    </systemPropertyVariables>
+
+                    <includes>
+                        <include>**/ITWebsterTest.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/WebsterUTest.java</exclude>
+                    </excludes>
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
