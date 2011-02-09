@@ -102,31 +102,61 @@ public class ServiceDescriptorUtil {
      * loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
-     * set
      */
     public static ServiceDescriptor getWebster(String policy,
                                                String sPort,
                                                String[] roots,
-                                               boolean debug)
-        throws IOException {
+                                               boolean debug)throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
-        boolean useAnonymous = false;
-        try {
-            int p = Integer.parseInt(sPort);
-            if(p==0)
-                useAnonymous = true;
-        } catch(NumberFormatException e) {
-            throw new RuntimeException("invalid port ["+sPort+"]");
+        String webster = rioHome+File.separator+"lib"+File.separator+"webster.jar";
+
+        return(getWebster(policy, sPort, roots, debug, webster));
+
+    }
+
+    /**
+     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * <tt>org.rioproject.tools.webster.Webster</tt>
+     *
+     * @param policy The security policy file to use
+     * @param sPort The port webster should use
+     * @param roots The roots webster should serve
+     * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
+     * @param webster The location an name of the webster jar
+     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * webster using a specified port. The <tt>webster.jar</tt> file will be
+     * loaded from <tt>RIO_HOME/lib</tt>
+     *
+     * @throws IOException If there are problems getting the anonymous port
+     * @throws IllegalArgumentException If the <tt>RIO_HOME</tt> system property is not set
+     */
+    public static ServiceDescriptor getWebster(String policy,
+                                               String sPort,
+                                               String[] roots,
+                                               boolean debug,
+                                               String webster)
+        throws IOException {
+        if(webster==null)
+            throw new IllegalArgumentException("webster jar cannot be null");
+        String portOptionArg = "-port";
+        String portArg;
+        if(sPort.indexOf("-")!=-1) {
+            portOptionArg = "-portRange";
+            portArg = sPort;
+        } else {
+            try {
+                int p = Integer.parseInt(sPort);
+                port = p==0?getAnonymousPort():p;
+                portArg = Integer.toString(port);
+            } catch(NumberFormatException e) {
+                throw new RuntimeException("invalid port ["+sPort+"]");
+            }
         }
-        String webster = rioHome+File.separator+
-                         "lib"+File.separator+
-                         "webster.jar";
         String websterRoots = ConfigUtil.concat(roots);
         String websterClass = "org.rioproject.tools.webster.Webster";
-        port = useAnonymous?getAnonymousPort():Integer.parseInt(sPort);
+
         if(debug) {
             System.setProperty("org.rioproject.tools.webster.debug", "1");
         }
@@ -136,34 +166,13 @@ public class ServiceDescriptorUtil {
                                                    policy,
                                                    webster,
                                                    websterClass,
-                                                   new String[]{"-port",
-                                                                Integer.toString(port),
+                                                   new String[]{portOptionArg,
+                                                                portArg,
                                                                 "-roots",
                                                                 websterRoots,
                                                                 "-bindAddress",
                                                                 address
                                                    }));
-    }
-
-    /**
-     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * <tt>org.rioproject.cybernode.Cybernode</tt> using the Webster port
-     * created by this utility.
-     *
-     * @param policy The security policy file to use
-     * @param cybernodeConfig The configuration options the Cybernode will use
-     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * the Cybernode using an anonymous port. The <tt>cybernode.jar</tt> file
-     * will be loaded from <tt>RIO_HOME/lib</tt>
-     *
-     * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
-     * set
-     */
-    public static ServiceDescriptor getCybernode(String policy,
-                                                 String cybernodeConfig)
-        throws IOException {
-        return(getCybernode(policy, new String[]{cybernodeConfig}));
     }
 
     /**
