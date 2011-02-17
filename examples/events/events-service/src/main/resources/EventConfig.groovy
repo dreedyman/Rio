@@ -32,7 +32,7 @@ class EventConfig {
             Resolver r = ResolverHelper.getInstance()
             String uiClass = 'org.rioproject.examples.events.service.ui.HelloEventUI'
             def classpath = []
-            for(String s : r.getClassPathFor("org.rioproject.examples.events-ui:2.0",
+            for(String s : r.getClassPathFor("org.rioproject.examples.events:events-ui:2.0",
                                              (File)null,
                                              true)) {
                 if(s.startsWith(ResolverHelper.M2_HOME))
