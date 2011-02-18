@@ -79,17 +79,17 @@ public abstract class ThresholdManager {
      * @param type The type of threshold, breached or cleared
      */
     protected void notifyListeners(Calculable calculable, int type) {
+        ThresholdListener[] tListeners = getThresholdListeners();
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("Notify ThresholdListeners");
+            logger.finest("Notify ThresholdListeners, number to notify: "
+                          + tListeners.length);
         ThresholdValues thresholds = null;
         try {
             thresholds = (ThresholdValues)thresholdValues.clone();
-        } catch (CloneNotSupportedException e) {}
-        ThresholdListener[] tListeners = getThresholdListeners();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Number ThresholdListeners ["
-                          + tListeners.length
-                          + "]");
+        } catch (CloneNotSupportedException e) {
+            //
+        }
+
         for (ThresholdListener tListener : tListeners) {
             tListener.notify(calculable, thresholds, type);
         }
@@ -98,31 +98,29 @@ public abstract class ThresholdManager {
     /**
      * Add a Threshold listener
      * 
-     * @param listener the thresholdlistener to add
+     * @param listener the ThresholdListener to add
      */
     public void addThresholdListener(ThresholdListener listener) {
         synchronized(thresholdListeners) {
             if(!thresholdListeners.contains(listener))
                 thresholdListeners.add(listener);
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Number ThresholdListeners ["
-                              + thresholdListeners.size()
-                              + "]");
+                logger.finest("Added a ThresholdListener, number now: "
+                              + thresholdListeners.size());
         }
     }
 
     /**
      * Remove a ThresholdListener
      * 
-     * @param listener the thresholdlistener to remove
+     * @param listener the ThresholdListener to remove
      */
     public void removeThresholdListener(ThresholdListener listener) {
         synchronized(thresholdListeners) {
             thresholdListeners.remove(listener);
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Number ThresholdListeners ["
-                              + thresholdListeners.size()
-                              + "]");
+                logger.finest("Removed a ThresholdListener, number now: "
+                              + thresholdListeners.size());
         }
     }
 
