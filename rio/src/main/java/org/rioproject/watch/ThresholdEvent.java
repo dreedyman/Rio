@@ -33,11 +33,11 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
     private ThresholdValues thresholdValues;
     /** Indicates a threshold that has been breached */
     public static final int BREACHED = 0;
-    /** Indicates a threshold that has been clreaed */
+    /** Indicates a threshold that has been cleared */
     public static final int CLEARED = 1;
     /** The type of the ThresholdEvent, breached or cleared */
     private int type;
-    /** OPtional detail describing the ThresholdEvent */
+    /** Optional detail describing the ThresholdEvent */
     private String detail;
 
     /**
@@ -55,7 +55,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
      * @param source The event source
      * @param calculable Value of property calculable
      * @param thresholdValues Value of property thresholdValues
-     * @param type Whether the treshold has been breached or cleared
+     * @param type Whether the threshold has been breached or cleared
      */
     public ThresholdEvent(Object source, 
                           Calculable calculable,
@@ -70,7 +70,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
      * @param source The event source
      * @param calculable Value of property calculable
      * @param thresholdValues Value of property thresholdValues
-     * @param type Whether the treshold has been breached or cleared
+     * @param type Whether the threshold has been breached or cleared
      * @param detail Optional details of the notification (may be null)
      */
     public ThresholdEvent(Object source,
@@ -88,7 +88,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
     /**
      * Getter for property type
      * 
-     * @return type Whether the treshold has been breached or cleared
+     * @return type Whether the threshold has been breached or cleared
      */
     public int getType() {
         return (type);
@@ -97,7 +97,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
     /**
      * Setter for property type
      * 
-     * @param type Whether the treshold has been breached or cleared
+     * @param type Whether the threshold has been breached or cleared
      */
     public void setType(int type) {
         this.type = type;
