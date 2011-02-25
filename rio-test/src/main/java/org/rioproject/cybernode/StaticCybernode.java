@@ -49,7 +49,7 @@ import java.util.*;
  * injection of associated services is undefined at this time.</li>
  * <li><tt>OperationalString</tt> attributes relating to provisioning and
  * SLAs are undefined at this time
- * <li>The StaticCYbernode does not support the instantiation of forked services.</li>
+ * <li>The StaticCybernode does not support the instantiation of forked services.</li>
  * </ul>
  *
  * @author Dennis Reedy
