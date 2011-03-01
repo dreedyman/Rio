@@ -10,7 +10,18 @@ SimpleDeployTest {
     numMonitors = 1
     numLookups = 1
     opstring = 'src/test/resources/simple_opstring.groovy'
-    harvest = true
+    //harvest = true
+    //testManager = new org.rioproject.test.TestManager(true)
+}
+
+SLAThresholdEventNotificationTest {
+    groups = "SLAThresholdEventNotificationTest"
+    //locators = ''
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/slathresholdeventnotify.groovy'
+    autoDeploy = true
     //testManager = new org.rioproject.test.TestManager(true)
 }
 
@@ -30,7 +41,7 @@ SimpleForkTest {
     numLookups = 1
     opstring = 'src/test/resources/fork.groovy'
     autoDeploy = true
-    harvest = true
+    //harvest = true
 }
 
 DeployMapTest {
@@ -46,14 +57,14 @@ MaintainTest {
     groups = "MaintainTest"
     numLookups = 1
     numMonitors = 1
-    harvest = true
+    //harvest = true
 }
 
 MaxPerMachineTest {
     groups = "MaxPerMachineTest"
     numLookups = 1
     numMonitors = 1
-    harvest = true
+    //harvest = true
 }
 
 HarvesterTest {
@@ -66,7 +77,7 @@ HarvesterTest {
 
 UndeployTest {
     groups = "UndeployTest"
-    harvest = true
+    //harvest = true
 
 }
 
