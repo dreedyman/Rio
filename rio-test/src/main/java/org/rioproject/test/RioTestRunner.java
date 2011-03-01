@@ -247,27 +247,27 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         sb.append("\n");
 
         if(testConfigLocation!=null) {
-            sb.append("test-config:   "+testConfigLocation);
+            sb.append("test-config:   ").append(testConfigLocation);
             sb.append("\n");
             testConfig.loadConfig(testConfigLocation);
-            sb.append("groups:        "+(testConfig.getGroups()==null?
+            sb.append("groups:        ").append((testConfig.getGroups()==null?
                                          "<not declared>":testConfig.getGroups()));
             sb.append("\n");
-            sb.append("locators:      "+(testConfig.getLocators()==null?
+            sb.append("locators:      ").append((testConfig.getLocators()==null?
                                          "<not declared>":testConfig.getLocators()));
             sb.append("\n");
-            sb.append("numCybernodes: "+testConfig.getNumCybernodes());
+            sb.append("numCybernodes: ").append(testConfig.getNumCybernodes());
             sb.append("\n");
-            sb.append("numMonitors:   "+testConfig.getNumMonitors());
+            sb.append("numMonitors:   ").append(testConfig.getNumMonitors());
             sb.append("\n");
             if(testConfig.getNumLookups()>0) {
-                sb.append("numLookups:    "+testConfig.getNumLookups());
+                sb.append("numLookups:    ").append(testConfig.getNumLookups());
                 sb.append("\n");
             }
-            sb.append("opstring:      "+(testConfig.getOpString()==null?
+            sb.append("opstring:      ").append((testConfig.getOpString()==null?
                                          "<not declared>":testConfig.getOpString()));
             sb.append("\n");
-            sb.append("autoDeploy:    "+testConfig.autoDeploy());
+            sb.append("autoDeploy:    ").append(testConfig.autoDeploy());
             sb.append("\n");
 
             if(testConfig.autoDeploy())
@@ -281,11 +281,11 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                                      "configuration",
                                      testConfig.getOpString());
         }
-        sb.append("testManager:   "+testConfig.getTestManager().getClass().getName());
+        sb.append("testManager:   ").append(testConfig.getTestManager().getClass().getName());
         sb.append("\n");
-        sb.append("harvest:       "+testConfig.runHarvester());
+        sb.append("harvest:       ").append(testConfig.runHarvester());
         sb.append("\n");
-        sb.append("timeout:       "+(testConfig.getTimeout()==0?
+        sb.append("timeout:       ").append((testConfig.getTimeout()==0?
                                      "<not declared>":testConfig.getTimeout()));
         sb.append("\n");
         sb.append("==========================================");
@@ -438,7 +438,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                             .getOperationalString().getName();
                     testManager.undeploy(undeploy);
                 } catch (Throwable t) {
-                    System.err.println("Failed to undeploy " +
+                    System.err.println("Failed automated undeployment as part of test case shutdown for " +
                                        "["+testManager.getOpStringToDeploy()+"], "+
                                        t.getClass().getName()+": "+t.getMessage());
                 }
