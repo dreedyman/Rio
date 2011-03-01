@@ -206,10 +206,10 @@ public class ServiceStarter {
         loginContext.login();
         Result[] results = null;
         try {
-            results = (Result[]) Subject.doAsPrivileged(
+            results = Subject.doAsPrivileged(
                 loginContext.getSubject(),
-                new PrivilegedExceptionAction() {
-                    public Object run()
+                new PrivilegedExceptionAction<Result[]>() {
+                    public Result[] run()
                         throws Exception {
                         return create(descs, config);
                     }

@@ -77,4 +77,12 @@ public interface Constants {
      * generated classpaths.
      */
     static final String RESOLVER_PRUNE_PLATFORM = BASE_COMPONENT+".resolver.prune.platform";
+    /**
+     * Property to indicate that Rio should limit the creation of utilities that
+     * create sockets (like {@link net.jini.export.Exporter}) to limit socket ports
+     * to within the specified port range. The port range is specified as &quot;-&quot; delimited
+     * string, <tt>startRange-endRange</tt>, where <tt>startRange</tt> and <tt>endRange</tt>
+     * are inclusive
+     */
+    static final String PORT_RANGE = BASE_COMPONENT+".portRange";
 }

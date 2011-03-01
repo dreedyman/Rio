@@ -30,7 +30,7 @@ public class InstrumentationHook {
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
-        InstrumentationHook.inst = inst;        
+        InstrumentationHook.inst = inst;
     }
-    
+
 }

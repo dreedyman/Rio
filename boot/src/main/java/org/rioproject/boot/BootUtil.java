@@ -16,10 +16,12 @@
  */
 package org.rioproject.boot;
 
+import org.rioproject.net.PortRangeServerSocketFactory;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.*;
 
@@ -36,22 +38,6 @@ public class BootUtil {
     private BootUtil() {
         throw new AssertionError(
                 "org.rioproject.boot.BootUtil cannot be instantiated");
-    }
-
-    /**
-     * Return the classpath for the provided JAR names. 
-     * 
-     * @param jars Array of JAR names
-     * @return The classpath with system dependant path delimeters 
-     */
-    public static String getClasspath(String[] jars) {
-        StringBuffer buffer = new StringBuffer();
-        for(int i=0; i<jars.length; i++) {
-            if(i>0)
-                buffer.append(File.pathSeparator);
-            buffer.append(jars[i]);
-        }
-        return(buffer.toString());        
     }
     
     /**
@@ -99,11 +85,9 @@ public class BootUtil {
      * @return the codebase for the JAR
      */
     public static String getCodebase(String jar, String address, String port) {
-        return(com.sun.jini.config.ConfigUtil.concat(new Object[] {
-                "http://", 
-                address,  
-                ":", port,
-                "/"+jar}));
+        StringBuilder sb = new StringBuilder();
+        sb.append("http://").append(address).append(":").append(port).append("/").append(jar);
+        return(sb.toString());
     }
     
     /**
@@ -115,7 +99,7 @@ public class BootUtil {
      * @return the codebase for the JAR
      */
     public static String getCodebase(String[] jars, String address, String port) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i=0; i<jars.length; i++) {
             if(i>0)
                 buffer.append(" ");
@@ -206,18 +190,47 @@ public class BootUtil {
         socket.close();
         return(port);
     }
-    
+
     /**
-     * Get an URL from a fully qualified file path
-     * 
-     * @param filePath A fully qualified file path
-     * 
-     * @return The URL from the file if the file exists
-     * @throws MalformedURLException If the filePath cannot be converted
+     * Get a port from a range of ports
+     *
+     * @param portRange A range of ports. The port range is specified as &quot;-&quot; delimited
+     * string, <tt>startRange-endRange</tt>, where <tt>startRange</tt> and <tt>endRange</tt>
+     * are inclusive.
+     *
+     * @return An port created by instantiating a
+     * <code>org.rioproject.net.PortRangeServerSocketFactory</code> with provided range
+     *
+     * @throws IOException If a port cannot be obtained
+     * @throws IllegalArgumentException is either bound is not between
+     * 0 and 65535, or if <code>end</code> is &lt; than <code>low</code>.
      */
-    public static URL fileToURL(String filePath) throws MalformedURLException {
-        File file = new File(filePath);
-        return(file.toURI().toURL());
+    public static int getPortFromRange(String portRange) throws IOException {
+        String[] range = portRange.split("-");
+        int start = Integer.parseInt(range[0]);
+        int end = Integer.parseInt(range[1]);
+        return getPortFromRange(start, end);
+    }
+
+    /**
+     * Get a port from a range of ports
+     *
+     * @param start The range to start from (inclusive)
+     * @param end The end of the range (inclusive)
+     *
+     * @return A port created by instantiating a
+     * <code>org.rioproject.net.PortRangeServerSocketFactory</code> with provided range
+     *
+     * @throws IOException If a port cannot be obtained
+     * @throws IllegalArgumentException is either bound is not between
+     * 0 and 65535, or if <code>end</code> is &lt; than <code>low</code>.
+     */
+    public static int getPortFromRange(int start, int end) throws IOException {
+        PortRangeServerSocketFactory factory = new PortRangeServerSocketFactory(start, end);
+        ServerSocket ss = factory.createServerSocket(0);
+        int p = factory.getLastPort();
+        ss.close();
+        return(p);
     }
     
     /**
@@ -313,91 +326,5 @@ public class BootUtil {
             i++;
         }
         return(array);
-    }
-
-    /**
-     * Read the properties file and return an array of String instances which
-     * can be used as Jini configuration overrides
-     *
-     * @param propertiesFile A Properties file containing override declarations
-     *
-     * @return An array of String values suitable for use as Jini configuration
-     * overrides. If the propeties file is empty return a zero-length array
-     *
-     * @throws NullPointerException if propertiesFile is null
-     * @throws IOException if the Properties file cannot be read
-     */
-    public static String[] parseOverrides(String propertiesFile) throws
-                                                               IOException {
-        return(parseOverrides(propertiesFile, null));
-    }
-
-    /**
-     * Read the properties file and return an array of String instances which
-     * can be used as Jini configuration overrides
-     *
-     * @param propertiesFile A Properties file containing override declarations
-     * @param components An array of components to match, maty be null. If not
-     * null, then if a ket starts with an element in the provided components
-     * array it will be p[art of the array of overrides returned. If this
-     * parameter is null or zero-length, all property components are returned
-     *
-     * @return An array of String values suitable for use as Jini configuration
-     * overrides. If there are no matching components or the propeties file is
-     * empty return a zero-length array
-     *
-     * @throws NullPointerException if propertiesFile is null
-     * @throws IOException if the Properties file cannot be read
-     */
-    public static String[] parseOverrides(String propertiesFile,
-                                          String[] components) throws
-                                                               IOException {
-        if(propertiesFile==null)
-            throw new NullPointerException("propertiesFile is null");
-        ArrayList<String> list = new ArrayList<String>();
-        Properties props = new Properties();
-        props.load(new FileInputStream(propertiesFile));
-        if(components!=null && components.length>0) {
-            for(Enumeration e=props.propertyNames(); e.hasMoreElements();) {
-                String key = (String)e.nextElement();
-                for (String component : components) {
-                    if (key.startsWith(component)) {
-                        list.add(key + "=" + props.getProperty(key));
-                    }
-                }
-            }
-        } else {
-            for(Enumeration e=props.propertyNames(); e.hasMoreElements();) {
-                String key = (String)e.nextElement();
-                list.add(key+"="+props.getProperty(key));
-            }
-        }
-        return(list.toArray(new String[list.size()]));
-    }
-
-    /**
-     * Assemble a String array suitable for use as Jini configuration options.
-     * The String array whose first element is the configuration source and
-     * remaining elements specify override values for entries
-     *
-     * @param configFile The location of the configuration file, must not be
-     * null
-     * @param overrides Array of elements specifying override values for
-     * entries, mat be null
-     *
-     * @return A String array suitable for use as a Jini configuration
-     *
-     * @throws NullPointerException if configFile is null
-     */
-    public static String[] createConfigArgs(String configFile, String[] overrides) {
-        String[] configArgs;
-        if(overrides!=null && overrides.length>0) {
-            configArgs = new String[overrides.length+1];
-            configArgs[0] = configFile;
-            System.arraycopy(overrides, 0, configArgs, 1, overrides.length);
-        } else {
-            configArgs = new String[]{configFile};
-        }
-        return(configArgs);
     }
 }

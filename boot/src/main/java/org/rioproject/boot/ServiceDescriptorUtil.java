@@ -18,6 +18,7 @@ package org.rioproject.boot;
 import com.sun.jini.config.ConfigUtil;
 import com.sun.jini.start.NonActivatableServiceDescriptor;
 import com.sun.jini.start.ServiceDescriptor;
+import org.rioproject.config.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,21 +31,17 @@ import java.io.IOException;
  * @author Dennis Reedy
  */
 public class ServiceDescriptorUtil {
-    /* Port value obtained from invoking the getAnonymousPort() method */
+    /* Port value obtained from invoking the getStartupPort() method */
     private static int port = 0;
 
-    /**
-     * Get an anonymous port.
-     *
-     * @return An anonymous port created by invoking
-     * {@link BootUtil#getAnonymousPort()}. Once this method
-     * is called the return value is set statically for future reference 
-     *
-     * @throws IOException If there are problems getting the anonymous port
-     */
-    public static int getAnonymousPort() throws IOException {
-        if(port==0)
-            port = BootUtil.getAnonymousPort();
+    static int getStartupPort() throws IOException {
+        if(port==0) {
+            if(System.getProperty(Constants.PORT_RANGE)!=null) {
+                port = BootUtil.getPortFromRange(System.getProperty(Constants.PORT_RANGE));
+            } else {
+                port = BootUtil.getAnonymousPort();
+            }
+        }
         return(port);
     }
 
@@ -145,10 +142,13 @@ public class ServiceDescriptorUtil {
         if(sPort.indexOf("-")!=-1) {
             portOptionArg = "-portRange";
             portArg = sPort;
+        //} else if(System.getProperty(Constants.PORT_RANGE)!=null) {
+        //    portOptionArg = "-portRange";
+        //    portArg = System.getProperty(Constants.PORT_RANGE);
         } else {
             try {
                 int p = Integer.parseInt(sPort);
-                port = p==0?getAnonymousPort():p;
+                port = p==0?getStartupPort():p;
                 portArg = Integer.toString(port);
             } catch(NumberFormatException e) {
                 throw new RuntimeException("invalid port ["+sPort+"]");
@@ -193,9 +193,7 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getCybernode(String policy,
                                                  String... cybernodeConfig)
         throws IOException {
-        return(getCybernode(policy,
-                            getAnonymousPort(),
-                            cybernodeConfig));
+        return(getCybernode(policy, getStartupPort(), cybernodeConfig));
     }
 
     /**
@@ -278,28 +276,6 @@ public class ServiceDescriptorUtil {
      * created by this utility.
      *
      * @param policy The security policy file to use
-     * @param monitorConfig The configuration file the Monitor will use
-     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * the Monitor using an anonymous port. The <tt>monitor.jar</tt> file will
-     * be loaded from <tt>RIO_HOME/lib</tt>
-     *
-     * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
-     * set
-     */
-    public static ServiceDescriptor getMonitor(String policy,
-                                               String monitorConfig)
-        throws IOException {
-        return(getMonitor(policy, new String[]{monitorConfig}));
-
-    }
-
-    /**
-     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * <tt>org.rioproject.monitor.ProvisionMonitor</tt> using the Webster port
-     * created by this utility.
-     *
-     * @param policy The security policy file to use
      * @param monitorConfig The configuration options the Monitor will use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * the Monitor using an anonymous port. The <tt>monitor.jar</tt> file will
@@ -312,9 +288,7 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getMonitor(String policy,
                                                String... monitorConfig)
         throws IOException {
-        return(getMonitor(policy,
-                          getAnonymousPort(),
-                          monitorConfig));
+        return(getMonitor(policy, getStartupPort(), monitorConfig));
     }
 
     /**
@@ -391,28 +365,6 @@ public class ServiceDescriptorUtil {
                                          monitorConfig));
     }
 
-
-    /**
-     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * the Jini Lookup Service (Reggie), using the Webster port
-     * created by this utility.
-     *
-     * @param policy The security policy file to use
-     * @param lookupConfig The configuration file Reggie will use
-     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * Reggie using an anonymous port. The <tt>reggie.jar</tt> file will
-     * be loaded from <tt>RIO_HOME/lib</tt>
-     *
-     * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
-     * set
-     */
-    public static ServiceDescriptor getLookup(String policy,
-                                              String lookupConfig)
-        throws IOException {
-        return(getLookup(policy, new String[]{lookupConfig}));
-    }
-
     /**
      * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
      * the Jini Lookup Service (Reggie), using the Webster port
@@ -431,9 +383,7 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getLookup(String policy,
                                               String... lookupConfig)
         throws IOException {
-        return(getLookup(policy,
-                         getAnonymousPort(),
-                         lookupConfig));
+        return(getLookup(policy, getStartupPort(), lookupConfig));
     }
 
     /**
