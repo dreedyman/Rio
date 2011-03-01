@@ -389,10 +389,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
         try {
             BeanHelper.invokeLifeCycle(PreDestroy.class, "preDestroy", bean);
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Invoking Bean ["+bean.getClass().getName()+"] "+
-                       "preDestroy() ",
-                       e);
+            String s = bean==null?"<unknown:null>":bean.getClass().getName();
+            logger.log(Level.WARNING, "Invoking Bean ["+s+"] preDestroy()", e);
         }
         try {
             super.destroy();
