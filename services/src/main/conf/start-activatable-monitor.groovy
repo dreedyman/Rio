@@ -14,11 +14,13 @@ class StartActivatableMonitorConfig extends ActivatableConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         String monitorCodebase =
             getServiceCodebase(['monitor-dl.jar', 'rio-dl.jar', 'jsk-dl.jar'])
-        def monitorConfigs = ["${rioHome}/config/monitor.groovy",
+        def monitorConfigs = ["${rioHome}/config/common.groovy",
+                              "${rioHome}/config/monitor.groovy",
                               "${rioHome}/config/persistent_monitor.groovy"]
         String reggieCodebase =
             getServiceCodebase(['reggie-dl.jar', 'rio-dl.jar', 'jsk-dl.jar'])
-        def reggieConfigs = ["${rioHome}/config/reggie.groovy",
+        def reggieConfigs = ["${rioHome}/config/common.groovy",
+                             "${rioHome}/config/reggie.groovy",
                              "${rioHome}/config/persistent_reggie.groovy"]
 
         def serviceDescriptors = [

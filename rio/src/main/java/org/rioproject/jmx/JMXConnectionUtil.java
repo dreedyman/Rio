@@ -17,7 +17,7 @@ package org.rioproject.jmx;
 
 import net.jini.config.Configuration;
 import org.rioproject.boot.BootUtil;
-import org.rioproject.boot.RegistryUtil;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 
 import javax.management.MBeanServer;
@@ -49,7 +49,7 @@ public class JMXConnectionUtil {
      * bound to the RMI Registry, and set the
      * <tt>org.rioproject.jmxServiceURL</tt> system property.
      *
-     * <p>This utility uses the {@link org.rioproject.boot.RegistryUtil} class to
+     * <p>This utility uses the {@link org.rioproject.rmi.RegistryUtil} class to
      * obtain the port to access the RMI Registry.
      *
      * <h4>Configuration</h4>
@@ -116,50 +116,34 @@ public class JMXConnectionUtil {
                                                       defaultAddress);
 
         MBeanServer mbs = MBeanServerFactory.getMBeanServer();
-        String jmxServiceURL = "service:jmx:rmi:///jndi/rmi://"+
+        /*String jmxServiceURL = "service:jmx:rmi:///jndi/rmi://"+
                                hostAddress+":"+registryPort+
                                "/jmxrmi";
+*/
+         JMXServiceURL jmxServiceURL =
+                new JMXServiceURL("service:jmx:rmi://"+hostAddress+
+                                  ":"+registryPort+"/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
+
         if(logger.isLoggable(Level.INFO))
             logger.info("JMXServiceURL="+jmxServiceURL);
 
         Map env = System.getProperties();
         JMXConnectorServer jmxConn =
             JMXConnectorServerFactory.newJMXConnectorServer(
-                new JMXServiceURL(jmxServiceURL),
+                //new JMXServiceURL(jmxServiceURL),
+                jmxServiceURL,
                 env,
+                //null,
                 mbs);
         if(jmxConn != null) {
             jmxConn.start();
-            System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL);
+            System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
             if(logger.isLoggable(Level.CONFIG))
                 logger.config(
                     "JMX Platform MBeanServer exported with RMI Connector");
         } else {
             throw new Exception("Unable to create the JMXConnectorServer");
         }
-    }
-
-    /*
-     * Create the JMXConnectorServer.
-     */
-    @SuppressWarnings("unchecked")
-    protected JMXConnectorServer getJMXConnectorServer(int registryPort,
-                                                       MBeanServer mbs,
-                                                       String hostAddress)
-        throws IOException {
-        String jmxServiceURL = "service:jmx:rmi:///jndi/rmi://"+
-                               hostAddress+":"+registryPort+
-                               "/jmxrmi";
-        if(logger.isLoggable(Level.INFO))
-            logger.info("JMXServiceURL="+jmxServiceURL);
-
-        Map env = System.getProperties();
-        JMXConnectorServer jmxConn =
-            JMXConnectorServerFactory.newJMXConnectorServer(
-                new JMXServiceURL(jmxServiceURL),
-                env,
-                mbs);
-        return(jmxConn);
     }
 
     /**
@@ -176,50 +160,6 @@ public class JMXConnectionUtil {
         if(hostAddress==null)
             throw new IllegalArgumentException("hostAddress is null");
         return "service:jmx:rmi:///jndi/rmi://"+hostAddress+":"+port+"/jmxrmi";
-    }
-
-    /**
-     * Get a {@link javax.management.MBeanServerConnection}
-     *
-     * @param port The port the MBeanServer has been created on
-     * @param hostAddress The host address the MBeanServer is running on
-     * @param env JMX environment variables
-     *
-     * @return A {@link javax.management.MBeanServerConnection}
-     *
-     * @throws IOException If the connection cannot be made
-     */
-    public static MBeanServerConnection getMBeanServerConnection(int port,
-                                                                 String hostAddress,
-                                                                 Map<String, ?> env)
-        throws IOException {
-        return(getMBeanServerConnection(getJMXServiceURL(port, hostAddress), env));
-    }
-
-    /**
-     * Get a {@link javax.management.MBeanServerConnection}
-     *
-     * @param jmxServiceURL The URL that will be used to create
-     * a {@link javax.management.remote.JMXServiceURL}
-     * @param env JMX environment variables
-     *
-     * @return A {@link javax.management.MBeanServerConnection}
-     *
-     * @throws IOException If the connection cannot be made
-     */
-    public static MBeanServerConnection getMBeanServerConnection(String jmxServiceURL,
-                                                                 Map<String, ?> env)
-        throws IOException {
-        if(jmxServiceURL==null)
-            throw new IllegalArgumentException("jmxServiceURL is null");
-        
-        if(logger.isLoggable(Level.INFO))
-            logger.info("JMXServiceURL="+jmxServiceURL);
-
-        final JMXConnector connector =
-            JMXConnectorFactory.connect(new JMXServiceURL(jmxServiceURL),
-                                        env);
-        return(connector.getMBeanServerConnection());
     }
 
     /**

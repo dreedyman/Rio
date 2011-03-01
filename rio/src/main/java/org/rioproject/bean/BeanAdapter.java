@@ -474,8 +474,10 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                              false,
                                              true);
         }
+        if(logger.isLoggable(Level.FINER))
+            logger.finer("["+bean.getClass().getName()+"] using exporter "+exporter.toString());
         return exporter;
-    }    
+    }
 
     /*
      * Override createProxy to check if the bean has it's own proxy defined

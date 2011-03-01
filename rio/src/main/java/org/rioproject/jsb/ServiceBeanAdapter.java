@@ -211,10 +211,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     private long unexportRetryDelay;
     /** When this service was created */
     long started;
-
-    //ObjectName used to register and unregister from mbean server
+    /* ObjectName used to register and unregister from mbean server */
     protected ObjectName objectName;
-    //mbean server we are registered to
+    /* MBean server we are registered to */
     protected MBeanServer mbeanServer;
     protected final List<MBeanNotificationInfo> mbeanNoticationInfoList =
         new ArrayList<MBeanNotificationInfo>();
@@ -427,6 +426,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         slaEventHandler = new DispatchEventHandler(slaEventDesc, config);
         getEventTable().put(slaEventDesc.eventID, slaEventHandler);
         addAttribute(slaEventDesc);
+
 
         /*
          * If the ServiceLogEventHandler has not had it's source service set,
@@ -1398,6 +1398,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                                        serviceBeanComponent,
                                        "adminExporter",
                                        basicExporter);
+        if(logger.isLoggable(Level.FINER))
+            logger.finer("["+context.getServiceElement().getName()+"] " +
+                         "using admin exporter: "+adminExporter.toString());
         return(adminExporter);
     }
 

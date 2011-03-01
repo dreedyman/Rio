@@ -20,16 +20,19 @@ class StartAllConfig {
                             m2Repo]
 
         String policyFile = rioHome+'/policy/policy.all'
-        String monitorConfig = rioHome+'/config/monitor.groovy'
-        String reggieConfig = rioHome+'/config/reggie.groovy'
-        def cybernodeConfigs = [rioHome+'/config/cybernode.groovy',
+        def monitorConfigs = [rioHome+'/config/common.groovy',
+                              rioHome+'/config/monitor.groovy']
+        def reggieConfigs = [rioHome+'/config/common.groovy',
+                             rioHome+'/config/reggie.groovy']
+        def cybernodeConfigs = [rioHome+'/config/common.groovy',
+                                rioHome+'/config/cybernode.groovy',
                                 rioHome+'/config/compute_resource.groovy']
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '9010', (String[])websterRoots),
-            ServiceDescriptorUtil.getLookup(policyFile, reggieConfig),
-            ServiceDescriptorUtil.getMonitor(policyFile, monitorConfig),
-            ServiceDescriptorUtil.getCybernode(policyFile, (String[])cybernodeConfigs)
+            ServiceDescriptorUtil.getWebster(policyFile, '9010', websterRoots as String[]),
+            ServiceDescriptorUtil.getLookup(policyFile, reggieConfigs as String[]),
+            ServiceDescriptorUtil.getMonitor(policyFile, monitorConfigs as String[]),
+            ServiceDescriptorUtil.getCybernode(policyFile, cybernodeConfigs as String[])
         ]
 
         return (ServiceDescriptor[])serviceDescriptors

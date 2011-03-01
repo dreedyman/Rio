@@ -11,7 +11,8 @@ import org.rioproject.config.maven2.Repository
 class StartCybernodeConfig {
 
     String[] getConfigArgs(String rioHome) {
-        def configArgs = [rioHome+'/config/cybernode.groovy',
+        def configArgs = [rioHome+'/config/common.groovy',
+                          rioHome+'/config/cybernode.groovy',
                           rioHome+'/config/compute_resource.groovy']
         return configArgs as String[]
     }
@@ -26,7 +27,7 @@ class StartCybernodeConfig {
         String policyFile = rioHome+'/policy/policy.all'
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '0', (String[])websterRoots),
+            ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
             ServiceDescriptorUtil.getCybernode(policyFile, getConfigArgs(rioHome))
         ]
         

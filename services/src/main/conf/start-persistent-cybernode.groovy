@@ -8,7 +8,8 @@ import org.rioproject.config.Component
 class StartPersistentCybernodeConfig extends StartCybernodeConfig {
 
     String[] getConfigArgs(String rioHome) {
-        def configArgs = ["${rioHome}/config/cybernode.groovy",
+        def configArgs = ["${rioHome}/config/common.groovy",
+                          "${rioHome}/config/cybernode.groovy",
                           "${rioHome}/config/persistent_cybernode.groovy",
                           "${rioHome}/config/compute_resource.groovy"]
         return configArgs as String[]

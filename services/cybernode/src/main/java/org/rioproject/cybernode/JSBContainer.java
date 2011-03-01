@@ -26,7 +26,6 @@ import org.rioproject.core.ServiceElement;
 import org.rioproject.core.provision.ServiceRecord;
 import org.rioproject.event.EventHandler;
 import org.rioproject.system.ComputeResource;
-import org.rioproject.resolver.Resolver;
 
 import java.util.*;
 import java.util.logging.Level;

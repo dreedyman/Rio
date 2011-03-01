@@ -15,7 +15,8 @@ class StartActivatableCybernodeConfig extends ActivatableConfig {
         String cybernodeCodebase =
             getServiceCodebase(['cybernode-dl.jar', 'rio-dl.jar', 'jsk-dl.jar'])            
             
-        def configArgs = ["${rioHome}/config/cybernode.groovy",
+        def configArgs = ["${rioHome}/config/common.groovy",
+                          "${rioHome}/config/cybernode.groovy",
                           "${rioHome}/config/persistent_cybernode.groovy",
                           "${rioHome}/config/compute_resource.groovy"]
 

@@ -1399,7 +1399,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
                                                                        ManagementFactory.THREAD_MXBEAN_NAME,
                                                                        ThreadMXBean.class);
             threadDeadlockMonitor.setThreadMXBean(threadMXBean);
-            PeriodicWatch p = new PeriodicWatch("Thread Deadlock") {
+            PeriodicWatch p = new PeriodicWatch("Thread Deadlock", config) {
                 public void checkValue() {
                     threadDeadlockMonitor.getThreadDeadlockCalculable();
                 }
@@ -1927,6 +1927,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
                                                       CONFIG_COMPONENT,
                                                       "opStringManagerExporter",
                                                       defaultExporter);
+                if(logger.isLoggable(Level.FINER))
+                    logger.finer("Deployment ["+opString.getName()+"] using exporter "+exporter);
                 /* Get the ProxyPreparer for ServiceProvisionListener instances */
                 serviceProvisionListenerPreparer =
                     (ProxyPreparer)config.getEntry(CONFIG_COMPONENT,
@@ -2437,7 +2439,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
                                    e);
                     } else {
                         logger.log(Level.INFO,
-                                   "RemoteException Updating ServiceElement for " +
+                                   e.getClass().getName()+": "+e.getLocalizedMessage()+" "+
+                                   "Updating ServiceElement for " +
                                    ir.getName() + " at [" +
                                    ir.getHostAddress() + "]");
                     }

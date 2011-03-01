@@ -21,7 +21,8 @@ class StartAllPersistentConfig {
 
         /* Configuration args for monitor, reggie and cybernode include the
          * class that overrides (extends) the base class declarations */
-        def monitorConfigs = [rioHome+'/config/monitor.groovy',
+        def monitorConfigs = [rioHome+'/config/common.groovy',
+                              rioHome+'/config/monitor.groovy',
                               rioHome+'/config/persistent_monitor.groovy']
 
         def reggieConfigs = [rioHome+'/config/reggie.groovy',

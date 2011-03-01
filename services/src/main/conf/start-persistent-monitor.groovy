@@ -21,16 +21,18 @@ class StartPersistentMonitorConfig {
 
         String policyFile = rioHome+'/policy/policy.all'
 
-        def reggieConfigs = [rioHome+'/config/reggie.groovy',
+        def reggieConfigs = [rioHome+'/config/common.groovy',
+                             rioHome+'/config/reggie.groovy',
                              rioHome+'/config/persistent_reggie.groovy']
                              
-        def monitorConfigs = [rioHome+'/config/monitor.groovy',
+        def monitorConfigs = [rioHome+'/config/common.groovy',
+                              rioHome+'/config/monitor.groovy',
                               rioHome+'/config/persistent_monitor.groovy']
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '9010', (String[])websterRoots),
-            ServiceDescriptorUtil.getLookup(policyFile, (String[])reggieConfigs),
-            ServiceDescriptorUtil.getMonitor(policyFile, (String[])monitorConfigs)
+            ServiceDescriptorUtil.getWebster(policyFile, '9010', websterRoots as String[]),
+            ServiceDescriptorUtil.getLookup(policyFile, reggieConfigs as String[]),
+            ServiceDescriptorUtil.getMonitor(policyFile, monitorConfigs as String[])
         ]
 
         return (ServiceDescriptor[])serviceDescriptors

@@ -50,8 +50,9 @@ class StartServiceBeanExecConfig {
         classpath = "$classpath${sep}${rioHome}/lib/resolver.jar"
         
         String policyFile = rioHome + '/policy/policy.all'
-        def configArgs = [rioHome + '/config/cybernode.groovy',
-            rioHome + '/config/compute_resource.groovy']
+        def configArgs = [rioHome + '/config/common.groovy',
+                          rioHome + '/config/cybernode.groovy',
+                          rioHome + '/config/compute_resource.groovy']
 
         def serviceDescriptors = [
             new RioServiceDescriptor(codebase,

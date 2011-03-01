@@ -8,17 +8,13 @@ import org.rioproject.fdh.FaultDetectionHandlerFactory
 import org.rioproject.resources.client.JiniClient
 
 import net.jini.core.discovery.LookupLocator
-import net.jini.jeri.BasicILFactory
-import net.jini.jeri.BasicJeriExporter
-import net.jini.jeri.tcp.TcpServerEndpoint
-import org.rioproject.boot.BootUtil
-import net.jini.export.Exporter
 import org.rioproject.core.ClassBundle
 import org.rioproject.config.Constants
 import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler
 import org.rioproject.log.LoggerConfig.LogHandlerConfig
 import java.util.logging.ConsoleHandler
+import net.jini.discovery.DiscoveryGroupManagement
 
 /*
  * Declare Cybernode properties
@@ -32,8 +28,9 @@ class CybernodeConfig {
     //long provisionerLeaseDuration = 1000*60
 
     String[] getInitialLookupGroups() {
-         def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                      System.getProperty('user.name'))]
+        //def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+        //              System.getProperty('user.name'))]
+        def groups = DiscoveryGroupManagement.NO_GROUPS
         return groups as String[]
     }
 
@@ -80,50 +77,5 @@ class CybernodeConfig {
         def fdh = org.rioproject.fdh.HeartbeatFaultDetectionHandler.class.name
         def fdhConf = ['-', fdh+'.heartbeatPeriod=10000', fdh+'.heartbeatGracePeriod=10000']
         return FaultDetectionHandlerFactory.getClassBundle(fdh, fdhConf)
-    }
-}
-
-/*
- * The exporter to declare as the *default* exporter for services and utilities
- */
-@Component('org.rioproject')
-class ExporterConfig {
-
-    Exporter getDefaultExporter() {
-        String host = BootUtil.getHostAddressFromProperty("java.rmi.server.hostname")
-        return new BasicJeriExporter(TcpServerEndpoint.getInstance(host, 0),
-                                     new BasicILFactory())
-    }
-}
-
-/*
- * Configure the watchDataSourceExporter
- */
-@Component('org.rioproject.watch')
-class WatchConfig extends ExporterConfig {
-    Exporter getWatchDataSourceExporter() {
-        return getDefaultExporter()
-    }
-}
-
-/*
- * Default exporter to use for the ServiceDiscoveryManager is the same as the
- * exporter in the ExporterConfig class
- */
-@Component('net.jini.lookup.ServiceDiscoveryManager')
-class SDMConfig extends ExporterConfig {
-    Exporter getEventListenerExporter() {
-        return getDefaultExporter()
-    }
-}
-
-/*
- * Test the liveness of  multicast announcements from previously discovered
- * lookup services every 5 seconds
- */
-@Component('net.jini.discovery.LookupDiscovery')
-class LookupDiscoConfig {
-    long getMulticastAnnouncementInterval() {
-        return 5000
     }
 }

@@ -27,7 +27,7 @@ import net.jini.discovery.DiscoveryLocatorManagement;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.lookup.entry.jmx.JMXProperty;
 import net.jini.lookup.entry.jmx.JMXProtocolType;
-import org.rioproject.boot.RegistryUtil;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.RioVersion;
@@ -670,7 +670,7 @@ public class CLI {
         void destroyFromRegistry(PrintStream out) {
             List<Registry> rmiRegistries = new ArrayList<Registry>();
             int port = RegistryUtil.DEFAULT_PORT;
-            for(int i=0; i<RegistryUtil.getRegistryRetries(sysConfig); i++) {
+            for(int i=0; i< RegistryUtil.getRegistryRetries(sysConfig); i++) {
                 try {
                     Registry registry = LocateRegistry.getRegistry(port++);
                     rmiRegistries.add(registry);

@@ -31,6 +31,7 @@ import java.util.Random;
 public class PortRangeServerSocketFactory extends ServerSocketFactory {
     private final int start;
     private final int end;
+    private int lastPort;
     private final static Random random = new Random();
     public static final int RANGE_END = 65535;
 
@@ -41,8 +42,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
      * @param start The range to start from (inclusive)
      *
      *
-     * @throws IllegalArgumentException is either bound is not between
-     * 0 and 65535.
+     * @throws IllegalArgumentException is not between 0 and 65535.
      */
     public PortRangeServerSocketFactory(int start) {
         this(start, RANGE_END);
@@ -56,8 +56,8 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
      * @param end The end of the range (inclusive)
      *
      *
-     * @throws IllegalArgumentException is either bound is not between
-     * 0 and 65535, or if <code>end</code> is &lt; than <code>low</code>.
+     * @throws IllegalArgumentException is not between 0 and 65535,
+     * or if <code>end</code> is &lt; than <code>low</code>.
      */
     public PortRangeServerSocketFactory(int start, int end) {
         if (start < 0 || end > RANGE_END || start > end) {
@@ -74,6 +74,10 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
 
     public int getEnd() {
         return end;
+    }
+
+    public int getLastPort() {
+        return lastPort;
     }
 
     /**
@@ -93,6 +97,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
             return doGetServerSocket(-1, null);
         } else {
             checkRange(port);
+            lastPort = port;
             return new ServerSocket(port);
         }
     }
@@ -115,6 +120,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
             return doGetServerSocket(backlog, null);
         } else {
             checkRange(port);
+            lastPort = port;
             return new ServerSocket(port, backlog);
         }
     }
@@ -138,6 +144,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
             return doGetServerSocket(backlog, inetAddress);
         } else {
             checkRange(port);
+            lastPort = port;
             return new ServerSocket(port, backlog, inetAddress);
         }
     }
@@ -191,9 +198,11 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
                 if(addr==null) {
                     if(backlog<0) {
                         ss = new ServerSocket(p);
+                        lastPort = p;
                     }
                 } else  {
                     ss = new ServerSocket(p, backlog, addr);
+                    lastPort = p;
                 }
                 return ss;
             } catch (BindException e) {

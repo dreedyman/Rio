@@ -28,7 +28,7 @@ import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.boot.CommonClassLoader;
 import org.rioproject.boot.MulticastStatus;
-import org.rioproject.boot.RegistryUtil;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.boot.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.core.ClassBundle;

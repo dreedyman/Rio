@@ -24,6 +24,8 @@ import net.jini.constraint.BasicMethodConstraints
 import net.jini.core.constraint.ConnectionRelativeTime
 import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
+import net.jini.discovery.DiscoveryGroupManagement
+import org.rioproject.boot.BootUtil
 
 /*
  * Declare Provision Monitor properties
@@ -35,8 +37,9 @@ class MonitorConfig {
     String jmxName = 'org.rioproject.monitor:type=Monitor'
 
     String[] getInitialLookupGroups() {
-        def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                      System.getProperty('user.name'))]
+        /*def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                      System.getProperty('user.name'))]*/
+        def groups = DiscoveryGroupManagement.NO_GROUPS
         return groups as String[]
     }
 
@@ -58,7 +61,11 @@ class MonitorConfig {
      * Use a JrmpExporter for the OpStringManager.
      */
     Exporter getOpStringManagerExporter() {
-        return new JrmpExporter()
+        int port = 0
+        String portRange = System.getProperty(Constants.PORT_RANGE)
+        if(portRange!=null)
+            port = BootUtil.getPortFromRange(portRange)
+        return new JrmpExporter(port)
     }
     
     ProxyPreparer getInstantiatorPreparer() {

@@ -33,6 +33,11 @@ import java.util.logging.Logger;
  * Environment variables used to control Webster are as follows: 
  * 
  * <table BORDER COLS=3 WIDTH="100%" >
+ ** <tr>
+ * <td>org.rioproject.tools.webster.port</td>
+ * <td>Sets the port for webster to use</td>
+ * <td>0</td>
+ * </tr>
  * <tr>
  * <td>org.rioproject.tools.webster.port</td>
  * <td>Sets the port for webster to use</td>
@@ -155,7 +160,8 @@ public class Webster implements Runnable {
      * 
      * @param options String[] of options. Valid options are [-port port],
      * [-roots list-of-roots], [-bindAddress address],
-     * [-maxThreads maxThreads] [-soTimeout soTimeout]. Note -port and -portRange are mutually exclusive
+     * [-maxThreads maxThreads] [-soTimeout soTimeout] [-portRange range].
+     * Note -port and -portRange are mutually exclusive
      * @param lifeCycle The LifeCycle object, may be null
      *
      * @throws BindException if Webster cannot create a socket
@@ -181,10 +187,7 @@ public class Webster implements Runnable {
                     throw new IllegalArgumentException("both -port and -portRange " +
                                                        "cannot be provided, choose one or the other");
                 i++;
-                String[] range = options[i].split("-");
-                int startRange = Integer.parseInt(range[0]);
-                int endRange = Integer.parseInt(range[1]);
-                socketFactory = new PortRangeServerSocketFactory(startRange, endRange);
+                socketFactory = parsePortRange(options[i]);
             } else if(option.equals("-roots")) {
                 i++;
                 roots = options[i];
@@ -202,6 +205,18 @@ public class Webster implements Runnable {
             }
         }
         initialize(roots, bindAddress);
+    }
+
+    /*
+     * Parse portRange string and return a ServerSocketFactory to deal with the port range
+     */
+    private ServerSocketFactory parsePortRange(String portRange) {
+        String[] range = portRange.split("-");
+        int startRange = Integer.parseInt(range[0]);
+        int endRange = Integer.parseInt(range[1]);
+        /* reset the port to '0', this way the range will be used as intended */
+        port = 0;
+        return new PortRangeServerSocketFactory(startRange, endRange);
     }
 
     /*

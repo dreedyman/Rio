@@ -14,12 +14,12 @@ import org.rioproject.config.maven2.Repository;
 class StartMonitorConfig {
 
     String[] getMonitorConfigArgs(String rioHome) {
-        def configArgs = [rioHome+'/config/monitor.groovy']
+        def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/monitor.groovy']
         return configArgs as String[]
     }
 
     String[] getLookupConfigArgs(String rioHome) {
-        def configArgs = [rioHome+'/config/reggie.groovy']
+        def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']
         return configArgs as String[]
     }
 
@@ -35,8 +35,8 @@ class StartMonitorConfig {
         String policyFile = rioHome+'/policy/policy.all'
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '0', (String[])websterRoots),
-            ServiceDescriptorUtil.getLookup(policyFile, getLookupConfigArgs(rioHome)),
+            ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+            //ServiceDescriptorUtil.getLookup(policyFile, getLookupConfigArgs(rioHome)),
             ServiceDescriptorUtil.getMonitor(policyFile, getMonitorConfigArgs(rioHome))
         ]
 
