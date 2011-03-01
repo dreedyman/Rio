@@ -22,7 +22,7 @@ import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
-import org.rioproject.boot.RegistryUtil;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.core.JSBInstantiationException;
@@ -34,7 +34,6 @@ import org.rioproject.core.provision.ServiceRecord;
 import org.rioproject.cybernode.Environment;
 import org.rioproject.cybernode.JSBContainer;
 import org.rioproject.cybernode.ServiceBeanContainerListener;
-import org.rioproject.event.DispatchEventHandler;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
 import org.rioproject.jmx.JMXConnectionUtil;
@@ -42,7 +41,6 @@ import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.resources.util.ThrowableUtil;
-import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.SystemCapabilities;
@@ -72,7 +70,6 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                                         FaultDetectionListener<ServiceID> {
     private JSBContainer container;
     private Exporter exporter;
-    private DispatchEventHandler eventHandler;
     private String execBindName;
     private ServiceBeanContext context;
     private int cybernodeRegistryPort;
@@ -154,9 +151,6 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                                                   configArgs,
                                                   getClass().getClassLoader());
 
-        eventHandler = new DispatchEventHandler(SLAThresholdEvent.getEventDescriptor(),
-                                                config);
-
         registry = LocateRegistry.getRegistry(cybernodeRegistryPort);
         exporter = ExporterConfig.getExporter(config,
                                               "org.rioproject.cybernode",
@@ -231,7 +225,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         /* Set up thread deadlock detection */
         ServiceElementUtil.setThreadDeadlockDetector(sElem, null);
 
-        return container.activate(sElem, opMgr, eventHandler);
+        return container.activate(sElem, opMgr, null);
     }
 
     public void update(ServiceElement element,

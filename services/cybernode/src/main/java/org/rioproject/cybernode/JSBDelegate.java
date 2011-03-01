@@ -48,6 +48,7 @@ import org.rioproject.jsb.*;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
@@ -395,7 +396,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     }
                 }
             } catch (ConfigurationException e) {
-
+                /* */
             }
             /* If we have an instance, go through service termination */
             if(instance!=null) {
@@ -588,6 +589,16 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         associationManagement.setServiceBeanContext(context);
                         sElemChangeMgr = new ServiceElementChangeManager();
                         context.getServiceBeanManager().addListener(sElemChangeMgr);
+
+                        if(context instanceof JSBContext) {
+                            EventHandler eH = ((JSBContext)context).getEventTable().get(SLAThresholdEvent.ID);
+                            if(eH!=null) {
+                                slaEventHandler = eH;
+                                if(logger.isLoggable(Level.FINE))
+                                    logger.fine("Set EventHandler ["+slaEventHandler.getClass().getName()+"] for " +
+                                                "SLAManagement for service "+sElem.getName());
+                            }
+                        }
 
                         /* Create the ServiceBeanSLAManager */
                         serviceBeanSLAManager =
@@ -792,6 +803,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    //
                 }
                 iterations++;
             }

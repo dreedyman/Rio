@@ -329,6 +329,8 @@ public class SLAPolicyHandler implements ThresholdListener {
             notifyListeners(localEvent);
             
             /* Enqueue the remote notification */
+            if(logger.isLoggable(Level.FINE))
+                logger.fine("Enqueue SLAThresholdEvent notification for "+sla);
             eventQ.add(event);
         } catch(Exception e) {
             logger.log(Level.SEVERE, "Creating a SLAThresholdEvent", e);
@@ -340,15 +342,19 @@ public class SLAPolicyHandler implements ThresholdListener {
      * SLAThresholdEvent
      */
     class SLAThresholdEventTask implements Runnable {
-        public void run() {
-            try {
-                SLAThresholdEvent event = eventQ.take();
-                eventHandler.fire(event);
-            } catch(InterruptedException e) {
-            } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Notifying SLAThresholdEvent consumers",
-                           e);
+       public void run() {
+            while (true) {
+                try {
+                    SLAThresholdEvent event = eventQ.take();
+                    eventHandler.fire(event);
+                } catch(InterruptedException e) {
+                    /* */
+                    break;
+                } catch(Exception e) {
+                    logger.log(Level.WARNING,
+                               "Notifying SLAThresholdEvent consumers",
+                               e);
+                }
             }
         }
     }
