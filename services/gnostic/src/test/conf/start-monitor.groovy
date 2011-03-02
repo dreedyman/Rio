@@ -22,13 +22,13 @@ class StartMonitorConfig {
                             cwd+'/target/']
 
         String policyFile = rioHome+'/policy/policy.all'
-        String monitorConfig = rioHome+'/config/monitor.groovy'
-        String reggieConfig = rioHome+'/config/reggie.groovy'
+        def monitorConfigs = [rioHome+'/config/common.groovy', rioHome+'/config/monitor.groovy']
+        def reggieConfigs = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '0', (String[])websterRoots),
-            ServiceDescriptorUtil.getLookup(policyFile, reggieConfig),
-            ServiceDescriptorUtil.getMonitor(policyFile, monitorConfig)
+            ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+            ServiceDescriptorUtil.getLookup(policyFile, reggieConfigs as String[]),
+            ServiceDescriptorUtil.getMonitor(policyFile, monitorConfigs as String[])
         ]
 
         return (ServiceDescriptor[])serviceDescriptors
