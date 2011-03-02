@@ -15,9 +15,13 @@
  */
 package org.rioproject.test.simple;
 
+import org.rioproject.bean.PreDestroy;
+import org.rioproject.bean.Started;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.exec.ExecDescriptor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
@@ -60,6 +64,28 @@ public class ForkImpl implements Fork {
             }
         }
         return true;
+    }
+
+    @Started
+    public void createMarker() throws IOException {
+        File marker = getMarkerFile();
+        if(!marker.exists() && marker.createNewFile())
+            logger.info("Created marker file: "+marker.getAbsolutePath());
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        logger.info("================\nShutting down "+context.getServiceElement().getName()+"\n================");
+        File marker = getMarkerFile();
+        if(marker.exists() && marker.delete()) {
+            String s = marker.getAbsolutePath();
+            logger.info("Deleted marker file: "+s);
+        }
+    }
+
+    public static File getMarkerFile() {
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        return new File(tmpDir, "testMarker");
     }
 
     private String[] toArray(String s) {

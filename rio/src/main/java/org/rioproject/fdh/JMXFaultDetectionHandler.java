@@ -16,6 +16,7 @@
 package org.rioproject.fdh;
 
 import com.sun.jini.config.Config;
+import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
@@ -69,7 +70,7 @@ import java.util.logging.Logger;
  * bold;">Description: <br>
  * </td>
  * <td style="vertical-align: top;">The amount of time in milliseconds to wait
- * between {@link net.jini.admin.Administrable#getAdmin()} method invocations</td>
+ * between obtaining a {@link javax.management.MBeanServerConnection} to the service being monitored</td>
  * </tr>
  * </tbody> </table></li>
  * </ul>
@@ -92,10 +93,8 @@ import java.util.logging.Logger;
  * bold;">Description: <br>
  * </td>
  * <td style="vertical-align: top;">The number of times to retry connecting to
- * the service when invoking the
- * {@link net.jini.admin.Administrable#getAdmin()} method. If the service cannot be
- * reached within the retry count specified the service will be determined to be
- * unreachable
+ * the service. If the service cannot be reached within the retry count specified
+ * the service will be determined to be unreachable
  * </td>
  * </tr>
  * </tbody> </table></li>
@@ -181,43 +180,42 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
             throw new NullPointerException("configArgs is null");
         try {
             this.configArgs = new String[configArgs.length];
+            this.configArgs = new String[configArgs.length];
             System.arraycopy(configArgs,
                              0,
                              this.configArgs,
                              0,
                              configArgs.length);
 
-            this.config = ConfigurationProvider.getInstance(configArgs);
-
-            setInvocationDelay(Config.getLongEntry(config,
-                                                   COMPONENT,
-                                                   INVOCATION_DELAY_KEY,
-                                                   DEFAULT_INVOCATION_DELAY,
-                                                   0,
-                                                   Long.MAX_VALUE));
-            setRetryCount(Config.getIntEntry(config,
-                                             COMPONENT,
-                                             RETRY_COUNT_KEY,
-                                             DEFAULT_RETRY_COUNT,
-                                             0,
-                                             Integer.MAX_VALUE));
-            setRetryTimeout(Config.getLongEntry(config,
-                                                COMPONENT,
-                                                RETRY_TIMEOUT_KEY,
-                                                DEFAULT_RETRY_TIMEOUT,
-                                                0,
-                                                Long.MAX_VALUE));
-
-            if (logger.isLoggable(Level.FINEST)) {
-                StringBuffer buffer = new StringBuffer();
-                buffer.append("JMXFaultDetectionHandler Properties : ");
-                buffer.append("retry count=").append(retryCount).append(", ");
-                buffer.append("retry timeout=").append(retryTimeout);
-                logger.finest(buffer.toString());
-            }
+            setConfiguration(ConfigurationProvider.getInstance(configArgs));
         } catch (ConfigurationException e) {
             logger.log(Level.SEVERE, "Setting Configuration", e);
         }
+    }
+
+    public void setConfiguration(Configuration config) throws ConfigurationException {
+        if (config == null)
+            throw new IllegalArgumentException("config is null");
+        this.config = config;
+
+        setInvocationDelay(Config.getLongEntry(config,
+                                               COMPONENT,
+                                               INVOCATION_DELAY_KEY,
+                                               DEFAULT_INVOCATION_DELAY,
+                                               0,
+                                               Long.MAX_VALUE));
+        setRetryCount(Config.getIntEntry(config,
+                                         COMPONENT,
+                                         RETRY_COUNT_KEY,
+                                         DEFAULT_RETRY_COUNT,
+                                         0,
+                                         Integer.MAX_VALUE));
+        setRetryTimeout(Config.getLongEntry(config,
+                                            COMPONENT,
+                                            RETRY_TIMEOUT_KEY,
+                                            DEFAULT_RETRY_TIMEOUT,
+                                            0,
+                                            Long.MAX_VALUE));
     }
 
     public void setInvocationDelay(long invocationDelay) {

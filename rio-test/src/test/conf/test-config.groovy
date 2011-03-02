@@ -33,6 +33,15 @@ SystemWatchAccessorTest {
     opstring = 'src/test/resources/scaling_service_test.groovy'
     autoDeploy = true
 }
+ForkedServicePreDestroyTest {
+    groups = "ForkedServicePreDestroyTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/fork.groovy'
+    autoDeploy = true
+    //harvest = true
+}
 
 SimpleForkTest {
     groups = "SimpleForkTest"

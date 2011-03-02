@@ -24,18 +24,6 @@ class ExporterConfig {
         return new BasicJeriExporter(getServerEndpoint(), new BasicILFactory())
     }
 
-    /*static ServerSocketFactory getServerSocketFactory() {
-        String range = System.getProperty(Constants.PORT_RANGE)
-        ServerSocketFactory factory = null
-        if(range!=null) {
-            String[] parts = range.split("-")
-            int start = Integer.parseInt(parts[0])
-            int end = Integer.parseInt(parts[1])
-            factory = new PortRangeServerSocketFactory(start, end)
-        }
-	    return factory
-	}*/
-
     static ServerEndpoint getServerEndpoint() {
         String host = BootUtil.getHostAddressFromProperty("java.rmi.server.hostname")
         String range = System.getProperty(Constants.PORT_RANGE)

@@ -170,6 +170,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
 
         /* Setup FDH to make sure Cybernode doesnt orphan us */
         fdh = new JMXFaultDetectionHandler();
+        fdh.setConfiguration(config);
         fdh.setJMXConnection(
             JMXConnectionUtil.getJMXServiceURL(cybernodeRegistryPort, "localhost"));
         fdh.register(this);
