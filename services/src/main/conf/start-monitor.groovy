@@ -36,7 +36,7 @@ class StartMonitorConfig {
 
         def serviceDescriptors = [
             ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
-            //ServiceDescriptorUtil.getLookup(policyFile, getLookupConfigArgs(rioHome)),
+            ServiceDescriptorUtil.getLookup(policyFile, getLookupConfigArgs(rioHome)),
             ServiceDescriptorUtil.getMonitor(policyFile, getMonitorConfigArgs(rioHome))
         ]
 

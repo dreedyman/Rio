@@ -14,7 +14,6 @@ import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler
 import org.rioproject.log.LoggerConfig.LogHandlerConfig
 import java.util.logging.ConsoleHandler
-import net.jini.discovery.DiscoveryGroupManagement
 
 /*
  * Declare Cybernode properties
@@ -28,9 +27,8 @@ class CybernodeConfig {
     //long provisionerLeaseDuration = 1000*60
 
     String[] getInitialLookupGroups() {
-        //def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-        //              System.getProperty('user.name'))]
-        def groups = DiscoveryGroupManagement.NO_GROUPS
+        def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                      System.getProperty('user.name'))]
         return groups as String[]
     }
 

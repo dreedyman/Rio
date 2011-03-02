@@ -18,13 +18,11 @@ import org.rioproject.resources.client.JiniClient
 import java.util.logging.ConsoleHandler
 import org.rioproject.log.LoggerConfig.LogHandlerConfig
 import net.jini.security.BasicProxyPreparer
-import net.jini.core.constraint.InvocationConstraint
 import net.jini.core.constraint.InvocationConstraints
 import net.jini.constraint.BasicMethodConstraints
 import net.jini.core.constraint.ConnectionRelativeTime
 import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
-import net.jini.discovery.DiscoveryGroupManagement
 import org.rioproject.boot.BootUtil
 
 /*
@@ -37,9 +35,8 @@ class MonitorConfig {
     String jmxName = 'org.rioproject.monitor:type=Monitor'
 
     String[] getInitialLookupGroups() {
-        /*def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                      System.getProperty('user.name'))]*/
-        def groups = DiscoveryGroupManagement.NO_GROUPS
+        def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
+                      System.getProperty('user.name'))]
         return groups as String[]
     }
 
