@@ -138,6 +138,17 @@ if [ "$start" = "1" ]; then
         command_line=$*
     fi
     ARGS="$starter_arg $command_line"
+
+    # -------------------
+    # System properties that change how Rio operates
+    #
+    # o To set a range of ports for the the system to use, add the following system property
+    #     -Dorg.rioproject.portRange="startRange-endRange"
+    #
+    # o To set common locators that all services should use, add the following system property
+    #     -Dorg.rioproject.locators="jini://localhost:10500" \
+    # -------------------
+
     ""$JAVACMD"" -server $JAVA_MEM_OPTIONS $JAVA_RMI_OPTIONS $JAVA_GC_OPTIONS \
         -XX:+HeapDumpOnOutOfMemoryError \
         -XX:OnOutOfMemoryError="$RIO_HOME/bin/rio restart %p $service" \
