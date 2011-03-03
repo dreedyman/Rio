@@ -306,7 +306,7 @@ manager {
                     </tr>
                     <tr>
                         <td>cleanLogs</td>
-                        <td>The classpath to use to start the core Rio services</td>
+                        <td>Remove any previously created service log files</td>
                     </tr>
                     <tr>
                         <td>mainClass</td>
