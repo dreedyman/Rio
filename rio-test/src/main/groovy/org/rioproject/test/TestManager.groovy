@@ -89,12 +89,13 @@ class TestManager {
         this.testConfig = testConfig
         config = loadManagerConfig()
         if(config.manager.cleanLogs) {
-            File logs = getCreatedLogsFile()
+            File logs = getCreatedLogsFile(testConfig.component)
             if(logs.exists()) {
                 logs.eachLine { line ->
                     File f = new File((String)line)
                     if(f.exists())
                         f.delete()
+
                 }
                 logs.delete()
             }
@@ -456,7 +457,7 @@ class TestManager {
                 if(!parent.exists())
                     parent.mkdirs()
             }
-            File createdLogsFile = getAndCreateCreatedLogsFile()
+            File createdLogsFile = getAndCreateCreatedLogsFile(testConfig.component)
             createdLogsFile.append(logFile+'\n')
             logger.info "Output will be sent to [${logFile}]"
         }                
@@ -640,16 +641,17 @@ class TestManager {
         return config
     }
 
-    def getCreatedLogsFile() {
-        File logs = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio"+File.separator+"test-logs")
+    def getCreatedLogsFile(String testName) {
+        File parent = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio")
+        File logs = new File(parent, "$testName-test-logs")
         return logs
     }
 
-    def getAndCreateCreatedLogsFile() {
+    def getAndCreateCreatedLogsFile(String testName) {
         File dir = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio")
         if(!dir.exists())
             dir.mkdirs()
-        File logs = new File(dir, "test-logs")
+        File logs = new File(dir, "$testName-test-logs")
         if(!logs.exists())
             logs.createNewFile()
         return logs
