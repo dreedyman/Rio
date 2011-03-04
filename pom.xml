@@ -144,6 +144,12 @@
         </developer>
     </developers>
 
+    <contributors>
+        <contributor>
+            <name>Jerome Bernard</name>
+        </contributor>
+    </contributors>
+
     <distributionManagement>
         <repository>
             <id>rio</id>
@@ -255,12 +261,6 @@
     </dependencyManagement>
 
     <build>
-        <!--
-        <directory>target</directory>
-        <outputDirectory>target/classes</outputDirectory>
-        <finalName>${artifactId}-${version}</finalName>
-        <testOutputDirectory>target/test-classes</testOutputDirectory>
-        -->
         <plugins>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
