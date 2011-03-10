@@ -399,7 +399,8 @@ class SimpleResolver implements Resolver {
             ext = "md5"
             digest = getTextFromURL(new URL(source+"."+ext))
         }
-        digest = parseDigest(digest)
+        if(digest!=null)
+            digest = parseDigest(digest)
 
         return digest==null?null:ext+":"+digest
     }
