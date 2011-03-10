@@ -77,6 +77,7 @@ class SettingsParser {
 
     static RemoteRepository createRemoteRepository(def r) {
         String url = r.url
+        url = url.trim().replaceAll("\n", '');
         if(!url.endsWith("/"))
             url = url+"/"
         RemoteRepository rr = new RemoteRepository()
