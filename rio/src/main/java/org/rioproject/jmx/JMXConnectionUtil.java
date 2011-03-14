@@ -15,6 +15,10 @@
  */
 package org.rioproject.jmx;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
+import com.sun.tools.attach.VirtualMachine;
 import net.jini.config.Configuration;
 import org.rioproject.boot.BootUtil;
 import org.rioproject.rmi.RegistryUtil;
@@ -175,56 +179,31 @@ public class JMXConnectionUtil {
      * created.
      *
      * @throws IOException if the MBeanServerConnection cannot be created.
+     * @throws AttachNotSupportedException if the underlying provider either does not exist,
+     * or if the provider attempts to attach to a Java virtual machine with which it is not compatible.
+     * @throws AgentInitializationException thrown when an agent fails to initialize in the
+     * target Java virtual machine.
+     * @throws AgentLoadException when an agent cannot be loaded into the target Java virtual machine.
      */
-    public static MBeanServerConnection attach(String id) throws IOException {
+    public static MBeanServerConnection attach(String id) throws IOException,
+                                                                 AttachNotSupportedException,
+                                                                 AgentInitializationException,
+                                                                 AgentLoadException {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {
             logger.info("The JMX Attach APIs require Java 6 or above. " +
                         "You are running Java "+jvmVersion);
             return null;
         }
-        String connectorAddr = null;
-        try {
-            /*--
-             * What the code looks like without reflection
-             *--
-            VirtualMachine vm = VirtualMachine.attach(Integer.toString(pid));
-            String connectorAddr = vm.getAgentProperties().getProperty(
-                "com.sun.management.jmxremote.localConnectorAddress");
-            if (connectorAddr == null) {
-                String agent = vm.getSystemProperties().getProperty(
-                    "java.home")+File.separator+"lib"+File.separator+
-                               "management-agent.jar";
-                vm.loadAgent(agent);
-                connectorAddr = vm.getAgentProperties().getProperty(
-                    "com.sun.management.jmxremote.localConnectorAddress");
-            }
-            */
-            Class vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
-            Method attach = vmClass.getMethod("attach", String.class);
-            Object vm = attach.invoke(null, id);
 
-            Method getAgentProperties = vm.getClass().getMethod("getAgentProperties");
-            Properties agentProps = (Properties)getAgentProperties.invoke(vm);
-
-            connectorAddr = agentProps.getProperty("com.sun.management.jmxremote.localConnectorAddress");
-            if (connectorAddr == null) {
-                Method getSystemProperties = vm.getClass().getMethod("getSystemProperties");
-                Properties sysProps = (Properties)getSystemProperties.invoke(vm);
-
-                String agent = sysProps.getProperty("java.home")+File.separator+
-                                                    "lib"+ File.separator+
-                                                    "management-agent.jar";
-                Method loadAgent = vm.getClass().getMethod("loadAgent", String.class);
-                loadAgent.invoke(vm, agent);
-                agentProps = (Properties)getAgentProperties.invoke(vm);
-                connectorAddr = agentProps.getProperty(
-                    "com.sun.management.jmxremote.localConnectorAddress");
-            }
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Could not attach to VM with id ["+id+"]", e);
+        VirtualMachine vm = VirtualMachine.attach(id);
+        String connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
+        if (connectorAddr == null) {
+            String agent = vm.getSystemProperties().getProperty("java.home")+File.separator+"lib"+File.separator+
+                           "management-agent.jar";
+            vm.loadAgent(agent);
+            connectorAddr = vm.getAgentProperties().getProperty("com.sun.management.jmxremote.localConnectorAddress");
         }
-
         MBeanServerConnection mbs = null;
         if(connectorAddr!=null) {
             JMXServiceURL serviceURL = new JMXServiceURL(connectorAddr);
