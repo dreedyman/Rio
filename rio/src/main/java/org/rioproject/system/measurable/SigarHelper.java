@@ -174,7 +174,7 @@ public class SigarHelper {
                 s.append(", ");
             s.append(pids[i]);
         }
-        System.out.println("JMX pids: ["+s.toString()+"]");
+        System.out.println("Parent PID: ["+ppid+"], JMX pids: ["+s.toString()+"]");
         try {
             for(String pid: sPids) {
                 long lPid = new Long(pid);
