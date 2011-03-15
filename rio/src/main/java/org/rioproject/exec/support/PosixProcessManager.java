@@ -303,7 +303,7 @@ public class PosixProcessManager extends ProcessManager {
                 } catch (InterruptedException e) {}
             }
             if(logger.isLoggable(Level.FINE))
-            logger.info("Process ["+getPid()+"] terminated for command ["+commandLine+"]");
+                logger.info("Process ["+getPid()+"] terminated for command ["+commandLine+"]");
             notifyOnTermination();
             if(procStatusFile.delete() && logger.isLoggable(Level.FINE))
                 logger.fine("Process stats file ["+getPid()+"] removed for command ["+commandLine+"]");
