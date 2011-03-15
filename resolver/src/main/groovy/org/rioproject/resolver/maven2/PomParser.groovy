@@ -36,6 +36,7 @@ public class PomParser {
     private String pomVersion
     def processedDeps = []
     def processedPoms = [:]
+    def resolvedParents = []
     def properties = [:]
     ArtifactUtils artifactUtils
     def excludes = []
@@ -237,8 +238,6 @@ public class PomParser {
 
                             }
                             result.dependencies.add(dep)
-                            if(dep.groupId.equals("junit") || dep.groupId.equals("jline") )
-                            //println "===> Added ${dep.getGAV()}, pom: $sPom"
                             processedDeps.add("${gid}:${depArtifactId}:${depVersion}")
                         }
                     }
@@ -255,6 +254,9 @@ public class PomParser {
         if(!pom.packaging.equals("pom")) {
             String ext = pom.packaging.equals("oar")?"oar":"jar"
             artifact.jar = ArtifactUtils.getLocalFile(artifact, localRepository, ext)
+        }
+        resolvedParents.each { parent ->
+            result.resolvedParents.add parent
         }
         return result
     }
@@ -304,10 +306,13 @@ public class PomParser {
                 }
                 parentArtifact.pomURL = parentPom
                 ResolutionResult parentResult = parse(parentArtifact, parentPom, filter)
+                resolvedParents << parentResult
+
                 for(Dependency d : parentResult.dependencies) {
                     if(!d.excluded)
                         r.dependencies.add(d)
                 }
+
             }  else {
                 properties.putAll(processedPoms.get(pPom))
             }

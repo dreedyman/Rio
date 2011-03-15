@@ -24,6 +24,7 @@ import org.rioproject.resolver.Dependency;
 class ResolutionResult {
     Artifact artifact
     List<Dependency> dependencies = new ArrayList<Dependency>()
+    def resolvedParents = []
 
     def ResolutionResult(Artifact artifact) {
         this.artifact = artifact;

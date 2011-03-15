@@ -28,6 +28,7 @@ class Artifact {
     URL pomURL
     String checkSumPolicy
     boolean loadFromProject = false
+    RemoteRepository remoteRepository
     
     def Artifact() {
     }

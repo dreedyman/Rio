@@ -54,51 +54,29 @@ class ArtifactUtils {
                         "loadFromProject? ${artifact.loadFromProject}"
         if (!localArtifact.exists()) {
             if(artifact.isSnapshot()) {
+                URL snapShotURL = null
                 String snapShotPath = buildArtifactSnapshotPath(artifact, ext, remoteRepositories)
                 if(logger.isLoggable(Level.FINE))
                     logger.fine "snapShotPath: $snapShotPath"
-                boolean notfound = false
+
+                boolean useSnapshotDirectly = false
                 if(snapShotPath==null) {
-                    notfound = true
+                    useSnapshotDirectly = true
+                    snapShotURL = getArtifactURL(artifact, ext, true, false, remoteRepositories)
                 } else {
-                    URL u = new URL(snapShotPath)
-                    if(test(u)) {
-                        artifactURL = u
-                    } else {
-                        notfound = true
-                    }
+                    snapShotURL = new URL(snapShotPath)
                 }
-                if(notfound) {
+                if(test(snapShotURL)) {
+                    artifactURL = snapShotURL
+                    if(useSnapshotDirectly)
+                        System.err.println "[WARNING] using snapshot ${artifact.getGAV()} (${ext}) without metadata"
+                } else {
                     System.err.println "[WARNING] snapshot ${artifact.getGAV()} (${ext}) not found"
                 }
+
+
             } else {
-                String path = artifact.getPath('/', ext)
-                for (RemoteRepository repo: remoteRepositories) {
-                    if(!repo.supportsReleases())
-                        continue
-                    if(!repo.url.endsWith("/"))
-                        repo.url = repo.url+"/"
-                    //println "===> path: ${path}, repo=${repo.url}, failedLookups=${failedLookups}"
-                    if(failedLookups.get(path)!=null) {
-                        List<String> repos = failedLookups.get(path)
-                        if(repos.contains(repo.url))
-                            continue
-                    }
-                    URL u = new URL(repo.url+path)
-                    if(test(u)) {
-                        artifactURL = u
-                        artifact.checkSumPolicy = repo.releaseChecksumPolicy
-                        break
-                    } else {
-                        System.err.println "[WARNING] ${artifact.getGAV()} (${ext}) not found on repository ${repo.url}"
-                        List<String> repos = failedLookups.get(path)
-                        if(repos==null)
-                            repos = new ArrayList<String>()
-                        if(!repos.contains(repo.url))
-                            repos.add(repo.url)
-                        failedLookups.put(path, repos)
-                    }
-                }
+                artifactURL = getArtifactURL(artifact, ext, false, true, remoteRepositories)
             }
         } else {
             artifactURL = localArtifact.toURI().toURL();
@@ -158,12 +136,52 @@ class ArtifactUtils {
             if(test(u)) {
                 metaDataURL = u
                 a.checkSumPolicy = repo.snapshotChecksumPolicy
+                a.remoteRepository = repo
                 break
             } else {
-                System.err.println "[WARNING] snapshot $path not found on repository ${repo.url}"
+                System.err.println "[WARNING] ${a.getGAV()} metadata (maven-metadata.xml) not found on repository ${repo.url}"
             }
         }
         return metaDataURL
+    }
+
+    private URL getArtifactURL(Artifact artifact,
+                               String ext,
+                               boolean snapshot,
+                               boolean release,
+                               List<RemoteRepository> remoteRepositories) {
+        URL artifactURL = null
+        String path = artifact.getPath('/', ext)
+        for (RemoteRepository repo: remoteRepositories) {
+            if(release && !repo.supportsReleases())
+                continue
+            if(snapshot && !repo.supportsSnapshots())
+                continue
+            if(!repo.url.endsWith("/"))
+                repo.url = repo.url+"/"
+            //println "===> path: ${path}, repo=${repo.url}, failedLookups=${failedLookups}"
+            if(failedLookups.get(path)!=null) {
+                List<String> repos = failedLookups.get(path)
+                if(repos.contains(repo.url))
+                    continue
+            }
+            URL u = new URL(repo.url+path)
+            if(test(u)) {
+                artifactURL = u
+                artifact.checkSumPolicy = repo.releaseChecksumPolicy
+                artifact.remoteRepository = repo
+                break
+            } else {
+                System.err.println "[WARNING] ${artifact.getGAV()} (${ext}) not found on repository ${repo.url}"
+                List<String> repos = failedLookups.get(path)
+                if(repos==null)
+                    repos = new ArrayList<String>()
+                if(!repos.contains(repo.url))
+                    repos.add(repo.url)
+                failedLookups.put(path, repos)
+            }
+        }
+        return artifactURL
     }
 
     private boolean test(URL u) {

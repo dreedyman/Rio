@@ -27,6 +27,7 @@ class SimpleResolver implements Resolver {
     List<RemoteRepository> repositories = []
     private File repoDir = Repository.getLocalRepository()
     private ArtifactUtils artifactUtils = new ArtifactUtils()
+    private Map<String, Artifact> resolvedCache = new HashMap<String, Artifact>()
 
     def SimpleResolver() {
     }
@@ -61,14 +62,13 @@ class SimpleResolver implements Resolver {
         }        
         String type = aType==null?"jar":(aType.length()==0?"jar":aType)
         URL loc = artifactUtils.getArtifactURLFromRepository(artifact,
-                                               type,
-                                               repoDir,
-                                               repositories)
+                                                             type,
+                                                             repoDir,
+                                                             repositories)
         return loc
     }
 
     public String[] getClassPathFor(String s, RemoteRepository[] remote, boolean download) {
-
         for(RemoteRepository rr: remote) {
             if(!repositories.contains(rr))
                 repositories << rr
@@ -138,21 +138,32 @@ class SimpleResolver implements Resolver {
                                    int indent,
                                    boolean download) {
         StringBuffer sb = new StringBuffer()
+        def remoteRepositories = repositories
+        Artifact resolvedArtifactGroup = resolvedCache.get(dep.groupId)
+        if(resolvedArtifactGroup!=null && resolvedArtifactGroup.remoteRepository!=null) {
+            System.err.println "[INFO] Already resolved groupId ${resolvedArtifactGroup.groupId} for ${dep.getGAV()}, using repository ${resolvedArtifactGroup.remoteRepository.url}"
+            remoteRepositories = [resolvedArtifactGroup.remoteRepository]
+        }
         if(!dep.scope.equals("test")) {
             sb.append printDependency(dep, indent)
             int i = indent
             i++
             PomParser p = new PomParser()
             p.artifactUtils = artifactUtils
-            p.remoteRepositories = repositories
+            p.remoteRepositories = remoteRepositories
             p.localRepository = repoDir
             p.settings = m2settings
             p.excludes = excludes
             ResolutionResult result = p.parse(dep, filter)
+            for(ResolutionResult parent : result.resolvedParents) {
+                resolve(parent.artifact, filter, cp, download)
+            }
             repositories = p.remoteRepositories
             //println "===> ${dumpRemoteRepositories()}"
             if(result && result.artifact) {
                 resolve(result.artifact, filter, cp, download)
+                if(!resolvedCache.containsKey(result.artifact.groupId) && result.artifact.remoteRepository!=null)
+                    resolvedCache.put(result.artifact.groupId, result.artifact)
                 for(Dependency d : result.dependencies) {
                     sb.append parseDependency(d, filter, cp, p.excludes, i, download)
                 }
@@ -178,19 +189,16 @@ class SimpleResolver implements Resolver {
             if(a.jar!=null) {
                 if(logger.isLoggable(Level.FINE))
                     logger.fine "${a.getGAV()}, jar exists? ${a.jar.exists()}"
-                if(!a.jar.exists()) {                    
+                if(!a.jar.exists()) {
+                    def r = repositories
+                    if(a.remoteRepository!=null)
+                        r = [a.remoteRepository]
                     if(a.pomURL==null || (a.pomURL.protocol=="file")) {
-                        a.pomURL = artifactUtils.getArtifactPomURLFromRepository(a,
-                                                                                 null,
-                                                                                 repositories)
+                        a.pomURL = artifactUtils.getArtifactPomURLFromRepository(a, null, r)
                     }
                     URL aJarURL
                     if(a.isSnapshot() && a.jar.name.endsWith("jar")) {
-                        aJarURL =
-                            artifactUtils.getArtifactURLFromRepository(a,
-                                                                       "jar",
-                                                                       repoDir,
-                                                                       repositories)
+                        aJarURL =  artifactUtils.getArtifactURLFromRepository(a, "jar", repoDir, r)
                     } else {
                         aJarURL = a.getJarURL()
                     }
@@ -330,6 +338,7 @@ class SimpleResolver implements Resolver {
                     }
                 } else {
                     moveFile(downloadedFile, location)
+                    break
                 }
             } catch(FileNotFoundException e) {
                 println "[WARNING] *** FAILED downloading $source, "+
