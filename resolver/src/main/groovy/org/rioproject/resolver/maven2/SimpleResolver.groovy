@@ -155,17 +155,18 @@ class SimpleResolver implements Resolver {
             p.settings = m2settings
             p.excludes = excludes
             ResolutionResult result = p.parse(dep, filter)
-            for(ResolutionResult parent : result.resolvedParents) {
-                resolve(parent.artifact, filter, cp, download)
-            }
             repositories = p.remoteRepositories
-            //println "===> ${dumpRemoteRepositories()}"
-            if(result && result.artifact) {
-                resolve(result.artifact, filter, cp, download)
-                if(!resolvedCache.containsKey(result.artifact.groupId) && result.artifact.remoteRepository!=null)
-                    resolvedCache.put(result.artifact.groupId, result.artifact)
-                for(Dependency d : result.dependencies) {
-                    sb.append parseDependency(d, filter, cp, p.excludes, i, download)
+            if(result) {
+                for(ResolutionResult parent : result.resolvedParents) {
+                    resolve(parent.artifact, filter, cp, download)
+                }
+                if(result.artifact) {
+                    resolve(result.artifact, filter, cp, download)
+                    if(!resolvedCache.containsKey(result.artifact.groupId) && result.artifact.remoteRepository!=null)
+                        resolvedCache.put(result.artifact.groupId, result.artifact)
+                    for(Dependency d : result.dependencies) {
+                        sb.append parseDependency(d, filter, cp, p.excludes, i, download)
+                    }
                 }
             }
         }
