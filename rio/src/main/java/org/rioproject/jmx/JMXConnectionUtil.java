@@ -15,10 +15,7 @@
  */
 package org.rioproject.jmx;
 
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.*;
 import net.jini.config.Configuration;
 import org.rioproject.boot.BootUtil;
 import org.rioproject.rmi.RegistryUtil;
@@ -231,12 +228,9 @@ public class JMXConnectionUtil {
         }
         List<String> vmList = new ArrayList<String>();
         try {
-            Class vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
-            Method list = vmClass.getMethod("list");
-            List vmDescriptors = (List)list.invoke(null);
-            for (Object vmDesc : vmDescriptors) {
-                Method id = vmDesc.getClass().getMethod("id");
-                vmList.add((String)id.invoke(vmDesc));
+            List<VirtualMachineDescriptor> vmDescriptors = VirtualMachine.list();
+            for (VirtualMachineDescriptor vmDesc : vmDescriptors) {
+                vmList.add(vmDesc.id());
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not obtain list of VMs", e);
