@@ -162,7 +162,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                                "[" + ir.getHostAddress() +"] " +
                                "has reached service limit of " +
                                "[" + serviceLimit + "], cannot be used to " +
-                               "instantiate [" + sElem.getName() + "]");
+                               "instantiate [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
                 continue;
             }
             /*
@@ -177,7 +177,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                            ir.getName() + " at [" + ir.getHostAddress() + "] " +
                            "has [" + actual + "] instance(s), " +
                            "planned [" + planned + "] " +
-                           "of [" + sElem.getName() + "]");
+                           "of [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
             if (actual >= planned)
                 continue;
             if (ir.getDynamicEnabled()) {
@@ -188,7 +188,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                             logger.finer("["+ir.getHostAddress()+", " +
                                          "service count:"+ir.getServiceCount()+"] " +
                                          "has been selected for service " +
-                                         "["+sElem.getName()+"]");
+                                         "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]");
                         }
                         return (svcResource);
                     }
@@ -197,7 +197,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                                "[" + ir.getName() + "] at " +
                                "[" + ir.getHostAddress() + "] " +
                                "during canProvision check for [" +
-                               sElem.getName() + "]",
+                               sElem.getOperationalStringName()+"/"+sElem.getName() + "]",
                                e);
                     if(e instanceof ProvisionException)
                         throw (ProvisionException)e;
@@ -239,7 +239,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         }
         if(logger.isLoggable(Level.FINER) && candidateList.size()==0) {
             logger.log(Level.FINER,
-                       "Service ["+elem.getName()+"] has a virtual machine " +
+                       "Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a virtual machine " +
                        "boundary constraint and an instance of the service has " +
                        "been found on all Cybernodes executing on each machine. " +
                        "There are no available Cybernodes to allocate service " +
@@ -315,7 +315,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
            candidateList.size()==0 &&
            elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
             logger.log(Level.FINER,
-                       "Service ["+elem.getName()+"] has a physical machine " +
+                       "Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a physical machine " +
                        "boundary constraint and an instance of the service has " +
                        "been found on all known machines.");
         }
@@ -360,7 +360,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                            "["+ir.getName()+"] at " +
                            "["+ir.getHostAddress()+"] " +
                            "during canProvision check for " +
-                           "["+sElem.getName()+"]",
+                           "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]",
                            e);
                 if(e instanceof ProvisionException)
                     throw (ProvisionException)e;

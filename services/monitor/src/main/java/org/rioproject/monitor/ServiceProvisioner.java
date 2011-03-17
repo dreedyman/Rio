@@ -459,7 +459,8 @@ public class ServiceProvisioner {
                           ServiceResource resource,
                           long index) {
         if(terminating || terminated) {
-            logger.info("Request to dispatch "+request.sElem.getName()+" ignored, utility has terminated");
+            logger.info("Request to dispatch "+ getLoggingName(request)+" " +
+                        "ignored, utility has terminated");
             return;
         }
         try {
@@ -476,7 +477,7 @@ public class ServiceProvisioner {
                      "provision":"relocate");
                 String failureReason = "A compute resource could not be " +
                                        "obtained to "+action+" " +
-                                       "["+request.sElem.getName()+"], " +
+                                       "["+ getLoggingName(request)+"], " +
                                        "total registered="+total;
                 if(logger.isLoggable(Level.FINE)) {
                     logger.log(Level.FINE,  failureReason);
@@ -491,7 +492,7 @@ public class ServiceProvisioner {
                     } catch(NoSuchObjectException e) {
                         logger.log(Level.WARNING,
                                    "ServiceBeanInstantiatorListener failure "+
-                                   "notification did not succeeed, "+
+                                   "notification did not succeed, "+
                                    "[java.rmi.NoSuchObjectException:"+
                                    e.getLocalizedMessage()+"], remove "+
                                    "ServiceBeanInstantiatorListener "+
@@ -510,8 +511,7 @@ public class ServiceProvisioner {
                     pendingMgr.addProvisionRequest(request, index);
                     if(logger.isLoggable(Level.FINE))
                         logger.log(Level.FINE,
-                                   "Wrote ["+
-                                   request.sElem.getName()+"] "+
+                                   "Wrote ["+ getLoggingName(request)+"] "+
                                    "to " + pendingMgr.getType());
                     if(logger.isLoggable(Level.FINEST))
                         pendingMgr.dumpCollection();
@@ -585,7 +585,7 @@ public class ServiceProvisioner {
                     if(provisionLogger.isLoggable(Level.FINE))
                         provisionLogger.log(Level.FINE,
                                             "Provision attempt failed for "+
-                                            "["+request.sElem.getName()+"]");
+                                            "["+ getLoggingName(request)+"]");
                     if((result & UNINSTANTIABLE_JSB) != 0) {
                         /* Notify ServiceProvisionListener of failure */
                         request.listener.uninstantiable(request);
@@ -593,7 +593,7 @@ public class ServiceProvisioner {
                         if(provisionLogger.isLoggable(Level.FINE))
                             provisionLogger.log(Level.FINE,
                                                 "Service ["+
-                                                request.sElem.getName()+"] "+
+                                                getLoggingName(request)+"] "+
                                                 "is un-instantiable, " +
                                                 "do not resubmit");
                     } else if((result & BAD_CYBERNODE) != 0) {
@@ -610,7 +610,7 @@ public class ServiceProvisioner {
                                 if(provisionLogger.isLoggable(Level.FINE))
                                     provisionLogger.log(Level.FINE,
                                                         "Re-submitted ["+
-                                                        request.sElem.getName()+
+                                                        getLoggingName(request)+
                                                         "] to " +
                                                         pendingMgr.getType());
                             }
@@ -662,7 +662,7 @@ public class ServiceProvisioner {
                             provisionLogger.log(Level.FINER,
                                                 name+" at ["+addr+"] " +
                                                 "did not allocate ["+
-                                                request.sElem.getName()+"], "+
+                                                getLoggingName(request)+"], "+
                                                 "service limit assumed to " +
                                                 "have been met");
                         }
@@ -725,8 +725,7 @@ public class ServiceProvisioner {
                             String retry = (i==0?"":", retry ("+i+") ");
                             provisionLogger.log(Level.FINER,
                                                 "Allocating "+retry+"["+
-                                                request.sElem.getOperationalStringName()+
-                                                "/"+request.sElem.getName()+
+                                                getLoggingName(request)+
                                                 "] ...");
                         }
                         DeployedService deployedService =
@@ -738,8 +737,7 @@ public class ServiceProvisioner {
                             if(provisionLogger.isLoggable(Level.INFO))
                                 provisionLogger.log(Level.INFO,
                                                     "Allocated ["+
-                                                    request.sElem.getOperationalStringName()+
-                                                    "/"+request.sElem.getName()+
+                                                    getLoggingName(request)+
                                                     "]");
                             if(provisionLogger.isLoggable(Level.FINEST)) {
                                 Object service = jsbInstance.getService();
@@ -749,7 +747,7 @@ public class ServiceProvisioner {
                                     "{0} ServiceBeanInstance {1}, "+
                                     "Annotation {2}",
                                     new Object[] {
-                                        request.sElem.getName(),
+                                        getLoggingName(request),
                                         jsbInstance,
                                         java.rmi.server.RMIClassLoader.
                                             getClassAnnotation(serviceClass)});
@@ -761,8 +759,7 @@ public class ServiceProvisioner {
                                                     ir.getName()+" at ["+
                                                     ir.getHostAddress()+
                                                     "] did not allocate ["+
-                                                    request.sElem.getOperationalStringName()+
-                                                    "/"+request.sElem.getName()+
+                                                    getLoggingName(request)+
                                                     "], "+
                                                     "retry ...");
                             long retryWait = 1000;
@@ -821,14 +818,12 @@ public class ServiceProvisioner {
                         if(logger.isLoggable(Level.FINEST))
                             provisionLogger.log(Level.WARNING,
                                                 "Provisioning ["+
-                                                request.sElem.getOperationalStringName()+
-                                                "/"+request.sElem.getName()+"] "+
+                                                getLoggingName(request)+"] "+
                                                 "to ["+ir.getHostAddress()+"]",
                                                 thrown);
                         else
                             provisionLogger.warning("Provisioning ["+
-                                                    request.sElem.getOperationalStringName()+
-                                                    "/"+request.sElem.getName()+"] to " +
+                                                    getLoggingName(request)+"] to " +
                                                     "["+ir.getHostAddress()+"], "+
                                                     thrown.getClass().getName()+": "+
                                                     thrown.getLocalizedMessage());
@@ -953,9 +948,7 @@ public class ServiceProvisioner {
             try {
                 if(provisionLogger.isLoggable(Level.FINER))
                     provisionLogger.log(Level.FINER,
-                                        "Deploy ["+
-                                        request.sElem.getOperationalStringName()+
-                                        "/"+request.sElem.getName()+"]");
+                                        "Deploy ["+ getLoggingName(request)+"]");
                 ServiceResource[] resources =
                     selector.getServiceResources(request.sElem);
                 /* Filter out isolated associations and max per machine levels
@@ -1017,9 +1010,7 @@ public class ServiceProvisioner {
                             request.type = ProvisionRequest.Type.UNINSTANTIABLE;
                             if(provisionLogger.isLoggable(Level.FINE))
                                 provisionLogger.log(Level.FINE,
-                                                    "Service ["+
-                                                    request.sElem.getOperationalStringName()+
-                                                    "/"+request.sElem.getName()+"] "+
+                                                    "Service ["+ getLoggingName(request)+"] "+
                                                     "is un-instantiable, " +
                                                     "do not resubmit");
                         }
@@ -1077,9 +1068,7 @@ public class ServiceProvisioner {
                 b.append("doDeploy ").
                     append(numAllowed).
                     append(" " + "[").
-                    append(req.sElem.getOperationalStringName()).
-                    append("/").
-                    append(req.sElem.getName()).
+                    append(getLoggingName(req)).
                     append("] instances");
                 
                 for(int i=0; i<numAllowed; i++) {
@@ -1095,8 +1084,7 @@ public class ServiceProvisioner {
                     if(provisionLogger.isLoggable(Level.FINEST))
                         provisionLogger.log(
                             Level.FINEST,
-                            "["+request.sElem.getOperationalStringName()+
-                            "/"+request.sElem.getName()+"] "+
+                            "["+ getLoggingName(request)+"] "+
                             "instanceID : "+
                             request.sElem.
                                 getServiceBeanConfig().
@@ -1193,6 +1181,12 @@ public class ServiceProvisioner {
      */
     void processProvisionFailure(ProvisionFailureEvent event) {
         provisionFailurePool.execute(new ProvisionFailureEventTask(event));
+    }
+
+    private String getLoggingName(ProvisionRequest request) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(request.sElem.getOperationalStringName()).append("/").append(request.sElem.getName());
+        return sb.toString();
     }
 
     /**
