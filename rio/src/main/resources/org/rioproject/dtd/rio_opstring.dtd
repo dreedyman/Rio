@@ -359,13 +359,14 @@ source to download
 The Exec element declares execution Attributes for an external service,
 started as a separate operating system process
 -->
-<!ELEMENT Exec (CommandLine | Environment | Error | Output | InputArg | WorkingDirectory)*>
+<!ELEMENT Exec (CommandLine | Environment | Error | Output | InputArg | WorkingDirectory | PidFile)*>
 <!--<!ATTLIST Exec nohup (yes | no) "no">-->
 <!ELEMENT CommandLine (#PCDATA)>
 <!ELEMENT Error (#PCDATA)>
 <!ELEMENT Output (#PCDATA)>
 <!ELEMENT InputArg (#PCDATA)>
 <!ELEMENT WorkingDirectory (#PCDATA)>
+<!ELEMENT PidFile (#PCDATA)>
 
 <!ELEMENT Environment (Property)+>
 <!ELEMENT Property EMPTY>

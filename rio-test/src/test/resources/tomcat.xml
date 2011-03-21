@@ -38,7 +38,8 @@
             <Exec>
                 <WorkingDirectory>bin</WorkingDirectory>
                 <CommandLine>catalina.sh</CommandLine>
-                <InputArg>run</InputArg>
+                <InputArg>start</InputArg>
+                <PidFile>/tmp/tomcat.pid</PidFile>
             </Exec>
 
             <Maintain>1</Maintain>

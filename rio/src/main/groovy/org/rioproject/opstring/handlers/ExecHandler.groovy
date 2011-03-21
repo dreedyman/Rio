@@ -22,6 +22,7 @@ import org.rioproject.opstring.ParsedService
  * Handles the parsing for the Exec element
  *
  * @author Jerome Bernard
+ * @author Dennis Reedy
  */
 class ExecHandler implements Handler {
     public parse(Object elem, Object options) {
@@ -49,6 +50,9 @@ class ExecHandler implements Handler {
                 if (inputArgs.length() > 0)
                     inputArgs.append(" ")
                 inputArgs.append(it.text())
+            }
+            if(it.name() == "PidFile") {
+                exec.pidFile = it.text()
             }
         }
         if (inputArgs.length() > 0)

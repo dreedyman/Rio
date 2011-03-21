@@ -1,4 +1,4 @@
-deployment(name:'Tomcat Deploy') {
+deployment(name:'Tomcat Deploy', debug:true) {
     groups('rio')
     serviceExec(name:'Tomcat') {
         software(name:'Tomcat', version:'6.0.16', removeOnDestroy: true) {
@@ -14,7 +14,7 @@ deployment(name:'Tomcat Deploy') {
              target: '${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/webapps',
              unarchive: true, perms: 'ugo+rwx'
              
-        execute inDirectory:'bin', command: 'catalina.sh run'
+        execute inDirectory:'bin', command: 'catalina.sh start',  pidFile: "/tmp/tomcat.pid"
         maintain 1
     }
 }

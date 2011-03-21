@@ -155,6 +155,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 builder.Exec() {
                     if (attributes.inDirectory)
                         WorkingDirectory(attributes.inDirectory)
+                    if (attributes.pidFile)
+                        PidFile(attributes.pidFile)
                     def String[] cmd = attributes.command.tokenize()
                     CommandLine(cmd[0])
                     if (cmd.size() - 1 > 0)
@@ -166,6 +168,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 builder.Exec() {
                     if (attributes.inDirectory)
                         WorkingDirectory(attributes.inDirectory)
+                    if (attributes.pidFile)
+                        PidFile(attributes.pidFile)
                     def String[] cmd = attributes.command.tokenize()
                     CommandLine(cmd[0])
                     if (cmd.size() - 1 > 0)

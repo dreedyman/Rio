@@ -541,7 +541,8 @@ class OpStringParserTest extends GroovyTestCase {
 
         assertEquals 'bin', service.execDescriptor.workingDirectory
         assertEquals 'catalina.sh', service.execDescriptor.commandLine
-        assertEquals 'run', service.execDescriptor.inputArgs
+        assertEquals 'start', service.execDescriptor.inputArgs
+        assertEquals '/tmp/tomcat.pid', service.execDescriptor.pidFile
         
         assertEquals 1, service.planned
     }

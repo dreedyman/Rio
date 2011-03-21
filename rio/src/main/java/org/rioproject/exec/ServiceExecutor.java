@@ -15,6 +15,7 @@
  */
 package org.rioproject.exec;
 
+import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
@@ -40,7 +41,9 @@ import org.rioproject.system.measurable.memory.ProcessMemoryMonitor;
 import org.rioproject.watch.WatchDescriptor;
 
 import javax.management.MBeanServerConnection;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -61,14 +64,110 @@ import java.util.logging.Logger;
  * If the runtime is Java 5, external service utilization monitoring is not
  * provided.
  *
- * <p>In order to obtain the identifier required to attach to
- * the exec'd JVM, <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>
+ * <p>In order to obtain the process identifier required to attach to
+ * the exec'd JVM, the external process may create a pid file, containing the
+ * process identifier of the process. If this is the case, then configuring the
+ * deployment to declare the path of the produced pid file can be done.
+ *
+ * <p>If the exec'd process does not create a pid file,
+ * <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>
  * is used to traverse the process tree to identify the parent process that
  * exec'd the child JVM. If the parent process can be identified
  * (see {@link org.rioproject.system.measurable.SigarHelper#matchChild} the
  * <tt>ServiceExecutor</tt> will attach to the JVM, and monitor CPU and Memory
  * utilization. <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>
  * is also used to monitor the real memory used by the exec'd JVM.
+ *
+ * <p>This class also provides configuration support for the following entries:
+ *
+ * <ul>
+ * <li><span
+ * style="font-weight: bold; font-family: courier new,courier,monospace;">shellTemplate</span><br
+ *style="font-weight: bold; font-family: courier new,courier,monospace;">
+ * <table style="text-align: left; width: 100%;" border="0"
+ * cellpadding="2" cellspacing="2">
+ * <tbody>
+ * <tr>
+ * <td
+ * style="vertical-align: top; text-align: right; font-weight: bold;">
+ * Type:<br>
+ * </td>
+ * <td style="vertical-align: top;">String<br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td
+ * style="vertical-align: top; text-align: right; font-weight: bold;">
+ * Default:<br>
+ * </td>
+ * <td style="vertical-align: top;"><span
+ * style="font-family: monospace;">exec-template.sh</span><br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td
+ * style="vertical-align: top; text-align: right; font-weight: bold;">
+ * Description:<br>
+ * </td>
+ * <td style="vertical-align: top;">The template to use for
+ * generating a script to exec a command. The script template must be
+ * loadable as a resource, and must provide the following token that get
+ * replaced by runtime values:<br>
+ * <br>
+ * <span style="font-family: monospace; font-weight: bold;">${command}</span>
+ * The command to execute. This token eirs placed by the command to
+ * execute.<br>
+ * <span style="font-family: monospace;">$<span
+ * style="font-weight: bold;">{pidFile}</span></span> Rio creates a file
+ * that stores the pid of the executed command. This token is replaced by
+ * the name of the pid file to create<br>
+ * <span style="font-family: monospace; font-weight: bold;">${commandLine}</span>
+ * This token is replaced by the actual command line that is created to
+ * 'exec' the command above. Inoput arguments, standard error and output
+ * are also part of the created command line<br>
+ * </td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * </li>
+ * </ul>
+ * <ul>
+ * <li>
+ * <span style="font-weight: bold; font-family: courier new,courier,monospace;">pidFileWaitTime</span>
+ * <br style="font-weight: bold; font-family: courier new,courier,monospace;">
+ * <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+ * <tbody>
+ * <tr>
+ * <td style="vertical-align: top; text-align: right; font-weight: bold;">
+ * Type:<br>
+ * </td>
+ * <td style="vertical-align: top;">int<br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top; text-align: right; font-weight: bold;">
+ * Default:<br>
+ * </td>
+ * <td style="vertical-align: top;"><span style="font-family: monospace;">60 </span><br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top; text-align: right; font-weight: bold;">
+ * Description:<br>
+ * </td>
+ * <td style="vertical-align: top;">
+ * The amount of time to wait for an exec'd service to create a pid file.
+ * The value is in seconds, where 60 seconds is the default. The minimum
+ * value for this property is 5 seconds, the maximum allowed 5 minutes.<br>
+ * <br>
+ * This value represents the maximum amount of time to wait. If the pid file is
+ * created prior to the timeout value, the utility proceeds immediately.<br>
+ * </td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * </li>
+ * </ul>
  *
  * <p><b>Notes:</b>
  * <ul>
@@ -97,6 +196,7 @@ public class ServiceExecutor {
     private ServiceBeanContext context;
     private Configuration config;
     private static final String COMPONENT = ServiceExecutor.class.getPackage().getName();
+    private int pidFileWaitTime = 60; // number of seconds
     static final Logger logger = Logger.getLogger(COMPONENT);
 
     public ServiceExecutor() {
@@ -115,6 +215,18 @@ public class ServiceExecutor {
         } catch (ConfigurationException e) {
             logger.warning("Cannot get shell template from configuration, " +
                            "continue with default");
+        }
+        try {
+            pidFileWaitTime = Config.getIntEntry(context.getConfiguration(),
+                                                 COMPONENT,
+                                                 "pidFileWaitTime",
+                                                 60,    //default is 1 minute
+                                                 5,     //minimum of 5 second wait
+                                                 60 * 5); // max of 5 minute wait
+        } catch(ConfigurationException e) {
+            logger.log(Level.WARNING,
+                       "Getting pidFileWaitTime, using default",
+                       e);
         }
         execDescriptor = context.getServiceElement().getExecDescriptor();
         if(execDescriptor==null)
@@ -176,32 +288,55 @@ public class ServiceExecutor {
                                                 "software has been extracted");
         exec();
         processManager.manage();
-        if(sigar!=null) {
-            String[] ids = JMXConnectionUtil.listIDs();
-            actualPID = sigar.matchChild(processManager.getPid(), ids);
-            if(actualPID!=-1) {
-                logger.info("PID of exec'd process obtained: "+actualPID);
-                try {
-                    mbsc = JMXConnectionUtil.attach(Long.toString(actualPID));
-                    logger.info("JMX Attach succeeded to exec'd JVM with pid: "+actualPID);
-                    createSystemWatches();
-                    setThreadDeadlockDetector(context.getServiceElement());
-                    checkWatchDescriptors(context.getServiceElement());
-                } catch(Exception e) {
-                    logger.log(Level.WARNING,
-                               "Could not attach to the exec'd " +
-                               "JVM with pid: "+actualPID+", " +
-                               "continue service execution",
-                               e);
+        String pidFileName = execDescriptor.getPidFile();
+        if(pidFileName!=null) {
+            logger.info("Try to obtain actual pid of exec'd process using pid file: "+pidFileName);
+            long waited = 0;
+            while(waited < pidFileWaitTime) {
+                File pidFile = new File(pidFileName);
+                if(pidFile.exists()) {
+                    actualPID = readPidFromFile(pidFile);
+                    break;
                 }
-            } else {
-                logger.info("Could not obtain actual pid of " +
-                            "exec'd process, process cpu and " +
-                            "java memory utilization are not available");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    logger.log(Level.WARNING, "Waiting for pid file to appear, abort wait", e);
+                    break;
+                }
+                waited++;
+            }
+        }
+        if(sigar!=null) {
+            if(actualPID==-1) {
+                logger.info("Try to obtain actual pid of exec'd process using SIGAR");
+                String[] ids = JMXConnectionUtil.listIDs();
+                actualPID = sigar.matchChild(processManager.getPid(), ids);
             }
         } else {
-            logger.warning("No SIGAR support available");
+            logger.warning("No SIGAR support available, unable to obtain PID");
         }
+        if(actualPID!=-1) {
+            logger.info("PID of exec'd process obtained: "+actualPID);
+            try {
+                mbsc = JMXConnectionUtil.attach(Long.toString(actualPID));
+                logger.info("JMX Attach succeeded to exec'd JVM with pid: "+actualPID);
+                createSystemWatches();
+                setThreadDeadlockDetector(context.getServiceElement());
+                checkWatchDescriptors(context.getServiceElement());
+            } catch(Exception e) {
+                logger.log(Level.WARNING,
+                           "Could not attach to the exec'd " +
+                           "JVM with PID: "+actualPID+", " +
+                           "continue service execution",
+                           e);
+            }
+        } else {
+            logger.info("Could not obtain actual PID of " +
+                        "exec'd process, process cpu and " +
+                        "java memory utilization are not available");
+        }
+
     }
 
     public ComputeResourceUtilization getComputeResourceUtilization() {
@@ -344,6 +479,20 @@ public class ServiceExecutor {
         if (processManager != null) {
             processManager.destroy(true);
         }
+    }
+
+    public long readPidFromFile(File f) throws IOException {
+        long pid = -1;
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(f));
+            String line = in.readLine().trim();
+            pid = Long.valueOf(line);
+        } finally {
+            if(in!=null)
+                in.close();
+        }
+        return pid;
     }
 
     public static void main(String[] args) {

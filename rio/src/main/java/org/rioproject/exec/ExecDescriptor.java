@@ -34,6 +34,7 @@ public class ExecDescriptor implements Serializable {
     private String stdOutFileName;
     private String stdErrFileName;
     private String inputArgs;
+    private String pidFile;
 
     /**
      * Create an ExecDescriptor
@@ -191,5 +192,23 @@ public class ExecDescriptor implements Serializable {
 
     public void setInputArgs(String inputArgs) {
         this.inputArgs = inputArgs;
-    }    
+    }
+
+    /**
+     * Optional path of the file that contains the pid of of the process
+     *
+     * @return The path of the file that contains the pid of of the process. Maybe null if no
+     */
+    public String getPidFile() {
+        return pidFile;
+    }
+
+    /**
+     * Set the pid file
+     *
+     * @param pidFile The path of the file that contains the pid of of the process
+     */
+    public void setPidFile(String pidFile) {
+        this.pidFile = pidFile;
+    }
 }

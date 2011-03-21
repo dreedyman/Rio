@@ -263,7 +263,7 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
         if (el.'@ref') {
             def bundles = global.bundles[el.'@ref'].collect {
                 if (classNames.size() > 1) {
-                    logger.fine "Oh oh... What are we supposed to do in that case? Picking the first interface"
+                    logger.fine "Uh oh... What are we supposed to do in that case? Picking the first interface"
                     logger.fine "Class names are: $classNames"
                 }
                 new ClassBundle(classNames[0], it.JARNames, it.sharedComponents, it.codebase)
