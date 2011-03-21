@@ -183,7 +183,7 @@ public class CybernodeImpl extends ServiceBeanAdapter
      * @param configArgs Configuration arguments
      * @param lifeCycle The LifeCycle object that started the Cybernode
      *
-     * @throws Exception if bbootstrapping fails
+     * @throws Exception if bootstrapping fails
      */
     public CybernodeImpl(String[] configArgs, LifeCycle lifeCycle)
     throws Exception {
