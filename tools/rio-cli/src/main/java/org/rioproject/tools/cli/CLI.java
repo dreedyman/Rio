@@ -781,20 +781,21 @@ public class CLI {
 
                     } else if(token.equals(GROUPS)) {
                         String value = tok.nextToken();
-                        if(value.equalsIgnoreCase("all_groups"))
-                            instance.settings.put(GROUPS,
-                                         DiscoveryGroupManagement.ALL_GROUPS);
-                        else
+                        String[] groups;
+                        if(value.equalsIgnoreCase("all_groups") || value.equalsIgnoreCase("all")) {
+                            instance.settings.put(GROUPS, DiscoveryGroupManagement.ALL_GROUPS);
+                            groups = DiscoveryGroupManagement.ALL_GROUPS;
+                        } else {
                             instance.settings.put(GROUPS, Formatter.toArray(value));
+                            groups = Formatter.toArray(value);
+                        }
                         DiscoveryManagement dMgr =
                             instance.getServiceFinder().getDiscoveryManagement();
                         if(dMgr instanceof DiscoveryGroupManagement) {
                             try {
-                                ((DiscoveryGroupManagement)dMgr).setGroups(
-                                                     Formatter.toArray(value));
+                                ((DiscoveryGroupManagement)dMgr).setGroups(groups);
                             } catch(Throwable t) {
-                                out.println("Exception setting " +
-                                            "groups : "+
+                                out.println("Exception setting groups : "+
                                             t.getMessage());
                             }
                         }

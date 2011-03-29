@@ -23,7 +23,6 @@ import net.jini.discovery.DiscoveryManagement;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -71,12 +70,12 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
     public void discarded(DiscoveryEvent dEvent) {
         long t = System.currentTimeMillis();
         ServiceRegistrar[] reggies = dEvent.getRegistrars();
-        for(int i = 0; i < reggies.length; i++) {
-            ReggieStat rStat = removeReggieStat(reggies[i].getServiceID());
-            if(rStat != null) {
+        for (ServiceRegistrar reggy : reggies) {
+            ReggieStat rStat = removeReggieStat(reggy.getServiceID());
+            if (rStat != null) {
                 rStat.eventTime = t;
                 rStat.type = ReggieStat.DISCARDED;
-                synchronized(discoveryTimes) {
+                synchronized (discoveryTimes) {
                     discoveryTimes.add(rStat);
                 }
             }
@@ -86,15 +85,20 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
     /**
      * Get the collection of known discovered/discarded ServiceRegistrar
      * discovery stats
+     *
+     * @param type The type of stat, either <code>ReggieStat.DISCOVERED</code>
+     * or <code>ReggieStat.DISCARDED</code>
+     *
+     * @return Array of <code>ReggieStat</code>s. If there are no stats, a
+     * zero-length array is returned. A new array is allocated each time.
      */
     public ReggieStat[] getReggieStats(int type) {
         if(type < ReggieStat.DISCOVERED || type > ReggieStat.DISCARDED)
             throw new IllegalArgumentException("bad type");
         List<ReggieStat> list = new ArrayList<ReggieStat>();
         synchronized(discoveryTimes) {
-            for(Iterator<ReggieStat> it = discoveryTimes.iterator(); it.hasNext();) {
-                ReggieStat rt = it.next();
-                if(rt.type == type)
+            for (ReggieStat rt : discoveryTimes) {
+                if (rt.type == type)
                     list.add(rt);
             }
         }
@@ -114,11 +118,10 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
             throw new NullPointerException("reggieStat is null");
         ReggieStat rStat = null;
         synchronized(discoveryTimes) {
-            for(Iterator it = discoveryTimes.iterator(); it.hasNext();) {
-                ReggieStat rt = (ReggieStat)it.next();
-                if(rt.machine.equals(reggieStat.machine) &&
-                   rt.port == reggieStat.port &&
-                   rt.groupsMatch(reggieStat)) {
+            for (ReggieStat rt : discoveryTimes) {
+                if (rt.machine.equals(reggieStat.machine) &&
+                    rt.port == reggieStat.port &&
+                    rt.groupsMatch(reggieStat)) {
                     rStat = rt;
                     break;
                 }
@@ -140,9 +143,8 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
             throw new NullPointerException("id is null");
         ReggieStat rStat = null;
         synchronized(discoveryTimes) {
-            for(Iterator it = discoveryTimes.iterator(); it.hasNext();) {
-                ReggieStat rt = (ReggieStat)it.next();
-                if(rt.serviceID.equals(id)) {
+            for (ReggieStat rt : discoveryTimes) {
+                if (rt.serviceID.equals(id)) {
                     rStat = rt;
                     discoveryTimes.remove(rt);
                     break;
