@@ -1227,8 +1227,8 @@ public class CybernodeImpl extends ServiceBeanAdapter
         }
 
         if(!scheduled) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Configured for constant availability");
+            if(logger.isLoggable(Level.INFO))
+                logger.info("Configured for constant availability");
             try {
                 svcConsumer.initializeProvisionDiscovery(
                                               context.getDiscoveryManagement());
@@ -1692,11 +1692,7 @@ public class CybernodeImpl extends ServiceBeanAdapter
          * The action to be performed by this timer task.
          */
         public void run() {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Unregister from ProvisionMonitor instances ");
-            svcConsumer.destroy();
-            if(serviceTerminationOnUnregister)
-                container.terminateServices();
+            doRelease();
             if(isLast)
                 setEnlisted(false);
             cancel();
@@ -1707,6 +1703,8 @@ public class CybernodeImpl extends ServiceBeanAdapter
             return(super.cancel());
         }
     }
+
+    private
 
     /**
      * If deadlocked threads are detected fire SLAThresholdEvents
@@ -1949,7 +1947,16 @@ public class CybernodeImpl extends ServiceBeanAdapter
         TimerTask[] registrationTasks = getRegistrationTasks();
         for (TimerTask registrationTask : registrationTasks)
             registrationTask.cancel();
+        doRelease();
         setEnlisted(false);
+    }
+
+    private void doRelease() {
+        if(logger.isLoggable(Level.INFO))
+                logger.info("Unregister from ProvisionMonitor instances ");
+            svcConsumer.destroy();
+            if(serviceTerminationOnUnregister)
+                container.terminateServices();
     }
 
     /*---------------------

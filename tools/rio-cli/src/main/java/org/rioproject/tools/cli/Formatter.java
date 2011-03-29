@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -239,6 +240,13 @@ public class Formatter {
             ServiceRecord[] records =
                 cybernode.getServiceRecords(
                     ServiceRecord.ACTIVE_SERVICE_RECORD);
+            String status;
+            try {
+                status = cybernode.isEnlisted()?"enlisted":"released";
+            } catch (RemoteException e) {
+                status = e.getMessage();
+            }
+            out.println("\tStatus: "+status);
             if(records.length==0) {
                 out.println("\tNo contained services");
             } else {

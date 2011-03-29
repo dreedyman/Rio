@@ -141,14 +141,8 @@ public class ListHandler implements OptionHandler {
         StringTokenizer tok = new StringTokenizer(input);
         while(tok.hasMoreTokens()) {
             String option = tok.nextToken();
-            if(option.equals("cpu")) {
-            }
-            else if(option.equals("codeserver")) {
-            }
-            else if(option.startsWith("timeout")) {
-            }
-            else {
-                valid = false;
+            valid = option.equals("codeserver");
+            if(!valid) {
                 break;
             }
         }

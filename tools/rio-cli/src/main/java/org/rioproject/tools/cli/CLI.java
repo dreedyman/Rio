@@ -366,31 +366,21 @@ public class CLI {
     protected void loadOptionHandlers(Configuration config) throws ConfigurationException {
         OptionHandlerDesc[] defaultHandlers =
             new OptionHandlerDesc[] {
-                new OptionHandlerDesc("list",
-                                      ListHandler.class.getName()),
-                new OptionHandlerDesc("destroy",
-                                      StopHandler.class.getName()),
-                new OptionHandlerDesc("deploy",
-                                      MonitorControl.DeployHandler.class.getName()),
-                new OptionHandlerDesc("redeploy",
-                                      MonitorControl.RedeployHandler.class.getName()),
-                new OptionHandlerDesc("undeploy",
-                                      MonitorControl.UndeployHandler.class.getName()),
+                new OptionHandlerDesc("list", ListHandler.class.getName()),
+                new OptionHandlerDesc("destroy", StopHandler.class.getName()),
+                new OptionHandlerDesc("deploy", MonitorControl.DeployHandler.class.getName()),
+                new OptionHandlerDesc("redeploy", MonitorControl.RedeployHandler.class.getName()),
+                new OptionHandlerDesc("undeploy", MonitorControl.UndeployHandler.class.getName()),
                 new OptionHandlerDesc("set", SettingsHandler.class.getName()),
-                new OptionHandlerDesc("ls",
-                                      DirHandler.class.getName()),
-                new OptionHandlerDesc("dir",
-                                      DirHandler.class.getName()),
-                new OptionHandlerDesc("pwd",
-                                      DirHandler.class.getName()),
-                new OptionHandlerDesc("cd",
-                                      DirHandler.class.getName()),
-                new OptionHandlerDesc("jconsole",
-                                      JConsoleHandler.class.getName()),
-                new OptionHandlerDesc("stats",
-                                      StatsHandler.class.getName()),
-                new OptionHandlerDesc("http",
-                                      HttpHandler.class.getName()),
+                new OptionHandlerDesc("ls", DirHandler.class.getName()),
+                new OptionHandlerDesc("dir", DirHandler.class.getName()),
+                new OptionHandlerDesc("pwd", DirHandler.class.getName()),
+                new OptionHandlerDesc("cd", DirHandler.class.getName()),
+                new OptionHandlerDesc("jconsole", JConsoleHandler.class.getName()),
+                new OptionHandlerDesc("stats", StatsHandler.class.getName()),
+                new OptionHandlerDesc("http", HttpHandler.class.getName()),
+                new OptionHandlerDesc("enlist", EnlistmentHandler.EnlistHandler.class.getName()),
+                new OptionHandlerDesc("release", EnlistmentHandler.ReleaseHandler.class.getName()),
                 new OptionHandlerDesc("help", HelpHandler.class.getName())
             };
         OptionHandlerDesc[] optionHandlers =
@@ -530,8 +520,7 @@ public class CLI {
         public OptionHandler getOptionHandler() {
             OptionHandler oh = null;
             try {
-                oh = (OptionHandler)Class.forName(
-                         optionHandlerClass).newInstance();
+                oh = (OptionHandler)Class.forName(optionHandlerClass).newInstance();
             } catch(Exception e) {
                 e.printStackTrace();
                 instance.cliOutput.println("Exception ["+e.getClass().getName()+"] " +

@@ -33,6 +33,7 @@ SystemWatchAccessorTest {
     opstring = 'src/test/resources/scaling_service_test.groovy'
     autoDeploy = true
 }
+
 ForkedServicePreDestroyTest {
     groups = "ForkedServicePreDestroyTest"
     numCybernodes = 1
@@ -86,8 +87,6 @@ HarvesterTest {
 
 UndeployTest {
     groups = "UndeployTest"
-    //harvest = true
-
 }
 
 ScalingServiceTest {
@@ -107,7 +106,13 @@ ServiceEventLogTest {
 
 OutOfMemoryTest {
     groups = "OutOfMemoryTest"
-    //groups = System.getProperty("user.name")
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+}
+
+EnlistReleaseTest {
+    groups = "ReleaseEnlistTest"
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
