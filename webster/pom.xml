@@ -11,7 +11,6 @@
     <groupId>org.rioproject</groupId>
     <artifactId>webster</artifactId>
     <name>Module :: Webster</name>
-    <packaging>classdepandjar</packaging>
 
     <dependencies>
         <dependency>
@@ -31,34 +30,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-rio-plugin</artifactId>
-                <extensions>true</extensions>
-
-                <configuration>
-                    <createJar>
-                        <ins>
-                            <in>org.rioproject</in>
-                            <in>com.sun.jini.start</in>
-                        </ins>
-                        <manifest>
-                            <Main-Class>org.rioproject.tools.webster.Webster</Main-Class>
-                            <Implementation-Title>Rio Project</Implementation-Title>
-                            <Implementation-Version>${version}</Implementation-Version>
-                            <Rio-Version>${version}</Rio-Version>
-                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                        </manifest>
-                        <topclasses>
-                            <topclass>org.rioproject.tools.webster.Webster</topclass>
-                            <topclass>org.rioproject.tools.webster.InternalWebster</topclass>
-                            <topclass>com.sun.jini.start.LifeCycle</topclass>
-                        </topclasses>
-
-                    </createJar>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -87,7 +58,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.7.2</version>
+                <version>2.8</version>
                 <configuration>
                     <forkMode>always</forkMode>
                     <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
