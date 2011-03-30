@@ -22,7 +22,6 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
-import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
@@ -45,8 +44,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * Find a service
@@ -66,8 +64,8 @@ public class ServiceFinder {
     /** ThreadPool for fetching service information */
     Executor serviceInfoFetchPool;
     /** Table of ServiceInfo and InfoFetchStats */
-    Map<ServiceInfo, InfoFetchStat> serviceInfoFetchMap =
-        Collections.synchronizedMap(new HashMap<ServiceInfo, InfoFetchStat>());
+    final Map<ServiceInfo, InfoFetchStat> serviceInfoFetchMap =
+        new HashMap<ServiceInfo, InfoFetchStat>();
     RecordingDiscoveryListener recordingDiscoveryListener;
     ProxyPreparer proxyPreparer;
     ProxyPreparer adminProxyPreparer;
@@ -77,9 +75,9 @@ public class ServiceFinder {
      * 
      * @param groups The groups to discover
      * @param locators The LookupLocators to use
-     * @param config The Cnfiguration to set
+     * @param config The Configuration to set
      * 
-     * @throws IOException If there are problems intializing discovery
+     * @throws IOException If there are problems initializing discovery
      * @throws ConfigurationException If problems are encountered accessing
      * the configuration
      */
@@ -307,23 +305,33 @@ public class ServiceFinder {
      * Resolve the information for a service in a poolable thread
      *
      * @param sInfo The ServiceInfo to resolve
+     *
+     * @return a Future
      */
-    void resolveServiceInfo(ServiceInfo sInfo) {
+    Future<ServiceInfo> resolveServiceInfo(ServiceInfo sInfo) {
         InfoFetchStat i = new InfoFetchStat(sInfo.getServiceName());
         i.starTime = System.currentTimeMillis();
-        serviceInfoFetchMap.put(sInfo, i);
-        serviceInfoFetchPool.execute(new InfoFetcher(sInfo));
+        synchronized(serviceInfoFetchMap) {
+            serviceInfoFetchMap.put(sInfo, i);
+        }
+        FutureTask<ServiceInfo> future = new FutureTask<ServiceInfo>(new InfoFetcher(sInfo));
+        serviceInfoFetchPool.execute(future);
+        return future;
     }
 
     /**
      * Get the table ServiceInfo instances
      *
-     * @return A Map of ServiceInfo to creation time instanxes. A new Map
+     * @return A Map of ServiceInfo to creation time instances. A new Map
      * is created each time. If there are no pending ServiceInfo instances
      * an empty Map is returned
      */
     Map<ServiceInfo, InfoFetchStat> getServiceInfoFetchMap() {
-        return new HashMap<ServiceInfo, InfoFetchStat>(serviceInfoFetchMap);
+        Map<ServiceInfo, InfoFetchStat> map;
+        synchronized(serviceInfoFetchMap) {
+            map = new HashMap<ServiceInfo, InfoFetchStat>(serviceInfoFetchMap);
+        }
+        return map;
     }
 
     /**
@@ -332,15 +340,6 @@ public class ServiceFinder {
     public class ServiceFilter implements ServiceItemFilter {
         private String[] hostNames;
         private Entry[] attrs;
-
-        /**
-         * Create an ServiceFilter
-         * 
-         * @param hostNames The names of hosts to match
-         */
-        public ServiceFilter(String[] hostNames) {
-            this(hostNames, null);
-        }
 
         /**
          * Create an ServiceFilter
@@ -554,26 +553,6 @@ public class ServiceFinder {
     }
 
     /**
-     * Get the ServiceInfo for the ServiceID
-     *
-     * @param serviceID The ServiceID to get info for
-     *
-     * @return A ServiceInfo object for the ServiceID or null if not found
-     */
-    public ServiceInfo getServiceInfo(ServiceID serviceID) {
-        ServiceInfo si = null;
-        synchronized(serviceInfo) {
-            for (ServiceInfo aServiceInfo : serviceInfo) {
-                if (aServiceInfo.getServiceItem().serviceID.equals(serviceID)) {
-                    si = aServiceInfo;
-                    break;
-                }
-            }
-        }
-        return(si);
-    }
-
-    /**
      * Class to hold a ServiceItem and the groups the service is a member of.
      * This class is created to pre-fetch group information since it is an
      * expensive operation, as it uses remote invocation to acquire a
@@ -660,7 +639,7 @@ public class ServiceFinder {
     /**
      * Used to fetch information about services
      */
-    public class InfoFetcher implements Runnable {
+    public class InfoFetcher implements Callable<ServiceInfo> {
         ServiceInfo sInfo;
 
         InfoFetcher(ServiceInfo sInfo) {
@@ -668,6 +647,20 @@ public class ServiceFinder {
         }
 
         public void run() {
+
+        }
+
+        void updateHost() {
+            InfoFetchStat ifs;
+            synchronized(serviceInfoFetchMap) {
+                ifs = serviceInfoFetchMap.get(sInfo);
+                ifs.host = sInfo.host;
+                serviceInfoFetchMap.put(sInfo, ifs);
+            }
+        }
+
+        @Override
+        public ServiceInfo call() throws Exception {
             try {
                 ServiceItem item = sInfo.getServiceItem();
                 if(item.service instanceof ServiceRegistrar) {
@@ -708,7 +701,7 @@ public class ServiceFinder {
                          * additionally implements DiscoveryAdmin
                          */
                         if(groups!=null &&
-                           groups.length == 0 && 
+                           groups.length == 0 &&
                            (admin instanceof DiscoveryAdmin))
                             groups = ((DiscoveryAdmin)admin).getMemberGroups();
 
@@ -727,20 +720,19 @@ public class ServiceFinder {
                 t.printStackTrace();
             } finally {
                 long t1 = System.currentTimeMillis();
-                InfoFetchStat ifs = serviceInfoFetchMap.remove(sInfo);
-                int size = serviceInfoFetchMap.size();
+                InfoFetchStat ifs;
+                int size;
+                synchronized(serviceInfoFetchMap) {
+                    ifs = serviceInfoFetchMap.remove(sInfo);
+                    size = serviceInfoFetchMap.size();
+                }
                 ifs.stopTime = t1;
                 if(!CLI.getInstance().commandLine)
                     System.err.println("XXXX ServiceInfo resolve time for " +
                                        "["+sInfo.getServiceName()+"] = "+
                                        (t1-ifs.starTime)+", pool size = "+size);
             }
-        }
-
-        void updateHost() {
-            InfoFetchStat ifs = serviceInfoFetchMap.get(sInfo);
-            ifs.host = sInfo.host;
-            serviceInfoFetchMap.put(sInfo, ifs);
+            return sInfo;
         }
     }
 
@@ -897,5 +889,6 @@ public class ServiceFinder {
         return(admin);
         */
     }
+
 }
 

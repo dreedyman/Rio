@@ -33,6 +33,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for formatting results
@@ -42,10 +44,6 @@ import java.util.*;
 public class Formatter {
     static final int EXPORT_CODEBASE = 1;
     static final int MAX_ITEM_LENGTH = 30;
-
-    public static String[] formattedArray(ServiceItem[] items) {
-        return(formattedArray(items, 0));
-    }
 
     public static String asList(ServiceItem[] items) {
         return(asList(items, 0));
@@ -88,7 +86,12 @@ public class Formatter {
             }
             if(sInfo==null) {
                 sInfo = new ServiceInfo(items[i]);
-                CLI.getInstance().finder.resolveServiceInfo(sInfo);
+                Future<ServiceInfo> future = CLI.getInstance().finder.resolveServiceInfo(sInfo);
+                try {
+                    sInfo = future.get(5, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             String name = sInfo.getServiceName();
@@ -398,71 +401,6 @@ public class Formatter {
         } catch(Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Produce a list of services, asking the operator to select a
-     * comma-separated service list.
-     *
-     * @param items Array of ServiceItems
-     * @param prompt The prompt to use when asking for input
-     * @param br The BufferedReader
-     * 
-     * @return The selected ServiceItem instances
-     */
-    public static ServiceItem[] selectItems(ServiceItem[] items,
-                                            String prompt,
-                                            BufferedReader br) {
-        ServiceItem[] selectedItems = null;
-        int[] selections;
-        System.out.println(Formatter.asChoices(items)+"\n");
-        System.out.print(prompt);
-        boolean validInput = true;
-        while(true) {
-            try {
-                String response = br.readLine();
-                if(response!=null) {
-                    if(response.equals("c"))
-                        return(null);
-                    StringTokenizer tok = new StringTokenizer(response, " ,");
-                    selections = new int[tok.countTokens()];
-                    for(int i=0; i<selections.length; i++) {
-                        try {
-                            String selection = tok.nextToken();
-                            selections[i] = Integer.parseInt(selection);
-                            if(selections[i]<1 ||
-                               selections[i] >(items.length+1)) {
-                                validInput = false;
-                                break;
-                            } else {
-                                if(selections[i]==(items.length+1)) {
-                                    return(items);
-                                }
-                            }
-                        } catch(NumberFormatException e) {
-                            validInput = false;
-                            break;
-                        }
-                    }
-                    if(validInput) {
-                        break;
-                    } else {
-                        System.out.println("Invalid choice "+response);
-                        System.out.print(prompt);
-                    }
-                }
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if(validInput && selections.length>0) {
-            selectedItems = new ServiceItem[selections.length];
-            for(int i=0; i<selectedItems.length; i++) {
-                selectedItems[i] = items[selections[i]-1];
-            }
-        }
-        return(selectedItems);
     }
 
     /**
