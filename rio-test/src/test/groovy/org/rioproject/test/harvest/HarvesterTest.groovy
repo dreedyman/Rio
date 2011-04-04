@@ -56,7 +56,7 @@ class HarvesterTest {
             if(duration >= timeout)
                 break;
         }
-        Assert.assertTrue("Agents handled should be greater than 0", h.agentsHandledCount>0)
+        Assert.assertTrue("Agents handled should be greater than 0, actual=${h.agentsHandledCount}", h.agentsHandledCount>0)
         ServiceMonitor sMon = new ServiceMonitor(testManager.serviceDiscoveryManager,
                                                  Harvester.class)
         sMon.waitFor(1)
