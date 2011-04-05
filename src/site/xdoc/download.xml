@@ -25,10 +25,40 @@
                 downloaded properly.
             </p>
 
-            <h2>Download Rio 4.1</h2>
+            <h2>Download Rio 4.2</h2>
             <p>
-                Rio 4.1 is a recommended update.
+                Rio 4.2 is a recommended update.
             </p>
+            <table>
+                <tbody>
+                    <tr>
+                        <th></th>
+                        <th>Link</th>
+                        <th>Size</th>
+                        <th>Signature</th>
+                        <th>Date</th>
+                    </tr>
+                    <tr>
+                        <td>Rio 4.2 (zip)</td>
+                        <td><a href="http://www.rio-project.org/releases/rio-4.2.zip">Download</a></td>
+                        <td>18 MB</td>
+                        <td><a href="http://www.rio-project.org/releases/rio-4.2.zip.md5">MD5</a></td>
+                        <td align="center">4/2011</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Rio Installer</h2>
+
+            <p>
+                The Rio Installer is a Java installer that installs Rio, and
+                allows to select which parts you'd like to install. For Windows users,
+                it also adds some useful shortcuts in the Windows menu.
+                <a href="http://www.rio-project.org/releases/rio-4.2-installer.jar">Download Rio 4.1 using the installer</a>
+            </p>
+
+            <h2>Previous Releases</h2>
+
             <table>
                 <tbody>
                     <tr>
@@ -44,29 +74,6 @@
                         <td>18 MB</td>
                         <td><a href="http://www.rio-project.org/releases/rio-4.1.zip.md5">MD5</a></td>
                         <td align="center">12/2010</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h2>Rio Installer</h2>
-
-            <p>
-                The Rio Installer is a Java installer that installs Rio, and
-                allows to select which parts you'd like to install. For Windows users,
-                it also adds some useful shortcuts in the Windows menu.
-                <a href="http://www.rio-project.org/releases/rio-4.1-installer.jar">Download Rio 4.1 using the installer</a>
-            </p>
-
-            <h2>Previous Releases</h2>
-
-            <table>
-                <tbody>
-                    <tr>
-                        <th></th>
-                        <th>Link</th>
-                        <th>Size</th>
-                        <th>Signature</th>
-                        <th>Date</th>
                     </tr>
                     <tr>
                         <td>Rio 4.0 (zip)</td>
