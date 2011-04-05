@@ -51,8 +51,8 @@ public class MaxPerMachineTest  {
     static Logger logger = Logger.getLogger("org.rioproject.test.monitor");
     @SetTestManager
     static TestManager testManager;
-    static ServiceMonitor cyberMon;
-    static ServiceMonitor pmMon;
+    static ServiceMonitor<Cybernode> cyberMon;
+    static ServiceMonitor<ProvisionMonitor> pmMon;
     /**
      * The service counts fetched before deploying a new OpString.
      */
@@ -68,9 +68,9 @@ public class MaxPerMachineTest  {
                 testManager.startCybernode(i);
             }
             ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-            pmMon = new ServiceMonitor(sdm, ProvisionMonitor.class);
+            pmMon = new ServiceMonitor<ProvisionMonitor>(sdm, ProvisionMonitor.class);
             pmMon.waitFor(1);
-            cyberMon = new ServiceMonitor(sdm, Cybernode.class);
+            cyberMon = new ServiceMonitor<Cybernode>(sdm, Cybernode.class);
             cyberMon.waitFor(N);
         }
     }
@@ -95,7 +95,7 @@ public class MaxPerMachineTest  {
 
         Object[][] combinations = ArrayUtils.combinations(new Object[][] {
                 trueFalse, maintainValues, maxPerMachineValues});
-        ProvisionMonitor monitor = (ProvisionMonitor) pmMon.getServices().get(0);
+        ProvisionMonitor monitor = pmMon.getServices().get(0);
         for (Object[] combination : combinations) {
             boolean fixed = (Boolean) combination[0];
             int maintain = (Integer) combination[1];
@@ -238,7 +238,7 @@ public class MaxPerMachineTest  {
     @Test
     public  void scenarioB() throws Exception {
         logBanner("Running Scenario B");
-        ProvisionMonitor monitor = (ProvisionMonitor) pmMon.getServices().get(0);
+        ProvisionMonitor monitor = pmMon.getServices().get(0);
         final boolean[] fixedValues = new boolean[] {false, true};
         final int maintainValue = 6;
         final int[] maxPerMachineValues = new int[] {

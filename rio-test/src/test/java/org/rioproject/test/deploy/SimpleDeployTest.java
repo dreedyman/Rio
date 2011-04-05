@@ -92,9 +92,8 @@ public class SimpleDeployTest {
                 cybernode.getServiceBeanInstances(opstring.getServices()[0]);
             Assert.assertEquals(1, instances.length);            
             mgr.increment(opstring.getServices()[0], true, null);
-            ServiceMonitor sMon =
-                new ServiceMonitor(testManager.getServiceDiscoveryManager(),
-                                   Simple.class);
+            ServiceMonitor<Simple> sMon =
+                new ServiceMonitor<Simple>(testManager.getServiceDiscoveryManager(), Simple.class);
             sMon.waitFor(2);
             instances =
                 cybernode.getServiceBeanInstances(opstring.getServices()[0]);
@@ -128,9 +127,8 @@ public class SimpleDeployTest {
             Simple simple = (Simple)instances[0].getService();
             Assert.assertEquals("Hello vistor : 1", simple.hello("hi"));
             mgr.decrement(instances[0], true, true);
-            ServiceMonitor sMon =
-                new ServiceMonitor(testManager.getServiceDiscoveryManager(),
-                                   Simple.class);
+            ServiceMonitor<Simple> sMon =
+                new ServiceMonitor<Simple>(testManager.getServiceDiscoveryManager(), Simple.class);
             sMon.waitFor(0);
             instances =
                 cybernode.getServiceBeanInstances(opstring.getServices()[0]);

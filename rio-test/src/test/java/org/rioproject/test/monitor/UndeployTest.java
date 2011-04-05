@@ -51,8 +51,8 @@ import java.util.logging.Logger;
 public class UndeployTest  {
     @SetTestManager
     static TestManager testManager;
-    static ServiceMonitor cyberMon;
-    static ServiceMonitor pmMon;
+    static ServiceMonitor<Cybernode> cyberMon;
+    static ServiceMonitor<ProvisionMonitor> pmMon;
     private static Logger logger = Logger.getLogger("org.rioproject.test.monitor");
 
     @Before
@@ -65,17 +65,17 @@ public class UndeployTest  {
                 testManager.startCybernode(i);
             }
             ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-            cyberMon = new ServiceMonitor(sdm, Cybernode.class);
+            cyberMon = new ServiceMonitor<Cybernode>(sdm, Cybernode.class);
             cyberMon.waitFor(N);
 
-            pmMon = new ServiceMonitor(sdm, ProvisionMonitor.class);
+            pmMon = new ServiceMonitor<ProvisionMonitor>(sdm, ProvisionMonitor.class);
             pmMon.waitFor(1);
         }
     }
 
     @Test
     public void testUndeploy() throws Exception {
-        ProvisionMonitor monitor = (ProvisionMonitor) pmMon.getServices().get(0);
+        ProvisionMonitor monitor = pmMon.getServices().get(0);
 
         deployOpString(ServiceElement.ProvisionType.FIXED, 10, monitor);
         checkState("fixed", 10, true);

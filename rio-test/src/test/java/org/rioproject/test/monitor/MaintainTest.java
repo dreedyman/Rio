@@ -52,12 +52,8 @@ public class MaintainTest {
     static Logger logger = Logger.getLogger("org.rioproject.test.monitor");
     @SetTestManager
     static TestManager testManager;
-    static ServiceMonitor cyberMon;
+    static ServiceMonitor<Cybernode> cyberMon;
 
-    /**
-     * The previous <code>maintain</code> value successfully tested.
-     */
-    private int prevMaintainInt = 0;
     /**
      * The previous <code>fixed</code> value successfully tested.
      */
@@ -74,7 +70,7 @@ public class MaintainTest {
                 testManager.startCybernode(i);
             }
             ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-            cyberMon = new ServiceMonitor(sdm, Cybernode.class);
+            cyberMon = new ServiceMonitor<Cybernode>(sdm, Cybernode.class);
             cyberMon.waitFor(cybernodeCount);
         }
     }
@@ -82,9 +78,9 @@ public class MaintainTest {
     @Test
     public void runTest() throws Exception {
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-        ServiceMonitor pmMon = new ServiceMonitor(sdm, ProvisionMonitor.class);
+        ServiceMonitor<ProvisionMonitor> pmMon = new ServiceMonitor<ProvisionMonitor>(sdm, ProvisionMonitor.class);
         pmMon.waitFor(1);
-        ProvisionMonitor monitor = (ProvisionMonitor) pmMon.getServices().get(0);
+        ProvisionMonitor monitor = pmMon.getServices().get(0);
 
         final boolean[] fixedValues = new boolean[] {false, true};
         final int[] maintainValues = new int[]
@@ -113,7 +109,7 @@ public class MaintainTest {
 
         testManager.undeployAll(monitor);
 
-        prevMaintainInt = 0;
+        int prevMaintainInt = 0;
 
         // Prepare OpString
         OpStringLoader loader = new OpStringLoader();

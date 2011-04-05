@@ -106,8 +106,8 @@ public class BackupTest  {
                   + "[" + N + "] Provision Monitors have been started");
 
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-        ServiceMonitor cyMon = new ServiceMonitor(sdm, Cybernode.class);
-        ServiceMonitor pmMon = new ServiceMonitor(sdm, ProvisionMonitor.class);
+        ServiceMonitor<Cybernode> cyMon = new ServiceMonitor<Cybernode>(sdm, Cybernode.class);
+        ServiceMonitor<ProvisionMonitor> pmMon = new ServiceMonitor<ProvisionMonitor>(sdm, ProvisionMonitor.class);
         cyMon.waitFor(N);
         pmMon.waitFor(N);
 
@@ -127,7 +127,7 @@ public class BackupTest  {
                        pms.get(0));
         
         // 3. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
-        ServiceMonitor simpleMon = new ServiceMonitor(sdm, Simple.class);
+        ServiceMonitor<Simple> simpleMon = new ServiceMonitor<Simple>(sdm, Simple.class);
         simpleMon.waitFor(1);
         
         // 4. DO THE MAIN CYCLE
@@ -213,14 +213,14 @@ public class BackupTest  {
         //ProvisionMonitor pm = testManager.startProvisionMonitor(-1);
         testManager.startProvisionMonitor(-1);
         logger.info("Provision Monitor has been started");
-        ServiceMonitor pmMon = new ServiceMonitor(sdm, ProvisionMonitor.class);
+        ServiceMonitor<ProvisionMonitor> pmMon = new ServiceMonitor<ProvisionMonitor>(sdm, ProvisionMonitor.class);
         
         // 2. START CYBERNODE
         logger.info("Starting Cybernode ...");
         //Cybernode cybernode = testManager.startCybernode(-1);
         testManager.startCybernode(-1);
         logger.info("Cybernode has been started");        
-        ServiceMonitor cyMon = new ServiceMonitor(sdm, Cybernode.class);
+        ServiceMonitor<Cybernode> cyMon = new ServiceMonitor<Cybernode>(sdm, Cybernode.class);
 
         pmMon.waitFor(1);
         cyMon.waitFor(1);
@@ -237,7 +237,7 @@ public class BackupTest  {
         
         // 4. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
         //TODO : port Dummy.class
-        ServiceMonitor simpleMon = new ServiceMonitor(sdm, Simple.class);
+        ServiceMonitor<Simple> simpleMon = new ServiceMonitor<Simple>(sdm, Simple.class);
         simpleMon.waitFor(1);
         
         // 5. DO THE MAIN CYCLE

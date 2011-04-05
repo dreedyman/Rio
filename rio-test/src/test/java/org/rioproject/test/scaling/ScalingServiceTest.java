@@ -71,7 +71,7 @@ public class ScalingServiceTest {
     static Logger logger = Logger.getLogger("org.rioproject.test.scaling");
     @SetTestManager
     static TestManager testManager;
-    ServiceMonitor cyberMon;
+    ServiceMonitor<Cybernode> cyberMon;
 
     @BeforeClass
     public static void init() throws Exception {
@@ -79,7 +79,7 @@ public class ScalingServiceTest {
         testManager.startProvisionMonitor();
 
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-        ServiceMonitor pmMon = new ServiceMonitor(sdm, ProvisionMonitor.class);
+        ServiceMonitor<ProvisionMonitor> pmMon = new ServiceMonitor<ProvisionMonitor>(sdm, ProvisionMonitor.class);
         pmMon.waitFor(1);
     }
 
@@ -99,7 +99,7 @@ public class ScalingServiceTest {
         logger.info("[" + N + "] Cybernodes have been started");
         if(cyberMon==null) {
             ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-            cyberMon = new ServiceMonitor(sdm, Cybernode.class);
+            cyberMon = new ServiceMonitor<Cybernode>(sdm, Cybernode.class);
         }
         cyberMon.waitFor(N);
     }
@@ -123,8 +123,7 @@ public class ScalingServiceTest {
 
         // 3. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-        ServiceMonitor servMon = new ServiceMonitor(sdm,
-                                                    SettableLoadService.class);
+        ServiceMonitor<SettableLoadService> servMon = new ServiceMonitor<SettableLoadService>(sdm, SettableLoadService.class);
         servMon.waitFor(1);
         Assert.assertEquals((long)1, (long)servMon.getCount());
 
@@ -186,8 +185,7 @@ public class ScalingServiceTest {
 
         // 3. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
-        ServiceMonitor servMon = new ServiceMonitor(sdm,
-                                                    SettableLoadService.class);
+        ServiceMonitor<SettableLoadService> servMon = new ServiceMonitor<SettableLoadService>(sdm, SettableLoadService.class);
         servMon.waitFor(1);
         Assert.assertEquals((long)1, (long)servMon.getCount());
 
