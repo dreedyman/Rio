@@ -46,6 +46,11 @@ import org.rioproject.tools.cli.CLI.StopHandler
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
+import org.rioproject.resolver.maven2.ArtifactUtils
+import org.rioproject.core.OperationalStringException
+import org.rioproject.resolver.ResolverException
+import org.rioproject.resolver.ResolverHelper
+import org.rioproject.resolver.Resolver
 
 /**
  * Simplifies the running of core Rio services
@@ -83,7 +88,14 @@ class TestManager {
         this.createShutdownHook = createShutdownHook
     }
 
-    def init(TestConfig testConfig) {
+    /**
+     * Initialize the TestManager
+     *
+     * @param testConfig The configuration used to initialize
+     *
+     * @throws IllegalArgumentException if the testConfig is null
+     */
+    public void init(TestConfig testConfig) {
         if(testConfig==null)
             throw new IllegalArgumentException("testConfig cannot be null")
         this.testConfig = testConfig
@@ -136,7 +148,7 @@ class TestManager {
         startConfiguredServices()
     }
 
-    def startConfiguredServices() {
+    private void startConfiguredServices() {
         int lookupCount = testConfig.getNumLookups()-countLookups();
         for(int i=0; i<lookupCount; i++)
             startReggie();
@@ -202,6 +214,13 @@ class TestManager {
         return cybernode
     }
 
+    /**
+     * Starts a Cybernode using the starter configuration obtain from the TestConfig.
+     *
+     * @param hostIndex The index of the host to start on
+     *
+     * @return The started Cybernode
+     */
     Cybernode startCybernode(int hostIndex) {
         def starter = config.manager.cybernodeStarter
         Cybernode cybernode = null
@@ -215,6 +234,11 @@ class TestManager {
         return cybernode
     }
 
+    /**
+     * Starts a ProvisionMonitor using the starter configuration obtain from the TestConfig.
+     *
+     * @return The started ProvisionMonitor
+     */
     ProvisionMonitor startProvisionMonitor() {
         def starter = config.manager.monitorStarter
         ProvisionMonitor monitor = null
@@ -228,6 +252,13 @@ class TestManager {
         return monitor
     }
 
+    /**
+     * Starts a ProvisionMonitor using the starter configuration obtain from the TestConfig.
+     *
+     * @param hostIndex The index of the host to start on
+     *
+     * @return The started ProvisionMonitor
+     */
     ProvisionMonitor startProvisionMonitor(int hostIndex) {
         def starter = config.manager.monitorStarter
         ProvisionMonitor monitor = null
@@ -241,12 +272,25 @@ class TestManager {
         return monitor
     }
 
+    /**
+     * Starts a Webster.
+     *
+     * @param port The port to use
+     * @param dirs Directories to serve
+     *
+     * @return The started Webster
+     */
     Webster startWebster(int port, String dirs) {
         Webster webster = new Webster(port, dirs);
         websters.add(webster);
         return webster;
     }
 
+    /**
+     * Starts a ServiceRegistrar using the starter configuration obtain from the TestConfig.
+     *
+     * @return The started ServiceRegistrar
+     */
     ServiceRegistrar startReggie() {
         def starter = config.manager.reggieStarter
         ServiceRegistrar reggie = null
@@ -260,35 +304,88 @@ class TestManager {
         return reggie
     }
 
+    /**
+     * Deploys the configured OperationalString
+     *
+     * @return The OperationalStringManager that is managing the OperationalString
+     *
+     * @throws OperationalStringException if there are problems deploying
+     */
     OperationalStringManager deploy() {
         Assert.assertNotNull "The OperationalString to deploy has not been "+
                              "set. Check to make sure a corresponding test "+
                              "configuration exists for the class being tested "+
                              "and set the <test-class-name>.opstring property",
                              opStringToDeploy
-        return deploy(new File(opStringToDeploy).toURL())
+        URL opStringURL
+        if(ArtifactUtils.isArtifact(opStringToDeploy)) {
+            opStringURL = ResolverHelper.getInstance().getLocation(opStringToDeploy, "oar", null)
+            if(opStringURL==null)
+                throw new OperationalStringException("Artifact "+opStringToDeploy+" not resolvable");
+        } else {
+            opStringURL = new File(opStringToDeploy).toURI().toURL()
+        }
+        return deploy(opStringURL)
     }
 
+    /**
+     * Deploys an OperationalString
+     *
+     * @param opstring The OperationalString file object
+     *
+     * @return The OperationalStringManager that is managing the OperationalString
+     */
     OperationalStringManager deploy(File opstring) {
         return deploy(opstring.toURL())
     }
 
+    /**
+     * Deploys an OperationalString
+     *
+     * @param opstring The OperationalString file object
+     * @param monitor The ProvisionMonitor to deploy to
+     *
+     * @return The OperationalStringManager that is managing the OperationalString
+     */
     OperationalStringManager deploy(File opstring, ProvisionMonitor monitor) {
         return deploy(opstring.toURL(), monitor)
     }
 
+    /**
+     * Deploys an OperationalString
+     *
+     * @param opstring The URL pointing to the OperationalString
+     *
+     * @return The OperationalStringManager that is managing the OperationalString
+     */
     OperationalStringManager deploy(URL opstring) {
         ProvisionMonitor monitor =
         (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         return deploy(opstring, monitor)
     }
 
+    /**
+     * Deploys an OperationalString
+     *
+     * @param opstring The URL pointing to the OperationalString
+     * @param monitor The ProvisionMonitor to deploy to
+     *
+     * @return The OperationalStringManager that is managing the OperationalString
+     */
     OperationalStringManager deploy(URL opstring, ProvisionMonitor monitor) {
         OpStringLoader loader = new OpStringLoader(getClass().classLoader)
         OperationalString[] opstrings = loader.parseOperationalString(opstring)
         return deploy(opstrings[0], monitor)        
     }
 
+    /**
+     * Deploys an OperationalString
+     *
+     * @param opstring The OperationalString object to deploy
+     * @param monitor The ProvisionMonitor to deploy to
+     *
+     * @return The OperationalStringManager that is managing the OperationalString
+     */
     OperationalStringManager deploy(OperationalString opstring, ProvisionMonitor monitor) {
         DeployAdmin dAdmin = (DeployAdmin)monitor.admin
         dAdmin.deploy(opstring)
@@ -296,6 +393,11 @@ class TestManager {
         return mgr
     }
 
+    /**
+     * Undeploys an OperationalString
+     *
+     * @param name The name of a deployed OperationalString
+     */
     def undeploy(String name) {
         ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
         if(items.length==0) {
@@ -305,6 +407,12 @@ class TestManager {
         undeploy(name, (ProvisionMonitor)items[0].service)
     }
 
+    /**
+     * Undeploys an OperationalString
+     *
+     * @param name The name of a deployed OperationalString
+     * @param monitor The ProvisionMonitor instance to perform the undeployment
+     */
     def undeploy(String name, ProvisionMonitor monitor) {
         if(monitor!=null) {
             DeployAdmin dAdmin = (DeployAdmin)monitor.admin
@@ -314,6 +422,11 @@ class TestManager {
         }
     }
 
+    /**
+     * Undeploy all deployed OperationalString
+     *
+     * @param monitor The ProvisionMonitor instance to perform the undeployment
+     */
     def undeployAll(ProvisionMonitor monitor) {
         DeployAdmin deployAdmin = (DeployAdmin) monitor.getAdmin();
         OperationalStringManager[] opStringMgrs =
@@ -324,6 +437,11 @@ class TestManager {
         }
     }
 
+    /**
+     * Get the OperationalStringManager for an OperationalString that was configured to be autoDeployed
+     *
+     * @return The OperationalStringManager for the automatically deployed OperationalString
+     */
     OperationalStringManager getOperationalStringManager() {
         Assert.assertNotNull "The deployed OperationalStringManager has not "+
                              "been set. This is most likely due to not having "+
@@ -337,21 +455,44 @@ class TestManager {
         return dAdmin.getOperationalStringManager(name)
     }
 
+    /**
+     * Get the OperationalStringManager for a deployment
+     *
+     * @name The name of the deployment
+     *
+     * @return The OperationalStringManager for the deployment
+     */
     OperationalStringManager getOperationalStringManager(String name) {
         ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         DeployAdmin dAdmin = (DeployAdmin)monitor.admin
         return dAdmin.getOperationalStringManager(name)
     }
 
-    def stopCybernode(Object service) {
+    /**
+     * Stop a Cybernode
+     *
+     * @param service The Cybernode service proxy
+     */
+    def stopCybernode(service) {
         stopService(service, "Cybernode")
     }
 
-    def stopProvisionMonitor(Object service) {
+    /**
+     * Stop a ProvisionMonitor
+     *
+     * @param service The ProvisionMonitor service proxy
+     */
+    def stopProvisionMonitor(service) {
         stopService(service, "Monitor") 
     }
 
-    def stopService(Object service, String name) {
+    /**
+     * Stop a service
+     *
+     * @param service The service proxy
+     * @param name The name of the service to stop
+     */
+    def stopService(service, String name) {
         if(service==null)
             throw new IllegalArgumentException("service proxy is null for ${name}")
 
@@ -359,6 +500,9 @@ class TestManager {
         stopHandler.destroyService(service, name, System.out)
     }
 
+    /**
+     * Shutdown all started services
+     */
     def shutdown() {
 
         for(Webster w : websters)
@@ -369,6 +513,10 @@ class TestManager {
         }
     }
 
+    /**
+     * Determine if the Harvester needs to run. This is based on whether the test configuration
+     * indicates that harvesting should occur
+     */
     def maybeRunHarvester() {
         if(testConfig.runHarvester()) {
             ProvisionMonitor monitor
@@ -424,11 +572,18 @@ class TestManager {
         }
     }
 
+    /**
+     * Get a local Harvester instance
+     *
+     * @param dMgr The DiscoveryManagement to use
+     *
+     * @return A {@link org.rioproject.tools.harvest.Harvester} instance
+     */
     def getHarvester(DiscoveryManagement dMgr) {
         return new HarvesterBean(dMgr)
     }
     
-    def exec(String starter) {
+    private void exec(String starter) {
         String classpath = "${PropertyHelper.expandProperties(config.manager.execClassPath)}"
         String jvmOptions = "${PropertyHelper.expandProperties(config.manager.jvmOptions)}"
         if(config.manager.inheritOptions)
@@ -480,7 +635,17 @@ class TestManager {
         processes.add(process)
     }
 
-    def waitForDeployment(OperationalStringManager mgr) {
+    /**
+     * Wait for a deployment to complete. This means to wait for all services
+     * declared to activate and join the network
+     *
+     * @param mgr The OperationalStringManager to connect with to
+     * wait for the deployment to complete
+     *
+     * @throws TimeoutException if the time waiting for the deployment exceeds
+     * {@link ServiceMonitor#MAX_TIMEOUT}
+     */
+    public void waitForDeployment(OperationalStringManager mgr) {
         OperationalString opstring  = mgr.getOperationalString()
         Map<ServiceElement, Integer> deploy = new HashMap<ServiceElement, Integer>()
         int total = 0
@@ -518,19 +683,19 @@ class TestManager {
             throw new TimeoutException("Timeout waiting for service to be deployed");
     }
 
-    int countLookups() {
+    private int countLookups() {
         return countServices(ServiceRegistrar.class)
     }
 
-    int countMonitors() {
+    private int countMonitors() {
         return countServices(ProvisionMonitor.class)
     }
 
-    int countCybernodes() {
+    private int countCybernodes() {
         return countServices(Cybernode.class)
     }
 
-    def countServices(Class serviceInterface) {
+    private int countServices(Class serviceInterface) {
         long t0 = System.currentTimeMillis()
         ServiceItem[] items = getServiceItems(serviceInterface)
         logger.info "Discovered $items.length instances of ${serviceInterface.name}, "+
@@ -538,8 +703,15 @@ class TestManager {
         return items.length
     }
 
-    ServiceItem[] getServiceItems(Class serviceInterface) {
-        def classes = [serviceInterface]
+    /**
+     * Get all ServiceItems for a service
+     *
+     * @param type The service type
+     *
+     * @return An array of ServiceItem instances.
+     */
+    ServiceItem[] getServiceItems(Class type) {
+        def classes = [type]
         ServiceTemplate template = new ServiceTemplate(null, (Class[])classes, null)
         ServiceItem[] items = serviceDiscoveryManager.lookup(template,
                                                              Integer.MAX_VALUE,
@@ -547,12 +719,27 @@ class TestManager {
         return items
     }
 
-    def getServices(Class serviceInterface) {
-        return getServices(serviceInterface, null)
+    /**
+     * Get all service proxy instances
+     *
+     * @param serviceInterface The service type
+     *
+     * @return An array of service proxy instances.
+     */
+    def getServices(Class type) {
+        return getServices(type, null)
     }
 
-    def getServices(Class serviceInterface, String name) {
-        def classes = [serviceInterface]
+    /**
+     * Get all service proxy instances
+     *
+     * @param serviceInterface The service type
+     * @param name The service name to match. If null, return all services for the given type
+     *
+     * @return An array of service proxy instances.
+     */
+    def getServices(Class type, String name) {
+        def classes = [type]
         def attrs = null
         if(name!=null)
             attrs = [new Name(name)]
@@ -566,26 +753,54 @@ class TestManager {
         return services
     }
 
-    def waitForService(Class serviceInterface) {
-        return waitForService(serviceInterface, null)
+    /**
+     * Wait for service to come online
+     *
+     * @param type The service type
+     *
+     * @return The discovered service instance.
+     *
+     * @throws TimeoutException is the service is not discovered in 60 seconds
+     */
+    def waitForService(Class type) {
+        return waitForService(type, null)
     }
 
+    /**
+     * Wait for service to come online
+     *
+     * @param serviceName The name of the service
+     *
+     * @return The discovered service instance.
+     *
+     * @throws TimeoutException is the service is not discovered in 60 seconds
+     */
     def waitForService(String serviceName) {
         return waitForService(null, serviceName)
     }
 
-    def waitForService(Class serviceInterface, String name) {
+    /**
+     * Wait for service to come online
+     *
+     * @param type The service type
+     * @param serviceName The name of the service
+     *
+     * @return The discovered service instance.
+     *
+     * @throws TimeoutException is the service is not discovered in 60 seconds
+     */
+    def waitForService(Class type, String name) {
         def classes = null
-        if(serviceInterface!=null)
-            classes = [serviceInterface]
+        if(type!=null)
+            classes = [type]
         def attrs = null
         if(name!=null)
             attrs = [new Name(name)]
         ServiceTemplate template = new ServiceTemplate(null, (Class[])classes, (Entry[])attrs)
         def service
         StringBuffer sb = new StringBuffer()
-        if(serviceInterface!=null)
-            sb.append(serviceInterface.name)
+        if(type!=null)
+            sb.append(type.name)
         if(name!=null) {
             if(sb.length()>0)
                 sb.append(", ")
@@ -595,7 +810,7 @@ class TestManager {
         long t0 = System.currentTimeMillis()
         ServiceItem serviceItem = serviceDiscoveryManager.lookup(template, null, 60000)
         if (serviceItem == null) {
-            throw new TimeoutException("Unable to discover service ${serviceInterface.name}")
+            throw new TimeoutException("Unable to discover service ${type.name}")
         }
         service = serviceItem.service
         logger.info "${sb.toString()} has been discovered, elapsed time: "+
@@ -603,7 +818,7 @@ class TestManager {
         return service
     }
 
-    def getJava() {
+    private String getJava() {
         StringBuilder jvmBuilder = new StringBuilder();
         jvmBuilder.append(System.getProperty("java.home"));
         jvmBuilder.append(File.separator);
@@ -614,7 +829,7 @@ class TestManager {
         return jvmBuilder.toString();
     }
 
-    def loadManagerConfig() {
+    private def loadManagerConfig() {
         String defaultManagerConfig =
             "jar:file:${Utils.getRioHome()}/lib/rio-test.jar!/default-manager-config.groovy"
         String mgrConfig = System.getProperty('org.rioproject.test.manager.config',
@@ -641,13 +856,13 @@ class TestManager {
         return config
     }
 
-    def getCreatedLogsFile(String testName) {
+    private File getCreatedLogsFile(String testName) {
         File parent = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio")
         File logs = new File(parent, "$testName-test-logs")
         return logs
     }
 
-    def getAndCreateCreatedLogsFile(String testName) {
+    private File getAndCreateCreatedLogsFile(String testName) {
         File dir = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio")
         if(!dir.exists())
             dir.mkdirs()

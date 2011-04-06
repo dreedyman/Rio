@@ -1,4 +1,3 @@
-import org.rioproject.test.memory.OutOfMemoryTest
 
 /*
 * Configuration file for Rio test cases
@@ -116,4 +115,8 @@ EnlistReleaseTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
+}
+
+LoadArtifactAsOpStringTest {
+    opstring = 'org.rioproject.test:deploy-oar-test:1.0'
 }
