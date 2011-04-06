@@ -19,6 +19,9 @@ import org.rioproject.resolver.Artifact
 import org.rioproject.resolver.RemoteRepository
 import java.util.logging.Logger
 import java.util.logging.Level
+import org.rioproject.resolver.Resolver
+import org.rioproject.resolver.ResolverHelper
+import org.rioproject.resolver.ResolverException
 
 /**
  * Some utilities for working with the artifact and URLs.
@@ -26,6 +29,26 @@ import java.util.logging.Level
 class ArtifactUtils {
     static Logger logger = Logger.getLogger(ArtifactUtils.class.getName());
     Map<String, List<String>> failedLookups = new HashMap<String, List<String>>()
+
+    /**
+     * Check to see if the provided string represents an Artifact
+     *
+     * @param s The string to check
+     *
+     * @return true if the string is an artifact, false otherwise
+     * @throws IllegalArgumentException is the provided string is null
+     */
+    public static boolean isArtifact(String s) {
+        if(s==null)
+            throw new IllegalArgumentException("supplied argument cannot be null")
+        boolean isArtifact = true;
+        try {
+            new Artifact(s);
+        } catch (IllegalArgumentException e) {
+            isArtifact = false;
+        }
+        return isArtifact;
+    }
 
     public URL getArtifactPomURLFromRepository(Artifact artifact,
                                                File localRepo,
