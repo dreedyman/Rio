@@ -40,7 +40,9 @@ Release Notes
 
     * {{{http://jira.rio-project.org/browse/RIO-306}RIO-306}} - When changing groups to ALL_GROUPS (or ALL, all, or all_groups) using the CLI, the group is not set correctly
 
-     []
+    * {{{http://jira.rio-project.org/browse/RIO-308}RIO-308}} - RioTestRunner test configuration does not accept a maven artifact id for its opstring
+
+      []
     
     
 **  New Feature
