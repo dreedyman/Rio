@@ -163,7 +163,7 @@ public class ITNotificationUsingArtifactTest {
         sb.append("end").append("\n");
         sb.append("rule \"Counter Notification Rule\"").append("\n");
         sb.append("when").append("\n");
-        sb.append("$count : Calculable(id == \"notification\", value > "+count1+" && < "+count2+") from entry-point \"calculables-stream\"").append("\n");
+        sb.append("$count : Calculable(id == \"notification\", value > ").append(count1).append(" && < ").append(count2).append(") from entry-point \"calculables-stream\"").append("\n");
         sb.append("then").append("\n");
         sb.append("    System.out.println(\"===> Test has been notified : \"+$count);").append("\n");
         sb.append("    TestService t = context.getService(\"Test\", TestService.class);").append("\n");

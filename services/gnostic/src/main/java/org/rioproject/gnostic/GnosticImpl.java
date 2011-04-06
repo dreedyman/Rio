@@ -31,6 +31,7 @@ import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.resolver.maven2.ArtifactUtils;
 import org.rioproject.sla.RuleMap;
 
 import java.io.File;
@@ -327,11 +328,10 @@ public class GnosticImpl implements Gnostic {
                 ruleMap.getRuleDefinition().getRuleClassPath();
             if (ruleClassPath != null) {
                 String[] classPath;
-                if (isArtifact(ruleClassPath)) {
-                    String[] cp = ResolverHelper.getInstance().getClassPathFor(
-                        ruleClassPath,
-                        (File) null,
-                        true);
+                if (ArtifactUtils.isArtifact(ruleClassPath)) {
+                    String[] cp = ResolverHelper.getInstance().getClassPathFor(ruleClassPath,
+                                                                               (File) null,
+                                                                               true);
                     classPath = new String[cp.length];
                     for (int i = 0; i < classPath.length; i++) {
                         String s =
@@ -363,15 +363,6 @@ public class GnosticImpl implements Gnostic {
             }
         }
 
-        private boolean isArtifact(String s) {
-            boolean isArtifact = true;
-            try {
-                new Artifact(s);
-            } catch (IllegalArgumentException e) {
-                isArtifact = false;
-            }
-            return isArtifact;
-        }
     }
 
     class RuleMapNotificationListener implements RuleMapListener {
