@@ -204,7 +204,7 @@ public class PomParser {
                     }
                 } else if(depVersion.equals('${pom.version}')) {
                     depVersion = pomVersion
-                } else if(depVersion.equals('${project.version}')) {
+                } else if(depVersion.equals('${project.version}') || depVersion.equals('${project.parent.version}')) {
                     depVersion = pomVersion
                 }
                 if(scope.length()==0 && depManagementInfo!=null) {
