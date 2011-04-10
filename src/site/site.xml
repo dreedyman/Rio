@@ -16,8 +16,6 @@
 		<version>1.0</version>
 	</skin>
 
-
-
 	<body>        
         <menu name="Main">
 			<item name="Welcome" href="./index.html"/>
@@ -56,7 +54,14 @@
 		</menu>
 
         <menu name="Examples">
-            <item name="Overview" href="./examples/index.html"/>
+            <item name="Overview" href="./examples/index.html">
+                <item name="Calculator" href="./examples/calculator/index.html"/>
+                <item name="Events" href="./examples/events/index.html"/>
+                <item name="Hospital" href="./examples/hospital/index.html"/>
+                <item name="Spring" href="./examples/springbean/index.html"/>
+                <item name="Tomcat" href="./examples/tomcat/index.html"/>
+                <item name="Workflow" href="./examples/workflow/index.html"/>
+            </item>
         </menu>
 
         <menu name="Support" collapse="true">

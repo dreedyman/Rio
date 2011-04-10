@@ -42,6 +42,7 @@ Release Notes
 
     * {{{http://jira.rio-project.org/browse/RIO-308}RIO-308}} - RioTestRunner test configuration does not accept a maven artifact id for its opstring
 
+    * {{{http://jira.rio-project.org/browse/RIO-309}RIO-309}} - Pom properties used in dependency version numbers are not resolved at deploy time
       []
     
     
