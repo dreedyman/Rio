@@ -10,6 +10,7 @@
     <artifactId>rio-archetype</artifactId>
     <name>Module :: Rio Maven Archetype</name>    
     <packaging>maven-archetype</packaging>
+    <description>A custom Maven archetype for creating a Rio project.</description>
 
     <build>
         <extensions>
