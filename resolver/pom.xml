@@ -29,13 +29,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.rioproject</groupId>
-            <artifactId>rio-test</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
         </dependency>
