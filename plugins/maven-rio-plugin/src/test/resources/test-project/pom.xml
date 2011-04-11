@@ -1,0 +1,51 @@
+<project 
+        xmlns="http://maven.apache.org/POM/4.0.0" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>CustomerService</artifactId>
+    <name>Customer Service</name>
+    <packaging>oar</packaging>
+    <version>1.0.0</version>
+   
+
+    <dependencies>
+        <dependency>
+           <groupId>org.rioproject</groupId>
+           <artifactId>boot</artifactId>
+           <version>4.1</version>
+           <type>pom</type>
+           <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rio-plugin</artifactId>
+
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- BEGIN default values set by Maven mechanism -->
+                    <project implementation="org.rioproject.tools.maven.ProjectStub" />
+                    <!-- END default values set by Maven mechanism -->
+                    <opstring>opstring/phony.groovy</opstring>
+                    <createJar>
+                        <classifier>dl</classifier>
+                        <in>com.vibrantmedia.customerservice.mozart</in>
+                        <topclasses>
+                            <topClass>com.vibrantmedia.customerservice.mozart.CustomerService</topClass>
+                        </topclasses>
+                    </createJar>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
