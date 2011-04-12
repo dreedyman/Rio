@@ -32,8 +32,8 @@ import org.rioproject.test.ServiceMonitor;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.rioproject.test.simple.Simple;
+import org.rioproject.test.utils.ArrayUtils;
 import org.rioproject.test.utils.CybernodeUtils;
-import org.rioproject.test.watch.ArrayUtils;
 
 import java.io.File;
 import java.rmi.RemoteException;

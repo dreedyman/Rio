@@ -16,27 +16,27 @@
     <dependencies>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio-cli</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>webster</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>cybernode</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -70,6 +70,7 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <excludes>
                         <exclude>**/*.java</exclude>
@@ -78,16 +79,16 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>failsafe-maven-plugin</artifactId>
-                <version>2.4.3-alpha-1</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.8</version>
                 <configuration>
                     <forkMode>always</forkMode>
 
                     <systemProperties>
                         <property>
                             <name>RIO_HOME</name>
-                            <value>${basedir}/../distribution/target/rio-${version}</value>
+                            <value>${basedir}/../distribution/target/rio-${project.version}</value>
                         </property>
                         <property>
                             <name>RIO_TEST_HOME</name>
@@ -109,8 +110,6 @@
 
                     <excludes>
                         <exclude>**/*$*</exclude>
-                        <exclude>**/ThresholdWatchTest.java</exclude>
-                        <exclude>**/WatchTest.java</exclude>
                     </excludes>
 
                 </configuration>
@@ -125,8 +124,12 @@
             </plugin>            
             
             <plugin>
-                <groupId>org.codehaus.groovy.maven</groupId>
+               <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
+                <version>1.3</version>
+                <configuration>
+                    <providerSelection>1.7</providerSelection>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
