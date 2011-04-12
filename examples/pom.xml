@@ -13,6 +13,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -50,6 +51,15 @@
             <url>http://www.rio-project.org/maven2</url>
         </pluginRepository>
     </pluginRepositories>
+
+
+    <distributionManagement>
+        <repository>
+            <id>rio</id>
+            <name>Rio Repository</name>
+            <url>scp://www.rio-project.org/var/www/maven2</url>
+        </repository>
+    </distributionManagement>
 
     <repositories>
         <repository>
