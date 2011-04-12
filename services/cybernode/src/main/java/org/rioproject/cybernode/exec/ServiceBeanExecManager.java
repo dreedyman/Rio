@@ -246,6 +246,8 @@ public class ServiceBeanExecManager {
 
         } catch (Exception e) {
             unregister(regPort, serviceBindName);
+            logger.info("Terminate process for ServiceBean ["+serviceBindName+"]");
+            manager.destroy(true);
             throw e;
         }
         return instance;
