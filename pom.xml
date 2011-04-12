@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>4.2-SNAPSHOT</version>
+    <version>4.2</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -48,20 +48,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
+                 <version>2.2</version>
                 <inherited>false</inherited>
                 <reportSets>
                     <reportSet>
                         <reports>
-                            <!--
-                            <report>dependencies</report>
-                            <report>dependency-convergence</report>
-                             -->
+                            <!--<report>dependencies</report>
+                            <report>dependency-convergence</report>-->
                             <report>dependency-management</report>
-                            <!--
                             <report>plugin-management</report>
-                            -->
-                            <report>modules</report>
-                            <report>cim</report>
+                            <!--<report>modules</report>-->
+                            <!--<report>cim</report>-->
                             <report>issue-tracking</report>
                             <report>mailing-list</report>
                             <report>license</report>
@@ -79,14 +76,8 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.2</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.7</version>
                 <inherited>false</inherited>
                 <configuration><aggregate>true</aggregate></configuration>
                 <reportSets>
@@ -95,11 +86,11 @@
                         <configuration>
                             <links>
                                 <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
-                                <link>https://hudson.apache.org/hudson/view/River/job/River-trunk/javadoc/api/index.html</link>
+                                <link>https://river.apache.org/doc/api/</link>
                             </links>
                             <detectLinks>true</detectLinks>
                             <breakiterator>true</breakiterator>
-                            <top><![CDATA[<h2>Rio Project ${pom.version} API Documentation</h2>]]></top>
+                            <top><![CDATA[<h2>Rio Project ${project.version} API Documentation</h2>]]></top>
                             <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
                             <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.cybernode.ui:org.rioproject.monitor.ui:org.rioproject.tools.ui:org.rioproject.tools.discovery</excludePackageNames>
                         </configuration>
@@ -109,15 +100,6 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <!--
-            <plugin>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <inherited>false</inherited>
-                <configuration>
-                    <aggregate>true</aggregate>
-                </configuration>
-            </plugin>
-            -->
         </plugins>
     </reporting>
 
@@ -125,10 +107,16 @@
         <mailingList>
             <name>Rio User List</name>
             <archive>http://groups.google.com/group/rio-users</archive>
+            <subscribe>http://groups.google.com/group/rio-users</subscribe>
+            <unsubscribe>http://groups.google.com/group/rio-users</unsubscribe>
+            <post>http://groups.google.com/group/rio-users</post>
         </mailingList>
         <mailingList>
             <name>Rio Developer List</name>
+            <subscribe>http://groups.google.com/group/rio-dev</subscribe>
+            <unsubscribe>http://groups.google.com/group/rio-dev</unsubscribe>
             <archive>http://groups.google.com/group/rio-dev</archive>
+            <post>http://groups.google.com/group/rio-dev</post>
         </mailingList>
     </mailingLists>
 
@@ -147,6 +135,52 @@
     <contributors>
         <contributor>
             <name>Jerome Bernard</name>
+            <organization>Kalixia</organization>
+            <timezone>+1</timezone>
+        </contributor>
+        <contributor>
+            <name>Ron Bowers</name>
+            <organization>Army Research Laboratories</organization>
+            <timezone>-5</timezone>
+            <organizationUrl>http://www.arl.army.mil/</organizationUrl>
+        </contributor>
+         <contributor>
+            <name>Rob Englander</name>
+            <organization>Vibrant Media</organization>
+             <timezone>-5</timezone>
+        </contributor>
+        <contributor>
+            <name>John Sarman</name>
+            <organization>Sarmin Enterprises</organization>
+        </contributor>
+        <contributor>
+            <name>Jeff Ramsdale</name>
+            <timezone>-8</timezone>
+        </contributor>
+        <contributor>
+            <name>Mauricio Salatino</name>
+            <organization>Plugtree</organization>
+            <organizationUrl>http://www.plugtree.com</organizationUrl>
+            <url>http://salaboy.wordpress.com/</url>
+            <timezone>-3</timezone>
+        </contributor>
+        <contributor>
+            <name>Fabrizio Giuduci</name>
+            <organization>Tidalwave</organization>
+            <organizationUrl>http://bluemarine.tidalwave.it/</organizationUrl>
+            <timezone>+1</timezone>
+            <url>http://www.java.net/blogs/fabriziogiudici/</url>
+        </contributor>
+        <contributor>
+            <name>Jim Clarke</name>
+            <organization>Oracle</organization>
+            <timezone>-5</timezone>
+        </contributor>
+        <contributor>
+            <name>Larry Mitchell</name>
+        </contributor>
+        <contributor>
+            <name>Kevin Hartig</name>
         </contributor>
     </contributors>
 
@@ -263,16 +297,34 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>2.1.1</version>
+                <version>3.0-beta-3</version>
                 <inherited>false</inherited>
+
                 <configuration>
                     <locales>en</locales>
                     <outputDirectory>${basedir}/docs</outputDirectory>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-descriptor</id>
+                        <goals>
+                            <goal>attach-descriptor</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.rioproject</groupId>
+                        <artifactId>maven-rio-skin</artifactId>
+                        <version>1.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -284,11 +336,16 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
+                <version>2.5</version>
             </plugin>
         </plugins>
+        <extensions>
+	        <extension>
+		        <groupId>org.apache.maven.wagon</groupId>
+		        <artifactId>wagon-ssh</artifactId>
+		        <version>1.0-beta-6</version>
+		      </extension>
+	    </extensions>
     </build>
 
     <modules>
@@ -303,13 +360,14 @@
         <module>rio-test</module>
         <module>examples</module>
         <module>distribution</module>
-  </modules>
+    </modules>
 
     <properties>
-        <rio.version>4.2-SNAPSHOT</rio.version>
+        <rio.version>4.2</rio.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    
+
 </project>

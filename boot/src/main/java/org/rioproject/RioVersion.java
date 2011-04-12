@@ -27,7 +27,7 @@ import java.net.URL;
  */
 public class RioVersion {
     /** Current version of Rio */ 
-    public static final String VERSION = "4.2-SNAPSHOT";
+    public static final String VERSION = "4.2";
 
     /**
      * Get the build number.

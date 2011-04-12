@@ -3,8 +3,8 @@ import org.rioproject.config.Constants
 deployment(name: 'Gnostic') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject:gnostic:4.2-SNAPSHOT'
-    artifact id: 'service-dl', 'org.rioproject:gnostic:dl:4.2-SNAPSHOT'
+    artifact id: 'service', 'org.rioproject:gnostic:4.2'
+    artifact id: 'service-dl', 'org.rioproject:gnostic:dl:4.2'
 
     service(name: 'Gnostic') {
         interfaces {

@@ -6,7 +6,7 @@
     <parent>
         <artifactId>services</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2-SNAPSHOT</version>
+        <version>4.2</version>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>monitor</artifactId>
@@ -16,9 +16,9 @@
     <dependencies>
 
 	    <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>resolver</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
         
         <dependency>
@@ -46,7 +46,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rio-plugin</artifactId>
                 <extensions>true</extensions>
-                <version>4.1</version>
+                <version>4.2</version>
 
                 <configuration>
                     <createJars>
@@ -56,8 +56,8 @@
                             </ins>
                             <manifest>
                                 <Implementation-Title>Rio Project</Implementation-Title>
-                                <Implementation-Version>${version}</Implementation-Version>
-                                <Rio-Version>${version}</Rio-Version>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Rio-Version>${project.version}</Rio-Version>
                                 <Rio-Build>${maven.build.timestamp}</Rio-Build>
                             </manifest>
                             <topclasses>
@@ -75,8 +75,8 @@
                             <preferredlist>${basedir}/src/main/resources/META-INF/PREFERRED.LIST</preferredlist>
                             <manifest>
                                 <Implementation-Title>Rio Project</Implementation-Title>
-                                <Implementation-Version>${version}</Implementation-Version>
-                                <Rio-Version>${version}</Rio-Version>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Rio-Version>${project.version}</Rio-Version>
                                 <Rio-Build>${maven.build.timestamp}</Rio-Build>
                             </manifest>
                             <ins>

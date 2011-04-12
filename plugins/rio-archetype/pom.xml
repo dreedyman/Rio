@@ -3,7 +3,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2-SNAPSHOT</version>
+        <version>4.2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject</groupId>

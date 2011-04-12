@@ -13,7 +13,7 @@
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio</artifactId>
-            <version>4.2-SNAPSHOT</version>
+            <version>4.2</version>
         </dependency>        
     </dependencies>
 

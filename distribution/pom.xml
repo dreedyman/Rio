@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2-SNAPSHOT</version>
+        <version>4.2</version>
     </parent>
     <artifactId>distribution</artifactId>
     <name>Rio Distribution</name>
@@ -15,79 +15,79 @@
     <dependencies>
        
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <classifier>dl</classifier>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <classifier>ui</classifier>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio-cli</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio-ui</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio-test</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>webster</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>cybernode</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>cybernode</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <classifier>dl</classifier>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>cybernode</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <classifier>ui</classifier>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>monitor</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>monitor</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
             <classifier>dl</classifier>
         </dependency>
 
@@ -118,7 +118,7 @@
                     <descriptors>
                         <descriptor>assembly.xml</descriptor>
                     </descriptors>
-                    <finalName>rio-${pom.version}</finalName>
+                    <finalName>rio-${project.version}</finalName>
                     <appendAssemblyId>true</appendAssemblyId>
                     <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
                 </configuration>
@@ -172,7 +172,7 @@
                                         <copy todir="${staging.dir}/izpack">
                                             <fileset dir="${basedir}/src/izpack"/>
                                             <filterset>
-                                                <filter token="VERSION" value="${pom.version}"/>
+                                                <filter token="VERSION" value="${project.version}"/>
                                             </filterset>
                                         </copy>
 
@@ -210,8 +210,8 @@
                                 <configuration>
                                     <tasks>
                                         <!-- Zip up the release  -->
-                                        <property name="release.archive" value="rio-${pom.version}"/>
-                                        <property name="dist.version" value="${pom.version}"/>
+                                        <property name="release.archive" value="rio-${project.version}"/>
+                                        <property name="dist.version" value="${project.version}"/>
                                         <ant antfile="${basedir}/ziprelease.xml" target="release"/>                                                                                
                                     </tasks>
                                 </configuration>
@@ -235,7 +235,7 @@
                                 <configuration>
                                     <!--<izpackBasedir>${staging.dir}/izpack</izpackBasedir>
                                     <customPanelDirectory>${staging.dir}/izpack</customPanelDirectory>-->
-                                    <installerFile>${project.build.directory}/rio-${pom.version}-installer.jar</installerFile>
+                                    <installerFile>${project.build.directory}/rio-${project.version}-installer.jar</installerFile>
                                 </configuration>
                             </execution>
                         </executions>
@@ -290,8 +290,8 @@
                                 <configuration>
                                     <tasks>
                                         <!-- Zip up the release  -->
-                                        <property name="release.archive" value="distribution-${pom.version}"/>
-                                        <property name="dist.version" value="${pom.version}"/>
+                                        <property name="release.archive" value="distribution-${project.version}"/>
+                                        <property name="dist.version" value="${project.version}"/>
                                         <ant antfile="${basedir}/ziprelease.xml" target="release"/>
                                     </tasks>
                                 </configuration>

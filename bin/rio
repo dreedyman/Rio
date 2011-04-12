@@ -168,7 +168,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=4.2-SNAPSHOT
+    -DarchetypeVersion=4.2
 else
     # Set system properties
     PROPS="-DRIO_HOME=$RIO_HOME"

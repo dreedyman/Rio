@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2-SNAPSHOT</version>
+        <version>4.2</version>
     </parent>
     <packaging>pom</packaging>
     <groupId>org.rioproject</groupId>
@@ -21,9 +21,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -480,8 +480,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     ServiceResource[] getServiceResources() {
         LeasedResource[] resources;
         synchronized(collectionLock) {
-            resources = collection.toArray(
-                                       new LeasedResource[collection.size()]);
+            resources = collection.toArray(new LeasedResource[collection.size()]);
         }
         ServiceResource[] svcResources = new ServiceResource[resources.length];
         for(int i=0; i<svcResources.length; i++)

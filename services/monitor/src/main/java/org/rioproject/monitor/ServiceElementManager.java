@@ -1433,11 +1433,9 @@ public class ServiceElementManager implements InstanceIDManager {
         ServiceChannel.getInstance().unsubscribe(serviceChannelClient);
         /* Remove service from TestManager instances */
         if(svcElement.getProvisionType()==ProvisionType.DYNAMIC)
-            provisioner.getPendingManager().
-                removeServiceElement(svcElement);
+            provisioner.getPendingManager().removeServiceElement(svcElement);
         else
-            provisioner.getFixedServiceManager().
-                removeServiceElement(svcElement);
+            provisioner.getFixedServiceManager().removeServiceElement(svcElement);
         /* Terminate the LookupCache and ServiceDiscoveryManagement
          * instances */
         if(lCache!=null && sElemListener!=null) {
@@ -1654,9 +1652,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     removeInstanceID(instance.getServiceBeanConfig().getInstanceID(), "clean");
             }
         } catch (Exception e) {
-            mgrLogger.log(Level.WARNING,
-                          "Getting ServiceBeanInstance",
-                          e);
+            mgrLogger.log(Level.WARNING, "Getting ServiceBeanInstance", e);
         }
         if(instance==null) {
             if(mgrLogger.isLoggable(Level.FINEST)) {

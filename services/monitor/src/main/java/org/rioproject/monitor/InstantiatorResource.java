@@ -324,7 +324,7 @@ public class InstantiatorResource {
     /**
      * Remove (decrement) a ServiceElement instance in the serviceElementMap.
      * If the ServiceElement exists in the table decrease it's instance counter
-     * by one. If the ServiceElement instances counter is decremenetd to zero,
+     * by one. If the ServiceElement instances counter is decremented to zero,
      * remove the ServiceElement from the serviceElementMap
      * 
      * @param sElem The ServiceElement instance to decrease

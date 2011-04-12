@@ -6,7 +6,7 @@
     <parent>
         <artifactId>tools</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2-SNAPSHOT</version>
+        <version>4.2</version>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>rio-ui</artifactId>
@@ -15,15 +15,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>resolver</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
 		<dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>webster</artifactId>
-            <version>${pom.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
 		<dependency>
