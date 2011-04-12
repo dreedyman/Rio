@@ -32,6 +32,7 @@ import javax.management.NotificationListener;
 import java.lang.management.MemoryNotificationInfo;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -217,7 +218,7 @@ public class Memory extends MeasurableCapability {
     }
 
     class JMXNotificationListener implements NotificationListener {
-        private final ExecutorService pool = Executors.newSingleThreadExecutor();
+        private final ExecutorService pool = Executors.newCachedThreadPool();
 
         ExecutorService getPool() {
             return pool;
@@ -225,6 +226,7 @@ public class Memory extends MeasurableCapability {
 
         public void handleNotification(Notification notification, Object handback) {
             if (notification.getType().equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
+                try {
                 pool.execute(new Runnable() {
                     public void run() {
                         CalculableMemory calculableMemory = createCalculableMemory();
@@ -240,6 +242,11 @@ public class Memory extends MeasurableCapability {
                         addWatchRecord(createCalculableMemory());
                     }
                 });
+                } catch(RejectedExecutionException e) {
+                    logger.log(Level.WARNING,
+                               "Unable to send JMX notification of LOW_MEMORY indication, " +
+                               "RejectedExecutionException: "+e.getMessage(), e);
+                }
             }
         }
     }    
