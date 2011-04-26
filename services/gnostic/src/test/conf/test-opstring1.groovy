@@ -23,7 +23,7 @@ deployment(name: 'Test Deploy 2') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    include 'org.rioproject:gnostic:4.2'
+    include 'org.rioproject:gnostic:4.3-SNAPSHOT'
 
     //logging {
     //    logger 'org.rioproject.associations', Level.FINEST
