@@ -1,8 +1,7 @@
 #!/bin/sh
 
 find_children() {
-    for child in $(ps xo pid,ppid | grep $pid | \
-       awk "{ if ( \$2 == $pid ) { print \$1 }}")
+    for child in `ps ${psOptions} pid,ppid | grep $pid | awk '{ if ( $2 == "$pid" ) { print $1 }}'`
     do
       pids="$child $pids"
       pid=$child

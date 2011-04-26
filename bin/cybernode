@@ -3,9 +3,9 @@
 # This script is a wrapper around the "rio" script, and provides the command
 # line instruction to start the Rio Cybernode
 
-scriptDir="$(dirname $0)"
+scriptDir="`dirname $0`"
 
 if [ -z "$RIO_HOME" ]; then
-    export RIO_HOME=$scriptDir/..
+    export RIO_HOME; RIO_HOME=$scriptDir/..
 fi
 $RIO_HOME/bin/rio start cybernode $*

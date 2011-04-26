@@ -3,7 +3,7 @@
 # This script provides the command and control utility for starting
 # Rio services and the Rio command line interface.
 
-scriptDir="$(dirname $0)"
+scriptDir="`dirname $0`"
 scriptName=`basename "$0"`
 scriptPath="$scriptDir/$scriptName"
 command_line=$*
@@ -31,7 +31,7 @@ if [ -z "$RIO_HOME" ] ; then
 fi
 
 # Convert to absolute path
-RIO_HOME=$(cd "$RIO_HOME" && pwd)
+RIO_HOME=`cd "$RIO_HOME" && pwd`
 
 RIO_LIB=$RIO_HOME/lib
 
@@ -105,7 +105,7 @@ fi
 # Otherwise invoke the CLI
 if [ "$start" = "1" ]; then
     if [ -z "$RIO_NATIVE_DIR" ] ; then
-        RIO_NATIVE_DIR="$(toNative $RIO_LIB/native)"
+        RIO_NATIVE_DIR="`toNative $RIO_LIB/native`"
     fi
     
     if [ -d $RIO_NATIVE_DIR ]; then
@@ -118,14 +118,15 @@ if [ "$start" = "1" ]; then
             if [ "$cygwin" = "1" ] ; then
                 libpath="-Djava.library.path=$RIO_NATIVE_DIR"
             else
-                export LD_LIBRARY_PATH=$RIO_NATIVE_DIR:$LD_LIBRARY_PATH
+		        # do export the "sh" way in case the system does not have bash as /bin/sh
+                export LD_LIBRARY_PATH; LD_LIBRARY_PATH=$RIO_NATIVE_DIR:$LD_LIBRARY_PATH
                 libpath="-Djava.library.path=$RIO_NATIVE_DIR"
             fi
         fi
         USER_OPTS="-DRIO_NATIVE_DIR=$RIO_NATIVE_DIR $USER_OPTS"
     fi
-    classpath="-cp $(toNative $RIO_LIB/boot.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar)"
-    agentpath="-javaagent:$(toNative $RIO_LIB/boot.jar)"
+    classpath="-cp `toNative $RIO_LIB/boot.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar`"
+    agentpath="-javaagent:`toNative $RIO_LIB/boot.jar`"
     launchTarget=com.sun.jini.start.ServiceStarter
     if [ -z "$1" ] ; then
         echo "A service to start is required, exiting"
@@ -168,14 +169,14 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=4.2
+    -DarchetypeVersion=4.3-SNAPSHOT
 else
     # Set system properties
     PROPS="-DRIO_HOME=$RIO_HOME"
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
     cliExt="$RIO_HOME/config/tools.groovy"
     launchTarget=org.rioproject.tools.cli.CLI
-    classpath="-cp $(toNative $RIO_LIB/rio-cli.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar)"
+    classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar`"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         $PROPS \

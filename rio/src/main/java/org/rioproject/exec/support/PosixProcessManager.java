@@ -19,6 +19,7 @@ import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
 import org.rioproject.resources.util.StreamRedirector;
 import org.rioproject.resources.util.FileUtils;
+import org.rioproject.system.OperatingSystemType;
 
 import java.io.*;
 import java.net.URL;
@@ -204,8 +205,13 @@ public class PosixProcessManager extends ProcessManager {
         String str;
         BufferedReader in =
             new BufferedReader(new InputStreamReader(url.openStream()));
+        String psOptions = "xo";
+        if(OperatingSystemType.isSolaris())
+            psOptions = "-e -o";
         while ((str = in.readLine()) != null) {
-            sb.append(Util.replace(str, "${pid}", sPid)).append("\n");
+            str = Util.replace(str, "${psOptions}", psOptions);
+            str = Util.replace(str, "${pid}", sPid);
+            sb.append(str).append("\n");
         }
         in.close();
 

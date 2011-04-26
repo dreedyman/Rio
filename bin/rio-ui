@@ -3,8 +3,7 @@
 # Launches the Rio UI
 #
 
-scriptDir="$(dirname $0)"
-
+scriptDir="`dirname $0`"
 if [ -z "$RIO_HOME" ] ; then
     if [ "$scriptDir" = "bin" ] ; then
         path_to_jar="lib/rio-ui.jar"

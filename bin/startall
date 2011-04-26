@@ -5,9 +5,9 @@
 # line instruction to start all required Rio services
 # (Cybernode, Monitor & Lookup)
 
-scriptDir="$(dirname $0)"
+scriptDir="`dirname $0`"
 
 if [ -z "$RIO_HOME" ]; then
-    export RIO_HOME=$scriptDir/..
+    export RIO_HOME; RIO_HOME="$scriptDir/.."
 fi
 $RIO_HOME/bin/rio start all $*

@@ -73,7 +73,7 @@ import java.util.logging.Logger;
  * <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>
  * is used to traverse the process tree to identify the parent process that
  * exec'd the child JVM. If the parent process can be identified
- * (see {@link org.rioproject.system.measurable.SigarHelper#matchChild} the
+ * (see {@link org.rioproject.system.measurable.SigarHelper#matchChild(int, String[])} the
  * <tt>ServiceExecutor</tt> will attach to the JVM, and monitor CPU and Memory
  * utilization. <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>
  * is also used to monitor the real memory used by the exec'd JVM.
@@ -307,6 +307,43 @@ public class ServiceExecutor {
                 waited++;
             }
         }
+        if(actualPID==-1) {
+            long managedPID = processManager.getPid();
+            long waited = 0;
+            long t0 = System.currentTimeMillis();
+            while(waited < 5) {
+                String[] ids = JMXConnectionUtil.listIDs();
+                StringBuffer s = new StringBuffer();
+                for(int i=0; i<ids.length; i++) {
+                    if(i>0)
+                        s.append(", ");
+                    s.append(ids[i]);
+                }
+                System.out.println("JMX pids: ["+s.toString()+"]");
+                long[] pids = new long[ids.length];
+                for(int i=0; i<ids.length; i++)
+                    pids[i] = new Long(ids[i]);
+
+                /* First check to see if the actualPID is in the list of JMX managed pids */
+                for(long pid : pids) {
+                    if(pid==managedPID) {
+                        actualPID = managedPID;
+                        long t1 = System.currentTimeMillis();
+                        System.out.println("Time waiting for process to be under JMX management: "+(t1/t0)+" milliseconds");
+                        break;
+                    }
+                }
+                if(actualPID!=-1)
+                    break;
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    logger.log(Level.WARNING, "Waiting for pid to appear under JMX management, abort wait", e);
+                    break;
+                }
+                waited++;
+            }
+        }
         if(sigar!=null) {
             if(actualPID==-1) {
                 logger.info("Try to obtain actual pid of exec'd process using SIGAR");
@@ -314,7 +351,8 @@ public class ServiceExecutor {
                 actualPID = sigar.matchChild(processManager.getPid(), ids);
             }
         } else {
-            logger.warning("No SIGAR support available, unable to obtain PID");
+            if(actualPID==-1)
+                logger.warning("No SIGAR support available, unable to obtain PID");
         }
         if(actualPID!=-1) {
             logger.info("PID of exec'd process obtained: "+actualPID);

@@ -47,7 +47,7 @@ public class PosixShell implements Shell {
     }
 
     /**
-     * @see org.rioproject.exec.Shell#exec
+     * @see org.rioproject.exec.Shell#exec(org.rioproject.exec.ExecDescriptor)
      */
     public ProcessManager exec(ExecDescriptor execDescriptor) throws IOException {
         String commandLine = execDescriptor.getCommandLine();
