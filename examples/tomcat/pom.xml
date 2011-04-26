@@ -4,11 +4,11 @@
     <parent>
         <artifactId>examples</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>2.0</version>
+        <version>2.0.1</version>
     </parent>
     <groupId>org.rioproject.examples</groupId>
     <artifactId>tomcat</artifactId>
-    <version>2.0</version>
+    <version>2.0.1</version>
     <packaging>oar</packaging>
     <name>Example :: Tomcat</name>
 
@@ -37,7 +37,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rio-plugin</artifactId>
-                <version>4.2</version>
+                <version>${rio.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <opstring>src/main/opstring/tomcat.groovy</opstring>

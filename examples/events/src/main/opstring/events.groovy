@@ -7,12 +7,12 @@ deployment(name:'Events Example') {
 
     /* The artifact the back end service requires to instantiate can
      * be done once and referenced using the identifier 'service' */
-    artifact id: 'service', 'org.rioproject.examples.events:events-service:2.0'
+    artifact id: 'service', 'org.rioproject.examples.events:events-service:2.0.1'
 
     /* Declaring the artifact clients need to communicate with the service can
      * be done once and referenced using the identifier 'client'. Note the
      * classifier of 'dl' */
-    artifact id: 'client', 'org.rioproject.examples.events:events-proxy:2.0'
+    artifact id: 'client', 'org.rioproject.examples.events:events-proxy:2.0.1'
 
     /*
      * The following declaration sets the logger level for the example

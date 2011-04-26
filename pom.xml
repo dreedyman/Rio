@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>4.2</version>
+    <version>4.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -197,6 +197,11 @@
             <id>rio</id>
             <url>http://www.rio-project.org/maven2</url>
         </repository>
+
+        <repository>
+            <id>jboss</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public</url>
+        </repository>
     </repositories>
 
     <!-- Needed if you are building Rio for the first time -->
@@ -363,11 +368,33 @@
     </modules>
 
     <properties>
-        <rio.version>4.2</rio.version>
+        <rio.version>4.3-SNAPSHOT</rio.version>
+        <rio.plugin.version>4.2</rio.plugin.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <profiles>
+        <profile>
+		    <id>default-tools.jar</id>
+		    <activation>
+			    <property>
+				    <name>java.vendor</name>
+				    <value>Sun Microsystems Inc.</value>
+			    </property>
+		    </activation>
+		    <dependencies>
+			    <dependency>
+				    <groupId>com.sun</groupId>
+				    <artifactId>tools</artifactId>
+				    <version>1.5.0</version>
+				    <scope>system</scope>
+				    <systemPath>${java.home}/../lib/tools.jar</systemPath>
+			    </dependency>
+		    </dependencies>
+	    </profile>
+    </profiles>
 
 </project>

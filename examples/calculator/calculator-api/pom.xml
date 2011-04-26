@@ -5,13 +5,11 @@
     <parent>
         <groupId>org.rioproject.examples</groupId>
         <artifactId>calculator</artifactId>
-        <version>2.0</version>
+        <version>2.0.1</version>
     </parent>
 
     <groupId>org.rioproject.examples.calculator</groupId>
     <artifactId>calculator-api</artifactId>
     <name>Example :: Calculator API</name>
-
-
 
 </project>

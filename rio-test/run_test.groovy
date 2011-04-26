@@ -1,9 +1,18 @@
 #!/usr/bin/env groovy
 
+def rioVersion() {
+    String version = "unknown"
+    File rioPom = new File("../", "pom.xml")
+    if(rioPom.exists()) {
+        def pom = new XmlSlurper().parse(rioPom)
+        version = pom.version
+    }
+    return version
+}
 
 def repo = "${System.getProperty('user.home')}/.m2/repository"
 cwd = System.getProperty('user.dir')
-def rioDist = "distribution/target/rio-4.2"
+def rioDist = "distribution/target/rio-${rioVersion()}"
 def distLib = "${cwd}/../${rioDist}/lib"
 def testClassDir = "${cwd}/target/test-classes"
 def testResourcesDir = "${cwd}/src/test/resources"
@@ -85,7 +94,7 @@ final classpath = { ->
     cp.addAll(scanner("${distLib}", ['boot.jar', 'rio.jar', 'rio-test.jar', 'webster.jar', 'groovy-all.jar', 'cglib-nodep.jar', 'prefuse.jar', 'cybernode.jar', 'rio-cli.jar']))    
 
     /* Add JUnit and Hyperic jars */
-    ["${repo}/junit/junit/4.6/"   : '*.jar',
+    ["${repo}/junit/junit/4.8.2/"   : '*.jar',
      "${distLib}/hyperic" : '*.jar'].each {dir, pattern ->
         cp.addAll(scanner(dir, [pattern]))
     }

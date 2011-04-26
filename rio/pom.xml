@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>rio</artifactId>
@@ -76,7 +76,7 @@
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rio-plugin</artifactId>
-                <version>4.2</version>
+                <version>${rio.plugin.version}</version>
                 <extensions>true</extensions>
 
                 <configuration>

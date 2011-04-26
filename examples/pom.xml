@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>    
     <packaging>pom</packaging>
     <groupId>org.rioproject</groupId>
-    <version>2.0</version>
+    <version>2.0.1</version>
     <artifactId>examples</artifactId>
     <name>Rio Examples</name>
 
@@ -26,19 +26,24 @@
         </plugins>
     </build>
 
+    <properties>
+        <rio.version>4.3-SNAPSHOT</rio.version>
+        <rio.plugin.version>4.2</rio.plugin.version>
+    </properties>
+
     <dependencyManagement>
         
         <dependencies>
             <dependency>
                 <groupId>org.rioproject</groupId>
                 <artifactId>rio</artifactId>
-                <version>4.2</version>
+                <version>${rio.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.rioproject</groupId>
                 <artifactId>rio-test</artifactId>
-                <version>4.2</version>
+                <version>${rio.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -51,7 +56,6 @@
             <url>http://www.rio-project.org/maven2</url>
         </pluginRepository>
     </pluginRepositories>
-
 
     <distributionManagement>
         <repository>

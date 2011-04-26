@@ -6,7 +6,7 @@
     <parent>
         <artifactId>services</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.2</version>
+        <version>4.3-SNAPSHOT</version>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>gnostic</artifactId>
@@ -83,7 +83,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rio-plugin</artifactId>                
                 <extensions>true</extensions>
-                <version>4.2</version>
+                <version>${rio.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>build-oar</id>
