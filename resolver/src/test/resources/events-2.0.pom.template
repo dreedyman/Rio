@@ -20,6 +20,7 @@
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio</artifactId>
+            <version>${current-rio-version}</version>
         </dependency>
 
     </dependencies>
