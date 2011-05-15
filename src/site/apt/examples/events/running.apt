@@ -10,7 +10,11 @@ Running Events
 
  To deploy the example to a running Rio system:
 
-   [[1]] Make sure Rio services are running
+   [[1]] Make sure you have built the examples
+
+            * From the examples directory run <<<mvn install -Dmaven.test.skip>>>
+
+   [[2]] Make sure Rio services are running
 
          * Run either:
 
@@ -21,12 +25,12 @@ Running Events
               {{{../../start-monitor-mojo.html}rio:start-monitor}}>>>
 
 
-   [[2]] Deploy the example
+   [[3]] Deploy the example
 
          * <<<{{{../../deploy-mojo.html}mvn rio:deploy}}>>>
 
 
-   [[3]] View the deployed example
+   [[4]] View the deployed example
 
          * <<<{{{../../ui-mojo.html}mvn rio:ui}}>>>
 
