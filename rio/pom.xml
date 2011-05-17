@@ -28,13 +28,13 @@
 		<dependency>
 		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>jmx-lookup</artifactId>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
 		<dependency>
 		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
@@ -139,6 +139,7 @@
                                 <topclass>org.rioproject.log.ServiceLogEvent</topclass>
                                 <topclass>org.rioproject.opstring.OpString</topclass>
                                 <topclass>org.rioproject.system.ComputeResourceAdmin</topclass>
+                                <topclass>org.rioproject.sla.RuleMap</topclass>
                                 <topclass>org.rioproject.sla.SLAThresholdEvent</topclass>
                                 <topclass>org.rioproject.resources.servicecore.AbstractProxy</topclass>
                                 <topclass>org.rioproject.resources.servicecore.ServiceAdminProxy</topclass>
