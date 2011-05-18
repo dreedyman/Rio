@@ -263,7 +263,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 return(false);
             }
 
-            if(context.getServiceBeanManager() instanceof JSBManager) {
+            if(context!=null && context.getServiceBeanManager() instanceof JSBManager) {
                 JSBManager jsbMgr = (JSBManager)context.getServiceBeanManager();
                 OperationalStringManager mgr = jsbMgr.getOperationalStringManager();
                 if(mgr!=null &&
