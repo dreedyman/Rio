@@ -13,12 +13,44 @@
     <name>Module :: Resolver</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <aetherVersion>1.11</aetherVersion>
+        <mavenVersion>3.0.2</mavenVersion>
+        <wagonVersion>1.0-beta-7</wagonVersion>
+    </properties>
+
     <dependencies>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.jini</groupId>
+                    <artifactId>start</artifactId>
+                </exclusion>
+               <exclusion>
+                    <groupId>net.jini</groupId>
+                    <artifactId>jsk-platform</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.jini</groupId>
+                    <artifactId>jsk-dl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.jini</groupId>
+                    <artifactId>jsk-lib</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.jini</groupId>
+                    <artifactId>start</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cglib</groupId>
+                    <artifactId>cglib-nodep</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -33,42 +65,89 @@
             <artifactId>groovy-all</artifactId>
         </dependency>
 
+        <!--
+        Begin aether dependencies. Most copied verbatim from https://docs.sonatype.org/display/AETHER/Home
+        -->
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-api</artifactId>
+            <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-util</artifactId>
+            <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-impl</artifactId>
+            <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-connector-file</artifactId>
+            <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-connector-asynchttpclient</artifactId>
+            <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-connector-wagon</artifactId>
+            <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-aether-provider</artifactId>
+            <version>${mavenVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-ssh</artifactId>
+            <version>${wagonVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-settings-builder</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-http-lightweight</artifactId>
+            <version>1.0-beta-7</version>
+        </dependency>
+
+<!--        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${mavenVersion}</version>
+        </dependency>-->
     </dependencies>
 
     <build>
 
         <plugins>
             <plugin>
-               <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.3</version>
-                <configuration>
-                    <providerSelection>1.7</providerSelection>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generateStubs</goal>
-                            <goal>compile</goal>
-                            <goal>generateTestStubs</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>            
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.3</version>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <customClasspathLayout>${artifact.artifactId}.${artifact.extension}</customClasspathLayout>
+                        </manifest>
                         <manifestEntries>
-							<Implementation-Title>Rio Project</Implementation-Title>
-							<Implementation-Version>${project.version}</Implementation-Version>
-						    <Rio-Version>${project.version}</Rio-Version>
-						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
-						</manifestEntries>
+                            <Implementation-Title>Rio Project</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Rio-Version>${project.version}</Rio-Version>
+                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

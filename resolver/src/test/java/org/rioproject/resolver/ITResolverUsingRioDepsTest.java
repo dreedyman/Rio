@@ -16,24 +16,39 @@
 package org.rioproject.resolver;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.config.maven2.Repository;
+import org.rioproject.exec.Util;
 import org.rioproject.resources.util.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Test resolving artifacts with and without inclusion of Rio
  */
 public class ITResolverUsingRioDepsTest {
+
+    @Before
+    public void setup() throws IOException {
+        File testRepo = Repository.getLocalRepository();
+        File parentDir = new File(testRepo, "org/rioproject/examples/events/2.0");
+        if(parentDir.exists())
+            FileUtils.remove(parentDir);
+        File artifactDir = new File(testRepo, "org/rioproject/examples/events/events-api/2.0");
+        if(artifactDir.exists())
+            FileUtils.remove(artifactDir);
+        prepareParentPom();
+    }
+
     @Test
     public void testExcludeRioDeps() throws ResolverException, IOException {
         String[] classPath = getClassPath();
         Assert.assertTrue(classPath.length>0);
-        Assert.assertTrue(classPath.length==1);
         System.out.println("EXCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
+        Assert.assertTrue(classPath.length==1);
     }
 
     @Test
@@ -41,8 +56,8 @@ public class ITResolverUsingRioDepsTest {
         System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "true");
         String[] classPath = getClassPath();
         Assert.assertTrue(classPath.length>0);
-        Assert.assertTrue(classPath.length==1);
         System.out.println("EXCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
+        Assert.assertTrue(classPath.length==1);
     }
 
     @Test
@@ -86,7 +101,6 @@ public class ITResolverUsingRioDepsTest {
         File srcJar = new File("src/test/resources/events-api-2.0.jar");
         Assert.assertTrue(srcJar.exists());
 
-
         File artifactDir = new File(testRepo, "org/rioproject/examples/events/events-api/2.0");
         if(!artifactDir.exists()) {
             if(artifactDir.mkdirs())
@@ -104,6 +118,22 @@ public class ITResolverUsingRioDepsTest {
         }
         Assert.assertTrue("The events-api-2.0.jar should be in "+jarArtifact.getAbsolutePath(), jarArtifact.exists());
 
-        return r.getClassPathFor("org.rioproject.examples.events:events-api:2.0", (File) null, false);
+        return r.getClassPathFor("org.rioproject.examples.events:events-api:2.0");
+    }
+
+    private void prepareParentPom() throws IOException {
+        File srcParentPomTemplate = new File("src/test/resources/events-2.0.pom.template");
+        Assert.assertTrue(srcParentPomTemplate.exists());
+        StringBuffer sb = new StringBuffer();
+        BufferedReader in = new BufferedReader(new FileReader(srcParentPomTemplate));
+        String str;
+        while ((str = in.readLine()) != null) {
+            str = Util.replace(str, "${current-rio-version}", RioVersion.VERSION);
+            sb.append(str).append("\n");
+        }
+        in.close();
+        File srcParentPom = new File("src/test/resources/events-2.0.pom");
+        Util.writeFile(sb.toString(), srcParentPom);
+
     }
 }

@@ -29,7 +29,7 @@ public class Utils {
         sb.append("<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\"").append("\n");
         sb.append("    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"").append("\n");
         sb.append("    xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">").append("\n");
-		sb.append("    <localRepository>test-repo/</localRepository> ").append("\n");
+		sb.append("    <localRepository>target/test-repo/</localRepository> ").append("\n");
         sb.append("    <profiles>").append("\n");
         sb.append("        <profile>").append("\n");
         sb.append("            <id>p1</id>").append("\n");
@@ -49,7 +49,7 @@ public class Utils {
         sb.append("                </repository>").append("\n");
         sb.append("                <repository>").append("\n");
         sb.append("                    <id>jboss</id>").append("\n");
-        sb.append("                    <url>https://repository.jboss.org/nexus/content/groups/public</url>").append("\n");
+        sb.append("                    <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>").append("\n");
         sb.append("                    <releases>").append("\n");
         sb.append("                        <enabled>true</enabled>").append("\n");
         sb.append("                    </releases>").append("\n");
