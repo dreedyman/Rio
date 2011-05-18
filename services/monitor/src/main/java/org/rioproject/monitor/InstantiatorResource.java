@@ -330,10 +330,10 @@ public class InstantiatorResource {
      * @param sElem The ServiceElement instance to decrease
      * @param uuid The id of the instance to remove
      *
-     * @return True if the instance was removed
+     * @return The removed ServiceBeanInstance, or null if the instance was removed
      */
-    boolean removeServiceElementInstance(ServiceElement sElem, Uuid uuid) {
-        boolean removed = false;
+    ServiceBeanInstance removeServiceElementInstance(ServiceElement sElem, Uuid uuid) {
+        ServiceBeanInstance removedInstance = null;
         synchronized(serviceElementMap) {
             if(serviceElementMap.containsKey(sElem)) {
                 List<DeployedService> list = serviceElementMap.get(sElem);
@@ -342,7 +342,7 @@ public class InstantiatorResource {
                 for (DeployedService deployedService : ids) {
                     if (deployedService.getServiceBeanInstance().getServiceBeanID().equals(uuid)) {
                         list.remove(deployedService);
-                        removed = true;
+                        removedInstance = deployedService.getServiceBeanInstance();
                         break;
                     }
                 }
@@ -354,7 +354,7 @@ public class InstantiatorResource {
             }
         }
 
-        return removed;
+        return removedInstance;
     }
 
     ServiceElement[] getServiceElements() {
