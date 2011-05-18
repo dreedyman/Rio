@@ -46,11 +46,9 @@ import org.rioproject.tools.cli.CLI.StopHandler
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
-import org.rioproject.resolver.maven2.ArtifactUtils
 import org.rioproject.core.OperationalStringException
-import org.rioproject.resolver.ResolverException
 import org.rioproject.resolver.ResolverHelper
-import org.rioproject.resolver.Resolver
+import org.rioproject.resolver.Artifact
 
 /**
  * Simplifies the running of core Rio services
@@ -318,8 +316,8 @@ class TestManager {
                              "and set the <test-class-name>.opstring property",
                              opStringToDeploy
         URL opStringURL
-        if(ArtifactUtils.isArtifact(opStringToDeploy)) {
-            opStringURL = ResolverHelper.getInstance().getLocation(opStringToDeploy, "oar", null)
+        if(Artifact.isArtifact(opStringToDeploy)) {
+            opStringURL = ResolverHelper.getInstance().getLocation(opStringToDeploy, "oar")
             if(opStringURL==null)
                 throw new OperationalStringException("Artifact "+opStringToDeploy+" not resolvable");
         } else {

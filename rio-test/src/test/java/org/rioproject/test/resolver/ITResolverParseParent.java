@@ -18,6 +18,7 @@ package org.rioproject.test.resolver;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.resolver.Resolver;
+import org.rioproject.resolver.ResolverException;
 import org.rioproject.resources.util.FileUtils;
 import org.rioproject.test.ProjectModuleResolver;
 
@@ -31,7 +32,7 @@ import java.io.IOException;
  */
 public class ITResolverParseParent {
     @Test
-    public void testVersionFromProjectParentVersion() throws IOException {
+    public void testVersionFromProjectParentVersion() throws IOException, ResolverException {
         File projectAPITarget = new File("src/test/resources/project/project-api/target");
         if(!projectAPITarget.exists())
             if(projectAPITarget.mkdirs())
@@ -49,7 +50,7 @@ public class ITResolverParseParent {
         File srcPom = new File("src/test/resources/project/project-service/pom.xml");
         Assert.assertTrue(srcPom.exists());
         Resolver r = new ProjectModuleResolver();
-        String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0", srcPom, false);
+        String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0");
         Assert.assertTrue("We should have 2 items in the classpath, we got: "+cp.length, cp.length==2);
     }
 

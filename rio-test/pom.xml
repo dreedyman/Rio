@@ -17,6 +17,12 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>resolver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -52,9 +58,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.3</version>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <customClasspathLayout>${artifact.artifactId}.${artifact.extension}</customClasspathLayout>
+                        </manifest>
                         <manifestEntries>
                             <Implementation-Title>Rio Project
                             </Implementation-Title>
@@ -62,7 +73,6 @@
                             </Implementation-Version>
                             <Rio-Version>${project.version}</Rio-Version>
                             <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                            <Class-Path>rio.jar</Class-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>

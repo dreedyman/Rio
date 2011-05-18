@@ -19,20 +19,20 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.core.OperationalStringException;
+import org.rioproject.resolver.ResolverException;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 
 /**
- * Tests that you cn configure an artifact as the opstring in a test configuration
+ * Tests that you can configure an artifact as the opstring in a test configuration
  */
 @RunWith(RioTestRunner.class)
 public class LoadArtifactAsOpStringTest {
     @SetTestManager
     static TestManager testManager;
 
-    @Test(expected=OperationalStringException.class)
+    @Test(expected=ResolverException.class)
     public void verifyConfigurationCanBeLoaded() {
         Assert.assertNotNull("TestManager should not be null", testManager);
         Assert.assertEquals("org.rioproject.test:deploy-oar-test:1.0", testManager.getOpStringToDeploy());
