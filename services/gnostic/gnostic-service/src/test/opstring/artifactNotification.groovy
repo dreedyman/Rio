@@ -1,15 +1,13 @@
 import org.rioproject.config.Constants
 
-import org.rioproject.resources.servicecore.Service
 import java.util.logging.Level
-import org.rioproject.system.SystemWatchID
 
 deployment(name: 'Notification Using Artifact Test') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject:gnostic:4.3-SNAPSHOT'
-    artifact id: 'service-dl', 'org.rioproject:gnostic:dl:4.3-SNAPSHOT'
+    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:4.3-SNAPSHOT'
+    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:4.3-SNAPSHOT'
     artifact id: 'test', 'org.rioproject.gnostic:test:1.0'
 
     logging {

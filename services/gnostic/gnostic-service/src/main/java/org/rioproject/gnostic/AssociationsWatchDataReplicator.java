@@ -217,6 +217,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                     handle.setElem(elem);
                     handle.setOpMgr(opMgr);
                     Cybernode c = null;
+
                     for(ServiceBeanInstance sbi : opMgr.getServiceBeanInstances(elem)) {
                         if(o.equals(sbi.getService())) {
                             elem.setServiceBeanConfig(sbi.getServiceBeanConfig());
@@ -361,7 +362,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                     calculable = calculablesQ.take();
                 } catch (InterruptedException e) {
                     if(logger.isLoggable(Level.FINER))
-                        logger.log(Level.FINER, "CEPWorker breaking out of main loop", e);
+                        logger.finer("CEPWorker breaking out of main loop: have been Interrupted");
                     break;
                 }
                 if(calculable!=null) {

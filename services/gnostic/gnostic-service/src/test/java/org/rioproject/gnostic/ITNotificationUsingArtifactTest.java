@@ -59,7 +59,7 @@ public class ITNotificationUsingArtifactTest {
     @Test
     public void verifyChangingFileBasedRuleWorks() {
         Assert.assertNotNull(testManager);
-        File opstring = new File("src/test/conf/artifactNotification.groovy");
+        File opstring = new File("src/test/opstring/artifactNotification.groovy");
         Assert.assertTrue(opstring.exists());
         testManager.deploy(opstring);
 
@@ -110,7 +110,7 @@ public class ITNotificationUsingArtifactTest {
     public void verifyChangingRuleLoadedFromClassPathWorks() {
         Throwable thrown;
         Assert.assertNotNull(testManager);
-        File opstring = new File("src/test/conf/artifactNotification2.groovy");
+        File opstring = new File("src/test/opstring/artifactNotification2.groovy");
         Assert.assertTrue(opstring.exists());
         OperationalStringManager mgr = testManager.deploy(opstring);
         testManager.waitForDeployment(mgr);

@@ -15,17 +15,14 @@
  */
 package org.rioproject.gnostic;
 
-import org.drools.KnowledgeBase;
 import org.drools.agent.KnowledgeAgent;
 import org.drools.impl.KnowledgeBaseImpl;
 import org.drools.reteoo.ReteooRuleBase;
 import org.rioproject.associations.*;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.resources.servicecore.Service;
 import org.rioproject.sla.RuleMap;
 
 import java.io.IOException;
-import java.rmi.Remote;
 import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,7 +142,7 @@ public class RuleMapAssociationController {
         }
     }
 
-    private boolean initializeEngine() {
+    private synchronized boolean initializeEngine() {
         if(ruleLoader!=null) {
             KnowledgeBaseImpl kImpl = (KnowledgeBaseImpl)kAgent.getKnowledgeBase();
             //KnowledgeBaseImpl kImpl = (KnowledgeBaseImpl)kBase;

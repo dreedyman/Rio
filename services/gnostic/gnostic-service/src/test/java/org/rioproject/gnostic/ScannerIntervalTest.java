@@ -16,25 +16,25 @@
 package org.rioproject.gnostic;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.rioproject.test.RioTestRunner;
-import org.rioproject.test.SetTestManager;
-import org.rioproject.test.TestManager;
+import org.rioproject.core.JSBInstantiationException;
+import org.rioproject.cybernode.StaticCybernode;
 
 
 /**
  * Test getting and setting scanner interval programmatically.
  */
-@RunWith (RioTestRunner.class)
-public class ITScannerIntervalTest {
-    @SetTestManager
-    static TestManager testManager;
+public class ScannerIntervalTest {
+    Gnostic g;
 
+    @Before
+    public void setup() throws JSBInstantiationException {
+        StaticCybernode cybernode = new StaticCybernode();
+        g = (Gnostic)cybernode.activate(GnosticImpl.class.getName());
+    }
      @Test
      public void verifySettingAndGettingScannerIntervalBehavesAsDesigned() {
-         Assert.assertNotNull(testManager);
-         Gnostic g = (Gnostic)testManager.waitForService(Gnostic.class);
          Assert.assertNotNull(g);
          Throwable thrown = null;
          try {
@@ -62,7 +62,7 @@ public class ITScannerIntervalTest {
          }
          Assert.assertNotNull(thrown);
          Assert.assertTrue(thrown instanceof IllegalArgumentException);
-
+         thrown = null;
          try {
              int scannerInterval = g.getScannerInterval();
              Assert.assertEquals("Expected scannerInterval to be 60", 60, scannerInterval);
@@ -70,5 +70,6 @@ public class ITScannerIntervalTest {
              t.printStackTrace();
              thrown = t;
          }
+         Assert.assertNull(thrown);
      }
 }

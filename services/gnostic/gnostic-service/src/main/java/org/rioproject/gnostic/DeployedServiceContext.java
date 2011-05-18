@@ -15,7 +15,6 @@
  */
 package org.rioproject.gnostic;
 
-import com.sun.jini.start.ClassLoaderUtil;
 import org.rioproject.core.OperationalString;
 import org.rioproject.core.OperationalStringManager;
 import org.rioproject.core.ServiceBeanInstance;

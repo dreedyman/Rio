@@ -200,6 +200,7 @@ public class DroolsCEPManager implements CEPSession {
             output.write(sb.toString());
             close(output);
             URL url = changeSetFile.toURI().toURL();
+            logger.info("===> kAgent: "+kAgent+" url: "+url);
             kAgent.applyChangeSet(ResourceFactory.newUrlResource(url));
         } finally {
             if(changeSetFile.delete()) {

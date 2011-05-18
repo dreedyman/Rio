@@ -136,7 +136,7 @@ public class ITMonitorRulesTest {
     public void verifyScalingMultipleServicesWorks() {
         Throwable thrown = null;
         try {
-            testManager.deploy(new File("src"+File.separator+"test"+File.separator+"conf",
+            testManager.deploy(new File("src"+File.separator+"test"+File.separator+"opstring",
                                         "test-opstring1.groovy"));
             try {
                 s1Instances = getServices("S1", TestService.class, testManager.getGroups());

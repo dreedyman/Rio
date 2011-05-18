@@ -43,7 +43,7 @@ public class ITSpaceUtilizationTest {
     @Test
     public void verifyGettingMetricsFromDeployedSpaceWorks() {
         Assert.assertNotNull(testManager);
-        File opstring = new File("src/test/conf/testspace.groovy");
+        File opstring = new File("src/test/opstring/testspace.groovy");
         Assert.assertTrue(opstring.exists());
         doTest(testManager, opstring);
     }
@@ -51,7 +51,7 @@ public class ITSpaceUtilizationTest {
     @Test
     public void verifyGettingMetricsFromDeployedForkedSpaceWorks() {
         Assert.assertNotNull(testManager);
-        File opstring = new File("src/test/conf/testforkedspace.groovy");
+        File opstring = new File("src/test/opstring/testforkedspace.groovy");
         Assert.assertTrue(opstring.exists());
         doTest(testManager, opstring);
     }

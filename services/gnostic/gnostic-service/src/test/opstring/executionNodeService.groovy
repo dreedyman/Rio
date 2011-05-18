@@ -1,9 +1,6 @@
 import org.rioproject.config.Constants
 import java.util.logging.Level
 
-import org.rioproject.resources.servicecore.Service
-import org.rioproject.system.SystemWatchID
-
 deployment(name:'executionNodeService',  debug: 'true') {
 
     logging {

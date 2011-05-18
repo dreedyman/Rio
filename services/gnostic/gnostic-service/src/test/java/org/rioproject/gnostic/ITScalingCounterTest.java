@@ -47,7 +47,7 @@ public class ITScalingCounterTest {
         Throwable thrown = null;
         Assert.assertNotNull(testManager);
         Assert.assertNotNull(testManager);
-        File opstring = new File("src/test/conf/executionNodeService.groovy");
+        File opstring = new File("src/test/opstring/executionNodeService.groovy");
         Assert.assertTrue(opstring.exists());
         testManager.deploy(opstring);
         Gnostic g = (Gnostic)testManager.waitForService(Gnostic.class);

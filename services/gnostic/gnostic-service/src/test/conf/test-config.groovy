@@ -7,19 +7,11 @@ ITScalingCounterTest {
    numMonitors = 1
 }
 
-ITScannerIntervalTest {
-    groups = "ITScannerIntervalTest"
-    numCybernodes = 1
-    numMonitors = 1
-    opstring = 'src/main/conf/gnostic.groovy'
-    autoDeploy = true
-}
-
 ITMonitorRulesTest {
     numCybernodes = 1
     numMonitors = 1
     groups = "ITMonitorRulesTest"
-    opstring = 'src/test/conf/test-opstring.groovy'
+    opstring = 'src/test/opstring/test-opstring.groovy'
     autoDeploy = true
 }
 
@@ -27,7 +19,7 @@ ITSpaceUtilizationTest {
     numCybernodes = 1
     numMonitors = 1
     groups = "ITSpaceUtilizationTest"
-    //opstring = 'src/test/conf/testspace.groovy'
+    //opstring = 'src/test/opstring/testspace.groovy'
     //autoDeploy = true
 }
 
@@ -35,7 +27,7 @@ ITSystemUtilizationTest {
     numCybernodes = 1
     numMonitors = 1
     groups = "ITSystemUtilizationTest"
-    opstring = 'src/test/conf/test-opstring2.groovy'
+    opstring = 'src/test/opstring/test-opstring2.groovy'
     autoDeploy = true
 }
 
