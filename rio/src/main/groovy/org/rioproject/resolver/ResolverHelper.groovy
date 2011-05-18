@@ -34,14 +34,12 @@ class ResolverHelper {
      * @param artifact The artifact to resolve
      * @param resolver The {@link Resolver} to use
      * @param repositories The repositories to use for resolution
-     * @param install If true, download and install the resolved elements
      */
 
     def static String[] resolve(String artifact,
                                 Resolver resolver,
-                                RemoteRepository[] repositories,
-                                boolean install) {
-        return resolve(artifact, resolver, repositories, (String) M2_HOME_URI, install);
+                                RemoteRepository[] repositories) {
+        return resolve(artifact, resolver, repositories, (String) M2_HOME_URI);
     }
 
     /**
@@ -52,19 +50,16 @@ class ResolverHelper {
      * @param repositories The repositories to use for resolution
      * @param codebase The codebase to set for jars that are located
      * in the local Maven repository.
-     * @param install If true, download and install the resolved elements
      */
 
     def static String[] resolve(String artifact,
                                 Resolver resolver,
                                 RemoteRepository[] repositories,
-                                String codebase,
-                                boolean install) {
+                                String codebase) {
         List<String> jars = new ArrayList<String>();
         if (artifact != null) {
             String[] classPath = resolver.getClassPathFor(artifact,
-                                                          (RemoteRepository[])repositories,
-                                                          install);
+                                                          (RemoteRepository[])repositories);
             for (String jar : classPath) {
                 String s = null
                 if(jar.startsWith(M2_HOME)) {
@@ -96,21 +91,13 @@ class ResolverHelper {
      *
      * @param bundle The {@link org.rioproject.core.ClassBundle}
      * @param resolver The {@link Resolver} to use
-     * @param pom The pom file
-     * @param install If true, download and install the resolved elements
      */
-    def static resolve(ClassBundle bundle,
-                       Resolver resolver,
-                       File pom,
-                       boolean install) {
+    def static resolve(ClassBundle bundle, Resolver resolver) {
         if(logger.isLoggable(Level.FINE))
             logger.fine "Artifact: ${bundle.getArtifact()}, "+
-                        "resolver: ${resolver.getClass().name}, "+
-                        "pom: $pom, install: $install"
+                        "resolver: ${resolver.getClass().name}"
         if (bundle.getArtifact() != null) {
-            String[] classPath = resolver.getClassPathFor(bundle.getArtifact(),
-                                                          (File) pom,
-                                                          install);
+            String[] classPath = resolver.getClassPathFor(bundle.getArtifact());
             List<String> jars = new ArrayList<String>();
             for (String jar : classPath) {
                 jars.add(handleWindows(jar));
@@ -144,9 +131,8 @@ class ResolverHelper {
      * configurable provider. The resolver provider can be specified by providing
      * a resource named "META-INF/services/org.rioproject.resolver.Resolver"
      * containing the name of the provider class. If multiple resources with
-     * that name are available, then the one used will be the first one returned
-     * by ServiceLoader.load. If the resource is not found, the
-     * SimpleResolver class is used.
+     * that name are available, then the one used will be the last one returned
+     * by ServiceLoader.load.
      *
      * @param cl The class loader to load resources and classes, and to pass when
      * constructing the provider. If null, uses the context class loader.
@@ -161,16 +147,9 @@ class ResolverHelper {
         try {
             r = getResolver(resourceLoader);
             if(logger.isLoggable(Level.FINE))
-                logger.fine "===> Selected Resolver: " +(r==null?"Use Default":"${r.getClass().name}")
+                logger.fine "===> Selected Resolver: " +(r==null?"No Resolvere configuration found":"${r.getClass().name}")
             if(r==null) {
-                String defaultResolver = "org.rioproject.resolver.maven2.SimpleResolver";
-                Class cls = Class.forName(defaultResolver, true, resourceLoader);
-                if (!Resolver.class.isAssignableFrom(cls)) {
-                    throw new ResolverException("provider class " + defaultResolver +
-                                                " does not implement Resolver");
-                } else {
-                    r = (Resolver)cls.newInstance();
-                }
+                throw new ResolverException("No Resolver configuration found");
             }
         } catch (Exception e) {
             throw new ResolverException("Creating Resolver", e);
@@ -198,7 +177,6 @@ class ResolverHelper {
         for(Resolver r : loader) {
             if(r!=null) {
                 resolver = r;
-                break;
             }
         }
         return resolver;

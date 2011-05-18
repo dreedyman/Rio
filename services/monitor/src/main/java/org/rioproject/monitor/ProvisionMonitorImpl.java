@@ -559,7 +559,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
         if(isArtifact) {
             try {
                 Resolver r = ResolverHelper.getInstance();
-                opStringURL = r.getLocation(a, "oar", null);
+                opStringURL = r.getLocation(a, "oar");
                 if(opStringURL==null)
                     throw new OperationalStringException("Artifact "+a+" not resolvable");
             } catch (ResolverException e) {
@@ -2030,7 +2030,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
         }
 
         /**
-         * @see org.rioproject.core.OperationalStringManager#setManaging
+         * @see org.rioproject.core.OperationalStringManager#setManaging(boolean)
          */
         public void setManaging(boolean newActive)  {
             setActive(newActive);
@@ -2242,7 +2242,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
         }
 
         /**
-         * @see org.rioproject.core.OperationalStringManager#update
+         * @see org.rioproject.core.OperationalStringManager#update(OperationalString)
          */
         public Map<String, Throwable> update(OperationalString newOpString)
             throws OperationalStringException, RemoteException {
@@ -2576,16 +2576,15 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
                                  ServiceProvisionListener listener) throws Exception {
             if(sElem.getExportBundles().length>0) {
                 
-                File pomFile = null;
+                /*File pomFile = null;
                 if(oar!=null) {
                     File dir = new File(oar.getDeployDir());
                     pomFile = OARUtil.find("pom.xml", dir);
-                }
+                }*/
                 Resolver resolver = ResolverHelper.getInstance();
                 OpStringUtil.checkCodebase(sElem,
                                            System.getProperty(Constants.CODESERVER),
-                                           resolver,
-                                           pomFile);
+                                           resolver);
                 createServiceElementManager(sElem, true, listener);
             } else {
                 throw new OperationalStringException("Interfaces are null");
@@ -3030,7 +3029,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
         }
 
         /**
-         * @see org.rioproject.core.OperationalStringManager#redeploy
+         * @see org.rioproject.core.OperationalStringManager#redeploy(ServiceElement,
+         * ServiceBeanInstance, boolean, boolean, long, ServiceProvisionListener)
          */
         public void redeploy(ServiceElement sElem,
                              ServiceBeanInstance instance,
@@ -3042,7 +3042,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
         }
 
         /**
-         * @see org.rioproject.core.OperationalStringManager#redeploy
+         * @see org.rioproject.core.OperationalStringManager#redeploy(ServiceElement,
+         * ServiceBeanInstance, boolean, long, ServiceProvisionListener)
          */
         public void redeploy(ServiceElement sElem,
                              ServiceBeanInstance instance,

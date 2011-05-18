@@ -18,7 +18,6 @@ package org.rioproject.resolver;
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Interface for an entity that resolves an artifact. The artifact must be in
@@ -27,9 +26,6 @@ import java.util.List;
  * <br><br>
  * <tt>groupId:artifactId[:classifier]:version</tt>
  *
- * <p>The <tt>Resolver</tt> will also download and install the resolved
- * artifact(s) and their dependencies (including transitive dependencies)
- * if instructed to.
  */
 public interface Resolver {
 
@@ -38,12 +34,13 @@ public interface Resolver {
      * and it's dependencies if needed.
      *
      * @param artifact The artifact string.
-     * @param pom The artifact pom
-     * @param download If true, download and install the resolved elements
      *
      * @return A string array containing the classpath elements for the artifact
+     *
+     * @throws ResolverException if the artifact cannot be resolved, or if the artifact's
+     * dependencies cannot be found
      */
-    String[] getClassPathFor(String artifact, File pom, boolean download);
+    String[] getClassPathFor(String artifact) throws ResolverException;
 
     /**
      * Get the classpath for an artifact, and resolve (download) the artifact
@@ -51,11 +48,13 @@ public interface Resolver {
      *
      * @param artifact The artifact string.
      * @param repositories Array of repositories to use to resolve the artifact
-     * @param download If true, download and install the resolved elements
      *
      * @return A string array containing the classpath elements for the artifact
+     *
+     * @throws ResolverException if the artifact cannot be resolved, or if the artifact's
+     * dependencies cannot be found
      */
-    String[] getClassPathFor(String artifact, RemoteRepository[] repositories, boolean download);
+    String[] getClassPathFor(String artifact, RemoteRepository[] repositories) throws ResolverException;
 
     /**
      * Get the location of the artifact
@@ -63,12 +62,13 @@ public interface Resolver {
      * @param artifact The artifact string.
      * @param artifactType The type of artifact. Typically either "jar" or
      * "oar". If null (or empty string), "jar" is used. This is used to
-     * determine the filename extension of the artifact to locate. 
-     * @param pom The artifact pom
+     * determine the filename extension of the artifact to locate.
      *
      * @return The location of the artifact, or null if not found.
+     *
+     * @throws ResolverException if the artifact cannot be located
      */
-    URL getLocation(String artifact, String artifactType,  File pom);
+    URL getLocation(String artifact, String artifactType) throws ResolverException;
 
     /**
      * Get the @{link RemoteRepository} instances the Resolver is using

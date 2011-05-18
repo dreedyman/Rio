@@ -899,8 +899,8 @@ public class ServiceBeanLoader {
 
     static synchronized Map<String, ProvisionedResources> provisionService(ServiceElement elem,
                                                                            Resolver resolver,
-                                                                           boolean install)
-        throws MalformedURLException {
+                                                                           boolean supportsInstallation)
+        throws MalformedURLException, JSBInstantiationException {
 
         Map<String, ProvisionedResources> map = new HashMap<String, ProvisionedResources>();
         URL[] implJARs;
@@ -912,11 +912,15 @@ public class ServiceBeanLoader {
             implPR = new ProvisionedResources(implArtifact);
             if(elem.getComponentBundle()!=null) {
                 if(elem.getComponentBundle().getArtifact()!=null && resolver!=null) {
+                    if(!supportsInstallation)
+                        throw new JSBInstantiationException("Service ["+elem.getName()+"] " +
+                                                            "cannot be instantiated, the Cybernode " +
+                                                            "does not support persistent provisioning, and the " +
+                                                            "service requires artifact resolution for "+implArtifact);
                     String[] jars =
                         ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
                                                resolver,
-                                               elem.getRemoteRepositories(),
-                                               install);
+                                               elem.getRemoteRepositories());
                     List<URL> urls = new ArrayList<URL>();
                     for(String jar: jars) {
                         if(jar!=null)
@@ -954,8 +958,7 @@ public class ServiceBeanLoader {
                     String[] jars = ResolverHelper.resolve(cb.getArtifact(),
                                                            resolver,
                                                            elem.getRemoteRepositories(),
-                                                           localCodebase,
-                                                           install);
+                                                           localCodebase);
                     for(String jar: jars) {
                         if(jar!=null)
                             exportURLs.add(new URL(jar));
@@ -1007,14 +1010,14 @@ public class ServiceBeanLoader {
 
         if(logger.isLoggable(Level.FINE)) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Service ["+elem.getName()+"], ");
+            sb.append("Service [").append(elem.getName()).append("], ");
             if(implArtifact!=null)
-                sb.append("impl artifact: ["+implPR.getArtifact()+"] ");
+                sb.append("impl artifact: [").append(implPR.getArtifact()).append("] ");
             sb.append("impl jars: ");
             sb.append(implPR.getJarsAsString());
             sb.append(", ");
             if(exportArtifact!=null)
-                sb.append("export artifact: ["+dlPR.getArtifact()+"] ");
+                sb.append("export artifact: [").append(dlPR.getArtifact()).append("] ");
             sb.append("export jars: ");
                 sb.append(dlPR.getJarsAsString());
             logger.fine(sb.toString());

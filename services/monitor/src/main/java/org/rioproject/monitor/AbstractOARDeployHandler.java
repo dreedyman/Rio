@@ -88,9 +88,6 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         if (opstringFile != null) {
             Date opstringDate = new Date(opstringFile.lastModified());
             if (opstringDate.after(from)) {
-
-                File pom = OARUtil.find("*.pom", dir);
-
                 try {
                     OperationalString[] opstrings =
                         opStringLoader.parseOperationalString(opstringFile);
@@ -99,10 +96,8 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
                         try {
                             Resolver resolver = ResolverHelper.getInstance();
                             OpStringUtil.checkCodebase(opstring,
-                                                       System.getProperty(
-                                                           Constants.CODESERVER),
-                                                       resolver,
-                                                       pom);
+                                                       System.getProperty(Constants.CODESERVER),
+                                                       resolver);
                             list.add(opstring);
                         } catch(IOException e) {
                             logger.log(Level.WARNING,

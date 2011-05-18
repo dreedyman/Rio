@@ -47,7 +47,7 @@ public class ResolverException extends Exception {
     }
 
     /**
-     * Constructs an OperationalStringException with no detail message.
+     * Constructs an ResolverException with no detail message.
      */
     public ResolverException() {
         super();

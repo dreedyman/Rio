@@ -510,9 +510,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 File tempResolvedOpString = null
                 if(opStringRef.indexOf(":")!=-1) {
                     Resolver r = ResolverHelper.getInstance()
-                    // TODO: NEED TO GET THE POM!!
-                    File pomFile = null;
-                    URL u = r.getLocation(opStringRef, "oar", pomFile)
+                    URL u = r.getLocation(opStringRef, "oar")
                     if(u==null)
                         throw new DSLException("Unable to resolve artifact "+
                                                "${opStringRef}, using "+
@@ -628,10 +626,10 @@ class GroovyDSLOpStringParser implements OpStringParser {
                     service(name: 'Gnostic') {
                         interfaces {
                             classes 'org.rioproject.gnostic.Gnostic'
-                            artifact "org.rioproject:gnostic:dl:${RioVersion.VERSION}"
+                            artifact "org.rioproject.gnostic:gnostic-api:${RioVersion.VERSION}"
                         }
                         implementation(class: 'org.rioproject.gnostic.GnosticImpl') {
-                            artifact "org.rioproject:gnostic:${RioVersion.VERSION}"
+                            artifact "org.rioproject.gnostic:gnostic-service:${RioVersion.VERSION}"
                         }
                         rules {
                             cl()

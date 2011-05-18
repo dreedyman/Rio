@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-	xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>services</artifactId>
+        <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
         <version>4.3-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>monitor</artifactId>
@@ -15,14 +16,14 @@
   
     <dependencies>
 
-	    <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>resolver</artifactId>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio</artifactId>
             <version>${project.version}</version>
         </dependency>
         
         <dependency>
-		    <groupId>net.jini.lookup</groupId>
+            <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
             <scope>provided</scope>
         </dependency>

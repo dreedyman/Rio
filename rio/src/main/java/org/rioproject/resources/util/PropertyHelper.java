@@ -15,6 +15,8 @@
  */
 package org.rioproject.resources.util;
 
+import java.util.Properties;
+
 /**
  * Property helper
  *
@@ -60,7 +62,7 @@ public class PropertyHelper {
      * contain at least 2 entries, or if a property value cannot be obtained
      */
     public static String expandProperties(String arg, String[] delimeters) {
-        if(arg ==null)
+        if(arg == null)
             throw new IllegalArgumentException("arg is null");
         if(delimeters == null)
             throw new IllegalArgumentException("delimeters is null");
@@ -83,6 +85,45 @@ public class PropertyHelper {
                     result.append(java.io.File.pathSeparator);
                 } else {
                     String value = System.getProperty(prop);
+                    if(value == null)
+                        throw new IllegalArgumentException("property "+
+                                                           "["+prop+"] "+
+                                                           "not declared");
+                    result.append(value);
+                }
+                s = e+start.length()+prop.length()+end.length();
+            } else {
+                result.append(start);
+                s = e+start.length();
+            }
+        }
+        result.append(arg.substring(s));
+        return (result.toString());
+    }
+
+    public static String expandProperties(String arg, Properties properties) {
+        if(arg ==null)
+            throw new IllegalArgumentException("arg is null");
+        if(properties ==null)
+            throw new IllegalArgumentException("arg is null");
+
+        String start=PARSETIME[0];
+        String end = PARSETIME[1];
+        int s = 0;
+        int e  ;
+        StringBuffer result = new StringBuffer();
+        while((e = arg.indexOf(start, s)) >= 0) {
+            String str = arg.substring(e+start.length());
+            int n = str.indexOf(end);
+            if(n != -1) {
+                result.append(arg.substring(s, e));
+                String prop = str.substring(0, n);
+                if(prop.equals("/")) {
+                    result.append(java.io.File.separator);
+                } else if(prop.equals(":")) {
+                    result.append(java.io.File.pathSeparator);
+                } else {
+                    String value = properties.getProperty(prop);
                     if(value == null)
                         throw new IllegalArgumentException("property "+
                                                            "["+prop+"] "+

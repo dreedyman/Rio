@@ -54,7 +54,7 @@ public class OpStringUtil {
                                      Resolver resolver) throws IOException {
 
         for (ServiceElement elem : opstring.getServices()) {
-            checkCodebase(elem, codebase, resolver, null);
+            checkCodebase(elem, codebase, resolver);
         }
         OperationalString[] nesteds = opstring.getNestedOperationalStrings();
         for (OperationalString nested : nesteds) {
@@ -65,41 +65,15 @@ public class OpStringUtil {
     /**
      * Check if the codebase is null or the codebase needs to be resolved
      *
-     * @param opstring The OperationalString to check
-     * @param codebase If the codebase is not set, set it to this value
-     * @param resolver The Resolver to use if artifacts need to be downloaded
-     * @param resolveFile The file to pass to the Resolver
-     *
-     * @throws java.io.IOException If the jars cannot be served
-     */
-    public static void checkCodebase(OperationalString opstring,
-                                     String codebase,
-                                     Resolver resolver,
-                                     File resolveFile) throws IOException {
-
-        for (ServiceElement elem : opstring.getServices()) {
-            checkCodebase(elem, codebase, resolver, resolveFile);
-        }
-        OperationalString[] nesteds = opstring.getNestedOperationalStrings();
-        for (OperationalString nested : nesteds) {
-            checkCodebase(nested, codebase, resolver, resolveFile);
-        }
-    }
-
-    /**
-     * Check if the codebase is null or the codebase needs to be resolved
-     *
      * @param elem The ServiceElement to check
      * @param codebase If the codebase is not set, set it to this value
      * @param resolver The Resolver to use if artifacts need to be downloaded
-     * @param resolveFile The file to pass to the Resolver
      *
      * @throws java.io.IOException If the jars cannot be served
      */
     public static void checkCodebase(ServiceElement elem,
                                      String codebase,
-                                     Resolver resolver,
-                                     File resolveFile) throws IOException {
+                                     Resolver resolver) throws IOException {
 
         if (codebase != null) {
             if (!codebase.endsWith("/"))
@@ -147,7 +121,7 @@ public class OpStringUtil {
         for (ClassBundle export : exports) {
             if(export.getArtifact()!=null) {
                 sb.append(" (").append(export.getArtifact()).append("): ");
-                ResolverHelper.resolve(export, resolver, resolveFile, true);
+                ResolverHelper.resolve(export, resolver);
                 didResolve = true;
             } else {
                 if(deployedAsArtifact) {

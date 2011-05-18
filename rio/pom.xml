@@ -28,13 +28,11 @@
 		<dependency>
 		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>jmx-lookup</artifactId>
-            <!--<scope>provided</scope>-->
         </dependency>
 
 		<dependency>
 		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
-            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
@@ -110,7 +108,7 @@
                                 <Implementation-Version>${project.version}</Implementation-Version>
                                 <Rio-Version>${project.version}</Rio-Version>
                                 <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                <Class-Path>jsk-lib.jar jsk-platform.jar</Class-Path>
+                                <Class-Path>boot.jar jsk-lib.jar jsk-platform.jar</Class-Path>
                             </manifest>
                         </createJar>
 
