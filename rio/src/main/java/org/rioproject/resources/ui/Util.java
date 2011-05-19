@@ -156,7 +156,7 @@ public class Util {
      */
     public static ImageIcon getImageIcon(String location) {
         ImageIcon icon = null;
-        URL url = Util.class.getClassLoader().getResource(location);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(location);
         if (url != null)
             icon = new ImageIcon(url);
         return (icon);
@@ -173,7 +173,7 @@ public class Util {
      */
     public static ImageIcon getScaledImageIcon(String location, int width, int height) {
         ImageIcon icon = null;
-        URL url = Util.class.getClassLoader().getResource(location);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(location);
         if (url != null) {
             icon = new ImageIcon(url);
             icon = new ImageIcon(icon.getImage().getScaledInstance(width,

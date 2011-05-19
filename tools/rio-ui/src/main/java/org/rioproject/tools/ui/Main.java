@@ -110,10 +110,10 @@ public class Main extends JFrame {
     int cybernodeRefreshRate;
     UtilitiesPanel utilities;
     String lastArtifact = null;
+    BasicEventConsumer clientEventConsumer;
+    ProvisionClientEventConsumer provisionClientEventConsumer;
 
-    public Main(Configuration config,
-                final boolean exitOnClose,
-                Properties startupProps) {
+    public Main(Configuration config, final boolean exitOnClose, Properties startupProps) {
         this.config = config;
         String lastArtifactName =
             startupProps.getProperty(Constants.LAST_ARTIFACT);
@@ -885,27 +885,54 @@ public class Main extends JFrame {
                                           new LeaseRenewalManager(),
                                           config);
         ServiceWatcher watcher = new ServiceWatcher();
+        provisionClientEventConsumer = new ProvisionClientEventConsumer();
+        clientEventConsumer = new BasicEventConsumer(new EventDescriptor(ProvisionMonitorEvent.class,
+                                                                         ProvisionMonitorEvent.ID),
+                                                     provisionClientEventConsumer,
+                                                     config);
         monitorCache = sdm.createLookupCache(monitors, null, watcher);
         sdm.createLookupCache(cybernodes, null, watcher);
         utilities.setDiscoveryManagement(jiniClient.getDiscoveryManager());
     }
-    
+
+    void addProvisionMonitor(ServiceItem item) throws RemoteException, OperationalStringException {
+        graphView.systemUp();
+        deploy.setEnabled(true);
+        clientEventConsumer.register(item);
+        ProvisionMonitor monitor = (ProvisionMonitor) item.service;
+        //failureEventConsumer.register(item);
+        DeployAdmin da = (DeployAdmin)monitor.getAdmin();
+        OperationalStringManager[] opStringMgrs = da.getOperationalStringManagers();
+        if (opStringMgrs == null || opStringMgrs.length == 0) {
+            return;
+        }
+        for (OperationalStringManager opStringMgr : opStringMgrs) {
+            OperationalString ops = opStringMgr.getOperationalString();
+            if(graphView.getOpStringNode(ops.getName())!=null)
+                return;
+            graphView.addOpString(monitor, ops);
+            ServiceElement[] elems = ops.getServices();
+            for(ServiceElement elem : elems) {
+                ServiceBeanInstance[] instances = opStringMgr.getServiceBeanInstances(elem);
+                for(ServiceBeanInstance instance : instances) {
+                    GraphNode node =
+                        graphView.serviceUp(elem, instance);
+                    if(node!=null)
+                        ServiceItemFetchQ.write(node);
+                    else {
+                        System.err.println("### Cant get GraphNode for ["+elem.getName()+"], " +
+                                           "instance ["+instance.getServiceBeanConfig().getInstanceID()+"]");
+                    }
+                }
+            }
+            graphView.setOpStringState(ops.getName());
+        }
+    }
+
     /**
      * ServiceDiscoveryListener for Cybernodes and ProvisionMonitors
      */
     class ServiceWatcher extends ServiceDiscoveryAdapter {
-        BasicEventConsumer clientEventConsumer;
-        ProvisionClientEventConsumer provisionClientEventConsumer;
-
-        ServiceWatcher() throws Exception {
-            provisionClientEventConsumer = new ProvisionClientEventConsumer();
-            clientEventConsumer =
-                new BasicEventConsumer(
-                          new EventDescriptor(ProvisionMonitorEvent.class,
-                                              ProvisionMonitorEvent.ID),
-                          provisionClientEventConsumer,
-                          config);
-        }
 
         public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
             try {

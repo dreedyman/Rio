@@ -248,10 +248,13 @@ public class CybernodeUtilizationPanel extends JPanel {
             Util.getImageIcon("org/rioproject/tools/ui/images/collapseall.gif");
         ImageIcon expandIcon =
             Util.getImageIcon("org/rioproject/tools/ui/images/expandall.gif");
-        ImageIcon refreshIcon =
-            Util.getScaledImageIcon("org/rioproject/tools/ui/images/view-refresh.png",
-                                    expandIcon.getIconWidth(),
-                                    expandIcon.getIconHeight());
+        ImageIcon refreshIcon = null;
+        if(expandIcon!=null) {
+            refreshIcon =
+                Util.getScaledImageIcon("org/rioproject/tools/ui/images/view-refresh.png",
+                                        expandIcon.getIconWidth(),
+                                        expandIcon.getIconHeight());
+        }
         JButton collapse = new JButton();
         collapse.setIcon(collapseIcon);
         collapse.setPreferredSize(new Dimension(22, 22));
