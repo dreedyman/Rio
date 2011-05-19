@@ -64,7 +64,7 @@
 
         <!-- service configs -->
         <fileSet>
-            <directory>${basedir}/../services/src/main/conf</directory>
+            <directory>${basedir}/src/main/config</directory>
             <outputDirectory>/config</outputDirectory>
             <includes>
                 <include>**/*</include>
@@ -99,7 +99,8 @@
 
     <dependencySets>
         <!-- The lib directory are service implementation jars and their transitive requirements -->
-        <dependencySet>            
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <excludes>                
                 <exclude>net.jini:jsk-dl</exclude>
                 <exclude>junit:junit</exclude>
@@ -115,6 +116,7 @@
 
         <!-- Get jsk-dl.jar and put into the lib-dl directory -->
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>net.jini:jsk-dl</include>
             </includes>
@@ -124,6 +126,7 @@
 
         <!-- The rest of the service download (-dl) jars go into the lib-dl directory -->
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>com.sun.jini:reggie:jar:dl</include>
@@ -138,6 +141,7 @@
 
         <!-- We also put the service user interface (-ui) jars on the download directory -->
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>org.rioproject:cybernode:jar:ui</include>
@@ -147,6 +151,7 @@
         </dependencySet>
 
         <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>org.rioproject:rio:jar:ui</include>

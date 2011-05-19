@@ -360,7 +360,9 @@
         <module>rio</module>
         <module>resolver</module>
         <module>webster</module>
-        <module>services</module>
+        <module>services/cybernode</module>
+        <module>services/gnostic</module>
+        <module>services/monitor</module>
         <module>tools</module>
         <module>rio-test</module>
         <module>examples</module>

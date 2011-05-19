@@ -23,7 +23,12 @@ import net.jini.constraint.BasicMethodConstraints
 import net.jini.core.constraint.ConnectionRelativeTime
 import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
+import net.jini.core.entry.Entry
 import org.rioproject.boot.BootUtil
+import org.rioproject.resolver.Resolver
+import org.rioproject.resolver.ResolverHelper
+import org.rioproject.entry.UIDescriptorFactory
+import org.rioproject.RioVersion
 
 /*
  * Declare Provision Monitor properties
@@ -52,6 +57,22 @@ class MonitorConfig {
 
     ServiceResourceSelector getServiceResourceSelector() {
         return new LeastActiveSelector()
+    }
+
+    Entry[] getServiceUIs(String codebase) {
+        def entry = []
+        if(codebase!=null) {
+            Resolver r = ResolverHelper.getInstance()
+            String uiClass = 'org.rioproject.tools.ui.ServiceUIWrapper'
+            def classpath = []
+            for(String s : r.getClassPathFor("org.rioproject:rio-ui:${RioVersion.VERSION}")) {
+                if(s.startsWith(ResolverHelper.M2_HOME))
+                    s = s.substring(ResolverHelper.M2_HOME.length()+1)
+                classpath << s
+            }
+            entry = [UIDescriptorFactory.getJFrameDesc(codebase, classpath as String[], uiClass)]
+        }
+        return entry as Entry[]
     }
 
     /*
