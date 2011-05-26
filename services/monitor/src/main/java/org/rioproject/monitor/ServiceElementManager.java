@@ -61,6 +61,7 @@ import org.rioproject.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.jsb.MonitorableService;
 import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.loader.ClassBundleLoader;
 import org.rioproject.monitor.ServiceChannel.ServiceChannelEvent;
 import org.rioproject.opstring.OpStringFilter;
 import org.rioproject.resources.client.DiscoveryManagementPool;
@@ -75,6 +76,7 @@ import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
+import java.security.PrivilegedExceptionAction;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -247,20 +249,16 @@ public class ServiceElementManager implements InstanceIDManager {
 
         String[] args = (String[])configParameters.get(ServiceBeanConfig.SERVICE_PROVISION_CONFIG);
         MethodConstraints serviceListenerConstraints=
-                new BasicMethodConstraints(new InvocationConstraints(new ConnectionRelativeTime(30000),
-                                                                     null));
-        ProxyPreparer defaultProxyPreparer =  new BasicProxyPreparer(false,
-                                                                     serviceListenerConstraints,
-                                                                     null);
+                new BasicMethodConstraints(new InvocationConstraints(new ConnectionRelativeTime(30000), null));
+        ProxyPreparer defaultProxyPreparer =  new BasicProxyPreparer(false, serviceListenerConstraints, null);
         if(args==null) {
             proxyPreparer = defaultProxyPreparer;
         } else {
             serviceProvisionConfig = ConfigurationProvider.getInstance(args);
-            proxyPreparer =
-                    (ProxyPreparer)serviceProvisionConfig.getEntry(SERVICE_PROVISION_CONFIG_COMPONENT,
-                                                                   "proxyPreparer",
-                                                                   ProxyPreparer.class,
-                                                                   defaultProxyPreparer);
+            proxyPreparer = (ProxyPreparer)serviceProvisionConfig.getEntry(SERVICE_PROVISION_CONFIG_COMPONENT,
+                                                                           "proxyPreparer",
+                                                                           ProxyPreparer.class,
+                                                                           defaultProxyPreparer);
         }
 
         /* Get the Class[] of interfaces to discover, simple for loop,
@@ -303,9 +301,9 @@ public class ServiceElementManager implements InstanceIDManager {
         this.maintain = svcElement.getPlanned();
         /* Set the initial planned services */
         Integer ips =
-            (Integer)svcElement.getServiceBeanConfig().
-                    getConfigurationParameters().
-                get(ServiceBeanConfig.INITIAL_PLANNED_SERVICES);
+            (Integer)svcElement.getServiceBeanConfig()
+                         .getConfigurationParameters()
+                         .get(ServiceBeanConfig.INITIAL_PLANNED_SERVICES);
         if(ips==null)
             setInitialPlanned(svcElement.getPlanned());
 
@@ -317,8 +315,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 if(preElem.getProvisionType() == ProvisionType.FIXED) {
                     removeFixedServiceRequests(preElem);
                 } else {
-                    provisioner.getPendingManager()
-                        .removeServiceElement(preElem);
+                    provisioner.getPendingManager().removeServiceElement(preElem);
                 }
             }
             synchronized(serviceBeanList) {
@@ -326,12 +323,9 @@ public class ServiceElementManager implements InstanceIDManager {
                     Long instanceID =
                         sbi.getServiceBeanConfig().getInstanceID();
                     ServiceBeanConfig updated = newElem.getServiceBeanConfig();
-                    Map<String, Object> configParms =
-                        updated.getConfigurationParameters();
+                    Map<String, Object> configParms = updated.getConfigurationParameters();
                     configParms.put(ServiceBeanConfig.INSTANCE_ID, instanceID);
-                    ServiceBeanConfig newConfig =
-                        new ServiceBeanConfig(configParms,
-                                              updated.getConfigArgs());
+                    ServiceBeanConfig newConfig = new ServiceBeanConfig(configParms, updated.getConfigArgs());
                     ServiceBeanConfig sbc = sbi.getServiceBeanConfig();
                     Map<String, Object> initParms = sbc.getInitParameters();
 
@@ -345,11 +339,10 @@ public class ServiceElementManager implements InstanceIDManager {
              * been changed */
             if(sdm!=null) {                
                 /* Update groups if they have changed */
-                if(ServiceElementUtil.hasDifferentGroups(preElem,
-                                                         newElem)) {
+                if(ServiceElementUtil.hasDifferentGroups(preElem, newElem)) {
                     String[] groups = newElem.getServiceBeanConfig().getGroups();
                     if(mgrLogger.isLoggable(Level.FINEST)) {
-                        StringBuffer buffer = new StringBuffer();
+                        StringBuilder buffer = new StringBuilder();
                         if(groups == DiscoveryGroupManagement.ALL_GROUPS)
                             buffer.append("ALL_GROUPS");
                         else {
@@ -371,12 +364,10 @@ public class ServiceElementManager implements InstanceIDManager {
                     ((DiscoveryGroupManagement)dMgr).setGroups(groups);
                 }
                 /* Update locators if they have changed */
-                if(ServiceElementUtil.hasDifferentLocators(preElem,
-                                                           newElem)) {
-                    LookupLocator[] locators =
-                        newElem.getServiceBeanConfig().getLocators();
+                if(ServiceElementUtil.hasDifferentLocators(preElem, newElem)) {
+                    LookupLocator[] locators = newElem.getServiceBeanConfig().getLocators();
                     if(mgrLogger.isLoggable(Level.FINEST)) {
-                        StringBuffer buffer = new StringBuffer();
+                        StringBuilder buffer = new StringBuilder();
                         if(locators==null)
                             buffer.append("null");
                         else {
@@ -409,9 +400,7 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     ServiceStatement getServiceStatement() {
         ServiceStatement statement = new ServiceStatement(svcElement);
-        InstantiatorResource[] resources =
-                        provisioner.getServiceResourceSelector().
-                                    getInstantiatorResources(svcElement);
+        InstantiatorResource[] resources = provisioner.getServiceResourceSelector().getInstantiatorResources(svcElement);
         for(InstantiatorResource ir : resources) {
             try {
                 ServiceRecord[] records = ir.getServiceRecords(svcElement);
@@ -419,9 +408,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     statement.putServiceRecord(ir.getInstantiatorUuid(), record);
             } catch (RemoteException e) {
                 Throwable cause = ThrowableUtil.getRootCause(e);
-                mgrLogger.log(Level.WARNING,
-                              "Could not obtain ServiceRecords from " +
-                              ""+ir.getHostAddress(), cause);
+                mgrLogger.log(Level.WARNING,  "Could not obtain ServiceRecords from "+ir.getHostAddress(), cause);
             }
         }
         return statement;
@@ -433,9 +420,7 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     List<DeployedService> getServiceDeploymentList() {
         List<DeployedService> list = new ArrayList<DeployedService>();
-        InstantiatorResource[] resources =
-                        provisioner.getServiceResourceSelector().
-                                    getInstantiatorResources(svcElement);
+        InstantiatorResource[] resources = provisioner.getServiceResourceSelector().getInstantiatorResources(svcElement);
         for(ServiceBeanInstance sbi : getServiceBeanInstances()) {
             for(InstantiatorResource ir : resources) {
                 if(sbi.getServiceBeanInstantiatorID()!=null &&
@@ -451,23 +436,19 @@ public class ServiceElementManager implements InstanceIDManager {
 
     private void setInitialPlanned(int value) {
         initialMaintain = value;
-        svcElement.setServiceBeanConfig(
-            ServiceElementUtil.addConfigParameter(
-                svcElement.getServiceBeanConfig(),
-                ServiceBeanConfig.INITIAL_PLANNED_SERVICES,
-                value));
+        svcElement.setServiceBeanConfig(ServiceElementUtil.addConfigParameter(svcElement.getServiceBeanConfig(),
+                                                                              ServiceBeanConfig.INITIAL_PLANNED_SERVICES,
+                                                                              value));
     }
 
     /*
      * Load interfaces for the service
      */
-    private Class[] loadInterfaceClasses(ServiceElement elem)
-        throws MalformedURLException, ClassNotFoundException {
-
+    private Class[] loadInterfaceClasses(ServiceElement elem) throws MalformedURLException, ClassNotFoundException {
         ClassBundle[] exportBundles = elem.getExportBundles();
         Class[] classes = new Class[exportBundles.length];
         for(int i = 0; i < classes.length; i++) {
-            classes[i] = exportBundles[i].loadClass();
+            classes[i] = ClassBundleLoader.loadClass(exportBundles[i]);
         }
         return(classes);
     }
@@ -527,11 +508,10 @@ public class ServiceElementManager implements InstanceIDManager {
                     removeFixedServiceRequests(svcElement);
                     return;
                 }
-                ProvisionRequest request =
-                    new ProvisionRequest(ServiceElementUtil.copyServiceElement(svcElement),
-                                         listener,
-                                         opStringMgr,
-                                         instanceIDMgr);
+                ProvisionRequest request = new ProvisionRequest(ServiceElementUtil.copyServiceElement(svcElement),
+                                                                listener,
+                                                                opStringMgr,
+                                                                instanceIDMgr);
                 if(provisioner.getFixedServiceManager().hasServiceElement(svcElement)) {
                     if(mgrLogger.isLoggable(Level.FINER))
                         mgrLogger.finer("Update ["+svcElement.getName()+"] instance in  FixedServiceManager");
@@ -702,8 +682,7 @@ public class ServiceElementManager implements InstanceIDManager {
             sElemListener = new ServiceElementManagerServiceListener();
             lCache.addListener(sElemListener);
             
-            ServiceBeanInstance[] sbInstances =
-                instanceList.toArray(new ServiceBeanInstance[instanceList.size()]);
+            ServiceBeanInstance[] sbInstances = instanceList.toArray(new ServiceBeanInstance[instanceList.size()]);
 
             if(sbInstances.length>0) {
                 if(mgrLogger.isLoggable(Level.FINEST))
@@ -1591,7 +1570,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 mgrLogger.fine("Could not find ServiceBeanInstance " +
                                 "for ["+svcElement.getOperationalStringName()+"/"+svcElement.getName()+"] "+
                                 "UUID=["+serviceUuid+"], in known collection of ServiceBeanInstances, look in " +
-                                "decremented list. "+decrementedServiceBeanList);
+                                "decremented list: "+decrementedServiceBeanList);
             }
             /* See if the proxy has been placed on the decrementedServiceBeanList */
             List<ServiceBeanInstance> decremented = new ArrayList<ServiceBeanInstance>();
@@ -1622,9 +1601,8 @@ public class ServiceElementManager implements InstanceIDManager {
         InstantiatorResource[] instantiators;
         if(instance!=null) {
             if(mgrLogger.isLoggable(Level.FINEST))
-                mgrLogger.finest("CLEAN SBI = " +
-                                 "["+svcElement.getOperationalStringName()+
-                                 "/"+svcElement.getName()+"] "+instance.toString());
+                mgrLogger.finest("CLEAN SBI = ["+svcElement.getOperationalStringName()+"/"+svcElement.getName()+"] "+
+                                 instance.toString());
             if(instance.getHostAddress()!=null) {
                 ServiceResource[] resources =
                     provisioner.getServiceResourceSelector().getServiceResources(instance.getHostAddress(), true);
@@ -1655,8 +1633,7 @@ public class ServiceElementManager implements InstanceIDManager {
 
         /* Remove all instances of the ServiceElement from InstantiatorResource objects */
         for(InstantiatorResource ir : instantiators) {
-            instance = ir.removeServiceElementInstance(svcElement,
-                                                       instance==null?serviceUuid:instance.getServiceBeanID());
+            instance = ir.removeServiceElementInstance(svcElement, instance==null?serviceUuid:instance.getServiceBeanID());
             if(instance!=null) {
                 if(mgrLogger.isLoggable(Level.FINER))
                     mgrLogger.finer("Removed ["+
@@ -1672,8 +1649,7 @@ public class ServiceElementManager implements InstanceIDManager {
         }
         */
         services.remove(proxy);
-        fdhTable.remove(new ServiceID(serviceUuid.getMostSignificantBits(),
-                                      serviceUuid.getLeastSignificantBits()));
+        fdhTable.remove(new ServiceID(serviceUuid.getMostSignificantBits(), serviceUuid.getLeastSignificantBits()));
         StringBuffer buff = new StringBuffer();
         buff.append("[").
             append(svcElement.getOperationalStringName()).
@@ -1735,17 +1711,11 @@ public class ServiceElementManager implements InstanceIDManager {
                     Object admin = ((Administrable)item.service).getAdmin();
                     if(admin instanceof ServiceBeanAdmin) {
                         ServiceBeanAdmin jsbAdmin = (ServiceBeanAdmin)admin;
-                        jsbConfig =
-                            jsbAdmin.getServiceElement().getServiceBeanConfig();
-                        instantiatorUuid =
-                            jsbAdmin.getServiceBeanInstantiatorUuid();
-
+                        jsbConfig = jsbAdmin.getServiceElement().getServiceBeanConfig();
+                        instantiatorUuid = jsbAdmin.getServiceBeanInstantiatorUuid();
                     }
                 } catch(RemoteException e) {
-                    mgrLogger.log(Level.WARNING,
-                                  "Getting ServiceBeanConfig for " +
-                                  "service ["+svcElement.getName()+"]",
-                                  e);
+                    mgrLogger.log(Level.WARNING, "Getting ServiceBeanConfig for service ["+svcElement.getName()+"]", e);
                 }
             }
 
@@ -1757,9 +1727,7 @@ public class ServiceElementManager implements InstanceIDManager {
             if(svcElement.getProvisionType() == ProvisionType.EXTERNAL) {
                 jsbConfig = svcElement.getServiceBeanConfig();
                 if(sbiLogger.isLoggable(Level.FINEST))
-                    sbiLogger.finest("ServiceElement ["+
-                                     svcElement.getOperationalStringName()+
-                                     "/"+svcElement.getName()+"] "+
+                    sbiLogger.finest("ServiceElement ["+svcElement.getOperationalStringName()+"/"+svcElement.getName()+"] "+
                                      "is an external service, create " +
                                      "generic ServiceBeanInstance");
             }
@@ -2484,6 +2452,10 @@ public class ServiceElementManager implements InstanceIDManager {
             //}
         }
         return (count);
+    }
+
+    private String getLoggingName() {
+        return "["+svcElement.getOperationalStringName()+"/"+svcElement.getName()+"]";
     }
     
 }
