@@ -105,6 +105,7 @@
                                 <in>org.rioproject.cybernode</in>
                                 <in>org.rioproject.system.measurable</in>
                                 <in>org.rioproject.resources.util</in>
+                                <in>org.rioproject.resources.ui</in>
                                 <in>org.rioproject.watch</in>
                             </ins>
                             <topclasses>
