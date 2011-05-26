@@ -314,8 +314,7 @@ public class SLAPolicyHandler implements ThresholdListener {
             SLAThresholdEvent event =
                 new SLAThresholdEvent(eventSource,
                                       context.getServiceElement(),
-                                      context.getServiceBeanManager().
-                                          getServiceBeanInstance(),
+                                      context.getServiceBeanManager().getServiceBeanInstance(),
                                       calculable,
                                       sla,
                                       getDescription(),
