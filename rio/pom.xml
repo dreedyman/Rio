@@ -132,13 +132,19 @@
                             </skips>
                             <topclasses>
                                 <topclass>org.rioproject.bean.BeanDelegator</topclass>
-                                <topclass>org.rioproject.core.provision.ProvisionManager</topclass>                                
+                                <topclass>org.rioproject.core.provision.ProvisionManager</topclass>
+                                <topclass>org.rioproject.event.RemoteServiceEventListener</topclass>
                                 <topclass>org.rioproject.log.LoggerConfig</topclass>
                                 <topclass>org.rioproject.log.ServiceLogEvent</topclass>
                                 <topclass>org.rioproject.opstring.OpString</topclass>
                                 <topclass>org.rioproject.system.ComputeResourceAdmin</topclass>
                                 <topclass>org.rioproject.sla.RuleMap</topclass>
                                 <topclass>org.rioproject.sla.SLAThresholdEvent</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.pool.CalculableMemoryPoolView</topclass>
+                                <topclass>org.rioproject.system.measurable.cpu.CalculableProcessCPU</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableSystemMemory</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.pool.CalculableMemoryPool</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.pool.MemoryPoolUtilization</topclass>
                                 <topclass>org.rioproject.resources.servicecore.AbstractProxy</topclass>
                                 <topclass>org.rioproject.resources.servicecore.ServiceAdminProxy</topclass>
                                 <topclass>org.rioproject.resources.servicecore.Service</topclass>
