@@ -231,16 +231,11 @@ public class AssociationFutureTest {
         //LogUtil.setLogger("org.rioproject.associations", Level.ALL);
         File opstring = new File("src/test/resources/space.groovy");
         Assert.assertNotNull(opstring);
-        testManager.startReggie();
+        /*testManager.startReggie();
         testManager.startProvisionMonitor();
-        testManager.startCybernode();
+        testManager.startCybernode();*/
         testManager.deploy(opstring);
-        AssociationDescriptor ad =
-            AssociationDescriptor.create("Spaced Out",
-                                         JavaSpace05.class,
-                                         System.getProperty(
-                                             Constants.GROUPS_PROPERTY_NAME,
-                                             System.getProperty("user.name")));
+        AssociationDescriptor ad = AssociationDescriptor.create("Spaced Out", JavaSpace05.class, "AssociationFutureTest");
         AssociationMgmt mgr = new AssociationMgmt();
         Association<JavaSpace05> a = mgr.addAssociationDescriptor(ad);
         Future<JavaSpace05> future = a.getServiceFuture();

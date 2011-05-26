@@ -111,7 +111,7 @@ OutOfMemoryTest {
 }
 
 EnlistReleaseTest {
-    groups = "ReleaseEnlistTest"
+    groups = "EnlistReleaseTest"
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
@@ -119,4 +119,11 @@ EnlistReleaseTest {
 
 LoadArtifactAsOpStringTest {
     opstring = 'org.rioproject.test:deploy-oar-test:1.0'
+}
+
+AssociationFutureTest {
+    groups = "AssociationFutureTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
 }
