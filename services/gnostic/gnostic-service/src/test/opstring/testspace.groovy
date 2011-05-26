@@ -40,7 +40,7 @@ deployment(name: 'Test Space') {
 
     rules {
         rule{
-            resource 'file:src/test/resources/SpaceUtilization'
+            resource 'file:'+System.getProperty('user.dir')+'/src/test/resources/SpaceUtilization'
             serviceFeed(name: "Space") {
                 watches "${SystemWatchID.PROC_CPU}, ${SystemWatchID.JVM_MEMORY}"
             }

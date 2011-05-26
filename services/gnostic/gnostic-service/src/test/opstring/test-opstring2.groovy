@@ -25,7 +25,7 @@ deployment(name: 'Test Deploy 3') {
 
     rules {
         rule{
-            resource 'file:src/test/resources/SystemUtilization'
+            resource 'file:'+System.getProperty('user.dir')+'/src/test/resources/SystemUtilization'
             ruleClassPath 'file:target/test-classes/'
             serviceFeed(name: "S3") {
                 watches "${SystemWatchID.SYSTEM_CPU}, ${SystemWatchID.JVM_MEMORY}"
