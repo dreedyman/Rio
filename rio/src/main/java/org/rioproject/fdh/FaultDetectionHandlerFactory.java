@@ -19,6 +19,7 @@ import net.jini.core.lookup.ServiceID;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.core.ClassBundle;
 import org.rioproject.core.ServiceElement;
+import org.rioproject.loader.ClassBundleLoader;
 
 import java.util.List;
 
@@ -100,9 +101,9 @@ public class FaultDetectionHandlerFactory {
                 "org.rioproject.fdh.AdminFaultDetectionHandler");
         }
         if(cl==null)
-            fdhClass = fdhBundle.loadClass();
+            fdhClass = ClassBundleLoader.loadClass(fdhBundle);
         else
-            fdhClass = fdhBundle.loadClass(cl);
+            fdhClass = ClassBundleLoader.loadClass(fdhBundle);
         FaultDetectionHandler fdh =
             (FaultDetectionHandler)fdhClass.newInstance();
         fdhBundle.runKnownMethods(fdh);

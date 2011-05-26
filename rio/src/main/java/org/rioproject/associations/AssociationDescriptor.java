@@ -426,8 +426,7 @@ public class AssociationDescriptor implements Serializable {
             if(proxyType.equals(JDK_PROXY) || proxyType.equals(CGLIB_PROXY)) {
                 this.proxyType = proxyType;
             } else {
-                throw new IllegalArgumentException("unknown proxy type: "+
-                                                   proxyType);
+                throw new IllegalArgumentException("unknown proxy type: "+proxyType);
             }
         }
     }
@@ -537,8 +536,7 @@ public class AssociationDescriptor implements Serializable {
         if(serviceDiscoveryTimeUnits==null)
             throw new IllegalArgumentException("serviceDiscoveryTimeUnits is null");
         if(serviceDiscoveryTimeUnits.ordinal()<TimeUnit.MILLISECONDS.ordinal())
-            throw new IllegalArgumentException("serviceDiscoveryTimeUnits cannot be " +
-                                               "smaller then MILLISECONDS");
+            throw new IllegalArgumentException("serviceDiscoveryTimeUnits cannot be smaller then MILLISECONDS");
         this.serviceDiscoveryTimeUnits = serviceDiscoveryTimeUnits;
     }
 
@@ -561,9 +559,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @return An AssociationDescriptor
      */
-    public static AssociationDescriptor create(String name,
-                                               Class serviceClass,
-                                               String... groups) {
+    public static AssociationDescriptor create(String name, Class serviceClass, String... groups) {
         return create(name, null, serviceClass, AssociationType.USES, groups);
     }
 
@@ -578,10 +574,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @return An AssociationDescriptor
      */
-    public static AssociationDescriptor create(String name,
-                                               String setter,
-                                               Class serviceClass,
-                                               String... groups) {
+    public static AssociationDescriptor create(String name, String setter, Class serviceClass, String... groups) {
         return create(name, setter, serviceClass, AssociationType.USES, groups);
     }
 
