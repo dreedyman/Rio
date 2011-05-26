@@ -231,75 +231,6 @@ public class ClassBundle implements Serializable {
     }
 
     /**
-     * Load the class using the provided JAR resources. If there are no JARs 
-     * resources for the class the curremt contxt ClassLoader will be used to
-     * load the class. If there are JAR resources, a new ClassLoader will be
-     * created each time this method is invoked, setting the delegating
-     * ClassLoader to the contextClassLoader
-     * 
-     * @return A new Class instance each time this method is invoked
-     *
-     * @throws ClassNotFoundException If the class cannot be loaded
-     * @throws MalformedURLException If URLs cannot be created
-     */
-    public Class loadClass() throws ClassNotFoundException,
-                                    MalformedURLException {
-        Class theClass = null;
-        final Thread currentThread = Thread.currentThread();
-        final ClassLoader cCL = AccessController.doPrivileged(
-                new PrivilegedAction<ClassLoader>() {
-                    public ClassLoader run() {
-                        return (currentThread.getContextClassLoader());
-                    }
-                });
-        try {
-            theClass = loadClass(cCL);
-        } finally {
-            AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                public ClassLoader run() {
-                    currentThread.setContextClassLoader(cCL);
-                    return (null);
-                }
-            });
-        }
-        return theClass;
-    }
-
-    /**
-     * Load the class using the provided JAR resources. If there are no JARs 
-     * resources for the class the parent ClassLoader will be used to load the
-     * class. If there are JAR resources, a new ClassLoader will be created
-     * each time this method is invoked.
-     * 
-     * @param parent Parent Classloader to use for delegation.
-     *
-     * @return A new Class instance each time this method is invoked
-     *
-     * @throws ClassNotFoundException If the class cannot be loaded
-     * @throws MalformedURLException If URLs cannot be created
-     */
-    public Class loadClass(final ClassLoader parent)
-        throws ClassNotFoundException, MalformedURLException {
-        if(parent == null)
-            throw new IllegalArgumentException("parent is null");
-        ClassLoader loader = parent;
-        URL[] urls = getJARs();
-        if(urls != null && urls.length > 0) {
-            try {
-                loader = new URIClassLoader(ServiceClassLoader.getURIs(urls), parent);
-            } catch (URISyntaxException e) {
-                throw new MalformedURLException("Creating URIs");
-            }
-        }
-        if(logger.isLoggable(Level.FINEST)) {
-            logger.finest("Using ClassLoader ["+loader.getClass().getName()+"] " +
-                          "to load class "+className);
-            ClassLoaderUtil.displayClassLoaderTree(loader);
-        }
-        return (loader.loadClass(className));
-    }
-
-    /**
      * Get the JAR names.
      *
      * @return A String array of the JAR names. This method will return a new
@@ -474,11 +405,11 @@ public class ClassBundle implements Serializable {
      */
     private URL[] urlsFromJARs(String[] jarNames) throws MalformedURLException {
         URL[] urls = new URL[jarNames.length];
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(int i = 0; i < urls.length; i++) {
             if(i>0)
                 sb.append(", ");
-            sb.append(translateCodebase()+jarNames[i]);
+            sb.append(translateCodebase()).append(jarNames[i]);
             urls[i] = new URL(translateCodebase()+jarNames[i]);
         }
         if(logger.isLoggable(Level.FINE)) {
@@ -499,7 +430,7 @@ public class ClassBundle implements Serializable {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("ClassName=").append(className).append("\n");
         buffer.append("Artifact=").append(artifact).append("\n");
         buffer.append("Codebase=").append(codebase).append("\n");

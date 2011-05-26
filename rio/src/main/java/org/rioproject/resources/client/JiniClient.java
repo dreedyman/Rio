@@ -27,6 +27,7 @@ import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.core.ClassBundle;
 import org.rioproject.core.ServiceElement;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.loader.ClassBundleLoader;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -269,7 +270,7 @@ public class JiniClient {
                  * So load the interface class(es) using the URLs in the
                  * export ClassBundle
                  */
-                interfaces[i] = eBundles[i].loadClass();
+                interfaces[i] = ClassBundleLoader.loadClass(eBundles[i]);
             }
         }
 
