@@ -30,6 +30,21 @@ import java.util.Collection;
 public interface Resolver {
 
     /**
+     * Get the classpath for an artifact.
+     *
+     * @param artifact The artifact string.
+     * @param pom The pom to use (may be null)
+     * @param download Whether to download the artifact
+     *
+     * @return A string array containing the classpath elements for the artifact
+     *
+     * @throws ResolverException if the artifact cannot be resolved, or if the artifact's
+     * dependencies cannot be found
+     */
+    @Deprecated
+    String[] getClassPathFor(String artifact, File pom, boolean download) throws ResolverException;
+
+    /**
      * Get the classpath for an artifact, and resolve (download) the artifact
      * and it's dependencies if needed.
      *
@@ -64,7 +79,7 @@ public interface Resolver {
      * "oar". If null (or empty string), "jar" is used. This is used to
      * determine the filename extension of the artifact to locate.
      *
-     * @return The location of the artifact, or null if not found.
+     * @return The location of the artifact.
      *
      * @throws ResolverException if the artifact cannot be located
      */

@@ -26,12 +26,10 @@ import java.util.List;
  */
 public class ResolutionResult {
     private Artifact artifact;
-    private DependencyNode root;
     private List<ArtifactResult> artifactResults;
 
-    public ResolutionResult(Artifact artifact, DependencyNode root, List<ArtifactResult> artifactResults) {
+    public ResolutionResult(Artifact artifact, List<ArtifactResult> artifactResults) {
         this.artifact = artifact;
-        this.root = root;
         this.artifactResults = artifactResults;
     }
 
@@ -41,10 +39,6 @@ public class ResolutionResult {
 
     public Artifact getArtifact() {
         return artifact;
-    }
-
-    public DependencyNode getRoot() {
-        return root;
     }
 
     public List<ArtifactResult> getArtifactResults() {

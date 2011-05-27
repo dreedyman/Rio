@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 to the original author or authors.
+ * Copyright 2011 to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,38 @@
  */
 package org.rioproject.test.resolver;
 
-import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.config.maven2.Repository;
 import org.rioproject.resolver.ResolverException;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.resolver.aether.AetherResolver;
 import org.rioproject.test.ProjectModuleResolver;
 import org.sonatype.aether.installation.InstallationException;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Test parsing pom with project.parent.version set
+ * Test including test dependencies
  */
-public class ITResolverParseParent {
-    @Test
-    public void testVersionFromProjectParentVersion() throws IOException, ResolverException, InstallationException {
+public class ITResolverTestDependencies {
+
+    @Before
+    public void cleanAndInstall() throws InstallationException, IOException {
+        Util.cleanProjectFromRepository();
         Util.verifyAndInstall();
-        ProjectModuleResolver r = new ProjectModuleResolver();
+    }
+
+    @Test
+    public void resolveWithoutTestDependenciesIncluded() throws ResolverException {
+        AetherResolver r = new AetherResolver();
         String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0");
         Assert.assertTrue("We should have 2 items in the classpath, we got: " + cp.length, cp.length == 2);
     }
 
-    @After
-    public void clean() {
-        Util.cleanProjectFromRepository();
+    @Test
+    public void resolveWithTestDependenciesIncluded() throws ResolverException {
+        ProjectModuleResolver r = new ProjectModuleResolver();
+        String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0");
+        Assert.assertTrue("We should have 3 items in the classpath, we got: " + cp.length, cp.length == 3);
     }
 }

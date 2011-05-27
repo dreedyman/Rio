@@ -42,11 +42,12 @@ import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyFilter;
-import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.impl.ArtifactDescriptorReader;
 import org.sonatype.aether.impl.VersionRangeResolver;
 import org.sonatype.aether.impl.VersionResolver;
 import org.sonatype.aether.impl.internal.DefaultServiceLocator;
+import org.sonatype.aether.installation.InstallRequest;
+import org.sonatype.aether.installation.InstallationException;
 import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
@@ -54,11 +55,15 @@ import org.sonatype.aether.resolution.*;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.artifact.JavaScopes;
+import org.sonatype.aether.util.artifact.SubArtifact;
+import org.sonatype.aether.util.filter.DependencyFilterUtils;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -68,6 +73,9 @@ public class AetherService {
     private final RepositorySystemSession repositorySystemSession;
     private final RepositorySystem repositorySystem;
     private Settings effectiveSettings;
+    private String dependencyFilterScope;
+    private final Collection<DependencyFilter> dependencyFilters =
+        Collections.synchronizedCollection(new ArrayList<DependencyFilter>());
 
     private AetherService(RepositorySystem repositorySystem) throws SettingsBuildingException {
         this.repositorySystem = repositorySystem;
@@ -82,6 +90,18 @@ public class AetherService {
         } catch (SettingsBuildingException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public RepositorySystemSession getRepositorySystemSession() {
+        return repositorySystemSession;
+    }
+
+    public void setDependencyFilterScope(String dependencyFilterScope) {
+        this.dependencyFilterScope = dependencyFilterScope;
+    }
+
+    public void addDependencyFilter(DependencyFilter filter) {
+        dependencyFilters.add(filter);
     }
 
     private static RepositorySystem newRepositorySystem() {
@@ -195,7 +215,8 @@ public class AetherService {
      * @param extension The file extension of the artifact, may be {@code null}.
      * @param classifier The classifier of the artifact, may be {@code null}.
      * @param version The version of the artifact, may be {@code null}.
-     * @param repositories A collection of repositories to use when resolving the artifact, may be {@code null}
+     * @param repositories A collection of repositories to use when resolving the artifact,
+     * may be {@code null}. If {@code null}, the repositories will be determined by reading the settings
      *
      * @return A <code>ResolutionResult</code> for the artifact with the specified coordinates.
      *
@@ -214,28 +235,63 @@ public class AetherService {
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
         Dependency dependency = new Dependency(artifact, JavaScopes.COMPILE);
+        if(repositories==null)
+            repositories = getRemoteRepositories();
 
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(dependency);
-        if(repositories!=null)
-            collectRequest.setRepositories(repositories);
+        collectRequest.setRepositories(repositories);
 
-        DependencyNode rootNode = repositorySystem.collectDependencies(repositorySystemSession, collectRequest).getRoot();
-        DependencyRequest dependencyRequest = new DependencyRequest(rootNode, getDependencyFilter(artifact));
+        DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, getDependencyFilter(artifact));
         dependencyRequest.setCollectRequest(collectRequest);
 
         List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession,
                                                                                     dependencyRequest).getArtifactResults();
-        return new ResolutionResult(artifact, rootNode, artifactResults);
+        return new ResolutionResult(artifact, artifactResults);
+    }
+
+    /**
+     * Installs a JAR and its POM to the local repository.
+     *
+     * @param groupId The group identifier of the artifact, may be {@code null}.
+     * @param artifactId The artifact identifier of the artifact, may be {@code null}.
+     * @param version The version of the artifact, may be {@code null}.
+     * @param pomFile The pom File, can not be {@code null}.
+     * @param artifactFile The file for the project's artifact, may be {@code null}.
+     *
+     * @throws InstallationException if the requested installation is unsuccessful
+     */
+    public void install(String groupId, String artifactId, String version, File pomFile, File artifactFile)
+        throws InstallationException {
+
+        InstallRequest installRequest = new InstallRequest();
+
+        if(artifactFile!=null) {
+            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", "jar", version);
+            jarArtifact = jarArtifact.setFile(artifactFile);
+
+            Artifact pomArtifact = new SubArtifact(jarArtifact, "", "pom");
+            pomArtifact = pomArtifact.setFile(pomFile);
+            installRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
+        } else {
+            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "", "pom", version);
+            pomArtifact = pomArtifact.setFile(pomFile);
+            installRequest.addArtifact(pomArtifact);
+        }
+        repositorySystem.install(repositorySystemSession, installRequest);
     }
 
     protected DependencyFilter getDependencyFilter(Artifact a) {
-        DependencyFilter filter;
+        Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();
         if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
-            filter = new ClassifierFilter(a.getClassifier());
+            filters.add(new ClassifierFilter(a.getClassifier()));
         else
-            filter = new ExcludePlatformFilter();
-        return filter;
+            filters.add(new ExcludePlatformFilter());
+        filters.add(DependencyFilterUtils.classpathFilter(dependencyFilterScope==null?
+                                                          JavaScopes.COMPILE:dependencyFilterScope));
+        for(DependencyFilter filter : dependencyFilters)
+            filters.add(filter);
+        return DependencyFilterUtils.andFilter(filters);
     }
 
     /**

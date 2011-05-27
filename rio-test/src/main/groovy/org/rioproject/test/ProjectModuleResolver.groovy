@@ -28,6 +28,16 @@ import org.rioproject.resolver.aether.ResolutionResult
 import org.sonatype.aether.resolution.ArtifactResult
 import org.sonatype.aether.resolution.ArtifactRequest
 
+import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector
+import org.sonatype.aether.util.graph.selector.ScopeDependencySelector
+import org.sonatype.aether.util.graph.selector.AndDependencySelector
+import org.sonatype.aether.collection.DependencySelector
+import org.apache.maven.repository.internal.MavenRepositorySystemSession
+import org.sonatype.aether.util.artifact.JavaScopes
+import org.rioproject.test.aether.ZeroOptionalDependencySelector
+import org.rioproject.test.aether.TestDependencySelector
+import org.rioproject.test.aether.TestDependencyFilter
+
 /**
  * Resolves artifacts from within (or among) a project (module)
  */
@@ -35,6 +45,19 @@ class ProjectModuleResolver extends AetherResolver {
 
     def ProjectModuleResolver() {
         super()
+        /* We need to modify the DependencySelector the repository system session will use to allow the
+         * inclusion of the test scope, and to disallow all optional dependencies. The reason for the latter
+         * is required since we will be iterating over the collection of declared dependencies, and resolving each one.
+         * As each dependency gets resolved, we will want to ignore that dependency's optional
+         * dependencies. Otherwise we would be resolving the dependency's optional dependencies at the wrong level
+         */
+        DependencySelector depFilter = new AndDependencySelector(new ScopeDependencySelector("provided"),
+                                                                 new TestDependencySelector(),
+                                                                 new ZeroOptionalDependencySelector(),
+                                                                 new ExclusionDependencySelector())
+        ((MavenRepositorySystemSession)aetherService.repositorySystemSession).setDependencySelector(depFilter)
+        aetherService.dependencyFilterScope = JavaScopes.TEST
+        aetherService.addDependencyFilter(new TestDependencyFilter())
     }
     
     def URL getLocation(String a, String type) {
@@ -53,12 +76,17 @@ class ProjectModuleResolver extends AetherResolver {
         return u
     }
 
-   def String[] getClassPathFor(String s, RemoteRepository[] remote) {
+    def String[] getClassPathFor(String s, RemoteRepository[] remote) {
         List<String> classPath = getProjectArtifacts(s, transformRemoteRepository(remote))
         return classPath.toArray(new String[classPath.size()]);
     }
 
-    def String[] getClassPathFor(String artifactCoordinates, File pom) {
+    @Deprecated
+    def String[] getClassPathFor(String artifactCoordinates, File pom, boolean download) {
+        return getClassPathFor(artifactCoordinates)
+    }
+
+    def String[] getClassPathFor(String artifactCoordinates) {
         List<String> classPath = getProjectArtifacts(artifactCoordinates, null)
         return classPath.toArray(new String[classPath.size()]);
     }
@@ -72,7 +100,7 @@ class ProjectModuleResolver extends AetherResolver {
         File localRepositoryJar = getLocalRepositoryFile(art)
         File projectArtifactJar = getProjectFile(target, art)
 
-        ResolutionResult result = new ResolutionResult(artifact, null, new ArrayList<ArtifactResult>())
+        ResolutionResult result = new ResolutionResult(artifact, new ArrayList<ArtifactResult>())
         /* Check project artifact first */
         if(projectArtifactJar.exists()) {
             artifact = (DefaultArtifact)artifact.setFile(projectArtifactJar)
@@ -122,8 +150,12 @@ class ProjectModuleResolver extends AetherResolver {
                                    System.getProperty("user.dir"))
             }
 
-        /* If not found in the project, check and resolve using the local repository */
+            /* If not found in the project, check and resolve using the local repository */
         } else  if(localRepositoryJar.exists()) {
+            System.err.println("=================================================\n" +
+                               artifact+"\n"+
+                               localRepositoryJar.absolutePath+
+                               "\n=================================================")
             appendArtifactResults(result, doResolve(artifact.groupId,
                                                     artifact.artifactId,
                                                     artifact.extension,
@@ -143,11 +175,7 @@ class ProjectModuleResolver extends AetherResolver {
                                        String classifier,
                                        String version,
                                        List<org.sonatype.aether.repository.RemoteRepository> repositories) {
-        ResolutionResult result
-        if(repositories==null)
-            result = aetherService.resolve(groupId, artifactId, type, classifier, version)
-        else
-            result = aetherService.resolve(groupId, artifactId, type, classifier, version, repositories)
+        ResolutionResult result = aetherService.resolve(groupId, artifactId, type, classifier, version, repositories)
         return result
     }
 
@@ -227,31 +255,6 @@ class ProjectModuleResolver extends AetherResolver {
         }
     }
 
-
-//    protected DependencyFilter getDependencyFilter(Artifact a) {
-//        DependencyFilter filter
-//        if(a.classifier && a.classifier=="dl") {
-//            filter = new ClassifierFilter(a.classifier)
-//        } else {
-//            filter = new ExclusionFilter(System.getProperty("RIO_TEST_ATTACH")!=null)
-//        }
-//        return filter
-//    }
-//
-//
-//    private File getJar(Artifact a, Map<String, File> map) {
-//        File jar = null
-//        if(map==null || map.size()==0) {
-//            File target = new File(System.getProperty("user.dir"), "target")
-//            jar =  new File(target, a.getFileName("jar"))
-//        } else {
-//            File target = map.get(a.getGAV())
-//            if(target!=null)
-//                jar =  new File(target, a.getFileName("jar"))
-//        }
-//        return jar
-//    }
-//
     private Map<String, File> getModuleMap(File pomFile, Artifact a) {
         Map<String, File> map
         URL u = PomUtils.getParentPomFromProject(pomFile, a.groupId, a.artifactId)

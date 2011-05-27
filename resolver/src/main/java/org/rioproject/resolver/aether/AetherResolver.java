@@ -20,25 +20,22 @@ import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
-import org.rioproject.resolver.aether.util.ConsoleDependencyGraphDumper;
 import org.sonatype.aether.RepositoryException;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Uses Maven 3's native dependency resolution interface, Aether.
  */
 public class AetherResolver implements Resolver {
     private AetherService service = AetherService.getDefaultInstance();
-    private static Logger logger = Logger.getLogger(AetherResolver.class.getName());
 
     /**
      * {@inheritDoc}
@@ -60,6 +57,11 @@ public class AetherResolver implements Resolver {
             throw new ResolverException("Error reading local Maven configuration", e);
         }
         return classPath;
+    }
+
+    @Override
+    public String[] getClassPathFor(String artifact, File pom, boolean download) throws ResolverException {
+        return getClassPathFor(artifact);
     }
 
     /**
@@ -123,7 +125,8 @@ public class AetherResolver implements Resolver {
         return remoteRepositories;
     }
 
-    protected AetherService getAetherService() {
+
+    public AetherService getAetherService() {
         return service;
     }
 
@@ -141,11 +144,6 @@ public class AetherResolver implements Resolver {
     }
 
     protected String[] produceClassPathFromResolutionResult(ResolutionResult result) {
-        if(logger.isLoggable(Level.FINE)) {
-            ConsoleDependencyGraphDumper graphDumper = new ConsoleDependencyGraphDumper();
-            graphDumper.setFilter(service.getDependencyFilter(result.getArtifact()));
-            result.getRoot().accept(graphDumper);
-        }
         List<String> classPath = new ArrayList<String>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
             classPath.add(artifactResult.getArtifact().getFile().getAbsolutePath());

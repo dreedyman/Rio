@@ -25,19 +25,16 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * Exclude platform classes, test, provided, system and optional,
- * and "dl" classifiers
+ * Exclude platform classes and "dl" classifiers
  */
 public class ExcludePlatformFilter implements DependencyFilter {
     private final Collection<String> excludes = new HashSet<String>();
-    private boolean allowTest = false;
 
     public ExcludePlatformFilter() {
         String prunePlatformProperty = System.getProperty(Constants.RESOLVER_PRUNE_PLATFORM);
         boolean prunePlatform = prunePlatformProperty == null || prunePlatformProperty.equals("true");
         if (prunePlatform)
             excludes.add("org.rioproject:rio");
-        allowTest = System.getProperty("RIO_TEST_ATTACH") != null;
     }
 
     @Override
@@ -48,20 +45,15 @@ public class ExcludePlatformFilter implements DependencyFilter {
             return true;
         }
 
-        if(parents.size()>0 && dependency.isOptional())
-            return false;
-
-        if(!allowTest && dependency.getScope().equals("test"))
-            return false;
-
         String id = getGroupIDAndArtifactID(dependency);
         if (excludes.contains(id)) {
             return false;
         }
 
         for (String parentID : getParentIDs(parents)) {
-            if (excludes.contains(parentID))
+            if (excludes.contains(parentID)) {
                 return false;
+            }
         }
         return true;
     }
