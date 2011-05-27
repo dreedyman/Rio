@@ -31,7 +31,7 @@ deployment(name: 'Notification Using Artifact Test') {
 
     rules {
         rule{
-            resource 'file:src/test/resources/CounterNotification'
+            resource 'file:'+System.getProperty('user.dir')+'/src/test/resources/CounterNotification'
             ruleClassPath 'org.rioproject.gnostic:test:1.0'
             serviceFeed(name: "Test") {
                 watches "notification"

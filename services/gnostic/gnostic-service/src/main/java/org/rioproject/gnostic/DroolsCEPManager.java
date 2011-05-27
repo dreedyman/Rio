@@ -49,8 +49,7 @@ public class DroolsCEPManager implements CEPSession {
         Logger.getLogger("org.rioproject.gnostic.drools");
     private boolean initialized = false;
 
-    public DroolsCEPManager(DeployedServiceContext context,
-                            KnowledgeAgent kAgent) {
+    public DroolsCEPManager(DeployedServiceContext context, KnowledgeAgent kAgent) {
         this.context = context;
         this.kAgent = kAgent;
     }

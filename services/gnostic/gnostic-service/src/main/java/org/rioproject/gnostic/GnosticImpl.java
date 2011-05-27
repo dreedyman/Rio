@@ -33,7 +33,6 @@ import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.sla.RuleMap;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,6 +66,7 @@ public class GnosticImpl implements Gnostic {
         new LinkedBlockingQueue<RuleMap>();
     private final List<RuleMapAssociationController> controllers = new ArrayList<RuleMapAssociationController>();
     private static final Logger logger = Logger.getLogger(Gnostic.class.getName());
+    private final AtomicBoolean droolsInitialized = new AtomicBoolean(false);
 
     /*
      * Set the configuration and wire up the Monitor association.
@@ -89,24 +90,25 @@ public class GnosticImpl implements Gnostic {
     @Initialized
     @SuppressWarnings("unchecked")
     public void setupDrools() {
-        execService = Executors.newSingleThreadExecutor();
-        execService.submit(new RuleMapWorker());
-
-        int scannerInterval = 30;
         try {
-            scannerInterval =(Integer) context.getConfiguration().getEntry("org.rioproject.gnostic",
-                                                                           "scannerInterval",
-                                                                           int.class,
-                                                                           scannerInterval);
-        } catch (ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Non-fatal error, unable to obtain scannerInterval " +
-                       "from configuration, defaulting to 30 seconds",
-                       e);
+            execService = Executors.newSingleThreadExecutor();
+            execService.submit(new RuleMapWorker());
+            int scannerInterval = 30;
+            try {
+                scannerInterval =(Integer) context.getConfiguration().getEntry("org.rioproject.gnostic",
+                                                                               "scannerInterval",
+                                                                               int.class,
+                                                                               scannerInterval);
+            } catch (ConfigurationException e) {
+                logger.log(Level.WARNING,
+                           "Non-fatal error, unable to obtain scannerInterval " +
+                           "from configuration, defaulting to 30 seconds",
+                           e);
+            }
+            kAgent = DroolsFactory.createKnowledgeAgent(scannerInterval);
+        } finally {
+            droolsInitialized.set(true);
         }
-
-        kAgent = DroolsFactory.createKnowledgeAgent(scannerInterval);
-
         List<RuleMap> ruleMappings = context.getServiceElement().getRuleMaps();
         List<RuleMap> otherMappings = null;
         try {
@@ -124,25 +126,41 @@ public class GnosticImpl implements Gnostic {
         }
         if(otherMappings!=null)
             ruleMappings.addAll(otherMappings);
-
+        System.err.println("4");
         if(ruleMappings!=null) {
             for(RuleMap ruleMap : ruleMappings) {
                 add(ruleMap);
             }
         }
+
+    }
+
+    private void checkDroolsHasInitialized() {
+        long t0 = System.currentTimeMillis();
+        while(droolsInitialized.get()==false) {
+            System.err.println("Waiting for Drools to initialize ... "+(System.currentTimeMillis()-t0));
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public int getScannerInterval() {
+        checkDroolsHasInitialized();
         return ((ResourceChangeScannerImpl)ResourceFactory.getResourceChangeScannerService()).getInterval();
     }
 
     public void setScannerInterval(int interval) {
         if(interval<=0)
             throw new IllegalArgumentException("The scannerInterval must be > 0");
+        checkDroolsHasInitialized();
         ResourceFactory.getResourceChangeScannerService().setInterval(interval);
     }
 
     public boolean add(RuleMap ruleMap) {
+        checkDroolsHasInitialized();
         verify(ruleMap);
         synchronized(managedRuleMaps) {
             if(managedRuleMaps.contains(ruleMap))
@@ -301,6 +319,8 @@ public class GnosticImpl implements Gnostic {
                         logger.log(Level.WARNING, "Unable to create URI from rule classpath " +
                                                   "["+ruleMap.getRuleDefinition().getRuleClassPath()+"], " +
                                                   "cannot set classpath for rule classpath jars", e);
+                    } catch (IllegalArgumentException e) {
+                        logger.log(Level.WARNING, "Unable to create RuleMapAssociationController", e);
                     } finally {
                         if(currentCL!=null)
                             Thread.currentThread().setContextClassLoader(currentCL);

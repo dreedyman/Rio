@@ -49,6 +49,8 @@ public class RuleMapAssociationController {
                                  ProvisionMonitor monitor,
                                  String[] groups,
                                  ClassLoader ruleLoader) {
+        if(kAgent==null)
+            throw new IllegalArgumentException("kAgent is null");
         this.ruleMap = ruleMap;
         associationMgmt = new AssociationMgmt();
         associationMgmt.setBackend(this);
@@ -106,8 +108,7 @@ public class RuleMapAssociationController {
 
     void process() {
         for (RuleMap.ServiceDefinition service : ruleMap.getServiceDefinitions()) {
-            AssociationDescriptor ad = new AssociationDescriptor(AssociationType.USES,
-                                                                 service.getServiceName());
+            AssociationDescriptor ad = new AssociationDescriptor(AssociationType.USES, service.getServiceName());
             //ad.setInterfaceNames(Remote.class.getName());
             ad.setPropertyName("service");
             ad.setGroups(groups);
@@ -142,7 +143,7 @@ public class RuleMapAssociationController {
         }
     }
 
-    private synchronized boolean initializeEngine() {
+    private boolean initializeEngine() {
         if(ruleLoader!=null) {
             KnowledgeBaseImpl kImpl = (KnowledgeBaseImpl)kAgent.getKnowledgeBase();
             //KnowledgeBaseImpl kImpl = (KnowledgeBaseImpl)kBase;
@@ -167,6 +168,7 @@ public class RuleMapAssociationController {
                 /* Add the watches */
                 for(ServiceHandle sh : serviceHandles) {
                     wdr.registerWatches(sh);
+
                 }
             }
         } catch(IllegalStateException e) {
