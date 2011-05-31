@@ -131,7 +131,6 @@ class ProjectModuleResolver extends AetherResolver {
                     }
 
                 } catch (Exception e) {
-                    e.printStackTrace()
                     System.err.println("[WARNING] Unable to resolve $artifactCoordinates "+
                                        "while processing pom. "+e.getLocalizedMessage())
                 } finally {
@@ -145,17 +144,13 @@ class ProjectModuleResolver extends AetherResolver {
                     }
                 }
             } else {
-                System.err.println("[WARNING] Coulnd not locate pom.xml for $artifactCoordinates "+
+                System.err.println("[WARNING] Could not locate pom.xml for $artifactCoordinates "+
                                    "Unable to resolve dependencies. Current working directory is "+
                                    System.getProperty("user.dir"))
             }
 
             /* If not found in the project, check and resolve using the local repository */
         } else  if(localRepositoryJar.exists()) {
-            System.err.println("=================================================\n" +
-                               artifact+"\n"+
-                               localRepositoryJar.absolutePath+
-                               "\n=================================================")
             appendArtifactResults(result, doResolve(artifact.groupId,
                                                     artifact.artifactId,
                                                     artifact.extension,
