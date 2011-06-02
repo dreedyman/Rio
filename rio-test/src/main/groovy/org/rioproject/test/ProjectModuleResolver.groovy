@@ -51,10 +51,13 @@ class ProjectModuleResolver extends AetherResolver {
          * As each dependency gets resolved, we will want to ignore that dependency's optional
          * dependencies. Otherwise we would be resolving the dependency's optional dependencies at the wrong level
          */
-        DependencySelector depFilter = new AndDependencySelector(new ScopeDependencySelector("provided"),
-                                                                 new TestDependencySelector(),
-                                                                 new ZeroOptionalDependencySelector(),
-                                                                 new ExclusionDependencySelector())
+        Set<DependencySelector> selectors = new LinkedHashSet<DependencySelector>()
+        Collections.addAll(selectors,
+                           new ScopeDependencySelector("provided"),
+                           new TestDependencySelector(),
+                           new ZeroOptionalDependencySelector(),
+                           new ExclusionDependencySelector())
+        DependencySelector depFilter = new AndDependencySelector(selectors)
         ((MavenRepositorySystemSession)aetherService.repositorySystemSession).setDependencySelector(depFilter)
         aetherService.dependencyFilterScope = JavaScopes.TEST
         aetherService.addDependencyFilter(new TestDependencyFilter())
