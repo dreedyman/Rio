@@ -47,6 +47,36 @@ public class AssociationProxyUtil {
     }
 
     /**
+     * Regenerate the associated service proxy
+     *
+     * @param proxy The association proxy
+     *
+     * @return A new association service proxy based on information obtained from the provided proxy.
+     * If the supplied proxy is not an <tt>instanceof</tt>
+     * {@link org.rioproject.associations.AssociationProxy} (in other words not
+     * a generated proxy), this method will return the supplied proxy.
+     *
+     * @throws ClassNotFoundException If the interfaces cannot be loaded
+     * @throws IllegalAccessException if the proxy class cannot be created
+     * @throws InstantiationException if the proxy class cannot be created
+     */
+    public static <T> T regenProxy(T proxy) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        if(proxy instanceof AssociationProxy) {
+            AssociationProxy<T> aProxy = (AssociationProxy)proxy;
+            Association<T> association = aProxy.getAssociation();
+            String proxyClass = association.getAssociationDescriptor().getProxyClass();
+            /*
+             * Check for null proxyFactoryClass. If null,
+             * AssociationProxySupport is default
+             */
+            proxyClass = (proxyClass==null? AssociationProxySupport.class.getName() : proxyClass);
+            String strategyClass = aProxy.getServiceSelectionStrategy().getClass().getName();
+            AssociationProxyFactory.createProxy(proxyClass, strategyClass, association, aProxy.getClass().getClassLoader());
+        }
+        return proxy;
+    }
+
+    /**
      * Get the first associated service proxy
      *
      * @param proxy The association proxy
