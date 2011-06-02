@@ -147,7 +147,7 @@ class ResolverHelper {
         try {
             r = getResolver(resourceLoader);
             if(logger.isLoggable(Level.FINE))
-                logger.fine "===> Selected Resolver: " +(r==null?"No Resolvere configuration found":"${r.getClass().name}")
+                logger.fine "===> Selected Resolver: " +(r==null?"No Resolver configuration found":"${r.getClass().name}")
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
             }
