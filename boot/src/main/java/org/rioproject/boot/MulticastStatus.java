@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +27,17 @@ import java.net.DatagramPacket;
  * goes to Alexander V. Konstantinou
  */
 public class MulticastStatus {
+    private static final Object lock = new Object();
     /**
      * Determines if a multicast socket can be created and a Request
-     * annnouncement can be sent. Note that it is still possible that multicast
+     * announcement can be sent. Note that it is still possible that multicast
      * does not work outside the host.
      *
      * @param timeout The timeout to use hen checking the status
      *
      * @throws IOException If there are errors interfacing ith the network
      */
-    public static void checkMulticast(final int timeout)
-        throws java.io.IOException {
+    public static void checkMulticast(final int timeout) throws IOException {
         if(timeout < 0)
             throw new IllegalArgumentException("Invalid timeout = " + timeout);
         /** Use Jini's multicast group */
@@ -59,7 +58,7 @@ public class MulticastStatus {
                                                    messageBytes.length,
                                                    group,
                                                    port);
-        final Object lock = new Object();
+
         final Boolean[] received = new Boolean[]{Boolean.FALSE};
         /**
          * Receive thread waits for msocket SOTIMEOUT to receive a packet. The
@@ -115,14 +114,13 @@ public class MulticastStatus {
         } while (System.currentTimeMillis() < endMillis);
         msocket.leaveGroup(group);
         msocket.close();
-        throw new IOException("Multicast packets were not received in the "+
-                              "alloted time");
+        throw new IOException("Multicast packets were not received in the allotted time");
     }
 
     public static void main(String[] args) {
         try {
             checkMulticast(1000 * 5);
-            System.out.println("Multicast check succesful");
+            System.out.println("Multicast check successful");
         } catch(IOException ioe) {
             ioe.printStackTrace();
         }
