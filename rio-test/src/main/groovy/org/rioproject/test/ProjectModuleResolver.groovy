@@ -152,17 +152,14 @@ class ProjectModuleResolver extends AetherResolver {
                                    System.getProperty("user.dir"))
             }
 
-            /* If not found in the project, check and resolve using the local repository */
-        } else  if(localRepositoryJar.exists()) {
+            /* If not found in the project, resolve it */
+        } else {
             appendArtifactResults(result, doResolve(artifact.groupId,
                                                     artifact.artifactId,
                                                     artifact.extension,
                                                     artifact.classifier,
                                                     artifact.version,
                                                     repositories).artifactResults)
-
-        } else {
-            System.err.println("[WARNING] Unable to resolve $artifactCoordinates")
         }
         return produceClassPathFromResolutionResult(result)
     }

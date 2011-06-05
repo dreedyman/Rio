@@ -332,10 +332,13 @@ public class AetherService {
     List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
         List<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
+        boolean haveRio = false;
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
                     for(org.apache.maven.settings.Repository r : profile.getRepositories()) {
+                        if(r.getId().equals("rio") || r.getUrl().equals("http://www.rio-project.org/maven2/"))
+                            haveRio = true;
                         RemoteRepository remoteRepository = new RemoteRepository(r.getId(), "default", r.getUrl());
                         RepositoryPolicy snapShotPolicy = new RepositoryPolicy(r.getSnapshots().isEnabled(),
                                                                                r.getSnapshots().getUpdatePolicy(),
@@ -360,6 +363,8 @@ public class AetherService {
             }
         }
         repositories.add(central);
+        if(!haveRio)
+            repositories.add(new RemoteRepository("rio", "default", "http://www.rio-project.org/maven2/"));
         return repositories;
     }
 
