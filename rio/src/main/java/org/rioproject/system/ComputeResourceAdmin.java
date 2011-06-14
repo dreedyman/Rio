@@ -108,8 +108,7 @@ public interface ComputeResourceAdmin {
      *
      * @throws RemoteException If communication errors occur
      */
-    ComputeResourceUtilization getComputeResourceUtilization()
-        throws RemoteException;
+    ComputeResourceUtilization getComputeResourceUtilization() throws RemoteException;
 
     /**
      * Get the {@link org.rioproject.system.ComputeResourceUtilization} for an
@@ -128,8 +127,7 @@ public interface ComputeResourceAdmin {
      *
      * @throws RemoteException If communication errors occur
      */
-    ComputeResourceUtilization getComputeResourceUtilization(Uuid serviceUuid)
-        throws RemoteException;
+    ComputeResourceUtilization getComputeResourceUtilization(Uuid serviceUuid) throws RemoteException;
 
     /**
      * Get the reportInterval property which controls how often the ComputeResource
