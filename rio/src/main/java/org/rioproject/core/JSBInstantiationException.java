@@ -120,16 +120,10 @@ public class JSBInstantiationException extends Exception {
     }
 
     /**
-     * Prints the stack backtrace. If an exception occurred during JSB
-     * instantiation it prints that exception's stack trace, or else prints the
-     * stack backtrace of this exception.
+     * Get the {@link ExceptionDescriptor} for the cause
      *
-     * @see java.lang.System#err
+     * @return The ExceptionDescriptor, or null if not recorded
      */
-    /*public void printStackTrace() {
-        printStackTrace(System.err);
-    }*/
-
     public ExceptionDescriptor getCauseExceptionDescriptor() {
         return exDesc;
     }
@@ -141,16 +135,9 @@ public class JSBInstantiationException extends Exception {
      */
     public void printStackTrace(PrintStream ps) {
         super.printStackTrace(ps);
-        /*Throwable cause = getCause();
-        if (cause != null) {
-            ps.print("org.rioproject.core.JSBInstantiationException: ");
-            cause.printStackTrace(ps);
-        } else*/
         if(exDesc!=null) {
             ps.print(exDesc.format());
-        } //else {
-          //  super.printStackTrace(ps);
-        //}
+        }
     }
 
     /**
@@ -160,16 +147,9 @@ public class JSBInstantiationException extends Exception {
      */
     public void printStackTrace(PrintWriter pw) {
         super.printStackTrace(pw);
-        //Throwable cause = getCause();
-        //if (cause != null) {
-        //    pw.print("org.rioproject.core.JSBInstantiationException: ");
-        //    cause.printStackTrace(pw);
-        //} else
         if(exDesc!=null) {
             pw.print(exDesc.format());
-        } //else {
-
-        //}
+        }
     }
 
     public static class ExceptionDescriptor implements Serializable {
