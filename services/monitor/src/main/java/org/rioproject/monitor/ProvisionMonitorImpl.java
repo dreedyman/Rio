@@ -563,8 +563,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter
                 if(opStringURL==null)
                     throw new OperationalStringException("Artifact "+a+" not resolvable");
             } catch (ResolverException e) {
-                throw new OperationalStringException("Unable to create instance of Resolver to resolve artifact " +
-                                                     a, e);
+                throw new OperationalStringException(e.getLocalizedMessage(), e);
             }
         }
         return opStringURL;

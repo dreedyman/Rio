@@ -98,7 +98,7 @@ public class AetherResolver implements Resolver {
         try {
             location = service.getLocation(artifact, artifactType);
         } catch (ArtifactResolutionException e) {
-            throw new ResolverException("Error locating "+artifact, e);
+            throw new ResolverException("Error locating "+artifact+": "+e.getLocalizedMessage());
         } catch (MalformedURLException e) {
             throw new ResolverException("Error creating URL for resolved artifact "+artifact, e);
         }
@@ -124,7 +124,6 @@ public class AetherResolver implements Resolver {
         }
         return remoteRepositories;
     }
-
 
     public AetherService getAetherService() {
         return service;
