@@ -248,7 +248,7 @@ public class ServiceRecord implements Comparable, Serializable {
      * Add a ResourceCost
      * 
      * @param resourceCost The ResourceCost to add. If the ResourceCost for
-     * a named resource alerady exists, it will be replaced
+     * a named resource already exists, it will be replaced
      */
     public void addResourceCost(ResourceCost resourceCost) {
         if(resourceCost == null)
@@ -292,7 +292,7 @@ public class ServiceRecord implements Comparable, Serializable {
      * @param o The Object to be compared.
      * @return A negative integer if this ServiceRecord has an instantiatedDate
      * before the ServiceRecord being compared to, zero if the instantiatedDate
-     * property is equal, or a postive number if the instantiatedDate is later.
+     * property is equal, or a positive number if the instantiatedDate is later.
      */
     public int compareTo(Object o) {
         ServiceRecord serviceRecord = (ServiceRecord)o;
@@ -333,7 +333,7 @@ public class ServiceRecord implements Comparable, Serializable {
     }
 
     public String toString() {
-        return "ServiceRecord{" +
+        return "ServiceRecord {" +
                "hostName='" + hostName + '\'' +
                ", instantiated=" + instantiated +
                ", updated=" + updated +
