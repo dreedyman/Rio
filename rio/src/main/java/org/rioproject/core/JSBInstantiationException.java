@@ -37,7 +37,7 @@ public class JSBInstantiationException extends Exception {
      */
     private boolean unInstantiable = false;
     /**
-     * An embedded formatted cause stacktrace
+     * An embedded formatted cause stackTrace
      */
     private String causeStackTrace;
 
@@ -152,17 +152,22 @@ public class JSBInstantiationException extends Exception {
         }
     }
 
+    /**
+     * The <code>ExceptionDescriptor</code> is used to capture details of an exception that has been raised by
+     * underlying software that may include classes that are not available on the clients classpath or may
+     * include non-serializable objects.
+     */
     public static class ExceptionDescriptor implements Serializable {
         private String className;
         private String message;
-        private StackTraceElement[] stacktrace;
+        private StackTraceElement[] stackTrace;
 
         public ExceptionDescriptor(String className,
                                    String message,
-                                   StackTraceElement[] stacktrace) {
+                                   StackTraceElement[] stackTrace) {
             this.className = className;
             this.message = message;
-            this.stacktrace = stacktrace;
+            this.stackTrace = stackTrace;
         }
 
         public String getClassName() {
@@ -174,7 +179,7 @@ public class JSBInstantiationException extends Exception {
         }
 
         public StackTraceElement[] getStacktrace() {
-            return stacktrace;
+            return stackTrace;
         }
 
         public String format() {
@@ -183,7 +188,7 @@ public class JSBInstantiationException extends Exception {
                 .append(className)
                 .append(": ")
                 .append(message).append("\n");
-            for(StackTraceElement e : stacktrace) {
+            for(StackTraceElement e : stackTrace) {
                 sb.append("\t").append("at ").append(e).append("\n");
             }
             return sb.toString();
