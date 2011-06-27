@@ -93,7 +93,7 @@ public class ClassAnnotator implements ClassAnnotation {
         } else if(urls.length == 1) {
             return (urls[0].toExternalForm());
         } else {
-            StringBuffer path = new StringBuffer(urls[0].toExternalForm());
+            StringBuilder path = new StringBuilder(urls[0].toExternalForm());
             for(int i = 1; i < urls.length; i++) {
                 path.append(' ');
                 path.append(urls[i].toExternalForm());
@@ -117,7 +117,7 @@ public class ClassAnnotator implements ClassAnnotation {
         } else if(uris.length == 1) {
             return (uris[0].toString());
         } else {
-            StringBuffer path = new StringBuffer(uris[0].toString());
+            StringBuilder path = new StringBuilder(uris[0].toString());
             for(int i = 1; i < uris.length; i++) {
                 path.append(' ');
                 path.append(uris[i].toString());
