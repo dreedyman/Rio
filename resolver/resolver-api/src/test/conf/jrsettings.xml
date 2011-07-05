@@ -1,0 +1,75 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+            <id>rds internal</id>
+            <username>jramsdale</username>
+            <password>my totally secret password</password>
+            <privateKey>/home/jramsdale/.ssh/id_rsa</privateKey>
+            <filePermissions>664</filePermissions>
+            <directoryPermissions>777</directoryPermissions>
+        </server>
+
+        <server>
+            <id>rds snapshots</id>
+            <username>jramsdale</username>
+            <privateKey>/home/jramsdale/.ssh/id_rsa</privateKey>
+            <filePermissions>664</filePermissions>
+            <directoryPermissions>777</directoryPermissions>
+        </server>
+
+        <!--
+                <server>
+                    <id>deployment.webdav</id>
+                    <username>deploy</username>
+                    <password>deployments totally secret password</password>
+                </server>
+        -->
+    </servers>
+    <profiles>
+        <profile>
+            <id>scmProfile</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>internal</id>
+                    <name>Archiva Managed Internal Repository</name>
+                    <url>http://rds.dev:8180/archiva/repository/internal/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>snapshots</id>
+                    <name>Archiva Managed Snapshot Repository</name>
+                    <url>http://rds.dev:8180/archiva/repository/snapshots/</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <!-- this is the maps repository -->
+                <repository>
+                    <id>real_repository</id>
+                    <url>http://build01.dev.real.com:9999/repository</url>
+                </repository>
+            </repositories>
+
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>scmProfile</activeProfile>
+    </activeProfiles>
+</settings>
+
