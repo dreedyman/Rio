@@ -20,6 +20,12 @@
             <version>${project.version}</version>
         </dependency>
 
+         <dependency>
+            <groupId>${project.groupId}.resolver</groupId>
+            <artifactId>resolver-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-compress</artifactId>

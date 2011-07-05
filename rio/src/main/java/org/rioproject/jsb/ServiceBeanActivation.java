@@ -199,6 +199,7 @@ public class ServiceBeanActivation {
         jsbManager.setServiceID(serviceID);
         JSBContext jsbContext = new JSBContext(sElem, jsbManager, computeResource, null); /* Shared Configuration */
         jsbContext.setConfiguration(config);
+        jsbContext.setConfigurationFiles(configArgs);
         return (jsbContext);
     }
 

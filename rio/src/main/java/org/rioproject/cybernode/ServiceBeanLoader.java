@@ -23,6 +23,7 @@ import net.jini.admin.Administrable;
 import net.jini.admin.JoinAdmin;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
+import net.jini.config.ConfigurationProvider;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.discovery.LookupDiscovery;
@@ -231,8 +232,7 @@ public class ServiceBeanLoader {
      * @param sElem The ServiceElement
      * @param serviceID Uuid for the service
      * @param jsbManager The ServiceBeanManager
-     * @param computeResource ComputeResource object
-     * @param sharedConfiguration Shared configuration
+     * @param container The ServiceBeanContainer
      * 
      * @return A Result object with attributes to access the instantiated
      * service
@@ -243,15 +243,13 @@ public class ServiceBeanLoader {
     public static Result load(ServiceElement sElem,
                               Uuid serviceID,
                               ServiceBeanManager jsbManager,
-                              ComputeResource computeResource,
-                              Configuration sharedConfiguration)
-    throws JSBInstantiationException {
+                              ServiceBeanContainer container) throws JSBInstantiationException {
         Object proxy;
         MarshalledInstance mi = null;
         Object impl = null;
         ServiceBeanContext context;
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
-
+        ComputeResource computeResource = container.getComputeResource();
         /*
          * Provision service jars
          */
@@ -260,17 +258,13 @@ public class ServiceBeanLoader {
         try {
             Resolver resolver = ResolverHelper.getInstance();
             boolean install = computeResource.getPersistentProvisioning();
-            Map<String, ProvisionedResources> serviceResources = provisionService(sElem,
-                                                                                  resolver,
-                                                                                  install);
+            Map<String, ProvisionedResources> serviceResources = provisionService(sElem, resolver, install);
             ProvisionedResources dlPR = serviceResources.get("dl");
             ProvisionedResources implPR = serviceResources.get("impl");
             exportJARs = dlPR.getJars();
             implJARs = implPR.getJars();
         } catch(Exception e) {
-            throw new JSBInstantiationException("Unable to provision JARs for " +
-                                                "service ["+sElem.getName()+"]",
-                                                e);
+            throw new JSBInstantiationException("Unable to provision JARs for service ["+sElem.getName()+"]", e);
         }
 
         /*
@@ -278,8 +272,7 @@ public class ServiceBeanLoader {
          */
         if(sElem.getComponentBundle()!=null) {
             try {
-                Map<String, URL[]> sharedResources =
-                    sElem.getComponentBundle().getSharedComponents();
+                Map<String, URL[]> sharedResources = sElem.getComponentBundle().getSharedComponents();
 
                 if(sharedResources.size()>0) {
                     for (Map.Entry<String, URL[]>entry : sharedResources.entrySet()) {
@@ -290,9 +283,7 @@ public class ServiceBeanLoader {
                     }
                 }
             } catch(MalformedURLException e) {
-                throw new JSBInstantiationException("Unable to load " +
-                                                    "SharedComponents for "+
-                                                    "["+sElem.getName()+"]",
+                throw new JSBInstantiationException("Unable to load SharedComponents for ["+sElem.getName()+"]",
                                                     e);
             }
         }
@@ -312,10 +303,8 @@ public class ServiceBeanLoader {
             urlList.addAll(Arrays.asList(implJARs));
 
             /* Get matched PlatformCapability jars to load */
-            PlatformCapability[] pCaps =
-                computeResource.getPlatformCapabilities();
-            PlatformCapability[] matched =
-                ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
+            PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
+            PlatformCapability[] matched = ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
             for (PlatformCapability pCap : matched) {
                 URL[] urls = pCap.getLoadableClassPath();
                 for(URL url : urls) {
@@ -328,11 +317,12 @@ public class ServiceBeanLoader {
             Properties metaData = new Properties();
             metaData.setProperty("opStringName", sElem.getOperationalStringName());
             metaData.setProperty("serviceName", sElem.getName());
-            ServiceClassLoader jsbCL =
-                new ServiceClassLoader(ServiceClassLoader.getURIs(classpath),
-                                       new ClassAnnotator(exportJARs),
-                                       commonCL,
-                                       metaData);
+
+            ServiceClassLoader jsbCL = new ServiceClassLoader(ServiceClassLoader.getURIs(classpath),
+                                                              new ClassAnnotator(exportJARs),
+                                                              //commonCL.getParent(),
+                                                              commonCL,
+                                                              metaData);
 
             /*
             ServiceClassLoader jsbCL =
@@ -340,8 +330,8 @@ public class ServiceBeanLoader {
                 */
             currentThread.setContextClassLoader(jsbCL);
             
-            if(logger.isLoggable(Level.FINEST)) {
-                StringBuffer buffer = new StringBuffer();
+            if(logger.isLoggable(Level.INFO)) {
+                StringBuilder buffer = new StringBuilder();
                 if(implJARs.length==0) {
                     buffer.append("<empty>");
                 } else {
@@ -351,16 +341,16 @@ public class ServiceBeanLoader {
                         buffer.append(implJARs[i].toExternalForm());
                     }
                 }
-                String className = (jsbBundle==null?"<not defined>":
-                                                     jsbBundle.getClassName());
-                logger.log(Level.FINEST,
-                           "Create ServiceClassLoader for {0}, "+
-                           "classpath {1}, codebase {2}",
-                           new Object[] { className,
-                                          buffer.toString(),
-                                          jsbCL.getClassAnnotation()});
+                String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
+                logger.log(Level.INFO,
+                           "Create ServiceClassLoader for {0}, classpath {1}, codebase {2}",
+                           new Object[] { className, buffer.toString(), jsbCL.getClassAnnotation()});
                 ClassLoaderUtil.displayClassLoaderTree(jsbCL);
             }
+
+            /* Reload the shared configuration using the service's classloader */
+            //String[] configFiles = container.getSharedConfigurationFiles().toArray(new String[sharedConfigurationFiles.size()]);
+            Configuration sharedConfiguration = container.getSharedConfiguration();
 
             /* Get the ServiceBeanContextFactory */
             ServiceBeanContextFactory serviceBeanContextFactory =
@@ -375,10 +365,9 @@ public class ServiceBeanLoader {
                                                        jsbManager,
                                                        computeResource,
                                                        sharedConfiguration);
-            /* Add a temporary startup value, used to check when issueing
+            /* Add a temporary startup value, used to check when issuing
              * lifecycle notification (RIO-141) */
-            Map<String, Object> configParms =
-                context.getServiceBeanConfig().getConfigurationParameters();
+            Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
             configParms.put(Constants.STARTING, true);
             context.getServiceBeanConfig().setConfigurationParameters(configParms);
             
@@ -387,10 +376,8 @@ public class ServiceBeanLoader {
              * exceptions loading the configurations, log the appropriate
              * message and continue
              */
-            java.util.Map map = 
-                context.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] loggerConfigs = 
-                (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+            Map map = context.getServiceBeanConfig().getConfigurationParameters();
+            LoggerConfig[] loggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
             if(loggerConfigs != null) {
                 for (LoggerConfig loggerConfig : loggerConfigs) {
                     try {
@@ -405,29 +392,22 @@ public class ServiceBeanLoader {
                 /* supplant global policy 1st time through */
                 if(globalPolicy == null) {
                     initialGlobalPolicy = Policy.getPolicy();
-                    globalPolicy =
-                        new AggregatePolicyProvider(initialGlobalPolicy);
+                    globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
                     Policy.setPolicy(globalPolicy);
                     if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Global policy set: {0}",
-                                   globalPolicy);
+                        logger.log(Level.FINEST, "Global policy set: {0}", globalPolicy);
                 }
                 /* Get the servicePolicyFile from the environment. If the
                  * property has not been set use the policy set for the VM */
-                String servicePolicyFile = 
-                    System.getProperty("rio.service.security.policy", 
-                                       System.getProperty(
-                                           "java.security.policy"));
+                String servicePolicyFile = System.getProperty("rio.service.security.policy",
+                                                              System.getProperty("java.security.policy"));
                 if(servicePolicyFile!=null) {
                     DynamicPolicyProvider service_policy =
-                        new DynamicPolicyProvider(
-                            new PolicyFileProvider(servicePolicyFile));
+                        new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
                     LoaderSplitPolicyProvider splitServicePolicy =
-                        new LoaderSplitPolicyProvider(
-                            jsbCL,
-                            service_policy,
-                            new DynamicPolicyProvider(initialGlobalPolicy));
+                        new LoaderSplitPolicyProvider(jsbCL,
+                                                      service_policy,
+                                                      new DynamicPolicyProvider(initialGlobalPolicy));
                     /*
                     * Grant "this" code enough permission to do its work under the
                     * service policy, which takes effect (below) after the context
@@ -441,19 +421,17 @@ public class ServiceBeanLoader {
             }                        
             
             /* Get the ServiceBeanFactory */
-            ServiceBeanFactory serviceBeanFactory = 
-                (ServiceBeanFactory)Config.getNonNullEntry(
-                                                    context.getConfiguration(),
-                                                    CONFIG_COMPONENT,
-                                                    "serviceBeanFactory",
-                                                    ServiceBeanFactory.class,
-                                                    new JSBLoader());
+            ServiceBeanFactory serviceBeanFactory =
+                (ServiceBeanFactory)Config.getNonNullEntry(context.getConfiguration(),
+                                                           CONFIG_COMPONENT,
+                                                           "serviceBeanFactory",
+                                                           ServiceBeanFactory.class,
+                                                           new JSBLoader());
             if(logger.isLoggable(Level.FINEST))
                 logger.log(Level.FINEST, 
                            "service = {0}, serviceBeanFactory = {1}",
                            new Object[]{sElem.getName(), serviceBeanFactory});            
-            ServiceBeanFactory.Created created =
-                serviceBeanFactory.create(context);
+            ServiceBeanFactory.Created created = serviceBeanFactory.create(context);
             impl = created.getImpl();
             
             if(context.getServiceElement().getComponentBundle()==null) {
@@ -462,19 +440,15 @@ public class ServiceBeanLoader {
                     int index = compName.lastIndexOf(".");
                     compName = compName.substring(0, index);
                 }
-                context.getServiceBeanConfig().addInitParameter(
-                                  ServiceBeanActivation.BOOT_CONFIG_COMPONENT,
-                                  compName);
+                context.getServiceBeanConfig().addInitParameter(ServiceBeanActivation.BOOT_CONFIG_COMPONENT, compName);
             }
 
             /* Get the ProxyPreparer */
-            ProxyPreparer servicePreparer = 
-                (ProxyPreparer)Config.getNonNullEntry(
-                                                context.getConfiguration(),
-                                                CONFIG_COMPONENT,
-                                                "servicePreparer",
-                                                ProxyPreparer.class,
-                                                new BasicProxyPreparer());
+            ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(context.getConfiguration(),
+                                                                                  CONFIG_COMPONENT,
+                                                                                  "servicePreparer",
+                                                                                  ProxyPreparer.class,
+                                                                                  new BasicProxyPreparer());
             proxy = created.getProxy();
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
@@ -491,8 +465,7 @@ public class ServiceBeanLoader {
              */
             if(proxy instanceof ReferentUuid) {
                 serviceID = ((ReferentUuid)proxy).getReferentUuid();
-                ((JSBManager)context.getServiceBeanManager()).setServiceID(
-                                                                  serviceID);
+                ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceID);
             }
             
             /*
@@ -503,8 +476,7 @@ public class ServiceBeanLoader {
             if(proxy instanceof Administrable) {
                 Object adminObject = ((Administrable)proxy).getAdmin();               
                 if(adminObject instanceof ServiceBeanControl) {
-                    context.getAssociationManagement().setServiceBeanControl(
-                                              (ServiceBeanControl)adminObject);
+                    context.getAssociationManagement().setServiceBeanControl((ServiceBeanControl)adminObject);
                 }                    
             }
             
@@ -518,16 +490,11 @@ public class ServiceBeanLoader {
         } catch(Throwable t) {
             JSBInstantiationException e;
             if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "Loading ServiceBean",
-                           t);
+                logger.log(Level.FINEST, "Loading ServiceBean", t);
             if(t instanceof JSBInstantiationException)
                 e = (JSBInstantiationException)t;
             else
-                e = new JSBInstantiationException(t.getClass().getName()
-                                                  + ": "
-                                                  + t.getLocalizedMessage(),
-                                                  t);
+                e = new JSBInstantiationException(t.getClass().getName()+ ": "+ t.getLocalizedMessage(), t);
             throw e;
         } finally {                
             currentThread.setContextClassLoader(currentClassLoader);
@@ -560,17 +527,12 @@ public class ServiceBeanLoader {
         } finally {
             currentThread.setContextClassLoader(currentClassLoader);
         }
-        String hostAddress =
-            context
-                .getComputeResourceManager().getComputeResource()
-                .getAddress().getHostAddress();
+        String hostAddress = context.getComputeResourceManager().getComputeResource().getAddress().getHostAddress();
         advertise(jsbProxy,
                   context.getServiceElement().getName(),
                   context.getServiceElement().getOperationalStringName(),
-                  context.getServiceElement().getServiceBeanConfig().
-                                              getGroups(),
-                  context.getServiceElement().getServiceBeanConfig().
-                                              getLocators(),
+                  context.getServiceElement().getServiceBeanConfig().getGroups(),
+                  context.getServiceElement().getServiceBeanConfig().getLocators(),
                   hostAddress,
                   configuredAttrs);
     }
@@ -607,8 +569,7 @@ public class ServiceBeanLoader {
                 Administrable admin = (Administrable)jsbProxy;                
                 Object adminObject = admin.getAdmin();
                 if(adminObject instanceof ServiceBeanControl) {
-                    ServiceBeanControl controller =
-                        (ServiceBeanControl)adminObject;
+                    ServiceBeanControl controller = (ServiceBeanControl)adminObject;
                     controller.advertise();
                     /* Additional attributes are ignored here, they are obtained
                      * by the ServiceBeanAdmin.advertise() method */
@@ -624,34 +585,24 @@ public class ServiceBeanLoader {
                     /* Try and add an OperationalStringEntry */
                     if(opStringName!=null && opStringName.length()>0) {
                         Entry opStringEntry =
-                            loadEntry("org.rioproject.entry.OperationalStringEntry",
-                                      joinAdmin,
-                                      opStringName,
-                                      jsbCL);
+                            loadEntry("org.rioproject.entry.OperationalStringEntry", joinAdmin, opStringName, jsbCL);
                         if(opStringEntry!=null)
                             addList.add(opStringEntry);
 
-                        Entry hostEntry = loadEntry("net.jini.lookup.entry.Host",
-                                                    joinAdmin,
-                                                    hostAddress,
-                                                    jsbCL);
+                        Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, jsbCL);
                         if(hostEntry!=null)
                             addList.add(hostEntry);
                     } else {
                         if(logger.isLoggable(Level.FINEST)) {
-                            String s = (opStringName==null?"[null]":
-                                        "[empty string]");
+                            String s = (opStringName==null?"[null]":"[empty string]");
                             logger.finest("OperationalString name is "+s);
                         }                        
                     }
                     /* Process the net.jini.lookup.entry.Name attribute */
                     try {
-                        Class nameClass = 
-                            jsbCL.loadClass("net.jini.lookup.entry.Name");
-                        Constructor cons = 
-                            nameClass.getConstructor(String.class);
-                        Entry name =
-                            (Entry)cons.newInstance(serviceName);
+                        Class nameClass = jsbCL.loadClass("net.jini.lookup.entry.Name");
+                        Constructor cons = nameClass.getConstructor(String.class);
+                        Entry name = (Entry)cons.newInstance(serviceName);
                         boolean add = true;
                         /* Check if the service already has a Name, if it does 
                          * ensure it is not the same name as the one this
@@ -660,11 +611,8 @@ public class ServiceBeanLoader {
                         for (Entry attribute : attributes) {
                             if (attribute.getClass().getName().equals(
                                 nameClass.getName())) {
-                                Field n =
-                                    attribute.getClass().
-                                        getDeclaredField("name");
-                                String value =
-                                    (String) n.get(attribute);
+                                Field n = attribute.getClass().getDeclaredField("name");
+                                String value =(String) n.get(attribute);
                                 if (value.equals(serviceName))
                                     add = false;
                                 break;
@@ -675,13 +623,9 @@ public class ServiceBeanLoader {
                             
                     } catch(Exception e) {                        
                         if(logger.isLoggable(Level.FINEST))
-                            logger.log(Level.FINEST, 
-                                       "Name not found, cannot add a " +
-                                       "Name Entry",
-                                       e);
+                            logger.log(Level.FINEST, "Name not found, cannot add a Name Entry", e);
                         else
-                            logger.warning("Name not found, "+
-                                           "cannot add a Name Entry");
+                            logger.warning("Name not found, cannot add a Name Entry");
                     }
                     
                     /* If any additional attributes (including the
@@ -709,7 +653,7 @@ public class ServiceBeanLoader {
                         }
                     }
                     if(logger.isLoggable(Level.FINEST)) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         if(groups == null || groups.length == 0) {
                             buff.append("LookupDiscovery.NO_GROUPS");
                         } else {
@@ -719,43 +663,34 @@ public class ServiceBeanLoader {
                                 buff.append(groups[i]);
                             }
                         }                        
-                        logger.finest("Setting groups ["+buff.toString()+"] " +
-                                      "using JoinAdmin.setLookupGroups");
+                        logger.finest("Setting groups ["+buff.toString()+"] using JoinAdmin.setLookupGroups");
                     }
                     joinAdmin.setLookupGroups(groups);
                     if((locators != null) && (locators.length > 0)) {
                         if(logger.isLoggable(Level.FINEST)) {
-                            StringBuffer buff = new StringBuffer();                            
+                            StringBuilder buff = new StringBuilder();
                             for(int i=0; i<locators.length; i++) {
                                 if(i>0)
                                     buff.append(",");
                                 buff.append(locators[i].toString());
                             }                                               
-                            logger.finest("Setting locators " +
-                                          "["+buff.toString()+"] "+
-                                          "using JoinAdmin.setLookupLocators");
+                            logger.finest("Setting locators ["+buff.toString()+"] using JoinAdmin.setLookupLocators");
                         }
                         joinAdmin.setLookupLocators(locators);
                     }
                 } else {
                     logger.log(Level.SEVERE,
-                               "Admin must implement JoinAdmin or " +
-                               "ServiceBeanControl to be properly " +
-                               "advertised");
+                               "Admin must implement JoinAdmin or ServiceBeanControl to be properly advertised");
                 }
                 
             } else {
-                throw new JSBControlException("Unable to obtain mechanism to "+
-                                              "advertise ["+serviceName+"]");
+                throw new JSBControlException("Unable to obtain mechanism to advertise ["+serviceName+"]");
             }
         } catch(JSBControlException e) {
             /* If we throw a JSBControlException above, just rethrow it */
             throw e;
         } catch(Throwable t) {
-            logger.warning("Advertising ServiceBean, " +
-                           "["+
-                           t.getClass().getName()+":"+t.getLocalizedMessage()+
-                           "]");
+            logger.warning("Advertising ServiceBean, ["+t.getClass().getName()+":"+t.getLocalizedMessage()+"]");
             throw new JSBControlException("advertise", t);
         } finally {
             currentThread.setContextClassLoader(currentClassLoader);

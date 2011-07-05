@@ -26,6 +26,8 @@ import org.rioproject.core.provision.ServiceRecord;
 import org.rioproject.event.EventHandler;
 import org.rioproject.system.ComputeResource;
 
+import java.util.Collection;
+
 /**
  * The ServiceBeanContainer defines the semantics required to instantiate service 
  * instances described by a ServiceElement
@@ -44,6 +46,16 @@ public interface ServiceBeanContainer {
      * @see org.rioproject.config.AggregateConfig
      */
     Configuration getSharedConfiguration();
+
+    /**
+     * Get the file name(s) to that can be used to create the shared configuration.
+     *
+     * @return A collection of file names that can be used to create the shared configuration. If there are
+     * no file names a zero-length collection is returned. A new collection is created each time.
+     *
+     * @see org.rioproject.config.AggregateConfig
+     */
+    Collection<String> getSharedConfigurationFiles();
     
     /**
      * Set the computeResource property. The computeResource attribute represents 

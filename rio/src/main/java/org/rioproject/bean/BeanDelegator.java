@@ -67,13 +67,8 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      * @throws IllegalArgumentException If the interfaces parameter has a
      * zero length
      */
-    public static Object getInstance(Object service,
-                                     Object bean,
-                                     Class[] interfaces) {
-        return(getInstance(service,
-                           bean,
-                           interfaces,
-                           bean.getClass().getClassLoader()));
+    public static Object getInstance(Object service, Object bean, Class[] interfaces) {
+        return(getInstance(service, bean, interfaces, bean.getClass().getClassLoader()));
     }
 
     /**
@@ -93,10 +88,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      * @throws IllegalArgumentException If the interfaces parameter has a zero
      * length
      */
-    public static Object getInstance(Object service,
-                                     Object bean,
-                                     Class[] interfaces,
-                                     ClassLoader loader) {
+    public static Object getInstance(Object service, Object bean, Class[] interfaces, ClassLoader loader) {
         if(service == null)
             throw new NullPointerException("service is null");
         if(bean == null)
@@ -106,10 +98,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
         if(interfaces.length == 0)
             throw new IllegalArgumentException("interfaces must contain values");
 
-        return (Proxy.newProxyInstance(loader,
-                                       interfaces,
-                                       new BeanDelegator(service,
-                                                         bean)));
+        return (Proxy.newProxyInstance(loader, interfaces, new BeanDelegator(service, bean)));
     }
 
     /**
@@ -118,30 +107,24 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      *
      * @see InvocationHandler#invoke(Object, java.lang.reflect.Method, Object[])
      */
-    public Object invoke(Object proxy, Method method, Object[] args)
-        throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         PackagedMethod template = null;
         try {
             template = new PackagedMethod(method);
             if(methodSet.contains(template)) {
                 if(logger.isLoggable(Level.FINEST)) {
                     logger.finest("Method "+method.getName()+", " +
-                                  "invocation found in ServiceBean using " +
-                                  "template "+template);
+                                  "invocation found in ServiceBean using template "+template);
                 }
                 return method.invoke(service, args);
             } else {
                 if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Method "+method.getName()+", " +
-                                  "invocation being performed on " +
-                                  bean.getClass().getName()+", "+
-                                  "no matching method found on service bean " +
+                    logger.finest("Method "+method.getName()+", invocation being performed on " +
+                                  bean.getClass().getName()+", no matching method found on service bean " +
                                   "using template "+template);
                 }
                 Class beanClass = bean.getClass();
-                Method beanMethod =
-                    beanClass.getMethod(method.getName(),
-                                        method.getParameterTypes());
+                Method beanMethod =  beanClass.getMethod(method.getName(), method.getParameterTypes());
                 return(beanMethod.invoke(bean, args));
             }
         } catch (InvocationTargetException e) {

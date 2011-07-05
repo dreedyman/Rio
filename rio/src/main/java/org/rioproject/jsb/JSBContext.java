@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +96,8 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     private final List<Entry> attrs = new ArrayList<Entry>();
     /** The service's configuration, created lazily */
     private Configuration  serviceBeanConfig;
+    /** Optional configuration files */
+    private String[] configurationFiles;
     /* The Subject used to authenticate the service */
     private Subject subject;
     /** Component name for logging and configuration property retrieval */
@@ -141,12 +142,12 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
 
     /**
      * Get the shared config
-     * 
+     *
      * @return The shared Configuration
      */
-    public Configuration getSharedConfiguration() {
+   /* public Configuration getSharedConfiguration() {
         return(sharedConfig);
-    }
+    }*/
 
     /**
      * Set the Subject used to authenticate the service
@@ -201,13 +202,11 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * @see org.rioproject.core.jsb.ServiceBeanContext#getConfiguration
      */
     public Configuration getConfiguration() throws ConfigurationException {
-        //Configuration  serviceBeanConfig;
         if(serviceBeanConfig==null) {
             ClassLoader cCL = Thread.currentThread().getContextClassLoader();
             String[] args;
             try {
-                args = ConfigHelper.getConfigArgs(
-                    sElem.getServiceBeanConfig().getConfigArgs(), cCL);
+                args = ConfigHelper.getConfigArgs(sElem.getServiceBeanConfig().getConfigArgs(), cCL);
             } catch (IOException e) {
                 throw new ConfigurationException("Creating configuration", e);
             }
@@ -216,7 +215,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                 for(String s : args) {
                     if(sb.length()>0)
                         sb.append("\n");
-                    sb.append("\t"+s);
+                    sb.append("\t").append(s);
                 }
                 logger.finer("===> CONFIG ARGS: \n"+sb);
             }
@@ -256,6 +255,14 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
         this.serviceBeanConfig = serviceBeanConfig;
     }
 
+    void setConfigurationFiles(String... configFiles) {
+        configurationFiles = new String[configFiles.length];
+        System.arraycopy(configFiles, 0, configurationFiles, 0, configFiles.length);
+    }
+
+    public String[] getConfigurationFiles() {
+        return configurationFiles;
+    }
 
     /**
      * @see org.rioproject.core.jsb.ServiceBeanContext#getServiceBeanConfig

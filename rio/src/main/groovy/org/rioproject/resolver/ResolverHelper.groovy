@@ -16,7 +16,7 @@
 package org.rioproject.resolver;
 
 import org.rioproject.core.ClassBundle
-import org.rioproject.config.maven2.Repository
+import org.rioproject.resolver.maven2.Repository
 import java.util.logging.Logger
 import java.util.logging.Level
 
@@ -123,7 +123,17 @@ class ResolverHelper {
      * @throws ResolverException if there are problems loading the resource
      */
     def static Resolver getInstance() throws ResolverException {
-        return getInstance(null);
+        File resolverJar = new File(getResolverJarFile())
+        URLClassLoader resolverLoader = new URLClassLoader([resolverJar.toURI().toURL()] as URL[],
+                                                           Thread.currentThread().contextClassLoader)
+        return getInstance(resolverLoader);
+    }
+
+    private static String getResolverJarFile() {
+        String resolverJarName =
+            System.getProperty("RIO_TEST_ATTACH")==null?"resolver-aether-impl.jar":"resolver-pmr.jar"
+        String resolverLibDir = "${System.getProperty("RIO_HOME")}${File.separator}lib${File.separator}resolver"
+        return "${resolverLibDir}${File.separator}${resolverJarName}"
     }
 
     /**

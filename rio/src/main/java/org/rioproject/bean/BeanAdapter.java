@@ -418,9 +418,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
     protected Remote createDelegatingProxy() {
         try {
             Class[] interfaces = getInterfaceClasses(bean.getClass());
-            Remote proxy = (Remote)BeanDelegator.getInstance(this,
-                                                              bean,
-                                                              interfaces);
+            Remote proxy = (Remote)BeanDelegator.getInstance(this, bean, interfaces);
             return(proxy);
             //Remote proxy = (Remote)ProxyCache.getProxy(bean,
             //                                           this,
