@@ -537,19 +537,12 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         /*
                         * Load and start the ServiceBean
                         */
-                        loadResult =
-                            ServiceBeanLoader.load(sElem,
-                                                   serviceID,
-                                                   jsbManager,
-                                                   container.getComputeResource(),
-                                                   container.getSharedConfiguration());
+                        loadResult = ServiceBeanLoader.load(sElem, serviceID, jsbManager, container);
 
                         AssociationManagement associationManagement;
-                        ClassLoader currentCL =
-                            Thread.currentThread().getContextClassLoader();
+                        ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
                         try {
-                            ClassLoader jsbCL =
-                                loadResult.getImpl().getClass().getClassLoader();
+                            ClassLoader jsbCL = loadResult.getImpl().getClass().getClassLoader();
                             Thread.currentThread().setContextClassLoader(jsbCL);
                             context = loadResult.getServiceBeanContext();
                             associationManagement = context.getAssociationManagement();
@@ -560,8 +553,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         serviceID = loadResult.getServiceID();
                         
                         /* Set properties to the ServiceCostCalculator */
-                        serviceCostCalculator.setDownloadRecords(
-                            stagedDataManager.getDownloadRecords());
+                        serviceCostCalculator.setDownloadRecords(stagedDataManager.getDownloadRecords());
 
                         //serviceCostCalculator.setImpl(loadResult.impl);
                         //serviceCostCalculator.setProxy(serviceProxy);
@@ -572,17 +564,11 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         registerPlatformCapabilities();
 
                         try {
-                            Method setBackend =
-                                associationManagement.getClass().
-                                    getMethod("setBackend",
-                                              Object.class);
-                            setBackend.invoke(associationManagement,
-                                              loadResult.getImpl());
+                            Method setBackend = associationManagement.getClass().getMethod("setBackend", Object.class);
+                            setBackend.invoke(associationManagement, loadResult.getImpl());
                         } catch(Exception e) {
                             logger.log(Level.WARNING,
-                                       "Failed to get setBackend method " +
-                                       "from "+
-                                       "ServiceBean ["+sElem.getName()+"] impl",
+                                       "Failed to get setBackend method from ServiceBean ["+sElem.getName()+"] impl",
                                        e);
                         }
                         associationManagement.setServiceBeanContainer(container);
@@ -642,7 +628,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     }
 
                 } catch(Throwable t) {
-                    StringBuffer buff = new StringBuffer();
+                    StringBuilder buff = new StringBuilder();
                     if(sElem.getComponentBundle()!=null) {
                         String[] jars = sElem.getComponentBundle().getJARNames();
                         for(int i=0; i<jars.length; i++) {

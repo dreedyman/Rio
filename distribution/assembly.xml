@@ -1,4 +1,5 @@
 <assembly>
+    <!--<id>bin</id>-->
     <!-- We dont use the <id> element to avoid the extension to the directory
          and zip name -->
     <formats>
@@ -7,7 +8,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        
+
         <fileSet>
             <directory>${basedir}/..</directory>
             <includes>
@@ -75,7 +76,9 @@
         <!-- Hyperic -->
         <fileSet>
             <!-- WHY DOESNT settings.localRepository WORK HERE??? -->
-            <directory>${user.home}/.m2/repository/org/hyperic/sigar-dist/${hyperic.version}/sigar-dist-${hyperic.version}/hyperic-sigar-1.6.3/sigar-bin/lib</directory>
+            <directory>
+                ${user.home}/.m2/repository/org/hyperic/sigar-dist/${hyperic.version}/sigar-dist-${hyperic.version}/hyperic-sigar-1.6.3/sigar-bin/lib
+            </directory>
             <fileMode>0644</fileMode>
             <outputDirectory>/lib/hyperic</outputDirectory>
             <excludes>
@@ -101,7 +104,7 @@
         <!-- The lib directory are service implementation jars and their transitive requirements -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <excludes>                
+            <excludes>
                 <exclude>net.jini:jsk-dl</exclude>
                 <exclude>junit:junit</exclude>
                 <exclude>ant:*</exclude>
@@ -109,6 +112,14 @@
                 <exclude>org.codehaus.izpack:*</exclude>
                 <exclude>*:oar</exclude>
                 <exclude>*:zip</exclude>
+                <!-- The following exclusions are for the resolver(s) and it's dependencies -->
+                <exclude>org.rioproject.resolver:resolver-aether-impl</exclude>
+                <exclude>org.rioproject.resolver:resolver-pmr</exclude>
+                <exclude>org.sonatype.*</exclude>
+                <exclude>org.apache.maven:*</exclude>
+                <exclude>org.apache.maven.wagon:*</exclude>
+                <exclude>org.codehaus.plexus:*</exclude>
+                <exclude>nekohtml:*</exclude>
             </excludes>
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
@@ -160,6 +171,35 @@
             <outputFileNameMapping>watch-ui.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useStrictFiltering>true</useStrictFiltering>
+            <includes>
+                <include>org.rioproject.resolver:resolver-aether-impl</include>
+                <include>org.rioproject.resolver:resolver-pmr</include>
+                <include>org.sonatype.*</include>
+                <include>org.apache.maven:*</include>
+                <include>org.apache.maven.wagon:*</include>
+                <include>org.codehaus.plexus:*</include>
+                <include>nekohtml:*</include>
+            </includes>
+            <outputDirectory>lib/resolver</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+
     </dependencySets>
+
+   <!-- <moduleSets>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>org.rioproject.resolver:resolver-pmr</include>
+            </includes>
+            <binaries>
+                <outputDirectory>lib/resolver/${artifactId}.${artifact.extension}</outputDirectory>
+                <unpack>false</unpack>
+            </binaries>
+        </moduleSet>
+    </moduleSets>-->
 
 </assembly>

@@ -116,7 +116,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     private void bootstrap(String[] configArgs) throws Exception {
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
         Configuration config = ConfigurationProvider.getInstance(configArgs, cCL);
-        container = new JSBContainer(config);
+        container = new JSBContainer(config, configArgs);
         computeResource = new ComputeResource(config);
 
         /* Setup persistent provisioning attributes */

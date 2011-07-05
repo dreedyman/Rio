@@ -46,8 +46,6 @@ class StartServiceBeanExecConfig {
         String classpath = "${rioHome}/lib/cybernode.jar${sep}"
         if (System.getProperty("RIO_TEST_ATTACH") != null)
             classpath = "$classpath${sep}${rioHome}/lib/rio-test.jar"
-
-        classpath = "$classpath${sep}${rioHome}/lib/resolver.jar"
         
         String policyFile = rioHome + '/policy/policy.all'
         def configArgs = [rioHome + '/config/common.groovy',

@@ -6,7 +6,7 @@
 import org.rioproject.boot.ServiceDescriptorUtil
 import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
-import org.rioproject.config.maven2.Repository
+import org.rioproject.resolver.maven2.Repository
 
 @Component('com.sun.jini.start')
 class StartAllConfig {

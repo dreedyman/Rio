@@ -48,6 +48,7 @@ import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
+import org.rioproject.jsb.JSBContext;
 import org.rioproject.jsb.JSBManager;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanActivation.LifeCycleManager;
@@ -1476,15 +1477,13 @@ public class CybernodeImpl extends ServiceBeanAdapter
      */
     void createContainer() throws ConfigurationException {
         Configuration config = context.getConfiguration();
-        ServiceBeanContainer defaultContainer =
-            new JSBContainer(config);
+        ServiceBeanContainer defaultContainer = new JSBContainer(config, ((JSBContext)context).getConfigurationFiles());
 
-        this.container =
-            (ServiceBeanContainer)config.getEntry(getConfigComponent(),
-                                                  "serviceBeanContainer",
-                                                  ServiceBeanContainer.class,
-                                                  defaultContainer,
-                                                  config);
+        this.container = (ServiceBeanContainer)config.getEntry(getConfigComponent(),
+                                                               "serviceBeanContainer",
+                                                               ServiceBeanContainer.class,
+                                                               defaultContainer,
+                                                               config);
         this.container.setUuid(getUuid());
         this.container.setComputeResource(computeResource);
         this.container.addListener(this);

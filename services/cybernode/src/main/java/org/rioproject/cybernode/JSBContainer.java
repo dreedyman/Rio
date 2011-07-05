@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +57,8 @@ public class JSBContainer implements ServiceBeanContainer {
         Collections.synchronizedList(new ArrayList<ServiceBeanContainerListener>());
     /** Configuration object, which is also used as the shared configuration */
     Configuration config;
+    /** Configuration files for the shared configuration*/
+    private final List<String> configurationFiles = new ArrayList<String>();
     /** Logger */
     static Logger logger = CybernodeImpl.logger;
 
@@ -67,7 +68,20 @@ public class JSBContainer implements ServiceBeanContainer {
      * @param config The Configuration to use
      */
     public JSBContainer(Configuration config) {
+        this(config, (String)null);
+    }
+
+    /**
+     * Create a new ServiceBeanContainer
+     *
+     * @param config The Configuration to use
+     * @param configFiles Files used to create the shared configuration, may be null
+     */
+    public JSBContainer(Configuration config, String... configFiles) {
         this.config = config;
+        if(configFiles!=null) {
+            Collections.addAll(configurationFiles, configFiles);
+        }
     }
 
     /**
@@ -75,6 +89,12 @@ public class JSBContainer implements ServiceBeanContainer {
      */
     public Configuration getSharedConfiguration() {
         return (config);
+    }
+
+    public Collection<String> getSharedConfigurationFiles() {
+        List<String> list = new ArrayList<String>();
+        list.addAll(configurationFiles);
+        return list;
     }
 
     /**

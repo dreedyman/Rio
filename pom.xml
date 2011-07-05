@@ -358,7 +358,9 @@
         <module>plugins/rio-archetype</module>
         <module>boot</module>
         <module>rio</module>
-        <module>resolver</module>
+        <module>resolver/resolver-api</module>
+        <module>resolver/resolver-aether-impl</module>
+        <module>resolver/resolver-pmr</module>
         <module>webster</module>
         <module>services/cybernode</module>
         <module>services/gnostic</module>
