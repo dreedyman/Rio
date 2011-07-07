@@ -359,8 +359,8 @@
         <module>boot</module>
         <module>rio</module>
         <module>resolver/resolver-api</module>
-        <module>resolver/resolver-aether-impl</module>
-        <module>resolver/resolver-pmr</module>
+        <module>resolver/resolver-aether</module>
+        <module>resolver/resolver-project</module>
         <module>webster</module>
         <module>services/cybernode</module>
         <module>services/gnostic</module>
