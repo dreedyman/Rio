@@ -131,7 +131,7 @@ class ResolverHelper {
 
     private static String getResolverJarFile() {
         String resolverJarName =
-            System.getProperty("RIO_TEST_ATTACH")==null?"resolver-aether-impl.jar":"resolver-pmr.jar"
+            System.getProperty("RIO_TEST_ATTACH")==null?"resolver-aether.jar":"resolver-project.jar"
         String resolverLibDir = "${System.getProperty("RIO_HOME")}${File.separator}lib${File.separator}resolver"
         return "${resolverLibDir}${File.separator}${resolverJarName}"
     }
