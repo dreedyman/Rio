@@ -113,8 +113,8 @@
                 <exclude>*:oar</exclude>
                 <exclude>*:zip</exclude>
                 <!-- The following exclusions are for the resolver(s) and it's dependencies -->
-                <exclude>org.rioproject.resolver:resolver-aether-impl</exclude>
-                <exclude>org.rioproject.resolver:resolver-pmr</exclude>
+                <exclude>org.rioproject.resolver:resolver-aether</exclude>
+                <exclude>org.rioproject.resolver:resolver-project</exclude>
                 <exclude>org.sonatype.*</exclude>
                 <exclude>org.apache.maven:*</exclude>
                 <exclude>org.apache.maven.wagon:*</exclude>
@@ -175,8 +175,8 @@
             <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
-                <include>org.rioproject.resolver:resolver-aether-impl</include>
-                <include>org.rioproject.resolver:resolver-pmr</include>
+                <include>org.rioproject.resolver:resolver-aether</include>
+                <include>org.rioproject.resolver:resolver-project</include>
                 <include>org.sonatype.*</include>
                 <include>org.apache.maven:*</include>
                 <include>org.apache.maven.wagon:*</include>
