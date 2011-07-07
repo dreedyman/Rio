@@ -29,6 +29,8 @@ public class RemoteRepository implements Serializable {
     private boolean releases = true;
     private String releaseChecksumPolicy = "fail";
     private String snapshotChecksumPolicy = "fail";
+    private String releaseUpdatePolicy = "daily";
+    private String snapshotUpdatePolicy = "daily";
     private boolean mirrored;
 
     public boolean supportsSnapshots() {
@@ -53,6 +55,22 @@ public class RemoteRepository implements Serializable {
 
     public void setReleases(boolean releases) {
         this.releases = releases;
+    }
+
+    public String getReleaseUpdatePolicy() {
+        return releaseUpdatePolicy;
+    }
+
+    public void setReleaseUpdatePolicy(String releaseUpdatePolicy) {
+        this.releaseUpdatePolicy = releaseUpdatePolicy;
+    }
+
+    public String getSnapshotUpdatePolicy() {
+        return snapshotUpdatePolicy;
+    }
+
+    public void setSnapshotUpdatePolicy(String snapshotUpdatePolicy) {
+        this.snapshotUpdatePolicy = snapshotUpdatePolicy;
     }
 
     public String getSnapshotChecksumPolicy() {
@@ -93,6 +111,21 @@ public class RemoteRepository implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override public String toString() {
+        return "RemoteRepository{" +
+               "id='" + id + '\'' +
+               ", name='" + name + '\'' +
+               ", url='" + url + '\'' +
+               ", snapshots=" + snapshots +
+               ", releases=" + releases +
+               ", releaseChecksumPolicy='" + releaseChecksumPolicy + '\'' +
+               ", snapshotChecksumPolicy='" + snapshotChecksumPolicy + '\'' +
+               ", releaseUpdatePolicy='" + releaseUpdatePolicy + '\'' +
+               ", snapshotUpdatePolicy='" + snapshotUpdatePolicy + '\'' +
+               ", mirrored=" + mirrored +
+               '}';
     }
 
     @Override
