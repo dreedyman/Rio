@@ -28,7 +28,8 @@ public class JarUtil {
     public static File createJar(File source,
                                  File target,                                 
                                  String jarName,
-                                 Manifest manifest) throws IOException {
+                                 Manifest manifest,
+                                 File toAdd) throws IOException {
         if (!target.exists())
             if (target.mkdirs())
                 System.out.println("Created " + target.getPath());
@@ -39,6 +40,8 @@ public class JarUtil {
             strip = strip+"/";
         try {
             jarOutput = new JarOutputStream(new FileOutputStream(jar), manifest);
+            if(toAdd!=null)
+                addToJar(toAdd, jarOutput, strip);
             addToJar(source, jarOutput, strip);
         } finally {
             if (jarOutput != null)
