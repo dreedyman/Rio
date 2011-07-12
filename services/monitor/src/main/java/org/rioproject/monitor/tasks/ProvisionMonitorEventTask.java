@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.tasks;
 
 import org.rioproject.event.EventHandler;
+import org.rioproject.monitor.ProvisionMonitorEvent;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,7 +27,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-class ProvisionMonitorEventTask implements Runnable {
+public class ProvisionMonitorEventTask implements Runnable {
     EventHandler eventHandler;
     ProvisionMonitorEvent event;
     private static final String COMPONENT = "org.rioproject.monitor";
@@ -39,8 +40,8 @@ class ProvisionMonitorEventTask implements Runnable {
      * send the event
      * @param event The event to send
      */
-    ProvisionMonitorEventTask(EventHandler eventHandler,
-                              ProvisionMonitorEvent event) {
+    public ProvisionMonitorEventTask(EventHandler eventHandler,
+                                     ProvisionMonitorEvent event) {
         if(eventHandler==null)
             throw new IllegalArgumentException("eventHandler is null");
         if(event==null)

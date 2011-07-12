@@ -140,7 +140,7 @@ public class InstantiatorResource {
      * 
      * @param newDeployedService The service to add
      */
-    void addDeployedService(DeployedService newDeployedService) {
+    public void addDeployedService(DeployedService newDeployedService) {
         ServiceElement sElem = newDeployedService.getServiceElement();
         synchronized(serviceElementMap) {
             if(serviceElementMap.containsKey(sElem)) {
@@ -184,7 +184,7 @@ public class InstantiatorResource {
      *
      * @return The name of the ServiceBeanInstantiator
      */
-    String getName() {
+    public String getName() {
         return(instantiatorName);
     }
 
@@ -193,7 +193,7 @@ public class InstantiatorResource {
      *
      * @return The Uuid for the ServiceBeanInstantiator
      */
-    Uuid getInstantiatorUuid() {
+    public Uuid getInstantiatorUuid() {
         return(instantiatorUuid);
     }
 
@@ -387,7 +387,7 @@ public class InstantiatorResource {
      * @return The number of instances of the ServiceElement the
      * ServiceBeanInstantiator has instantiated. If not found return 0
      */
-    int getServiceElementCount(ServiceElement sElem) {
+    public int getServiceElementCount(ServiceElement sElem) {
         int numInstances = 0;
         synchronized(serviceElementMap) {
             if(serviceElementMap.containsKey(sElem)) {
@@ -409,7 +409,7 @@ public class InstantiatorResource {
      * @return The total number of ServiceElement instances the 
      * ServiceBeanInstantiator has instantiated
      */
-    int getServiceElementCount() {
+    public int getServiceElementCount() {
         int totalInstances = 0;
         synchronized(serviceElementMap) {
             Set<ServiceElement> keys = serviceElementMap.keySet();
@@ -426,7 +426,7 @@ public class InstantiatorResource {
      * 
      * @return The Instantiator
      */
-    ServiceBeanInstantiator getInstantiator() {
+    public ServiceBeanInstantiator getInstantiator() {
         return (instantiator);
     }
 
@@ -435,7 +435,7 @@ public class InstantiatorResource {
      *
      * @return The number of active and in-process services.
      */
-    int getServiceCount() {
+    public int getServiceCount() {
         int count = getServiceElementCount();
         int planned = getInProcessCounter();
         return count + planned;
@@ -482,7 +482,7 @@ public class InstantiatorResource {
      * 
      * @return The ResourceCapability of the ServiceBeanInstantiator
      */
-    ResourceCapability getResourceCapability() {
+    public ResourceCapability getResourceCapability() {
         ResourceCapability rCap;
         synchronized(resourceCapabilityLock) {
             rCap = resourceCapability;
@@ -520,7 +520,7 @@ public class InstantiatorResource {
      * @return The maximum number of services the ServiceBeanInstantiator can 
      * instantiate 
      */
-    int getServiceLimit() {
+    public int getServiceLimit() {
         int limit;
         synchronized(this) {
             limit = serviceLimit;
@@ -533,7 +533,7 @@ public class InstantiatorResource {
      *
      * @param sElem The ServiceElement to add
      */
-    void incrementProvisionCounter(ServiceElement sElem) {
+    public void incrementProvisionCounter(ServiceElement sElem) {
         inProcessCounter.incrementAndGet();
         synchronized(inProcessMap) {
             if(inProcessMap.containsKey(sElem)) {
@@ -550,7 +550,7 @@ public class InstantiatorResource {
      *
       * @param sElem The ServiceElement to remove
      */
-    void decrementProvisionCounter(ServiceElement sElem) {
+    public void decrementProvisionCounter(ServiceElement sElem) {
         inProcessCounter.decrementAndGet();
         synchronized(inProcessMap) {
             if(inProcessMap.containsKey(sElem)) {
@@ -566,7 +566,7 @@ public class InstantiatorResource {
      *
      * @return The inprocess counter value
      */
-    int getInProcessCounter() {
+    public int getInProcessCounter() {
         return(inProcessCounter.intValue());
     }
 
@@ -577,7 +577,7 @@ public class InstantiatorResource {
      *
      * @return The inprocess counter value for a ServiceElement
      */
-    int getInProcessCounter(ServiceElement sElem) {
+    public int getInProcessCounter(ServiceElement sElem) {
         int count = 0;
         synchronized(inProcessMap) {
             if(inProcessMap.containsKey(sElem)) {
@@ -612,7 +612,7 @@ public class InstantiatorResource {
      * @return The host address of the ServiceBeanInstantiator as a
      * String "%d.%d.%d.%d"
      */
-    String getHostAddress() {
+    public String getHostAddress() {
         return (resourceCapability.getAddress());
     }
 
@@ -630,7 +630,7 @@ public class InstantiatorResource {
      * the ServiceBeanInstantiator is available for the provisioning of
      * ServiceBean objects which have a provisioning type of <i>dynamic </i>
      */
-    void setDynamicEnabledOn() {
+    public void setDynamicEnabledOn() {
         dynamicEnabled = true;
     }
 
@@ -641,7 +641,7 @@ public class InstantiatorResource {
      * for the provisioning of ServiceBean objects which have a provisioning
      * type of <i>dynamic </i>, otherwise return <code>false</code>
      */
-    boolean getDynamicEnabled() {
+    public boolean getDynamicEnabled() {
         return (dynamicEnabled);
     }
 
@@ -659,7 +659,7 @@ public class InstantiatorResource {
      * operational requirements of the ServiceBean.
      * @throws ProvisionException If there are errors obtaining available disk space
      */
-    boolean canProvision(ServiceElement sElem) throws ProvisionException {
+    public boolean canProvision(ServiceElement sElem) throws ProvisionException {
         if(sElem.getPlanned()==0)
             return(false);
 
@@ -727,7 +727,7 @@ public class InstantiatorResource {
 
         if(!AssociationMatcher.meetsColocationRequirements(sElem, this)) {
             if(logger.isLoggable(Level.FINER)) {
-                StringBuffer b = new StringBuffer();
+                StringBuilder b = new StringBuilder();
                 b.append("Do not allocate ")
                     .append(provType)
                     .append(" " + "service [")
@@ -760,7 +760,7 @@ public class InstantiatorResource {
 
         if(!resourceCapability.measuredResourcesWithinRange()) {
             if(logger.isLoggable(Level.FINER)) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 MeasuredResource[] m =
                     resourceCapability.getMeasuredResources(
                         ResourceCapability.MEASURED_RESOURCES_BREACHED);
@@ -797,7 +797,7 @@ public class InstantiatorResource {
                 /* Create a String representation of the unsupportedReqs
                  * object for logging */
                 int x = 0;
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 for (SystemComponent unsupportedReq : unsupportedReqs) {
                     if (x > 0)
                         buffer.append(", ");
@@ -916,7 +916,7 @@ public class InstantiatorResource {
                     double avail =
                         getAvailableStorage(
                             resourceCapability.getPlatformCapabilities());
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     sb.append(getName())
                         .append(" at [").append(getHostAddress()).append("] ");
                     if(avail>0) {
@@ -1177,7 +1177,7 @@ public class InstantiatorResource {
         /*
          * Check each of the MeasuredResource objects
          */
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         if(logger.isLoggable(Level.FINER))
             buffer.append("Evaluate [")
                 .append(systemThresholdIDs.length)

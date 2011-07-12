@@ -64,8 +64,8 @@
                             <topclasses>
                                 <topclass>org.rioproject.monitor.ProvisionMonitorImpl</topclass>
                                 <topclass>org.rioproject.monitor.ProvisionMonitorPermission</topclass>
-                                <topclass>org.rioproject.monitor.ResourceCostSelector</topclass>
-                                <topclass>org.rioproject.monitor.LeastActiveSelector</topclass>
+                                <topclass>org.rioproject.monitor.selectors.ResourceCostSelector</topclass>
+                                <topclass>org.rioproject.monitor.selectors.LeastActiveSelector</topclass>
                             </topclasses>
 
                         </createJar>

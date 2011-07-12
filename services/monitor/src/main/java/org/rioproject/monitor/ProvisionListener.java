@@ -27,7 +27,7 @@ public interface ProvisionListener  {
 
     /**
      * Notify listener that the Service described by the ServiceBeanInstance has
-     * been provision succesfully
+     * been provision successfully
      * 
      * @param jsbInstance The ServiceBeanInstance
      * @param resource The InstantiatorResource that instantiated the service
@@ -37,10 +37,10 @@ public interface ProvisionListener  {
 
     /**
      * Notify listener that the Service described by the ServiceBeanInstance is
-     * uninstnaible, allowing the listener to release any pending resources
+     * uninstantiable, allowing the listener to release any pending resources
      * associated with the provisioning
      *
-     * @param request The ProvisonRequest that resulted in failure
+     * @param request The ProvisionRequest that resulted in failure
      */
     void uninstantiable(ProvisionRequest request);
 }

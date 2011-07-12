@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.handlers;
 
 import org.rioproject.core.OperationalString;
 import org.rioproject.resolver.Resolver;
@@ -37,7 +37,7 @@ public interface DeployHandler {
      * allocated each time. If there are no <tt>OperationalString</tt>s
      * to deploy, a zero-length list is returned
      */
-    List<OperationalString> listofOperationalStrings();
+    List<OperationalString> listOfOperationalStrings();
 
     /**
      * Get a list of {@link org.rioproject.core.OperationalString}s to deploy
@@ -53,5 +53,5 @@ public interface DeployHandler {
      *
      * @throws IllegalArgumentException if the <tt>fromDate</tt> is null
      */
-    List<OperationalString> listofOperationalStrings(Date fromDate);
+    List<OperationalString> listOfOperationalStrings(Date fromDate);
 }

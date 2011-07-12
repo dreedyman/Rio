@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +28,7 @@ import net.jini.id.Uuid;
  * @author Dennis Reedy
  */
 public class ProvisionRequest {
-    enum Type {PROVISION, RELOCATE, UNINSTANTIABLE}
+    public enum Type {PROVISION, RELOCATE, UNINSTANTIABLE}
     /** The ServiceElement */
     ServiceElement sElem;
     /** The ServiceProvisionListener */
@@ -135,6 +134,54 @@ public class ProvisionRequest {
             throw new IllegalArgumentException("invalid type");
         this.type = type;
         timestamp = System.currentTimeMillis();
+    }
+
+    public Uuid getRequestedUuid() {
+        return requestedUuid;
+    }
+
+    public Uuid getExcludeUuid() {
+        return excludeUuid;
+    }
+
+    public ServiceElement getServiceElement() {
+        return sElem;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public InstanceIDManager getInstanceIDMgr() {
+        return instanceIDMgr;
+    }
+
+    public void setServiceElement(ServiceElement sElem) {
+        this.sElem = sElem;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setServiceProvisionListener(ServiceProvisionListener svcProvisionListener) {
+        this.svcProvisionListener = svcProvisionListener;
+    }
+
+    public ServiceProvisionListener getServiceProvisionListener() {
+        return svcProvisionListener;
+    }
+
+    public ProvisionListener getListener() {
+        return listener;
+    }
+
+    public OperationalStringManager getOpStringManager() {
+        return opStringMgr;
     }
 
     /**

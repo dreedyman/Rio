@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.handlers;
 
 import org.rioproject.config.Constants;
 import org.rioproject.core.OperationalString;
-import org.rioproject.core.provision.DownloadRecord;
+import org.rioproject.monitor.DeploymentVerifier;
 import org.rioproject.opstring.*;
-import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resources.util.FileUtils;
-import org.rioproject.resolver.Resolver;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,7 +50,7 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         }
     }
 
-    public List<OperationalString> listofOperationalStrings() {
+    public List<OperationalString> listOfOperationalStrings() {
         List<OperationalString> list = new ArrayList<OperationalString>();
         if (opStringLoader != null) {
             list.addAll(look(new Date(0)));
@@ -68,7 +61,7 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         return Collections.unmodifiableList(list);
     }
 
-    public List<OperationalString> listofOperationalStrings(Date fromDate) {
+    public List<OperationalString> listOfOperationalStrings(Date fromDate) {
         if (fromDate == null)
             throw new IllegalArgumentException("the fromDate must not be null");
         List<OperationalString> list = new ArrayList<OperationalString>();
@@ -85,24 +78,23 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         List<OperationalString> list = new ArrayList<OperationalString>();
         File dir = new File(oar.getDeployDir());
         File opstringFile = OARUtil.find(oar.getOpStringName(), dir);
+        DeploymentVerifier deploymentVerifier = new DeploymentVerifier();
         if (opstringFile != null) {
             Date opstringDate = new Date(opstringFile.lastModified());
             if (opstringDate.after(from)) {
                 try {
-                    OperationalString[] opstrings =
-                        opStringLoader.parseOperationalString(opstringFile);
-                    for(OperationalString opstring : opstrings) {
-                        ((OpString) opstring).setLoadedFrom(oar.getURL());
+                    OperationalString[] opStrings = opStringLoader.parseOperationalString(opstringFile);
+                    for(OperationalString opString : opStrings) {
+                        ((OpString) opString).setLoadedFrom(oar.getURL());
                         try {
-                            Resolver resolver = ResolverHelper.getInstance();
-                            OpStringUtil.checkCodebase(opstring,
-                                                       System.getProperty(Constants.CODESERVER),
-                                                       resolver);
-                            list.add(opstring);
+                            Collection<RemoteRepository> r = oar.getRepositories();
+                            RemoteRepository[] repositories = r.toArray(new RemoteRepository[r.size()]);
+                            deploymentVerifier.verifyOperationalString(opString, repositories);
+                            list.add(opString);
                         } catch(IOException e) {
                             logger.log(Level.WARNING,
                                        "Unable to resolve codebase for services " +
-                                       "in ["+opstring.getName()+"] using codebase "+
+                                       "in ["+opString.getName()+"] using codebase "+
                                        System.getProperty(Constants.CODESERVER)+
                                        ". Make sure that the codeserver is set " +
                                        "up correctly to serve the service's " +
@@ -133,7 +125,7 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
                            "The OAR may not be built correctly.");
         }
         if(logger.isLoggable(Level.FINER)) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for(OperationalString opstring : list) {
                 if(buffer.length()>0)
                     buffer.append(", ");
@@ -147,29 +139,6 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
                             "OperationalStrings: "+buffer.toString());
         }
         return list;
-    }
-
-    protected DownloadRecord install(URL archive, File installDir)
-        throws IOException, OARException {
-
-        DownloadRecord record = OARUtil.install(archive, installDir);
-        /* Persist the download record */
-        ObjectOutputStream oos = null;
-        try {
-            String path = record.getPath();
-            if (!path.endsWith("/"))
-                path = path + "/";
-            oos = new ObjectOutputStream(new FileOutputStream(path + "record.ser"));
-            oos.writeObject(record);
-            oos.flush();
-        } catch (IOException e) {
-            if(oos!=null)
-                oos.close();
-            logger.log(Level.WARNING, "Writing DownloadRecord", e);
-        } catch (Throwable t) {
-            logger.log(Level.WARNING, "Installing "+archive.toExternalForm(), t);
-        }
-        return (record);
     }
 
     protected void install(File oar, File installDir) throws IOException, OARException {

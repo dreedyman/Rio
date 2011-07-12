@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.managers;
 
 import org.rioproject.core.ServiceElement;
 import org.rioproject.core.ServiceProvisionListener;
 import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.monitor.ProvisionRequest;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-abstract class PendingServiceElementManager {
+public abstract class PendingServiceElementManager {
     /** Sorted collection of pending provision requests */
     final TreeMap<Key, ProvisionRequest> collection;
     /** Index into the collection to insert elements */
@@ -48,7 +48,7 @@ abstract class PendingServiceElementManager {
     /** A descriptive String type */
     String type;
     /** A Logger */
-    static Logger logger = ProvisionMonitorImpl.logger;
+    private final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
 
     /**
      * A key for the sortable set
@@ -126,7 +126,7 @@ abstract class PendingServiceElementManager {
     /**
      * @return The descriptive type of this Manager
      */
-    String getType() {
+    public String getType() {
         return (type);
     }
 
@@ -138,13 +138,13 @@ abstract class PendingServiceElementManager {
      * @return The index that was used to insert the ProvisionRequest into the
      * collection
      */
-    long addProvisionRequest(ProvisionRequest request, long index) {
+    public long addProvisionRequest(ProvisionRequest request, long index) {
         long ndx;
         synchronized(collection) {                        
             Long keyIndex = (index == 0 ? collectionIndex++ : index);
-            Key key = new Key(request.sElem,
+            Key key = new Key(request.getServiceElement(),
                               keyIndex,
-                              request.timestamp);
+                              request.getTimestamp());
             collection.put(key, request);
             ndx = keyIndex;
         }
@@ -170,7 +170,7 @@ abstract class PendingServiceElementManager {
      * 
      * @param sElem The ServiceElement to match
      *
-     * @return The number of ServicElement macthes
+     * @return The number of ServiceElement matches
      */
     int getCount(ServiceElement sElem) {
         int count = 0;
@@ -179,7 +179,7 @@ abstract class PendingServiceElementManager {
             if(c != null) {
                 for (Object aC : c) {
                     ProvisionRequest pr = (ProvisionRequest) aC;
-                    if (pr.sElem.equals(sElem))
+                    if (pr.getServiceElement().equals(sElem))
                         count++;
                 }
             }
@@ -196,7 +196,7 @@ abstract class PendingServiceElementManager {
      * @return An array of ProvisionRequest instances that have been removed. If 
      * there are no instances that have been removed, return an empty array
      */
-    ProvisionRequest[] removeServiceElement(ServiceElement sElem, int numToRemove) {
+    public ProvisionRequest[] removeServiceElement(ServiceElement sElem, int numToRemove) {
         List<Key> removals = new ArrayList<Key>();
         List<ProvisionRequest> removed = new ArrayList<ProvisionRequest>();
         
@@ -204,7 +204,7 @@ abstract class PendingServiceElementManager {
             Set<Key> keys = collection.keySet();
             for (Key key : keys) {
                 ProvisionRequest pr = collection.get(key);
-                if (pr != null && sElem.equals(pr.sElem))
+                if (pr != null && sElem.equals(pr.getServiceElement()))
                     removals.add(key);
             }
         }
@@ -234,7 +234,7 @@ abstract class PendingServiceElementManager {
      * @return An array of ProvisionRequest instances that have been removed. If 
      * there are no instances that have been removed, return an empty array
      */
-    ProvisionRequest[] removeServiceElement(ServiceElement sElem) {
+    public ProvisionRequest[] removeServiceElement(ServiceElement sElem) {
         List<Key> removals = new ArrayList<Key>();
         List<ProvisionRequest> removed = new ArrayList<ProvisionRequest>();
         
@@ -242,7 +242,7 @@ abstract class PendingServiceElementManager {
             Set<Key> keys = collection.keySet();
             for (Key key : keys) {
                 ProvisionRequest pr = collection.get(key);
-                if (pr != null && sElem.equals(pr.sElem))
+                if (pr != null && sElem.equals(pr.getServiceElement()))
                     removals.add(key);
             }
         }
@@ -267,13 +267,13 @@ abstract class PendingServiceElementManager {
      *
      * @return If found return true
      */
-    boolean hasServiceElement(ServiceElement sElem) {
+    public boolean hasServiceElement(ServiceElement sElem) {
         boolean contains = false;
         synchronized(collection) {
             Set<Key> keys = collection.keySet();
             for (Key key : keys) {
                 ProvisionRequest pr = collection.get(key);
-                if (sElem.equals(pr.sElem)) {
+                if (sElem.equals(pr.getServiceElement())) {
                     contains = true;
                     break;
                 }
@@ -290,23 +290,23 @@ abstract class PendingServiceElementManager {
      * @param sElem The ServiceElement
      * @param listener A ServiceProvisionListener to be notified
      */
-    void updateProvisionRequests(ServiceElement sElem,
-                                 ServiceProvisionListener listener) {
+    public void updateProvisionRequests(ServiceElement sElem,
+                                        ServiceProvisionListener listener) {
         synchronized(collection) {
             Set<Key> keys = collection.keySet();
             for (Key key : keys) {
                 ProvisionRequest pr = collection.get(key);
-                if (sElem.equals(pr.sElem)) {
+                if (sElem.equals(pr.getServiceElement())) {
                     /* Preserve instance IDs */
-                    Long id = pr.sElem.getServiceBeanConfig().getInstanceID();
+                    Long id = pr.getServiceElement().getServiceBeanConfig().getInstanceID();
                     ServiceElement newElem = sElem;
                     if (id != null)
                         newElem =
                             ServiceElementUtil.prepareInstanceID(sElem,
                                                                  id.intValue());
-                    pr.sElem = newElem;
+                    pr.setServiceElement(newElem);
                     if(listener!=null)
-                    pr.svcProvisionListener = listener;
+                        pr.setServiceProvisionListener(listener);
                 }
             }
         }
@@ -327,7 +327,7 @@ abstract class PendingServiceElementManager {
      *
      * @param sElem The ServiceElement to use
      *
-     * @return An array of ProvisonRequest instances
+     * @return An array of ProvisionRequest instances
      */
     ProvisionRequest[] getProvisionRequests(ServiceElement sElem) {
         ProvisionRequest[] prs;        
@@ -342,7 +342,7 @@ abstract class PendingServiceElementManager {
                 Set<Key> keys = collection.keySet();
                 for (Key key : keys) {
                     ProvisionRequest pr = collection.get(key);
-                    if (sElem.equals(pr.sElem)) {
+                    if (sElem.equals(pr.getServiceElement())) {
                         items.add(pr);
                     }
                 }
@@ -355,10 +355,10 @@ abstract class PendingServiceElementManager {
     /**
      * Dumps the contents of the collection
      */
-    void dumpCollection() {
+    public void dumpCollection() {
         if(logger.isLoggable(Level.FINEST)) {
-            ProvisionRequest[] elements = getProvisionRequests(null);            
-            StringBuffer buffer = new StringBuffer();            
+            ProvisionRequest[] elements = getProvisionRequests(null);
+            StringBuilder buffer = new StringBuilder();
             int x=1;
             buffer.append("\n");
             buffer.append(type);
@@ -366,7 +366,7 @@ abstract class PendingServiceElementManager {
             buffer.append(elements.length).append("\n");
             buffer.append("--\n");
             for (ProvisionRequest element : elements) {
-                ServiceElement sElem = element.sElem;
+                ServiceElement sElem = element.getServiceElement();
                 Long id = sElem.getServiceBeanConfig().getInstanceID();
                 buffer.append(x++);
                 buffer.append(" ");
@@ -382,5 +382,5 @@ abstract class PendingServiceElementManager {
             buffer.append("--");
             logger.finest(buffer.toString());
         }
-    }    
+    }
 }

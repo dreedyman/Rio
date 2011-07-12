@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
+import org.rioproject.monitor.InstantiatorResource;
 import org.rioproject.resources.servicecore.ServiceResource;
 
 import java.util.*;
@@ -31,8 +32,7 @@ import java.util.logging.Logger;
  */
 public class LeastActiveSelector extends ServiceResourceSelector {
     private final List<Bucket> resourceList = new LinkedList<Bucket>();
-    static final Logger logger =
-        Logger.getLogger(ProvisionMonitorImpl.LOGGER+".selector");
+    static Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
     private LeastActiveComparator comparator = new LeastActiveComparator();
 
     public LeastActiveSelector() {
@@ -103,7 +103,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
     }
 
     @Override
-    ServiceResource[] getServiceResources() {
+    public ServiceResource[] getServiceResources() {
         Bucket[] buckets;
         synchronized(resourceList) {
             buckets = resourceList.toArray(new Bucket[resourceList.size()]);
@@ -121,7 +121,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
         Collections.sort(s, comparator);
         ServiceResource[] resources = s.toArray(new ServiceResource[s.size()]);
         if(logger.isLoggable(Level.FINER)) {
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             int i=0;
             for(ServiceResource sr : resources) {
                 InstantiatorResource ir = (InstantiatorResource)sr.getResource();

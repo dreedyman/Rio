@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
 import net.jini.id.Uuid;
 import org.rioproject.core.ServiceElement;
+import org.rioproject.monitor.AssociationMatcher;
+import org.rioproject.monitor.InstantiatorResource;
+import org.rioproject.monitor.ProvisionException;
 import org.rioproject.resources.servicecore.LandlordLessor;
 import org.rioproject.resources.servicecore.LeaseListener;
 import org.rioproject.resources.servicecore.ServiceResource;
@@ -61,16 +63,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     protected Collection<LeasedResource> collection;
     /* Semaphore for access to modifying the collection */
     protected final Object collectionLock = new Object();
+    static Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
     /**
      * The LandlordLessor which will be registered to, and will provide Lease
      * notification events
      */
     protected LandlordLessor landlord;
-    /**
-     * Logger for provision requests
-     */
-    static final Logger logger =
-        Logger.getLogger(ProvisionMonitorImpl.LOGGER+".provision");
 
     /**
      * Set the <code>LandlordLessor</code> the
@@ -133,7 +131,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return If a <code>ServiceResource</code> object can
      * be identified, otherwise return <code>null</code>
      *
-     * @throws ProvisionException If there are unrecoverable errors 
+     * @throws org.rioproject.monitor.ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
     protected ServiceResource selectServiceResource(ServiceElement sElem,
@@ -220,8 +218,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return An array of suitable ServiceResource instances
      */
-    ServiceResource[] filterIsolated(ServiceElement elem,
-                                     ServiceResource... candidates) {
+    public ServiceResource[] filterIsolated(ServiceElement elem,
+                                            ServiceResource... candidates) {
         /* For the set of candidate instantiator resources, remove the
          * candidate instantiator resources that have the same host name */
         InstantiatorResource[] known = getInstantiatorResources(elem, true);
@@ -255,8 +253,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @param candidates
      * @return
      */
-    ServiceResource[] filterMachineBoundaries(ServiceElement elem,
-                                              ServiceResource... candidates) {
+    public ServiceResource[] filterMachineBoundaries(ServiceElement elem,
+                                                     ServiceResource... candidates) {
         int maxPerMachine = elem.getMaxPerMachine();
         if(!(maxPerMachine!=-1 &&
              elem.getMachineBoundary()==ServiceElement.MachineBoundary.PHYSICAL)) {
@@ -412,11 +410,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return Array of ServiceResource instances that match the host address
      */
-    ServiceResource[] getServiceResources(String hostAddress,
-                                          boolean inclusive) {
-        return(getServiceResources(getServiceResources(),
-                                   hostAddress,
-                                   inclusive));
+    public ServiceResource[] getServiceResources(String hostAddress, boolean inclusive) {
+        return(getServiceResources(getServiceResources(), hostAddress, inclusive));
     }
 
     /**
@@ -459,7 +454,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param resource The ServiceResource
      */
-    void dropServiceResource(ServiceResource resource) {
+    public void dropServiceResource(ServiceResource resource) {
         remove(resource);
         try {
             landlord.cancel(resource.getCookie());
@@ -477,7 +472,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return An array of ServiceResource instances
      */
-    ServiceResource[] getServiceResources() {
+    public ServiceResource[] getServiceResources() {
         LeasedResource[] resources;
         synchronized(collectionLock) {
             resources = collection.toArray(new LeasedResource[collection.size()]);
@@ -587,7 +582,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of InstantiatorResource instances that have instantiated
      * the ServiceElement
      */
-    InstantiatorResource[] getInstantiatorResources(ServiceElement sElem) {
+    public InstantiatorResource[] getInstantiatorResources(ServiceElement sElem) {
         return(getInstantiatorResources(sElem, false));
     }
 

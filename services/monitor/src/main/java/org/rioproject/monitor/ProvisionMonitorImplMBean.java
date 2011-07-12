@@ -22,7 +22,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 
 /**
- * MBean interface for the ProvisonMonitor
+ * MBean interface for the ProvisionMonitor
  *
  * @author Ming Fang
  * @author Dennis Reedy

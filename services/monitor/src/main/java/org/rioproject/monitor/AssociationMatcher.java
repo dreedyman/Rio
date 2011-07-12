@@ -31,8 +31,7 @@ import java.util.logging.Logger;
  */
 public class AssociationMatcher {
     /** The Logger */
-    static final Logger logger =
-        Logger.getLogger(ProvisionMonitorImpl.LOGGER+".provision");
+    static final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
 
     /**
      * This method verifies whether the InstantiatorResource can support any
@@ -44,8 +43,7 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      * colocation requirements
      */
-    static boolean meetsColocationRequirements(ServiceElement sElem,
-                                               InstantiatorResource ir) {
+    static boolean meetsColocationRequirements(ServiceElement sElem, InstantiatorResource ir) {
         boolean provisionable = true;
         AssociationDescriptor[] aDescs = sElem.getAssociationDescriptors();
         for (AssociationDescriptor aDesc : aDescs) {
@@ -75,12 +73,8 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      *         opposed requirements
      */
-    static boolean meetsOpposedRequirements(ServiceElement sElem,
-                                            InstantiatorResource ir) {
-        return(meetsAssociatedRequirements(sElem,
-                                           AssociationType.OPPOSED,
-                                           ir,
-                                           null));
+    static boolean meetsOpposedRequirements(ServiceElement sElem, InstantiatorResource ir) {
+        return(meetsAssociatedRequirements(sElem, AssociationType.OPPOSED, ir, null));
     }
     /**
      * This method verifies whether the InstantiatorResource can support any
@@ -94,13 +88,10 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      *         isolation requirements
      */
-    static boolean meetsIsolatedRequirements(ServiceElement sElem,
-                                            InstantiatorResource ir,
-                                            InstantiatorResource[] known) {
-        return(meetsAssociatedRequirements(sElem,
-                                           AssociationType.ISOLATED,
-                                           ir,
-                                           known));
+    public static boolean meetsIsolatedRequirements(ServiceElement sElem,
+                                                    InstantiatorResource ir,
+                                                    InstantiatorResource[] known) {
+        return(meetsAssociatedRequirements(sElem, AssociationType.ISOLATED, ir, known));
 
     }
 
@@ -122,10 +113,9 @@ public class AssociationMatcher {
                                                        InstantiatorResource ir,
                                                        InstantiatorResource[] known) {
         boolean provisionable = true;
-        StringBuffer errorLog = new StringBuffer();
+        StringBuilder errorLog = new StringBuilder();
 
-        AssociationDescriptor[] aDescs =
-            ServiceElementUtil.getAssociationDescriptors(sElem, type);
+        AssociationDescriptor[] aDescs = ServiceElementUtil.getAssociationDescriptors(sElem, type);
 
         /* Check in process elements, to see if they match any of the service's
          * opposed requirements */
@@ -226,8 +216,7 @@ public class AssociationMatcher {
      * @return If the candidate has a host address that is in the known set,
      * return true, otherwise return false
      */
-    static boolean inKnownSet(InstantiatorResource candidate,
-                              InstantiatorResource[] knownOnes) {
+    static boolean inKnownSet(InstantiatorResource candidate, InstantiatorResource[] knownOnes) {
         boolean inKnownSet = false;
         if(candidate!=null && knownOnes!=null) {
             for (InstantiatorResource knownOne : knownOnes) {
@@ -248,8 +237,7 @@ public class AssociationMatcher {
      * @param elems Array of ServiceElement instances
      * @return True if the AssociationFilter matches a ServiceElement
      */
-    static boolean matches(AssociationDescriptor descriptor,
-                           ServiceElement[] elems) {
+    static boolean matches(AssociationDescriptor descriptor, ServiceElement[] elems) {
         boolean matches = false;
         AssociationMatchFilter filter = getAssociationMatchFilter(descriptor);
         for (ServiceElement elem : elems) {

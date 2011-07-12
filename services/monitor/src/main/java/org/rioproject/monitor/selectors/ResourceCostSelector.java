@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.monitor;
+package org.rioproject.monitor.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
+import org.rioproject.monitor.InstantiatorResource;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.system.ResourceCapability;
 
@@ -51,7 +52,7 @@ public class ResourceCostSelector extends ServiceResourceSelector {
     }
 
     /**
-     * @see org.rioproject.monitor.ServiceResourceSelector#serviceResourceSelected
+     * @see ServiceResourceSelector#serviceResourceSelected
      */
     public void serviceResourceSelected(ServiceResource svcResource) {
         /* Empty implementation, nothing required */

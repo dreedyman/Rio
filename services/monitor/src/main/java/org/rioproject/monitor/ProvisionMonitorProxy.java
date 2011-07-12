@@ -46,10 +46,7 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-class ProvisionMonitorProxy extends AbstractProxy
-    implements
-        ProvisionMonitor,
-        Serializable {
+class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, Serializable {
     private static final long serialVersionUID = 2L;
     final ProvisionMonitor monitorProxy;
 

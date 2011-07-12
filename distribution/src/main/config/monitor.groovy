@@ -11,8 +11,8 @@ import org.rioproject.config.Component
 import org.rioproject.config.Constants
 import org.rioproject.core.ClassBundle
 import org.rioproject.log.LoggerConfig
-import org.rioproject.monitor.LeastActiveSelector
-import org.rioproject.monitor.ServiceResourceSelector
+import org.rioproject.monitor.selectors.LeastActiveSelector
+import org.rioproject.monitor.selectors.ServiceResourceSelector
 import org.rioproject.fdh.FaultDetectionHandlerFactory
 import org.rioproject.resources.client.JiniClient
 import java.util.logging.ConsoleHandler

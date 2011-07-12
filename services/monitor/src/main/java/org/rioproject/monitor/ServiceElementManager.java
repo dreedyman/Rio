@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +54,6 @@ import org.rioproject.core.provision.DeployedService;
 import org.rioproject.core.provision.ServiceRecord;
 import org.rioproject.core.provision.ServiceStatement;
 import org.rioproject.entry.ApplianceInfo;
-import org.rioproject.event.EventHandler;
 import org.rioproject.fdh.FaultDetectionHandler;
 import org.rioproject.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.fdh.FaultDetectionListener;
@@ -76,9 +74,7 @@ import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
-import java.security.PrivilegedExceptionAction;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -117,7 +113,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /** The OperationalStringManager for the ServiceElementManager */
     private OperationalStringManager opStringMgr;
     /** Is informed that a service has been provisioned successfully */
-    private ProvisionListener listener = new JSBProvisionListener();
+    private ProvisionListener listener = new ServiceBeanProvisionListener();
     /** Is informed if a service is detected to have failed */
     private ServiceFaultListener serviceFaultListener =
                                                    new ServiceFaultListener();
@@ -155,10 +151,8 @@ public class ServiceElementManager implements InstanceIDManager {
     private ServiceElementManagerServiceListener sElemListener;
     /** Event source */
     ProvisionMonitor eventSource;
-    /** EventHandler to fire ProvisionMonitorEvent notifications */
-    EventHandler eventHandler;
-    /** Executor for event processing */
-    Executor eventPool;
+    /** Event processor */
+    ProvisionMonitorEventProcessor eventProcessor;
     InstanceIDManager instanceIDMgr;
     /** Collection of known/allocated instance IDs.  */
     final List<Long> instanceIDs = Collections.synchronizedList(new ArrayList<Long>());
@@ -609,7 +603,7 @@ public class ServiceElementManager implements InstanceIDManager {
      *
      * @return The ServiceElement property
      */
-    ServiceElement getServiceElement() {
+    public ServiceElement getServiceElement() {
         svcElement.setActual(getActual());
         return(svcElement);
     }
@@ -625,7 +619,7 @@ public class ServiceElementManager implements InstanceIDManager {
      *
      * @throws Exception If there are any problems starting the manager
      */
-    int startManager(ServiceProvisionListener provListener) throws Exception {
+    public int startManager(ServiceProvisionListener provListener) throws Exception {
         return(startManager(provListener, new ServiceBeanInstance[0]));
     }
 
@@ -746,7 +740,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /*
      * Return the started state
      */
-    boolean isStarted() {
+    public boolean isStarted() {
         return(svcManagerStarted);
     }
 
@@ -1154,7 +1148,7 @@ public class ServiceElementManager implements InstanceIDManager {
         boolean okayToIncrement = false;
         synchronized(svcElementRWLock) {
             int planned = svcElement.getPlanned();
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("INCREMENT [")
                 .append(svcElement.getName())
                 .append("] ")
@@ -1338,7 +1332,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * value will be ignored if the provision type is
      * ServiceProvisionManagement.EXTERNAL
      */
-    void stopManager(boolean destroyServices) {
+    public void stopManager(boolean destroyServices) {
         shutdown=true;
         /* Unsubscribe from the service channel */
         ServiceChannel.getInstance().unsubscribe(serviceChannelClient);
@@ -1804,7 +1798,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /*
      * Import a ServiceBeanInstance, notification from a peer
      */
-    void importServiceBeanInstance(ServiceBeanInstance instance)
+    public void importServiceBeanInstance(ServiceBeanInstance instance)
         throws Exception {
         Object proxy = instance.getService();
         if(proxy instanceof RemoteMethodControl)
@@ -1880,7 +1874,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * Manage service provision notifications 
      */
-    class JSBProvisionListener implements ProvisionListener {
+    class ServiceBeanProvisionListener implements ProvisionListener {
         /**
          * @see ProvisionListener#uninstantiable(ProvisionRequest)
          */
@@ -2079,7 +2073,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 /**
                  * If this ServiceElementManager is active, then services will
                  * be added as they are provisioned (through the
-                 * JSBProvisionListener). Therefore only process a serviceAdded
+                 * ServiceBeanProvisionListener). Therefore only process a serviceAdded
                  * transition in active-mode if the service is EXTERNAL, or
                  * when in inactive (backup) mode
                  */
@@ -2353,7 +2347,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * ProvisionMonitorTask to send a ProvisionMonitorEvent
      */
     void processEvent(ProvisionMonitorEvent event) {
-        eventPool.execute(new ProvisionMonitorEventTask(eventHandler, event));
+        eventProcessor.processEvent(event);
     }
 
     /*
@@ -2365,18 +2359,10 @@ public class ServiceElementManager implements InstanceIDManager {
     }
 
     /*
-     * Set the ProvisionFailureHandler for sending
-     * ProvisionFailureEvent objects
+     * Set the ProvisionMonitorEventProcessor
      */
-    void setEventHandler(EventHandler eventHandler) {
-        this.eventHandler = eventHandler;
-    }
-
-    /*
-     * Set the Executor to use
-     */
-    void setEventPool(Executor eventPool) {
-        this.eventPool = eventPool;
+    void setEventProcessor(ProvisionMonitorEventProcessor eventProcessor) {
+        this.eventProcessor = eventProcessor;
     }
 
     /**
@@ -2453,9 +2439,4 @@ public class ServiceElementManager implements InstanceIDManager {
         }
         return (count);
     }
-
-    private String getLoggingName() {
-        return "["+svcElement.getOperationalStringName()+"/"+svcElement.getName()+"]";
-    }
-    
 }
