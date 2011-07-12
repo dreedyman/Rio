@@ -1,0 +1,10 @@
+<repositories>
+  <repository id='rio' url='http://www.rio-project.org/maven2'>
+    <snapshots supported='true' policy='daily' checksumPolicy='warn' />
+    <releases supported='true' policy='daily' checksumPolicy='warn' />
+  </repository>
+  <repository id='central' url='http://repo1.maven.org/maven2'>
+    <snapshots supported='false' policy='daily' checksumPolicy='warn' />
+    <releases supported='true' policy='daily' checksumPolicy='warn' />
+  </repository>
+</repositories>
