@@ -42,7 +42,7 @@ public class SwingDeployHelper {
                               final ServiceItem item,
                               final JFrame frame,
                               final String deployName) {
-        StringBuffer opstringNames = new StringBuffer();
+        StringBuilder opstringNames = new StringBuilder();
         for(OperationalString opString : opstrings) {
             if(opstringNames.length()>0)
                 opstringNames.append(", ");
@@ -58,14 +58,12 @@ public class SwingDeployHelper {
                     DeployAdmin dAdmin = (DeployAdmin) monitor.getAdmin();
                     for (OperationalString opString : opstrings) {
                         if (dAdmin.hasDeployed(opString.getName())) {
-                            int result =
-                            JOptionPane.showConfirmDialog(
-                                                         frame,
-                                                         "The [" + opString.getName() + "] " +
-                                                         "is already deployed, " +
-                                                         "update the deployment?",
-                                                         "Update Deployed Application",
-                                                         JOptionPane.YES_NO_OPTION);
+                            int result = JOptionPane.showConfirmDialog(frame,
+                                                                       "The [" + opString.getName() + "] " +
+                                                                       "is already deployed, " +
+                                                                       "update the deployment?",
+                                                                       "Update Deployed Application",
+                                                                       JOptionPane.YES_NO_OPTION);
                             if (result == JOptionPane.YES_OPTION) {
                                 dAdmin.getOperationalStringManager(opString.getName()).update(opString);
                             }
@@ -75,10 +73,7 @@ public class SwingDeployHelper {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Util.showError(e,
-                                   frame,
-                                   "Failure trying to deploy " +
-                                   deployName);
+                    Util.showError(e, frame, "Failure trying to deploy " + deployName);
                 }
                 return null;
             }
@@ -101,9 +96,7 @@ public class SwingDeployHelper {
     public static void deploy(final String artifact,
                               final ServiceItem item,
                               final JFrame frame) {
-        final JDialog dialog = new WaitingDialog(frame,
-                                                 "Deploying "+artifact+"...",
-                                                 500);
+        final JDialog dialog = new WaitingDialog(frame, "Deploying "+artifact+"...", 500);
 
         SwingWorker worker = new SwingWorker() {
             public Object construct() {
@@ -124,9 +117,7 @@ public class SwingDeployHelper {
                                                       "Deployment Failure",
                                                       JOptionPane.ERROR_MESSAGE);
                     } else {
-                        Util.showError(e,
-                                       frame,
-                                       "Failure trying to deploy artifact" +artifact);
+                        Util.showError(e, frame, "Failure trying to deploy artifact" +artifact);
                     }
                 }
                 return null;

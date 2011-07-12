@@ -23,8 +23,11 @@ import org.rioproject.monitor.DeployAdmin;
 import org.rioproject.opstring.OAR;
 import org.rioproject.opstring.OpStringLoader;
 import org.rioproject.resolver.Artifact;
+import org.rioproject.tools.webster.Webster;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -40,16 +43,13 @@ public class MonitorControl {
      * Manages deployments
      */
     public static class DeployHandler implements OptionHandler {
-        public String process(String input,
-                              BufferedReader br,
-                              PrintStream out) {
+        public String process(String input, BufferedReader br, PrintStream out) {
             if (out == null)
                 throw new NullPointerException("Must have an output PrintStream");
             StringTokenizer tok = new StringTokenizer(input);
             String deployment = null;
             DeployOptions deployOptions = new DeployOptions();
-            deployOptions.deployTimeout =
-                (Long) CLI.getInstance().settings.get(CLI.DEPLOY_WAIT);
+            deployOptions.deployTimeout = (Long) CLI.getInstance().settings.get(CLI.DEPLOY_WAIT);
             boolean oarDeployment = false;
 
             if (tok.countTokens() > 1) {
@@ -110,34 +110,23 @@ public class MonitorControl {
                 try {
                     deploy = loadDeployment(deployment);
                     if (deploy == null) {
-                        return (deployment + ": Cannot find file [" +
-                                deployment + "]\n");
+                        return (deployment + ": Cannot find file ["+deployment+"]\n");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return ("Problem loading [" + deployment + "], " +
-                            "Exception : " + e.getLocalizedMessage() + "\n");
+                    return ("Problem loading [" + deployment + "], Exception : " + e.getLocalizedMessage() + "\n");
                 }
             }
 
-            ServiceItem[] items = CLI.getInstance().finder.findMonitors(null,
-                                                                        null,
-                                                                        deployOptions.verbose);
+            ServiceItem[] items = CLI.getInstance().finder.findMonitors(null, null, deployOptions.verbose);
             if (items.length == 0)
                 return ("No Provision Monitor instances discovered\n");
 
             if (items.length == 1 || deployOptions.noPrompt()) {
                 if (oarDeployment) {
-                    return (deploy(items[0],
-                                   deployment,
-                                   deployOptions,
-                                   out));
+                    return (deploy(items[0], deployment, deployOptions, out));
                 } else {
-                    return (deploy(items[0],
-                                   deploy,
-                                   deployOptions,
-                                   br,
-                                   out));
+                    return (deploy(items[0], deploy, deployOptions, br, out));
                 }
             }
             if (br == null)
@@ -158,16 +147,9 @@ public class MonitorControl {
                             printRequest(out);
                         } else {
                             if (oarDeployment) {
-                                deploy(items[0],
-                                       deployment,
-                                       deployOptions,
-                                       out);
+                                deploy(items[0], deployment, deployOptions, out);
                             } else {
-                                deploy(items[num - 1],
-                                       deploy,
-                                       deployOptions,
-                                       br,
-                                       out);
+                                deploy(items[num - 1], deploy, deployOptions, br, out);
                             }
                             break;
                         }
@@ -189,63 +171,39 @@ public class MonitorControl {
          * @param deploy The OperationalString
          * @param deployOptions Deploy options
          * @param br A BufferedReader
-         * @param out The printstream
+         * @param out The printStream
          *
          * @return A String for the completed command
          */
-        String deploy(ServiceItem item,
-                      OperationalString deploy,
-                      DeployOptions deployOptions,
-                      BufferedReader br,
-                      PrintStream out) {
+        String deploy(ServiceItem item, OperationalString deploy, DeployOptions deployOptions, BufferedReader br, PrintStream out) {
             try {
-                //DeployAdmin deployAdmin =
-                //    (DeployAdmin)((ProvisionMonitor)item.service).getAdmin();
-                DeployAdmin deployAdmin =
-                    (DeployAdmin) CLI.getInstance().getServiceFinder().
-                        getPreparedAdmin(item.service);
-                Boolean wait =
-                    (Boolean) CLI.getInstance().settings.get(CLI.DEPLOY_BLOCK);
+                DeployAdmin deployAdmin = (DeployAdmin)CLI.getInstance().getServiceFinder().getPreparedAdmin(item.service);
+                Boolean wait = (Boolean) CLI.getInstance().settings.get(CLI.DEPLOY_BLOCK);
                 if (deployAdmin.hasDeployed(deploy.getName())) {
                     if (deployOptions.update()) {
                         try {
-                            out.print("The [" + deploy.getName() + "] is " +
-                                      "currently deployed, " +
-                                      "updating ...\n");
-                            OperationalStringManager mgr =
-                                deployAdmin.getOperationalStringManager(
-                                    deploy.getName());
+                            out.print("The [" + deploy.getName() + "] is currently deployed, updating ...\n");
+                            OperationalStringManager mgr = deployAdmin.getOperationalStringManager(deploy.getName());
                             mgr.update(deploy);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            return ("Exception " +
-                                    e.getClass() +
-                                    ":" +
-                                    e.getLocalizedMessage() +
-                                    ", check log for details");
+                            return ("Exception "+e.getClass()+":"+e.getLocalizedMessage()+", check log for details");
                         }
                     } else {
                         if (deployOptions.noPrompt()) {
-                            return ("The [" + deploy.getName() + "] is " +
-                                    "currently deployed, " +
-                                    "interactive mode disabled, returning");
+                            return ("The [" + deploy.getName() + "] is currently deployed, interactive mode disabled, " +
+                                    "returning");
                         }
-                        out.print("The [" + deploy.getName() + "] is " +
-                                  "currently deployed, " +
-                                  "update the deployment? [y/n] ");
+                        out.print("The ["+deploy.getName()+"] is currently deployed, update the deployment? [y/n] ");
                         try {
                             if (br == null)
-                                br = new BufferedReader(
-                                    new InputStreamReader(System.in));
+                                br = new BufferedReader(new InputStreamReader(System.in));
                             String response = br.readLine();
                             if (response == null) {
                                 return ("");
                             }
-                            if (response.startsWith("y") ||
-                                response.startsWith("Y")) {
-                                OperationalStringManager mgr =
-                                    deployAdmin.getOperationalStringManager(
-                                        deploy.getName());
+                            if (response.startsWith("y") || response.startsWith("Y")) {
+                                OperationalStringManager mgr = deployAdmin.getOperationalStringManager(deploy.getName());
                                 mgr.update(deploy);
                                 return ("Updated");
                             } else {
@@ -253,35 +211,23 @@ public class MonitorControl {
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            return ("Exception " +
-                                    e.getClass() +
-                                    ":" +
-                                    e.getLocalizedMessage() +
-                                    ", check log for details");
+                            return ("Exception "+e.getClass()+":"+e.getLocalizedMessage()+", check log for details");
                         }
                     }
                 } else {
                     if (deployOptions.getDeployTimeout() > 0 && wait) {
-                        ServiceProvisionNotification spn =
-                            CLI.getInstance().provisionNotifier;
-                        deployAdmin.deploy(deploy,
-                                           spn.getServiceProvisionListener());
+                        ServiceProvisionNotification spn = CLI.getInstance().provisionNotifier;
+                        deployAdmin.deploy(deploy, spn.getServiceProvisionListener());
                         long t0 = System.currentTimeMillis();
-                        out.println("Deploying " +
-                                    "[" +
-                                    ServiceProvisionNotification.getDeploymentNames(
-                                        deploy) + "], " +
-                                    "total services " +
-                                    "[" +
-                                    ServiceProvisionNotification.sumUpServices(
-                                        deploy) + "] ...");
+                        out.println("Deploying [" +
+                                    ServiceProvisionNotification.getDeploymentNames(deploy) + "], " +
+                                    "total services ["+ServiceProvisionNotification.sumUpServices(deploy) + "] ...");
                         spn.notify(
                             ServiceProvisionNotification.sumUpServices(deploy),
                             deployOptions.getDeployTimeout());
                         long t1 = System.currentTimeMillis();
                         return ((deployOptions.verbose ?
-                                 "Deployment notification time " +
-                                 (t1 - t0) + " millis, Command completed"
+                                 "Deployment notification time " +(t1 - t0) + " millis, Command completed"
                                                        : ""));
                     } else {
                         deployAdmin.deploy(deploy, null);
@@ -301,13 +247,10 @@ public class MonitorControl {
          * @param item The ServiceItem
          * @param deployName The OAR or artifact name
          * @param deployOptions Deploy options
-         * @param out A printstream for output
+         * @param out A printStream for output
          * @return A String for the completed command
          */
-        String deploy(ServiceItem item,
-                      String deployName,
-                      DeployOptions deployOptions,
-                      PrintStream out) {
+        String deploy(ServiceItem item, String deployName, DeployOptions deployOptions, PrintStream out) {
             boolean isArtifact = false;
             try {
                 new Artifact(deployName);
@@ -316,45 +259,53 @@ public class MonitorControl {
                 /**/
             }
             OperationalString toDeploy = null;
+            Webster embeddedWebster = null;
+            URL oarUrl = null;
+            //String oarUrl = null;
             try {
                 if(!isArtifact) {
-                    File oarFile = getDeploymentFile(deployName);
-                    OAR oar = new OAR(oarFile);
-                    toDeploy = oar.loadOperationalStrings()[0];
+                    try {
+                        oarUrl = new URL(deployName);
+                    } catch(MalformedURLException e) {
+                        File oarFile = getDeploymentFile(deployName);
+                        OAR oar = new OAR(oarFile);
+                        embeddedWebster = new Webster(0, oarFile.getParentFile().getAbsolutePath());
+                        toDeploy = oar.loadOperationalStrings()[0];
+                        oarUrl = new URL("http://"+embeddedWebster.getAddress()+":"+embeddedWebster.getPort()+"/"+oarFile.getName());
+                    }
+                    System.out.println("===> "+oarUrl);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return("Problem resolving ["+deployName+"], "+
-                       "Exception : "+e.getLocalizedMessage());
+                return("Problem resolving ["+deployName+"], Exception : "+e.getLocalizedMessage());
             }
 
             try {
-                //DeployAdmin deployAdmin =
-                //    (DeployAdmin)((ProvisionMonitor)item.service).getAdmin();
                 DeployAdmin deployAdmin =
-                (DeployAdmin)CLI.getInstance().getServiceFinder().
-                                                                 getPreparedAdmin(item.service);
+                    (DeployAdmin)CLI.getInstance().getServiceFinder().getPreparedAdmin(item.service);
                 Boolean wait = (Boolean)CLI.getInstance().settings.get(CLI.DEPLOY_BLOCK);
 
                 if(deployOptions.getDeployTimeout()>0 && wait) {
                     ServiceProvisionNotification spn = CLI.getInstance().provisionNotifier;
                     String label = "Artifact";
                     if(isArtifact) {
-                        deployAdmin.deploy(deployName,
-                                           spn.getServiceProvisionListener());
+                        deployAdmin.deploy(deployName, spn.getServiceProvisionListener());
                     } else {
                         label = "OAR";
-                        deployAdmin.deploy(toDeploy,
-                                           spn.getServiceProvisionListener());
+                        try{
+                            //deployAdmin.deploy(toDeploy, spn.getServiceProvisionListener());
+                            deployAdmin.deploy(oarUrl, spn.getServiceProvisionListener());
+                        } finally {
+                            if(embeddedWebster!=null)
+                                embeddedWebster.terminate();
+                        }
                     }
                     long t0 = System.currentTimeMillis();
                     out.println("Deploying "+label+" ["+deployName+"] ...");
-                    spn.notify(1,
-                               deployOptions.getDeployTimeout());
+                    spn.notify(1, deployOptions.getDeployTimeout());
                     long t1 = System.currentTimeMillis();
                     return((deployOptions.verbose?
-                            "Deployment notification time "+
-                            (t1-t0)+" millis, Command completed":""));
+                            "Deployment notification time "+(t1-t0)+" millis, Command completed":""));
                 } else {
                     if(isArtifact)
                         deployAdmin.deploy(deployName, null);
@@ -365,8 +316,7 @@ public class MonitorControl {
                 return((deployOptions.verbose?"Command completed":""));
             } catch (Exception e) {
                 e.printStackTrace();
-                return("Problem deploying ["+deployName+"], "+
-                       "Exception : "+e.getLocalizedMessage());
+                return("Problem deploying ["+deployName+"], Exception : "+e.getLocalizedMessage());
             }
 
         }
@@ -383,7 +333,7 @@ public class MonitorControl {
          * @return Get the usage
          */
         public String getUsage() {
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             b.append("\n");
             b.append("usage: deploy opstring " +
                      "[-t=deploy-timeout] " +
@@ -714,21 +664,17 @@ public class MonitorControl {
      *
      * @throws Exception If there are any errors
      */
-    static File getDeploymentFile(String deployment)
-        throws Exception {
+    static File getDeploymentFile(String deployment) throws Exception {
         File deployFile;
         if (deployment.startsWith(File.separator)) {
             deployFile = new File(deployment);
-        } else if (deployment.indexOf(":") != -1) {
+        } else if (deployment.contains(":")) {
             deployFile = new File(deployment);
         } else if (deployment.startsWith("~/")) {
             deployment = deployment.substring(2);
-            deployFile = new File(System.getProperty("user.home") +
-                                  File.separator + deployment);
+            deployFile = new File(System.getProperty("user.home")+File.separator + deployment);
         } else {
-            deployFile = new File(
-                CLI.getInstance().currentDir.getCanonicalPath() +
-                File.separator + deployment);
+            deployFile = new File(CLI.getInstance().currentDir.getCanonicalPath()+File.separator+deployment);
         }
         return (deployFile);
     }
@@ -740,21 +686,16 @@ public class MonitorControl {
      * @param deploy The OperationalString
      * @return The primary OperationalStringManager
      */
-    static OperationalStringManager findOperationalStringManager(
-        ServiceItem[] items,
-        OperationalString deploy) {
+    static OperationalStringManager findOperationalStringManager(ServiceItem[] items, OperationalString deploy) {
         OperationalStringManager primary = null;
         for (ServiceItem item : items) {
             try {
                 DeployAdmin deployAdmin =
-                    (DeployAdmin) CLI.getInstance().getServiceFinder().
-                        getPreparedAdmin(item.service);
-                OperationalStringManager[] opMgrs =
-                    deployAdmin.getOperationalStringManagers();
+                    (DeployAdmin) CLI.getInstance().getServiceFinder().getPreparedAdmin(item.service);
+                OperationalStringManager[] opMgrs = deployAdmin.getOperationalStringManagers();
                 for (OperationalStringManager opMgr : opMgrs) {
                     OperationalString opString = opMgr.getOperationalString();
-                    if (opString.getName().equals(deploy.getName()) &&
-                        opMgr.isManaging()) {
+                    if (opString.getName().equals(deploy.getName()) && opMgr.isManaging()) {
                         primary = opMgr;
                         break;
                     }

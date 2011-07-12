@@ -182,15 +182,13 @@ public class Main extends JFrame {
                             if(opStringFile.getName().endsWith("oar")) {
                                 OAR oar = new OAR(opStringFile);
                                 opstrings = oar.loadOperationalStrings();
+                                // TODO embed webster and stream the OAR
                             } else {
                                 opstrings = parseOperationalString(opStringFile);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Util.showError(e,
-                                           frame,
-                                           "Failure parsing "+
-                                           opStringFile.getName());
+                            Util.showError(e, frame, "Failure parsing "+ opStringFile.getName());
                             return;
                         }
                         SwingDeployHelper.deploy(opstrings, item, frame, chosen);
