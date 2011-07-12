@@ -91,13 +91,13 @@ class ResolverHelper {
      *
      * @param bundle The {@link org.rioproject.core.ClassBundle}
      * @param resolver The {@link Resolver} to use
+     * @param repositories Array of repositories to use to resolve the artifact
      */
-    def static resolve(ClassBundle bundle, Resolver resolver) {
+    def static resolve(ClassBundle bundle, Resolver resolver, RemoteRepository[] repositories) {
         if(logger.isLoggable(Level.FINE))
-            logger.fine "Artifact: ${bundle.getArtifact()}, "+
-                        "resolver: ${resolver.getClass().name}"
+            logger.fine "Artifact: ${bundle.getArtifact()}, resolver: ${resolver.getClass().name}"
         if (bundle.getArtifact() != null) {
-            String[] classPath = resolver.getClassPathFor(bundle.getArtifact());
+            String[] classPath = resolver.getClassPathFor(bundle.getArtifact(), repositories);
             List<String> jars = new ArrayList<String>();
             for (String jar : classPath) {
                 jars.add(handleWindows(jar));

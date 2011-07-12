@@ -28,6 +28,8 @@ import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -89,6 +91,38 @@ public class OarMojo extends ClassDepAndJarMojo {
             getLog().debug("The opstring ["+opstring+"] does not exist, cannot build OAR");
             return;
         }
+
+        List<Repository> remoteRepositories = new ArrayList<Repository>();
+        try {
+            for(Object o : project.getRemoteArtifactRepositories()) {
+                Repository repository = new Repository();
+                Method getId = o.getClass().getMethod("getId");
+                repository.setId((String) getId.invoke(o));
+                Method getUrl = o.getClass().getMethod("getUrl");
+                repository.setUrl((String) getUrl.invoke(o));
+
+                repository.setSnapshots(repositoryPolicySupported(o, "getSnapshots"));
+                repository.setSnapshotUpdatePolicy(repositoryPolicyUpdatePolicy(o, true));
+                repository.setSnapshotChecksumPolicy(repositoryPolicyChecksumPolicy(o, true));
+
+                repository.setReleases(repositoryPolicySupported(o, "getReleases"));
+                repository.setReleaseUpdatePolicy(repositoryPolicyUpdatePolicy(o, false));
+                repository.setReleaseChecksumPolicy(repositoryPolicyChecksumPolicy(o, false));
+
+                remoteRepositories.add(repository);
+            }
+        } catch(NoSuchMethodException e) {
+            throw new MojoExecutionException("Building Repository list", e);
+        } catch (InvocationTargetException e) {
+            throw new MojoExecutionException("Building Repository list", e);
+        } catch (IllegalAccessException e) {
+            throw new MojoExecutionException("Building Repository list", e);
+        }
+        RepositoryEncoder repositoryEncoder = new RepositoryEncoder();
+        File repoConfiguration = new File(System.getProperty("java.io.tmpdir"), "repositories.xml");
+        //repoConfiguration.deleteOnExit();
+        repositoryEncoder.encode(remoteRepositories, repoConfiguration);
+
         doExecute(getMavenProject(), false);                
         getLog().info("Building OAR: "+getOarFileName());
         if(getOarName()==null)
@@ -98,7 +132,13 @@ public class OarMojo extends ClassDepAndJarMojo {
         File oarFile = new File(getOarFileName());
         oar.setDestFile(oarFile);
 
-        // add the pom
+        /* Add repository configuration */
+        ZipFileSet fileSetRepositoryConfig = new ZipFileSet();
+        fileSetRepositoryConfig.setDir(repoConfiguration.getParentFile());
+        fileSetRepositoryConfig.setIncludes(repoConfiguration.getName());
+        oar.addZipfileset(fileSetRepositoryConfig);
+
+        /* Add the pom */
         File projectPath = getMavenProject().getBasedir();
         String pomName = getMavenProject().getBuild().getFinalName();
         File tempPom = new File(System.getProperty("java.io.tmpdir"), pomName+".pom");
@@ -194,6 +234,45 @@ public class OarMojo extends ClassDepAndJarMojo {
         } else {
             getMavenProject().getArtifact().setFile(oarFile);
         }
+    }
+
+    private Boolean repositoryPolicySupported(Object o, String method) throws NoSuchMethodException,
+                                                                             InvocationTargetException,
+                                                                             IllegalAccessException {
+        boolean enabled = true;
+        Method policy = o.getClass().getMethod(method);
+        Object support = policy.invoke(o);
+        if(support!=null) {
+            Method isEnabled = support.getClass().getMethod("isEnabled");
+            enabled = (Boolean)isEnabled.invoke(support);
+        }
+        return enabled;
+    }
+
+    private String repositoryPolicyUpdatePolicy(Object o, boolean snapshot) throws NoSuchMethodException,
+                                                                            InvocationTargetException,
+                                                                            IllegalAccessException {
+        Method policy;
+        if(snapshot)
+            policy = o.getClass().getMethod("getSnapshots");
+        else
+            policy = o.getClass().getMethod("getReleases");
+        Object support = policy.invoke(o);
+        Method getUpdatePolicy = support.getClass().getMethod("getUpdatePolicy");
+        return (String)getUpdatePolicy.invoke(support);
+    }
+
+    private String repositoryPolicyChecksumPolicy(Object o, boolean snapshot) throws NoSuchMethodException,
+                                                                                     InvocationTargetException,
+                                                                                     IllegalAccessException {
+        Method policy;
+        if(snapshot)
+            policy = o.getClass().getMethod("getSnapshots");
+        else
+            policy = o.getClass().getMethod("getReleases");
+        Object support = policy.invoke(o);
+        Method getChecksumPolicy = support.getClass().getMethod("getChecksumPolicy");
+        return (String)getChecksumPolicy.invoke(support);
     }
 
     protected String getOarName() {

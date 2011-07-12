@@ -18,6 +18,7 @@ package org.rioproject.opstring;
 import org.rioproject.core.ClassBundle;
 import org.rioproject.core.OperationalString;
 import org.rioproject.core.ServiceElement;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resources.util.PropertyHelper;
@@ -45,20 +46,16 @@ public class OpStringUtil {
      *
      * @param opstring The OperationalString to check
      * @param codebase If the codebase is not set, set it to this value
-     * @param resolver The Resolver to use if artifacts need to be downloaded
      *
      * @throws java.io.IOException If the jars cannot be served
      */
-    public static void checkCodebase(OperationalString opstring,                                     
-                                     String codebase,
-                                     Resolver resolver) throws IOException {
-
+    public static void checkCodebase(OperationalString opstring, String codebase) throws IOException {
         for (ServiceElement elem : opstring.getServices()) {
-            checkCodebase(elem, codebase, resolver);
+            checkCodebase(elem, codebase);
         }
         OperationalString[] nesteds = opstring.getNestedOperationalStrings();
         for (OperationalString nested : nesteds) {
-            checkCodebase(nested, codebase, resolver);
+            checkCodebase(nested, codebase);
         }
     }
 
@@ -67,74 +64,43 @@ public class OpStringUtil {
      *
      * @param elem The ServiceElement to check
      * @param codebase If the codebase is not set, set it to this value
-     * @param resolver The Resolver to use if artifacts need to be downloaded
      *
      * @throws java.io.IOException If the jars cannot be served
      */
-    public static void checkCodebase(ServiceElement elem,
-                                     String codebase,
-                                     Resolver resolver) throws IOException {
-
+    public static void checkCodebase(ServiceElement elem, String codebase) throws IOException {
         if (codebase != null) {
             if (!codebase.endsWith("/"))
                 codebase = codebase + "/";
         }
         ClassBundle bundle = elem.getComponentBundle();
-        boolean deployedAsArtifact = bundle.getArtifact()!=null;
-        if(!deployedAsArtifact) {
-            if (bundle.getCodebase() == null) {
-                if (codebase == null) {
-                    if (logger.isLoggable(Level.WARNING))
-                        logger.warning("Cannot fix null codebase for " +
-                                       "[" + elem.getName() + "], " +
-                                       "unknown codebase");
-                    return;
-                }
-                for(String jar : bundle.getJARNames())
-                    canServe(jar, codebase);
-                bundle.setCodebase(codebase);
-                logger.fine("Fixed ClassBundle "+bundle);
-
-            } else if (bundle.getRawCodebase().startsWith("$[")) {
-                String resolved =
-                    PropertyHelper.expandProperties(bundle.getRawCodebase(),
-                                                    PropertyHelper.RUNTIME);
-                if (resolved == null) {
-                    if (logger.isLoggable(Level.FINE))
-                        logger.fine("Cannot fix " +
-                                    "[" + bundle.getRawCodebase() +
-                                    "] codebase " +
-                                    "for [" + elem.getName() + "], " +
-                                    "unknown property");
-                    return;
-                }
-                canServe(bundle.getClassName(), codebase);
-                bundle.setCodebase(codebase);
+        if (bundle.getCodebase() == null) {
+            if (codebase == null) {
+                if (logger.isLoggable(Level.WARNING))
+                    logger.warning("Cannot fix null codebase for [" + elem.getName() + "], unknown codebase");
+                return;
             }
+            for(String jar : bundle.getJARNames())
+                canServe(jar, codebase);
+            bundle.setCodebase(codebase);
+            logger.fine("Fixed ClassBundle "+bundle);
+
+        } else if (bundle.getRawCodebase().startsWith("$[")) {
+            String resolved = PropertyHelper.expandProperties(bundle.getRawCodebase(), PropertyHelper.RUNTIME);
+            if (resolved == null) {
+                if (logger.isLoggable(Level.FINE))
+                    logger.fine("Cannot fix ["+bundle.getRawCodebase()+"] codebase for ["+elem.getName()+"], "+
+                                "unknown property");
+                return;
+            }
+            canServe(bundle.getClassName(), codebase);
+            bundle.setCodebase(codebase);
         }
 
         ClassBundle[] exports = elem.getExportBundles();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
-        StringBuffer sb1 = new StringBuffer();
-        boolean didResolve = false;
+        StringBuilder sb1 = new StringBuilder();
         for (ClassBundle export : exports) {
-            if(export.getArtifact()!=null) {
-                sb.append(" (").append(export.getArtifact()).append("): ");
-                ResolverHelper.resolve(export, resolver);
-                didResolve = true;
-            } else {
-                if(deployedAsArtifact) {
-                    return;
-                    /*System.out.println("===> service interface: "+export.getClassName());
-                    sb.append(" (").append("default-exports").append("): ");
-                    export.setCodebase("file://");
-                    for(String jar : export.getJARNames()) {
-                        if(getPath(jar)!=null)
-                            export.addJAR(getPath(jar));
-                    }*/
-                }
-            }
             if (export.getCodebase() == null) {
                 for(String jar : export.getJARNames()) {
                     canServe(jar, codebase);
@@ -142,9 +108,7 @@ public class OpStringUtil {
                 export.setCodebase(codebase);
                 logger.fine("Fixed export ClassBundle "+export);
             } else if (export.getRawCodebase().startsWith("$[")) {
-                String resolved =
-                    PropertyHelper.expandProperties(export.getRawCodebase(),
-                                                    PropertyHelper.RUNTIME);
+                String resolved = PropertyHelper.expandProperties(export.getRawCodebase(), PropertyHelper.RUNTIME);
                 for(String jar : export.getJARNames())
                     canServe(jar, resolved);
                 export.setCodebase(resolved);
@@ -158,30 +122,10 @@ public class OpStringUtil {
                 sb1.append(export.getCodebase()).append(jar);
             }
         }
-        if(didResolve)
-            elem.setRemoteRepositories(resolver.getRemoteRepositories());
         sb.append(sb1.toString());
         if (logger.isLoggable(Level.INFO)) {
-            if(deployedAsArtifact)
-                logger.info(elem.getName()+" "+
-                            "derived classpath for loading artifact "+sb.toString());
+            logger.info(elem.getName()+" derived classpath for loading artifact "+sb.toString());
         }
-        /*
-        if(elem.getFaultDetectionHandlerBundle()!=null) {
-            ClassBundle fdhBundle = elem.getFaultDetectionHandlerBundle();
-            if(fdhBundle.getCodebase()==null) {
-                canServe(fdhBundle.getClassName(), codebase);
-                fdhBundle.setCodebase(codebase);
-            } else if(fdhBundle.getRawCodebase().startsWith("$[")) {
-                String resolved =
-                    PropertyHelper.expandProperties(fdhBundle.getRawCodebase(),
-                                                    PropertyHelper.RUNTIME);
-                canServe(fdhBundle.getClassName(), resolved);
-                fdhBundle.setCodebase(codebase);
-            }
-        }
-        */
-
     }
 
     private static void canServe(String name, String codebase) throws IOException {
@@ -216,13 +160,4 @@ public class OpStringUtil {
         }
     }
 
-    private static String getPath(String jarName) {
-        File rioDLDir = new File(System.getProperty("RIO_HOME"), "lib-dl");
-        File jar = new File(rioDLDir, jarName);
-        String path = null;
-        if(jar.exists())
-            path = jar.getAbsolutePath();
-        return path;
-
-    }
 }

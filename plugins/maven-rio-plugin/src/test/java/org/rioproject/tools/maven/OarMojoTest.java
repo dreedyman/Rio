@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 
 public class OarMojoTest extends AbstractMojoTestCase {
 
@@ -35,6 +36,17 @@ public class OarMojoTest extends AbstractMojoTestCase {
     public void testMojoLookup() throws Exception {
         OarMojo mojo = getOarMojo();
         assertNotNull(mojo);
+    }
+
+     @Test
+    public void testRepositorySetting() throws Exception {
+        OarMojo mojo = getOarMojo();
+        assertNotNull(mojo);
+        assertNotNull(mojo.getOpstring());
+        MavenProject project = (MavenProject)getVariableValueFromObject( mojo, "project" );
+        assertNotNull(project);
+        List repositories = project.getRemoteArtifactRepositories();
+        assertTrue(repositories.size()==4);
     }
 
     @Test

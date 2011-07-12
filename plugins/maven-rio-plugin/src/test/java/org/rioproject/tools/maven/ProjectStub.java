@@ -39,6 +39,7 @@ import java.util.List;
  */
 public class ProjectStub extends MavenProjectStub {
     private final List<Artifact> dependencies = new ArrayList<Artifact>();
+    private final List repositories = new ArrayList();
 
     public ProjectStub() {
         MavenXpp3Reader pomReader = new MavenXpp3Reader();
@@ -56,6 +57,7 @@ public class ProjectStub extends MavenProjectStub {
         setName(model.getName());
         setUrl(model.getUrl());
         setPackaging(model.getPackaging());
+        setRemoteArtifactRepositories(model.getRepositories());
         for(Object o : model.getDependencies()) {
             Dependency dep = (Dependency)o;
             Artifact a = new ArtifactMock(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getType());
@@ -64,7 +66,19 @@ public class ProjectStub extends MavenProjectStub {
         }
     }
 
-    @Override public List getDependencies() {
+    @Override
+    @SuppressWarnings("unchecked")
+    public void setRemoteArtifactRepositories(List list) {
+        repositories.addAll(list);
+    }
+
+    @Override
+    public List getRemoteArtifactRepositories() {
+        return repositories;
+    }
+
+    @Override
+    public List getDependencies() {
         return dependencies;
     }
 

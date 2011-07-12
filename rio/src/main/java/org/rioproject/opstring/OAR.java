@@ -16,14 +16,18 @@
 package org.rioproject.opstring;
 
 import org.rioproject.core.OperationalString;
+import org.rioproject.resolver.RemoteRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.*;
 import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -34,13 +38,15 @@ import java.util.jar.Manifest;
  */
 public class OAR implements Serializable {
     static final long serialVersionUID = 1L;
-    String name;
-    String version;
-    String opStringName;
-    URL url;
-    String deployDir;
-    String activationType;
-    String artifacts;
+    private String name;
+    private String version;
+    private String opStringName;
+    private URL url;
+    private String deployDir;
+    private String activationType;
+    private String artifacts;
+    private final Set<RemoteRepository> repositories = new HashSet<RemoteRepository>();
+
     public static final String OAR_NAME = "OAR-Name";
     public static final String OAR_VERSION = "OAR-Version";
     public static final String OAR_OPSTRING = "OAR-OperationalString";
@@ -65,6 +71,7 @@ public class OAR implements Serializable {
             jar = new JarFile(file);
             Manifest man = jar.getManifest();
             getManifestAttributes(man);
+            loadRepositories(jar);
             url = file.toURI().toURL();
         } catch (IOException e) {
             throw new OARException("Problem processing "+file.getName(), e);
@@ -103,6 +110,7 @@ public class OAR implements Serializable {
             jar = conn.getJarFile();
             Manifest man = jar.getManifest();
             getManifestAttributes(man);
+            loadRepositories(jar);
             jar.close();
             this.url = url;
         } catch (Exception e) {
@@ -195,6 +203,18 @@ public class OAR implements Serializable {
         return opStringName;
     }
 
+    public void setRepositories(Collection<RemoteRepository> repositories) {
+        if(repositories==null)
+            throw new IllegalArgumentException("repositories must not be null");
+        this.repositories.addAll(repositories);
+    }
+
+    public Collection<RemoteRepository> getRepositories() {
+        Set<RemoteRepository> remoteRepositories = new HashSet<RemoteRepository>();
+        remoteRepositories.addAll(repositories);
+        return remoteRepositories;
+    }
+
     /**
      * Get the name of the directory to store the OAR in
      *
@@ -266,10 +286,19 @@ public class OAR implements Serializable {
                "name='" + name + '\'' +
                ", version='" + version + '\'' +
                ", opStringName='" + opStringName + '\'' +
-               ", url=" + url.toExternalForm() +
+               ", url=" + (url==null?"uknown": url.toExternalForm()) +
                ", deployDir='" + deployDir + '\'' +
                ", activationType='" + activationType + '\'' +
                '}';
+    }
+
+    private void loadRepositories(JarFile jarFile) throws IOException {
+        JarEntry repositoriesXML = jarFile.getJarEntry("repositories.xml");
+        InputStream input = jarFile.getInputStream(repositoriesXML);
+        RepositoryDecoder repositoryDecoder = new RepositoryDecoder();
+        Collection<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
+        Collections.addAll(repositories, (RemoteRepository[]) repositoryDecoder.decode(input));
+        setRepositories(repositories);
     }
 
     private void fillInAndThrow(String name) throws OARException {

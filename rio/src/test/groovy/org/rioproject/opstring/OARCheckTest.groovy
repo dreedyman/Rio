@@ -102,6 +102,7 @@ class OARCheckTest extends GroovyTestCase {
         assertEquals "1.0", oar.version
         assertEquals "test.groovy", oar.opStringName
         assertEquals OAR.AUTOMATIC, oar.activationType
+        assertTrue oar.repositories.size()==2
     }
 
     void testOARCreateFromJarURL() {
@@ -126,6 +127,7 @@ class OARCheckTest extends GroovyTestCase {
         assertEquals "1.0", oar.version
         assertEquals "test.groovy", oar.opStringName
         assertEquals OAR.AUTOMATIC, oar.activationType
+        assertTrue oar.repositories.size()==2
     }
 
     void testOARCreateFromURLAndLoadOpStrings() {
@@ -157,6 +159,7 @@ class OARCheckTest extends GroovyTestCase {
         OperationalString[] opstrings = oar.loadOperationalStrings();
         assertTrue "Should have 1 opstring ", opstrings.length==1
         opstrings[0].name.equals "Gnostic"
+        assertTrue oar.repositories.size()==2
     }
 
     void testOARCreateFromJarURLAndLoadOpStrings() {
@@ -188,6 +191,7 @@ class OARCheckTest extends GroovyTestCase {
         OperationalString[] opstrings = oar.loadOperationalStrings();
         assertTrue "Should have 1 opstring ", opstrings.length==1
         opstrings[0].name.equals "Gnostic"
+        assertTrue oar.repositories.size()==2
     }
 
     def createOAR(Manifest manifest) {
@@ -196,10 +200,8 @@ class OARCheckTest extends GroovyTestCase {
         File jar = new File(target, "test.oar")
         if(jar.exists())
             jar.delete()
-        return JarUtil.createJar(new File('target/test-classes'),
-                                     target,
-                                     "test.oar",
-                                     manifest)
+        File repositories = new File("${System.getProperty('user.dir')}${sep}src${sep}test${sep}resources${sep}repositories.xml")
+        return JarUtil.createJar(new File('target/test-classes'), target, "test.oar", manifest, repositories)
     }
 
     private File getOpString(String name) {
