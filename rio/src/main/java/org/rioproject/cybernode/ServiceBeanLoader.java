@@ -345,7 +345,7 @@ public class ServiceBeanLoader {
                 logger.log(Level.INFO,
                            "Create ServiceClassLoader for {0}, classpath {1}, codebase {2}",
                            new Object[] { className, buffer.toString(), jsbCL.getClassAnnotation()});
-                ClassLoaderUtil.displayClassLoaderTree(jsbCL);
+                //ClassLoaderUtil.displayClassLoaderTree(jsbCL);
             }
 
             /* Reload the shared configuration using the service's classloader */
