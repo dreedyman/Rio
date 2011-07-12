@@ -15,8 +15,9 @@
  */
 package org.rioproject.resolver;
 
-import java.io.File;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An artifact in the form of: groupId:artifactId[:classifier]:version
@@ -26,12 +27,8 @@ public class Artifact {
     String groupId;
     String version;
     String classifier;
-    File jar;
-    File pom;
     URL pomURL;
-    String checkSumPolicy;
     boolean loadFromProject = false;
-    RemoteRepository remoteRepository;
     
     public Artifact() {
     }
@@ -52,21 +49,20 @@ public class Artifact {
     public Artifact(String artifact) {
         if(artifact==null)
             throw new IllegalArgumentException("artifact is null");
-        String[] parts = artifact.split(":");
-        if(parts.length<3 )
-            throw new IllegalArgumentException("artifact must be in the form of "+
-                                               "groupId:artifactId[:classifier]:version");
-        boolean haveClassifier = parts.length > 3;
-        groupId = parts[0];
-        artifactId = parts[1];
-        version = "";
-        if (haveClassifier) {
-            classifier = parts[2];
-            version = parts[3];
-        } else {
-            if (parts.length > 2)
-                version = parts[2];
+        Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]+))?:([^: /]+)");
+        Matcher m = p.matcher( artifact );
+        if (!m.matches() ) {
+            throw new IllegalArgumentException( "Bad artifact coordinates " + artifact
+                + ", expected format is <groupId>:<artifactId>[:<classifier>]:<version>" );
         }
+        groupId = m.group(1);
+        artifactId = m.group(2);
+        classifier = get( m.group( 4 ), "" );
+        version = m.group(5);
+    }
+
+    private static String get( String value, String defaultValue ) {
+        return ( value == null || value.length() <= 0 ) ? defaultValue : value;
     }
 
     public String getArtifactId() {
@@ -105,10 +101,6 @@ public class Artifact {
                 name = s;
         }
         return name+"."+ext;
-    }
-
-    public boolean isSnapshot() {
-        return version==null?false:version.contains("SNAPSHOT");
     }
 
     public String getGAV() {
