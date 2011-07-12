@@ -51,6 +51,8 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Test dependencies -->
+
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>cybernode</artifactId>
