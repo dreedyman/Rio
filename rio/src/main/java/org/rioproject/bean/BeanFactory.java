@@ -15,9 +15,6 @@
  */
 package org.rioproject.bean;
 
-//import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
-//import org.rioproject.config.AggregateConfig;
 import org.rioproject.core.ClassBundle;
 import org.rioproject.core.JSBInstantiationException;
 import org.rioproject.core.jsb.ServiceBeanContext;
@@ -45,12 +42,11 @@ public class BeanFactory implements ServiceBeanFactory {
 
     /**
      * Creates the bean and the {@link org.rioproject.bean.BeanAdapter}
-     * which will handle dynamic remoting and proxy delegation.
+     * that will handle dynamic remoting and proxy delegation.
      *
      * @see org.rioproject.core.jsb.ServiceBeanFactory#create
      */
-    public Created create(ServiceBeanContext context)
-    throws JSBInstantiationException {
+    public Created create(ServiceBeanContext context) throws JSBInstantiationException {
         Object bean;
         Object proxy;
         try {
@@ -77,8 +73,7 @@ public class BeanFactory implements ServiceBeanFactory {
      */
     protected Object getBean(ServiceBeanContext context) throws Exception {
         final Thread currentThread = Thread.currentThread();
-        ClassBundle bundle =
-            context.getServiceElement().getComponentBundle();
+        ClassBundle bundle = context.getServiceElement().getComponentBundle();
         ClassLoader beanCL = currentThread.getContextClassLoader();
         Class beanClass = beanCL.loadClass(bundle.getClassName());
         if(logger.isLoggable(Level.FINEST))
