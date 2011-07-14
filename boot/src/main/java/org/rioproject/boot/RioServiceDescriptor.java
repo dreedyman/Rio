@@ -301,7 +301,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             throw new RuntimeException("No commonJARs have been defined");
         */
         if(logger.isLoggable(Level.FINEST)) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for(int i=0; i<commonJARs.length; i++) {
                 if(i>0)
                     buffer.append("\n");
@@ -413,7 +413,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * manifest setting. If there is, append the settings to the classpath
      */
     private String setClasspath(String cp) {
-        StringBuffer buff = new StringBuffer();        
+        StringBuilder buff = new StringBuilder();
         for(String s : BootUtil.toArray(cp, ","+File.pathSeparator)) {
             buff.append(s);
             File f = new File(s);
