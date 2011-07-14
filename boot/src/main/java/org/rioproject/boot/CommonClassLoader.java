@@ -20,7 +20,6 @@ import org.rioproject.core.jsb.ComponentLoader;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -85,7 +84,6 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
     private static final String COMPONENT = "org.rioproject.boot";
     private static Logger logger = Logger.getLogger(COMPONENT);
     private static final Map<String, URL[]> components = new HashMap<String, URL[]>();
-    private static final ArrayList<URL> codebaseComponents = new ArrayList<URL>();
     private static CommonClassLoader instance;
 
 	/**
@@ -119,7 +117,7 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         URL[] urls = doGetURLs(cl);
         if(logger.isLoggable(Level.FINEST)) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for(int i=0; i<urls.length; i++) {
                 if(i>0)
                     buffer.append(", ");
@@ -194,21 +192,7 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
                 addURL(jar);
         }
     }
-	
-    /**
-     * Add common codebase JARs
-     * 
-     * @param jars Array of URLs
-     */
-    void addCodebaseComponents(URL[] jars) {
-        if(jars==null)
-            return;
-        for (URL jar : jars) {
-            if (!codebaseComponents.contains(jar))
-                codebaseComponents.add(jar);
-        }
-        addCommonJARs(jars);
-    }
+
 	/**
 	 * @see org.rioproject.core.jsb.ComponentLoader#testResourceExistence
 	 */
@@ -254,7 +238,7 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
                 components.put(name, urls);
             } else {
                 if(logger.isLoggable(Level.FINEST)) {
-                    StringBuffer buffer = new StringBuffer();
+                    StringBuilder buffer = new StringBuilder();
                     URL[] codebase = components.get(name);
                     for(int i=0; i<codebase.length; i++) {
                         if(i>0)
@@ -280,13 +264,12 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
 	/**
 	 * @see org.rioproject.core.jsb.ComponentLoader#load
 	 */
-	public Object load(String name) throws 
-	ClassNotFoundException, IllegalAccessException, InstantiationException {		
+	public Object load(String name) throws  ClassNotFoundException, IllegalAccessException, InstantiationException {
 	    if (name == null)
 	        throw new NullPointerException("name is null");
 	    boolean registered;
 	    synchronized (components) {
-	        registered = components.containsKey(name);			
+	        registered = components.containsKey(name);
 	    }		
 	    if(!registered) {
 	        if(testComponentExistence(name)) {
@@ -317,7 +300,7 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
      **/
     public String toString() {
         URL[] urls = doGetURLs(this);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i=0; i<urls.length; i++) {
             if(i>0)
                 buffer.append(" ");
