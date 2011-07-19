@@ -189,17 +189,4 @@
 
     </dependencySets>
 
-   <!-- <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <includes>
-                <include>org.rioproject.resolver:resolver-pmr</include>
-            </includes>
-            <binaries>
-                <outputDirectory>lib/resolver/${artifactId}.${artifact.extension}</outputDirectory>
-                <unpack>false</unpack>
-            </binaries>
-        </moduleSet>
-    </moduleSets>-->
-
 </assembly>
