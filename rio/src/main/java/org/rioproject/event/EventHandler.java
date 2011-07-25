@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The EventHandler is an abstract class which handles the basic event plumbing.
+ * The EventHandler is an abstract class that handles the basic event plumbing.
  * The EventHandler sets up a LandLordLessor for the event type and creates
  * leased event registrations for event registrants
  *
@@ -56,9 +56,9 @@ public abstract class EventHandler {
     static final Logger logger = Logger.getLogger("org.rioproject.event");
     /**
      * The sequence number is an increasing value that will act as a hint to the
-     * number of occurances of an event type. The sequence number should differ
+     * number of occurrences of an event type. The sequence number should differ
      * if and only if the RemoteEvent objects are a response to different
-     * events. The sequence number should be increased only afetr an event has
+     * events. The sequence number should be increased only after an event has
      * been sent
      */
     protected long sequenceNumber = 0;
@@ -245,7 +245,7 @@ public abstract class EventHandler {
     }
 
     /**
-     * Convenience method to print statisitics for every thousand events sent.
+     * Convenience method to print statistics for every thousand events sent.
      * This method will only print result if the
      * <code>-Dorg.rioproject.debug</code> flag is set
      */
@@ -268,8 +268,9 @@ public abstract class EventHandler {
             sktime = System.currentTimeMillis();
         }
     }
+
     /**
-     * Container class for event registration objects which are created and
+     * Container class for event registration objects that are created and
      * behave as the resource that is being leased and controlled by the
      * ServiceResource
      */
