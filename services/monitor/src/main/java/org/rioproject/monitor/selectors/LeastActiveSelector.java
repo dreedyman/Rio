@@ -120,7 +120,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
         }
         Collections.sort(s, comparator);
         ServiceResource[] resources = s.toArray(new ServiceResource[s.size()]);
-        if(logger.isLoggable(Level.FINER)) {
+        if(logger.isLoggable(Level.FINEST)) {
             StringBuilder b = new StringBuilder();
             int i=0;
             for(ServiceResource sr : resources) {
@@ -138,7 +138,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
                     .append(")");
                 i++;
             }
-            logger.finer(b.toString());
+            logger.finest(b.toString());
         }
         return resources;
     }
