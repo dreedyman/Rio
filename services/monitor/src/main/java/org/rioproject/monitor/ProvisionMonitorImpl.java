@@ -87,10 +87,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                                                         ServerProxyTrust {
     /** Component name we use to find items in the configuration */
     static final String CONFIG_COMPONENT = "org.rioproject.monitor";
-    /** Logger */
-    static final String LOGGER = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    static Logger logger = Logger.getLogger(LOGGER);
+    static Logger logger = Logger.getLogger("org.rioproject.monitor");
     /** EventHandler for ProvisionFailureEvent consumers */
     EventHandler failureHandler;
     /** The provisioner to use for provisioning */

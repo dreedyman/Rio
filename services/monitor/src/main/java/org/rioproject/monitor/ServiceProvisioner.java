@@ -105,9 +105,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     /** ProxyPreparer for ServiceInstantiator proxies */
     ProxyPreparer instantiatorPreparer;
     /** Logger instance */
-    static final Logger logger = ProvisionMonitorImpl.logger;
-    /** Logger for feedback updates from Cybernode instances */
-    static final Logger feedbackLogger = Logger.getLogger(ProvisionMonitorImpl.LOGGER+".feedback");
+    static final Logger logger = Logger.getLogger("org.rioproject.monitor");
     private boolean terminating = false;
     private boolean terminated = false;
 
@@ -278,7 +276,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         try {
             resource.setDeployedServices(deployedServices);
         } catch (Throwable t) {
-            feedbackLogger.log(Level.WARNING, "Registering a ServiceBeanInstantiator", t);
+            logger.log(Level.WARNING, "Registering a ServiceBeanInstantiator", t);
             throw new LeaseDeniedException("Getting ServiceRecords");
         }
 
@@ -290,11 +288,12 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                                eventSource,
                                                                lease,
                                                                eventRegistrationSequenceNumber.incrementAndGet());
-        if(feedbackLogger.isLoggable(Level.FINE)) {
+
+        if(logger.isLoggable(Level.FINE)) {
             int instantiatorCount = landlord.total();
-            feedbackLogger.log(Level.FINE,
-                               "Registered new "+name+" @ {0}, count [{1}]",
-                               new Object[]{resourceCapability.getAddress(), instantiatorCount});
+            logger.log(Level.FINE,
+                       "Registered new "+name+" @ {0}, count [{1}]",
+                       new Object[]{resourceCapability.getAddress(), instantiatorCount});
         }
         /* Process all provision types of Fixed first */
         fixedServiceManager.process(serviceResource);
@@ -334,14 +333,14 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         boolean updated = false;
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
-            if(feedbackLogger.isLoggable(Level.FINEST))
-                feedbackLogger.log(Level.FINEST,
-                                   "Update from [{0}:{1}] updatedCapabilities: {2}, serviceLimit {3}",
-                                   new Object[] {ir.getHostAddress(),
-                                                 resource.toString(),
-                                                 updatedCapabilities,
-                                                 serviceLimit
-                                   });
+            if(logger.isLoggable(Level.FINEST))
+                logger.log(Level.FINEST,
+                           "Update from [{0}:{1}] updatedCapabilities: {2}, serviceLimit {3}",
+                           new Object[] {ir.getHostAddress(),
+                                         resource.toString(),
+                                         updatedCapabilities,
+                                         serviceLimit
+                           });
             if(ir.getInstantiator().equals(resource)) {
                 if(!landlord.ensure(svcResource))
                     throw new UnknownLeaseException("No matching Lease found");
@@ -351,9 +350,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                 try {
                     ir.setDeployedServices(deployedServices);
                 } catch (Throwable t) {
-                    feedbackLogger.log(Level.WARNING,
-                                       "Getting ServiceRecords",
-                                       t);
+                    logger.log(Level.WARNING, "Getting ServiceRecords", t);
                 }
                 /* Process all provision types of Fixed first */
                 fixedServiceManager.process(svcResource);
