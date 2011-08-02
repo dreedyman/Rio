@@ -119,6 +119,8 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
         /**
          * Get the TCP/IP address of the machine the ProvisionMonitor
          * is running on
+         *
+         * @return The address of the machine the ProvisionMonitor is running on
          */
         public String getAddress() {
             return(address);    
@@ -139,7 +141,9 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
         }
         
         /**
-         * Get the number of ProvisionMonitors are backed up
+         * Get the number of ProvisionMonitors that are backed up
+         *
+         * @return The number of ProvisionMonitors that are backed up
          */
         public Integer getBackupCount() {
             Integer bCount;
@@ -151,6 +155,8 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
         
         /**
          * Get the ProvisionMonitor service
+         *
+         * @return The ProvisionMonitor
          */
         public ProvisionMonitor getService() {
             return(service);
@@ -159,7 +165,7 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
         /**
          * Set the initial deployment load state
          *
-         * @param state
+         * @param state The state
          *
          * @throws IllegalStateException if the new state is not valid
          */
@@ -174,7 +180,9 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
         }
 
         /**
-         * Get the initial deploymemnt state
+         * Get the initial deployment state
+         *
+         * @return The initial deployment state
          */
         public int getInitialDeploymentLoadState() {
             return(initialDeploymentState);
