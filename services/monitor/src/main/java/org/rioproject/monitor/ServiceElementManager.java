@@ -160,13 +160,11 @@ public class ServiceElementManager implements InstanceIDManager {
     ProxyPreparer proxyPreparer;
     ServiceChannelClient serviceChannelClient = new ServiceChannelClient();
     /** Logger instance */
-    static Logger logger = ProvisionMonitorImpl.logger;
+    static Logger logger = Logger.getLogger("org.rioproject.monitor");
     /** Logger instance for ServiceElementManager details */
-    static Logger mgrLogger =
-        Logger.getLogger(ProvisionMonitorImpl.LOGGER+".services");
+    static Logger mgrLogger = Logger.getLogger("org.rioproject.monitor.services");
     /** Logger instance for ServiceBeanInstance tracking */
-    static Logger sbiLogger =
-        Logger.getLogger(ProvisionMonitorImpl.LOGGER+".sbi");
+    static Logger sbiLogger = Logger.getLogger("org.rioproject.monitor.sbi");
     /** Used to access service provisioning configuration */
     static final String SERVICE_PROVISION_CONFIG_COMPONENT="service.provision";
 
