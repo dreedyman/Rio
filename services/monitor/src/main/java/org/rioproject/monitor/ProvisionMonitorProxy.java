@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -53,7 +53,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
     /**
      * Creates a ProvisionMonitor proxy, returning an instance that implements
      * RemoteMethodControl if the server does too.
-     * 
+     *
      * @param monitor The ProvisionMonitor server
      * @param id The Uuid of the ProvisionMonitor
      *
@@ -77,20 +77,17 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
 
     /* -------- Implement ProvisionMonitor methods -------- */
     /** @see org.rioproject.monitor.ProvisionMonitor#assignBackupFor */
-    public boolean assignBackupFor(ProvisionMonitor monitor)
-        throws RemoteException {
+    public boolean assignBackupFor(ProvisionMonitor monitor) throws RemoteException {
         return (monitorProxy.assignBackupFor(monitor));
     }
 
     /** @see org.rioproject.monitor.ProvisionMonitor#removeBackupFor */
-    public boolean removeBackupFor(ProvisionMonitor monitor)
-        throws RemoteException {
+    public boolean removeBackupFor(ProvisionMonitor monitor) throws RemoteException {
         return (monitorProxy.removeBackupFor(monitor));
     }
 
     /** @see org.rioproject.monitor.ProvisionMonitor#update */
-    public void update(PeerInfo info)
-        throws RemoteException {
+    public void update(PeerInfo info) throws RemoteException {
         monitorProxy.update(info);
     }
 
@@ -109,8 +106,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
                                       ResourceCapability resourceCapability,
                                       List<DeployedService> deployedServices,
                                       int serviceLimit,
-                                      long duration)
-        throws LeaseDeniedException, RemoteException {
+                                      long duration) throws LeaseDeniedException, RemoteException {
         return (monitorProxy.register(instantiator,
                                       handback,
                                       resourceCapability,
@@ -120,8 +116,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
     }
 
 
-    public ServiceBeanInstantiator[] getServiceBeanInstantiators()
-        throws RemoteException {
+    public ServiceBeanInstantiator[] getServiceBeanInstantiators() throws RemoteException {
         return monitorProxy.getServiceBeanInstantiators();
     }
 
@@ -129,51 +124,39 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
     public void update(ServiceBeanInstantiator instantiator,
                        ResourceCapability resourceCapability,
                        List<DeployedService> deployedServices,
-                       int serviceLimit)
-        throws UnknownLeaseException, RemoteException {
-        monitorProxy.update(instantiator, resourceCapability,
-                            deployedServices, serviceLimit);
+                       int serviceLimit) throws UnknownLeaseException, RemoteException {
+        monitorProxy.update(instantiator, resourceCapability, deployedServices, serviceLimit);
     }
 
     /**
      * A subclass of ProvisionMonitorProxy that implements RemoteMethodControl.
      */
-    final static class ConstrainableProvisionMonitorProxy
-        extends ProvisionMonitorProxy implements RemoteMethodControl {
+    final static class ConstrainableProvisionMonitorProxy extends ProvisionMonitorProxy implements RemoteMethodControl {
         private static final long serialVersionUID = 2L;
-        
+
 
         /* Creates an instance of this class. */
-        private ConstrainableProvisionMonitorProxy(ProvisionMonitor monitor,
-                                                   Uuid id,
-                                                   MethodConstraints constraints) {
+        private ConstrainableProvisionMonitorProxy(ProvisionMonitor monitor, Uuid id, MethodConstraints constraints) {
             super(constrainServer(monitor, constraints), id);
         }
 
 
         /** @see net.jini.core.constraint.RemoteMethodControl#setConstraints  */
         public RemoteMethodControl setConstraints(MethodConstraints constraints) {
-            return (new ConstrainableProvisionMonitorProxy((ProvisionMonitor)server,
-                                                           uuid,
-                                                           constraints));
+            return (new ConstrainableProvisionMonitorProxy((ProvisionMonitor)server, uuid, constraints));
         }
 
         /*
          * Returns a copy of the server proxy with the specified client
          * constraints and methods mapping.
          */
-        private static ProvisionMonitor constrainServer(
-                                                    ProvisionMonitor monitor,
-                                                    MethodConstraints constraints) {
-            java.lang.reflect.Method[] methods = ProvisionMonitor.class.getMethods();
-            java.lang.reflect.Method[] methodMapping =
-                new java.lang.reflect.Method[methods.length * 2];
+        private static ProvisionMonitor constrainServer( ProvisionMonitor monitor, MethodConstraints constraints) {
+            Method[] methods = ProvisionMonitor.class.getMethods();
+            Method[] methodMapping = new java.lang.reflect.Method[methods.length * 2];
             for(int i = 0; i < methodMapping.length; i++)
                 methodMapping[i] = methods[i / 2];
-            return ((ProvisionMonitor)((RemoteMethodControl)monitor).setConstraints(
-                                    ConstrainableProxyUtil.translateConstraints(
-                                                                  constraints,
-                                                                  methodMapping)));
+            MethodConstraints mConstraints = ConstrainableProxyUtil.translateConstraints(constraints, methodMapping);
+            return ((ProvisionMonitor)((RemoteMethodControl)monitor).setConstraints(mConstraints));
         }
 
         /** @see RemoteMethodControl#getConstraints */
@@ -195,8 +178,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
         /*
          * Verify that the server implements RemoteMethodControl 
          */
-        private void readObject(ObjectInputStream s) throws IOException,
-            ClassNotFoundException {
+        private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
             /*
              * Note that basic validation of the fields of this class was
              * already performed in the readObject() method of this class' super
@@ -205,8 +187,8 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
             s.defaultReadObject();
             if(!(server instanceof RemoteMethodControl)) {
                 throw new InvalidObjectException(
-                                "ConstrainableProvisionMonitorProxy.readObject "+ 
-                                "failure - server does not implement "+ 
+                                "ConstrainableProvisionMonitorProxy.readObject "+
+                                "failure - server does not implement "+
                                 "constrainable functionality ");
             }
         }
@@ -225,8 +207,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
          * TrustEquivalence.
          */
         Verifier(Object serverProxy) {
-            if (serverProxy instanceof RemoteMethodControl &&
-                serverProxy instanceof TrustEquivalence) {
+            if (serverProxy instanceof RemoteMethodControl && serverProxy instanceof TrustEquivalence) {
                 this.serverProxy = (RemoteMethodControl) serverProxy;
             } else {
                 throw new UnsupportedOperationException();
@@ -242,11 +223,9 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
                 return false;
             }
             RemoteMethodControl otherServerProxy =
-                (RemoteMethodControl) ((ConstrainableProvisionMonitorProxy)obj).
-                    monitorProxy;
+                (RemoteMethodControl) ((ConstrainableProvisionMonitorProxy)obj).monitorProxy;
             MethodConstraints mc = otherServerProxy.getConstraints();
-            TrustEquivalence trusted =
-                (TrustEquivalence) serverProxy.setConstraints(mc);
+            TrustEquivalence trusted = (TrustEquivalence) serverProxy.setConstraints(mc);
             return(trusted.checkTrustEquivalence(otherServerProxy));
         }
     }
