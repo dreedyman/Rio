@@ -105,7 +105,7 @@ public class Artifact {
 
     public String getGAV() {
         String gav;
-        if(classifier==null)
+        if(classifier==null || classifier.length()==0)
             gav = groupId+":"+artifactId+":"+version;
         else
             gav = groupId+":"+artifactId+":"+classifier+":"+version;
