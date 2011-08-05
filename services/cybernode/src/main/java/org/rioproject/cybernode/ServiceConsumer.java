@@ -33,6 +33,7 @@ import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.core.provision.ProvisionManager;
 import org.rioproject.core.provision.DeployedService;
+import org.rioproject.core.provision.ServiceBeanInstantiator;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
@@ -41,6 +42,7 @@ import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ResourceCapability;
 
 import java.io.IOException;
+import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.security.AccessControlException;
 import java.util.*;
@@ -379,15 +381,10 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
         for (ProvisionLeaseManager mgr : mgrs) {
             try {
-                mgr.provisioner.update(adapter.getInstantiator(),
-                                       resourceCapability,
-                                       deployedServices,
-                                       serviceLimit);
+                mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Throwable t) {
                 if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "Updating ProvisionManager",
-                               t);
+                    logger.log(Level.FINEST, "Updating ProvisionManager", t);
                 boolean connected = false;
 
                 /* Determine if we should even try to reconnect */
@@ -418,7 +415,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         for(int i = 1; i <= provisionerRetryCount; i++) {
             try {
                 EventRegistration er = 
-                    provisioner.register(adapter.getInstantiator(),
+                    provisioner.register(new MarshalledObject<ServiceBeanInstantiator>(adapter.getInstantiator()),
                                          null,
                                          adapter.getResourceCapability(),
                                          getServiceDeployments(),
@@ -542,12 +539,11 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                     lease.cancel();
                 } catch(AccessControlException e) {
                     logger.log(Level.WARNING,
-                               "Permissions porblen dropping lease",
+                               "Permissions problem dropping lease",
                                ThrowableUtil.getRootCause(e));
                 } catch(Exception e) {
                     if(logger.isLoggable(Level.FINER))
-                        logger.finer("ProvisionLeaseManager: could not " +
-                                     "drop lease, already cancelled");
+                        logger.finer("ProvisionLeaseManager: could not drop lease, already cancelled");
                 }
             }
             lease = null;
