@@ -21,6 +21,7 @@ import net.jini.config.ConfigurationProvider;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.discovery.DiscoveryManagement;
+import net.jini.discovery.LookupDiscoveryManager;
 import org.rioproject.associations.AssociationManagement;
 import org.rioproject.associations.AssociationMgmt;
 import org.rioproject.boot.CommonClassLoader;
@@ -141,15 +142,6 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     }
 
     /**
-     * Get the shared config
-     *
-     * @return The shared Configuration
-     */
-   /* public Configuration getSharedConfiguration() {
-        return(sharedConfig);
-    }*/
-
-    /**
      * Set the Subject used to authenticate the service
      *
      * @param subject The Subject 
@@ -187,8 +179,8 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /**
      * @see org.rioproject.core.jsb.ServiceBeanContext#getComponentLoader
      */
-    public ComponentLoader getComponentLoader() {        
-        return (CommonClassLoader.getInstance());
+    public ComponentLoader getComponentLoader() {
+        return (null);
     }
 
     /**
@@ -251,7 +243,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
         return(serviceBeanConfig);
     }
 
-    void setConfiguration(Configuration serviceBeanConfig) {
+    public void setConfiguration(Configuration serviceBeanConfig) {
         this.serviceBeanConfig = serviceBeanConfig;
     }
 
@@ -336,8 +328,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             if(logger.isLoggable(Level.FINEST))
                 logger.finest("Create DiscoveryManagement for "+sElem.getName());
             
-            DiscoveryManagementPool discoPool = 
-                DiscoveryManagementPool.getInstance();
+            DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
 
             String locatorString = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
             List<LookupLocator> locators = new ArrayList<LookupLocator>();
@@ -369,10 +360,9 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             LookupLocator[] locatorsToUse = locators.size()==0?null:
                                             locators.toArray(new LookupLocator[locators.size()]);
             if(sElem.getDiscoveryManagementPooling()) { 
-                serviceDiscoMgmt = discoPool.getDiscoveryManager(
-                                       getOperationalStringName(),
-                                       sElem.getServiceBeanConfig().getGroups(),
-                                       locatorsToUse);
+                serviceDiscoMgmt = discoPool.getDiscoveryManager(getOperationalStringName(),
+                                                                 sElem.getServiceBeanConfig().getGroups(),
+                                                                 locatorsToUse);
             } else {
                 Configuration discoConfig = null;
                 try {
@@ -384,12 +374,19 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                                    "creating DiscoveryManagement",
                                    e);
                 }
-                serviceDiscoMgmt = discoPool.getDiscoveryManager(
-                                        serviceBeanManager.getServiceID().toString(),
-                                        sElem.getServiceBeanConfig().getGroups(),
-                                        locatorsToUse,
-                                        null,
-                                        discoConfig);
+                try {
+                    serviceDiscoMgmt = new LookupDiscoveryManager(sElem.getServiceBeanConfig().getGroups(),
+                                                                     locatorsToUse,
+                                                                     null,
+                                                                     discoConfig);
+                } catch (ConfigurationException e) {
+                    e.printStackTrace();
+                }
+                /*serviceDiscoMgmt = discoPool.getDiscoveryManager(serviceBeanManager.getServiceID().toString(),
+                                                                 sElem.getServiceBeanConfig().getGroups(),
+                                                                 locatorsToUse,
+                                                                 null,
+                                                                 discoConfig);*/
             }
         }
         return (serviceDiscoMgmt);
