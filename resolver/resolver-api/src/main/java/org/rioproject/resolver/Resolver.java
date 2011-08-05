@@ -86,6 +86,21 @@ public interface Resolver {
     URL getLocation(String artifact, String artifactType) throws ResolverException;
 
     /**
+     * Get the location of the artifact
+     *
+     * @param artifact The artifact string.
+     * @param artifactType The type of artifact. Typically either "jar" or
+     * "oar". If null (or empty string), "jar" is used. This is used to
+     * determine the filename extension of the artifact to locate.
+     * @param repositories Array of repositories to use to resolve the artifact
+     *
+     * @return The location of the artifact.
+     *
+     * @throws ResolverException if the artifact cannot be located
+     */
+    URL getLocation(String artifact, String artifactType, RemoteRepository[] repositories) throws ResolverException;
+
+    /**
      * Get the @{link RemoteRepository} instances the Resolver is using
      *
      * @return The @{link RemoteRepository} instances the Resolver is using. If

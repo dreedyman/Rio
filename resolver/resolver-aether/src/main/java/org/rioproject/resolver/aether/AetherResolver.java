@@ -113,6 +113,24 @@ public class AetherResolver implements Resolver {
      * {@inheritDoc}
      */
     @Override
+    public URL getLocation(String artifact, String artifactType, RemoteRepository[] repositories) throws ResolverException {
+        URL location;
+        try {
+            List<org.sonatype.aether.repository.RemoteRepository> remoteRepositories =
+                transformRemoteRepository(repositories);
+            location = service.getLocation(artifact, artifactType, remoteRepositories);
+        } catch (ArtifactResolutionException e) {
+            throw new ResolverException("Error locating "+artifact+": "+e.getLocalizedMessage());
+        } catch (MalformedURLException e) {
+            throw new ResolverException("Error creating URL for resolved artifact "+artifact, e);
+        }
+        return location;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Collection<RemoteRepository> getRemoteRepositories() {
         List<org.sonatype.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();
         List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();

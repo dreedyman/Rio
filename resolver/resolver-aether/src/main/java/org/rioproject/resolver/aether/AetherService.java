@@ -307,12 +307,34 @@ public class AetherService {
      */
     public URL getLocation(String artifactCoordinates, String artifactExt) throws ArtifactResolutionException,
                                                                                   MalformedURLException {
+        return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories());
+    }
+
+    /**
+     * Determine the location of an artifact given its coordinates.
+     *
+     * @param artifactCoordinates maven artifact coordinate string
+     * @param artifactExt The extension of the artifact. If null, jar is used.
+     * @param repositories A collection of repositories to use when resolving the artifact,
+     * may be {@code null}. If {@code null}, the repositories will be determined by reading the settings
+     *
+     * @return The location of the artifact
+     *
+     * @throws ArtifactResolutionException if the artifact cannot be resolved
+     * @throws MalformedURLException if the resolved artifact cannot be converted to a URL
+     */
+    public URL getLocation(String artifactCoordinates,
+                           String artifactExt,
+                           List<RemoteRepository> repositories) throws ArtifactResolutionException,
+                                                                       MalformedURLException {
         DefaultArtifact a = new DefaultArtifact(artifactCoordinates);
         String extension = artifactExt==null? "jar":artifactExt;
         ArtifactRequest artifactRequest = new ArtifactRequest();
         DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), extension, a.getVersion());
         artifactRequest.setArtifact(artifact);
-        artifactRequest.setRepositories(getRemoteRepositories());
+        if(repositories==null)
+            repositories = getRemoteRepositories();
+        artifactRequest.setRepositories(repositories);
         ArtifactResult artifactResult = repositorySystem.resolveArtifact(repositorySystemSession, artifactRequest);
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
@@ -332,13 +354,13 @@ public class AetherService {
     List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
         List<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
-        boolean haveRio = false;
+        //boolean haveRio = false;
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
                     for(org.apache.maven.settings.Repository r : profile.getRepositories()) {
-                        if(r.getId().equals("rio") || r.getUrl().equals("http://www.rio-project.org/maven2/"))
-                            haveRio = true;
+                        /*if(r.getId().equals("rio") || r.getUrl().equals("http://www.rio-project.org/maven2/"))
+                            haveRio = true;*/
                         RemoteRepository remoteRepository = new RemoteRepository(r.getId(), "default", r.getUrl());
                         RepositoryPolicy snapShotPolicy = new RepositoryPolicy(r.getSnapshots().isEnabled(),
                                                                                r.getSnapshots().getUpdatePolicy(),
@@ -363,8 +385,8 @@ public class AetherService {
             }
         }
         repositories.add(central);
-        if(!haveRio)
-            repositories.add(new RemoteRepository("rio", "default", "http://www.rio-project.org/maven2/"));
+        /*if(!haveRio)
+            repositories.add(new RemoteRepository("rio", "default", "http://www.rio-project.org/maven2/"));*/
         return repositories;
     }
 
