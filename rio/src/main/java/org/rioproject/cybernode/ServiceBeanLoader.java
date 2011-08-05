@@ -17,13 +17,11 @@ package org.rioproject.cybernode;
 
 import com.sun.jini.config.Config;
 import com.sun.jini.start.AggregatePolicyProvider;
-import com.sun.jini.start.ClassLoaderUtil;
 import com.sun.jini.start.LoaderSplitPolicyProvider;
 import net.jini.admin.Administrable;
 import net.jini.admin.JoinAdmin;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import net.jini.config.ConfigurationProvider;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.discovery.LookupDiscovery;
@@ -52,6 +50,7 @@ import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.PlatformCapabilityLoader;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -110,10 +109,7 @@ public class ServiceBeanLoader {
          * @param m The proxy as a MarshalledInstance
          * @param s The id of the service
          */
-        public Result(ServiceBeanContext c,
-                      Object o,
-                      MarshalledInstance m,
-                      Uuid s) {
+        public Result(ServiceBeanContext c, Object o, MarshalledInstance m, Uuid s) {
             context = c;
             impl = o;
             mi = m;
@@ -153,7 +149,6 @@ public class ServiceBeanLoader {
         unload(result.impl.getClass().getClassLoader(), elem);
     }
 
-
     /**
      * Clean up resources
      * <br>
@@ -170,11 +165,12 @@ public class ServiceBeanLoader {
         if(globalPolicy!=null)
             globalPolicy.setPolicy(loader, null);
         cleanJars(elem);
+        //LoaderHandler.release(loader);
     }
 
     /*
-    * Remove downloaded jars
-    */
+     * Remove downloaded jars
+     */
     private static void cleanJars(ServiceElement elem) {
         List<ProvisionedResources> toRemove = new ArrayList<ProvisionedResources>();
         ProvisionedResources[] copy;
@@ -250,9 +246,21 @@ public class ServiceBeanLoader {
         ServiceBeanContext context;
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
         ComputeResource computeResource = container.getComputeResource();
+
+        synchronized(ServiceBeanLoader.class) {
+            /* supplant global policy 1st time through */
+            if(globalPolicy == null) {
+                initialGlobalPolicy = Policy.getPolicy();
+                globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
+                Policy.setPolicy(globalPolicy);
+                if(logger.isLoggable(Level.FINEST))
+                    logger.log(Level.FINEST, "Global policy set: {0}", globalPolicy);
+            }
+        }
+
         /*
-         * Provision service jars
-         */
+        * Provision service jars
+        */
         URL[] exportJARs;
         URL[] implJARs;
         try {
@@ -306,7 +314,7 @@ public class ServiceBeanLoader {
             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
             PlatformCapability[] matched = ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
             for (PlatformCapability pCap : matched) {
-                URL[] urls = pCap.getLoadableClassPath();
+                URL[] urls = PlatformCapabilityLoader.getLoadableClassPath(pCap);
                 for(URL url : urls) {
                     if(!urlList.contains(url))
                         urlList.add(url);
@@ -320,7 +328,6 @@ public class ServiceBeanLoader {
 
             ServiceClassLoader jsbCL = new ServiceClassLoader(ServiceClassLoader.getURIs(classpath),
                                                               new ClassAnnotator(exportJARs),
-                                                              //commonCL.getParent(),
                                                               commonCL,
                                                               metaData);
 
@@ -348,18 +355,39 @@ public class ServiceBeanLoader {
                 //ClassLoaderUtil.displayClassLoaderTree(jsbCL);
             }
 
+            /* Get the servicePolicyFile from the environment. If the
+             * property has not been set use the policy set for the VM */
+            String servicePolicyFile = System.getProperty("rio.service.security.policy",
+                                                          System.getProperty("java.security.policy"));
+            if(servicePolicyFile!=null) {
+                DynamicPolicyProvider service_policy =
+                    new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
+                LoaderSplitPolicyProvider splitServicePolicy =
+                    new LoaderSplitPolicyProvider(jsbCL,
+                                                  service_policy,
+                                                  new DynamicPolicyProvider(initialGlobalPolicy));
+                /*
+                 * Grant "this" code enough permission to do its work under the
+                 * service policy, which takes effect (below) after the context
+                 * loader is (re)set.
+                 */
+                splitServicePolicy.grant(ServiceBeanLoader.class,
+                                         null, /* Principal[] */
+                                         new Permission[]{new AllPermission()});
+                globalPolicy.setPolicy(jsbCL, splitServicePolicy);
+            }
+
             /* Reload the shared configuration using the service's classloader */
             //String[] configFiles = container.getSharedConfigurationFiles().toArray(new String[sharedConfigurationFiles.size()]);
             Configuration sharedConfiguration = container.getSharedConfiguration();
 
             /* Get the ServiceBeanContextFactory */
             ServiceBeanContextFactory serviceBeanContextFactory =
-                (ServiceBeanContextFactory)Config.getNonNullEntry(
-                                                sharedConfiguration,
-                                                CONFIG_COMPONENT,
-                                                "serviceBeanContextFactory",
-                                                ServiceBeanContextFactory.class,
-                                                new JSBContextFactory());
+                (ServiceBeanContextFactory)Config.getNonNullEntry(sharedConfiguration,
+                                                                  CONFIG_COMPONENT,
+                                                                  "serviceBeanContextFactory",
+                                                                  ServiceBeanContextFactory.class,
+                                                                  new JSBContextFactory());
             /* Create the ServiceBeanContext */
             context = serviceBeanContextFactory.create(sElem,
                                                        jsbManager,
@@ -387,38 +415,6 @@ public class ServiceBeanLoader {
                     }
                 }
             }
-            
-            synchronized(ServiceBeanLoader.class) {
-                /* supplant global policy 1st time through */
-                if(globalPolicy == null) {
-                    initialGlobalPolicy = Policy.getPolicy();
-                    globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
-                    Policy.setPolicy(globalPolicy);
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, "Global policy set: {0}", globalPolicy);
-                }
-                /* Get the servicePolicyFile from the environment. If the
-                 * property has not been set use the policy set for the VM */
-                String servicePolicyFile = System.getProperty("rio.service.security.policy",
-                                                              System.getProperty("java.security.policy"));
-                if(servicePolicyFile!=null) {
-                    DynamicPolicyProvider service_policy =
-                        new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
-                    LoaderSplitPolicyProvider splitServicePolicy =
-                        new LoaderSplitPolicyProvider(jsbCL,
-                                                      service_policy,
-                                                      new DynamicPolicyProvider(initialGlobalPolicy));
-                    /*
-                    * Grant "this" code enough permission to do its work under the
-                    * service policy, which takes effect (below) after the context
-                    * loader is (re)set.
-                    */
-                    splitServicePolicy.grant(ServiceBeanLoader.class,
-                                             null, /* Principal[] */
-                                             new Permission[]{new AllPermission()});
-                    globalPolicy.setPolicy(jsbCL, splitServicePolicy);
-                }
-            }                        
             
             /* Get the ServiceBeanFactory */
             ServiceBeanFactory serviceBeanFactory =
@@ -511,8 +507,7 @@ public class ServiceBeanLoader {
      *
      * @throws JSBControlException If the service bean cannot be advertised
      */
-    public static void advertise(Object jsbProxy, ServiceBeanContext context)
-    throws JSBControlException {
+    public static void advertise(Object jsbProxy, ServiceBeanContext context) throws JSBControlException {
         if(jsbProxy==null)
             throw new NullPointerException("jsbProxy is null");
         if(context==null)
@@ -556,8 +551,7 @@ public class ServiceBeanLoader {
                                  String[] groups, 
                                  LookupLocator[] locators,
                                  String hostAddress,
-                                 Entry[] attrs)
-    throws JSBControlException {
+                                 Entry[] attrs) throws JSBControlException {
         if(jsbProxy == null)
             throw new NullPointerException("instance is null");
         final Thread currentThread = Thread.currentThread();
@@ -889,6 +883,7 @@ public class ServiceBeanLoader {
             dlPR = new ProvisionedResources(exportArtifact);
             List<URL> exportURLs = new ArrayList<URL>();
             if(exportArtifact!=null && resolver!=null && localCodebase!=null) {
+            //if(exportArtifact!=null && resolver!=null) {
                 for(ClassBundle cb : elem.getExportBundles()) {
                     String[] jars = ResolverHelper.resolve(cb.getArtifact(),
                                                            resolver,
@@ -910,7 +905,9 @@ public class ServiceBeanLoader {
         if(System.getProperty("StaticCybernode")==null) {
             /* Check the dlPR jars for requisite rio-dl.jar and jsk-dl.jar
              * inclusion */
-            String[] requisiteExports = new String[]{"rio-dl.jar", "jsk-dl.jar"};
+            String[] requisiteExports = new String[]{"rio-dl.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
+            //String libDLDir = new File(System.getProperty("RIO_HOME")+ File.separator+"lib-dl").toURI().toString();
+
             for(String export : requisiteExports) {
                 boolean found = false;
                 for(URL u : dlPR.getJars()) {
@@ -939,6 +936,11 @@ public class ServiceBeanLoader {
                             dlPR.addJar(new URL(localCodebase+export));
                         }
                     }
+                    /*if(implPR.getArtifact()!=null) {
+                        if(!libDLDir.endsWith("/"))
+                            libDLDir = libDLDir+"/";
+                        dlPR.addJar(new URL(libDLDir+export));
+                    }*/
                 }
             }
         }
