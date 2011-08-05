@@ -59,8 +59,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getWebster(String policy, String[] roots)
-        throws IOException {
+    public static ServiceDescriptor getWebster(String policy, String[] roots) throws IOException {
         return(getWebster(policy, "0", roots));        
     }
 
@@ -79,10 +78,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getWebster(String policy,
-                                               String sPort,
-                                               String[] roots)
-        throws IOException {
+    public static ServiceDescriptor getWebster(String policy, String sPort, String[] roots) throws IOException {
         return(getWebster(policy, sPort, roots, false));
     }
 
@@ -103,12 +99,11 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getWebster(String policy,
                                                String sPort,
                                                String[] roots,
-                                               boolean debug)throws IOException {
+                                               boolean debug) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
         String webster = rioHome+File.separator+"lib"+File.separator+"webster.jar";
-
         return(getWebster(policy, sPort, roots, debug, webster));
 
     }
@@ -133,18 +128,14 @@ public class ServiceDescriptorUtil {
                                                String sPort,
                                                String[] roots,
                                                boolean debug,
-                                               String webster)
-        throws IOException {
+                                               String webster) throws IOException {
         if(webster==null)
             throw new IllegalArgumentException("webster jar cannot be null");
         String portOptionArg = "-port";
         String portArg;
-        if(sPort.indexOf("-")!=-1) {
+        if(sPort.contains("-")) {
             portOptionArg = "-portRange";
             portArg = sPort;
-        //} else if(System.getProperty(Constants.PORT_RANGE)!=null) {
-        //    portOptionArg = "-portRange";
-        //    portArg = System.getProperty(Constants.PORT_RANGE);
         } else {
             try {
                 int p = Integer.parseInt(sPort);
@@ -191,8 +182,7 @@ public class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getCybernode(String policy,
-                                                 String... cybernodeConfig)
-        throws IOException {
+                                                 String... cybernodeConfig) throws IOException {
         return(getCybernode(policy, getStartupPort(), cybernodeConfig));
     }
 
@@ -213,12 +203,8 @@ public class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getCybernode(String policy,
                                                  int port,
-                                                 String... cybernodeConfig)
-        throws IOException {
-        return(getCybernode(policy,
-                            BootUtil.getHostAddress(),
-                            port,
-                            cybernodeConfig));
+                                                 String... cybernodeConfig) throws IOException {
+        return(getCybernode(policy, BootUtil.getHostAddress(), port, cybernodeConfig));
 
     }
 
@@ -241,8 +227,7 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getCybernode(String policy,
                                                  String hostAddress,
                                                  int port,
-                                                 String... cybernodeConfig)
-        throws IOException {
+                                                 String... cybernodeConfig) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
@@ -253,20 +238,11 @@ public class ServiceDescriptorUtil {
             jars = new String[]{"cybernode.jar"};
         //String[] jars = new String[]{"cybernode.jar", "resolver.jar"};
         //String[] jars = new String[]{"cybernode.jar"};
-        String cybernodeClasspath = makePath(rioHome+File.separator+"lib",
-                                             jars);
-        String cybernodeCodebase =
-            BootUtil.getCodebase(new String[]{"cybernode-dl.jar",
-                                              "rio-dl.jar",
-                                              "jsk-dl.jar"},
-                                 hostAddress,
-                                 Integer.toString(port));
+        String cybernodeClasspath = makePath(rioHome+File.separator+"lib", jars);
+        String[] dlJars = new String[]{"cybernode-dl.jar", "rio-dl.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
+        String cybernodeCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
         String implClass = "org.rioproject.cybernode.CybernodeImpl";
-        return(new RioServiceDescriptor(cybernodeCodebase,
-                                        policy,
-                                        cybernodeClasspath,
-                                        implClass,
-                                        cybernodeConfig));
+        return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
 
     }
 
@@ -286,8 +262,7 @@ public class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getMonitor(String policy,
-                                               String... monitorConfig)
-        throws IOException {
+                                               String... monitorConfig) throws IOException {
         return(getMonitor(policy, getStartupPort(), monitorConfig));
     }
 
@@ -308,12 +283,8 @@ public class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getMonitor(String policy,
                                                int port,
-                                               String... monitorConfig)
-        throws IOException {
-        return(getMonitor(policy,
-                          BootUtil.getHostAddress(),
-                          port,
-                          monitorConfig));
+                                               String... monitorConfig) throws IOException {
+        return(getMonitor(policy, BootUtil.getHostAddress(), port, monitorConfig));
 
     }
 
@@ -336,8 +307,7 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getMonitor(String policy,
                                                String hostAddress,
                                                int port,
-                                               String... monitorConfig)
-        throws IOException {
+                                               String... monitorConfig) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
@@ -348,21 +318,13 @@ public class ServiceDescriptorUtil {
             jars = new String[]{"monitor.jar"};
         //String[] jars = new String[]{"monitor.jar", "resolver.jar"};
         //String[] jars = new String[]{"monitor.jar"};
-        String monitorClasspath = makePath(rioHome+File.separator+"lib",
-                                           jars);
+        String monitorClasspath = makePath(rioHome+File.separator+"lib", jars);
 
-        String monitorCodebase =
-            BootUtil.getCodebase(new String[]{"monitor-dl.jar",
-                                              "rio-dl.jar",
-                                              "jsk-dl.jar"},
-                                 hostAddress,
-                                 Integer.toString(port));
+        String[] dlJars = new String[]{"monitor-dl.jar", "rio-dl.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
+        String monitorCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
+
         String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
-        return (new RioServiceDescriptor(monitorCodebase,
-                                         policy,
-                                         monitorClasspath,
-                                         implClass,
-                                         monitorConfig));
+        return (new RioServiceDescriptor(monitorCodebase, policy, monitorClasspath, implClass, monitorConfig));
     }
 
     /**
@@ -381,8 +343,7 @@ public class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getLookup(String policy,
-                                              String... lookupConfig)
-        throws IOException {
+                                              String... lookupConfig) throws IOException {
         return(getLookup(policy, getStartupPort(), lookupConfig));
     }
 
@@ -403,12 +364,8 @@ public class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getLookup(String policy,
                                               int port,
-                                              String... lookupConfig)
-        throws IOException {
-        return(getLookup(policy,
-                         BootUtil.getHostAddress(),
-                         port,
-                         lookupConfig));
+                                              String... lookupConfig) throws IOException {
+        return(getLookup(policy,  BootUtil.getHostAddress(), port, lookupConfig));
     }
 
     /**
@@ -431,32 +388,36 @@ public class ServiceDescriptorUtil {
     public static ServiceDescriptor getLookup(String policy,
                                               String hostAddress,
                                               int port,
-                                              String... lookupConfig)
-        throws IOException {
+                                              String... lookupConfig) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
-        String reggieClasspath =
-            rioHome+File.separator+"lib"+File.separator+"reggie.jar";
-        String reggieCodebase =
-            BootUtil.getCodebase(new String[]{"reggie-dl.jar",
-                                              "jsk-dl.jar"},
-                                 hostAddress,
-                                 Integer.toString(port));
+        String reggieClasspath = rioHome+File.separator+"lib"+File.separator+"reggie.jar";
+        String[] dlJars = new String[]{"reggie-dl.jar", "jsk-dl.jar"};
+        //String reggieCodebase = makeCodebaseFilePath(rioHome + File.separator + "lib-dl", dlJars);
+        String reggieCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
-        return (new RioServiceDescriptor(reggieCodebase,
-                                         policy,
-                                         reggieClasspath,
-                                         implClass,
-                                         lookupConfig));
+        return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }
     
     protected static String makePath(String dir, String... jars) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(String jar : jars) {
             if(sb.length()>0)
                 sb.append(File.pathSeparator);
             sb.append(dir).append(File.separator).append(jar);
+        }
+        return sb.toString();
+    }
+
+    protected static String makeCodebaseFilePath(String dir, String... jars) {
+        StringBuilder sb = new StringBuilder();
+        for(String jar : jars) {
+            StringBuilder pathBuilder = new StringBuilder();
+            if(sb.length()>0)
+                sb.append(" ");
+            pathBuilder.append(dir).append(File.separator).append(jar);
+            sb.append(new File(pathBuilder.toString()).toURI().toString());
         }
         return sb.toString();
     }
