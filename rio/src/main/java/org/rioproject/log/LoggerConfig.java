@@ -54,6 +54,8 @@ public class LoggerConfig implements Serializable {
     private static Logger myLogger = Logger.getLogger("org.rioproject.log");
     /** An instance of the Logger */
     private transient Logger logger;
+    /* Instance of a HandlerFilter (if we created one) */
+    private transient HandlerFilter handlerFilter;
 
     /**
      * Create a LoggerConfig, send logging output to its parent's handlers, with
@@ -134,6 +136,14 @@ public class LoggerConfig implements Serializable {
         }
     }
 
+    public void close() {
+        for (Handler h : logger.getHandlers()) {
+            if(handlerFilter!=null && h.getFilter()!=null && h.getFilter().equals(handlerFilter)) {
+                h.setFilter(null);
+            }
+        }
+    }
+
     /**
      * Get the Logger, configured with attributes
      *
@@ -194,7 +204,8 @@ public class LoggerConfig implements Serializable {
                         else
                             handler.setLevel(h.getLevel());
                         if (logger.getUseParentHandlers()) {
-                            handler.setFilter(new HandlerFilter(logger, handler));
+                            handlerFilter = new HandlerFilter(logger, handler);
+                            handler.setFilter(handlerFilter);
                         }
                         logger.addHandler(handler);
                     } else {
@@ -283,7 +294,7 @@ public class LoggerConfig implements Serializable {
     }
 
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Logger=").
                append(loggerName).
                append(", Level=").
@@ -594,22 +605,21 @@ public class LoggerConfig implements Serializable {
          */
         private Class[] getParameterTypes() throws Exception {
             List<Class> classes = new LinkedList<Class> ();
-            for(Iterator<FormalArgument> it = handlerArgList.listIterator(); it.hasNext();) {
-                FormalArgument arg = it.next();
+            for (FormalArgument arg : handlerArgList) {
                 String param = arg.getDataType();
-                if(param.equals("boolean"))
+                if (param.equals("boolean"))
                     classes.add(Boolean.TYPE);
-                else if(param.equals("byte"))
+                else if (param.equals("byte"))
                     classes.add(Byte.TYPE);
-                else if(param.equals("short"))
+                else if (param.equals("short"))
                     classes.add(Short.TYPE);
-                else if(param.equals("int"))
+                else if (param.equals("int"))
                     classes.add(Integer.TYPE);
-                else if(param.equals("long"))
+                else if (param.equals("long"))
                     classes.add(Long.TYPE);
-                else if(param.equals("float"))
+                else if (param.equals("float"))
                     classes.add(Float.TYPE);
-                else if(param.equals("double"))
+                else if (param.equals("double"))
                     classes.add(Double.TYPE);
                 else
                     classes.add(Class.forName(param,
@@ -625,44 +635,43 @@ public class LoggerConfig implements Serializable {
          */
         private Object[] getInitArgs() throws Exception {
             List<Object> values = new LinkedList<Object>();
-            for (Iterator<FormalArgument> it = handlerArgList.listIterator(); it.hasNext(); ) {
-                FormalArgument arg = it.next();
+            for (FormalArgument arg : handlerArgList) {
                 String type = arg.getDataType();
-                String value = arg.getValue();                
-                if(type.equals("boolean"))
+                String value = arg.getValue();
+                if (type.equals("boolean"))
                     values.add(Boolean.valueOf(value));
-                else if(type.equals("byte"))
+                else if (type.equals("byte"))
                     values.add(new Byte(value));
-                else if(type.equals("short"))
+                else if (type.equals("short"))
                     values.add(new Short(value));
-                else if(type.equals("int"))
+                else if (type.equals("int"))
                     values.add(new Integer(value));
-                else if(type.equals("long"))
+                else if (type.equals("long"))
                     values.add(new Long(value));
-                else if(type.equals("float"))
+                else if (type.equals("float"))
                     values.add(new Float(value));
-                else if(type.equals("double"))
+                else if (type.equals("double"))
                     values.add(new Double(value));
                 else {
                     Class clazz = Class.forName(type,
                                                 true,
                                                 this.getClass().getClassLoader());
-                    if(clazz == String.class) {
+                    if (clazz == String.class) {
                         value = transformString(value);
                         values.add(value);
-                    } else if(clazz == Boolean.class)
+                    } else if (clazz == Boolean.class)
                         values.add(Boolean.valueOf(value));
-                    else if(clazz == Byte.class)
+                    else if (clazz == Byte.class)
                         values.add(new Byte(value));
-                    else if(clazz == Short.class)
+                    else if (clazz == Short.class)
                         values.add(new Short(value));
-                    else if(clazz == Integer.class)
+                    else if (clazz == Integer.class)
                         values.add(new Integer(value));
-                    else if(clazz == Long.class)
+                    else if (clazz == Long.class)
                         values.add(new Long(value));
-                    else if(clazz == Float.class)
+                    else if (clazz == Float.class)
                         values.add(new Float(value));
-                    else if(clazz == Double.class)
+                    else if (clazz == Double.class)
                         values.add(new Double(value));
                 }
             }
@@ -679,7 +688,7 @@ public class LoggerConfig implements Serializable {
          * @return A transformed string
          */
         String transformString(String input) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             int index;
             while ((index = input.indexOf("${")) != -1) {
                 buffer.append(input.substring(0, index));
