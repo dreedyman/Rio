@@ -52,15 +52,6 @@
         </dependency>
 
         <!-- Test dependencies -->
-
-        <dependency>
-            <groupId>org.rioproject</groupId>
-            <artifactId>cybernode</artifactId>
-            <version>${project.version}</version>
-            <classifier>dl</classifier>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
