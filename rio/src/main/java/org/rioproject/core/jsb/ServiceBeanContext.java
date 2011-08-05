@@ -134,6 +134,7 @@ public interface ServiceBeanContext {
      *
      * @return The ComponentLoader
      */
+    @Deprecated
     ComponentLoader getComponentLoader();
     
     /**
