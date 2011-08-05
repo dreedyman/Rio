@@ -38,7 +38,13 @@
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject.resolver</groupId>
+            <artifactId>resolver-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     
     <build>
