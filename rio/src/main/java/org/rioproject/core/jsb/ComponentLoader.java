@@ -23,6 +23,7 @@ package org.rioproject.core.jsb;
  *
  * @author Dennis Reedy
  */
+@Deprecated
 public interface ComponentLoader {
     /**
      * Creates an Object which has been added to the ComponentLoader using the
