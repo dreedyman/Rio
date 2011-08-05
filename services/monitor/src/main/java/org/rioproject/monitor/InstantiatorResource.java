@@ -1,5 +1,5 @@
 /*
- * Copyright to the original author or authors.
+ * Copyright 2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,10 @@ public class InstantiatorResource {
      */
     private ServiceBeanInstantiator instantiator;
     /**
+     * The ServiceBeanInstantiator wrapped in a MarshalledObject
+     */
+    private MarshalledObject<ServiceBeanInstantiator> wrappedServiceBeanInstantiator;
+    /**
      * The maximum number of services the ServiceBeanInstantiator can instantiate 
      */
     private int serviceLimit;
@@ -107,7 +111,8 @@ public class InstantiatorResource {
 
     /**
      * Create an InstantiatorResource
-     * 
+     *
+     * @param wrappedServiceBeanInstantiator The ServiceBeanInstantiator wrapped in a MarshalledObject
      * @param instantiator A ServiceBeanInstantiator
      * @param instantiatorName Name for the ServiceBeanInstantiator
      * @param instantiatorUuid The Uuid that has been assigned to the
@@ -119,18 +124,24 @@ public class InstantiatorResource {
      * @param serviceLimit The total number of services the ServiceBeanInstantiator
      * will allocate
      */
-    public InstantiatorResource(ServiceBeanInstantiator instantiator,
+    public InstantiatorResource(MarshalledObject<ServiceBeanInstantiator> wrappedServiceBeanInstantiator,
+                                ServiceBeanInstantiator instantiator,
                                 String instantiatorName,
                                 Uuid instantiatorUuid,
                                 MarshalledObject handback,
                                 ResourceCapability resourceCapability,
                                 int serviceLimit) {
+        this.wrappedServiceBeanInstantiator = wrappedServiceBeanInstantiator;
         this.instantiator = instantiator;
         this.instantiatorName = instantiatorName;
         this.instantiatorUuid = instantiatorUuid;
         this.handback = handback;
         this.resourceCapability = resourceCapability;
         this.serviceLimit = serviceLimit;
+    }
+
+    public MarshalledObject<ServiceBeanInstantiator> getWrappedServiceBeanInstantiator() {
+        return wrappedServiceBeanInstantiator;
     }
 
     /**

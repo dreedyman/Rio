@@ -16,15 +16,20 @@
  */
 package org.rioproject.monitor;
 
+import com.sun.jini.proxy.MarshalledWrapper;
 import org.rioproject.core.provision.ProvisionManager;
+import org.rioproject.core.provision.ServiceBeanInstantiator;
 import org.rioproject.resources.servicecore.Service;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
+import java.util.Collection;
 
 /**
- * The ProvisionMonitor extends the ProvisionManager and Service interfaces, and 
- * defines the semantics required for ProvisionMonitor instances to back-up each 
+ * The ProvisionMonitor extends the ProvisionManager and Service interfaces, and
+ * defines the semantics required for ProvisionMonitor instances to back-up each
  * other
  *
  * @author Dennis Reedy
@@ -33,12 +38,12 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
 
     /**
      * Assign the ProvisionMonitor as a backup for another ProvisionMonitor
-     * 
+     *
      * @param monitor The ProvisionMonitor that will be backed up. If this
-     * ProvisionMonitor is removed from the network, then all OperationalString 
-     * instances the removed ProvisionManager was managing will be managed by this 
+     * ProvisionMonitor is removed from the network, then all OperationalString
+     * instances the removed ProvisionManager was managing will be managed by this
      * ProvisionMonitor
-     * 
+     *
      * @return Return true if the ProvisionMonitor accepts the backup role, false
      * if it refuses.
      *
@@ -48,10 +53,10 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
 
     /**
      * Remove the ProvisionMonitor as a backup for another ProvisionMonitor
-     * 
-     * @param monitor The <i>primary</i> ProvisionMonitor that no longer requires 
+     *
+     * @param monitor The <i>primary</i> ProvisionMonitor that no longer requires
      * the support of this ProvisionManager
-     * 
+     *
      * @return Return true if the ProvisionMonitor has removed itself as a backup
      *
      * @throws RemoteException if communication errors occur
@@ -59,10 +64,10 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
     boolean removeBackupFor(ProvisionMonitor monitor) throws RemoteException;
 
     /**
-     * Notification from ProvisionMonitor peers updates to the PeerInfo object. 
-     * This notification is sent as ProvisionMonitor instances are selected by 
+     * Notification from ProvisionMonitor peers updates to the PeerInfo object.
+     * This notification is sent as ProvisionMonitor instances are selected by
      * other ProvisionMonitor instances for backup duty.
-     * 
+     *
      * @param info The PeerInfo object
      *
      * @throws RemoteException if communication errors occur
@@ -71,12 +76,24 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
 
     /**
      * Get the PeerInfo object for the ProvisionMonitor
-     * 
+     *
      * @return The PeerInfo object for the ProvisionMonitor
      *
      * @throws RemoteException if communication errors occur
      */
     PeerInfo getPeerInfo() throws RemoteException;
+    
+    /**
+     * Get all registered {@link ServiceBeanInstantiator} instances, wrapped in a collection of 
+     * {@link MarshalledObject}s.
+     *
+     * @return An array of registered {@link ServiceBeanInstantiator} instances as {@link MarshalledObject}.
+     * If there are no registered <tt>ServiceBeanInstantiator</tt>s, return
+     * a zero-length array. A new array is allocated each time
+     *
+     * @throws IOException If communication errors happen
+     */
+    Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws IOException;
     
     /**
      * Contains information about ProvisionMonitor peers involved in providing 

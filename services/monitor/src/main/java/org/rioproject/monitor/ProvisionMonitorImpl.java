@@ -16,6 +16,7 @@
 package org.rioproject.monitor;
 
 import com.sun.jini.config.Config;
+import com.sun.jini.proxy.MarshalledWrapper;
 import com.sun.jini.start.LifeCycle;
 import net.jini.config.Configuration;
 import net.jini.core.event.EventRegistration;
@@ -738,7 +739,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     /*
      * @see org.rioproject.core.provision.ProvisionManager#register
      */
-    public EventRegistration register(ServiceBeanInstantiator instantiator,
+    public EventRegistration register(MarshalledObject<ServiceBeanInstantiator> instantiator,
                                       MarshalledObject handback,
                                       ResourceCapability resourceCapability,
                                       List<DeployedService> deployedServices,
@@ -763,9 +764,19 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         provisioner.handleFeedback(instantiator, resourceCapability, deployedServices, serviceLimit);
     }
 
+    public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws IOException {
+        Collection<MarshalledObject<ServiceBeanInstantiator>> marshalledWrappers =
+            new ArrayList<MarshalledObject<ServiceBeanInstantiator>>();
+        ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
+        for(ServiceResource s : resources) {
+            marshalledWrappers.add(((InstantiatorResource)s.getResource()).getWrappedServiceBeanInstantiator());
+        }
+        return marshalledWrappers;
+    }
+
     /*
-     * @see org.rioproject.core.provision.ProvisionManager#getServiceBeanInstantiators
-     */
+    * @see org.rioproject.core.provision.ProvisionManager#getServiceBeanInstantiators
+    */
     public ServiceBeanInstantiator[] getServiceBeanInstantiators() {
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
         List<ServiceBeanInstantiator> list = new ArrayList<ServiceBeanInstantiator>();

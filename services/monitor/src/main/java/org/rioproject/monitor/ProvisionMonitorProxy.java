@@ -38,7 +38,11 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A <code>ProvisionMonitorProxy</code> is a proxy for the ProvisionMonitor
@@ -48,6 +52,7 @@ import java.util.List;
  */
 class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, Serializable {
     private static final long serialVersionUID = 2L;
+    static final Logger logger = Logger.getLogger("org.rioproject.monitor");
     final ProvisionMonitor monitorProxy;
 
     /**
@@ -101,7 +106,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
      * Implement org.rioproject.core.provision.ProvisionManager methods
      */
     /** @see org.rioproject.core.provision.ProvisionManager#register */
-    public EventRegistration register(ServiceBeanInstantiator instantiator,
+    public EventRegistration register(MarshalledObject<ServiceBeanInstantiator> instantiator,
                                       MarshalledObject handback,
                                       ResourceCapability resourceCapability,
                                       List<DeployedService> deployedServices,
@@ -115,9 +120,22 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
                                       duration));
     }
 
+    public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws IOException {
+        return monitorProxy.getWrappedServiceBeanInstantiators();
+    }
 
     public ServiceBeanInstantiator[] getServiceBeanInstantiators() throws RemoteException {
-        return monitorProxy.getServiceBeanInstantiators();
+        Collection<ServiceBeanInstantiator> serviceBeanInstantiators = new ArrayList<ServiceBeanInstantiator>();
+        try {
+            for(MarshalledObject<ServiceBeanInstantiator> marshalledObject : getWrappedServiceBeanInstantiators()) {
+                serviceBeanInstantiators.add(marshalledObject.get());
+            }
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Unwrapping a Cybernode", e);
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.WARNING, "Unwrapping a Cybernode", e);
+        }
+        return serviceBeanInstantiators.toArray(new ServiceBeanInstantiator[serviceBeanInstantiators.size()]);
     }
 
     /** @see org.rioproject.core.provision.ProvisionManager#update */

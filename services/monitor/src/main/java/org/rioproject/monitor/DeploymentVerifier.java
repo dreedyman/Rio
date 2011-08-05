@@ -26,6 +26,8 @@ import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,8 +44,8 @@ public class DeploymentVerifier {
         }
     }
 
-    public void verifyOperationalString(OperationalString opString, RemoteRepository[] repositories) throws ResolverException,
-                                                                                                            IOException {
+    public void verifyOperationalString(OperationalString opString, RemoteRepository[] repositories)
+        throws ResolverException, IOException {
         Resolver resolver = ResolverHelper.getInstance();
         for(ServiceElement service : opString.getServices()) {
             verifyOperationalStringService(service, resolver, repositories);
@@ -53,7 +55,7 @@ public class DeploymentVerifier {
     }
 
     void verifyOperationalStringService(ServiceElement service, Resolver resolver, RemoteRepository[] repositories)
-        throws IOException {
+        throws IOException, ResolverException {
         /* Check the component bundle for deployment as an artifact, easier check this way */
         if(service.getComponentBundle().getArtifact()!=null) {
             resolveOperationalStringService(service, resolver, repositories);
@@ -62,14 +64,15 @@ public class DeploymentVerifier {
         }
     }
 
-    void resolveOperationalStringService(ServiceElement service, Resolver resolver, RemoteRepository[] repositories) {
+    void resolveOperationalStringService(ServiceElement service, Resolver resolver, RemoteRepository[] repositories)
+        throws ResolverException {
         StringBuilder sb = new StringBuilder();
         StringBuilder sb1 = new StringBuilder();
         boolean didResolve = false;
         for (ClassBundle export : service.getExportBundles()) {
             if(export.getArtifact()!=null) {
                 sb.append(" (").append(export.getArtifact()).append("): ");
-                ResolverHelper.resolve(export, resolver, repositories);
+                resolve(export, resolver, repositories);
                 didResolve = true;
             }
             for(String jar : export.getJARNames()) {
@@ -85,6 +88,22 @@ public class DeploymentVerifier {
         sb.append(sb1.toString());
         if (logger.isLoggable(Level.INFO)) {
             logger.info(service.getName()+" derived classpath for loading artifact "+sb.toString());
+        }
+    }
+
+    void resolve(ClassBundle bundle, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Artifact: "+bundle.getArtifact()+", resolver: "+resolver.getClass().getName());
+        if (bundle.getArtifact() != null) {
+            String[] classPath = resolver.getClassPathFor(bundle.getArtifact(), repositories);
+            List<String> jars = new ArrayList<String>();
+            for (String jar : classPath) {
+                jars.add(ResolverHelper.handleWindows(jar));
+            }
+            if(logger.isLoggable(Level.FINE))
+                logger.fine("Artifact: "+bundle.getArtifact()+", resolved jars "+jars);
+            bundle.setCodebase("file://");
+            bundle.setJARs(jars.toArray(new String[jars.size()]));
         }
     }
 }

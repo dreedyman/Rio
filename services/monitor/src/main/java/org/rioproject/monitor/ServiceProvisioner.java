@@ -47,6 +47,7 @@ import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.watch.GaugeWatch;
 
+import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
@@ -237,7 +238,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * fashion to instantiate a ServiceBean as defined by the ServiceElement object 
      * that will be contained within the ServiceProvisionEvent<br>
      *
-     * @param instantiator The listener
+     * @param sbi The ServiceBeanInstantiator wrapped in a MarshalledObject
      * @param handback A handback object
      * @param resourceCapability The capabilities of the ServiceInstantiator
      * @param deployedServices List of deployed services
@@ -250,12 +251,21 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @throws LeaseDeniedException If the Lease is denied for any reason
      * @throws RemoteException for comm errors
      */
-    EventRegistration register(ServiceBeanInstantiator instantiator,
+    EventRegistration register(MarshalledObject<ServiceBeanInstantiator> sbi,
                                MarshalledObject handback,
                                ResourceCapability resourceCapability,
                                List<DeployedService> deployedServices,
                                int serviceLimit,
                                long duration) throws LeaseDeniedException, RemoteException {
+        ServiceBeanInstantiator instantiator;
+
+        try {
+            instantiator = sbi.get();
+        } catch (IOException e) {
+            throw new LeaseDeniedException("Error calling MarshalledObject.get(), "+e.getLocalizedMessage());
+        } catch (ClassNotFoundException e) {
+            throw new LeaseDeniedException("Could not load ServiceBeanInstantiator, "+e.getLocalizedMessage());
+        }
 
         if(instantiator instanceof RemoteMethodControl)
             instantiator = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(instantiator);
@@ -267,7 +277,8 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         }
 
         Uuid uuid=instantiator.getInstantiatorUuid();
-        InstantiatorResource resource = new InstantiatorResource(instantiator,
+        InstantiatorResource resource = new InstantiatorResource(sbi,
+                                                                 instantiator,
                                                                  name,
                                                                  uuid,
                                                                  handback,
@@ -310,7 +321,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * 
      * @param resource The ServiceBeanInstantiator
      * @param updatedCapabilities Updated ResourceCapability
-     * @param deployedServices List of depoyed services
+     * @param deployedServices List of deployed services
      * @param serviceLimit The maximum number of services the 
      * ServiceBeanInstantiator has been configured to instantiate
      *
