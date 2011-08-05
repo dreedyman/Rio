@@ -67,8 +67,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
      * @param service Concrete implementation of a ServiceBeanAdapter
      * @param exporter The Exporter to export this object
      */
-    public ServiceAdminImpl(ServiceBeanAdapter service, 
-                            Exporter exporter)  {
+    public ServiceAdminImpl(ServiceBeanAdapter service, Exporter exporter)  {
         this(service, exporter, null);
     }
 
@@ -112,10 +111,8 @@ public class ServiceAdminImpl implements ServiceAdmin {
      */
     public ServiceAdmin getServiceAdmin() throws RemoteException {
         if(adminProxy==null) {
-            ServiceAdmin serviceAdminRemoteRef =
-                (ServiceAdmin)exporter.export(this);        
-            adminProxy = ServiceAdminProxy.getInstance(serviceAdminRemoteRef, 
-                                                       UuidFactory.generate());
+            ServiceAdmin serviceAdminRemoteRef = (ServiceAdmin)exporter.export(this);
+            adminProxy = ServiceAdminProxy.getInstance(serviceAdminRemoteRef, UuidFactory.generate());
         }
         return(adminProxy);
     }
@@ -174,12 +171,12 @@ public class ServiceAdminImpl implements ServiceAdmin {
     }   
     
     /** @see org.rioproject.core.jsb.ServiceBeanAdmin#getUpTime */
-    public long getUpTime() throws RemoteException {
+    public long getUpTime() {
         return(System.currentTimeMillis()-started);
     }
 
     /** @see org.rioproject.core.jsb.ServiceBeanAdmin#getServiceBeanInstantiatorUuid */
-    public Uuid getServiceBeanInstantiatorUuid() throws RemoteException {
+    public Uuid getServiceBeanInstantiatorUuid() {
         return(service.getServiceBeanInstantiatorUuid());
     }
     
@@ -219,10 +216,9 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public void advertise() throws JSBControlException {
         try {
             if(context!=null) {
-                Entry[] configuredAttrs = 
-                    ServiceBeanLoader.getConfiguredAttributes(context);
+                /*Entry[] configuredAttrs = ServiceBeanLoader.getConfiguredAttributes(context);
                 if(configuredAttrs.length>0)
-                    service.addAttributes(configuredAttrs);
+                    service.addAttributes(configuredAttrs);*/
             } else {
                 logger.warning("ServiceBeanContext is null");
             }
@@ -278,8 +274,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                 try {
                     snapshotHandler.takeSnapshot();
                 } catch(IOException ioe) {
-                    logger.log(Level.WARNING, 
-                               "Persisting Added Lookup Attributes", ioe);
+                    logger.log(Level.WARNING, "Persisting Added Lookup Attributes", ioe);
                 }
             }
         } else
@@ -294,8 +289,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                 try {
                     snapshotHandler.takeSnapshot();
                 } catch(IOException ioe) {
-                    logger.log(Level.WARNING, 
-                               "Persisting Modified Lookup Attributes", ioe);
+                    logger.log(Level.WARNING, "Persisting Modified Lookup Attributes", ioe);
                 }
             }
         } else
@@ -332,8 +326,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                     try {
                         snapshotHandler.takeSnapshot();
                     } catch(IOException ioe) {
-                        logger.log(Level.WARNING, 
-                                   "Persisting Added Lookup groups", ioe);
+                        logger.log(Level.WARNING, "Persisting Added Lookup groups", ioe);
                     }
                 }
                 /* Update ServiceBeanConfig */
@@ -356,8 +349,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                     try {
                         snapshotHandler.takeSnapshot();
                     } catch(IOException ioe) {
-                        logger.log(Level.WARNING, 
-                                   "Persisting removed Lookup groups", ioe);
+                        logger.log(Level.WARNING, "Persisting removed Lookup groups", ioe);
                     }
                 }
                 /* Update ServiceBeanConfig */
@@ -399,9 +391,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
             try {
                 dm = service.getServiceBeanContext().getDiscoveryManagement();
             } catch(IOException e) {
-                logger.log(Level.WARNING, 
-                           "Getting DiscoveryManagement", 
-                           e);
+                logger.log(Level.WARNING,  "Getting DiscoveryManagement", e);
                 return(new LookupLocator[0]);
             }
         }
@@ -419,8 +409,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                 try {
                     snapshotHandler.takeSnapshot();
                 } catch(IOException ioe) {
-                    logger.log(Level.WARNING, 
-                               "Persisting Added LookupLocators", ioe);
+                    logger.log(Level.WARNING,  "Persisting Added LookupLocators", ioe);
                 }
             }
             /* Update ServiceBeanConfig */
@@ -470,39 +459,33 @@ public class ServiceAdminImpl implements ServiceAdmin {
     
     /**
      * Set new groups into the ServiceBeanConfig and update the ServiceBeanConfig 
-     * using the ServiceBeranManager
+     * using the ServiceBeanManager
      * 
      * @param groups Array of groups names to set
      */
     private void setGroups(String[] groups) {
-        ServiceBeanConfig sbConfig = 
-            service.getServiceBeanContext().getServiceBeanConfig(); 
+        ServiceBeanConfig sbConfig = service.getServiceBeanContext().getServiceBeanConfig();
         sbConfig.setGroups(groups);
         try {
             service.getServiceBeanContext().getServiceBeanManager().update(sbConfig);
         } catch(Exception e) {
-            logger.log(Level.WARNING, 
-                       "Updating ServiceBeanConfig to OperationalStringManager", 
-                       e);
+            logger.log(Level.WARNING, "Setting groups", e);
         }
     }
     
     /**
      * Set new LookupLocators into the ServiceBeanConfig and update the 
-     * ServiceBeanConfig using the ServiceBeranManager
+     * ServiceBeanConfig using the ServiceBeanManager
      * 
      * @param locators Array of LookupLocator names to set
      */
     private void setLocators(LookupLocator[] locators) {
-        ServiceBeanConfig sbConfig = 
-            service.getServiceBeanContext().getServiceBeanConfig(); 
+        ServiceBeanConfig sbConfig =  service.getServiceBeanContext().getServiceBeanConfig();
         sbConfig.setLocators(locators);
         try {
             service.getServiceBeanContext().getServiceBeanManager().update(sbConfig);
         } catch(Exception e) {
-            logger.log(Level.WARNING, 
-                       "Updating ServiceBeanConfig to OperationalStringManager", 
-                       e);
+            logger.log(Level.WARNING, "Setting LookupLocators", e);
         }
     }
 }
