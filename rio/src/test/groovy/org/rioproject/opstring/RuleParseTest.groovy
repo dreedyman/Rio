@@ -16,10 +16,6 @@
 package org.rioproject.opstring
 
 import org.rioproject.core.ServiceElement
-import org.rioproject.opstring.OpString
-import org.rioproject.opstring.GroovyDSLOpStringParser
-import org.rioproject.opstring.OpStringParser
-import org.rioproject.opstring.XmlOpStringParser
 import org.rioproject.sla.RuleMap
 import org.rioproject.sla.RuleMap.ServiceDefinition
 import org.rioproject.sla.RuleMap.RuleDefinition
