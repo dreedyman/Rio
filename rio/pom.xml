@@ -66,11 +66,11 @@
             <artifactId>groovy-all</artifactId>
         </dependency>
 
-        <dependency>
+      <!--  <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib-nodep</artifactId>
         </dependency>
-
+-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -93,22 +93,10 @@
                         <createJar>
                             <ins>
                                 <in>org.rioproject</in>
-                                <in>com.artima</in>
-                                <in>net.jini.lookup.ui</in>
-                                <in>net.jini.lookup.entry</in>
-                                <in>edu.emory.mathcs.backport.java.util.concurrent</in>
                             </ins>
                             <outs>
                                 <out>org.rioproject.boot</out>
                             </outs>
-                            <skips>
-                                <skip>net.jini.lookup.entry.Comment</skip>
-                                <skip>net.jini.lookup.entry.Name</skip>
-                                <skip>net.jini.lookup.entry.ServiceControlled</skip>
-                                <skip>net.jini.lookup.entry.ServiceType</skip>
-                                <skip>net.jini.lookup.entry.Status</skip>
-                                <skip>net.jini.lookup.entry.StatusType</skip>
-                            </skips>
 
                             <topclasses>
                                 <topclass>${project.build.outputDirectory}</topclass>
@@ -129,20 +117,12 @@
                             <preferredlist>${basedir}/src/main/resources/META-INF/PREFERRED.LIST</preferredlist>
                             <ins>
                                 <in>org.rioproject</in>
-                                <in>com.artima</in>
-                                <in>net.jini.lookup.ui</in>
-                                <in>net.jini.lookup.entry</in>
                             </ins>
-                            <skips>
-                                <skip>net.jini.lookup.entry.Comment</skip>
-                                <skip>net.jini.lookup.entry.Name</skip>
-                                <skip>net.jini.lookup.entry.ServiceControlled</skip>
-                                <skip>net.jini.lookup.entry.ServiceType</skip>
-                                <skip>net.jini.lookup.entry.Status</skip>
-                                <skip>net.jini.lookup.entry.StatusType</skip>
-                            </skips>
+                            <outs>
+                                <out>org.rioproject.boot</out>
+                            </outs>
                             <topclasses>
-                                <topclass>org.rioproject.bean.BeanDelegator</topclass>
+                                <topclass>org.rioproject.bean.proxy.BeanDelegator</topclass>
                                 <topclass>org.rioproject.core.provision.ProvisionManager</topclass>
                                 <topclass>org.rioproject.event.RemoteServiceEventListener</topclass>
                                 <topclass>org.rioproject.log.LoggerConfig</topclass>
@@ -166,17 +146,6 @@
                                 <topclass>org.rioproject.resources.serviceui.UIWindowFactory</topclass>
                                 <topclass>${project.build.outputDirectory}/org/rioproject/entry</topclass>
                                 <topclass>${project.build.outputDirectory}/org/rioproject/system/capability</topclass>
-
-                                <!-- Service UI classes to include -->
-                                <topclass>net.jini.lookup.ui.AboutUI</topclass>
-                                <topclass>net.jini.lookup.ui.AdminUI</topclass>
-                                <topclass>net.jini.lookup.ui.MainUI</topclass>
-                                <topclass>net.jini.lookup.ui.attribute.UIFactoryTypes</topclass>
-
-                                <!-- JMX Entry classes to include -->
-                                <topclass>net.jini.lookup.entry.Host</topclass>
-                                <topclass>net.jini.lookup.entry.jmx.JMXProperty</topclass>
-                                <topclass>net.jini.lookup.entry.jmx.JMXProtocolType</topclass>
                             </topclasses>
 
                             <manifest>
