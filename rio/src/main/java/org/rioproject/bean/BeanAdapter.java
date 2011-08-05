@@ -19,6 +19,7 @@ import net.jini.config.Configuration;
 import net.jini.export.Exporter;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
+import org.rioproject.bean.proxy.BeanDelegator;
 import org.rioproject.boot.BootUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBean;
@@ -418,7 +419,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
     protected Remote createDelegatingProxy() {
         try {
             Class[] interfaces = getInterfaceClasses(bean.getClass());
-            Remote proxy = (Remote)BeanDelegator.getInstance(this, bean, interfaces);
+            Remote proxy = (Remote) BeanDelegator.getInstance(this, bean, interfaces);
             return(proxy);
             //Remote proxy = (Remote)ProxyCache.getProxy(bean,
             //                                           this,

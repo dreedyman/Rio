@@ -15,6 +15,7 @@
  */
 package org.rioproject.bean;
 
+import org.rioproject.bean.proxy.PackagedMethod;
 import org.rioproject.resources.servicecore.Service;
 
 import java.lang.ref.ReferenceQueue;
