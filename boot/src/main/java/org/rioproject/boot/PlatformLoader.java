@@ -27,7 +27,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,7 +207,7 @@ public class PlatformLoader {
                         if(okay)
                             capabilities.add(cap);
                         else {
-                            StringBuffer sb = new StringBuffer();
+                            StringBuilder sb = new StringBuilder();
                             for(String s : cap.getClasspath()) {
                                 if(sb.length()>0)
                                     sb.append(" ");
@@ -295,7 +294,7 @@ public class PlatformLoader {
      */
     String getTextValue(Node node) {
         NodeList eList = node.getChildNodes();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < eList.getLength(); i++) {
             Node n = eList.item(i);
             if (n.getNodeType() == Node.ENTITY_REFERENCE_NODE) {
@@ -311,16 +310,6 @@ public class PlatformLoader {
         return(PropertyHelper.expandProperties(arg, PropertyHelper.PARSETIME));
     }
 
-
-    URL getURL(String location) throws MalformedURLException {
-        URL url;
-        if(location.startsWith("http") || location.startsWith("file:")) {
-            url = new URL(location);
-        } else {
-            url = new File(location).toURI().toURL();
-        }
-        return(url);
-    }
 
     /**
      * Get the default platform configuration
@@ -349,12 +338,11 @@ public class PlatformLoader {
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig();
         File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio.jar");
-        File resolverJar = new File(rioHomeDir, "lib"+File.separator+"resolver.jar");
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");
         rioCap.setName("Rio");
         rioCap.setVersion(RioVersion.VERSION);
-        rioCap.setClasspath(rioJar.getAbsolutePath()+File.pathSeparator+resolverJar.getAbsolutePath());
+        rioCap.setClasspath(rioJar.getAbsolutePath());
 
         PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig();
         File jskLibJar = new File(rioHomeDir, "lib"+File.separator+"jsk-lib.jar");
