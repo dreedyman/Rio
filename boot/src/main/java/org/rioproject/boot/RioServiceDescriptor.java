@@ -254,10 +254,10 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     public Object create(Configuration config) throws Exception {
         ensureSecurityManager();
         Object proxy = null;
-                
+
         /* Warn user of inaccessible codebase(s) */
         HTTPDStatus.httpdWarning(getCodebase());
-                                            
+
         /* Set common JARs to the CommonClassLoader */
 
         //URL[] defaultCommonJARs = null;
@@ -456,15 +456,13 @@ public class RioServiceDescriptor implements ServiceDescriptor {
 
 
     public String toString() {
-        return "RioServiceDescriptor{" +
+        return "RioServiceDescriptor " +
                "codebase='" + codebase + '\'' +
                ", policy='" + policy + '\'' +
                ", classpath='" + classpath + '\'' +
                ", implClassName='" + implClassName + '\'' +
                ", serverConfigArgs=" +
                (serverConfigArgs == null ? null :
-                Arrays.asList(serverConfigArgs)) +
-                                                 ", lifeCycle=" + lifeCycle +
-                                                 '}';
+                Arrays.asList(serverConfigArgs)) +", lifeCycle=" + lifeCycle;
     }
 }
