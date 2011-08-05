@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ public class JSBLoader implements ServiceBeanFactory {
     /* (non-Javadoc)
      * @see org.rioproject.cybernode.ServiceBeanFactory#create(org.rioproject.core.jsb.ServiceBeanContext)
      */
-    public Created create(ServiceBeanContext context)
-    throws JSBInstantiationException {
+    public Created create(ServiceBeanContext context) throws JSBInstantiationException {
         Object proxy;
         Object impl;
         final Thread currentThread = Thread.currentThread();
@@ -59,27 +58,18 @@ public class JSBLoader implements ServiceBeanFactory {
         try {
             ClassBundle jsbBundle = context.getServiceElement().getComponentBundle();
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Loading class ["+jsbBundle.getClassName()+"], " +
-                              "using ClassLoader: "+jsbCL.toString());
+                logger.finest("Loading class ["+jsbBundle.getClassName()+"], using ClassLoader: "+jsbCL.toString());
             Class implClass = jsbCL.loadClass(jsbBundle.getClassName());
             if(useActivationConstructor(implClass) && !isServiceBean(implClass)) {
-                Constructor constructor =
-                    implClass.getDeclaredConstructor(activationTypes);
+                Constructor constructor = implClass.getDeclaredConstructor(activationTypes);
                 if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "Obtained implementation constructor: {0}",
-                               constructor);
+                    logger.log(Level.FINEST, "Obtained implementation constructor: {0}", constructor);
                 constructor.setAccessible(true);
-                LifeCycle lifeCycle =
-                    (LifeCycle)context.getServiceBeanManager().getDiscardManager();
-                String[] args =
-                    ConfigHelper.getConfigArgs(
-                        context.getServiceBeanConfig().getConfigArgs());
+                LifeCycle lifeCycle = (LifeCycle)context.getServiceBeanManager().getDiscardManager();
+                String[] args = ConfigHelper.getConfigArgs(context.getServiceBeanConfig().getConfigArgs());
                 impl = constructor.newInstance(args, lifeCycle);
                 if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "Obtained implementation instance: {0}",
-                               impl);
+                    logger.log(Level.FINEST, "Obtained implementation instance: {0}", impl);
                 if(impl instanceof ServiceProxyAccessor) {
                     proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
                 } else if(impl instanceof ProxyAccessor) {
@@ -94,15 +84,11 @@ public class JSBLoader implements ServiceBeanFactory {
                         logger.log(Level.FINEST, "Activating as ServiceBean");
                     Constructor constructor = implClass.getConstructor((Class[])null);
                     if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Obtained implementation constructor: {0}",
-                                   constructor);
+                        logger.log(Level.FINEST, "Obtained implementation constructor: {0}", constructor);
                     impl = constructor.newInstance((Object[])null);
                     ServiceBean instance = (ServiceBean)impl;
                     if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Obtained implementation instance: {0}",
-                                   instance);
+                        logger.log(Level.FINEST, "Obtained implementation instance: {0}", instance);
                     proxy = instance.start(context);
                 } else {
                     BeanFactory beanFactory = new BeanFactory();
@@ -114,8 +100,7 @@ public class JSBLoader implements ServiceBeanFactory {
 
         } catch(Throwable t) {
             ServiceBeanLoader.unload(jsbCL, context.getServiceElement());
-            throw new JSBInstantiationException("Service Instantiation Exception",
-                                                t);
+            throw new JSBInstantiationException("Service Instantiation Exception", t);
         }
         return (new Created(impl, proxy));
     }
