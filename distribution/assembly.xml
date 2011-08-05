@@ -106,6 +106,8 @@
             <useProjectArtifact>false</useProjectArtifact>
             <excludes>
                 <exclude>net.jini:jsk-dl</exclude>
+                <exclude>net.jini.lookup:jmx-lookup</exclude>
+                <exclude>net.jini.lookup:serviceui</exclude>
                 <exclude>junit:junit</exclude>
                 <exclude>ant:*</exclude>
                 <exclude>jline:*</exclude>
@@ -130,6 +132,8 @@
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>net.jini:jsk-dl</include>
+                <include>net.jini.lookup:jmx-lookup</include>
+                <include>net.jini.lookup:serviceui</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
