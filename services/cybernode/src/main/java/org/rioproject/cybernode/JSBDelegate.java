@@ -55,8 +55,11 @@ import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.capability.PlatformCapability;
 
 import javax.management.ObjectName;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -380,24 +383,18 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 serviceBeanSLAManager.terminate();
                 serviceBeanSLAManager = null;
             }
-            /* Remove ServiceElementChangeManager */
-            if(context!=null)
+
+            if(context!=null) {
+                /* Remove ServiceElementChangeManager */
                 context.getServiceBeanManager().removeListener(sElemChangeMgr);
+            }
+
+            ServiceTerminationHelper.cleanup(context);
+
             if(opStringMgr instanceof OpStringManagerProxy.OpStringManager) {
                 ((OpStringManagerProxy.OpStringManager)opStringMgr).terminate();
             }
-            /* If we have a groovy configuration, clean the configuration, clearing
-             * the class cache and setting the embedded groovy classloader to null */
-            try {
-                if(context!=null && context.getConfiguration() instanceof AggregateConfig) {
-                    AggregateConfig ac = (AggregateConfig)context.getConfiguration();
-                    if(ac.getOuterConfiguration() instanceof GroovyConfig) {
-                        ((GroovyConfig)ac.getOuterConfiguration()).clear();
-                    }
-                }
-            } catch (ConfigurationException e) {
-                /* */
-            }
+
             /* If we have an instance, go through service termination */
             if(instance!=null) {
                 if(serviceProxy!=null) {
@@ -587,20 +584,17 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         }
 
                         /* Create the ServiceBeanSLAManager */
-                        serviceBeanSLAManager =
-                            new ServiceBeanSLAManager(loadResult.getImpl(),
-                                                      serviceProxy,
-                                                      context,
-                                                      slaEventHandler);
+                        serviceBeanSLAManager = new ServiceBeanSLAManager(loadResult.getImpl(),
+                                                                          serviceProxy,
+                                                                          context,
+                                                                          slaEventHandler);
                         serviceBeanSLAManager.addSLAs(
                             sElem.getServiceLevelAgreements().getServiceSLAs());
                         serviceBeanSLAManager.createSLAThresholdEventAdapter();
 
                         /* Invoke postInitialize lifecycle method if defined
                          * (RIO-141) */
-                        BeanHelper.invokeLifeCycle(Initialized.class,
-                                                   "postInitialize",
-                                                   loadResult.getImpl());
+                        BeanHelper.invokeLifeCycle(Initialized.class, "postInitialize", loadResult.getImpl());
 
                         /* Create the ServiceBeanInstance */
                         instance = new ServiceBeanInstance(serviceID,
@@ -612,11 +606,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
                         /* Create the ServiceRecord */
                         synchronized(this) {
-                            serviceRecord =
-                                new ServiceRecord(serviceID,
-                                                  sElem,
-                                                  container.getComputeResource().getAddress().
-                                                      getHostName());
+                            serviceRecord = new ServiceRecord(serviceID,
+                                                              sElem,
+                                                              container.getComputeResource().getAddress().getHostName());
                         }
                     }
 
@@ -665,6 +657,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                        e);
         } finally {
             starting = false;
+            //Thread.currentThread().setContextClassLoader(tccl);
         }
 
         try {
