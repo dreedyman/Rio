@@ -15,7 +15,7 @@
  */
 package org.rioproject.associations;
 
-import net.sf.cglib.proxy.*;
+//import net.sf.cglib.proxy.*;
 import net.jini.core.discovery.LookupLocator;
 import org.rioproject.resources.util.ThrowableUtil;
 
@@ -68,10 +68,10 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
      * This method can be overriden to return a different array of
      * <tt>Callback</tt> instances if required.
      */
-    public Callback[] getCallbacks(final Association<T> association) {
+   /* public Callback[] getCallbacks(final Association<T> association) {
         return new Callback[]{new LocalInterceptor(this),
                               new Interceptor(association)};
-    }
+    }*/
 
     /**
      * Create a {@link net.sf.cglib.proxy.CallbackFilter}
@@ -84,9 +84,9 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
      * This method can be overriden to return a different
      * <tt>CallbackFilter</tt> if required.
      */
-    public CallbackFilter getCallbackFilter(Association<T> association) {
+    /*public CallbackFilter getCallbackFilter(Association<T> association) {
         return new LocalCallbackFilter(getClass().getMethods());
-    }
+    }*/
 
     /**
      * Create a {@link net.sf.cglib.proxy.Dispatcher}
@@ -97,9 +97,9 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
      * CGLIB proxy. This method returna a <tt>null</tt>. If the underlying proxy
      * requires a <tt>Dispatcher</tt>, this method should be overriden.
      */
-    public Dispatcher getDispatcher(final Association<T> association) {
+    /*public Dispatcher getDispatcher(final Association<T> association) {
         return null;
-    }
+    }*/
 
     public Association getAssociation() {
         return strategy.getAssociation();
@@ -327,7 +327,7 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
      * Attempts to invoke an available service will continue until either the
      * invocation succeeds, or there are no more services available
      */
-    public class Interceptor implements MethodInterceptor {
+    /*public class Interceptor implements MethodInterceptor {
         Association<T> association;
 
         public Interceptor(Association<T> association) {
@@ -341,12 +341,12 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                                 MethodProxy methodProxy) throws Throwable {
             return doInvokeService(association, method, args);
         }
-    }
+    }*/
 
     /*
      * A method interceptor that operates on the local class
      */
-    public class LocalInterceptor implements MethodInterceptor {
+    /*public class LocalInterceptor implements MethodInterceptor {
         Object localRef;
 
         public LocalInterceptor(Object localRef) {
@@ -359,12 +359,12 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                                 MethodProxy methodProxy) throws Throwable {
             return method.invoke(localRef, args);
         }
-    }
+    }*/
 
     /*
      * A CallbackFilter for local operations
      */
-    public class LocalCallbackFilter implements CallbackFilter {
+    /*public class LocalCallbackFilter implements CallbackFilter {
         public static final int LOCAL = 0;
         public static final int DEFAULT = 1;
         final List<String> localMethodNames = new ArrayList<String>();
@@ -375,12 +375,12 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
             }
         }
 
-        /**
+        *//**
          * Specify which callback to use for the method being invoked.
          *
          * @param method the method being invoked.
          * @return the callback index in the callback array for this method
-         */
+         *//*
         public int accept(Method method) {
             int callback = DEFAULT;
             String name = method.getName();
@@ -392,7 +392,7 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
         protected List<String> getLocalMethodNames() {
             return localMethodNames;
         }
-    }
+    }*/
 
     /*
      * An InvocationHandler that operates on the service returned by the
@@ -430,7 +430,7 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
     }
 
     /**
-     * Ceck if the methos is found in the generated proxy
+     * Check if the methods is found in the generated proxy
      *
      * @param method The Method to check
      * @return true if the method is local to the proxy

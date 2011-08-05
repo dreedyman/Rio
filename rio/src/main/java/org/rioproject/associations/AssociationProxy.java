@@ -15,9 +15,11 @@
  */
 package org.rioproject.associations;
 
+/*
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Dispatcher;
+*/
 
 import java.lang.reflect.InvocationHandler;
 
@@ -52,7 +54,7 @@ public interface AssociationProxy<T> extends AssociationListener<T> {
      * @return An array of {@link net.sf.cglib.proxy.Callback} for use with a
      * generated CGLIB proxy.
      */
-    Callback[] getCallbacks(final Association<T> association);
+    //Callback[] getCallbacks(final Association<T> association);
 
     /**
      * Create a {@link net.sf.cglib.proxy.CallbackFilter}
@@ -62,7 +64,7 @@ public interface AssociationProxy<T> extends AssociationListener<T> {
      * @return An array of {@link net.sf.cglib.proxy.CallbackFilter} for use
      * with a generated CGLIB proxy.
      */
-    CallbackFilter getCallbackFilter(Association<T> association);
+    //CallbackFilter getCallbackFilter(Association<T> association);
 
     /**
      * Create a {@link net.sf.cglib.proxy.Dispatcher}
@@ -72,7 +74,7 @@ public interface AssociationProxy<T> extends AssociationListener<T> {
      * @return A {@link net.sf.cglib.proxy.Dispatcher} for use with a generated
      * CGLIB proxy.
      */
-    Dispatcher getDispatcher(final Association<T> association);
+    //Dispatcher getDispatcher(final Association<T> association);
 
     /**
      * Get the super-class when creating a concrete CGLIB proxy

@@ -666,7 +666,7 @@ public class AssociationDescriptor implements Serializable {
      * Override toString
      */
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         if(interfaceNames!=null) {
             for(int i=0; i<interfaceNames.length; i++) {
                 if(i>0)

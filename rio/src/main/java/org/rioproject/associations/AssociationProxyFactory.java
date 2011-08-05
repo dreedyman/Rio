@@ -15,10 +15,10 @@
  */
 package org.rioproject.associations;
 
-import net.sf.cglib.proxy.Callback;
+/*import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Dispatcher;
-import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Enhancer;*/
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -105,7 +105,7 @@ public class AssociationProxyFactory {
                                                interfaces,
                                                aProxy.getInvocationHandler(association));
             } else {
-                Enhancer enhancer = new Enhancer();
+                /*Enhancer enhancer = new Enhancer();
                 enhancer.setInterfaces(interfaces);
                 if(aProxy.getSuperClass()!=null)
                     enhancer.setSuperclass(aProxy.getSuperClass());
@@ -121,7 +121,7 @@ public class AssociationProxyFactory {
                 Callback[] callbacks = aProxy.getCallbacks(association);
                 if(callbacks!=null)
                     enhancer.setCallbacks(callbacks);
-                proxy = enhancer.create();
+                proxy = enhancer.create();*/throw new IllegalArgumentException("cglib no longer supported");
             }
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
