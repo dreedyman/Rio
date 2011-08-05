@@ -22,6 +22,7 @@ import org.rioproject.boot.PlatformLoader;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.PlatformCapabilityLoader;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.SigarHelper;
 import org.rioproject.system.measurable.cpu.CPU;
@@ -522,7 +523,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                         caps[i].geCostModelClass()).newInstance();
                 pCap.setResourceCostModel(costModel);
             }
-            pCap.getLoadableClassPath();
+            PlatformCapabilityLoader.getLoadableClassPath(pCap);
             pCaps[i] = pCap;
         }
         return(pCaps);
