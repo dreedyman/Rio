@@ -50,7 +50,7 @@ public interface ProvisionManager {
      * ProvisionManager determines that a ServiceBeanInstantiator meets requirements
      * specified by the ServiceBean.
      *
-     * @param instantiator The ServiceBeanInstantiator
+     * @param instantiator The ServiceBeanInstantiator wrapped in a MarshalledObject
      * @param handback The handback Object to include with event notification
      * @param deployedServices An immutable <tt>List</tt> of {@link DeployedService}
      * objects documenting existing deployed (and active) services. If there
@@ -62,17 +62,16 @@ public interface ProvisionManager {
      *
      * @return An EventRegistration
      *
-     * @throws LeaseDeniedException If the Lease to the ProvisionManager is
-     * denied
+     * @throws LeaseDeniedException If the Lease to the ProvisionManager is denied
      * @throws RemoteException If communication errors happen
      */
-    EventRegistration register(ServiceBeanInstantiator instantiator,
+    EventRegistration register(MarshalledObject<ServiceBeanInstantiator> instantiator,
                                MarshalledObject handback,
                                ResourceCapability resourceCapability,
                                List<DeployedService> deployedServices,
                                int serviceLimit,
                                long duration)
-    throws LeaseDeniedException, RemoteException;    
+    throws LeaseDeniedException, RemoteException;
 
     /**
      * Provides a feedback mechanism for a
