@@ -23,6 +23,7 @@ import net.jini.config.ConfigurationFile
 import java.util.logging.Logger
 import java.util.logging.Level
 import java.lang.reflect.Constructor
+import org.codehaus.groovy.runtime.InvokerHelper
 
 /**
  * Provides support for Groovy based configuration.
@@ -34,7 +35,6 @@ class GroovyConfig implements Configuration {
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
     private static Logger logger = Logger.getLogger(GroovyConfig.class.getPackage().name)
-    private GroovyClassLoader gcl
 
     GroovyConfig(String gFile) {
         File f = new File(gFile)
@@ -80,7 +80,7 @@ class GroovyConfig implements Configuration {
     def traverseInputs(String[] args, ClassLoader loader) {
         if(loader==null)
             loader = Thread.currentThread().getContextClassLoader()
-        gcl = new GroovyClassLoader(loader)
+        GroovyClassLoader gcl = new GroovyClassLoader(loader)
         args.each { arg ->
             String groovyFile = arg
             InputStream is = null
@@ -120,15 +120,16 @@ class GroovyConfig implements Configuration {
                                 'milliseconds'
             }
         }
-
+        gcl = null
     }
 
     def clear() {
-        if(gcl!=null) {
-            gcl.clearCache()
-            gcl = null
-        }
+        visited.clear()
         if(groovyConfigs!=null) {
+            for(Map.Entry<String, GroovyObject> entry : groovyConfigs)  {
+                println "===> REMOVING ${entry.value.class.getName()}"
+                //InvokerHelper.removeClass(entry.value.class)
+            }
             groovyConfigs.clear()
             groovyConfigs = null
         }
