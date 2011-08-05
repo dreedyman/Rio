@@ -23,7 +23,7 @@ import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
-import net.sf.cglib.proxy.*;
+//import net.sf.cglib.proxy.*;
 import org.rioproject.core.OperationalStringManager;
 import org.rioproject.core.provision.ProvisionManager;
 import org.rioproject.monitor.DeployAdmin;
@@ -34,7 +34,9 @@ import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +51,7 @@ public class OpStringManagerProxy {
     private static DiscoveryManagement discoMgmt;
 
     /**
-     * Create a dynamic CGLIB generated proxy for OperationalStringManager
+     * Create a dynamic proxy for OperationalStringManager
      * management. Invoking this method relies on this utility having it's
      * DiscoveryManagement property set.
      *
@@ -62,27 +64,28 @@ public class OpStringManagerProxy {
      * or created
      * @throws IOException If DiscoveryManagement has problems
      */
-    public static
-    OperationalStringManager getProxy(String name,
-                                      OperationalStringManager manager)
+    public static OperationalStringManager getProxy(String name,
+                                                    OperationalStringManager manager)
         throws ConfigurationException, IOException {
 
         if(discoMgmt==null) {
-            throw new IllegalStateException("DiscoveryManagement has not been " +
-                                            "set into proxy");
+            throw new IllegalStateException("DiscoveryManagement has not been set into proxy");
         }
-        Enhancer enhancer = new Enhancer();
+      /*  Enhancer enhancer = new Enhancer();
         enhancer.setInterfaces(new Class[]{OpStringManager.class});
         enhancer.setUseFactory(false);
         enhancer.setCallback(new OpStringManagerDispatcher(name,
                                                            manager,
                                                            discoMgmt));
         return (OperationalStringManager)enhancer.create();
+    }*/
+        return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                                                                 new Class[]{OperationalStringManager.class},
+                                                                 new OpStringManagerDispatcher(name, manager, discoMgmt));
     }
 
     /**
-     * Create a dynamic CGLIB generated proxy for OperationalStringManager
-     * management
+     * Create a dynamic proxy for OperationalStringManager management
      *
      * @param name The name of the OperationalString. This must not be null.
      * @param manager The primary (managing) OperationalStringManager
@@ -94,32 +97,33 @@ public class OpStringManagerProxy {
      * or created
      * @throws IOException If DiscoveryManagement has problems
      */
-    public static
-    OperationalStringManager getProxy(String name,
-                                      OperationalStringManager manager,
-                                      DiscoveryManagement dMgr)
+    public static OperationalStringManager getProxy(String name,
+                                                    OperationalStringManager manager,
+                                                    DiscoveryManagement dMgr)
         throws ConfigurationException, IOException {
 
         assert name!=null;
         assert dMgr!=null;
         if(discoMgmt==null)
             discoMgmt = dMgr;
-        Enhancer enhancer = new Enhancer();
+        /*Enhancer enhancer = new Enhancer();
         enhancer.setInterfaces(new Class[]{OpStringManager.class});
         enhancer.setUseFactory(false);
         enhancer.setCallbackFilter(FILTER);
         enhancer.setCallbacks(new Callback[] {
             new OpStringManagerDispatcher(name, manager, dMgr),
             NoOp.INSTANCE});        
-        return (OperationalStringManager)enhancer.create();
+        return (OperationalStringManager)enhancer.create();*/
+        return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                                                                 new Class[]{OperationalStringManager.class},
+                                                                 new OpStringManagerDispatcher(name, manager, dMgr));
     }
 
     /**
      * A CGLIB dispatcher for managing the invocation of methods to the
      * primary {@link org.rioproject.core.OperationalStringManager} instance.
      */
-    public static class OpStringManagerDispatcher
-        extends ServiceDiscoveryAdapter implements MethodInterceptor {
+    public static class OpStringManagerDispatcher extends ServiceDiscoveryAdapter implements /*MethodInterceptor*/ InvocationHandler {
         String name;
         OperationalStringManager manager;
         DiscoveryManagement dMgr;
@@ -135,12 +139,8 @@ public class OpStringManagerProxy {
             this.name = name;
             this.manager = manager;
             this.dMgr = dMgr;
-            ServiceTemplate template =
-                new ServiceTemplate(null,
-                                    new Class[] {ProvisionManager.class},
-                                    null);
-            lCache = LookupCachePool.getInstance().getLookupCache(dMgr,
-                                                                  template);
+            ServiceTemplate template = new ServiceTemplate(null, new Class[] {ProvisionManager.class}, null);
+            lCache = LookupCachePool.getInstance().getLookupCache(dMgr, template);
             if(lCache instanceof LookupCachePool.SharedLookupCache) {
                 LookupCachePool.SharedLookupCache sCache =
                     (LookupCachePool.SharedLookupCache)lCache;
@@ -159,7 +159,7 @@ public class OpStringManagerProxy {
             lCache.addListener(this);
         }
 
-        public Object intercept(Object proxy,
+ /*       public Object intercept(Object proxy,
                                 Method method,
                                 Object[] args,
                                 MethodProxy methodProxy) throws Throwable {
@@ -197,7 +197,7 @@ public class OpStringManagerProxy {
             if(terminated)
                 return null;
             return method.invoke(manager, args);
-        }
+        }*/
 
         public void serviceAdded(ServiceDiscoveryEvent event) {
             ServiceItem item = event.getPostEventServiceItem();
@@ -225,7 +225,7 @@ public class OpStringManagerProxy {
                 if(monitors.size()>0)
                     monitor = monitors.get(0);
                 else {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     if(dMgr instanceof DiscoveryManagementPool.SharedDiscoveryManager) {
                         DiscoveryManagementPool.SharedDiscoveryManager sdm =
                             (DiscoveryManagementPool.SharedDiscoveryManager)dMgr;
@@ -254,9 +254,7 @@ public class OpStringManagerProxy {
                             sb.append("] ");
                         }
                     }
-                    throw new RemoteException("No ProvisionMonitor " +
-                                              "instances available. "+
-                                              sb.toString());
+                    throw new RemoteException("No ProvisionMonitor instances available. "+sb.toString());
                 }
             }
             /* If we get an OperationalStringException getting the primary
@@ -267,8 +265,7 @@ public class OpStringManagerProxy {
                 if(terminated)
                     break;
                 try {
-                    DeployAdmin dAdmin =
-                        (DeployAdmin)((Administrable)monitor).getAdmin();
+                    DeployAdmin dAdmin = (DeployAdmin)((Administrable)monitor).getAdmin();
                     opMgr = dAdmin.getOperationalStringManager(name);
                     toThrow = null;
                     break;
@@ -294,6 +291,44 @@ public class OpStringManagerProxy {
                 throw toThrow;
             return opMgr;
         }
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if(terminated) {
+                throw new IllegalStateException("The OpStringManagerDispatcher "+
+                                                "has been terminated, " +
+                                                "invocations through this " +
+                                                "utility are not possible " +
+                                                "in it's current state. " +
+                                                "Make sure all invoking " +
+                                                "threads are terminated to " +
+                                                "resolve this issue");
+            }
+            if(method.getName().equals("terminate")) {
+                lCache.removeListener(this);
+                monitors.clear();
+                terminated = true;
+                return null;
+            }
+            while(!terminated) {
+                try {
+                    if(manager.isManaging())
+                        break;
+                    manager = getManager();
+                } catch (Throwable t) {
+                    if(terminated)
+                        break;
+                    if(!ThrowableUtil.isRetryable(t)) {
+                        manager = getManager();
+                    } else {
+                        throw t;
+                    }
+                }
+            }
+            if(terminated)
+                return null;
+
+            return method.invoke(manager, args);
+        }
     }
 
     public static void setDiscoveryManagement(DiscoveryManagement dMgr) {
@@ -308,7 +343,7 @@ public class OpStringManagerProxy {
         void terminate();
     }
 
-    private static final CallbackFilter FILTER = new CallbackFilter() {
+    /*private static final CallbackFilter FILTER = new CallbackFilter() {
         public int accept(Method method) {
             if (method.getParameterTypes().length == 0 &&
                 method.getName().equals("finalize") ){
@@ -318,5 +353,7 @@ public class OpStringManagerProxy {
                 return 0;
             }
         }
-    };
+    };*/
+
+
 }
