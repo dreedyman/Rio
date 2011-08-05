@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +15,6 @@
  */
 package org.rioproject.boot;
 
-import org.rioproject.core.jsb.ComponentLoader;
-
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
@@ -26,9 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The CommonClassLoader implements {@link org.rioproject.core.jsb.ComponentLoader} 
- * interface and is created by the 
- * {@link org.rioproject.boot.RioServiceDescriptor} or 
+ * The CommonClassLoader is created by the {@link org.rioproject.boot.RioServiceDescriptor} or
  * {@link org.rioproject.boot.RioActivatableServiceDescriptor} when starting a Rio 
  * service and contains common declared platform JARs to be made available to its 
  * children.
@@ -80,7 +75,7 @@ Codebase: "serviceX-dl.jar rio-dl.jar jsk-lib-dl.jar"<br>
 
  @author Dennis Reedy
  */
-public class CommonClassLoader extends URLClassLoader implements ComponentLoader {
+public class CommonClassLoader extends URLClassLoader {
     private static final String COMPONENT = "org.rioproject.boot";
     private static Logger logger = Logger.getLogger(COMPONENT);
     private static final Map<String, URL[]> components = new HashMap<String, URL[]>();
@@ -156,8 +151,12 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
     }
 
     /**
-	 * @see org.rioproject.core.jsb.ComponentLoader#testComponentExistence
-	 */
+     * Test whether a named component (Class) exists.
+     *
+     * @param name The component name
+     * @return true If the requested component can be located, false
+     * otherwise.
+     */
 	public boolean testComponentExistence(String name) {
 		boolean exists = false;
 		/* First check if the class is registered in the component Map */
@@ -194,15 +193,12 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
     }
 
 	/**
-	 * @see org.rioproject.core.jsb.ComponentLoader#testResourceExistence
-	 */
-	public boolean testResourceExistence(String name) {
-		return getResource(name) != null;
-	}
-
-	/**
-	 * @see org.rioproject.core.jsb.ComponentLoader#addComponent
-	 */
+     * Registers a class name, and the code source which is used as the search
+     * path to load the class.
+     *
+     * @param name The name of the class
+     * @param urls Codebase for the class identified by the name parameter
+     */
 	public void addComponent(String name, URL[] urls) {
 		boolean added = false;
 		boolean toAdd = false;
@@ -259,28 +255,6 @@ public class CommonClassLoader extends URLClassLoader implements ComponentLoader
                 }
             }
 		}        
-	}
-
-	/**
-	 * @see org.rioproject.core.jsb.ComponentLoader#load
-	 */
-	public Object load(String name) throws  ClassNotFoundException, IllegalAccessException, InstantiationException {
-	    if (name == null)
-	        throw new NullPointerException("name is null");
-	    boolean registered;
-	    synchronized (components) {
-	        registered = components.containsKey(name);
-	    }		
-	    if(!registered) {
-	        if(testComponentExistence(name)) {
-	            if(logger.isLoggable(Level.FINEST))
-	                logger.finest("Loading unregistered component "+name);
-	        } else { 
-	            throw new ClassNotFoundException ("Unregistered component "+name);
-	        }
-	    }			
-	    Class component = loadClass(name);				
-	    return(component.newInstance());
 	}
     
     /*
