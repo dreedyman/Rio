@@ -16,8 +16,6 @@
  */
 package org.rioproject.system.capability;
 
-import org.rioproject.boot.BootUtil;
-import org.rioproject.boot.CommonClassLoader;
 import org.rioproject.core.provision.DownloadRecord;
 import org.rioproject.core.provision.StagedSoftware;
 import org.rioproject.core.provision.SystemRequirements.SystemComponent;
@@ -27,8 +25,6 @@ import org.rioproject.costmodel.ResourceCostProducer;
 import org.rioproject.costmodel.ZeroCostModel;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -202,45 +198,6 @@ public class PlatformCapability implements PlatformCapabilityMBean,
      */
     public String[] getClassPath() {
         return classpath;
-    }
-    
-    /**
-     * Get the loadable classpath for the PlatformCapability.
-     *
-     * @return The classpath for loading the PlatformCapability. If the
-     * classpath for this PlatformCapability is already loaded by the common
-     * class loader, this method will return a zero-length array. Otherwise this
-     * method will return the resources required to load this platform
-     * capability
-     *
-     * @throws MalformedURLException if the classpath cannot be constructed
-     */
-    public URL[] getLoadableClassPath() throws MalformedURLException {
-        if(classpath==null)
-            return(new URL[0]);
-        ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
-        CommonClassLoader cCL = CommonClassLoader.getInstance();
-        URL[] loadedURLs = null;
-        try {
-            Thread.currentThread().setContextClassLoader(cCL);
-            loadedURLs = cCL.getURLs();
-        } finally {
-            Thread.currentThread().setContextClassLoader(currentCL);
-        }
-        List<URL> loadables = new ArrayList<URL>();
-        URL[] urls = BootUtil.toURLs(classpath);
-        for (URL url : urls) {
-            boolean loaded = false;
-            for (URL loadedURL : loadedURLs) {
-                if (url.sameFile(loadedURL)) {
-                    loaded = true;
-                    break;
-                }
-            }
-            if (!loaded)
-                loadables.add(url);
-        }
-        return(loadables.toArray(new URL[loadables.size()]));
     }
 
     /**
