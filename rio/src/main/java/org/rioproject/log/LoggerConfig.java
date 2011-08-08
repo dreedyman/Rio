@@ -18,7 +18,6 @@ package org.rioproject.log;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.*;
@@ -137,9 +136,11 @@ public class LoggerConfig implements Serializable {
     }
 
     public void close() {
-        for (Handler h : logger.getHandlers()) {
-            if(handlerFilter!=null && h.getFilter()!=null && h.getFilter().equals(handlerFilter)) {
-                h.setFilter(null);
+        if(logger!=null && logger.getHandlers()!=null) {
+            for (Handler h : logger.getHandlers()) {
+                if(handlerFilter!=null && h.getFilter()!=null && h.getFilter().equals(handlerFilter)) {
+                    h.setFilter(null);
+                }
             }
         }
     }
