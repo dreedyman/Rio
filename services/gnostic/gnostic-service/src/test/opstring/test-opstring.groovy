@@ -23,7 +23,7 @@ deployment(name: 'Test Deploy') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    include 'org.rioproject:gnostic:4.3-SNAPSHOT'
+    include 'org.rioproject:gnostic:5.0-SNAPSHOT'
 
     service(name: 'S1') {
         interfaces {

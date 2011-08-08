@@ -156,6 +156,7 @@ if [ "$start" = "1" ]; then
         -XX:HeapDumpPath=$RIO_HOME/logs \
         $classpath $agentpath $libpath $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
+        -Djava.protocol.handler.pkgs=org.rioproject.url \
         -Dcom.sun.jini.jeri.tcp.useNIO=true \
         -DRIO_HOME=$RIO_HOME \
         -Dorg.rioproject.home=$RIO_HOME \

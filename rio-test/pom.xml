@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>4.3-SNAPSHOT</version>
+        <version>5.0-SNAPSHOT</version>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>rio-test</artifactId>
@@ -82,9 +82,15 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/*.java</exclude>
-                    </excludes>
+                    <systemProperties>
+                        <property>
+                            <name>RIO_HOME</name>
+                            <value>${basedir}/../distribution/target/rio-${project.version}</value>
+                        </property>
+                    </systemProperties>
+                    <includes>
+                        <include>**/HandlerTest.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 

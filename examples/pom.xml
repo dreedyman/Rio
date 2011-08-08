@@ -27,7 +27,7 @@
     </build>
 
     <properties>
-        <rio.version>4.3-SNAPSHOT</rio.version>
+        <rio.version>5.0-SNAPSHOT</rio.version>
         <rio.plugin.version>4.2</rio.plugin.version>
     </properties>
 
