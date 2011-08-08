@@ -59,24 +59,25 @@ public class ITNotificationUsingArtifactTest {
     @Test
     public void verifyChangingFileBasedRuleWorks() {
         Assert.assertNotNull(testManager);
-        File opstring = new File("src/test/opstring/artifactNotification.groovy");
-        Assert.assertTrue(opstring.exists());
-        testManager.deploy(opstring);
 
-        Gnostic g = (Gnostic)testManager.waitForService(Gnostic.class);
         Throwable thrown = null;
         try {
-            g.setScannerInterval(5);
-            Assert.assertEquals("Scanner Interval expected to be 5 seconds", 5, g.getScannerInterval());
-        } catch (Throwable e) {
+            writeRule(5, 20, "src/test/resources/CounterNotification.drl");
+        } catch (IOException e) {
             e.printStackTrace();
             thrown = e;
         }
         Assert.assertNull(thrown);
 
+        File opstring = new File("src/test/opstring/artifactNotification.groovy");
+        Assert.assertTrue(opstring.exists());
+        testManager.deploy(opstring);
+        Gnostic g = (Gnostic)testManager.waitForService(Gnostic.class);
+
         try {
-            writeRule(5, 20, "src/test/resources/CounterNotification.drl");
-        } catch (IOException e) {
+            g.setScannerInterval(5);
+            Assert.assertEquals("Scanner Interval expected to be 5 seconds", 5, g.getScannerInterval());
+        } catch (Throwable e) {
             e.printStackTrace();
             thrown = e;
         }
