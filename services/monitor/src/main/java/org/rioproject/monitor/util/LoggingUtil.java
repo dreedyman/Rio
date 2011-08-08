@@ -15,6 +15,8 @@
  */
 package org.rioproject.monitor.util;
 
+import org.rioproject.core.ServiceBeanConfig;
+import org.rioproject.core.ServiceElement;
 import org.rioproject.monitor.ProvisionRequest;
 
 /**
@@ -23,10 +25,18 @@ import org.rioproject.monitor.ProvisionRequest;
 public class LoggingUtil {
 
     public static String getLoggingName(ProvisionRequest request) {
+        return getLoggingName(request.getServiceElement());
+    }
+
+    public static String getLoggingName(ServiceElement element) {
         StringBuilder sb = new StringBuilder();
-        sb.append(request.getServiceElement().getOperationalStringName())
-            .append("/")
-            .append(request.getServiceElement().getName());
+        sb.append(element.getOperationalStringName()).append("/").append(element.getName());
+        return sb.toString();
+    }
+
+     public static String getLoggingName(ServiceBeanConfig config) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(config.getOperationalStringName()).append("/").append(config.getName());
         return sb.toString();
     }
 }
