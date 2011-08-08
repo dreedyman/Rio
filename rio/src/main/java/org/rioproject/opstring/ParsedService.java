@@ -42,7 +42,9 @@ public class ParsedService extends GlobalAttrs{
     public static final String FIXED="fixed";
     /** Default array of export jar names */
     public static final String[] DEFAULT_EXPORT_JARS = new String[]{"rio-dl.jar",
-                                                                    "jsk-dl.jar"};
+                                                                    "jsk-dl.jar",
+                                                                    "jmx-lookup.jar",
+                                                                    "serviceui.jar"};
     /** Default name of the service interface class */
     public static final String DEFAULT_SERVICE_INTERFACE  = Service.class.getName();
     /** Name of the service */
@@ -524,7 +526,7 @@ public class ParsedService extends GlobalAttrs{
          String[] fdhConfig;    
          ServiceLevelAgreements slaAgreements; 
          */
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("ParsedService : ").append(name).append("\n");
         buffer.append("Use Name      : ").append(useName).append("\n");
         buffer.append("JMX Name      : ").append(jmxName == null ? "<null>" : jmxName).append("\n");
