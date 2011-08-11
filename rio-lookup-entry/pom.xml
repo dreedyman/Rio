@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"     
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>main</artifactId>
+        <groupId>org.rioproject</groupId>
+        <version>5.0-SNAPSHOT</version>
+    </parent>
+    <groupId>org.rioproject</groupId>
+    <artifactId>rio-lookup-entry</artifactId>
+    <name>Module :: Rio Lookup Entries</name>
+    <packaging>jar</packaging>
+    <description>Classes that act as attributes for service registration into the lookup service. </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.jini</groupId>
+            <artifactId>jsk-platform</artifactId>
+        </dependency>
+
+		<dependency>
+            <groupId>net.jini</groupId>
+            <artifactId>jsk-dl</artifactId>
+        </dependency>
+
+		<dependency>
+            <groupId>net.jini.lookup</groupId>
+            <artifactId>serviceui</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    
+    <build>
+	    <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <archive>                
+                        <manifestEntries>
+							<Implementation-Title>Rio Project</Implementation-Title>
+							<Implementation-Version>${project.version}</Implementation-Version>
+						    <Rio-Version>${project.version}</Rio-Version>
+						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
+						</manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+                        
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.6</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+	    </plugins>
+    </build>
+    
+</project>

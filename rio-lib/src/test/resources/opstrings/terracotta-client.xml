@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE opstring PUBLIC "-/RIO//DTD" "http://www.rio-project.org/dtd/rio_opstring.dtd">
+<opstring>
+
+   <OperationalString Name="Terracotta-SharedEditor">
+
+       <Groups>
+           <Group>rio</Group>
+       </Groups>
+
+       <ServiceExec Name="SharedEditor">
+           <SystemRequirements>
+               <SystemComponent Name="SoftwareSupport">
+                   <Attribute Name="Name" Value="Terracotta"/>
+                   <Attribute Name="Version" Value="2.4.8"/>
+               </SystemComponent>
+           </SystemRequirements>
+
+           <Exec>
+               <WorkingDirectory>samples/pojo/sharededitor</WorkingDirectory>
+               <CommandLine>run.sh</CommandLine>
+           </Exec>
+
+           <Maintain>1</Maintain>
+
+           <MaxPerMachine type="physical">1</MaxPerMachine>
+
+       </ServiceExec>
+
+   </OperationalString>
+</opstring>

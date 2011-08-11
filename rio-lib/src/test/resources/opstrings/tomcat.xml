@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE opstring PUBLIC "-/RIO//DTD" "http://www.rio-project.org/dtd/rio_opstring.dtd">
+<opstring>
+
+    <OperationalString Name="Tomcat Deploy">
+
+        <Groups>
+            <Group>rio</Group>
+        </Groups>
+
+        <ServiceExec Name="Tomcat">
+            <SystemRequirements>
+                <SystemComponent Name="SoftwareSupport">
+                    <Attribute Name="Name" Value="Tomcat"/>
+                    <Attribute Name="Version" Value="6.0.16"/>
+                    <SoftwareLoad RemoveOnDestroy="yes">
+                        <Download Source="apache-tomcat-6.0.16.zip"
+                                  InstallRoot="${RIO_HOME}/system/external/tomcat"
+                                  Unarchive="yes">
+                            <Location>https://elastic-grid.s3.amazonaws.com/tomcat/</Location>
+                        </Download>
+                        <PostInstall RemoveOnCompletion="no">
+                            <Exec>
+                                <CommandLine>/bin/chmod</CommandLine>
+                                <InputArg>+x ${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh</InputArg>
+                            </Exec>
+                        </PostInstall>
+                    </SoftwareLoad>
+                </SystemComponent>
+            </SystemRequirements>
+
+            <Data Unarchive="yes" Perms="ugo+rwx">
+                <FileName>sample.war</FileName>
+                <Source>https://elastic-grid.s3.amazonaws.com/tomcat/</Source>
+                <Target>${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/webapps</Target>
+            </Data>
+
+            <Exec>
+                <WorkingDirectory>bin</WorkingDirectory>
+                <CommandLine>catalina.sh</CommandLine>
+                <InputArg>start</InputArg>
+                <PidFile>/tmp/tomcat.pid</PidFile>
+            </Exec>
+
+            <Maintain>1</Maintain>
+
+        </ServiceExec>
+
+    </OperationalString>
+</opstring>

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE opstring PUBLIC "-/RIO//DTD" "http://www.rio-project.org/dtd/rio_opstring.dtd" [
+        <!ENTITY Local.IP SYSTEM "java://java.net.InetAddress.getLocalHost().getHostAddress()" >
+        <!ENTITY Local.Port "9000" >
+        <!ENTITY CodeServerURL "http://&Local.IP;:&Local.Port;/" >
+        <!ENTITY group SYSTEM "java://java.lang.System.getProperty(MUVES_GROUP)">
+        ]>
+<opstring>
+    <OperationalString Name="Muves">
+         <!-- Declares the codebase to download JARs from for all rtservice
+         in this OperationalString -->
+         <Codebase>&CodeServerURL;</Codebase>
+
+        <Groups>
+            <Group>${user.name}</Group>
+        </Groups>
+
+        <!--
+        The configuration for the services is loaded as a classpath resources.
+        All services in this opstring use the same configuration file. Declaring
+        the configuration globally allows all services to "inherit" this
+        declaration
+        -->
+        <Configuration file="classpath:gomez.config"/>
+
+        <!--
+        This association results in a dynamic proxy being injected to the
+        Worker and Job Monitor service beans. The opposed attribute also
+        ensures that the service beans declared here are provisioned in a
+        different Cybernode then the Task Space.
+
+        The strategy is used to ensure invocations made to a result space are
+        not made if the task space is running out of memory
+        -->
+        <Association Type="opposed" Interface="net.jini.space.JavaSpace05"
+                     Name="Task Space" Property="taskSpace">
+            <Management Proxy="net.gomez.provider.space.SpaceProxy"
+                        Strategy="org.rioproject.associations.strategy.Utilization"
+                        ProxyType="cglib"/>
+        </Association>
+
+        <!--
+        This association is used to ensure that the service beans declared
+        here are provisioned in a different Cybernode the the Result Space.
+
+        The strategy is used to ensure invocations made to a result space are
+        not made if the result space is running out of memory
+        -->
+        <Association Type="opposed" Interface="net.jini.space.JavaSpace05"
+                     Name="Result Space">
+            <Management Proxy="net.gomez.provider.space.SpaceProxy"
+                        Strategy="org.rioproject.associations.strategy.Utilization"
+                        ProxyType="cglib"/>
+        </Association>
+
+        <Logging>
+            <Logger Name="net.gomez.provider.space.TakeInterceptor" Level="WARNING">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="WARNING"/>
+            </Logger>
+            
+            <Logger Name="net.gomez.provider.space.SpaceSession" Level="WARNING">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="WARNING"/>
+            </Logger>
+
+            <Logger Name="net.gomez.fester.FesterImpl" Level="INFO">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="FINEST"/>
+            </Logger>
+
+            <Logger Name="net.gomez.fester.FesterImpl.FesterTaker" Level="INFO">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="FINEST"/>
+            </Logger>
+
+            <Logger Name="net.gomez.worker" Level="WARNING">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="WARNING"/>
+            </Logger>
+
+            <Logger Name="net.gomez.jobmonitor" Level="INFO">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="INFO"/>
+            </Logger>
+
+            <Logger Name="mil.army.arl.muves.task.MuvesTaskPreparer" Level="INFO">
+                <Handler ClassName="java.util.logging.ConsoleHandler"
+                         Level="FINEST"/>
+            </Logger>
+        </Logging>
+
+        <Resources id="impl.jars">
+            <JAR>lib/gomez/worker.jar</JAR>
+            <JAR>lib/arl/arl-authenticator-impl.jar</JAR>
+            <JAR>lib/arl/arl-authenticator.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice.jar</JAR>
+            <JAR>lib/arl/arl-dbservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-dbservice.jar</JAR>
+            <JAR>lib/arl/arl-geometryservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-geometryservice.jar</JAR>
+            <JAR>lib/arl/arl-jobindexer-impl.jar</JAR>
+            <JAR>lib/arl/arl-jobindexer.jar</JAR>
+            <JAR>lib/arl/arl-loggingservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-loggingservice.jar</JAR>
+            <JAR>lib/arl/arl-resources.jar</JAR>
+            <JAR>lib/arl/arl-sl.jar</JAR>
+            <JAR>lib/arl/arl-support.jar</JAR>
+            <JAR>lib/arl/arl-tasks.jar</JAR>
+            <JAR>lib/arl/arl-vlservice-impl.jar</JAR>
+            <JAR>lib/arl/arl-vlservice.jar</JAR>
+            <JAR>lib/hibernate3.jar</JAR>
+            <JAR>lib/ojdbc14.jar</JAR>
+            <JAR>lib/log4j-1.2.11.jar</JAR>
+            <JAR>lib/dom4j-1.6.1.jar</JAR>
+            <JAR>lib/commons-logging-1.0.4.jar</JAR>
+            <JAR>lib/commons-collections-2.1.1.jar</JAR>
+            <JAR>lib/commons-digester-1.6.jar</JAR>
+            <JAR>lib/commons-beanutils-core-1.7.0.jar</JAR>
+            <JAR>lib/jta.jar</JAR>
+            <JAR>lib/antlr-2.7.5H3.jar</JAR>
+            <JAR>lib/xerces-2.6.2.jar</JAR>
+        </Resources>
+
+        <Resources id="client.jars">
+            <JAR>lib/gomez/worker-dl.jar</JAR>
+            <JAR>lib/arl/arl-authenticator-dl.jar</JAR>
+            <JAR>lib/arl/arl-authenticator.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice-dl.jar</JAR>
+            <JAR>lib/arl/arl-brlcadservice.jar</JAR>
+            <JAR>lib/arl/arl-dbservice-dl.jar</JAR>
+            <JAR>lib/arl/arl-dbservice.jar</JAR>
+            <JAR>lib/arl/arl-geometryservice-dl.jar</JAR>
+            <JAR>lib/arl/arl-geometryservice.jar</JAR>
+            <JAR>lib/arl/arl-jobindexer-dl.jar</JAR>
+            <JAR>lib/arl/arl-jobindexer.jar</JAR>
+            <JAR>lib/arl/arl-loggingservice-dl.jar</JAR>
+            <JAR>lib/arl/arl-loggingservice.jar</JAR>
+            <JAR>lib/arl/arl-resources.jar</JAR>
+            <JAR>lib/arl/arl-sl-dl.jar</JAR>
+            <JAR>lib/arl/arl-sl.jar</JAR>
+            <JAR>lib/arl/arl-support.jar</JAR>
+            <JAR>lib/arl/arl-tasks.jar</JAR>
+            <JAR>lib/arl/arl-vlservice-dl.jar</JAR>
+            <JAR>lib/arl/arl-vlservice.jar</JAR>
+            <JAR>lib/jscience.jar</JAR>
+            <JAR>lib/hibernate3.jar</JAR>
+            <JAR>lib/log4j-1.2.11.jar</JAR>
+            <JAR>lib/dom4j-1.6.1.jar</JAR>
+            <JAR>lib/commons-logging-1.0.4.jar</JAR>
+            <JAR>lib/commons-collections-2.1.1.jar</JAR>
+        </Resources>
+
+        <ServiceBean Name="Worker">
+            <Interfaces>
+                <Interface>net.gomez.worker.Worker</Interface>
+                <Resources ref="client.jars"/>
+            </Interfaces>
+            <ImplementationClass Name="net.gomez.worker.WorkerImpl">
+                <Resources ref="impl.jars"/>
+                <Resources>
+                    <JAR>lib/jscience.jar</JAR>
+                </Resources>
+            </ImplementationClass>
+
+            <Parameters>
+                <Parameter Name="doSpin" Value="false"/>
+            </Parameters>
+
+            <Maintain>3</Maintain>
+
+            <MaxPerMachine type="physical">1</MaxPerMachine>
+
+        </ServiceBean>
+
+        <ServiceBean Name="Job Monitor">
+            <Interfaces>
+                <Interface>net.gomez.jobmonitor.JobMonitor</Interface>
+                <Resources ref="client.jars"/>
+            </Interfaces>
+            <ImplementationClass Name="net.gomez.jobmonitor.JobMonitorImpl">
+                <Resources ref="impl.jars"/>
+            </ImplementationClass>
+
+            <Maintain>1</Maintain>
+
+        </ServiceBean>
+
+        <ServiceBean Name="Lurch">
+            <Interfaces>
+                <Interface>net.gomez.lurch.Lurch</Interface>
+                <Resources ref="client.jars"/>
+            </Interfaces>
+            <ImplementationClass Name="net.gomez.lurch.LurchImpl">
+                <Resources ref="impl.jars"/>
+            </ImplementationClass>
+
+            <Maintain>1</Maintain>
+
+            <Association Type="uses" Interface="net.gomez.jobmonitor.JobMonitor"
+                         Name="Job Monitor" Property="jobMonitor"/>
+
+            <Association Type="uses" Interface="org.rioproject.watch.Watchable"
+                         Name="Job Monitor" Property="watchables"/>
+
+        </ServiceBean>
+
+        <ServiceBean Name="Fester">
+            <Interfaces>
+                <Interface>net.gomez.fester.Fester</Interface>
+                <Resources ref="client.jars"/>
+            </Interfaces>
+            <ImplementationClass Name="net.gomez.fester.FesterImpl">
+                <Resources ref="impl.jars"/>
+                <Resources>
+                    <JAR>lib/jscience.jar</JAR>
+                    <JAR>lib/activemq/activemq-core-5.0.0.jar</JAR>
+                    <JAR>lib/activemq/geronimo-jms_1.1_spec-1.0.jar</JAR>
+                    <JAR>lib/activemq/jaxb-api-2.0.jar</JAR>
+                    <JAR>lib/activemq/jaxb-impl-2.0.3.jar</JAR>
+                    <JAR>lib/activemq/commons-logging-1.1.jar</JAR>
+                </Resources>
+            </ImplementationClass>
+
+            <Maintain>1</Maintain>
+
+            <!-- should be using global association
+            <Association Type="uses" Interface="net.jini.space.JavaSpace05"
+                         Name="Result Space" Property="resultSpace"/>
+            -->
+
+        </ServiceBean>
+
+        <ServiceBean Name="GeometryService">
+            <Interfaces>
+                <Interface>mil.army.arl.geometryservice.GeometryService</Interface>
+                <Resources ref="client.jars"/>
+                <Resources>
+                    <JAR>lib/arl/arl-support.jar</JAR>
+                    <JAR>lib/jscience.jar</JAR>
+                    <JAR>lib/arl/arl-brlcadservice-dl.jar</JAR>
+                </Resources>
+            </Interfaces>
+
+            <ImplementationClass Name="mil.army.arl.brlcadservice.impl.BrlcadServiceImpl">
+                <Resources ref="impl.jars"/>
+                <Resources>
+                    <JAR>lib/arl/arl-support.jar</JAR>
+                    <JAR>lib/jscience.jar</JAR>
+                    <JAR>lib/log4j-1.2.11.jar</JAR>
+                    <JAR>lib/arl/arl-brlcadservice.jar</JAR>
+                    <SharedComponent>
+                        <ClassName>mil.army.arl.brlcadservice.impl.BrlcadJNIWrapper</ClassName>
+                        <JAR>lib/arl/arl-brlcadservice.jar</JAR>
+                        <JAR>lib/jscience.jar</JAR>
+                    </SharedComponent>
+                </Resources>
+            </ImplementationClass>
+
+            <SystemRequirements>
+                <SystemComponent Name="NativeLibrarySupport">
+                    <Attribute Name="Name" Value="LinuxBrlcadServer"/>
+                    <SoftwareLoad RemoveOnDestroy="yes">
+                        <Download Source="lib/arl/brlcadserverlibs.zip"
+                                  InstallRoot="brlcadserverlibs"
+                                  Unarchive="yes">
+                            <Location>&CodeServerURL;</Location>
+                        </Download>
+                    </SoftwareLoad>
+                </SystemComponent>
+            </SystemRequirements>
+
+            <Configuration>
+                import mil.army.arl.brlcadservice.datatypes.BRLCADEntry;
+                GeometryService {
+                BRLCADEntry = new BRLCADEntry( 1, 8, "t62.g", "component");
+                }
+            </Configuration>
+
+            <Logging>
+                <Logger Name="mil.army.arl.brlcadservice" Level="INFO"/>
+            </Logging>
+
+            <Maintain>3</Maintain>
+
+            <!--<MaxPerMachine>1</MaxPerMachine>-->
+            <MaxPerMachine type="physical">1</MaxPerMachine>
+
+
+            <Comment>BrlcadService</Comment>
+        </ServiceBean>
+
+        <Include>outrigger_lite.xml</Include>
+
+    </OperationalString>
+</opstring>
