@@ -27,6 +27,7 @@ import net.jini.discovery.DiscoveryLocatorManagement;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.lookup.entry.jmx.JMXProperty;
 import net.jini.lookup.entry.jmx.JMXProtocolType;
+import org.rioproject.resources.servicecore.ServiceStopHandler;
 import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.jmx.JMXUtil;
@@ -611,49 +612,9 @@ public class CLI {
         }
 
         public void destroyService(ServiceItem item, PrintStream out) {
-            destroyService(item.service,
-                           ServiceFinder.getName(item.attributeSets),
-                           out);
-        }
-
-        public void destroyService(Object proxy, String name, PrintStream out) {
-            if(proxy==null)
-               return;
-            Object admin;
-            if(!(proxy instanceof Administrable)) {
-                //System.err.println("Unable to acquire Administrable "+
-                //                   "interface for ["+name+"], proxy does not " +
-                //                   "implement Administrable");
-                return;
-            }
-            try {
-                admin = ((Administrable)proxy).getAdmin();
-            } catch(RemoteException e) {
-                //System.err.println("Unable to acquire Administrable " +
-                //                   "interface for "+
-                //                   "["+name+"], Exception : "+e.getMessage());
-                return;
-            }
-            for(int i=1; i<3; i++) {
-                try {
-                    ((DestroyAdmin)admin).destroy();
-                    out.println("Destroyed "+name);
-                    break;
-                } catch(Exception e) {
-                    if(!ThrowableUtil.isRetryable(e)) {
-                        break;
-                    }
-                    System.err.println("Unable to destroy "+
-                                       "["+name+"], Exception : "+
-                                       e.getMessage()+
-                                       "Retry ["+i+"]");
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e1) {
-                        /* ignore */
-                    }
-                }
-            }
+            ServiceStopHandler.destroyService(item.service,
+                                              ServiceFinder.getName(item.attributeSets),
+                                              out);
         }
 
         void destroyFromRegistry(PrintStream out) {
@@ -674,7 +635,7 @@ public class CLI {
                         String[] registered = registry.list();
                         for (String aRegistered : registered) {
                             Object proxy = registry.lookup(aRegistered);
-                            destroyService(proxy, aRegistered, out);
+                            ServiceStopHandler.destroyService(proxy, aRegistered, out);
                         }
                     } catch (ConnectException e) {
                         //out.println("Exception getting service from registry, "+
@@ -1460,8 +1421,7 @@ public class CLI {
                 commandArgs.removeFirst();
             }
             if(createConfig) {
-                sysConfig =
-                    ConfigurationProvider.getInstance(new String[]{args[0]});
+                sysConfig = ConfigurationProvider.getInstance(new String[]{args[0]});
             }
         }
 

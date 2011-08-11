@@ -42,13 +42,13 @@ import org.rioproject.opstring.OpStringManagerProxy
 import org.rioproject.resources.client.DiscoveryManagementPool
 import org.rioproject.resources.client.JiniClient
 import org.rioproject.util.PropertyHelper
-import org.rioproject.tools.cli.CLI.StopHandler
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
 import org.rioproject.opstring.OperationalStringException
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resolver.Artifact
+import org.rioproject.resources.servicecore.ServiceStopHandler
 
 /**
  * Simplifies the running of core Rio services
@@ -494,7 +494,7 @@ class TestManager {
         if(service==null)
             throw new IllegalArgumentException("service proxy is null for ${name}")
 
-        StopHandler stopHandler = new StopHandler();
+        ServiceStopHandler stopHandler = new ServiceStopHandler();
         stopHandler.destroyService(service, name, System.out)
     }
 
