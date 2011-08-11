@@ -1,0 +1,39 @@
+package org.rioproject.gnostic;
+
+import org.rioproject.system.measurable.cpu.CalculableCPU;
+import org.rioproject.system.measurable.memory.CalculableMemory;
+import org.rioproject.gnostic.test.TestService;
+import org.rioproject.gnostic.test.TestService.Status;
+
+global org.rioproject.gnostic.DeployedServiceContext context;
+
+declare CalculableCPU
+    @role(event)
+    @timestamp(date)
+end
+
+declare CalculableMemory
+    @role(event)
+    @timestamp(date)
+end
+
+rule "System Utilization Rule"
+when
+     $cpu : Number(doubleValue > 0.02)
+              from accumulate(CalculableCPU($value : value) over window:time(1m)
+              from entry-point "calculables-stream", average($value))
+     $mem : Number(doubleValue > 0.1)
+              from accumulate(CalculableMemory($value : value) over window:time(1m)
+              from entry-point "calculables-stream", average($value))
+then
+    try {
+    System.out.println("===> System is over utilized, cpu: "+$cpu+", memory: "+$mem);
+    //System.out.println("===> "+Thread.currentThread().getContextClassLoader().getClass().getName());
+    TestService t = context.getService("S3", "Test Deploy 3", TestService.class);
+    System.out.println("===> TestService: "+t);
+    t.setStatus(Status.DISALLOWED);
+    System.out.println("===> After call to TestService: "+t.getStatus().toString());
+    } catch(Throwable th) {
+    th.printStackTrace();
+    }
+end
