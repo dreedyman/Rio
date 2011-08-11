@@ -16,14 +16,14 @@
 package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.core.OperationalStringManager;
-import org.rioproject.core.ServiceBeanInstance;
-import org.rioproject.core.ServiceElement;
-import org.rioproject.core.provision.ServiceRecord;
+import org.rioproject.deploy.ServiceRecord;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.cybernode.Cybernode;
-import org.rioproject.monitor.DeployAdmin;
+import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.resources.util.TimeUtil;
+import org.rioproject.util.TimeUtil;
 import org.rioproject.tools.cli.ServiceFinder.ServiceInfo;
 
 import java.io.BufferedReader;

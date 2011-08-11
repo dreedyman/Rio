@@ -32,7 +32,7 @@ import org.rioproject.config.Constants;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.RioVersion;
 import org.rioproject.resources.util.ThrowableUtil;
-import org.rioproject.resources.util.TimeUtil;
+import org.rioproject.util.TimeUtil;
 import org.rioproject.tools.discovery.ReggieStat;
 import org.rioproject.tools.webster.Webster;
 

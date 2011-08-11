@@ -108,6 +108,15 @@
                 <exclude>net.jini:jsk-dl</exclude>
                 <exclude>net.jini.lookup:jmx-lookup</exclude>
                 <exclude>net.jini.lookup:serviceui</exclude>
+                <exclude>com.sun.jini:reggie:jar:dl</exclude>
+                <exclude>org.rioproject.cybernode:cybernode-api:jar</exclude>
+                <exclude>org.rioproject.cybernode:cybernode-proxy:jar</exclude>
+                <exclude>org.rioproject.cybernode:cybernode-ui:jar</exclude>
+                <exclude>org.rioproject.monitor:monitor-api:jar</exclude>
+                <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
+                <exclude>org.rioproject:rio-api:jar</exclude>
+                <exclude>org.rioproject:rio-lookup-entry:jar</exclude>
+                <exclude>org.rioproject:watch-ui</exclude>
                 <exclude>junit:junit</exclude>
                 <exclude>ant:*</exclude>
                 <exclude>jline:*</exclude>
@@ -127,7 +136,7 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <!-- Get jsk-dl.jar and put into the lib-dl directory -->
+        <!-- Get jsk-dl.jar, jmx-lookup.jar and serviceui.jar into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
@@ -139,40 +148,33 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <!-- The rest of the service download (-dl) jars go into the lib-dl directory -->
+        <!-- Get reggie-dl.jar and put into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>com.sun.jini:reggie:jar:dl</include>
-                <include>org.rioproject:cybernode:jar:dl</include>
-                <include>org.rioproject:monitor:jar:dl</include>
-                <include>org.rioproject:rio:jar:dl</include>
-                <!--<include>org.rioproject:gnostic:jar:dl</include>-->
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}-dl.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <!-- We also put the service user interface (-ui) jars on the download directory -->
+        <!-- The rest of the service download (-api, -proxy and -ui) jars go into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
-                <include>org.rioproject:cybernode:jar:ui</include>
+                <include>org.rioproject.cybernode:cybernode-api:jar</include>
+                <include>org.rioproject.cybernode:cybernode-proxy:jar</include>
+                <include>org.rioproject.cybernode:cybernode-ui:jar</include>
+                <include>org.rioproject.monitor:monitor-api:jar</include>
+                <include>org.rioproject.monitor:monitor-proxy:jar</include>
+                <include>org.rioproject:rio-api:jar</include>
+                <include>org.rioproject:rio-lookup-entry:jar</include>
+                <include>org.rioproject:watch-ui</include>
+                <!--<include>org.rioproject:gnostic:jar:dl</include>-->
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}-ui.${artifact.extension}</outputFileNameMapping>
-        </dependencySet>
-
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <useStrictFiltering>true</useStrictFiltering>
-            <includes>
-                <include>org.rioproject:rio:jar:ui</include>
-            </includes>
-            <outputDirectory>lib-dl</outputDirectory>
-            <outputFileNameMapping>watch-ui.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <dependencySet>

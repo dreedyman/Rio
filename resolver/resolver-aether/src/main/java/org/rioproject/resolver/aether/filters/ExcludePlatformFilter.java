@@ -32,8 +32,11 @@ public class ExcludePlatformFilter implements DependencyFilter {
     public ExcludePlatformFilter() {
         String prunePlatformProperty = System.getProperty("org.rioproject.resolver.prune.platform");
         boolean prunePlatform = prunePlatformProperty == null || prunePlatformProperty.equals("true");
-        if (prunePlatform)
-            excludes.add("org.rioproject:rio");
+        if (prunePlatform) {
+            excludes.add("org.rioproject:rio-lib");
+            excludes.add("org.codehaus.groovy:groovy-all");
+            excludes.add("net.jini:jsk-platform");
+        }
     }
 
     @Override

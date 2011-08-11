@@ -15,8 +15,8 @@
  */
 package org.rioproject.test.bean
 
-import org.rioproject.core.JSBInstantiationException
 import org.rioproject.cybernode.StaticCybernode
+import org.rioproject.deploy.ServiceBeanInstantiationException
 
 /**
  * Test loading service config
@@ -34,7 +34,7 @@ class ServiceConfigTest extends GroovyTestCase {
             thrown = t
         }
         assertNotNull thrown
-        assertEquals JSBInstantiationException.class.name, thrown.getClass().name
+        assertEquals ServiceBeanInstantiationException.class.name, thrown.getClass().name
         cybernode.destroy()
     }
 
@@ -92,7 +92,7 @@ class ServiceConfigTest extends GroovyTestCase {
             thrown = t
         }
         assertNotNull thrown
-        assertEquals JSBInstantiationException.class.name, thrown.getClass().name
+        assertEquals ServiceBeanInstantiationException.class.name, thrown.getClass().name
         cybernode.destroy()
     }
 

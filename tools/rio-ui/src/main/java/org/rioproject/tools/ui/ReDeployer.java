@@ -15,11 +15,11 @@
  */
 package org.rioproject.tools.ui;
 
-import org.rioproject.core.OperationalStringManager;
-import org.rioproject.core.ServiceBeanInstance;
-import org.rioproject.core.ServiceElement;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 
 /**
  * Redeploy utilities

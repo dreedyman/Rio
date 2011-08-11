@@ -64,14 +64,14 @@ Codebase: none<br>
 the common Rio and
 Jini technology classes (and other declared common platform JARs) to be
 made available to its children.<br>
-Classpath: Common JARs such as rio.jar<br>
+Classpath: Common JARs such as rio-lib.jar<br>
 Codebase: Context dependent. The codebase returned is the codebase of
 the specific child CL that is the current context of the request.<br>
 <br>
 <span style="font-weight: bold;">Service-nCL</span> - Contains the
 service specific implementation classes.<br>
 Classpath: serviceImpl.jar<br>
-Codebase: "serviceX-dl.jar rio-dl.jar jsk-lib-dl.jar"<br>
+Codebase: "serviceX-dl.jar rio-api.jar jsk-lib-dl.jar"<br>
 
  @author Dennis Reedy
  */

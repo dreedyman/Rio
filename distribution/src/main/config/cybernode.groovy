@@ -8,7 +8,7 @@ import org.rioproject.fdh.FaultDetectionHandlerFactory
 import org.rioproject.resources.client.JiniClient
 
 import net.jini.core.discovery.LookupLocator
-import org.rioproject.core.ClassBundle
+import org.rioproject.opstring.ClassBundle
 import org.rioproject.config.Constants
 import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler

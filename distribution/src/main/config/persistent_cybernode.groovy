@@ -3,7 +3,7 @@
  */
 import org.rioproject.config.Component
 import org.rioproject.cybernode.PersistentServiceStatementManager
-import org.rioproject.core.provision.ServiceStatementManager
+import org.rioproject.deploy.ServiceStatementManager
 import net.jini.config.Configuration
 
 /*

@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.core.OperationalStringManager;
+import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.test.IfPropertySet;
 import org.rioproject.test.RioTestRunner;

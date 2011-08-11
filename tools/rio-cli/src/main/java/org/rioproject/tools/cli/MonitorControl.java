@@ -16,12 +16,11 @@
 package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.core.OperationalString;
-import org.rioproject.core.OperationalStringException;
-import org.rioproject.core.OperationalStringManager;
-import org.rioproject.monitor.DeployAdmin;
-import org.rioproject.opstring.OAR;
-import org.rioproject.opstring.OpStringLoader;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.tools.webster.Webster;
 

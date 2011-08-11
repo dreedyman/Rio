@@ -9,7 +9,7 @@ import net.jini.jrmp.JrmpExporter
 
 import org.rioproject.config.Component
 import org.rioproject.config.Constants
-import org.rioproject.core.ClassBundle
+import org.rioproject.opstring.ClassBundle
 import org.rioproject.log.LoggerConfig
 import org.rioproject.monitor.selectors.LeastActiveSelector
 import org.rioproject.monitor.selectors.ServiceResourceSelector

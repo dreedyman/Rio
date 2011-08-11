@@ -10,7 +10,7 @@
     </parent>
     <packaging>pom</packaging>
     <groupId>org.rioproject</groupId>
-    <artifactId>tools</artifactId>
+    <artifactId>rio-tools</artifactId>
     <name>Module :: Tools</name>
 
     <modules>

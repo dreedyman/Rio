@@ -16,13 +16,13 @@
 package org.rioproject.tools.ui;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.core.OperationalStringException;
-import org.rioproject.core.OperationalStringManager;
-import org.rioproject.core.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.opstring.OperationalStringException;
+import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.entry.ApplianceInfo;
 import org.rioproject.jsb.ServiceElementUtil;
-import org.rioproject.monitor.DeployAdmin;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.ui.Util;
 import org.rioproject.tools.ui.serviceui.ServiceAdminManager;
 import org.rioproject.tools.ui.serviceui.ServiceElementPanel;
 import prefuse.Display;
@@ -43,7 +43,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A listener for graph actons
+ * A listener for graph actions
  *
  * @author Dennis Reedy
  */
@@ -64,7 +64,7 @@ public class GraphListener extends ControlAdapter {
         if (!(uo instanceof GraphNode))
             return;
         final GraphNode node = (GraphNode) uo;
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
         if (node.isOpString()) {
             buff.append("OperationalString: ")
                 .append(item.getString(VisualItem.LABEL));

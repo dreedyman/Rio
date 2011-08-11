@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 import org.junit.Assert
 import org.junit.Test
 import org.rioproject.monitor.ProvisionMonitor
-import org.rioproject.core.provision.ServiceBeanInstantiator
+import org.rioproject.deploy.ServiceBeanInstantiator
 import org.rioproject.test.RioTestRunner
 import org.rioproject.test.SetTestManager
 import org.rioproject.test.TestManager

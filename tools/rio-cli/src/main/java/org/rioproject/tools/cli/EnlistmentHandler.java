@@ -16,7 +16,7 @@
 package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.core.Schedule;
+import org.rioproject.opstring.Schedule;
 import org.rioproject.cybernode.Cybernode;
 
 import java.io.BufferedReader;

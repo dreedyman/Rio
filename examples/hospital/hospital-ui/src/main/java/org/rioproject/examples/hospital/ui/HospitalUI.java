@@ -19,15 +19,15 @@ import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceMatches;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
-import org.rioproject.core.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.examples.hospital.*;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.resources.servicecore.Service;
-import org.rioproject.resources.servicecore.ServiceAdmin;
+import org.rioproject.servicecore.Service;
+import org.rioproject.admin.ServiceAdmin;
 
 import javax.swing.*;
 import java.awt.*;

@@ -233,13 +233,21 @@ public class ServiceDescriptorUtil {
             throw new RuntimeException("RIO_HOME property not declared");
         String[] jars;
         if(System.getProperty("RIO_TEST_ATTACH")!=null)
-            jars = new String[]{"cybernode.jar", "rio-test.jar"};
+            jars = new String[]{"cybernode-service.jar", "rio-test.jar"};
          else
-            jars = new String[]{"cybernode.jar"};
-        //String[] jars = new String[]{"cybernode.jar", "resolver.jar"};
-        //String[] jars = new String[]{"cybernode.jar"};
+            jars = new String[]{"cybernode-service.jar"};
         String cybernodeClasspath = makePath(rioHome+File.separator+"lib", jars);
-        String[] dlJars = new String[]{"cybernode-dl.jar", "rio-dl.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
+        cybernodeClasspath = cybernodeClasspath+File.pathSeparator+makePath(rioHome+File.separator+"lib-dl",
+                                                                            "cybernode-proxy.jar",
+                                                                            "cybernode-api.jar");
+        String[] dlJars = new String[]{"cybernode-proxy.jar",
+                                       "cybernode-api.jar",
+                                       "rio-api.jar",
+                                       "jmx-lookup.jar",
+                                       "jsk-dl.jar",
+                                       "rio-lookup-entry.jar",
+                                       "resolver-api.jar",
+                                       "serviceui.jar"};
         String cybernodeCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
         String implClass = "org.rioproject.cybernode.CybernodeImpl";
         return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
@@ -313,14 +321,21 @@ public class ServiceDescriptorUtil {
             throw new RuntimeException("RIO_HOME property not declared");
         String[] jars;
         if(System.getProperty("RIO_TEST_ATTACH")!=null)
-            jars = new String[]{"monitor.jar", "rio-test.jar"};
+            jars = new String[]{"monitor-service.jar", "rio-test.jar"};
          else
-            jars = new String[]{"monitor.jar"};
-        //String[] jars = new String[]{"monitor.jar", "resolver.jar"};
-        //String[] jars = new String[]{"monitor.jar"};
+            jars = new String[]{"monitor-service.jar"};
         String monitorClasspath = makePath(rioHome+File.separator+"lib", jars);
-
-        String[] dlJars = new String[]{"monitor-dl.jar", "rio-dl.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
+        monitorClasspath = monitorClasspath+File.pathSeparator+makePath(rioHome+File.separator+"lib-dl",
+                                                                        "monitor-proxy.jar",
+                                                                        "monitor-api.jar");
+        String[] dlJars = new String[]{"monitor-proxy.jar",
+                                       "monitor-api.jar",
+                                       "rio-api.jar",
+                                       "jmx-lookup.jar",
+                                       "jsk-dl.jar",
+                                       "rio-lookup-entry.jar",
+                                       "resolver-api.jar",
+                                       "serviceui.jar"};
         String monitorCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
 
         String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";

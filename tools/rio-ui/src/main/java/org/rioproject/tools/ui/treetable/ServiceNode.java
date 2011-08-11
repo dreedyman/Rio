@@ -16,8 +16,8 @@
 package org.rioproject.tools.ui.treetable;
 
 import net.jini.id.Uuid;
-import org.rioproject.core.ServiceElement;
-import org.rioproject.core.provision.ServiceRecord;
+import org.rioproject.opstring.ServiceElement;
+import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.system.ComputeResourceUtilization;
 
 import javax.swing.tree.DefaultMutableTreeNode;

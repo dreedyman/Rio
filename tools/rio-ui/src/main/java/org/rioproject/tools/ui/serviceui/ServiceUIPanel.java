@@ -18,7 +18,6 @@ package org.rioproject.tools.ui.serviceui;
 import net.jini.admin.Administrable;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
-import net.jini.lookup.entry.Name;
 import net.jini.lookup.entry.ServiceInfo;
 import net.jini.lookup.entry.ServiceType;
 import net.jini.lookup.ui.factory.JComponentFactory;
@@ -26,8 +25,8 @@ import net.jini.lookup.ui.factory.JDialogFactory;
 import net.jini.lookup.ui.factory.JFrameFactory;
 import net.jini.lookup.ui.factory.JWindowFactory;
 import org.rioproject.entry.ApplianceInfo;
-import org.rioproject.resources.serviceui.UILoader;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.serviceui.UILoader;
+import org.rioproject.ui.Util;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,7 +54,6 @@ import java.util.TimerTask;
  * @author Dennis Reedy
  */
 public class ServiceUIPanel extends JPanel {
-    String svcName;
     /** Various push buttons */
     JButton dismissB, terminateB;
     /** The ServiceItem for the service */
@@ -70,15 +68,8 @@ public class ServiceUIPanel extends JPanel {
     /* List of loaded JComponent instances */
     java.util.List<JComponent> jComponentList = new ArrayList<JComponent>();
     Container parent;
-    public static final long DEFAULT_DELAY=1000*30;
 
-    public ServiceUIPanel(ServiceItem item, Container parent) throws Exception {
-        this(item, DEFAULT_DELAY, parent);
-    }
-
-    public ServiceUIPanel(ServiceItem item,
-                          long startupDelay,
-                          Container parent)
+    public ServiceUIPanel(ServiceItem item, long startupDelay, Container parent)
         throws Exception {
         super(new BorderLayout());
         this.item = item;
@@ -399,15 +390,6 @@ public class ServiceUIPanel extends JPanel {
         for (Entry attr : attrs) {
             if (attr instanceof ServiceType) {
                 return (ServiceType) attr;
-            }
-        }
-        return(null);
-    }
-
-    Name getName(Entry[] attrs) {
-        for (Entry attr : attrs) {
-            if (attr instanceof Name) {
-                return (Name) attr;
             }
         }
         return(null);

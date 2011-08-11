@@ -16,7 +16,7 @@
 package org.rioproject.tools.ui.prefs;
 
 import org.rioproject.tools.ui.*;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 
 import javax.swing.*;
 import java.awt.*;

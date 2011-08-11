@@ -15,7 +15,7 @@
  */
 package org.rioproject.tools.ui;
 
-import org.rioproject.core.ServiceElement;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
@@ -23,10 +23,8 @@ import org.rioproject.tools.ui.treetable.*;
 
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

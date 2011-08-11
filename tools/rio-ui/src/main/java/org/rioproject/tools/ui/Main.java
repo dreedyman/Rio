@@ -31,23 +31,22 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
-import org.rioproject.core.*;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
+import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.monitor.DeployAdmin;
+import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.opstring.OAR;
-import org.rioproject.opstring.OpStringLoader;
+import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.ui.GlassPaneContainer;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.GlassPaneContainer;
+import org.rioproject.ui.Util;
 import org.rioproject.resources.util.SecurityPolicyLoader;
 import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.system.ComputeResourceAdmin;
@@ -1162,11 +1161,7 @@ public class Main extends JFrame {
      * Update the compute resource utilization with a scheduled task
      */
     class ComputeResourceUtilizationTask implements Runnable {
-        final List<CybernodeAdmin> targets = new ArrayList<CybernodeAdmin>();
-
-        final Map<ServiceItem, CybernodeAdmin> adminTable =
-            new HashMap<ServiceItem, CybernodeAdmin>();
-
+        final Map<ServiceItem, CybernodeAdmin> adminTable = new HashMap<ServiceItem, CybernodeAdmin>();
         final List<ServiceItem> removals = new ArrayList<ServiceItem>();
         private boolean cancelled = false;
 
@@ -1330,10 +1325,7 @@ public class Main extends JFrame {
 
     private static String generateJiniOverride(long multicastAnnouncementInterval) {
         String lookupComponent = "net.jini.discovery.LookupDiscovery";
-        String lookupDiscoveryOverride =
-            lookupComponent+".multicastAnnouncementInterval="+
-            multicastAnnouncementInterval;
-        return lookupDiscoveryOverride;
+        return lookupComponent+".multicastAnnouncementInterval="+multicastAnnouncementInterval;
     }
 
     public static void main(String[] args) {

@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.core.provision.ServiceBeanInstantiator;
+import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.test.RioTestRunner;

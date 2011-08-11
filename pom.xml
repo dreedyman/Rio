@@ -357,24 +357,33 @@
         <module>plugins/maven-rio-plugin</module>
         <module>plugins/rio-archetype</module>
         <module>boot</module>
-        <module>rio</module>
+        <module>rio-api</module>
+        <module>rio-lib</module>
+        <module>rio-lookup-entry</module>
         <module>resolver/resolver-api</module>
         <module>resolver/resolver-aether</module>
         <module>resolver/resolver-project</module>
         <module>webster</module>
-        <module>services/cybernode</module>
-        <module>services/gnostic</module>
-        <module>services/monitor</module>
-        <module>tools</module>
+        <module>cybernode/cybernode-api</module>
+        <module>cybernode/cybernode-proxy</module>
+        <module>cybernode/cybernode-service</module>
+        <module>cybernode/cybernode-ui</module>
+        <module>gnostic</module>
+        <module>monitor/monitor-api</module>
+        <module>monitor/monitor-proxy</module>
+        <module>monitor/monitor-service</module>
+        <module>tools/rio-cli</module>
+        <module>tools/rio-ui</module>
         <module>rio-test</module>
         <module>examples</module>
         <module>distribution</module>
+        <module>watch-ui</module>
     </modules>
 
     <properties>
         <groovy.version>1.8.0</groovy.version>
         <rio.version>5.0-SNAPSHOT</rio.version>
-        <rio.plugin.version>4.2</rio.plugin.version>
+        <rio.plugin.version>5.0-SNAPSHOT</rio.plugin.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>

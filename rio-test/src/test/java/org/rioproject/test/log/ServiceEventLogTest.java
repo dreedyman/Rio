@@ -16,7 +16,7 @@
 package org.rioproject.test.log;
 
 import org.junit.runner.RunWith;
-import org.rioproject.core.OperationalStringManager;
+import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;

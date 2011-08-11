@@ -19,8 +19,9 @@ import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
 import org.rioproject.boot.BootUtil;
-import org.rioproject.core.*;
-import org.rioproject.opstring.OpStringLoader;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.opstring.*;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.system.ComputeResource;
 
@@ -105,9 +106,9 @@ public class StaticCybernode {
      * <tt>Cybernode</tt>. The service bean will have been instantiated with
      * an empty configuration.
      * 
-     * @throws JSBInstantiationException If the service bean cannot be created
+     * @throws org.rioproject.deploy.ServiceBeanInstantiationException If the service bean cannot be created
      */
-    public Object activate(String classname) throws JSBInstantiationException {
+    public Object activate(String classname) throws ServiceBeanInstantiationException {
         if(classname==null)
             throw new IllegalArgumentException("classname must not be null");
         ServiceBeanInstance instance =
@@ -147,7 +148,7 @@ public class StaticCybernode {
     }
 
     /** 
-     * Activate service beans defined in an {@link org.rioproject.core.OperationalString},
+     * Activate service beans defined in an {@link org.rioproject.opstring.OperationalString},
      * scoping the beans to be activated by providing the bean names.
      *
      * @param opstring The <tt>OperationalString</tt> document
@@ -155,10 +156,10 @@ public class StaticCybernode {
      * services in the opstring will be created
      * @return A map of bean name keys and service implementation object values
      *
-     * @throws JSBInstantiationException If the bean(s) cannot be created.
+     * @throws org.rioproject.deploy.ServiceBeanInstantiationException If the bean(s) cannot be created.
      */
     public Map<String, Object> activate(OperationalString opstring, String... beans)
-        throws JSBInstantiationException {
+        throws ServiceBeanInstantiationException {
         if(opstring==null)
             throw new IllegalArgumentException("opstring must not be null");
         Map<String, Object> map = new HashMap<String, Object>();
@@ -177,15 +178,15 @@ public class StaticCybernode {
 
     /**
      * Activate all service beans defined in an
-     * {@link org.rioproject.core.OperationalString}
+     * {@link org.rioproject.opstring.OperationalString}
      *
      * @param opstring The <tt>OperationalString</tt> document
      * @return A map of bean name keys and service implementation object values
      *
-     * @throws JSBInstantiationException If the bean(s) cannot be created.
+     * @throws org.rioproject.deploy.ServiceBeanInstantiationException If the bean(s) cannot be created.
      */
     public Map<String, Object> activate(OperationalString opstring)
-        throws JSBInstantiationException {
+        throws ServiceBeanInstantiationException {
         Map<String, Object> map = new HashMap<String, Object>();
         for(ServiceElement elem : opstring.getServices()) {
             map.put(elem.getName(), instantiateBean(elem));
@@ -211,9 +212,9 @@ public class StaticCybernode {
     }
 
     private Object instantiateBean(ServiceElement elem) throws
-                                                        JSBInstantiationException {
+                                                        ServiceBeanInstantiationException {
         if(elem.forkService())
-            throw new JSBInstantiationException("The StaticCybernode does not " +
+            throw new ServiceBeanInstantiationException("The StaticCybernode does not " +
                                                 "support the instantiation of a " +
                                                 "service declared to be forked");
         ServiceBeanInstance instance =

@@ -24,10 +24,10 @@ import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import org.rioproject.core.OperationalString;
-import org.rioproject.core.ServiceBeanInstance;
-import org.rioproject.core.ServiceElement;
-import org.rioproject.core.ServiceProvisionListener;
+import org.rioproject.deploy.ServiceProvisionListener;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.opstring.ServiceElement;
 
 import java.rmi.RemoteException;
 import java.rmi.server.ExportException;
@@ -37,7 +37,7 @@ import java.rmi.server.ExportException;
  *
  * @author Dennis Reedy
  */
- public class ServiceProvisionNotification implements ServiceProvisionListener, 
+ public class ServiceProvisionNotification implements ServiceProvisionListener,
                                                       ServerProxyTrust {
      Exporter exporter;
      ServiceProvisionListener provisionListener;
@@ -130,7 +130,7 @@ import java.rmi.server.ExportException;
          receivedNotify();
      }
      
-     public void failed(ServiceElement sElem, boolean resubmitted) 
+     public void failed(ServiceElement sElem, boolean resubmitted)
      throws RemoteException {
          provisionFailures++;
          receivedNotify();

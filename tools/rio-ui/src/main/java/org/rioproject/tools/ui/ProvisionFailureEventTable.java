@@ -19,12 +19,12 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.discovery.DiscoveryManagement;
-import org.rioproject.core.ServiceElement;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.*;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 import org.rioproject.tools.ui.treetable.DeploymentNode;
 import org.rioproject.tools.ui.treetable.JTreeTable;
 import org.rioproject.tools.ui.treetable.RemoteServiceEventNode;
@@ -401,7 +401,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                     } else {
                         Util.showError(thrown,
                                        parent,
-                                       "Stacktrace for "+label);
+                                       "Stacktrace for " + label);
                     }
                 }
             }

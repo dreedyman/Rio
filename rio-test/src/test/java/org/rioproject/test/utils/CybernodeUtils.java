@@ -15,9 +15,9 @@
  */
 package org.rioproject.test.utils;
 
-import org.rioproject.core.ClassBundle;
-import org.rioproject.core.ServiceElement;
-import org.rioproject.core.provision.ServiceRecord;
+import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.ServiceElement;
+import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.Cybernode;
 
 import java.rmi.RemoteException;

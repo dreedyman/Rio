@@ -16,11 +16,11 @@
 package org.rioproject.tools.ui;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.core.provision.ServiceRecord;
+import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.jmx.JMXUtil;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.SystemWatchID;

@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rio</artifactId>
+            <artifactId>rio-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -40,8 +40,8 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cybernode</artifactId>
+            <groupId>${project.groupId}.cybernode</groupId>
+            <artifactId>rio-cybernode-service</artifactId>
             <version>${project.version}</version>
         </dependency>
 

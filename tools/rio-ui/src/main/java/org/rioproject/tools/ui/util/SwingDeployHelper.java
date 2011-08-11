@@ -16,11 +16,11 @@
 package org.rioproject.tools.ui.util;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.core.OperationalString;
-import org.rioproject.core.OperationalStringException;
-import org.rioproject.monitor.DeployAdmin;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
+import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 import org.rioproject.tools.ui.progresspanel.WaitingDialog;
 
 import javax.swing.*;
@@ -117,7 +117,7 @@ public class SwingDeployHelper {
                                                       "Deployment Failure",
                                                       JOptionPane.ERROR_MESSAGE);
                     } else {
-                        Util.showError(e, frame, "Failure trying to deploy artifact" +artifact);
+                        Util.showError(e, frame, "Failure trying to deploy artifact" + artifact);
                     }
                 }
                 return null;

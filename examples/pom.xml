@@ -28,7 +28,7 @@
 
     <properties>
         <rio.version>5.0-SNAPSHOT</rio.version>
-        <rio.plugin.version>4.2</rio.plugin.version>
+        <rio.plugin.version>5.0-SNAPSHOT</rio.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -36,7 +36,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.rioproject</groupId>
-                <artifactId>rio</artifactId>
+                <artifactId>rio-lib</artifactId>
                 <version>${rio.version}</version>
             </dependency>
 

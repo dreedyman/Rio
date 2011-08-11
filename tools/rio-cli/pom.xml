@@ -4,9 +4,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-       <artifactId>tools</artifactId>
+       <artifactId>main</artifactId>
        <groupId>org.rioproject</groupId>
        <version>5.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject</groupId>
     <artifactId>rio-cli</artifactId>
@@ -16,7 +17,19 @@
     <dependencies>
         <dependency>
             <groupId>org.rioproject</groupId>
-            <artifactId>rio</artifactId>
+            <artifactId>rio-lib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject.cybernode</groupId>
+            <artifactId>cybernode-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject.monitor</groupId>
+            <artifactId>monitor-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

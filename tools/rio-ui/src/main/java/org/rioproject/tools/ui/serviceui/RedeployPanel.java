@@ -15,8 +15,8 @@
  */
 package org.rioproject.tools.ui.serviceui;
 
-import org.rioproject.core.Schedule;
-import org.rioproject.resources.util.TimeUtil;
+import org.rioproject.opstring.Schedule;
+import org.rioproject.util.TimeUtil;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;

@@ -337,12 +337,16 @@ public class PlatformLoader {
             throw new Exception(rioHome+" does not exist");
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig();
-        File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio.jar");
+        File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio-lib.jar");
+        /*File rioAPIJar = new File(rioHomeDir, "lib-dl"+File.separator+"rio-api.jar");
+        File rioLookupAttributesJar = new File(rioHomeDir, "lib-dl"+File.separator+"rio-lookup-entry.jar");*/
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");
         rioCap.setName("Rio");
         rioCap.setVersion(RioVersion.VERSION);
-        rioCap.setClasspath(rioJar.getAbsolutePath());
+        rioCap.setClasspath(rioJar.getAbsolutePath()+File.pathSeparator/*+
+                            rioAPIJar.getAbsolutePath()+File.pathSeparator+
+                            rioLookupAttributesJar.getAbsolutePath()*/);
 
         PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig();
         File jskLibJar = new File(rioHomeDir, "lib"+File.separator+"jsk-lib.jar");

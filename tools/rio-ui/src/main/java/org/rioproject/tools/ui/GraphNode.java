@@ -15,10 +15,10 @@
  */
 package org.rioproject.tools.ui;
 
+import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.core.OperationalString;
-import org.rioproject.core.ServiceElement;
-import org.rioproject.core.ServiceBeanInstance;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.ServiceElement;
 import net.jini.core.lookup.ServiceItem;
 import prefuse.data.tuple.TableNode;
 

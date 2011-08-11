@@ -23,22 +23,20 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rio</artifactId>
+            <artifactId>rio-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rio</artifactId>
+            <artifactId>rio-api</artifactId>
             <version>${project.version}</version>
-            <classifier>dl</classifier>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rio</artifactId>
+            <artifactId>watch-ui</artifactId>
             <version>${project.version}</version>
-            <classifier>ui</classifier>
         </dependency>
 
         <dependency>
@@ -66,36 +64,21 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cybernode</artifactId>
+            <groupId>${project.groupId}.cybernode</groupId>
+            <artifactId>cybernode-service</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cybernode</artifactId>
-            <version>${project.version}</version>
-            <classifier>dl</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cybernode</artifactId>
-            <version>${project.version}</version>
-            <classifier>ui</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>monitor</artifactId>
+            <groupId>${project.groupId}.cybernode</groupId>
+            <artifactId>cybernode-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>monitor</artifactId>
+            <groupId>${project.groupId}.monitor</groupId>
+            <artifactId>monitor-service</artifactId>
             <version>${project.version}</version>
-            <classifier>dl</classifier>
         </dependency>
 
         <dependency>

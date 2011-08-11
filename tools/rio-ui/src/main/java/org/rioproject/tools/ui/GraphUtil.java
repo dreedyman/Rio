@@ -15,8 +15,8 @@
  */
 package org.rioproject.tools.ui;
 
-import org.rioproject.core.ServiceBeanInstance;
-import org.rioproject.core.ServiceElement;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.opstring.ServiceElement;
 import prefuse.Visualization;
 import prefuse.data.Graph;
 import prefuse.data.Node;

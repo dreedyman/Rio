@@ -17,7 +17,7 @@
 package org.rioproject.tools.ui.treetable;
 
 import org.rioproject.tools.ui.ColorManager;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 import org.rioproject.tools.ui.GraphViewAdapter;
 import org.rioproject.jsb.ServiceElementUtil;
 
@@ -345,7 +345,7 @@ public class JTreeTable extends JTable {
                         DefaultMutableTreeNode node =
                             (DefaultMutableTreeNode)tPath.getLastPathComponent();
                         Color color =
-                            Util.getRowColor((DefaultMutableTreeNode)t.getModel().getRoot(),
+                            Util.getRowColor((DefaultMutableTreeNode) t.getModel().getRoot(),
                                              node,
                                              t,
                                              getBackground(),

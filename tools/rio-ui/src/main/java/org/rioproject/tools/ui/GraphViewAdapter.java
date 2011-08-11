@@ -17,7 +17,7 @@ package org.rioproject.tools.ui;
 
 import net.jini.core.lookup.ServiceItem;
 import net.jini.id.Uuid;
-import org.rioproject.core.ServiceElement;
+import org.rioproject.opstring.ServiceElement;
 
 /**
  * Use as an interchange between the Cybernode tree table and the graph to

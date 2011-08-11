@@ -20,7 +20,7 @@ import net.jini.admin.Administrable;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.entry.ServiceType;
-import org.rioproject.resources.ui.Util;
+import org.rioproject.ui.Util;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
