@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>main</artifactId>
+        <groupId>org.rioproject</groupId>
+        <version>5.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <groupId>org.rioproject.cybernode</groupId>
+    <artifactId>cybernode-service</artifactId>
+    <name>Module :: Cybernode Service Implementation</name>
+    <packaging>jar</packaging>
+    
+    <dependencies>
+
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-lib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+         <dependency>
+            <groupId>org.rioproject.cybernode</groupId>
+            <artifactId>cybernode-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+         <dependency>
+            <groupId>org.rioproject.cybernode</groupId>
+            <artifactId>cybernode-proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+		    <groupId>net.jini.lookup</groupId>
+		    <artifactId>jmx-lookup</artifactId>
+        </dependency>
+
+        <dependency>
+		    <groupId>net.jini.lookup</groupId>
+		    <artifactId>serviceui</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hyperic</groupId>
+            <artifactId>sigar-dist</artifactId>
+            <type>zip</type>
+        </dependency>
+    
+    </dependencies>
+
+    <build>
+	    <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Implementation-Title>Rio Project</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Rio-Version>${project.version}</Rio-Version>
+                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rio-plugin</artifactId>
+                <extensions>true</extensions>
+                <version>${rio.plugin.version}</version>
+
+                <configuration>
+                    <createJars>
+
+                        <createJar>
+                            <classifier>dl</classifier>
+                            <includeResources>false</includeResources>
+                            <preferredlist>${basedir}/src/main/resources/META-INF/PREFERRED.LIST</preferredlist>
+                            <manifest>
+                                <Implementation-Title>Rio Project</Implementation-Title>
+                                <Implementation-Version>${version}</Implementation-Version>
+                                <Rio-Version>${version}</Rio-Version>
+                                <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                            </manifest>
+                            <ins>
+                                <in>org.rioproject.cybernode</in>
+                                <in>org.rioproject.system.measurable</in>
+                            </ins>                            
+                            <topclasses>
+                                <topclass>org.rioproject.cybernode.CybernodeProxy</topclass>
+                                <topclass>org.rioproject.cybernode.CybernodeAdminProxy</topclass>
+                                <topclass>org.rioproject.cybernode.CybernodePermission</topclass>
+                                <topclass>org.rioproject.system.measurable.cpu.CalculableCPU</topclass>
+                                <topclass>org.rioproject.system.measurable.disk.CalculableDiskSpace</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableMemory</topclass>
+                                <topclass>org.rioproject.cybernode.exec.ServiceBeanExecutor</topclass>
+                            </topclasses>
+
+                        </createJar>
+                        
+                        <createJar>
+                            <classifier>ui</classifier>
+                            <includeResources>false</includeResources>
+                            <manifest>
+                                <Implementation-Title>Rio Project</Implementation-Title>
+                                <Implementation-Version>${version}</Implementation-Version>
+                                <Rio-Version>${version}</Rio-Version>
+                                <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                            </manifest>
+                            <ins>
+                                <in>org.rioproject.cybernode</in>
+                                <in>org.rioproject.system.measurable</in>
+                                <in>org.rioproject.resources.util</in>
+                                <in>org.rioproject.resources.ui</in>
+                                <in>org.rioproject.watch</in>
+                            </ins>
+                            <topclasses>
+                                <topclass>org.rioproject.cybernode.ui.CybernodeUI</topclass>
+                                <topclass>org.rioproject.cybernode.ui.PlatformCapabilityUI</topclass>
+                                <topclass>org.rioproject.system.measurable.cpu.CalculableCPU</topclass>
+                                <topclass>org.rioproject.system.measurable.cpu.CalculableCPUView</topclass>
+                                <topclass>org.rioproject.system.measurable.disk.CalculableDiskSpace</topclass>
+                                <topclass>org.rioproject.system.measurable.disk.CalculableDiskSpaceView</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableMemory</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableMemoryView</topclass>
+                                <topclass>org.rioproject.system.measurable.memory.CalculableSystemMemoryView</topclass>
+                                <topclass>org.rioproject.watch.AccumulatorViewer</topclass>
+                                <topclass>org.rioproject.watch.CounterCalculableView</topclass>
+                                <topclass>org.rioproject.watch.DefaultCalculableView</topclass>
+                                <topclass>org.rioproject.watch.ResponseTimeCalculableView</topclass>
+                                <topclass>org.rioproject.watch.ThresholdCalculableView</topclass>
+                            </topclasses>
+
+                        </createJar>
+                    </createJars>
+                </configuration>
+            </plugin>
+
+            <!-- Unzip Hyperic distribution if needed-->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-hyperic</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <unzip src="${sigar.dist}.zip" dest="${sigar.dist}" overwrite="false"/>                                
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <extensions>
+	        <extension>
+		        <groupId>org.apache.maven.wagon</groupId>
+		        <artifactId>wagon-ssh</artifactId>
+		        <version>1.0-beta-6</version>
+		      </extension>
+	    </extensions>
+    </build>
+
+</project>
