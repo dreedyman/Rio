@@ -47,7 +47,41 @@
     </dependencies>
   
     <build>
-	    <plugins>		
+	    <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.rioproject.cybernode:cybernode-api</include>
+                                    <include>org.rioproject.monitor:monitor-api</include>
+                                </includes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>org.rioproject.tools.cli.CLI</Main-Class>
+                                        <Implementation-Title>Rio Project</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Rio-Version>${project.version}</Rio-Version>
+                                        <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                                        <Class-Path>boot.jar rio-lib.jar webster.jar groovy-all.jar</Class-Path>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-jar-plugin</artifactId>
@@ -60,7 +94,7 @@
 							<Implementation-Version>${project.version}</Implementation-Version>
 						    <Rio-Version>${project.version}</Rio-Version>
 						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
-						    <Class-Path>boot.jar rio.jar webster.jar groovy-all.jar</Class-Path>
+						    <Class-Path>boot.jar rio-lib.jar webster.jar groovy-all.jar</Class-Path>
 						</manifestEntries>
                   </archive>
               </configuration>
