@@ -161,7 +161,6 @@
         <!-- The rest of the service download (-api, -proxy and -ui) jars go into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>org.rioproject.cybernode:cybernode-api:jar</include>
                 <include>org.rioproject.cybernode:cybernode-proxy:jar</include>
@@ -171,7 +170,7 @@
                 <include>org.rioproject:rio-api:jar</include>
                 <include>org.rioproject:rio-lookup-entry:jar</include>
                 <include>org.rioproject:watch-ui</include>
-                <!--<include>org.rioproject:gnostic:jar:dl</include>-->
+                <!--<include>org.rioproject:gnostic-api:jar</include>-->
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>

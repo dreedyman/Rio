@@ -65,6 +65,12 @@
 
         <dependency>
             <groupId>${project.groupId}.cybernode</groupId>
+            <artifactId>cybernode-proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.cybernode</groupId>
             <artifactId>cybernode-service</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -72,6 +78,12 @@
         <dependency>
             <groupId>${project.groupId}.cybernode</groupId>
             <artifactId>cybernode-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.monitor</groupId>
+            <artifactId>monitor-proxy</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -41,7 +41,13 @@
 
         <dependency>
             <groupId>${project.groupId}.cybernode</groupId>
-            <artifactId>rio-cybernode-service</artifactId>
+            <artifactId>cybernode-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.monitor</groupId>
+            <artifactId>monitor-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
