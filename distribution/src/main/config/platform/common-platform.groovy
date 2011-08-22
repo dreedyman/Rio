@@ -24,20 +24,9 @@ class CommonPlatformConfig {
     def getPlatformCapabilityConfigs() {
         def configs = []
         String libDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator
-        String libDlDir = System.getProperty("RIO_HOME")+File.separator+"lib-dl"+File.separator
         /*configs << new PlatformCapabilityConfig("CGLib",
                                                 "2.2",
                                                 libDir+"cglib-nodep.jar")*/
-        configs << new PlatformCapabilityConfig("Service UI support",
-                                                "2.1",
-                                                "Jini service user interface support",
-                                                "Apache Software Foundation",
-                                                libDlDir+"serviceui.jar")
-        configs << new PlatformCapabilityConfig("JMX lookup attribute support",
-                                                "2.1",
-                                                "JMX lookup attribute support",
-                                                "Apache Software Foundation",
-                                                libDlDir+"jmx-lookup.jar")
         configs << new PlatformCapabilityConfig("Commons Compress",
                                                 "1.0",
                                                 "Apache Commons Compress",

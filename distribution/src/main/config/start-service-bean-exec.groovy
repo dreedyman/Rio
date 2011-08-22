@@ -11,6 +11,7 @@ import java.util.logging.SimpleFormatter
 import java.util.logging.FileHandler
 import org.rioproject.config.Constants
 import java.util.logging.Handler
+import org.rioproject.boot.ServiceDescriptorUtil
 
 @Component('com.sun.jini.start')
 class StartServiceBeanExecConfig {
@@ -41,11 +42,8 @@ class StartServiceBeanExecConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         //setFileHandler()
         String rioHome = System.getProperty('RIO_HOME')
-        String codebase = "file://${rioHome}/lib-dl/cybernode-dl.jar"
-        String sep = File.pathSeparator
-        String classpath = "${rioHome}/lib/cybernode.jar${sep}"
-        if (System.getProperty("RIO_TEST_ATTACH") != null)
-            classpath = "$classpath${sep}${rioHome}/lib/rio-test.jar"
+        String codebase = ServiceDescriptorUtil.getCybernodeCodebase("file://${rioHome}/lib-dl")
+        String classpath = ServiceDescriptorUtil.getCybernodeClasspath()
         
         String policyFile = rioHome + '/policy/policy.all'
         def configArgs = [rioHome + '/config/common.groovy',
