@@ -15,9 +15,7 @@
  */
 package org.rioproject.tools.cli;
 
-import com.sun.jini.admin.DestroyAdmin;
 import com.sun.jini.config.Config;
-import net.jini.admin.Administrable;
 import net.jini.config.*;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
@@ -32,7 +30,6 @@ import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.RioVersion;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.tools.discovery.ReggieStat;
 import org.rioproject.tools.webster.Webster;
@@ -148,7 +145,7 @@ public class CLI {
      * Print usage
      */
     void printUsage() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Usage :\n");
         buffer.append("\t").append(getClass().getName()).append(
             " [commands] [options]");
@@ -212,7 +209,7 @@ public class CLI {
      * @return A formatted String for displaying usage of an interactive session
      */
     public String getInteractiveUsage() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String[] optionNames = getOptionNames();
 
         /* Iterate over the option names and construct a table of column
@@ -233,7 +230,7 @@ public class CLI {
                     longest = columnLengths.get(col);
             }
         }
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
         for(int i=0; i<optionNames.length; i++) {
             buff.append(optionNames[i]);
             if(i > 0 && i%5 == 0) {
@@ -249,12 +246,12 @@ public class CLI {
 
     private String getOutput(String s, Map<Integer, Integer> columnLengths) {
         String output;
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         Object[] array = toArray(s);
         for(int i=0; i<array.length; i++) {
             if(i>0)
                 buffer.append(" ");
-            buffer.append("%-"+(columnLengths.get(i+1)+1)+"s");
+            buffer.append("%-").append(columnLengths.get(i + 1) + 1).append("s");
         }
         output = String.format("%n"+buffer.toString(), toArray(s));
 
@@ -396,7 +393,7 @@ public class CLI {
                                                  new OptionHandlerDesc[0]);
         if(addOptionHandlers.length > 0) {
             if(logger.isLoggable(Level.CONFIG)) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 for(int i = 0; i < addOptionHandlers.length; i++) {
                     if(i > 0)
                         buffer.append("\n");
@@ -607,6 +604,7 @@ public class CLI {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                //
             }
             destroyFromRegistry(out);
         }
@@ -625,6 +623,7 @@ public class CLI {
                     Registry registry = LocateRegistry.getRegistry(port++);
                     rmiRegistries.add(registry);
                 } catch (RemoteException e) {
+                    //;
                 }
             }
             if(rmiRegistries.size()>0) {
@@ -694,7 +693,7 @@ public class CLI {
         public String process(String input, BufferedReader br, PrintStream out) {
             if(out==null)
                 throw new NullPointerException("Must have an output PrintStream");
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             StringTokenizer tok = new StringTokenizer(input);
             if(tok.countTokens()>1) {
                 while(tok.hasMoreTokens()) {
@@ -1238,8 +1237,7 @@ public class CLI {
          * Print the request to the operator
          */
         void printRequest(PrintStream out) {
-            out.print("Choose a service for jconsole support or "+
-                             "\"c\" to cancel : ");
+            out.print("Choose a service for jconsole support or \"c\" to cancel : ");
         }
 
         public String getUsage() {
@@ -1282,14 +1280,10 @@ public class CLI {
         Configuration config = getConfiguration();
         Properties sysProps = new Properties();
         String[] systemProperties =
-            (String[])config.getEntry("org.rioproject.boot",
-                                      "systemProperties",
-                                      String[].class,
-                                      new String[0]);
+            (String[])config.getEntry("org.rioproject.boot", "systemProperties", String[].class, new String[0]);
         if(systemProperties.length > 0) {
             if(systemProperties.length%2 != 0) {
-                System.err.println("systemProperties elements has odd length : "+
-                                   systemProperties.length);
+                System.err.println("systemProperties elements has odd length : "+systemProperties.length);
             } else {
                 for(int i = 0; i < systemProperties.length; i += 2) {
                     String name = systemProperties[i];
@@ -1329,10 +1323,7 @@ public class CLI {
             homeDir = System.getProperty("user.dir");
         currentDir = new File(homeDir);
         if(!commandLine) {
-            String logDirPath =
-                System.getProperty(CONFIG_COMPONENT+".logDir",
-                                   rioHome+File.separator+
-                                   "logs");
+            String logDirPath = System.getProperty(CONFIG_COMPONENT+".logDir", rioHome+File.separator+"logs");
             File logDir = new File(logDirPath);
             if(!logDir.exists()) {
                 if(!logDir.mkdir()) {
@@ -1358,7 +1349,7 @@ public class CLI {
                                "Operator : "+System.getProperty("user.name"));
             System.err.println("===============================================");
             if(addedProps.size()>0) {
-                StringBuffer buff = new StringBuffer();
+                StringBuilder buff = new StringBuilder();
                 for (Map.Entry<Object, Object> entry : addedProps.entrySet()) {
                     String key = (String) entry.getKey();
                     String value = (String) entry.getValue();
@@ -1428,17 +1419,11 @@ public class CLI {
         if(sysConfig==null)
             sysConfig = EmptyConfiguration.INSTANCE;
 
-        userName = (String)sysConfig.getEntry(CONFIG_COMPONENT,
-                                              "userName",
-                                              String.class,
-                                              null);
+        userName = (String)sysConfig.getEntry(CONFIG_COMPONENT, "userName", String.class, null);
         loginContext = null;
         try {
             loginContext =
-                (LoginContext) Config.getNonNullEntry(sysConfig,
-                                                      CONFIG_COMPONENT,
-                                                      "loginContext",
-                                                      LoginContext.class);
+                (LoginContext) Config.getNonNullEntry(sysConfig, CONFIG_COMPONENT, "loginContext", LoginContext.class);
         } catch (NoSuchEntryException e) {
             // leave null
         }
@@ -1448,15 +1433,13 @@ public class CLI {
         if (loginContext != null) {
             loginContext.login();
             try {
-                result =
-                    (String[])Subject.doAsPrivileged(
-                        loginContext.getSubject(),
-                        new PrivilegedExceptionAction<String[]>() {
-                            public String[] run() throws Exception {
-                                return (doInit(args, commandArgs));
-                            }
-                        },
-                        null);
+                result = Subject.doAsPrivileged(loginContext.getSubject(),
+                                                new PrivilegedExceptionAction<String[]>() {
+                                                    public String[] run() throws Exception {
+                                                        return (doInit(args, commandArgs));
+                                                    }
+                                                },
+                                                null);
             } catch (PrivilegedActionException e) {
                 throw e.getCause();
             }
@@ -1470,35 +1453,20 @@ public class CLI {
     static String[] doInit(String[] args, LinkedList<String> commandArgs)
     throws Exception {
         getInstance();        
-        instance.setOutput((PrintStream)sysConfig.getEntry(CONFIG_COMPONENT,
-                                                    "output",
-                                                    PrintStream.class,
-                                                    System.out));
+        instance.setOutput((PrintStream)sysConfig.getEntry(CONFIG_COMPONENT, "output", PrintStream.class, System.out));
+
         String[] groups =
-            (String[])sysConfig.getEntry(CONFIG_COMPONENT,
-                                         "groups",
-                                         String[].class,
-                                         DiscoveryGroupManagement.ALL_GROUPS);
+            (String[])sysConfig.getEntry(CONFIG_COMPONENT, "groups", String[].class, DiscoveryGroupManagement.ALL_GROUPS);
+
         LookupLocator[] locators =
-            (LookupLocator[])sysConfig.getEntry(CONFIG_COMPONENT,
-                                                "locators",
-                                                LookupLocator[].class,
-                                                null);
+            (LookupLocator[])sysConfig.getEntry(CONFIG_COMPONENT, "locators", LookupLocator[].class, null);
 
         long discoveryTimeout =
-            (Long) sysConfig.getEntry(CONFIG_COMPONENT,
-                                      "discoveryTimeout",
-                                      long.class,
-                                      (long) 1000 * 5);
-        int httpPort =
-            (Integer) sysConfig.getEntry(CONFIG_COMPONENT,
-                                         "httpPort",
-                                         int.class,
-                                         (int)0);
-        boolean noHttp = (Boolean) sysConfig.getEntry(CONFIG_COMPONENT,
-                                                      "noHttp",
-                                                      boolean.class,
-                                                      Boolean.FALSE);
+            (Long) sysConfig.getEntry(CONFIG_COMPONENT, "discoveryTimeout", long.class, (long) 1000 * 5);
+
+        int httpPort = (Integer) sysConfig.getEntry(CONFIG_COMPONENT, "httpPort", int.class, 0);
+
+        boolean noHttp = (Boolean) sysConfig.getEntry(CONFIG_COMPONENT, "noHttp", boolean.class, Boolean.FALSE);
         /* Look to see if the operator has provided a starting directory,
          * groups, locators, discovery timeout, httpPort or ignore http */
         String homeDir = null;
@@ -1575,10 +1543,7 @@ public class CLI {
             if(instance.validCommand(args[0])) {
                 OptionHandler handler = instance.getOptionHandler(args[0]);
                 if(handler!=null) {
-                    String response =
-                        handler.process(Formatter.fromArray(args, " "),
-                                        null,
-                                        instance.getOutput());
+                    String response = handler.process(Formatter.fromArray(args, " "), null, instance.getOutput());
                     if(response.length()>0)
                         instance.getOutput().println(response);
                 }
@@ -1593,8 +1558,7 @@ public class CLI {
 
     public static class LoginCallbackHandler implements CallbackHandler {
 
-        public void handle(Callback[] callbacks) throws IOException,
-                                                        UnsupportedCallbackException {
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
             for (Callback callback : callbacks) {
                 if (callback instanceof NameCallback) {
                     NameCallback nc = (NameCallback) callback;
@@ -1613,7 +1577,7 @@ public class CLI {
                     PasswordCallback pc = (PasswordCallback) callback;
                     String prompt = pc.getPrompt();
                     /* If prompt has an optional entry, skip */
-                    if (prompt.indexOf("optional") == -1) {
+                    if (!prompt.contains("optional")) {
                         System.out.print(prompt);
                         String tmpPassword = (new BufferedReader(new
                             InputStreamReader(System.in))).readLine();
