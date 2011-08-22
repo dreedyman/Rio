@@ -54,7 +54,7 @@
 
         <!-- policy directory -->
         <fileSet>
-            <directory>${basedir}/../policy</directory>
+            <directory>${basedir}/src/main/policy</directory>
             <includes>
                 <include>policy.all</include>
             </includes>
