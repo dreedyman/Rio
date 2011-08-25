@@ -37,7 +37,6 @@ import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.event.BasicEventConsumer;
-import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.deploy.DeployAdmin;
@@ -794,7 +793,7 @@ public class Main extends JFrame {
     }
 
     public void startDiscovery() throws Exception {
-        lookupDiscovery = new LookupDiscovery(DiscoveryGroupManagement.ALL_GROUPS, config)
+        lookupDiscovery = new LookupDiscovery(DiscoveryGroupManagement.ALL_GROUPS, config);
         recordingListener = new RecordingDiscoveryListener(lookupDiscovery);
         lookupDiscovery.addDiscoveryListener(recordingListener);
 
