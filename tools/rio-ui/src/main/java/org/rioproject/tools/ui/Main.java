@@ -97,7 +97,7 @@ public class Main extends JFrame {
     static JiniClient jiniClient;
     ServiceDiscoveryManager sdm;
     CybernodeUtilizationPanel cup;
-    /** A task to control ComputeResourceutilization refreshes */
+    /** A task to control ComputeResourceUtilization refreshes */
     ComputeResourceUtilizationTask cruTask;
     /** Scheduler for Cybernode utilization gathering */
     ScheduledExecutorService scheduler;
@@ -661,6 +661,8 @@ public class Main extends JFrame {
      * Terminate the utility
      */
     public void terminate() {
+        if(lookupDiscovery!=null)
+            lookupDiscovery.terminate();
         if(sdm != null)
             sdm.terminate();
         if(jiniClient != null)
@@ -1236,10 +1238,9 @@ public class Main extends JFrame {
             //rioHome = System.getProperty("user.home")+File.separator+".rio";
         }
 
-        String logDirPath =
-            System.getProperty(Constants.COMPONENT+".logDir",
-                               rioHome+File.separator+
-                               "logs");
+        String logDirPath = System.getProperty(Constants.COMPONENT+".logDir",
+                                               rioHome+File.separator+
+                                               "logs");
         File logDir = new File(logDirPath);
         if(!logDir.exists())
             logDir.mkdirs();
@@ -1313,7 +1314,7 @@ public class Main extends JFrame {
                     String[] values = arg.split("=");
                     String locatorsArg = values[1].trim();
                     String[] locators = locatorsArg.split(",");
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     int i=0;
                     for(String locator : locators) {
                         if(!locator.startsWith("jini://"))
@@ -1363,6 +1364,7 @@ public class Main extends JFrame {
             try {
                 props.putAll(Util.loadProperties(Constants.UI_PROPS));
             } catch(IOException e) {
+                //
             }
             PrivilegedExceptionAction<Main> createViewer =
                 new PrivilegedExceptionAction<Main>() {
