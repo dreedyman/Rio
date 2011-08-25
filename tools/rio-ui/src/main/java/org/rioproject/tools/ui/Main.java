@@ -25,6 +25,8 @@ import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
+import net.jini.discovery.DiscoveryGroupManagement;
+import net.jini.discovery.LookupDiscovery;
 import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.id.Uuid;
 import net.jini.lease.LeaseRenewalManager;
@@ -45,6 +47,8 @@ import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
+import org.rioproject.tools.discovery.RecordingDiscoveryListener;
+import org.rioproject.tools.ui.discovery.GroupSelector;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
 import org.rioproject.resources.util.SecurityPolicyLoader;
@@ -87,6 +91,10 @@ public class Main extends JFrame {
     JSplitPane splitPane;
     File lastDir = new File(System.getProperty("user.dir"));
     Configuration config;
+    /** A DiscoveryListener that will record lookup service discovery/discard times */
+	RecordingDiscoveryListener recordingListener;
+	/** LookupDiscovery for discovering all groups */
+	LookupDiscovery lookupDiscovery;
     static JiniClient jiniClient;
     ServiceDiscoveryManager sdm;
     CybernodeUtilizationPanel cup;
@@ -114,36 +122,28 @@ public class Main extends JFrame {
 
     public Main(Configuration config, final boolean exitOnClose, Properties startupProps) {
         this.config = config;
-        String lastArtifactName =
-            startupProps.getProperty(Constants.LAST_ARTIFACT);
+        String lastArtifactName = startupProps.getProperty(Constants.LAST_ARTIFACT);
         if(lastArtifactName!=null)
             lastArtifact = lastArtifactName;
-        String lastDirname =
-            startupProps.getProperty(Constants.LAST_DIRECTORY);
+        String lastDirname = startupProps.getProperty(Constants.LAST_DIRECTORY);
         if(lastDirname!=null)
             lastDir = new File(lastDirname);
 
         ServiceAdminManager.getInstance().setAdminFrameProperties(startupProps);
         colorManager = new ColorManager(startupProps);
         utilizationColumnManager = new UtilizationColumnManager(startupProps);
-        int orientation =
-            Integer.parseInt(startupProps.getProperty(Constants.GRAPH_ORIENTATION,
-                                                      Constants.GRAPH_ORIENTATION_WEST));
+        int orientation = Integer.parseInt(startupProps.getProperty(Constants.GRAPH_ORIENTATION,
+                                                                    Constants.GRAPH_ORIENTATION_WEST));
         graphView = new GraphView(this, config, colorManager, orientation);
 
-        String defaultRefreshRate =
-            Integer.toString(Constants.DEFAULT_CYBERNODE_REFRESH_RATE);
-        String refreshRate = startupProps.getProperty(Constants.CYBERNODE_REFRESH_RATE,
-                                                      defaultRefreshRate);
+        String defaultRefreshRate = Integer.toString(Constants.DEFAULT_CYBERNODE_REFRESH_RATE);
+        String refreshRate = startupProps.getProperty(Constants.CYBERNODE_REFRESH_RATE, defaultRefreshRate);
         cybernodeRefreshRate = Integer.parseInt(refreshRate);
 
         deploy = new JButton("Deploy ...");
         deploy.setEnabled(false);
         try {
-            String title = (String)config.getEntry(Constants.COMPONENT,
-                                                   "title",
-                                                   String.class,
-                                                   null);
+            String title = (String)config.getEntry(Constants.COMPONENT, "title", String.class, null);
             if(title!=null)
                 setTitle(title);
         } catch (ConfigurationException e) {
@@ -153,10 +153,7 @@ public class Main extends JFrame {
         frame = this;
         deploy.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                OpStringAndOARFileChooser chooser =
-                new OpStringAndOARFileChooser(frame,
-                                              lastDir,
-                                              lastArtifact);
+                OpStringAndOARFileChooser chooser = new OpStringAndOARFileChooser(frame, lastDir, lastArtifact);
                 final String chosen = chooser.getName();
                 if(chosen==null)
                     return;
@@ -205,9 +202,7 @@ public class Main extends JFrame {
         undeploy.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 String[] names = graphView.getOpStringNames();
-                JDialog dialog = new JDialog((JFrame)null,
-                                     "Undeploy OperationalString",
-                                     true);
+                JDialog dialog = new JDialog((JFrame)null, "Undeploy OperationalString", true);
                 UndeployPanel u = new UndeployPanel(names, dialog);
                 Container contentPane = dialog.getContentPane();
                 contentPane.add(u, BorderLayout.CENTER);
@@ -220,15 +215,11 @@ public class Main extends JFrame {
                 if(name==null)
                     return;
                 final GraphNode node = graphView.getOpStringNode(name);
-                final JDialog waitDialog =
-                        new WaitingDialog(frame,
-                                          "Undeploying "+name+"...",
-                                          500);
+                final JDialog waitDialog = new WaitingDialog(frame, "Undeploying "+name+"...", 500);
                 SwingWorker worker = new SwingWorker() {
                     public Object construct() {
                         try {
-                            DeployAdmin dAdmin =
-                                (DeployAdmin)node.getProvisionMonitor().getAdmin();
+                            DeployAdmin dAdmin = (DeployAdmin)node.getProvisionMonitor().getAdmin();
                             dAdmin.undeploy(name);
                         } catch(OperationalStringException e) {
                             graphView.removeOpString(name);
@@ -251,9 +242,7 @@ public class Main extends JFrame {
         final JButton colorChooser = new JButton("Color ...");
         colorChooser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                JColorChooser.showDialog(colorChooser,
-                                         "Colors",
-                                         colorChooser.getForeground());
+                JColorChooser.showDialog(colorChooser, "Colors", colorChooser.getForeground());
             }
         });
 
@@ -262,24 +251,12 @@ public class Main extends JFrame {
         toolBar.setRollover(true);
         toolBar.setBorderPainted(false);
 
-        ImageIcon refreshIcon =
-            Util.getImageIcon("org/rioproject/tools/ui/images/view-refresh.png");
-        ImageIcon fitIcon =
-            Util.getImageIcon("org/rioproject/tools/ui/images/view-fullscreen.png");
-        westIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/west.png",
-                                           22,
-                                           22);
-        westSelectedIcon =
-            Util.getScaledImageIcon("org/rioproject/tools/ui/images/west-selected.png",
-                                    22,
-                                    22);
-        northIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/north.png",
-                                            22,
-                                            22);
-        northSelectedIcon =
-            Util.getScaledImageIcon("org/rioproject/tools/ui/images/north-selected.png",
-                                    22,
-                                    22);
+        ImageIcon refreshIcon = Util.getImageIcon("org/rioproject/tools/ui/images/view-refresh.png");
+        ImageIcon fitIcon = Util.getImageIcon("org/rioproject/tools/ui/images/view-fullscreen.png");
+        westIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/west.png", 22, 22);
+        westSelectedIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/west-selected.png", 22, 22);
+        northIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/north.png", 22, 22);
+        northSelectedIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/north-selected.png", 22, 22);
         /*
         JButton zoomOut = new JButton(zoomOutIcon);
         zoomOut.getAccessibleContext().setAccessibleName("zoom-out");
@@ -319,15 +296,11 @@ public class Main extends JFrame {
             }
         });
 
-        final JButton west =
-            new JButton((orientation==prefuse.Constants.ORIENT_LEFT_RIGHT?
-                         westSelectedIcon:westIcon));
+        final JButton west = new JButton((orientation==prefuse.Constants.ORIENT_LEFT_RIGHT? westSelectedIcon:westIcon));
         west.getAccessibleContext().setAccessibleName("root on left");
         west.setToolTipText("Root on the left");
 
-        final JButton north =
-            new JButton((orientation==prefuse.Constants.ORIENT_TOP_BOTTOM?
-                         northSelectedIcon:northIcon));
+        final JButton north = new JButton((orientation==prefuse.Constants.ORIENT_TOP_BOTTOM? northSelectedIcon:northIcon));
         west.getAccessibleContext().setAccessibleName("root at top");
         north.setToolTipText("Root at the top");
 
@@ -372,10 +345,7 @@ public class Main extends JFrame {
         //topTabs.add("Infrastructure", new JPanel());
 
         try {
-            String bannerIcon = (String)config.getEntry(Constants.COMPONENT,
-                                                        "bannerIcon",
-                                                        String.class,
-                                                        null);
+            String bannerIcon = (String)config.getEntry(Constants.COMPONENT, "bannerIcon", String.class, null);
             if(bannerIcon!=null) {
                 ImageIcon icon = Util.getImageIcon(bannerIcon);
                 if(icon!=null) {
@@ -469,9 +439,7 @@ public class Main extends JFrame {
             preferencesMenuItem.setMnemonic('P');
             preferencesMenuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    PreferencesDialog prefs = new PreferencesDialog(frame,
-                                                                    graphView,
-                                                                    cup);
+                    PreferencesDialog prefs = new PreferencesDialog(frame, graphView, cup);
                     prefs.setVisible(true);
                 }
             });
@@ -484,6 +452,13 @@ public class Main extends JFrame {
             });
         }
         JMenu discoMenu = new JMenu("Discovery");
+        JMenuItem groupSelector = discoMenu.add(new JMenuItem("Group Selector"));
+        groupSelector.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                JDialog dialog = GroupSelector.getDialog(frame, sdm.getDiscoveryManager(), recordingListener);
+                dialog.setVisible(true);
+            }
+        });
         JMenuItem addLocator = discoMenu.add(new JMenuItem("Add Locator..."));
         addLocator.setMnemonic('L');
         addLocator.addActionListener(new ActionListener() {
@@ -819,6 +794,10 @@ public class Main extends JFrame {
     }
 
     public void startDiscovery() throws Exception {
+        lookupDiscovery = new LookupDiscovery(DiscoveryGroupManagement.ALL_GROUPS, config);
+		recordingListener = new RecordingDiscoveryListener(lookupDiscovery);
+        lookupDiscovery.addDiscoveryListener(recordingListener);
+
         int threadPoolSize = Config.getIntEntry(config,
                                                 Constants.COMPONENT,
                                                 Constants.THREAD_POOL_SIZE_KEY,
@@ -833,22 +812,15 @@ public class Main extends JFrame {
         scheduleComputeResourceUtilizationTask();
         
         String[] defaultGroups =
-            JiniClient.parseGroups(
-                System.getProperty(
-                    org.rioproject.config.Constants.GROUPS_PROPERTY_NAME, "all"));
+            JiniClient.parseGroups(System.getProperty(org.rioproject.config.Constants.GROUPS_PROPERTY_NAME, "all"));
 
         /* Get group values, default to all groups */
         String[] groups =
-            (String[]) config.getEntry(Constants.COMPONENT,
-                                       "initialLookupGroups",
-                                       String[].class,
-                                       defaultGroups);
+            (String[]) config.getEntry(Constants.COMPONENT, "initialLookupGroups", String[].class, defaultGroups);
         LookupLocator[] locators = null;
         try {
             LookupLocator[] defaultLocators =
-                JiniClient.parseLocators(
-                    System.getProperty(
-                        org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME));
+                JiniClient.parseLocators(System.getProperty(org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME));
             /* Get LookupLocator values */
             locators = (LookupLocator[]) config.getEntry(Constants.COMPONENT,
                                                          "initialLookupLocators",
@@ -867,24 +839,13 @@ public class Main extends JFrame {
                                           "Locators Incorrect",
                                           JOptionPane.WARNING_MESSAGE);
         }
-        jiniClient =
-            new JiniClient(
-                new LookupDiscoveryManager(groups, locators, null, config));
-        ServiceTemplate monitors = new ServiceTemplate(null,
-                                                       new Class[]{
-                                                           ProvisionMonitor.class},
-                                                       null);
-        ServiceTemplate cybernodes = new ServiceTemplate(null,
-                                                       new Class[]{
-                                                           Cybernode.class},
-                                                       null);
-        sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(),
-                                          new LeaseRenewalManager(),
-                                          config);
+        jiniClient = new JiniClient(new LookupDiscoveryManager(groups, locators, null, config));
+        ServiceTemplate monitors = new ServiceTemplate(null, new Class[]{ProvisionMonitor.class}, null);
+        ServiceTemplate cybernodes = new ServiceTemplate(null, new Class[]{Cybernode.class}, null);
+        sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(), new LeaseRenewalManager(), config);
         ServiceWatcher watcher = new ServiceWatcher();
         provisionClientEventConsumer = new ProvisionClientEventConsumer();
-        clientEventConsumer = new BasicEventConsumer(new EventDescriptor(ProvisionMonitorEvent.class,
-                                                                         ProvisionMonitorEvent.ID),
+        clientEventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(),
                                                      provisionClientEventConsumer,
                                                      config);
         monitorCache = sdm.createLookupCache(monitors, null, watcher);
