@@ -794,8 +794,8 @@ public class Main extends JFrame {
     }
 
     public void startDiscovery() throws Exception {
-        lookupDiscovery = new LookupDiscovery(DiscoveryGroupManagement.ALL_GROUPS, config);
-		recordingListener = new RecordingDiscoveryListener(lookupDiscovery);
+        lookupDiscovery = new LookupDiscovery(DiscoveryGroupManagement.ALL_GROUPS, config)
+        recordingListener = new RecordingDiscoveryListener(lookupDiscovery);
         lookupDiscovery.addDiscoveryListener(recordingListener);
 
         int threadPoolSize = Config.getIntEntry(config,
