@@ -378,15 +378,15 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         if(mgrs.length == 0)
             return;
         StringBuilder sb = new StringBuilder();
-        sb.append("Deployed: ").append(deployedServices.size()).append(" Limit: ").append(serviceLimit).append("\n");
+        sb.append("Deployed: ").append(deployedServices.size()).append(" Limit: ").append(serviceLimit);
         if(!resourceCapability.measuredResourcesWithinRange()) {
             for(MeasuredResource mr : resourceCapability.getMeasuredResources(ResourceCapability.MEASURED_RESOURCES_BREACHED)) {
                 sb.append(mr.getIdentifier())
-                    .append("\tBREACHED value: ").append(mr.getValue())
-                    .append(", threshold: ").append(mr.getThresholdValues().getHighThreshold()).append("\n");
+                    .append("\n\tBREACHED value: ").append(mr.getValue())
+                    .append(", threshold: ").append(mr.getThresholdValues().getHighThreshold());
             }
         } else{
-            sb.append("All Measured Resources within range").append("\n");
+            sb.append(", All Measured Resources within range");
         }
         logger.info(sb.toString());
 
