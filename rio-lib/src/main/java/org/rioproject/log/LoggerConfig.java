@@ -137,9 +137,11 @@ public class LoggerConfig implements Serializable {
     }
 
     public void close() {
-        for (Handler h : logger.getHandlers()) {
-            if(handlerFilter!=null && h.getFilter()!=null && h.getFilter().equals(handlerFilter)) {
-                h.setFilter(null);
+        if(logger!=null) {
+            for (Handler h : logger.getHandlers()) {
+                if(handlerFilter!=null && h.getFilter()!=null && h.getFilter().equals(handlerFilter)) {
+                    h.setFilter(null);
+                }
             }
         }
     }

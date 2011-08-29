@@ -812,15 +812,15 @@ public class ServiceElementManager implements InstanceIDManager {
             destroyAdmin.destroy();
             terminated = true;
         } catch(Exception e) {
-            if(mgrLogger.isLoggable(Level.FINEST)) {
+            //if(mgrLogger.isLoggable(Level.FINEST)) {
                 mgrLogger.log(Level.WARNING, "Destroying Service ["+LoggingUtil.getLoggingName(svcElement)+"]", e);
-            } else {
+            /*} else {
                 Throwable t = ThrowableUtil.getRootCause(e);
                 mgrLogger.warning("Destroying Service " +
                                   "["+LoggingUtil.getLoggingName(svcElement)+"]\n"+
                                   t.getClass().getName()+": "+
                                   t.getLocalizedMessage());
-            }
+            }*/
             
             if(!ThrowableUtil.isRetryable(e)) {
                 if(mgrLogger.isLoggable(Level.FINE))
@@ -1058,12 +1058,10 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     boolean replaceServiceBeanInstance(ServiceBeanInstance instance) {
         boolean replaced = false;
-        synchronized(serviceBeanList) {
-            int ndx = serviceBeanList.indexOf(instance);
-            if(ndx!=-1) {
-                serviceBeanList.set(ndx, instance);
-                replaced = true;
-            }
+        int ndx = serviceBeanList.indexOf(instance);
+        if(ndx!=-1) {
+            serviceBeanList.set(ndx, instance);
+            replaced = true;
         }
         return(replaced);
     }
@@ -1432,8 +1430,7 @@ public class ServiceElementManager implements InstanceIDManager {
     ServiceBeanInstance[] getServiceBeanInstances() {
         ServiceBeanInstance[] instances;
         synchronized(serviceBeanList) {
-            instances = serviceBeanList.toArray(
-                new ServiceBeanInstance[serviceBeanList.size()]);
+            instances = serviceBeanList.toArray(new ServiceBeanInstance[serviceBeanList.size()]);
         }
         return(instances);
     }
@@ -1724,9 +1721,7 @@ public class ServiceElementManager implements InstanceIDManager {
             return;
         boolean changed = false;
         StringBuffer buff = new StringBuffer();
-        buff.append("[")
-            .append(svcElement.getName())
-            .append("] ");
+        buff.append("[").append(svcElement.getName()).append("] ");
         if(!serviceBeanList.contains(instance)) {
             serviceBeanList.add(instance);
             Long instanceID =
@@ -1826,17 +1821,17 @@ public class ServiceElementManager implements InstanceIDManager {
                                                 hostAddress,
                                                 instance.getServiceBeanInstantiatorID());
                     }
-                    if(mgrLogger.isLoggable(Level.FINE))
-                        mgrLogger.fine("["+LoggingUtil.getLoggingName(svcElement)+"] service " +
-                                       "provisioned, "+
-                                       "instance=["+instance.getServiceBeanConfig().getInstanceID()+"], "+
-                                       "type=["+svcElement.getProvisionType()+"]");
                     if(hasServiceBeanInstance(instance)) {
                         replaceServiceBeanInstance(instance);
                     }
                     else {
                         addServiceBeanInstance(instance);
                     }
+                    mgrLogger.info("["+LoggingUtil.getLoggingName(svcElement)+"] service " +
+                                   "provisioned, "+
+                                   "instanceId=["+instance.getServiceBeanConfig().getInstanceID()+"], "+
+                                   "type=["+svcElement.getProvisionType()+"], " +
+                                   "have ["+serviceBeanList.size()+"] service instances");
                 }
                 /* Re-get the proxy using the proxy's classloader */
                 ClassLoader currentCL = Thread.currentThread().getContextClassLoader();

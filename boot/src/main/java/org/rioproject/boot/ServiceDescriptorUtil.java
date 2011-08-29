@@ -228,30 +228,34 @@ public class ServiceDescriptorUtil {
                                                  String hostAddress,
                                                  int port,
                                                  String... cybernodeConfig) throws IOException {
+        String cybernodeClasspath = getCybernodeClasspath();
+        String cybernodeCodebase = getCybernodeCodebase("http://"+hostAddress+":"+port);
+        String implClass = "org.rioproject.cybernode.CybernodeImpl";
+        return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
+
+    }
+
+    public static String getCybernodeClasspath() {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         String[] jars;
         if(System.getProperty("RIO_TEST_ATTACH")!=null)
             jars = new String[]{"cybernode-service.jar", "rio-test.jar"};
-         else
+        else
             jars = new String[]{"cybernode-service.jar"};
-        String cybernodeClasspath = makePath(rioHome+File.separator+"lib", jars);
-        cybernodeClasspath = cybernodeClasspath+File.pathSeparator+makePath(rioHome+File.separator+"lib-dl",
-                                                                            "cybernode-proxy.jar",
-                                                                            "cybernode-api.jar");
+        return makePath(rioHome+File.separator+"lib", jars);
+    }
+
+    public static String getCybernodeCodebase(String location) {
         String[] dlJars = new String[]{"cybernode-proxy.jar",
                                        "cybernode-api.jar",
                                        "rio-api.jar",
                                        "jmx-lookup.jar",
                                        "jsk-dl.jar",
                                        "rio-lookup-entry.jar",
-                                       "resolver-api.jar",
                                        "serviceui.jar"};
-        String cybernodeCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
-        String implClass = "org.rioproject.cybernode.CybernodeImpl";
-        return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
-
+        return createCodebase(dlJars, location);
     }
 
     /**
@@ -325,19 +329,14 @@ public class ServiceDescriptorUtil {
          else
             jars = new String[]{"monitor-service.jar"};
         String monitorClasspath = makePath(rioHome+File.separator+"lib", jars);
-        monitorClasspath = monitorClasspath+File.pathSeparator+makePath(rioHome+File.separator+"lib-dl",
-                                                                        "monitor-proxy.jar",
-                                                                        "monitor-api.jar");
         String[] dlJars = new String[]{"monitor-proxy.jar",
                                        "monitor-api.jar",
                                        "rio-api.jar",
                                        "jmx-lookup.jar",
                                        "jsk-dl.jar",
                                        "rio-lookup-entry.jar",
-                                       "resolver-api.jar",
                                        "serviceui.jar"};
         String monitorCodebase = BootUtil.getCodebase(dlJars, hostAddress, Integer.toString(port));
-
         String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
         return (new RioServiceDescriptor(monitorCodebase, policy, monitorClasspath, implClass, monitorConfig));
     }
@@ -425,15 +424,21 @@ public class ServiceDescriptorUtil {
         return sb.toString();
     }
 
-    protected static String makeCodebaseFilePath(String dir, String... jars) {
-        StringBuilder sb = new StringBuilder();
-        for(String jar : jars) {
-            StringBuilder pathBuilder = new StringBuilder();
-            if(sb.length()>0)
-                sb.append(" ");
-            pathBuilder.append(dir).append(File.separator).append(jar);
-            sb.append(new File(pathBuilder.toString()).toURI().toString());
+    /**
+     * Return the codebase for the provided JAR names, port and address
+     *
+     * @param jars Array of JAR names
+     * @param location The location to use when constructing the codebase
+     * @return the codebase for the JAR
+     */
+    public static String createCodebase(String[] jars, String location) {
+        StringBuilder buffer = new StringBuilder();
+        for(int i=0; i<jars.length; i++) {
+            if(i>0)
+                buffer.append(" ");
+            buffer.append(location).append("/").append(jars[i]);
         }
-        return sb.toString();
+        return(buffer.toString());
     }
+
 }

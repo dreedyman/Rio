@@ -19,12 +19,7 @@ import com.sun.jini.config.Config;
 import com.sun.jini.start.AggregatePolicyProvider;
 import com.sun.jini.start.LoaderSplitPolicyProvider;
 import net.jini.admin.Administrable;
-import net.jini.admin.JoinAdmin;
 import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
-import net.jini.core.discovery.LookupLocator;
-import net.jini.core.entry.Entry;
-import net.jini.discovery.LookupDiscovery;
 import net.jini.id.ReferentUuid;
 import net.jini.id.Uuid;
 import net.jini.io.MarshalledInstance;
@@ -32,7 +27,6 @@ import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
-import org.rioproject.admin.ServiceBeanControlException;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.boot.ClassAnnotator;
 import org.rioproject.boot.CommonClassLoader;
@@ -55,8 +49,6 @@ import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AllPermission;
@@ -69,10 +61,6 @@ import java.util.logging.Logger;
 
 /**
  * The ServiceBeanLoader will load and create a ServiceBean.
- *
- * The ServiceBeanLoader supports the following configuration entries
- * <ul>
- * </ul>
  *
  * @author Dennis Reedy
  */
@@ -501,333 +489,6 @@ public class ServiceBeanLoader {
         
         return(new Result(context, impl, mi, serviceID));
     }  
-    
-    /**
-     * Advertise a ServiceBean
-     *
-     * @param jsbProxy Proxy to the JSB
-     * @param context The ServiceBeanContext
-     *
-     * @throws org.rioproject.admin.ServiceBeanControlException If the service bean cannot be advertised
-     */
-    public static void advertise(Object jsbProxy, ServiceBeanContext context) throws ServiceBeanControlException {
-        if(jsbProxy==null)
-            throw new NullPointerException("jsbProxy is null");
-        if(context==null)
-            throw new NullPointerException("context is null");
-        Entry[] configuredAttrs = null;
-        final Thread currentThread = Thread.currentThread();
-        ClassLoader currentClassLoader = currentThread.getContextClassLoader();
-        try {            
-            ClassLoader jsbCL = jsbProxy.getClass().getClassLoader();
-            currentThread.setContextClassLoader(jsbCL);
-            configuredAttrs = getConfiguredAttributes(context);
-        } finally {
-            currentThread.setContextClassLoader(currentClassLoader);
-        }
-        String hostAddress = context.getComputeResourceManager().getComputeResource().getAddress().getHostAddress();
-        advertise(jsbProxy,
-                  context.getServiceElement().getName(),
-                  context.getServiceElement().getOperationalStringName(),
-                  context.getServiceElement().getServiceBeanConfig().getGroups(),
-                  context.getServiceElement().getServiceBeanConfig().getLocators(),
-                  hostAddress,
-                  configuredAttrs);
-    }
-
-    /**
-     * Advertise a ServiceBean
-     * 
-     * @param jsbProxy Proxy to the JSB
-     * @param serviceName The name for the service
-     * @param opStringName The name of the OperationalString
-     * @param groups Array of String discovery groups
-     * @param locators Array LookupLocators
-     * @param hostAddress the address of the machine the service is executing on
-     * @param attrs An array of additional Entry objects to add
-     *
-     * @throws org.rioproject.admin.ServiceBeanControlException If the service bean cannot be advertised
-     */
-    public static void advertise(Object jsbProxy, 
-                                 String serviceName,
-                                 String opStringName,
-                                 String[] groups, 
-                                 LookupLocator[] locators,
-                                 String hostAddress,
-                                 Entry[] attrs) throws ServiceBeanControlException {
-        if(jsbProxy == null)
-            throw new NullPointerException("instance is null");
-        final Thread currentThread = Thread.currentThread();
-        ClassLoader currentClassLoader = currentThread.getContextClassLoader();
-        try {            
-            ClassLoader jsbCL = jsbProxy.getClass().getClassLoader();
-            currentThread.setContextClassLoader(jsbCL);
-            if(jsbProxy instanceof Administrable) {
-                Administrable admin = (Administrable)jsbProxy;                
-                Object adminObject = admin.getAdmin();
-                if(adminObject instanceof ServiceBeanControl) {
-                    ServiceBeanControl controller = (ServiceBeanControl)adminObject;
-                    controller.advertise();
-                    /* Additional attributes are ignored here, they are obtained
-                     * by the ServiceBeanAdmin.advertise() method */
-                    /*
-                    if(attrs.length>0) {
-                        JoinAdmin joinAdmin = (JoinAdmin)adminObject;
-                        addAttributes(attrs, joinAdmin);
-                    }
-                    */
-                } else if(adminObject instanceof JoinAdmin) {                    
-                    JoinAdmin joinAdmin = (JoinAdmin)adminObject;
-                    ArrayList<Entry> addList = new ArrayList<Entry>();
-                    /* Try and add an OperationalStringEntry */
-                    if(opStringName!=null && opStringName.length()>0) {
-                        Entry opStringEntry =
-                            loadEntry("org.rioproject.entry.OperationalStringEntry", joinAdmin, opStringName, jsbCL);
-                        if(opStringEntry!=null)
-                            addList.add(opStringEntry);
-
-                        Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, jsbCL);
-                        if(hostEntry!=null)
-                            addList.add(hostEntry);
-                    } else {
-                        if(logger.isLoggable(Level.FINEST)) {
-                            String s = (opStringName==null?"[null]":"[empty string]");
-                            logger.finest("OperationalString name is "+s);
-                        }                        
-                    }
-                    /* Process the net.jini.lookup.entry.Name attribute */
-                    try {
-                        Class nameClass = jsbCL.loadClass("net.jini.lookup.entry.Name");
-                        Constructor cons = nameClass.getConstructor(String.class);
-                        Entry name = (Entry)cons.newInstance(serviceName);
-                        boolean add = true;
-                        /* Check if the service already has a Name, if it does 
-                         * ensure it is not the same name as the one this
-                         * utility is prepared to add */
-                        Entry[] attributes = joinAdmin.getLookupAttributes();
-                        for (Entry attribute : attributes) {
-                            if (attribute.getClass().getName().equals(
-                                nameClass.getName())) {
-                                Field n = attribute.getClass().getDeclaredField("name");
-                                String value =(String) n.get(attribute);
-                                if (value.equals(serviceName))
-                                    add = false;
-                                break;
-                            }
-                        }
-                        if(add)
-                            addList.add(name);
-                            
-                    } catch(Exception e) {                        
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.log(Level.FINEST, "Name not found, cannot add a Name Entry", e);
-                        else
-                            logger.warning("Name not found, cannot add a Name Entry");
-                    }
-                    
-                    /* If any additional attributes (including the
-                     * OperationalString and Name entry already processed) are
-                     * passed in, include them as well */
-                    addList.addAll(Arrays.asList(attrs));
-                    
-                    /* If we have Entry objects to add, add them */                    
-                    if(addList.size()>0) {
-                        Entry[] adds = 
-                            addList.toArray(new Entry[addList.size()]);
-                        addAttributes(adds, joinAdmin);
-                    }
-                    /* Apply groups to the JoinAdmin */
-                    if(groups == null || groups.length == 0)
-                        groups = LookupDiscovery.NO_GROUPS;
-                    if(groups != null && groups.length > 0) {
-                        if(groups.length == 1 && groups[0].equals("all")) {
-                            groups = LookupDiscovery.ALL_GROUPS;
-                        } else {
-                            for(int i = 0; i < groups.length; i++) {
-                                if(groups[i].equals("public"))
-                                    groups[i] = "";
-                            }
-                        }
-                    }
-                    if(logger.isLoggable(Level.FINEST)) {
-                        StringBuilder buff = new StringBuilder();
-                        if(groups == null || groups.length == 0) {
-                            buff.append("LookupDiscovery.NO_GROUPS");
-                        } else {
-                            for(int i=0; i<groups.length; i++) {
-                                if(i>0)
-                                    buff.append(",");
-                                buff.append(groups[i]);
-                            }
-                        }                        
-                        logger.finest("Setting groups ["+buff.toString()+"] using JoinAdmin.setLookupGroups");
-                    }
-                    joinAdmin.setLookupGroups(groups);
-                    if((locators != null) && (locators.length > 0)) {
-                        if(logger.isLoggable(Level.FINEST)) {
-                            StringBuilder buff = new StringBuilder();
-                            for(int i=0; i<locators.length; i++) {
-                                if(i>0)
-                                    buff.append(",");
-                                buff.append(locators[i].toString());
-                            }                                               
-                            logger.finest("Setting locators ["+buff.toString()+"] using JoinAdmin.setLookupLocators");
-                        }
-                        joinAdmin.setLookupLocators(locators);
-                    }
-                } else {
-                    logger.log(Level.SEVERE,
-                               "Admin must implement JoinAdmin or ServiceBeanControl to be properly advertised");
-                }
-                
-            } else {
-                throw new ServiceBeanControlException("Unable to obtain mechanism to advertise ["+serviceName+"]");
-            }
-        } catch(ServiceBeanControlException e) {
-            /* If we throw a ServiceBeanControlException above, just rethrow it */
-            throw e;
-        } catch(Throwable t) {
-            logger.warning("Advertising ServiceBean, ["+t.getClass().getName()+":"+t.getLocalizedMessage()+"]");
-            throw new ServiceBeanControlException("advertise", t);
-        } finally {
-            currentThread.setContextClassLoader(currentClassLoader);
-        }
-    }   
-    
-    /**
-     * Get configuration defined attributes
-     *
-     * @param context The ServiceBeanContext
-     *
-     * @return An array of configured Entry attributes from the ServiceBeanContext
-     */
-    public static Entry[] getConfiguredAttributes(ServiceBeanContext context) {
-        if(context==null)
-            throw new NullPointerException("context is null");
-        ArrayList<Entry> attrList = new ArrayList<Entry>();
-        String serviceBeanComponent;
-        String className = null;
-        if(context.getServiceElement().getComponentBundle()==null) {
-            serviceBeanComponent =
-                (String)context.getInitParameter(
-                    ServiceBeanActivation.BOOT_CONFIG_COMPONENT);
-        } else {
-            if(context.getServiceElement().getComponentBundle()!=null)
-                className = context.getServiceElement().getComponentBundle().
-                                                       getClassName();
-            if(className==null)
-                className =
-                    context.getServiceElement().getExportBundles()[0].
-                                                getClassName();
-            
-            if(className.indexOf(".")>0) {
-                int index = className.lastIndexOf(".");
-                serviceBeanComponent = className.substring(0, index);
-            } else {
-                serviceBeanComponent = className;
-            }
-        }
-        if(serviceBeanComponent!=null) {
-            try {
-                /* 1. Get any configured ServiceUIs */
-                Entry[] serviceUIs =
-                    (Entry[])context.getConfiguration().getEntry(
-                        serviceBeanComponent,
-                        "serviceUIs",
-                        Entry[].class,
-                        new Entry[0],
-                        context.getExportCodebase()==null?
-                            Configuration.NO_DATA:context.getExportCodebase());
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Obtained ["+serviceUIs.length+"] " +
-                                  "serviceUI "+
-                                  "declarations for "+
-                                  "["+context.getServiceElement().getName()+"] "+
-                                  "using component ["+
-                                  serviceBeanComponent+"]");
-                attrList.addAll(Arrays.asList(serviceUIs));
-            } catch (ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Getting ServiceUIs for " +
-                           "["+context.getServiceElement().getName()+"]",
-                           e);
-            }
-            /* 2. Get any additional attributes */
-            try {
-                Entry[] initialAttributes =
-                    (Entry[])context.getConfiguration().getEntry(
-                        serviceBeanComponent,
-                        "initialAttributes",
-                        Entry[].class,
-                        new Entry[0]);
-                attrList.addAll(Arrays.asList(initialAttributes));
-            } catch (ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Getting initialAttributes for "+
-                           "["+context.getServiceElement().getName()+"]",
-                           e);
-            }
-        }
-        return(attrList.toArray(new Entry[attrList.size()]));
-    }
-    
-    /*
-     * Add Attributes using the JoinAdmin
-     */
-    static void addAttributes(Entry[] attrs, JoinAdmin joinAdmin) {
-        try {
-            joinAdmin.addLookupAttributes(attrs);
-        } catch (Exception e) {                            
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, 
-                           "Unable to add Entry attributes", 
-                           e);
-            else
-                logger.warning("Unable to add Entry attributes");
-            e.printStackTrace();
-        }
-    }
-
-    /*
-     * Add an entry
-     */
-    static Entry loadEntry(String entryClassName,
-                           JoinAdmin joinAdmin,
-                           String value,
-                           ClassLoader loader) {
-        Entry entry = null;
-        try {
-            boolean add = true;
-            Class entryClass = loader.loadClass(entryClassName);
-            Constructor cons = entryClass.getConstructor(String.class);
-            Entry newEntry = (Entry)cons.newInstance(value);
-            /* Check if the service already has the Entry, if it does perform
-             * no more work if it does not add the entry*/
-            Entry[] attributes = joinAdmin.getLookupAttributes();
-            for (Entry attribute : attributes) {
-                if (attribute.getClass().getName().equals(
-                    entryClass.getName())) {
-                    add = false;
-                    break;
-                }
-            }
-            if(add)
-                entry = newEntry;
-
-        } catch(Exception e) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           entryClassName+" not " +
-                           "found, "+
-                           "cannot add an "+
-                           entryClassName,
-                           e);
-            else
-                logger.warning(entryClassName+" not found, "+
-                               "cannot add "+entryClassName);
-        }
-        return(entry);
-    }
 
     static synchronized Map<String, ProvisionedResources> provisionService(ServiceElement elem,
                                                                            Resolver resolver,
@@ -906,9 +567,8 @@ public class ServiceBeanLoader {
 
         /* RIO-228 */
         if(System.getProperty("StaticCybernode")==null) {
-            /* Check the dlPR jars for requisite rio-dl.jar and jsk-dl.jar
-             * inclusion */
-            String[] requisiteExports = new String[]{"rio-dl.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
+            /* Check the dlPR jars for requisite jar inclusion */
+            String[] requisiteExports = new String[]{"rio-api.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
             //String libDLDir = new File(System.getProperty("RIO_HOME")+ File.separator+"lib-dl").toURI().toString();
 
             for(String export : requisiteExports) {
@@ -925,7 +585,7 @@ public class ServiceBeanLoader {
                      * case where a service is just implemented as a pojo with
                      * no custom remote methods, and is just exported using Rio
                      * infrastructure support
-                     * (through the org.rioproject.resources.servicecore.Service
+                     * (through the org.rioproject.servicecore.Service
                      * interface).
                      *
                      * If there is no declared artifact, we sail through since

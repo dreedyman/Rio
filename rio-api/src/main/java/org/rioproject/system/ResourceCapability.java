@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,12 +156,10 @@ public class ResourceCapability implements Comparable, Serializable {
     public MeasuredResource[] getMeasuredResources(int type) {
         if(type < ALL_MEASURED_RESOURCES || type > MEASURED_RESOURCES_BREACHED)
             throw new IllegalArgumentException("unknown type : "+type);
-        Collection<MeasuredResource> measuredResources =
-            resourceUtilization.getMeasuredResources();
+        Collection<MeasuredResource> measuredResources = resourceUtilization.getMeasuredResources();
         MeasuredResource[] mRes;
         if(type == ALL_MEASURED_RESOURCES) {
-            mRes = measuredResources.toArray(
-                new MeasuredResource[measuredResources.size()]);
+            mRes = measuredResources.toArray(new MeasuredResource[measuredResources.size()]);
         } else {
             ArrayList<MeasuredResource> list = new ArrayList<MeasuredResource>();
             for (MeasuredResource measuredResource : measuredResources) {
@@ -209,16 +206,13 @@ public class ResourceCapability implements Comparable, Serializable {
      * Provide a String output
      */
     public String toString() {
-        return "ResourceCapability{" +
-               "platformCapabilities=" +
-               (platformCapabilities == null ? null : Arrays.asList(
-                   platformCapabilities)) +
-                                          ", resourceUtilization=" +
-                                          resourceUtilization +
-                                          ", address='" + address + '\'' +
-                                          ", hostName='" + hostName + '\'' +
-                                          ", persistentProvisioning=" +
-                                          persistentProvisioning +
-                                          '}';
+        return "ResourceCapability: platformCapabilities=" +
+               (platformCapabilities == null ? null : Arrays.asList(platformCapabilities)) +
+               ", resourceUtilization=" +
+               resourceUtilization +", address='" + address +
+               ", hostName='" + hostName + '\'' +
+               ", persistentProvisioning=" +
+               persistentProvisioning +
+               '}';
     }
 }

@@ -599,16 +599,14 @@ public class AssociationMgmt implements AssociationManagement {
      */
     public List<Association<?>> addAssociationDescriptors(AssociationDescriptor... aDescs) {
         if(aDescs == null)
-            throw new IllegalArgumentException("The AssociationDescriptor " +
-                                               "cannot be null");
+            throw new IllegalArgumentException("The AssociationDescriptor cannot be null");
         List<AssociationHandler> newHandlers = new ArrayList<AssociationHandler>();
         List<Association<?>> associations = new ArrayList<Association<?>>();
         for (AssociationDescriptor aDesc : aDescs) {
             AssociationHandler handler = getAssociationHandler(aDesc);
             if (handler!=null) {
                 if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Already managing ["+aDesc.toString()+"] " +
-                                  "for ["+clientName+"]");
+                    logger.finest("Already managing ["+aDesc.toString()+"] for ["+clientName+"]");
                 }
                 associations.add(handler.getAssociation());
                 continue;
@@ -651,9 +649,8 @@ public class AssociationMgmt implements AssociationManagement {
      */
     @SuppressWarnings("unchecked")
     class Listener implements AssociationListener {
-        List<Association> requiredAssociations =
-            Collections.synchronizedList(new ArrayList<Association>());
-       AssociationInjector associationInjector;
+        final List<Association> requiredAssociations = Collections.synchronizedList(new ArrayList<Association>());
+        AssociationInjector associationInjector;
 
         /*
          * Create injector
@@ -957,9 +954,7 @@ public class AssociationMgmt implements AssociationManagement {
      * The AssociationHandler handle an Association created from
      * AssociationDescriptor.
      */
-    public class AssociationHandler extends ServiceDiscoveryAdapter
-        implements
-        FaultDetectionListener <ServiceID> {
+    public class AssociationHandler extends ServiceDiscoveryAdapter implements FaultDetectionListener <ServiceID> {
         /** The AssociationDescriptor */
         AssociationDescriptor aDesc;
         /** Number of instances of the associated service */
@@ -968,8 +963,7 @@ public class AssociationMgmt implements AssociationManagement {
          * Table of service IDs to FaultDetectionHandler instances, one for
          * each service
          */
-        Map<ServiceID, FaultDetectionHandler> fdhTable =
-            new Hashtable<ServiceID, FaultDetectionHandler>();
+        Map<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
         /** The Association for the AssociationHandler */
         Association association;
         /** The LookupCache for the ServiceDiscoveryManager */
@@ -1038,6 +1032,7 @@ public class AssociationMgmt implements AssociationManagement {
                     template = JiniClient.getServiceTemplate(aDesc, callerCL);
                     LookupCachePool lcPool = LookupCachePool.getInstance();
                     String sharedName = aDesc.getOperationalStringName();
+
                     lCache = lcPool.getLookupCache(sharedName,
                                                    aDesc.getGroups(),
                                                    aDesc.getLocators(),

@@ -25,6 +25,7 @@ import org.rioproject.gnostic.test.TestService;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
+import sun.awt.windows.ThemeReader;
 
 import java.io.*;
 
@@ -105,6 +106,8 @@ public class ITNotificationUsingArtifactTest {
 
         verifyCounts(test, 33, 50);
         testManager.undeploy("Notification Using Artifact Test");
+        /* wait for resources to be cleaned up*/
+        sleep(8000);
     }
 
     @Test
@@ -171,5 +174,13 @@ public class ITNotificationUsingArtifactTest {
         sb.append("    t.executedRHS();").append("\n");
         sb.append("end").append("\n");
         return sb.toString();
+    }
+
+    private void sleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            //
+        }
     }
 }

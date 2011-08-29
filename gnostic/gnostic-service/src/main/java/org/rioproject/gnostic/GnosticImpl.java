@@ -62,8 +62,7 @@ public class GnosticImpl implements Gnostic {
     private ExecutorService execService;
     private final List<RuleMap> managedRuleMaps = new ArrayList<RuleMap>();
     private final List<RuleMap> ruleMapsInProcess = new ArrayList<RuleMap>();
-    private static BlockingQueue<RuleMap> addRuleMapQ =
-        new LinkedBlockingQueue<RuleMap>();
+    private static BlockingQueue<RuleMap> addRuleMapQ = new LinkedBlockingQueue<RuleMap>();
     private final List<RuleMapAssociationController> controllers = new ArrayList<RuleMapAssociationController>();
     private static final Logger logger = Logger.getLogger(Gnostic.class.getName());
     private final AtomicBoolean droolsInitialized = new AtomicBoolean(false);
@@ -126,7 +125,6 @@ public class GnosticImpl implements Gnostic {
         }
         if(otherMappings!=null)
             ruleMappings.addAll(otherMappings);
-        System.err.println("4");
         if(ruleMappings!=null) {
             for(RuleMap ruleMap : ruleMappings) {
                 add(ruleMap);
@@ -137,7 +135,7 @@ public class GnosticImpl implements Gnostic {
 
     private void checkDroolsHasInitialized() {
         long t0 = System.currentTimeMillis();
-        while(droolsInitialized.get()==false) {
+        while(!droolsInitialized.get()) {
             System.err.println("Waiting for Drools to initialize ... "+(System.currentTimeMillis()-t0));
             try {
                 Thread.sleep(1000);
@@ -236,8 +234,9 @@ public class GnosticImpl implements Gnostic {
     @PreDestroy
     public void cleanup() {
         try {
-            /*ResourceFactory.getResourceChangeNotifierService().stop();
-            ResourceFactory.getResourceChangeScannerService().stop();*/
+            context.getAssociationManagement().terminate();
+            ResourceFactory.getResourceChangeNotifierService().stop();
+            ResourceFactory.getResourceChangeScannerService().stop();
             if(execService!=null)
                 execService.shutdownNow();
             for (RuleMapAssociationController controller : controllers) {

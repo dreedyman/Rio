@@ -1,6 +1,5 @@
 import org.rioproject.config.Constants
 
-import org.rioproject.resources.servicecore.Service
 import java.util.logging.Level
 import org.rioproject.system.SystemWatchID
 

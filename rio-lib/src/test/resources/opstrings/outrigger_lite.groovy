@@ -1,7 +1,7 @@
 deployment(name:'Space') {
     groups('${user.name}')
 
-    resources id:'outrigger-dl', 'outrigger-dl.jar', 'jsk-dl.jar', 'rio-dl.jar'
+    resources id:'outrigger-dl', 'outrigger-dl.jar', 'jsk-dl.jar', 'rio-lookup-entry.jar'
     resources id:'outrigger-impl', 'outrigger.jar'
 
     service(name:'Result Space') {

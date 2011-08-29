@@ -136,14 +136,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <systemProperties>
-                        <property>
-                            <name>rio.version</name>
-                            <value>${project.version}</value>
-                        </property>
-                    </systemProperties>
+                    <!--
+                    Just used for testing. We know that version 4.2 (as opposed to the current version)
+                    is in the repository
+                    -->
                     <systemPropertyVariables>
-                        <rio.version>${project.version}</rio.version>
+                        <rio.version>4.2</rio.version>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

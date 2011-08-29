@@ -170,6 +170,7 @@ public class ProvisionTask implements Runnable {
         int result = 0;
         InstantiatorResource ir = (InstantiatorResource) serviceResource.getResource();
         try {
+            //ir.incrementProvisionCounter(request.getServiceElement());
             try {
                 ServiceProvisionEvent event = new ServiceProvisionEvent(context.getEventSource(),
                                                                         request.getOpStringManager(),

@@ -199,8 +199,6 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 append("\n");*/
 
                 context.getInProcess().add(request.getServiceElement());
-                InstantiatorResource ir = (InstantiatorResource) resource.getResource();
-                ir.incrementProvisionCounter(request.getServiceElement());
                 context.setProvisionRequest(request);
                 context.setServiceResource(resource);
                 context.getProvisioningPool().execute(new ProvisionTask(context, pendingManager));

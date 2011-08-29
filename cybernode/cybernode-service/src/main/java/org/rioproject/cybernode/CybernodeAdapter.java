@@ -66,15 +66,12 @@ public class CybernodeAdapter {
 
         for (ServiceRecord record :
             impl.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD)) {
-            ServiceBeanDelegate delegate =
-                impl.getServiceBeanContainer()
-                    .getServiceBeanDelegate(record.getServiceID());
+            ServiceBeanDelegate delegate = impl.getServiceBeanContainer().getServiceBeanDelegate(record.getServiceID());
 
             if(delegate!=null) {
-                DeployedService deployed =
-                    new DeployedService(delegate.getServiceElement(),
-                                        delegate.getServiceBeanInstance(),
-                                        delegate.getComputeResourceUtilization());
+                DeployedService deployed = new DeployedService(delegate.getServiceElement(),
+                                                               delegate.getServiceBeanInstance(),
+                                                               delegate.getComputeResourceUtilization());
                 list.add(deployed);
             }
 

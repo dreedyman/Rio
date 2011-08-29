@@ -101,8 +101,8 @@ class MonitorConfig {
     LoggerConfig[] getLoggerConfigs() {
         def loggers = []
         ['org.rioproject.monitor' : Level.FINER,
-         'org.rioproject.monitor.sbi' : Level.FINE,
          'org.rioproject.monitor.provision': Level.FINER,
+         'org.rioproject.monitor.sbi' : Level.FINE,
          'org.rioproject.monitor.selector' : Level.OFF,
          'org.rioproject.monitor.services' : Level.FINEST,
 

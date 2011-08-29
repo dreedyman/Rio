@@ -318,7 +318,7 @@ public class DiscoveryManagementPool {
                                                       Configuration config) 
         throws IOException {
             if(logger.isLoggable(Level.FINE)) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 if(groups==null) {
                     buffer.append("Create new SharedDiscoveryManager for "+
                                   "ALL_GROUPS");

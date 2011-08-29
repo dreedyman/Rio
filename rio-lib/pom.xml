@@ -108,6 +108,8 @@
                         <configuration>
                             <artifactSet>
                                <includes>
+                                   <include>net.jini.lookup:jmx-lookup</include>
+                                   <include>net.jini.lookup:serviceui</include>
                                    <include>org.rioproject:rio-api</include>
                                    <include>org.rioproject:rio-lookup-entry</include>
                                </includes>

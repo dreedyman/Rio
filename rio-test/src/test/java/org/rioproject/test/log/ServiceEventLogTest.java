@@ -16,11 +16,11 @@
 package org.rioproject.test.log;
 
 import org.junit.runner.RunWith;
+import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.monitor.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.TestManager;
@@ -164,7 +164,6 @@ public class ServiceEventLogTest {
 
         public void notify(RemoteServiceEvent event) {
             Assert.assertTrue(event instanceof ServiceLogEvent);
-            ServiceLogEvent e = (ServiceLogEvent)event;
             notifications++;
         }
     }

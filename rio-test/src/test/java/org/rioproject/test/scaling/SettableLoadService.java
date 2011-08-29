@@ -15,7 +15,7 @@
  */
 package org.rioproject.test.scaling;
 
-import org.rioproject.resources.servicecore.Service;
+import org.rioproject.servicecore.Service;
 
 import java.rmi.RemoteException;
 
@@ -30,6 +30,7 @@ public interface SettableLoadService extends Service {
      * Sets the service load.
      *
      * @param load the load.
+     * @throws java.rmi.RemoteException if comms errors
      */
     void setLoad(double load) throws RemoteException;
 }

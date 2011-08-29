@@ -834,8 +834,8 @@ public class ServiceElement implements Serializable {
             ServiceBeanConfig sbc = new ServiceBeanConfig(new java.util.HashMap<String, Object>(),
                                                           new String[] {"-"});
             ClassBundle export1 = 
-                new ClassBundle("org.rioproject.resources.servicecore.Service");
-            export1.addJAR("rio-dl.jar");
+                new ClassBundle("org.rioproject.servicecore.Service");
+            export1.addJAR("rio-api.jar");
             export1.addJAR("service-dl.jar");
             export1.setCodebase("http://10.1.1.3:9000");
             ClassBundle impl = new ClassBundle("com.foo.ExampleImpl");
@@ -851,8 +851,8 @@ public class ServiceElement implements Serializable {
                                                    impl);            
             
             ClassBundle export2 = 
-                new ClassBundle("org.rioproject.resources.servicecore.Service");
-            export2.addJAR("rio-dl.jar");
+                new ClassBundle("org.rioproject.servicecore.Service");
+            export2.addJAR("rio-api.jar");
             export2.addJAR("service-dl.jar");
             export2.setCodebase("http://10.1.1.3:9000");
             ServiceElement s2 = new ServiceElement(ProvisionType.DYNAMIC,

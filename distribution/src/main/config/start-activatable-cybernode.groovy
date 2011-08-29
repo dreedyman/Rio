@@ -6,14 +6,14 @@ import org.rioproject.config.Component
 import org.rioproject.boot.RioActivatableServiceDescriptor
 import com.sun.jini.start.SharedActivationGroupDescriptor
 import com.sun.jini.start.ServiceDescriptor
+import org.rioproject.boot.ServiceDescriptorUtil
 
 @Component('com.sun.jini.start')
 class StartActivatableCybernodeConfig extends ActivatableConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
-        String cybernodeClasspath = "${rioHome}/lib/cybernode.jar${File.pathSeparator}${rioHome}/lib/resolver.jar"
-        String cybernodeCodebase =
-            getServiceCodebase(['cybernode-dl.jar', 'rio-dl.jar', 'jsk-dl.jar'])            
+        String cybernodeClasspath = ServiceDescriptorUtil.getCybernodeClasspath()
+        String cybernodeCodebase = ServiceDescriptorUtil.getCybernodeCodebase("http://${host}:${port}")
             
         def configArgs = ["${rioHome}/config/common.groovy",
                           "${rioHome}/config/cybernode.groovy",

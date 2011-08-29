@@ -16,9 +16,6 @@
 
 import org.rioproject.config.Constants
 
-import org.rioproject.resources.servicecore.Service
-import java.util.logging.Level
-
 deployment(name: 'Test Deploy 2') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))

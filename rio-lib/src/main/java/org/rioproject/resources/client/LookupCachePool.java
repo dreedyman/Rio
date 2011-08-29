@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
  */
 package org.rioproject.resources.client;
 
-import com.sun.jini.config.Config;
 import com.sun.jini.lookup.entry.LookupAttributes;
 import net.jini.admin.Administrable;
 import net.jini.admin.JoinAdmin;
@@ -33,6 +31,7 @@ import net.jini.discovery.LookupDiscovery;
 import net.jini.id.Uuid;
 import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.*;
+import net.jini.lookup.entry.Name;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.ServiceBeanContainer;
@@ -43,6 +42,7 @@ import org.rioproject.opstring.OpStringFilter;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,9 +55,6 @@ import java.util.logging.Logger;
  */
 public class LookupCachePool {
     private final List<SDMWrapper> pool = new ArrayList<SDMWrapper>();
-    private Timer taskTimer = new Timer(true);
-    private static final long DEFAULT_CACHE_TIMEOUT=1000*10;
-    private long cacheTimeout;
     private ServiceBeanContainerListener containerListener;
     private static final String COMPONENT = LookupCachePool.class.getName();
     private static final Logger logger = Logger.getLogger(COMPONENT);
@@ -102,22 +99,8 @@ public class LookupCachePool {
             if(config==null)
                 logger.fine("Set null configuration for LookupCachePool");
             else
-                logger.log(Level.FINE,
-                           "Set configuration for LookupCachePool {0}",
-                           new Object[] {config});
-        } 
-        try {
-            cacheTimeout = Config.getLongEntry(conf, 
-                                               COMPONENT, 
-                                               "cacheTimeout", 
-                                               DEFAULT_CACHE_TIMEOUT, 
-                                               1000*5, 
-                                               Long.MAX_VALUE);
-                                               
-        } catch(Exception e) {
-            logger.log(Level.WARNING, "getting cacheTimeout", e);
-            cacheTimeout = DEFAULT_CACHE_TIMEOUT;
-        }        
+                logger.log(Level.FINE, "Set configuration for LookupCachePool "+config);
+        }
     }
     
     /**
@@ -144,9 +127,8 @@ public class LookupCachePool {
      * @throws IOException If discovery management cannot be created
      * @throws ConfigurationException If the Jini configuration cannot be used
      */
-    public LookupCache getLookupCache(DiscoveryManagement dMgr,
-                                      ServiceTemplate template) 
-    throws IOException, ConfigurationException {
+    public LookupCache getLookupCache(DiscoveryManagement dMgr, ServiceTemplate template) throws IOException,
+                                                                                                 ConfigurationException {
         if(!(dMgr instanceof DiscoveryManagementPool.SharedDiscoveryManager)) {
             logger.warning("The DiscoveryManagement instance pass was not " +
                            "created by the "+
@@ -154,12 +136,8 @@ public class LookupCachePool {
                            "returning null");
             return(null);
         }
-        DiscoveryManagementPool.SharedDiscoveryManager sharedDM = 
-            (DiscoveryManagementPool.SharedDiscoveryManager)dMgr;        
-        return(getLookupCache(sharedDM.getSharedName(),
-                              sharedDM.getGroups(), 
-                              sharedDM.getLocators(), 
-                              template));
+        DiscoveryManagementPool.SharedDiscoveryManager sharedDM = (DiscoveryManagementPool.SharedDiscoveryManager)dMgr;
+        return(getLookupCache(sharedDM.getSharedName(), sharedDM.getGroups(), sharedDM.getLocators(), template));
     }
     
     /**
@@ -184,7 +162,7 @@ public class LookupCachePool {
      * @param template ServiceTemplate to match
      * @return A ServiceDiscoveryManager object based on the provided parameters
      *
-     * @throws IOException If discovery mangement cannot be created
+     * @throws IOException If discovery management cannot be created
      * @throws ConfigurationException If the Jini configuration cannot be used
      */
     public LookupCache getLookupCache(String sharedName, 
@@ -195,9 +173,7 @@ public class LookupCachePool {
         
         if(template==null)
             throw new NullPointerException("template is null");
-        SDMWrapper sdmWrapper = getSDMWrapper(sharedName,  
-                                              groups, 
-                                              locators);        
+        SDMWrapper sdmWrapper = getSDMWrapper(sharedName, groups, locators);
         return(sdmWrapper.getLookupCache(template, true));
     }
     
@@ -209,10 +185,7 @@ public class LookupCachePool {
         SDMWrapper[] sdms = getSDMWrappers();
         for(SDMWrapper sdmWrapper : sdms) {
             sdmWrapper.sdm.terminate();
-        }        
-        if(taskTimer!=null)
-            taskTimer.cancel();
-        taskTimer = null;
+        }
         pool.clear();
         singleton = null;        
     }
@@ -247,38 +220,25 @@ public class LookupCachePool {
         if(sdmWrapper==null) {            
             config = (config==null?EmptyConfiguration.INSTANCE:config);
             ServiceDiscoveryManager sdm = 
-                new ServiceDiscoveryManager(
-                        DiscoveryManagementPool.getInstance().
-                                                getDiscoveryManager(sharedName,
-                                                                    groupsToMatch, 
-                                                                    locatorsToMatch),
-                        new LeaseRenewalManager(config), 
-                        config);
+                new ServiceDiscoveryManager(DiscoveryManagementPool.getInstance().getDiscoveryManager(sharedName,
+                                                                                                      groupsToMatch,
+                                                                                                      locatorsToMatch),
+                                            new LeaseRenewalManager(config),
+                                            config);
                     
-            sdmWrapper = new SDMWrapper(sharedName, 
-                                        sdm, 
-                                        groupsToMatch, 
-                                        locatorsToMatch);
+            sdmWrapper = new SDMWrapper(sharedName, sdm, groupsToMatch, locatorsToMatch);
             synchronized(pool) {
                 pool.add(sdmWrapper);
             }
         }
         return(sdmWrapper);
-    }    
-    
-    /*
-     * Schedule a CacheTimeout to chec for an unues SharedLookupCache
-     */
-    void scheduleCacheTimeout(SharedLookupCache cache) {
-        long now = System.currentTimeMillis();
-        taskTimer.schedule(new CacheTimeout(cache), new Date(now+cacheTimeout));
     }
     
     /**
      * The SDMWrapper class provides a wrapper around a known ServiceDiscoveryManager,
      * the lookupCache instances that this utility has created using the
      * ServiceDiscoveryManager and checks to see if the referenced 
-     * ServiceDsicoveryManager matches specified criteria, or if any known 
+     * ServiceDiscoveryManager matches specified criteria, or if any known
      * LookupCache instances match criteria
      */
     class SDMWrapper {
@@ -286,13 +246,9 @@ public class LookupCachePool {
         ServiceDiscoveryManager sdm;
         String[] groups;
         LookupLocator[] locators;
-        Hashtable<ServiceTemplate, SharedLookupCache> cacheTable =
-            new Hashtable<ServiceTemplate, SharedLookupCache>();
+        Hashtable<ServiceTemplate, SharedLookupCache> cacheTable = new Hashtable<ServiceTemplate, SharedLookupCache>();
         
-        SDMWrapper(String sharedName,
-                   ServiceDiscoveryManager sdm, 
-                   String[] groups, 
-                   LookupLocator[] locators) {
+        SDMWrapper(String sharedName, ServiceDiscoveryManager sdm, String[] groups, LookupLocator[] locators) {
             this.sharedName = sharedName;
             this.sdm = sdm;
             if(groups!=null) {
@@ -517,12 +473,11 @@ public class LookupCachePool {
     public class SharedLookupCache implements LookupCache {
         private LookupCache lCache;
         private ServiceTemplate template;
-        private int refCounter;
+        private AtomicInteger refCounter = new AtomicInteger();
         private SDMWrapper sdmWrapper;
         private boolean terminated = false;
         private ServiceItemFilter filter;
-        private final List<ServiceDiscoveryListener> localListeners =
-            new ArrayList<ServiceDiscoveryListener>();
+        private final List<ServiceDiscoveryListener> localListeners = new ArrayList<ServiceDiscoveryListener>();
         
         public SharedLookupCache(LookupCache lCache, 
                                  ServiceTemplate template, 
@@ -544,34 +499,37 @@ public class LookupCachePool {
         }
 
         /* (non-Javadoc)
-         * @see net.jini.lookup.LookupCache#lookup(net.jini.lookup.ServiceItemFilter)
+         * @see net.jini.lookup.LookupCache#lookup(ServiceItemFilter)
          */
         public ServiceItem lookup(ServiceItemFilter filter) {
             return(lCache.lookup(filter));
         }
 
         /* (non-Javadoc)
-         * @see net.jini.lookup.LookupCache#lookup(net.jini.lookup.ServiceItemFilter, int)
+         * @see LookupCache#lookup(ServiceItemFilter, int)
          */
         public ServiceItem[] lookup(ServiceItemFilter filter, int maxMatches) {
             return(lCache.lookup(filter, maxMatches));
         }
 
         /* (non-Javadoc)
-         * @see net.jini.lookup.ServiceDiscoveryManager#lookup(net.jini.core.lookup.ServiceTemplate, int, net.jini.lookup.ServiceItemFilter)
+         * @see ServiceDiscoveryManager#lookup(ServiceTemplate, int, ServiceItemFilter)
          */
         public ServiceItem[] lookupRemote(ServiceItemFilter filter, int maxMatches) {
             return sdmWrapper.sdm.lookup(template, maxMatches, filter);
         }
 
         /* (non-Javadoc)
-         * @see net.jini.lookup.LookupCache#addListener(net.jini.lookup.ServiceDiscoveryListener)
+         * @see LookupCache#addListener(ServiceDiscoveryListener)
          */
-        public void addListener(ServiceDiscoveryListener listener) {
-            synchronized(this) {
-                refCounter++;
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("LookupCache refCounter : "+refCounter);
+        public synchronized void addListener(ServiceDiscoveryListener listener) {
+            refCounter.incrementAndGet();
+            if(logger.isLoggable(Level.FINEST)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Added LookupCache Listener for template [")
+                    .append(getServiceTemplateAsString())
+                    .append("], refCounter: ").append(refCounter.get());
+                logger.finest(sb.toString());
             }
             synchronized(localListeners) {
                 localListeners.add(listener);
@@ -580,34 +538,35 @@ public class LookupCachePool {
         }
 
         /* (non-Javadoc)
-         * @see net.jini.lookup.LookupCache#removeListener(net.jini.lookup.ServiceDiscoveryListener)
+         * @see LookupCache#removeListener(ServiceDiscoveryListener)
          */
-        public void removeListener(ServiceDiscoveryListener listener) {
-            synchronized(this) {
-                if(!terminated) {
+        public synchronized void removeListener(ServiceDiscoveryListener listener) {
+            if(!terminated) {
+                synchronized(localListeners) {
                     localListeners.remove(listener);
-                    lCache.removeListener(listener);
-                    refCounter--;
                 }
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "LCache={0} refCounter={1}",
-                               new Object[] {lCache.toString(),
-                                             Integer.toString(refCounter)});
-                if(refCounter==0) {
-                    scheduleCacheTimeout(this);
-                }
+                lCache.removeListener(listener);
+                refCounter.decrementAndGet();
+            }
+            if(logger.isLoggable(Level.FINEST)) {
+                StringBuilder sb = new StringBuilder();
+                    sb.append("Removed LookupCache Listener for template [")
+                        .append(getServiceTemplateAsString())
+                        .append("], refCounter: ").append(refCounter.get());
+                    logger.log(Level.FINEST, sb.toString());
+                logger.log(Level.FINEST, "lCache="+lCache.toString()+" refCounter="+refCounter.get());
+            }
+            if(refCounter.get()==0) {
+                terminate();
             }
         }
 
         /* (non-Javadoc)
-         * @see net.jini.lookup.LookupCache#discard(java.lang.Object)
+         * @see LookupCache#discard(Object)
          */
         public void discard(Object o) {
             if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "Discard "+o.getClass().getName()+" " +
-                               "from LookupCache");
+                logger.log(Level.FINEST, "Discard "+o.getClass().getName()+" from LookupCache");
             lCache.discard(o);
 
         }
@@ -615,20 +574,47 @@ public class LookupCachePool {
         /* (non-Javadoc)
          * @see net.jini.lookup.LookupCache#terminate()
          */
-        public void terminate() {
-            if(refCounter==0) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "LCache={0} terminated",
-                               new Object[] {lCache.toString()});
-                synchronized(this) {
-                    terminated = true;
-                    lCache.terminate();
+        public synchronized void terminate() {
+            if(refCounter.get()==0) {
+                if(logger.isLoggable(Level.FINEST)) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Terminating LookupCache for template [")
+                        .append(getServiceTemplateAsString())
+                        .append("], refCounter: ").append(refCounter.get());
+                    logger.log(Level.FINEST, sb.toString());
                 }
+                terminated = true;
+                lCache.terminate();
                 sdmWrapper.removeCache(this);
             }
         }
 
+        String getServiceTemplateAsString() {
+            StringBuilder sb1 = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
+            if(template.serviceTypes!=null) {
+                for(Class c : template.serviceTypes) {
+                    if(sb2.length()>0)
+                        sb2.append(", ");
+                    sb2.append(c.getName());
+                }
+            }
+            sb1.append("types: [").append(sb2.toString()).append("] ");
+            sb2.delete(0, sb2.length());
+            if(template.attributeSetTemplates!=null) {
+                for(Entry e : template.attributeSetTemplates) {
+                    if(sb2.length()>0)
+                        sb2.append(", ");
+                    if(e instanceof Name)
+                        sb2.append("Name: ").append(((Name)e).name);
+                    else
+                        sb2.append(e.getClass().getName());
+                }
+            }
+            sb1.append("attributes: [").append(sb2.toString()).append("] ");
+            return sb1.toString();
+
+        }
         void notifyOnLocalAdd(ServiceItem item) {
             boolean cleared = true;
             if(filter!=null) {
@@ -644,25 +630,6 @@ public class LookupCachePool {
                 }
             }
         }
-    }
-    
-    /**
-     * Scheduled task to check for a SharedLookupCache that is not being used.
-     */
-    static class CacheTimeout extends TimerTask {
-        SharedLookupCache cache;
-        
-        CacheTimeout(SharedLookupCache cache) {
-            this.cache = cache;
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.TimerTask#run()
-         */
-        public void run() {
-            cache.terminate();
-        }
-        
     }
 
     class ContainerListener implements ServiceBeanContainerListener {

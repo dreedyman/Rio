@@ -25,6 +25,13 @@
 
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>rio</id>
+            <url>http://www.rio-project.org/maven2</url>
+        </repository>
+    </repositories>
+
     <modules>
         <module>events-api</module>        
     </modules>

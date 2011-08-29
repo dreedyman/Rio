@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class ITResolverTest {
     @Test
-    public void testJskPlatformPom() throws ResolverException {
+    public void testJskLibResolution() throws ResolverException {
         File testRepo;
         File saveOrigSettings = null;
         Throwable thrown = null;
@@ -38,16 +38,13 @@ public class ITResolverTest {
             saveOrigSettings = Utils.saveM2Settings();
             Utils.writeLocalM2RepoSettings();
             Resolver r = new AetherResolver();
-            File pom = new File("src/test/resources/jsk-platform-2.1.pom");
-            Assert.assertTrue(pom.exists());
             testRepo = Repository.getLocalRepository();
             if(testRepo.exists())
                 FileUtils.remove(testRepo);
-            //File jskPlatformDir = new File(testRepo, "net/jini/jsk-platform/2.1");
-            //Assert.assertFalse(jskPlatformDir.exists());
-            String[] classPath = r.getClassPathFor("net.jini:jsk-platform:2.1");
-            Assert.assertTrue(classPath.length>0);
-            File jskPlatformJar = new File(testRepo, "net/jini/jsk-platform/2.1/jsk-platform-2.1.jar");
+            String[] classPath = r.getClassPathFor("net.jini:jsk-lib:2.1");
+            Assert.assertTrue("classPath for net.jini:jsk-lib:2.1 expected to be > 1, actual="+classPath.length,
+                              classPath.length>0);
+            File jskPlatformJar = new File(testRepo, "net/jini/jsk-lib/2.1/jsk-lib-2.1.jar");
             Assert.assertTrue(jskPlatformJar.exists());
             StringBuilder sb = new StringBuilder();
             for(String s : classPath) {
@@ -86,7 +83,6 @@ public class ITResolverTest {
             Assert.assertNotNull(loc);
             File groovyJar = new File(testRepo, "org/codehaus/groovy/groovy-all/1.6.2/groovy-all-1.6.2.jar");
             Assert.assertTrue(groovyJar.exists());
-            List<String> cp = getClassPathFor("org.codehaus.groovy:groovy-all:1.6.2", r);
         } catch (IOException e) {
             e.printStackTrace();
             thrown = e;

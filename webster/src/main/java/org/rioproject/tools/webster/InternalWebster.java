@@ -53,8 +53,7 @@ public class InternalWebster {
         InetAddress ip = InetAddress.getLocalHost();
         String localIPAddress = ip.getHostAddress();
 
-        CodeSource cs =
-            InternalWebster.class.getProtectionDomain().getCodeSource();
+        CodeSource cs = InternalWebster.class.getProtectionDomain().getCodeSource();
         if(cs != null && cs.getLocation() != null) {
             String codebase = cs.getLocation().toExternalForm();
             File jar = new File(codebase);
@@ -95,7 +94,7 @@ public class InternalWebster {
 
     public static void main(String[] args) {
         try {            
-            startWebster("rio-dl.jar");
+            startWebster("rio-api.jar");
         } catch(Exception ex) {
             ex.printStackTrace();
         }

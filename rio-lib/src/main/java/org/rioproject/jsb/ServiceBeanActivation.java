@@ -29,6 +29,7 @@ import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.ServiceBeanControlException;
 import org.rioproject.boot.CommonClassLoader;
 import org.rioproject.boot.MulticastStatus;
+import org.rioproject.cybernode.ServiceAdvertiser;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
@@ -38,7 +39,6 @@ import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.provision.SystemRequirements;
-import org.rioproject.cybernode.ServiceBeanLoader;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.LookupCachePool;
@@ -343,7 +343,7 @@ public class ServiceBeanActivation {
                     throw new NullPointerException("sbProxy is null");
                 if(context == null)
                     throw new NullPointerException("context is null");
-                ServiceBeanLoader.advertise(sbProxy, context);
+                ServiceAdvertiser.advertise(sbProxy, context);
 
                 try {
                     ProxyPreparer prep = (ProxyPreparer)context.getConfiguration().getEntry(BOOT_COMPONENT,

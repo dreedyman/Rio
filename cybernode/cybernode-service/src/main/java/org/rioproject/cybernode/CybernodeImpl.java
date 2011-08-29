@@ -1363,24 +1363,20 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
                 /* Set the temporal service count to be equal to the in process
                  * count and active instances */
-                int activeServiceCounter =
-                    inProcessServiceCount+instantiatedServiceCount;
+                int activeServiceCounter = inProcessServiceCount+instantiatedServiceCount;
                 if(loaderLogger.isLoggable(Level.FINEST))
                     loaderLogger.finest("["+event.getServiceElement().getName()+"] "+
-                                        "activeServiceCounter="+
-                                        activeServiceCounter+", "+
-                                        "inProcessServiceCount="+
-                                        inProcessServiceCount+", " +
-                                        "instantiatedServiceCount="+
-                                        instantiatedServiceCount);
+                                        "activeServiceCounter=["+activeServiceCounter+"], "+
+                                        "inProcessServiceCount=["+inProcessServiceCount+"], " +
+                                        "instantiatedServiceCount=["+instantiatedServiceCount+"]");
                 /* First check max per machine */
                 int maxPerMachine = event.getServiceElement().getMaxPerMachine();
                 if(maxPerMachine!=-1 && activeServiceCounter >= maxPerMachine) {
                     if(loaderLogger.isLoggable(Level.FINEST))
                         loaderLogger.finest("Abort allocation of ["+
                                             event.getServiceElement().getName()+"] "+
-                                            "inProcessServiceCount=["+
-                                            inProcessServiceCount+"] "+
+                                            "activeServiceCounter=["+activeServiceCounter+"] "+
+                                            "inProcessServiceCount=["+inProcessServiceCount+"] "+
                                             "maxPerMachine=["+maxPerMachine+"]");
                     throw new ServiceBeanInstantiationException("MaxPerMachine "+
                                                         "["+maxPerMachine+"] " +
@@ -1394,10 +1390,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     if(loaderLogger.isLoggable(Level.FINEST))
                         loaderLogger.finest("Cancel allocation of ["+
                                             event.getServiceElement().getName()+"] "+
-                                            "activeServiceCounter=["+
-                                            activeServiceCounter+"] "+
-                                            "numPlannedServices=["+
-                                            numPlannedServices+"]");
+                                            "activeServiceCounter=["+activeServiceCounter+"] "+
+                                            "numPlannedServices=["+numPlannedServices+"]");
                     return(null);
                 }
 

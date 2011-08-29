@@ -30,9 +30,7 @@ import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import java.lang.management.MemoryNotificationInfo;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,13 +47,14 @@ public class Memory extends MeasurableCapability {
     private double tempUtilization;
     /** Computed utilization value */
     private double utilization;
-    private static final String VIEW =
-        "org.rioproject.system.measurable.memory.CalculableMemoryView";
+    private static final String VIEW = "org.rioproject.system.measurable.memory.CalculableMemoryView";
     /** Total memory arena */
     double totalArena;
     /** Component for Configuration and Logging */
     private static final String COMPONENT = "org.rioproject.system.measurable.memory";
     private JMXNotificationListener jmxListener;
+    /** For handling JX event notifications */
+    private final BlockingQueue<Notification> eventQ = new LinkedBlockingQueue<Notification>();
     /** A Logger for this class */
     static Logger logger = Logger.getLogger(COMPONENT);
 
@@ -91,18 +90,16 @@ public class Memory extends MeasurableCapability {
             return;
         setView(VIEW);
         try {           
-            ThresholdValues tVals = 
-                (ThresholdValues)config.getEntry(getComponentName(),
-                                                 "thresholdValues", 
-                                                 ThresholdValues.class,
-                                                 new ThresholdValues(0.0, 1.0));            
+            ThresholdValues tVals = (ThresholdValues)config.getEntry(getComponentName(),
+                                                                     "thresholdValues",
+                                                                     ThresholdValues.class,
+                                                                     new ThresholdValues(0.0, 1.0));
             setThresholdValues(tVals);
             
-            ResourceCostModel rCostModel =
-                (ResourceCostModel)config.getEntry(getComponentName(),
-                                                   "resourceCost", 
-                                                   ResourceCostModel.class,
-                                                   new ZeroCostModel());
+            ResourceCostModel rCostModel = (ResourceCostModel)config.getEntry(getComponentName(),
+                                                                              "resourceCost",
+                                                                              ResourceCostModel.class,
+                                                                              new ZeroCostModel());
             setResourceCostModel(rCostModel);
             sampleSize = Config.getIntEntry(config,
                                             getComponentName(),
@@ -125,9 +122,7 @@ public class Memory extends MeasurableCapability {
             totalArena = Runtime.getRuntime().maxMemory();
             
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Getting Memory Configuration",
-                       e);
+            logger.log(Level.WARNING, "Getting Memory Configuration", e);
         }
     }
 
@@ -135,8 +130,7 @@ public class Memory extends MeasurableCapability {
         return COMPONENT;
     }
 
-    protected MeasurableMonitor createMeasurableMonitor(Configuration config)
-            throws ConfigurationException {
+    protected MeasurableMonitor createMeasurableMonitor(Configuration config) throws ConfigurationException {
         MeasurableMonitor mMon = (MeasurableMonitor)config.getEntry(getComponentName(),
                                                                     "monitor",
                                                                     MeasurableMonitor.class,
@@ -167,7 +161,7 @@ public class Memory extends MeasurableCapability {
     public void stop() {
         super.stop();
         if(jmxListener!=null)
-            jmxListener.getPool().shutdownNow();
+            jmxListener.getExecutorService().shutdownNow();
     }
 
     /**
@@ -218,37 +212,47 @@ public class Memory extends MeasurableCapability {
     }
 
     class JMXNotificationListener implements NotificationListener {
-        private final ExecutorService pool = Executors.newCachedThreadPool();
+        private final ExecutorService execService = Executors.newSingleThreadExecutor();
 
-        ExecutorService getPool() {
-            return pool;
+        JMXNotificationListener() {
+            execService.submit(new JMXNotificationHandler());
+        }
+
+        ExecutorService getExecutorService() {
+            return execService;
         }
 
         public void handleNotification(Notification notification, Object handback) {
-            if (notification.getType().equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
+            eventQ.add(notification);
+        }
+    }
+
+    class JMXNotificationHandler implements Runnable {
+        public void run() {
+            while (true) {
+                Notification notification;
                 try {
-                pool.execute(new Runnable() {
-                    public void run() {
-                        CalculableMemory calculableMemory = createCalculableMemory();
-                        /* We may have a reading that lags behind the notification memory threshold notification. Force
-                         *  the value to be greater than the high threshold */
-                        if(calculableMemory.getValue()<=getThresholdValues().getCurrentHighThreshold()) {
-                            logger.info("JMX MEMORY_THRESHOLD_EXCEEDED, adjusting " +
+                    notification = eventQ.take();
+                } catch (InterruptedException e) {
+                    logger.fine("JMXNotificationHandler breaking out of main loop");
+                    break;
+                }
+                if (notification.getType().equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
+                    CalculableMemory calculableMemory = createCalculableMemory();
+                    /* We may have a reading that lags behind the notification memory threshold notification.
+                     * Force the value to be greater than the high threshold */
+                    if(calculableMemory.getValue()<=getThresholdValues().getCurrentHighThreshold()) {
+                        logger.info("JMX MEMORY_THRESHOLD_EXCEEDED, adjusting " +
                                     "CalculableMemory value from ["+calculableMemory.getValue()+"] to " +
                                     "["+(getThresholdValues().getCurrentHighThreshold()+0.01)+"] to " +
                                     "enforce SLA actions to occur.");
-                            calculableMemory.setValue(getThresholdValues().getCurrentHighThreshold()+0.01);
-                        }
-                        addWatchRecord(createCalculableMemory());
+                        calculableMemory.setValue(getThresholdValues().getCurrentHighThreshold()+0.01);
                     }
-                });
-                } catch(RejectedExecutionException e) {
-                    logger.log(Level.WARNING,
-                               "Unable to send JMX notification of LOW_MEMORY indication, " +
-                               "RejectedExecutionException: "+e.getMessage(), e);
+                    addWatchRecord(createCalculableMemory());
                 }
             }
         }
-    }    
+    }
+
 }
 

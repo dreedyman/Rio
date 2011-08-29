@@ -185,7 +185,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                                                 Long.MAX_VALUE));
             
             if(logger.isLoggable(Level.FINEST)) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 buffer.append("AdminFaultDetectionHandler Properties : ");
                 buffer.append("invocation delay=").append(invocationDelay).append(", ");
                 buffer.append("retry count=").append(retryCount).append(", ");

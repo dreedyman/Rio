@@ -123,7 +123,10 @@ public class OpStringUtil {
     }
 
     private static void canServe(String name, String codebase) throws IOException {
-        if(name.equals("rio-dl.jar") || name.equals("jsk-dl.jar"))
+        if(name.equals("rio-api.jar")    ||
+           name.equals("jsk-dl.jar")     ||
+           name.equals("jmx-lookup.jar") ||
+           name.equals("serviceui.jar"))
             return;
         InputStream is = null;
         URLConnection conn = null;

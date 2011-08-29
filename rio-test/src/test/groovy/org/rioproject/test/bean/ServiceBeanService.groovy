@@ -23,9 +23,9 @@ import org.rioproject.bean.SetConfiguration
 import net.jini.config.Configuration
 import org.rioproject.bean.SetParameters
 import org.rioproject.bean.CreateProxy
-import org.rioproject.resources.servicecore.AbstractProxy
 import net.jini.id.UuidFactory
 import net.jini.id.Uuid
+import org.rioproject.servicecore.AbstractProxy
 
 
 class ServiceBeanService extends ServiceBeanAdapter implements ServiceBeanServiceInterface {

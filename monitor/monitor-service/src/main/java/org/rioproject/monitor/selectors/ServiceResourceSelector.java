@@ -93,8 +93,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @throws Exception If there are errors getting a ServiceResource
      */
-    public ServiceResource getServiceResource(ServiceElement sElem)
-    throws Exception {
+    public ServiceResource getServiceResource(ServiceElement sElem) throws Exception {
         ServiceResource[] svcResources = getServiceResources();
         return (selectServiceResource(sElem, svcResources));
     }
@@ -135,8 +134,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * provisioning the service
      */
     protected ServiceResource selectServiceResource(ServiceElement sElem,
-                                                    ServiceResource[] svcResources)
-        throws ProvisionException {
+                                                    ServiceResource[] svcResources) throws ProvisionException {
 
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
@@ -145,8 +143,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             svcResources = filterIsolated(sElem, svcResources);
 
         for (ServiceResource svcResource : svcResources) {
-            InstantiatorResource ir =
-                (InstantiatorResource) svcResource.getResource();
+            InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             /*
              * Make sure the InstantiatorResource has not reached it's
              * serviceLimit

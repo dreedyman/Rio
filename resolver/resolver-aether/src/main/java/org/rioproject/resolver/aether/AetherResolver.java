@@ -197,6 +197,8 @@ public class AetherResolver implements Resolver {
             resolvedList.append("  ").append(String.format("%-"+artifactLength+"s", artifactResult.getArtifact()));
             resolvedList.append(" resolved to ").append(artifactResult.getArtifact().getFile());
         }
+        if(resolvedList.length()==0)
+            resolvedList.append("  <No artifacts resolved>");
         System.err.println("[INFO] Artifact resolution for "+result.getArtifact()+": \n"+resolvedList);
     }
 

@@ -21,7 +21,6 @@ import net.jini.config.ConfigurationProvider;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.discovery.DiscoveryManagement;
-import net.jini.discovery.LookupDiscoveryManager;
 import org.rioproject.associations.AssociationManagement;
 import org.rioproject.associations.AssociationMgmt;
 import org.rioproject.boot.CommonClassLoader;
@@ -366,19 +365,19 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                                    "creating DiscoveryManagement",
                                    e);
                 }
-                try {
+                /*try {
                     serviceDiscoMgmt = new LookupDiscoveryManager(sElem.getServiceBeanConfig().getGroups(),
                                                                      locatorsToUse,
                                                                      null,
                                                                      discoConfig);
                 } catch (ConfigurationException e) {
                     e.printStackTrace();
-                }
-                /*serviceDiscoMgmt = discoPool.getDiscoveryManager(serviceBeanManager.getServiceID().toString(),
+                }*/
+                serviceDiscoMgmt = discoPool.getDiscoveryManager(serviceBeanManager.getServiceID().toString(),
                                                                  sElem.getServiceBeanConfig().getGroups(),
                                                                  locatorsToUse,
                                                                  null,
-                                                                 discoConfig);*/
+                                                                 discoConfig);
             }
         }
         return (serviceDiscoMgmt);

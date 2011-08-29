@@ -36,6 +36,7 @@ import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.system.MeasuredResource;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ResourceCapability;
@@ -366,8 +367,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @param resourceCapability The ResourceCapability object
      * @param deployedServices List of deployed services
      */
-    void updateMonitors(ResourceCapability resourceCapability,
-                        List<DeployedService> deployedServices) {
+    void updateMonitors(ResourceCapability resourceCapability, List<DeployedService> deployedServices) {
         ProvisionLeaseManager[] mgrs;
         synchronized(leaseTable) {
             Collection<ProvisionLeaseManager> c = leaseTable.values();
@@ -377,6 +377,18 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             return;
         if(mgrs.length == 0)
             return;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Deployed: ").append(deployedServices.size()).append(" Limit: ").append(serviceLimit).append("\n");
+        if(!resourceCapability.measuredResourcesWithinRange()) {
+            for(MeasuredResource mr : resourceCapability.getMeasuredResources(ResourceCapability.MEASURED_RESOURCES_BREACHED)) {
+                sb.append(mr.getIdentifier())
+                    .append("\tBREACHED value: ").append(mr.getValue())
+                    .append(", threshold: ").append(mr.getThresholdValues().getHighThreshold()).append("\n");
+            }
+        } else{
+            sb.append("All Measured Resources within range").append("\n");
+        }
+        logger.info(sb.toString());
 
         for (ProvisionLeaseManager mgr : mgrs) {
             try {
@@ -424,8 +436,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 long leaseTime = lease.getExpiration() - System.currentTimeMillis();
                 if(leaseTime>0) {
                     if(logger.isLoggable(Level.FINE))
-                        logger.log(Level.FINE,
-                        "Established ProvisionManager registration");
+                        logger.log(Level.FINE, "Established ProvisionManager registration");
                     connected = true;
                     break;
                 } else {

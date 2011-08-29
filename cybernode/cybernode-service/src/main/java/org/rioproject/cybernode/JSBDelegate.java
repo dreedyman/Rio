@@ -337,7 +337,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             }
         }
         try {
-            ServiceBeanLoader.advertise(serviceProxy, context);
+            ServiceAdvertiser.advertise(serviceProxy, context);
             if(logger.isLoggable(Level.FINE))
                 logger.log(Level.FINE, sElem.getName()+": advertised");
         } catch(ServiceBeanControlException e) {

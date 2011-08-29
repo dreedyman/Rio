@@ -39,7 +39,7 @@ public class ParsedService extends GlobalAttrs{
     public static final String DYNAMIC="dynamic";
     public static final String FIXED="fixed";
     /** Default array of export jar names */
-    public static final String[] DEFAULT_EXPORT_JARS = new String[]{"rio-dl.jar",
+    public static final String[] DEFAULT_EXPORT_JARS = new String[]{"rio-api.jar",
                                                                     "jsk-dl.jar",
                                                                     "jmx-lookup.jar",
                                                                     "serviceui.jar"};

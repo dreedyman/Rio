@@ -104,7 +104,7 @@
                     <systemProperties>
                         <property>
                             <name>RIO_HOME</name>
-                            <value>${basedir}/../../../distribution/target/rio-${project.version}</value>
+                            <value>${basedir}/../../distribution/target/rio-${project.version}</value>
                         </property>
                         <property>
                             <name>opstring</name>

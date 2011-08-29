@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +28,10 @@ import java.util.List;
 
 /**
  * The ComputeResourceUtilization provides a mechanism to represent the
- * utilization of a {@link org.rioproject.system.ComputeResource}. ComputeResource
- * quantitative behavior is represented by 
- * {@link MeasuredResource} objects. Each MeasuredResource
- * contains a relative value which represents the percentage of the resource
- * being measured. This value is the relative utilization of the resource's
- * usage. The summation of a compute resource's utilization is represented by
- * the utilization property.
+ * utilization of a ComputeResource. ComputeResource quantitative behavior is represented by
+ * {@link MeasuredResource} objects. Each MeasuredResource contains a relative value which represents
+ * the percentage of the resource being measured. This value is the relative utilization of the resource's
+ * usage. The summation of a compute resource's utilization is represented by the utilization property.
  *
  * @author Dennis Reedy
  */
@@ -311,7 +307,7 @@ public class ComputeResourceUtilization implements Comparable,
 
 
     public String toString() {
-        return "ComputeResourceUtilization{" +
+        return "ComputeResourceUtilization: " +
                "description='" + description + '\'' +
                ", hostName='" + hostName + '\'' +
                ", address='" + address + '\'' +

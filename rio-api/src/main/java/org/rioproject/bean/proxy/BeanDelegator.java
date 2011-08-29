@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 /**
  * An {@link java.lang.reflect.InvocationHandler} that delegates method
- * calls between the {@link org.rioproject.bean.BeanAdapter} and the bean
+ * calls between the <code>BeanAdapter</code> and the bean
  *
  * @author Dennis Reedy
  */
@@ -43,7 +43,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
     private BeanDelegator(Object service, Object bean, ClassLoader loader) throws ClassNotFoundException {
         this.service = service;
         this.bean = bean;
-        String interfaceName = "org.rioproject.resources.servicecore.Service";
+        String interfaceName = "org.rioproject.servicecore.Service";
         Class interfaceClass = Class.forName(interfaceName, false, loader);
         Method[] methods = interfaceClass.getMethods();
         for(Method method : methods) {
@@ -65,6 +65,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      * @throws NullPointerException if any of the parameters is <code>null</code>
      * @throws IllegalArgumentException If the interfaces parameter has a
      * zero length
+     * @throws ClassNotFoundException If the class cannot be loaded
      */
     public static Object getInstance(Object service, Object bean, Class[] interfaces) throws ClassNotFoundException {
         return getInstance(service, bean, interfaces, bean.getClass().getClassLoader());
@@ -83,6 +84,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      * @throws NullPointerException if any of the parameters is <code>null</code>
      * @throws IllegalArgumentException If the interfaces parameter has a zero
      * length
+     * @throws ClassNotFoundException If the class cannot be loaded
      */
     public static Object getInstance(Object service, Object bean, Class[] interfaces, ClassLoader loader) throws ClassNotFoundException {
         if(service == null)
@@ -93,27 +95,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
             throw new NullPointerException("interfaces is null");
         if(interfaces.length == 0)
             throw new IllegalArgumentException("interfaces must contain values");
-
-        v(interfaces, loader);
         return (Proxy.newProxyInstance(loader, interfaces, new BeanDelegator(service, bean, loader)));
-    }
-
-    static void v(Class[] interfaces, ClassLoader loader) {
-        for (int i = 0; i < interfaces.length; i++) {
-            /*
-            * Verify that the class loader resolves the name of this
-            * interface to the same Class object.
-            */
-            String interfaceName = interfaces[i].getName();
-            Class interfaceClass = null;
-            try {
-                interfaceClass = Class.forName(interfaceName, false, loader);
-            } catch (ClassNotFoundException e) {
-            }
-            if (interfaceClass != interfaces[i]) {
-                throw new IllegalArgumentException(interfaces[i] + " is not visible from class loader");
-            }
-        }
     }
 
     /**

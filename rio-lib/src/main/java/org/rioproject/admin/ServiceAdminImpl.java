@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +25,7 @@ import net.jini.export.Exporter;
 import net.jini.id.UuidFactory;
 import net.jini.id.Uuid;
 import net.jini.lookup.JoinManager;
+import org.rioproject.cybernode.ServiceAdvertiser;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.ServiceBeanContext;
@@ -214,9 +214,9 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public void advertise() throws ServiceBeanControlException {
         try {
             if(context!=null) {
-                /*Entry[] configuredAttrs = ServiceBeanLoader.getConfiguredAttributes(context);
+                Entry[] configuredAttrs = ServiceAdvertiser.getConfiguredAttributes(context);
                 if(configuredAttrs.length>0)
-                    service.addAttributes(configuredAttrs);*/
+                    service.addAttributes(configuredAttrs);
             } else {
                 logger.warning("ServiceBeanContext is null");
             }
