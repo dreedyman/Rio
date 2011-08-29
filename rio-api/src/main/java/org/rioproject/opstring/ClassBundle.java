@@ -86,7 +86,7 @@ public class ClassBundle implements Serializable {
      * Create a new ClassBundle
      *
      * @param className The className
-     * @param jarNames Array of Strings identifyng resource names used to load
+     * @param jarNames Array of Strings identifying resource names used to load
      * the className
      * @param shComponents Map of class names and jar names to load the class
      * from. A shared component will be loaded by the common loader for all
@@ -270,20 +270,6 @@ public class ClassBundle implements Serializable {
     }
 
     /**
-     * Get raw shared component information
-     * 
-     * @return A Map of the shared component information, not performing the
-     * transformation from string urls to URLs. This method will return a new Map
-     * each time. If there are no shared components, this method will return
-     * an empty Map
-     */
-    public Map<String, String[]> getRawSharedComponents()  {
-        Map<String, String[]> map = new HashMap<String, String[]>();
-        map.putAll(sharedComponents);
-        return map;
-    }
-
-    /**
      * Add a method name and the parameters to use for when reflecting on
      * specified public member method of the class or interface represented by
      * this ClassBundle object. The array of parameter types will be determined
@@ -296,7 +282,7 @@ public class ClassBundle implements Serializable {
      */
     public void addMethod(String methodName, Object[] parameters) {
         if(methodName == null)
-            throw new IllegalArgumentException("methodname is null");
+            throw new IllegalArgumentException("methodName is null");
         if(parameters == null) {
             methodObjectTable.put(methodName, null);
             return;
@@ -507,11 +493,8 @@ public class ClassBundle implements Serializable {
     private String translateCodebase() {
         if(codebase==null)
             return(codebase);
-        String translated =
-                PropertyHelper.expandProperties(codebase,
-                                               PropertyHelper.RUNTIME);
-        if(System.getProperty("os.name").startsWith("Win") &&
-           translated.startsWith("file://")) {
+        String translated = PropertyHelper.expandProperties(codebase, PropertyHelper.RUNTIME);
+        if(System.getProperty("os.name").startsWith("Win") && translated.startsWith("file://")) {
             translated = "file:/"+translated.substring(7);
         }
         return(translated);
@@ -535,8 +518,7 @@ public class ClassBundle implements Serializable {
                 if(className==null)
                     className = bundle.getClassName();
                 else if(!className.equals(bundle.getClassName()))
-                    throw new IllegalArgumentException("bundles must have same " +
-                                                       "classname");
+                    throw new IllegalArgumentException("bundles must have same classname");
             }
         }
 
