@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * The class tests the <code>ThresholdWatch</code> part of a class derived from
@@ -393,14 +392,14 @@ public class ThresholdWatchTest extends WatchTest {
                            ThresholdValues thresholdValues,
                            int type) {
 
-            String status =
+            /*String status =
                 (type == ThresholdEvent.BREACHED ? "breached" : "cleared");
             System.out.println(
                 "Threshold [" + calculable.getId() + "] " + status + " " +
                 "value [" + calculable.getValue() + "] " +
                 "low [" + thresholdValues.getCurrentLowThreshold() + "] " +
-                "high [" + thresholdValues.getCurrentHighThreshold() + "]");
-            StringBuffer buf = new StringBuffer();
+                "high [" + thresholdValues.getCurrentHighThreshold() + "]");*/
+            StringBuilder buf = new StringBuilder();
             buf.append(type == ThresholdEvent.BREACHED ? "breach(" : "clear(");
             buf.append(calculable.getId()).append(",");
             buf.append(calculable.getValue()).append(",");
