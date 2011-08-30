@@ -42,11 +42,21 @@ public class ArtifactCreationTest {
     }
 
     @Test
-    public void createGoodArtifactWithClassifier() {
-        Artifact a = new Artifact("org.foo:bar:dl:2.0");
+    public void createGoodArtifactWithType() {
+        Artifact a = new Artifact("org.foo:bar:oar:2.0");
         Assert.assertTrue(a.getGroupId().equals("org.foo"));
         Assert.assertTrue(a.getArtifactId().equals("bar"));
         Assert.assertTrue(a.getVersion().equals("2.0"));
+        Assert.assertTrue(a.getType().equals("oar"));
+    }
+
+    @Test
+    public void createGoodArtifactWithClassifier() {
+        Artifact a = new Artifact("org.foo:bar:jar:dl:2.0");
+        Assert.assertTrue(a.getGroupId().equals("org.foo"));
+        Assert.assertTrue(a.getArtifactId().equals("bar"));
+        Assert.assertTrue(a.getVersion().equals("2.0"));
+        Assert.assertTrue(a.getType().equals("jar"));
         Assert.assertTrue(a.getClassifier().equals("dl"));
     }
 }

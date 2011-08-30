@@ -15,7 +15,6 @@
  */
 package org.rioproject.resolver.aether;
 
-import org.apache.maven.model.Organization;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.RemoteRepository;
@@ -26,6 +25,7 @@ import org.sonatype.aether.repository.ArtifactRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.sonatype.aether.resolution.ArtifactResult;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -40,6 +40,7 @@ import java.util.List;
 public class AetherResolver implements Resolver {
     private AetherService service = AetherService.getDefaultInstance();
     private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
+    private boolean logResults = true;
 
     /**
      * {@inheritDoc}
@@ -48,10 +49,10 @@ public class AetherResolver implements Resolver {
     public String[] getClassPathFor(String artifact) throws ResolverException {
         String[] classPath;
         try {
-            Artifact a = new Artifact(artifact);
+            DefaultArtifact a = new DefaultArtifact(artifact);
             ResolutionResult result = service.resolve(a.getGroupId(),
                                                       a.getArtifactId(),
-                                                      "jar",
+                                                      a.getExtension(),
                                                       a.getClassifier(),
                                                       a.getVersion());
             classPath = produceClassPathFromResolutionResult(result);
@@ -173,6 +174,10 @@ public class AetherResolver implements Resolver {
         return remoteRepositories;
     }
 
+    public void setLogResults(boolean logResults) {
+        this.logResults = logResults;
+    }
+
     protected String[] produceClassPathFromResolutionResult(ResolutionResult result) {
         List<String> classPath = new ArrayList<String>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
@@ -183,8 +188,10 @@ public class AetherResolver implements Resolver {
                 if(!cachedRemoteRepositories.contains(rr))
                     cachedRemoteRepositories.add(rr);
             }
+
         }
-        logResolutionResult(result);
+        if(logResults)
+            logResolutionResult(result);
         return classPath.toArray(new String[classPath.size()]);
     }
 

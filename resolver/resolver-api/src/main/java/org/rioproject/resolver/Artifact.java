@@ -20,13 +20,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * An artifact in the form of: groupId:artifactId[:classifier]:version
+ * An artifact in the form of: groupId:artifactId[:type[:classifier]]:version
  */
 public class Artifact {
     String artifactId;
     String groupId;
     String version;
     String classifier;
+    String type;
     URL pomURL;
     boolean loadFromProject = false;
     
@@ -39,26 +40,29 @@ public class Artifact {
         this.version = version;
     }
 
-    public Artifact(String groupId, String artifactId, String version, String classifier) {
+    public Artifact(String groupId, String artifactId, String version, String type, String classifier) {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
+        this.type = type;
         this.classifier = classifier;
     }
 
     public Artifact(String artifact) {
         if(artifact==null)
             throw new IllegalArgumentException("artifact is null");
-        Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]+))?:([^: /]+)");
+        //Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]+))?:([^: /]+)");
+        Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]*)(:([^: /]+))?)?:([^: /]+)" );
         Matcher m = p.matcher( artifact );
         if (!m.matches() ) {
             throw new IllegalArgumentException( "Bad artifact coordinates " + artifact
-                + ", expected format is <groupId>:<artifactId>[:<classifier>]:<version>" );
+                + ", expected format is <groupId>:<artifactId>[:<type>[:<classifier>]]:<version>" );
         }
         groupId = m.group(1);
         artifactId = m.group(2);
-        classifier = get( m.group( 4 ), "" );
-        version = m.group(5);
+        type = get(m.group(4), "jar");
+        classifier = get( m.group(6), "" );
+        version = m.group(7);
     }
 
     private static String get( String value, String defaultValue ) {
@@ -79,6 +83,10 @@ public class Artifact {
 
     public String getClassifier() {
         return classifier;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getFileName(String ext) {
@@ -106,9 +114,9 @@ public class Artifact {
     public String getGAV() {
         String gav;
         if(classifier==null || classifier.length()==0)
-            gav = groupId+":"+artifactId+":"+version;
+            gav = groupId+":"+artifactId+":"+type+":"+version;
         else
-            gav = groupId+":"+artifactId+":"+classifier+":"+version;
+            gav = groupId+":"+artifactId+":"+type+":"+classifier+":"+version;
         return gav;
     }
 
@@ -118,6 +126,7 @@ public class Artifact {
         sb.append("{ groupId='").append(groupId);
         sb.append(", artifactId='").append(artifactId);
         sb.append(", version='").append(version);
+        sb.append(", type='").append(type);
         sb.append(", classifier='").append(classifier);
         sb.append(" }");
         return sb.toString();
