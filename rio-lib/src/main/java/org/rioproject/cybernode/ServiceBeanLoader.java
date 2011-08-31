@@ -45,7 +45,7 @@ import org.rioproject.log.LoggerConfig;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.rmi.AdaptiveLoader;
+//import org.rioproject.rmi.AdaptiveLoader;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
