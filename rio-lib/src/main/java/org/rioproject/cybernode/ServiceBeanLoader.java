@@ -42,9 +42,10 @@ import org.rioproject.core.jsb.ServiceBeanFactory;
 import org.rioproject.core.jsb.ServiceBeanManager;
 import org.rioproject.jsb.*;
 import org.rioproject.log.LoggerConfig;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.rmi.LoaderHandler;
+import org.rioproject.rmi.AdaptiveLoader;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
@@ -156,7 +157,7 @@ public class ServiceBeanLoader {
         if(globalPolicy!=null)
             globalPolicy.setPolicy(loader, null);
         cleanJars(elem);
-        LoaderHandler.release(loader);
+        //AdaptiveLoader.release(loader);
     }
 
     /*
@@ -183,12 +184,10 @@ public class ServiceBeanLoader {
                 if(count!=null) {
                     int using = count.decrementAndGet();
                     if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Number of ["+pr.getArtifact()+"] " +
-                                      "artifacts still active="+using);
+                        logger.finest("Number of ["+pr.getArtifact()+"] artifacts still active="+using);
                     if(using==0) {
                         if(pr.getArtifact().contains("SNAPSHOT")) {
-                            System.out.println("["+elem.getName()+"], " +
-                                               "artifact="+pr.getArtifact()+", " +
+                            System.out.println("["+elem.getName()+"], artifact="+pr.getArtifact()+", " +
                                                "has the following jars");
                             for(URL u : pr.getJars()) {
                                 System.out.println("\t"+u.toExternalForm());
@@ -203,8 +202,7 @@ public class ServiceBeanLoader {
                             provisionedResources.remove(pr);
                         }
                         if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Remove cached artifact " +
-                                          "["+pr.getArtifact()+"] "+pr);
+                            logger.finest("Remove cached artifact ["+pr.getArtifact()+"] "+pr);
                     } else {
                         counterTable.put(pr.getArtifact(), count);
                     }
@@ -250,9 +248,9 @@ public class ServiceBeanLoader {
         }
 
         /*
-        * Provision service jars
-        */
-        URL[] exportJARs;
+         * Provision service jars
+         */
+        URL[] exports;
         URL[] implJARs;
         try {
             Resolver resolver = ResolverHelper.getInstance();
@@ -260,7 +258,12 @@ public class ServiceBeanLoader {
             Map<String, ProvisionedResources> serviceResources = provisionService(sElem, resolver, install);
             ProvisionedResources dlPR = serviceResources.get("dl");
             ProvisionedResources implPR = serviceResources.get("impl");
-            exportJARs = dlPR.getJars();
+            if(dlPR.getJars().length==0 && dlPR.getArtifact()!=null) {
+                String convertedArtifact = dlPR.getArtifact().replaceAll(":", "/");
+                exports = new URL[]{new URL("artifact:"+convertedArtifact+dlPR.getRepositories())};
+            } else {
+                exports = dlPR.getJars();
+            }
             implJARs = implPR.getJars();
         } catch(Exception e) {
             throw new ServiceBeanInstantiationException("Unable to provision JARs for service ["+sElem.getName()+"]", e);
@@ -318,7 +321,7 @@ public class ServiceBeanLoader {
             metaData.setProperty("serviceName", sElem.getName());
 
             ServiceClassLoader jsbCL = new ServiceClassLoader(ServiceClassLoader.getURIs(classpath),
-                                                              new ClassAnnotator(exportJARs),
+                                                              new ClassAnnotator(exports),
                                                               commonCL,
                                                               metaData);
 
@@ -510,10 +513,9 @@ public class ServiceBeanLoader {
                                                             "cannot be instantiated, the Cybernode " +
                                                             "does not support persistent provisioning, and the " +
                                                             "service requires artifact resolution for "+implArtifact);
-                    String[] jars =
-                        ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
-                                               resolver,
-                                               elem.getRemoteRepositories());
+                    String[] jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
+                                                           resolver,
+                                                           elem.getRemoteRepositories());
                     List<URL> urls = new ArrayList<URL>();
                     for(String jar: jars) {
                         if(jar!=null)
@@ -542,23 +544,26 @@ public class ServiceBeanLoader {
             }
         }
         ProvisionedResources dlPR = getProvisionedResources(exportArtifact);
-        String localCodebase = System.getProperty(Constants.CODESERVER);
+        //String localCodebase = System.getProperty(Constants.CODESERVER);
         if(dlPR==null) {
             dlPR = new ProvisionedResources(exportArtifact);
-            List<URL> exportURLs = new ArrayList<URL>();
-            if(exportArtifact!=null && resolver!=null && localCodebase!=null) {
+            //List<URL> exportURLs = new ArrayList<URL>();
+            //if(exportArtifact!=null && resolver!=null && localCodebase!=null) {
+            if(exportArtifact!=null && resolver!=null) {
             //if(exportArtifact!=null && resolver!=null) {
                 for(ClassBundle cb : elem.getExportBundles()) {
-                    String[] jars = ResolverHelper.resolve(cb.getArtifact(),
+                    /*String[] jars = */ResolverHelper.resolve(cb.getArtifact(),
                                                            resolver,
-                                                           elem.getRemoteRepositories(),
-                                                           localCodebase);
-                    for(String jar: jars) {
+                                                           elem.getRemoteRepositories()/*,
+                                                           localCodebase*/);
+                    for(RemoteRepository r : elem.getRemoteRepositories())
+                        dlPR.addRepositoryUrl(r.getUrl());
+                    /*for(String jar: jars) {
                         if(jar!=null)
                             exportURLs.add(new URL(jar));
-                    }
+                    }*/
                 }
-                dlPR.setJars(exportURLs.toArray(new URL[exportURLs.size()]));
+                //dlPR.setJars(exportURLs.toArray(new URL[exportURLs.size()]));
             } else {
                 if(System.getProperty("StaticCybernode")==null)
                     dlPR.setJars(elem.getExportURLs());
@@ -585,19 +590,18 @@ public class ServiceBeanLoader {
                      * case where a service is just implemented as a pojo with
                      * no custom remote methods, and is just exported using Rio
                      * infrastructure support
-                     * (through the org.rioproject.servicecore.Service
-                     * interface).
+                     * (through the org.rioproject.servicecore.Service interface).
                      *
                      * If there is no declared artifact, we sail through since
                      * the ServiceElement would have been constructed with the
                      * default platform export jars as part of it's creation.
                      */
                     if(implPR.getArtifact()!=null) {
-                        if(localCodebase!=null) {
+                        /*if(localCodebase!=null) {
                             if(!localCodebase.endsWith("/"))
                                 localCodebase = localCodebase+"/";
                             dlPR.addJar(new URL(localCodebase+export));
-                        }
+                        }*/
                     }
                     /*if(implPR.getArtifact()!=null) {
                         if(!libDLDir.endsWith("/"))
@@ -680,6 +684,7 @@ public class ServiceBeanLoader {
     private static class ProvisionedResources {
         List<URL> jarList = new ArrayList<URL>();
         String artifact;
+        StringBuilder repositories = new StringBuilder();
 
         private ProvisionedResources(String artifact) {
             this.artifact = artifact;
@@ -687,10 +692,6 @@ public class ServiceBeanLoader {
 
         void setJars(URL[] jars) {
             jarList.addAll(Arrays.asList(jars));
-        }
-
-        void addJar(URL jar) {
-            jarList.add(jar);
         }
 
         URL[] getJars() {
@@ -703,6 +704,14 @@ public class ServiceBeanLoader {
 
         String getJarsAsString() {
             return jarList.size() == 0 ? "<>" : jarList.toString();
+        }
+
+        void addRepositoryUrl(String u) {
+            repositories.append(";").append(u);
+        }
+
+        String getRepositories() {
+            return repositories.toString();
         }
 
         @Override
