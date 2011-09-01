@@ -1298,17 +1298,9 @@ public class Main extends JFrame {
                 if (arg.startsWith("groups")) {
                     String[] values = arg.split("=");
                     String groupsArg = values[1].trim();
-                    String s =
-                        System.getProperty(
-                            org.rioproject.config.Constants.GROUPS_PROPERTY_NAME);
-                    if(s!=null)
-                        System.setProperty(
-                            org.rioproject.config.Constants.GROUPS_PROPERTY_NAME,
-                            s+","+groupsArg);
-                    else
-                        System.setProperty(
-                            org.rioproject.config.Constants.GROUPS_PROPERTY_NAME,
-                            groupsArg);
+                    String s = System.getProperty(org.rioproject.config.Constants.GROUPS_PROPERTY_NAME);
+                    groupsArg = s!=null? s+","+groupsArg : groupsArg;
+                    System.setProperty(org.rioproject.config.Constants.GROUPS_PROPERTY_NAME, groupsArg);
                     commandArgs.remove(arg);
                 } else if (arg.startsWith("locators")) {
                     String[] values = arg.split("=");
@@ -1325,17 +1317,9 @@ public class Main extends JFrame {
                         i++;
                     }
                     locatorsArg = sb.toString();
-                    String s =
-                        System.getProperty(
-                            org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME);
-                    if(s!=null)
-                        System.setProperty(
-                            org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME,
-                            s+","+locatorsArg);
-                    else
-                        System.setProperty(
-                            org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME,
-                            locatorsArg);
+                    String s = System.getProperty(org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME);
+                    locatorsArg = s!=null? s+","+locatorsArg : locatorsArg;
+                    System.setProperty(org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME, locatorsArg);
                     commandArgs.remove(arg);
                 }
             }
@@ -1371,8 +1355,7 @@ public class Main extends JFrame {
                 public Main run() throws Exception {
                     String securityPolicy = System.getProperty("java.security.policy");
                     if(securityPolicy == null) 
-                        SecurityPolicyLoader.load(Main.class,
-                                                  "rio-ui.policy");
+                        SecurityPolicyLoader.load(Main.class, "rio-ui.policy");
                     else
                         System.setSecurityManager(new RMISecurityManager());
 
@@ -1387,15 +1370,12 @@ public class Main extends JFrame {
             };
 
             try {
-                LoginContext loginContext =
-                    (LoginContext) Config.getNonNullEntry(config,
-                                                         Constants.COMPONENT,
-                                                         "loginContext",
-                                                         LoginContext.class);
+                LoginContext loginContext = (LoginContext) Config.getNonNullEntry(config,
+                                                                                  Constants.COMPONENT,
+                                                                                  "loginContext",
+                                                                                  LoginContext.class);
                 loginContext.login();
-                frame = Subject.doAsPrivileged(loginContext.getSubject(),
-                                               createViewer,
-                                               null);
+                frame = Subject.doAsPrivileged(loginContext.getSubject(), createViewer, null);
             } catch(NoSuchEntryException e) {
                 frame = createViewer.run();
             }
