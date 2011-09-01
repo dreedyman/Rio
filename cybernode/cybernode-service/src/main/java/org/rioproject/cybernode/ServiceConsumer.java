@@ -279,34 +279,22 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         try {
             if(haveRegistration(item)) {
                 if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, 
-                               "Already registered to {0}",
-                               new Object[] {item.service});
+                    logger.log(Level.FINEST, "Already registered to "+item.service);
                 return;                
             }
-            ProvisionManager provisioner = 
-                (ProvisionManager)provisionerPreparer.prepareProxy(item.service);
+            ProvisionManager provisioner = (ProvisionManager)provisionerPreparer.prepareProxy(item.service);
             if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "ServiceConsumer - prepared ProvisionManager proxy: {0}",
-                           provisioner);
+                logger.log(Level.FINEST, "ServiceConsumer - prepared ProvisionManager proxy: "+provisioner.toString());
             ResourceCapability rCap = adapter.getResourceCapability();
             if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "ResourceCapability {0}",
-                           new Object[] {rCap});
+                logger.log(Level.FINEST, "ResourceCapability "+rCap);
 
             Lease lease = connect(provisioner);
             if(lease==null) {
-                logger.log(Level.WARNING,
-                           "Unable to register to ProvisionManager {0}",
-                           new Object[] {provisioner.toString()});
+                logger.log(Level.WARNING, "Unable to register to ProvisionManager "+provisioner.toString());
                 return;
             }            
-            leaseTable.put(item.service, 
-                           new ProvisionLeaseManager(lease,
-                                                     provisioner,
-                                                     item.serviceID));
+            leaseTable.put(item.service, new ProvisionLeaseManager(lease, provisioner, item.serviceID));
             logger.log(Level.INFO, "Registered to a ProvisionManager");
                         
         } catch(Throwable t) {
@@ -345,8 +333,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * Update all known Provisioners
      */
     void updateMonitors() {
-        updateMonitors(adapter.getResourceCapability(),
-                       adapter.getDeployedServices());
+        updateMonitors(adapter.getResourceCapability(), adapter.getDeployedServices());
     }
 
     /**
@@ -357,8 +344,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      */
     void updateMonitors(int serviceLimit) {
         setServiceLimit(serviceLimit);
-        updateMonitors(adapter.getResourceCapability(),
-                       adapter.getDeployedServices());
+        updateMonitors(adapter.getResourceCapability(), adapter.getDeployedServices());
     }
 
     /**
@@ -385,10 +371,12 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                     .append("\n\tBREACHED value: ").append(mr.getValue())
                     .append(", threshold: ").append(mr.getThresholdValues().getHighThreshold());
             }
+            logger.warning(sb.toString());
         } else{
             sb.append(", All Measured Resources within range");
+            if(logger.isLoggable(Level.FINE))
+                logger.fine(sb.toString());
         }
-        logger.info(sb.toString());
 
         for (ProvisionLeaseManager mgr : mgrs) {
             try {
@@ -447,9 +435,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                         lease.cancel();
                     } catch(Exception e ) {
                         if(logger.isLoggable(Level.FINEST))
-                            logger.log(Level.FINEST, 
-                                       "Cancelling Lease with invalid lease time",
-                                       e);
+                            logger.log(Level.FINEST, "Cancelling Lease with invalid lease time", e);
                     }
                     try {
                         Thread.sleep(provisionerRetryDelay);
@@ -460,9 +446,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
             } catch(SecurityException e) {
                 //cancelRegistration(provisioner);
-                logger.log(Level.WARNING,
-                           "ProvisionManager security exception",
-                           e);
+                logger.log(Level.WARNING, "ProvisionManager security exception", e);
                 break;
             } catch(Exception e) {
                 Throwable cause = ThrowableUtil.getRootCause(e);
@@ -524,9 +508,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         ProvisionManager provisioner;
         ServiceID serviceID;
 
-        ProvisionLeaseManager(Lease lease,
-                              ProvisionManager provisioner,
-                              ServiceID serviceID) {
+        ProvisionLeaseManager(Lease lease, ProvisionManager provisioner, ServiceID serviceID) {
             super("ProvisionLeaseManager");
             this.lease = lease; 
             leaseTime = lease.getExpiration() - System.currentTimeMillis();            
@@ -584,38 +566,27 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                         if(!ThrowableUtil.isRetryable(e)) {
                             keepAlive = false;
                             if(logger.isLoggable(Level.FINEST))
-                                logger.log(Level.FINEST,
-                                           "Unrecoverable Exception renewing"+
-                                           "ProvisionManager Lease",
-                                           e);
+                                logger.log(Level.FINEST, "Unrecoverable Exception renewing ProvisionManager Lease", e);
                             if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
-                                           "Unrecoverable Exception renewing"+
-                                           "ProvisionManager Lease");
+                                logger.log(Level.FINE, "Unrecoverable Exception renewing ProvisionManager Lease");
                         }
                         if(keepAlive) {
                             /*
                              * If we failed to renew the Lease we should try and
-                             * re-establish comms to the ProvisionManager and get
+                             * re-establish communications to the ProvisionManager and get
                              * another Lease
                              */                            
                             if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
-                                           "Could not renew, attempt to "+
-                                           "reconnect");
+                                logger.log(Level.FINE, "Could not renew, attempt to reconnect");
                             boolean connected = reconnect();
                             if(!connected) {
-                                logger.log(Level.WARNING,
-                                           "Unable to recover ProvisionManager "+
-                                           "registration, exiting");
+                                logger.log(Level.WARNING, "Unable to recover ProvisionManager registration, exiting");
                                 break;
                             } 
                             
                         } else {
                             if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
-                                           "No retry attempted, ProvisionMonitor "+
-                                           "determined unreachable");
+                                logger.log(Level.FINE, "No retry attempted, ProvisionMonitor determined unreachable");
                             break;
                         }                        
                     }
@@ -627,8 +598,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             Object removed = leaseTable.remove(provisioner);
             if(removed!=null) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE,
-                               "Remove ProvisionLeaseManager from leaseManagerTable");    
+                    logger.log(Level.FINE, "Remove ProvisionLeaseManager from leaseManagerTable");
             }
         }   
         
@@ -670,16 +640,14 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
          */
         public void update(Observable o, Object arg) {            
             if(!(o instanceof ComputeResource)) {
-                logger.log(Level.WARNING,
-                           "Observable update is not a ComputeResource, detach");
-                           computeResource.deleteObserver(this);
+                logger.log(Level.WARNING, "Observable update is not a ComputeResource, detach");
+                computeResource.deleteObserver(this);
                 return;
             }
             if(!destroyed) {
                 updateMonitors((ResourceCapability)arg, getServiceDeployments());
             } else {
-                logger.warning("Destroyed, but still getting updates from " +
-                               "ComputeResource");
+                logger.warning("Destroyed, but still getting updates from ComputeResource");
             }
         }        
     }
