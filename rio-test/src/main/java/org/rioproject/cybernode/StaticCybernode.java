@@ -24,8 +24,11 @@ import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.opstring.*;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.system.ComputeResource;
+import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.RMISecurityManager;
 import java.security.*;
 import java.util.*;
@@ -76,6 +79,11 @@ public class StaticCybernode {
     }
 
     public StaticCybernode()  {
+        try {
+            new URL("artifact:org.rioproject");
+        } catch (MalformedURLException e) {
+            URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
+        }
         try {
             Configuration config = EmptyConfiguration.INSTANCE;
             instantiator = new JSBContainer(config);
