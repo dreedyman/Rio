@@ -74,7 +74,7 @@ class MonitorConfig {
                 }
                 entry = [UIDescriptorFactory.getJFrameDesc(codebase, classpath as String[], uiClass)]
             } finally {
-                System.setProperty("org.rioproject.resolver.prune.platform", "false")
+                System.setProperty("org.rioproject.resolver.prune.platform", "true")
             }
         }
         return entry as Entry[]
