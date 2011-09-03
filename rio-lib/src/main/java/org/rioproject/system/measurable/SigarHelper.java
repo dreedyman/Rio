@@ -24,12 +24,7 @@ import java.util.logging.Logger;
 
 /**
  * This class is used to help in loading and using
- * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>. 
- *
- * <p><b>Note:</b>Hyperic SIGAR is licensed under the
- * GPL with a FLOSS license exception, allowing it to be included with the Rio
- * Apache License v2 distribution. If for some reason the GPL cannot be used with
- * your distribution of Rio, remove the <tt>RIO_HOME/lib/hyperic</tt> directory.
+ * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>.
  *
  * <p>This class does not explicitly include and Hyperic SIGAR classes, it uses
  * reflection to access and use SIGAR. In this way if there is an issue
