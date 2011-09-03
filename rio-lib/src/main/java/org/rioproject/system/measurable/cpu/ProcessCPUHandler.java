@@ -31,13 +31,6 @@ import java.util.logging.Logger;
  * process CPU time. Hyperic SIGAR is preferred. If not available
  * the <tt>com.sun.management.OperatingSystemMXBean</tt> will be used.
  *
- * <p><b>Note:</b>
- * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>
- * is licensed under the GPL with a FLOSS license exception, allowing it to be
- * included with the Rio Apache License v2 distribution. If for some reason the
- * GPL cannot be used with your distribution of Rio,
- * remove the <tt>RIO_HOME/lib/hyperic</tt> directory.
- *
  * @author Dennis Reedy
  */
 public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
