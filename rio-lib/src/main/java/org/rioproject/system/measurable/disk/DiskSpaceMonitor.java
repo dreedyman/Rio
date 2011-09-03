@@ -35,13 +35,6 @@ import java.util.logging.Logger;
  * available will use external <tt>df</t> exec by forking a process and parsing
  * it's results.
  *
- * <p><b>Note:</b>
- * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>
- * is licensed under the GPL with a FLOSS license exception, allowing it to be
- * included with the Rio Apache License v2 distribution. If for some reason the
- * GPL cannot be used with your distribution of Rio,
- * remove the <tt>RIO_HOME/lib/hyperic</tt> directory.
- *
  * @author Dennis Reedy
  */
 public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization> {
