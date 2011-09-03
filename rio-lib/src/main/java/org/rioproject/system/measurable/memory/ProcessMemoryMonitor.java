@@ -35,13 +35,6 @@ import java.util.logging.Logger;
  * <p>JMX is used to obtain detailed information on
  * heap and non-heap usage. If SIGAR is not available, only JMX will be used.
  *
- * <p><b>Note:</b>
- * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>
- * is licensed under the GPL with a FLOSS license exception, allowing it to be
- * included with the Rio Apache License v2 distribution. If for some reason the
- * GPL cannot be used with your distribution of Rio,
- * remove the <tt>RIO_HOME/lib/hyperic</tt> directory.
- *
  * @author Dennis Reedy
  */
 public class ProcessMemoryMonitor implements MXBeanMonitor<MemoryMXBean> {
@@ -130,45 +123,32 @@ public class ProcessMemoryMonitor implements MXBeanMonitor<MemoryMXBean> {
                 System.out.println("Non Heap Committed = "+nf.format(nonHeapUsage.getMax()/MB)+" MB");
                 System.out.println("**************");
                 */
-                if(memBean!=null) {
-                    memoryUtilization =
-                        new ProcessMemoryUtilization(id,
-                                                     utilization,
-                                                     vSize,
-                                                     resident,
-                                                     shared,
-                                                     heapUsage.getInit()/MB,
-                                                     heapUsage.getUsed()/MB,
-                                                     heapUsage.getMax()/MB,
-                                                     heapUsage.getCommitted()/MB,
-                                                     nonHeapUsage.getInit()/MB,
-                                                     nonHeapUsage.getUsed()/MB,
-                                                     nonHeapUsage.getMax()/MB,
-                                                     nonHeapUsage.getCommitted()/MB,
-                                                     tVals);
+                if(heapUsage!=null) {
+                    memoryUtilization = new ProcessMemoryUtilization(id,
+                                                                     utilization,
+                                                                     vSize,
+                                                                     resident,
+                                                                     shared,
+                                                                     heapUsage.getInit()/MB,
+                                                                     heapUsage.getUsed()/MB,
+                                                                     heapUsage.getMax()/MB,
+                                                                     heapUsage.getCommitted()/MB,
+                                                                     nonHeapUsage.getInit()/MB,
+                                                                     nonHeapUsage.getUsed()/MB,
+                                                                     nonHeapUsage.getMax()/MB,
+                                                                     nonHeapUsage.getCommitted()/MB,
+                                                                     tVals);
                 } else {
-                    memoryUtilization =
-                        new ProcessMemoryUtilization(id,
-                                                     utilization,
-                                                     vSize,
-                                                     resident,
-                                                     shared,
-                                                     tVals);
+                    memoryUtilization = new ProcessMemoryUtilization(id, utilization, vSize, resident, shared, tVals);
                 }
 
             } catch (Exception e) {
-                logger.log(Level.WARNING,
-                           "SIGAR exception getting Process Memory",
-                           e);
-                memoryUtilization = getJvmMemoryUtilization(utilization,
-                                                            heapUsage,
-                                                            nonHeapUsage);
+                logger.log(Level.WARNING, "SIGAR exception getting Process Memory", e);
+                memoryUtilization = getJvmMemoryUtilization(utilization, heapUsage, nonHeapUsage);
             }
 
         } else {
-            memoryUtilization = getJvmMemoryUtilization(utilization,
-                                                        heapUsage,
-                                                        nonHeapUsage);
+            memoryUtilization = getJvmMemoryUtilization(utilization, heapUsage, nonHeapUsage);
         }
         return memoryUtilization;
     }
