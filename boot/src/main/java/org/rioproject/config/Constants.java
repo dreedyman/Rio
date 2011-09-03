@@ -71,12 +71,17 @@ public interface Constants {
      */
     static final String RIO_TEST_EXEC_DIR = BASE_COMPONENT+".test.exec.dir";
     /**
-     * Property to indicate that the Rio Resolver should not include Rio artifacts 
+     * Property to indicate that the Resolver should not include Rio artifacts
      * in the resolution of a classpath. If this property is set to &quot;false&quot;,
      * the Resolver will not include the Rio platform (and it's dependencies) in
      * generated classpaths.
      */
     static final String RESOLVER_PRUNE_PLATFORM = BASE_COMPONENT+".resolver.prune.platform";
+    /**
+     * Property to indicate the jar(s) to use when creating the class loader to load an implementation
+     * of the {@link org.rioproject.resolver.Resolver}
+     */
+    static final String RESOLVER_JAR = BASE_COMPONENT+".resolver.jar";
     /**
      * Property to indicate that Rio should limit the creation of utilities that
      * create sockets (like {@link net.jini.export.Exporter}) to limit socket ports
