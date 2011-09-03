@@ -169,18 +169,6 @@ import java.util.logging.Logger;
  * </li>
  * </ul>
  *
- * <p><b>Notes:</b>
- * <ul>
- * <li>
- * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>
- * is licensed under the GPL with a FLOSS license exception, allowing it to be
- * included with the Rio Apache License v2 distribution. If for some reason the
- * GPL cannot be used with your distribution of Rio,
- * remove the <tt>RIO_HOME/lib/hyperic</tt> directory.
- * <li>If <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>
- * is removed, external service utilization monitoring is not provided.
- * </ul>
- *
  * @author Dennis Reedy
  */
 public class ServiceExecutor {
