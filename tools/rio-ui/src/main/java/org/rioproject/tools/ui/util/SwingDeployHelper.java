@@ -108,7 +108,7 @@ public class SwingDeployHelper {
                     e.printStackTrace();
                     if(e instanceof OperationalStringException) {
                         StringBuilder sb = new StringBuilder();
-                        sb.append("<html><body>Failure trying to deploy artifact ")
+                        sb.append("<html><body>Failure trying to deploy ")
                         .append(artifact).append("<br><center>")
                         .append(e.getLocalizedMessage()).append("</center></body></html>");
 
