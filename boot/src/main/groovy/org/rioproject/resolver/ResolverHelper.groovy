@@ -19,15 +19,34 @@ import org.rioproject.resolver.maven2.Repository
 import java.util.logging.Logger
 import java.util.logging.Level
 import org.rioproject.boot.CommonClassLoader
+import org.rioproject.config.Constants
 
 /**
- * Provides utilities for working with a {@link org.rioproject.resolver.Resolver}
+ * <p>A helper that provides utilities for obtaining and working with a
+ * {@link org.rioproject.resolver.Resolver}.</p>
+ *
+ * <p>This utility uses the following approach to load a <code>Resolver</code> instance:</p>
+ * <p>The location of the jar that contains an implementation of the <code>Resolver</code> interface is
+ *     determined in the following order:</p>
+ * <ul>
+ *     <li>First checking if the <code>org.rioproject.resolver.jar</code> system property has been
+ *     declared. This property should contain the location of the resolver jar(s) needed to instantiate a
+ *     <code>Resolver</code>.
+ *     <li>If the <code>org.rioproject.resolver.jar</code> system property is not set, the default
+ *     <code>$RIO_HOME/lib/resolver/resolver-aether.jar</code> will be used
+ * </ul>
+ * <p>Refer to {@link ResolverHelper#getResolver} for details on determining the class to instantiate.</p>
  */
 class ResolverHelper {
     static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
     static String M2_HOME_URI = Repository.getLocalRepository().toURI().toString()
     static URLClassLoader resolverLoader
     static final Logger logger = Logger.getLogger(ResolverHelper.class.getName())
+
+    public static List<Resolver> getAllResolvers() {
+        def resolvers = [getResolver()]
+        return resolvers
+    }
 
     /**
      * Resolve the classpath with the local Maven repository as the codebase
@@ -50,15 +69,13 @@ class ResolverHelper {
      * @param codebase The codebase to set for jars that are located
      * in the local Maven repository.
      */
-
     def static String[] resolve(String artifact,
                                 Resolver resolver,
                                 RemoteRepository[] repositories,
                                 String codebase) {
         List<String> jars = new ArrayList<String>();
         if (artifact != null) {
-            String[] classPath = resolver.getClassPathFor(artifact,
-                                                          (RemoteRepository[])repositories);
+            String[] classPath = resolver.getClassPathFor(artifact, (RemoteRepository[])repositories);
             for (String jar : classPath) {
                 String s = null
                 if(jar.startsWith(M2_HOME)) {
@@ -97,20 +114,26 @@ class ResolverHelper {
      *
      * @throws ResolverException if there are problems loading the resource
      */
-    def static synchronized Resolver getInstance() throws ResolverException {
+    public static synchronized Resolver getResolver() throws ResolverException {
         File resolverJar = new File(getResolverJarFile())
         if(resolverLoader==null)
             resolverLoader = new URLClassLoader([resolverJar.toURI().toURL()] as URL[],
                                                 CommonClassLoader.instance)
-        return getInstance(resolverLoader);
+        return getResolver(resolverLoader);
     }
 
-    // TODO This needs to be externalized, the resolver jar names should be provided by some sort of a configuration and/or system property
     private static String getResolverJarFile() {
-        String resolverJarName =
-            System.getProperty("RIO_TEST_ATTACH")==null?"resolver-aether.jar":"resolver-project.jar"
-        String resolverLibDir = "${System.getProperty("RIO_HOME")}${File.separator}lib${File.separator}resolver"
-        return "${resolverLibDir}${File.separator}${resolverJarName}"
+        String resolverJarFile = System.getProperty(Constants.RESOLVER_JAR)
+        if(resolverJarFile==null) {
+            if(System.getProperty("RIO_HOME")==null)
+                throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar")
+            String resolverJarName = "resolver-aether.jar"
+            String resolverLibDir = "${System.getProperty("RIO_HOME")}${File.separator}lib${File.separator}resolver"
+            resolverJarFile = "${resolverLibDir}${File.separator}${resolverJarName}"
+        }
+        if(logger.isLoggable(Level.FINE))
+            logger.fine "#######################\n$resolverJarFile\n#######################"
+        return resolverJarFile
     }
 
     /**
@@ -128,13 +151,13 @@ class ResolverHelper {
      *
      * @throws ResolverException if there are problems loading the resource
      */
-    def static Resolver getInstance(ClassLoader cl) throws ResolverException {
+    public static Resolver getResolver(ClassLoader cl) throws ResolverException {
         Resolver r;
         ClassLoader resourceLoader = (cl != null) ? cl : Thread.currentThread().getContextClassLoader();
         try {
-            r = getResolver(resourceLoader);
+            r = doGetResolver(resourceLoader);
             if(logger.isLoggable(Level.FINE))
-                logger.fine "===> Selected Resolver: " +(r==null?"No Resolver configuration found":"${r.getClass().name}")
+                logger.fine "Selected Resolver: " +(r==null?"No Resolver configuration found":"${r.getClass().name}")
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
             }
@@ -147,7 +170,7 @@ class ResolverHelper {
     /*
      * Returns the Resolver using ServiceLoader.load.
      */
-    def static Resolver getResolver(ClassLoader cl) throws IOException, ResolverException {
+    private static Resolver doGetResolver(ClassLoader cl) throws IOException, ResolverException {
         Resolver resolver = null;
         ServiceLoader<Resolver> loader =  ServiceLoader.load(Resolver.class, cl);
         if(logger.isLoggable(Level.FINE)) {
@@ -159,7 +182,7 @@ class ResolverHelper {
                 sb.append(r.getClass().name)
                 num++
             }            
-            logger.fine "===> Found ($num) Resolvers: [${sb.toString()}]"
+            logger.fine "Found ($num) Resolvers: [${sb.toString()}]"
         }
         for(Resolver r : loader) {
             if(r!=null) {

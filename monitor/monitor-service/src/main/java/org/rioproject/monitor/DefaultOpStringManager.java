@@ -763,7 +763,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 pomFile = OARUtil.find("pom.xml", dir);
             }*/
             deploymentVerifier.verifyOperationalStringService(sElem,
-                                                              ResolverHelper.getInstance(),
+                                                              ResolverHelper.getResolver(),
                                                               getRemoteRepositories());
             createServiceElementManager(sElem, true, listener);
         } else {

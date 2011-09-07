@@ -347,7 +347,7 @@ public class GnosticImpl implements Gnostic {
             if (ruleClassPath != null) {
                 String[] classPath;
                 if (Artifact.isArtifact(ruleClassPath)) {
-                    String[] cp = ResolverHelper.getInstance().getClassPathFor(ruleClassPath);
+                    String[] cp = ResolverHelper.getResolver().getClassPathFor(ruleClassPath);
                     classPath = new String[cp.length];
                     for (int i = 0; i < classPath.length; i++) {
                         String s =

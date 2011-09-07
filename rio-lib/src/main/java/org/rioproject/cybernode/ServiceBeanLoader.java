@@ -45,7 +45,7 @@ import org.rioproject.log.LoggerConfig;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverHelper;
-//import org.rioproject.rmi.AdaptiveLoader;
+import org.rioproject.rmi.ResolvingLoader;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
@@ -157,7 +157,7 @@ public class ServiceBeanLoader {
         if(globalPolicy!=null)
             globalPolicy.setPolicy(loader, null);
         cleanJars(elem);
-        //AdaptiveLoader.release(loader);
+        ResolvingLoader.release(loader);
     }
 
     /*
@@ -253,13 +253,14 @@ public class ServiceBeanLoader {
         URL[] exports;
         URL[] implJARs;
         try {
-            Resolver resolver = ResolverHelper.getInstance();
+            Resolver resolver = ResolverHelper.getResolver();
             boolean install = computeResource.getPersistentProvisioning();
             Map<String, ProvisionedResources> serviceResources = provisionService(sElem, resolver, install);
             ProvisionedResources dlPR = serviceResources.get("dl");
             ProvisionedResources implPR = serviceResources.get("impl");
             if(dlPR.getJars().length==0 && dlPR.getArtifact()!=null) {
                 String convertedArtifact = dlPR.getArtifact().replaceAll(":", "/");
+                // TODO: if the repositories is default maven central, still need to add?
                 exports = new URL[]{new URL("artifact:"+convertedArtifact+dlPR.getRepositories())};
             } else {
                 exports = dlPR.getJars();
@@ -472,7 +473,6 @@ public class ServiceBeanLoader {
             
             if(logger.isLoggable(Level.FINEST))
                 logger.log(Level.FINEST, "Proxy =  {0}", proxy);
-            //currentThread.setContextClassLoader(currentClassLoader);
             //TODO - factor in code integrity for MO
             //proxy = (new MarshalledObject(proxy)).get();
             //currentThread.setContextClassLoader(currentClassLoader);
@@ -573,6 +573,8 @@ public class ServiceBeanLoader {
         /* RIO-228 */
         if(System.getProperty("StaticCybernode")==null) {
             /* Check the dlPR jars for requisite jar inclusion */
+
+            // TODO instead of checking for requisite jars, should check for requisite artifact
             String[] requisiteExports = new String[]{"rio-api.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
             //String libDLDir = new File(System.getProperty("RIO_HOME")+ File.separator+"lib-dl").toURI().toString();
 

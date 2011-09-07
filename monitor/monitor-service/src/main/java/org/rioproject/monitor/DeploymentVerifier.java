@@ -46,7 +46,7 @@ public class DeploymentVerifier {
 
     public void verifyOperationalString(OperationalString opString, RemoteRepository[] repositories)
         throws ResolverException, IOException {
-        Resolver resolver = ResolverHelper.getInstance();
+        Resolver resolver = ResolverHelper.getResolver();
         for(ServiceElement service : opString.getServices()) {
             verifyOperationalStringService(service, resolver, repositories);
         }

@@ -467,7 +467,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         URL opStringURL = null;
         if(isArtifact) {
             try {
-                Resolver r = ResolverHelper.getInstance();
+                Resolver r = ResolverHelper.getResolver();
                 opStringURL = r.getLocation(a, "oar");
                 if(opStringURL==null)
                     throw new OperationalStringException("Artifact "+a+" not resolvable");
