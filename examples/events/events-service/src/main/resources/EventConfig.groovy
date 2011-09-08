@@ -29,7 +29,7 @@ class EventConfig {
     Entry[] getServiceUIs(String codebase) {
         def entry = []
         if(codebase!=null) {
-            Resolver r = ResolverHelper.getInstance()
+            Resolver r = ResolverHelper.getResolver()
             String uiClass = 'org.rioproject.examples.events.service.ui.HelloEventUI'
             def classpath = []
             for(String s : r.getClassPathFor("org.rioproject.examples.events:events-ui:2.0.1")) {
