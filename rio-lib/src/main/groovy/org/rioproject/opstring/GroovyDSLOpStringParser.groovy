@@ -509,7 +509,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 def location = null
                 File tempResolvedOpString = null
                 if(opStringRef.indexOf(":")!=-1) {
-                    Resolver r = ResolverHelper.getInstance()
+                    Resolver r = ResolverHelper.getResolver()
                     URL u = r.getLocation(opStringRef, "oar")
                     if(u==null)
                         throw new DSLException("Unable to resolve artifact "+
