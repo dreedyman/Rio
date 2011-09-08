@@ -317,7 +317,7 @@ class TestManager {
                              opStringToDeploy
         URL opStringURL
         if(Artifact.isArtifact(opStringToDeploy)) {
-            opStringURL = ResolverHelper.getInstance().getLocation(opStringToDeploy, "oar")
+            opStringURL = ResolverHelper.getResolver().getLocation(opStringToDeploy, "oar")
             if(opStringURL==null)
                 throw new OperationalStringException("Artifact "+opStringToDeploy+" not resolvable");
         } else {
