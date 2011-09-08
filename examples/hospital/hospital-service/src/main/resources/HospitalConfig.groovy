@@ -25,7 +25,7 @@ class HospitalConfig {
     Entry[] getServiceUIs(String codebase) {
         def entry = []
         if(codebase!=null) {
-            Resolver r = ResolverHelper.getInstance()
+            Resolver r = ResolverHelper.getResolver()
             String uiClass = 'org.rioproject.examples.hospital.ui.HospitalIntro'
             def classpath = []
             for(String s : r.getClassPathFor("org.rioproject.examples.hospital:hospital-ui:2.0.1")) {
