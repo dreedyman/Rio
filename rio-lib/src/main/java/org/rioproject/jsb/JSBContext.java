@@ -134,7 +134,10 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             ServiceClassLoader scl = (ServiceClassLoader)cCL;
             URL urls[] = scl.getURLs();
             if(urls!=null && urls.length>0) {
-                exportCodebase = urls[0].getProtocol()+"://"+urls[0].getHost()+":"+urls[0].getPort()+"/";
+                if(urls[0].getProtocol().equals("artifact"))
+                    exportCodebase = urls[0].toExternalForm();
+                else
+                    exportCodebase = urls[0].getProtocol()+"://"+urls[0].getHost()+":"+urls[0].getPort()+"/";
             }
         }
     }
