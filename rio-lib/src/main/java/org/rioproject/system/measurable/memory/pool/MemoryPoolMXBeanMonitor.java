@@ -33,7 +33,7 @@ public class MemoryPoolMXBeanMonitor implements MeasurableMonitor<MemoryPoolUtil
         if(memoryPoolBean != null)
             return memoryPoolBean;
         for(MemoryPoolMXBean mBean : ManagementFactory.getMemoryPoolMXBeans()) {
-            if(mBean.getName().indexOf(id)!=-1) {
+            if(mBean.getName().contains(id)) {
                 memoryPoolBean = mBean;
                 break;
             }
