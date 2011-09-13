@@ -30,7 +30,7 @@ import java.util.Vector;
 
 /** 
  * The PlatformCapabilityUI displays PlatformCapability instances for a Cybernode and
- * allows adminsitrators to enable/disable persistent provisioning
+ * allows administrators to enable/disable persistent provisioning
  *
  * @author Dennis Reedy
  */
