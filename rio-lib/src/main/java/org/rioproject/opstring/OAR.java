@@ -293,11 +293,13 @@ public class OAR implements Serializable {
 
     private void loadRepositories(JarFile jarFile) throws IOException {
         JarEntry repositoriesXML = jarFile.getJarEntry("repositories.xml");
-        InputStream input = jarFile.getInputStream(repositoriesXML);
-        RepositoryDecoder repositoryDecoder = new RepositoryDecoder();
-        Collection<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
-        Collections.addAll(repositories, (RemoteRepository[]) repositoryDecoder.decode(input));
-        setRepositories(repositories);
+        if(repositoriesXML!=null) {
+            InputStream input = jarFile.getInputStream(repositoriesXML);
+            RepositoryDecoder repositoryDecoder = new RepositoryDecoder();
+            Collection<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
+            Collections.addAll(repositories, (RemoteRepository[]) repositoryDecoder.decode(input));
+            setRepositories(repositories);
+        }
     }
 
     private void fillInAndThrow(String name) throws OARException {
