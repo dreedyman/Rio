@@ -49,6 +49,7 @@ import org.rioproject.opstring.OperationalStringException
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resolver.Artifact
 import org.rioproject.resources.servicecore.ServiceStopHandler
+import org.rioproject.opstring.OAR
 
 /**
  * Simplifies the running of core Rio services
@@ -320,6 +321,9 @@ class TestManager {
             opStringURL = ResolverHelper.getResolver().getLocation(opStringToDeploy, "oar")
             if(opStringURL==null)
                 throw new OperationalStringException("Artifact "+opStringToDeploy+" not resolvable");
+            OAR oar = new OAR(new File(opStringURL.toURI()));
+            ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
+            return deploy(oar.loadOperationalStrings()[0], monitor)
         } else {
             opStringURL = new File(opStringToDeploy).toURI().toURL()
         }
@@ -357,8 +361,7 @@ class TestManager {
      * @return The OperationalStringManager that is managing the OperationalString
      */
     OperationalStringManager deploy(URL opstring) {
-        ProvisionMonitor monitor =
-        (ProvisionMonitor)waitForService(ProvisionMonitor.class)
+        ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         return deploy(opstring, monitor)
     }
 
