@@ -644,9 +644,11 @@ public class LookupCachePool {
         public void serviceInstantiated(ServiceRecord r) {
             try {
                 for(ServiceRecord record : container.getServiceRecords()) {
-                    ServiceTemplate templateToMatch = JiniClient.getServiceTemplate(record.getServiceElement());
                     ServiceBeanDelegate delegate = container.getServiceBeanDelegate(record.getServiceID());
                     ServiceBeanInstance instance = delegate.getServiceBeanInstance();
+                    ServiceTemplate templateToMatch =
+                        JiniClient.getServiceTemplate(record.getServiceElement(),
+                                                      instance.getService().getClass().getClassLoader());
                     SDMWrapper[] sdms = getSDMWrappers();
                     for(SDMWrapper sdm : sdms) {
                         SharedLookupCache lCache =
