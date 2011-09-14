@@ -138,10 +138,9 @@ class MeasurableDiskSpace extends BasicMeasurable {    }
 class MemoryPools extends BasicMeasurable {
     MemoryPool[] getMemoryPools(Configuration config) {
         def memoryPools = []
-        memoryPools << new MemoryPool("Perm Gen",
-                                      config,
-                                      new ThresholdValues(0.0, 0.80))
         for(MemoryPoolMXBean mBean : ManagementFactory.getMemoryPoolMXBeans()) {
+            if(mBean.name.contains("Perm Gen"))
+                memoryPools << new MemoryPool(mBean.name, config, new ThresholdValues(0.0, 0.80))
             if(mBean.getType()==MemoryType.HEAP && mBean.isUsageThresholdSupported()) {
                 memoryPools << new MemoryPool(mBean.name, config, new ThresholdValues(0.0, 0.80))
             }
