@@ -21,7 +21,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>rio-api</artifactId>
@@ -44,6 +43,12 @@
             <groupId>${project.groupId}.cybernode</groupId>
             <artifactId>cybernode-service</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hyperic</groupId>
+                    <artifactId>sigar-dist</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -88,6 +93,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>-javaagent:${basedir}/../distribution/target/rio-${project.version}/lib/boot.jar</argLine>
                     <systemProperties>
                         <property>
                             <name>RIO_HOME</name>
@@ -96,6 +102,7 @@
                     </systemProperties>
                     <includes>
                         <include>**/HandlerTest.java</include>
+                        <include>**/ResolvingLoaderTestTest.java</include>
                     </includes>
                 </configuration>
             </plugin>
