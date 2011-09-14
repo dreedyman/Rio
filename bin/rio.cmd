@@ -34,7 +34,7 @@ set command_line=%*
 set launchTarget=org.rioproject.tools.cli.CLI
 set classpath=-cp "%RIO_HOME%\lib\rio-cli.jar";"%RIO_LIB%\jsk-lib.jar";"%RIO_LIB%\jsk-platform.jar";"%RIO_HOME%\lib\groovy-all.jar";
 set props="-DRIO_HOME=%RIO_HOME%"
-"%JAVACMD%" %classpath% -Xms256m -Xmx256m -DRIO_HOME="%RIO_HOME%" -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
+"%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -DRIO_HOME="%RIO_HOME%" -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
 goto end
 
 :create-project
@@ -59,7 +59,7 @@ set agentpath=-javaagent:"%RIO_HOME%\lib\boot.jar"
 
 set launchTarget=com.sun.jini.start.ServiceStarter
 
-"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.protocol.handler.pkgs=net.jini.url -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
+"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.protocol.handler.pkgs=net.jini.url -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
 goto end
 
 :noStarter

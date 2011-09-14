@@ -180,6 +180,7 @@ else
     classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar`"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
+        -Djava.protocol.handler.pkgs=org.rioproject.url \
         $PROPS \
         $NETWORK \
         $DEBUG \

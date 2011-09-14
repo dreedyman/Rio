@@ -6,6 +6,7 @@
 scriptDir="`dirname $0`"
 if [ -z "$RIO_HOME" ] ; then
     if [ "$scriptDir" = "bin" ] ; then
+        RIO_HOME="$scriptDir"
         path_to_jar="lib/rio-ui.jar"
     else
         if [ "$scriptDir" = "." ] ; then
@@ -18,11 +19,12 @@ if [ -z "$RIO_HOME" ] ; then
 else
     path_to_jar="$RIO_HOME/lib/rio-ui.jar"
 fi
+
 # Check for running on OS/X
 opSys=`uname -s`
 if [ $opSys = "Darwin" ] ; then
-    java  -Xdock:name="Rio" -jar $path_to_jar $*
+    java -DRIO_HOME=$RIO_HOME -Djava.protocol.handler.pkgs=org.rioproject.url -Xdock:name="Rio" -jar $path_to_jar $*
 else
-    java -jar $path_to_jar  $*
+    java -DRIO_HOME=$RIO_HOME -Djava.protocol.handler.pkgs=org.rioproject.url -jar $path_to_jar  $*
 fi
 
