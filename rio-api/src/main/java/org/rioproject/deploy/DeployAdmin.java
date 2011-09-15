@@ -80,9 +80,8 @@ public interface DeployAdmin {
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(String opStringLocation,
-                                  ServiceProvisionListener listener)
-    throws OperationalStringException, RemoteException;
+    Map<String, Throwable> deploy(String opStringLocation, ServiceProvisionListener listener)
+        throws OperationalStringException, RemoteException;
 
 
     /**
@@ -107,8 +106,7 @@ public interface DeployAdmin {
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(URL opStringUrl)
-    throws OperationalStringException, RemoteException;
+    Map<String, Throwable> deploy(URL opStringUrl) throws OperationalStringException, RemoteException;
 
     
     /**
@@ -135,9 +133,8 @@ public interface DeployAdmin {
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(URL opStringUrl,
-                                  ServiceProvisionListener listener)
-    throws OperationalStringException, RemoteException;    
+    Map<String, Throwable> deploy(URL opStringUrl, ServiceProvisionListener listener)
+    throws OperationalStringException, RemoteException;
     
     /**
      * Deploy an OperationalString to the ProvisionMonitor. The 

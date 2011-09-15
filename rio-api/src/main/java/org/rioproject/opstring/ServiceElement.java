@@ -71,8 +71,7 @@ public class ServiceElement implements Serializable {
     private ClassBundle[] exportBundles = new ClassBundle[0];
     /** Collection of provisionable PlatformCapability objects  */
     private final Collection<SystemRequirements.SystemComponent>
-        provisionableCapabilities =
-            new ArrayList<SystemRequirements.SystemComponent>();
+        provisionableCapabilities = new ArrayList<SystemRequirements.SystemComponent>();
     /** The ServiceLevelAgreements object defines system and service level 
      * objectives that are to be monitored, metered and acted on by policy 
      * handlers */
@@ -191,7 +190,7 @@ public class ServiceElement implements Serializable {
     /**
      * Set the provision type set for this service.
      *
-     * @param provisionType The provison type
+     * @param provisionType The provision type
      */
     public void setProvisionType(ProvisionType provisionType) {
         this.provisionType = provisionType;
@@ -288,8 +287,7 @@ public class ServiceElement implements Serializable {
      */
     public void setMaxPerMachine(int maxPerMachine) {
         if(maxPerMachine < -1)
-            throw new IllegalArgumentException("maxPerMachine cannot be less " +
-                                               "then -1");
+            throw new IllegalArgumentException("maxPerMachine cannot be less then -1");
         this.maxPerMachine = maxPerMachine;
     }
 
@@ -560,10 +558,10 @@ public class ServiceElement implements Serializable {
 
     /**
      * Get the export URLs. Helper method to get the array of URLs from the
-     * array of ClassBundle objcts representing the export class(es) and searchpaths
+     * array of ClassBundle objects representing the export class(es) and search paths
      * for those classes
      * 
-     * @return Array of URLs of the export classes. A new array is allocate each
+     * @return Array of URLs of the export classes. A new array is allocated each
      * time this method is called
      *
      * @throws MalformedURLException If the URLs are incorrect
@@ -651,10 +649,8 @@ public class ServiceElement implements Serializable {
      * no provisionable SystemRequirement instances, this method returns an
      * empty Collection.
      */
-    public Collection<SystemRequirements.SystemComponent>
-        getProvisionablePlatformCapabilities() {
-        Collection<SystemRequirements.SystemComponent> collection =
-            new ArrayList<SystemRequirements.SystemComponent>();
+    public Collection<SystemRequirements.SystemComponent> getProvisionablePlatformCapabilities() {
+        Collection<SystemRequirements.SystemComponent> collection = new ArrayList<SystemRequirements.SystemComponent>();
         synchronized(provisionableCapabilities) {
             collection.addAll(provisionableCapabilities);
         }
@@ -798,17 +794,10 @@ public class ServiceElement implements Serializable {
         sb.append("ServiceElement");
         sb.append("{provisionType=").append(provisionType);
         sb.append(", sbConfig=").append(sbConfig);
-        sb.append(", associations=").append(
-            associations == null
-            ? "null"
-            : Arrays.asList(associations).toString());
+        sb.append(", associations=").append(associations == null? "null": Arrays.asList(associations).toString());
         sb.append(", componentBundle=").append(componentBundle);
-        sb.append(", exportBundles=").append(exportBundles == null
-                                             ? "null"
-                                             : Arrays.asList(exportBundles)
-                                                 .toString());
-        sb.append(", provisionableCapabilities=").append(
-            provisionableCapabilities);
+        sb.append(", exportBundles=").append(exportBundles == null? "null": Arrays.asList(exportBundles).toString());
+        sb.append(", provisionableCapabilities=").append(provisionableCapabilities);
         sb.append(", slAgreements=").append(slAgreements);
         sb.append(", matchOnName=").append(matchOnName);
         sb.append(", autoAdvertise=").append(autoAdvertise);
@@ -817,10 +806,7 @@ public class ServiceElement implements Serializable {
         sb.append(", maxPerMachine=").append(maxPerMachine);
         sb.append(", machineBoundary=").append(machineBoundary);
         sb.append(", actual=").append(actual);
-        sb.append(", machineCluster=").append(machineCluster == null
-                                              ? "null"
-                                              : Arrays.asList(machineCluster)
-                                                  .toString());
+        sb.append(", machineCluster=").append(machineCluster == null? "null": Arrays.asList(machineCluster).toString());
         sb.append(", fdhBundle=").append(fdhBundle);
         sb.append(", execDescriptor=").append(execDescriptor);
         sb.append(", stagedData=").append(stagedData);
@@ -829,48 +815,5 @@ public class ServiceElement implements Serializable {
         return sb.toString();
     }
 
-    public static void main(String[] args) {
-        try {   
-            ServiceBeanConfig sbc = new ServiceBeanConfig(new java.util.HashMap<String, Object>(),
-                                                          new String[] {"-"});
-            ClassBundle export1 = 
-                new ClassBundle("org.rioproject.servicecore.Service");
-            export1.addJAR("rio-api.jar");
-            export1.addJAR("service-dl.jar");
-            export1.setCodebase("http://10.1.1.3:9000");
-            ClassBundle impl = new ClassBundle("com.foo.ExampleImpl");
-            impl.addJAR("rio.jar");
-            impl.addJAR("service.jar");
-            impl.setCodebase("http://10.1.1.3:9000");
-            String fdh = "org.rioproject.fdh.LeaseFaultDetectionHandler";
-            ServiceElement s1 = new ServiceElement(ProvisionType.DYNAMIC,
-                                                   sbc,
-                                                   new ServiceLevelAgreements(),
-                                                   new ClassBundle[] {export1},
-                                                   new ClassBundle(fdh),
-                                                   impl);            
-            
-            ClassBundle export2 = 
-                new ClassBundle("org.rioproject.servicecore.Service");
-            export2.addJAR("rio-api.jar");
-            export2.addJAR("service-dl.jar");
-            export2.setCodebase("http://10.1.1.3:9000");
-            ServiceElement s2 = new ServiceElement(ProvisionType.DYNAMIC,
-                                                   sbc,
-                                                   new ServiceLevelAgreements(),
-                                                   new ClassBundle[] {export2},
-                                                   new ClassBundle(fdh),
-                                                   impl);
-            System.out.println("s1 equal s2 ? "+s1.equals(s2));
-            System.out.println("s2 equal s1 ? "+s2.equals(s1));
-            System.out.println("s1 equal s1 ? "+s1.equals(s1));
-            System.out.println("s2 equal s2 ? "+s2.equals(s2));
-            System.out.println("s1 hash : "+s1.hashCode());
-            System.out.println("s2 hash : "+s2.hashCode());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-    }
 }
 
