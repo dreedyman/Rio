@@ -29,7 +29,6 @@ import net.jini.core.entry.Entry;
 import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.lookup.ServiceID;
-import net.jini.discovery.DiscoveryManagement;
 import net.jini.export.Exporter;
 import net.jini.export.ProxyAccessor;
 import net.jini.id.Uuid;
@@ -46,16 +45,15 @@ import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.admin.ServiceAdminImpl;
-import org.rioproject.associations.AssociationManagement;
 import org.rioproject.bean.BeanAdapter;
 import org.rioproject.boot.BootUtil;
 import org.rioproject.boot.ServiceClassLoader;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.*;
-import org.rioproject.entry.ApplianceInfo;
 import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.entry.StandardServiceType;
 import org.rioproject.entry.UIDescriptorFactory;
@@ -778,8 +776,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             context.getServiceElement().getOperationalStringName();
         if (opStringName != null)
             attrList.add(new OperationalStringEntry(opStringName));
-        /* 3. Create and add ApplianceInfo */
-        ApplianceInfo aInfo = new ApplianceInfo();
+        /* 3. Create and add ComputeResourceInfo */
+        ComputeResourceInfo aInfo = new ComputeResourceInfo();
         aInfo.initialize(computeResource.getAddress());
         attrList.add(aInfo);
         /* 4. Create and add Host */

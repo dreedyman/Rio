@@ -35,7 +35,7 @@ public interface ServiceBeanAdapterMBean {
      * for the service:
      * <ul>
      * <li>ComputeResourceUtilization
-     * <li>ApplianceInfo
+     * <li>ComputeResourceInfo
      * <li>StandardServiceType
      * </ul>
      *

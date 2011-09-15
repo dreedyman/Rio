@@ -19,9 +19,9 @@ import net.jini.admin.Administrable;
 import net.jini.core.entry.Entry;
 import net.jini.io.UnsupportedConstraintException;
 import org.rioproject.deploy.ProvisionManager;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.entry.ApplianceInfo;
 import org.rioproject.deploy.DeployAdmin;
 
 import javax.swing.*;
@@ -180,15 +180,15 @@ public class Util {
     }
 
     /**
-     * Helper to get the ApplianceInfo Entry
+     * Helper to get the ComputeResourceInfo Entry
      *
      * @param attrs - Array of Entry objects
      * @return ApplianceInfo
      */
-    public static ApplianceInfo getApplianceInfo(Entry[] attrs) {
+    public static ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
-            if (attr instanceof ApplianceInfo) {
-                return (ApplianceInfo) attr;
+            if (attr instanceof ComputeResourceInfo) {
+                return (ComputeResourceInfo) attr;
             }
         }
         return (null);

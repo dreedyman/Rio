@@ -48,12 +48,12 @@ import net.jini.security.ProxyPreparer;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.deploy.*;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.ServiceElement.ProvisionType;
 import org.rioproject.admin.ServiceBeanAdmin;
 import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.deploy.ServiceStatement;
-import org.rioproject.entry.ApplianceInfo;
 import org.rioproject.fdh.FaultDetectionHandler;
 import org.rioproject.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.fdh.FaultDetectionListener;
@@ -1632,7 +1632,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 }
             }
 
-            ApplianceInfo ai = getApplianceInfo(item.attributeSets);
+            ComputeResourceInfo ai = getApplianceInfo(item.attributeSets);
             if(ai!=null) {
                 hostAddress = ai.hostAddress;
             }
@@ -2245,16 +2245,16 @@ public class ServiceElementManager implements InstanceIDManager {
     }
 
     /**
-     * Helper to get the ApplianceInfo Entry
+     * Helper to get the ComputeResourceInfo Entry
      * 
      * @param attrs Array of Entry objects
      * 
      * @return ApplianceInfo
      */
-    ApplianceInfo getApplianceInfo(Entry[] attrs) {
+    ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
-            if (attr instanceof ApplianceInfo) {
-                return (ApplianceInfo) attr;
+            if (attr instanceof ComputeResourceInfo) {
+                return (ComputeResourceInfo) attr;
             }
         }
         return(null);
