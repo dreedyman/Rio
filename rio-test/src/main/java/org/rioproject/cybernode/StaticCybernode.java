@@ -22,6 +22,8 @@ import org.rioproject.boot.BootUtil;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.opstring.*;
+import org.rioproject.resolver.Artifact;
+import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
@@ -60,7 +62,8 @@ import java.util.*;
  */
 public class StaticCybernode {
     private JSBContainer instantiator;
-    private final Map<Object, Object> serviceMap = new HashMap<Object, Object>();
+    //private final Map<Object, Object> serviceMap = new HashMap<Object, Object>();
+    private final Set<ActivatedService> serviceSet = new HashSet<ActivatedService>();
 
     static {
         Policy.setPolicy(
@@ -145,8 +148,39 @@ public class StaticCybernode {
             throw new IllegalArgumentException("opstring file must not be null");
         Map<String, Object> map = new HashMap<String, Object>();
         OpStringLoader opl = new OpStringLoader();
-        OperationalString[] opstrings = opl.parseOperationalString(opstring);
-        for(OperationalString ops : opstrings) {
+        OperationalString[] opStrings = opl.parseOperationalString(opstring);
+        for(OperationalString ops : opStrings) {
+            if(beans!=null && beans.length>0)
+                map.putAll(activate(ops, beans));
+            else
+                map.putAll(activate(ops));
+        }
+        return map;
+    }
+
+    /**
+     * Activate service beans defined by an OAR artifact,
+     * scoping the beans to be activated by providing the bean names.
+     *
+     * @param artifact The <code>Artifact</code> to activate
+     * @param beans The bean names to create. If not provided all
+     * services in the opstring will be created
+     * @return A map of bean name keys and service implementation object values
+     *
+     * @throws Exception If the <tt>OperationalString</tt> document results in
+     * parsing errors or the bean(s) cannot be created.
+     */
+    public Map<String, Object> activate(Artifact artifact, String... beans) throws Exception {
+        if(artifact==null)
+            throw new IllegalArgumentException("artifact must not be null");
+        URL opStringURL = ResolverHelper.getResolver().getLocation(artifact.getGAV(), "oar");
+        if(opStringURL==null)
+            throw new OperationalStringException("Artifact "+artifact+" not resolvable");
+        OAR oar = new OAR(new File(opStringURL.toURI()));
+        OperationalString[] opStrings = oar.loadOperationalStrings();
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        for(OperationalString ops : opStrings) {
             if(beans!=null && beans.length>0)
                 map.putAll(activate(ops, beans));
             else
@@ -203,6 +237,25 @@ public class StaticCybernode {
     }
 
     /**
+     * De-activate a service
+     *
+     * @param impl The service implementation, obtained through the
+     * <tt>activate</tt> method
+     */
+    public void deactivate(Object impl)  {
+        ActivatedService a = getActivatedService(impl);
+        if(a!=null) {
+            a.delegate.terminate();
+            a.proxy = null;
+            a.impl = null;
+            a.delegate = null;
+            synchronized (serviceSet) {
+                serviceSet.remove(a);
+            }
+        }
+    }
+
+    /**
      * Get the proxy for a service implementation created by the
      * <tt>StaticCybernode</tt>
      *
@@ -216,15 +269,28 @@ public class StaticCybernode {
     public Object getServiceProxy(Object impl)  {
         if(impl==null)
             throw new IllegalArgumentException("impl must not be null");
-        return serviceMap.get(impl);
+        ActivatedService a = getActivatedService(impl);
+        return a==null?null:a.proxy;
     }
 
-    private Object instantiateBean(ServiceElement elem) throws
-                                                        ServiceBeanInstantiationException {
+    private ActivatedService getActivatedService(Object impl) {
+        ActivatedService activatedService = null;
+        synchronized (serviceSet) {
+            for(ActivatedService a : serviceSet) {
+                if(a.impl.equals(impl)) {
+                    activatedService = a;
+                    break;
+                }
+            }
+        }
+        return activatedService;
+    }
+
+    private Object instantiateBean(ServiceElement elem) throws ServiceBeanInstantiationException {
         if(elem.forkService())
             throw new ServiceBeanInstantiationException("The StaticCybernode does not " +
-                                                "support the instantiation of a " +
-                                                "service declared to be forked");
+                                                        "support the instantiation of a " +
+                                                        "service declared to be forked");
         ServiceBeanInstance instance =
             instantiator.activate(elem,
                                   null,  // OperationalStringManager
@@ -232,7 +298,7 @@ public class StaticCybernode {
         JSBDelegate delegate =
             (JSBDelegate) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
         Object impl = delegate.getImpl();
-        serviceMap.put(impl, delegate.getProxy());
+        serviceSet.add(new ActivatedService(impl, delegate.getProxy(), delegate));
         return impl;
     }
 
@@ -252,6 +318,18 @@ public class StaticCybernode {
         sbc.setName(name);
         elem.setServiceBeanConfig(sbc);
         return elem;
+    }
+
+    private static class ActivatedService {
+        private Object impl;
+        private Object proxy;
+        private JSBDelegate delegate;
+
+        private ActivatedService(Object impl, Object proxy, JSBDelegate delegate) {
+            this.impl = impl;
+            this.proxy = proxy;
+            this.delegate = delegate;
+        }
     }
 
     /**
@@ -307,7 +385,7 @@ public class StaticCybernode {
      */
     public static void main(String... args) {
         if(args.length==0) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Usage: \n");
             sb.append("\t")
                 .append(StaticCybernode.class.getName())
