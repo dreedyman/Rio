@@ -375,11 +375,9 @@
         <module>boot</module>
         <module>rio-api</module>
         <module>rio-lib</module>
-        <module>rio-lookup-entry</module>
         <module>resolver/resolver-api</module>
         <module>resolver/resolver-aether</module>
         <module>resolver/resolver-project</module>
-        <module>webster</module>
         <module>cybernode/cybernode-api</module>
         <module>cybernode/cybernode-proxy</module>
         <module>cybernode/cybernode-service</module>
@@ -390,6 +388,7 @@
         <module>monitor/monitor-service</module>
         <module>tools/rio-cli</module>
         <module>tools/rio-ui</module>
+        <module>tools/webster</module>
         <module>rio-test</module>
         <module>examples</module>
         <module>distribution</module>
