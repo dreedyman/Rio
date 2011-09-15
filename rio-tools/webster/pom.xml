@@ -63,7 +63,7 @@
                     <argLine>-DRIO_TEST_ATTACH</argLine>
                     -->
                     <systemPropertyVariables>
-                        <java.security.policy>../distribution/src/main/policy/policy.all</java.security.policy>
+                        <java.security.policy>../../distribution/src/main/policy/policy.all</java.security.policy>
                         <WEBSTER_JAR>${project.build.directory}/webster-${project.version}.jar
                         </WEBSTER_JAR>
                     </systemPropertyVariables>
