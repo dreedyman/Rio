@@ -16,7 +16,7 @@
 package org.rioproject.system.capability;
 
 import org.rioproject.boot.BootUtil;
-import org.rioproject.boot.CommonClassLoader;
+import org.rioproject.loader.CommonClassLoader;
 
 import java.net.MalformedURLException;
 import java.net.URL;
