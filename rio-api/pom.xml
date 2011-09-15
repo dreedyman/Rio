@@ -30,12 +30,6 @@
             <artifactId>jsk-dl</artifactId>
         </dependency>
 
-         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>rio-lookup-entry</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}.resolver</groupId>
             <artifactId>resolver-api</artifactId>
@@ -123,7 +117,6 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.6</version>
             </plugin>
             
         </plugins>
