@@ -42,7 +42,7 @@ class StartServiceBeanExecConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         //setFileHandler()
         String rioHome = System.getProperty('RIO_HOME')
-        String codebase = ServiceDescriptorUtil.getCybernodeCodebase("file://${rioHome}/lib-dl")
+        String codebase = ServiceDescriptorUtil.getCybernodeCodebase()
         String classpath = ServiceDescriptorUtil.getCybernodeClasspath()
         
         String policyFile = rioHome + '/policy/policy.all'
