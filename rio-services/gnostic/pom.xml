@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>main</artifactId>
+        <groupId>org.rioproject</groupId>
+        <version>5.0-SNAPSHOT</version>
+	<relativePath>../../pom.xml</relativePath>
+    </parent>
+    <groupId>org.rioproject</groupId>
+    <artifactId>gnostic</artifactId>
+    <name>Module :: Gnostic</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>gnostic-api</module>
+        <module>gnostic-service</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rio-plugin</artifactId>
+                <version>${rio.plugin.version}</version>
+                <extensions>true</extensions>
+
+                <executions>
+                    <execution>
+                        <id>build-oar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>oar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <opstring>${basedir}/src/main/opstring/gnostic.groovy</opstring>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
