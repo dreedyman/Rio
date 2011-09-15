@@ -183,9 +183,9 @@ public class Util {
      * Helper to get the ComputeResourceInfo Entry
      *
      * @param attrs - Array of Entry objects
-     * @return ApplianceInfo
+     * @return ComputeResourceInfo
      */
-    public static ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
+    public static ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ComputeResourceInfo) {
                 return (ComputeResourceInfo) attr;
