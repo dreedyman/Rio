@@ -27,12 +27,6 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>rio-lookup-entry</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-         <dependency>
             <groupId>${project.groupId}.resolver</groupId>
             <artifactId>resolver-api</artifactId>
             <version>${project.version}</version>
@@ -168,13 +162,48 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.8</version>
                 <configuration>
+                     <!--<forkMode>never</forkMode>-->
                     <excludes>
+                        <exclude>**/WatchDataSourceImplTest.java</exclude>
+                        <exclude>**/CounterWatchTest.java</exclude>
+                        <exclude>**/GaugeWatchTest.java</exclude>
+                        <exclude>**/StopWatchTest.java</exclude>
+                        <exclude>**/PeriodicWatchTest.java</exclude>
                         <exclude>**/ThresholdWatchTest.java</exclude>
                         <exclude>**/WatchTest.java</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <forkMode>never</forkMode>
+                    <systemProperties>
+                        <property>
+                            <name>java.security.policy</name>
+                            <value>${basedir}/../distribution/src/main/policy/policy.all</value>
+                        </property>
+                    </systemProperties>
+                    <includes>
+                        <include>**/WatchDataSourceImplTest.java</include>
+                        <include>**/CounterWatchTest.java</include>
+                        <include>**/GaugeWatchTest.java</include>
+                        <include>**/StopWatchTest.java</include>
+                        <include>**/PeriodicWatchTest.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             
         </plugins>
