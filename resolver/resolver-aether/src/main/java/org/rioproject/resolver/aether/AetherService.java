@@ -204,7 +204,7 @@ public class AetherService {
                                                            DependencyResolutionException,
                                                            SettingsBuildingException {
 
-        return resolve(groupId, artifactId, extension, classifier, version, getRemoteRepositories());
+        return resolve(groupId, artifactId, extension, classifier, version, getRemoteRepositories(null));
     }
 
     /**
@@ -235,8 +235,7 @@ public class AetherService {
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
         Dependency dependency = new Dependency(artifact, JavaScopes.COMPILE);
-        //if(repositories==null)
-            repositories = getRemoteRepositories();
+        repositories = getRemoteRepositories(repositories);
 
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(dependency);
@@ -307,7 +306,7 @@ public class AetherService {
      */
     public URL getLocation(String artifactCoordinates, String artifactExt) throws ArtifactResolutionException,
                                                                                   MalformedURLException {
-        return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories());
+        return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories(null));
     }
 
     /**
@@ -332,8 +331,7 @@ public class AetherService {
         ArtifactRequest artifactRequest = new ArtifactRequest();
         DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), extension, a.getVersion());
         artifactRequest.setArtifact(artifact);
-        if(repositories==null)
-            repositories = getRemoteRepositories();
+        repositories = getRemoteRepositories(repositories);
         artifactRequest.setRepositories(repositories);
         ArtifactResult artifactResult = repositorySystem.resolveArtifact(repositorySystemSession, artifactRequest);
         return artifactResult.getArtifact().getFile().toURI().toURL();
@@ -351,10 +349,11 @@ public class AetherService {
         return build.getEffectiveSettings();
     }
 
-    List<RemoteRepository> getRemoteRepositories() {
+    List<RemoteRepository> getRemoteRepositories(List<RemoteRepository> repositories) {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
-        List<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
-        //boolean haveRio = false;
+        if(repositories==null)
+            repositories = new ArrayList<RemoteRepository>();
+        //boolean haveCentral = false;
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
@@ -384,7 +383,8 @@ public class AetherService {
                 central = new RemoteRepository("central", "default", mirror.getUrl());
             }
         }
-        repositories.add(central);
+        if(!repositories.contains(central))
+            repositories.add(central);
         /*if(!haveRio)
             repositories.add(new RemoteRepository("rio", "default", "http://www.rio-project.org/maven2/"));*/
         return repositories;

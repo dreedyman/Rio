@@ -81,7 +81,7 @@ public class AetherResolver implements Resolver {
             Artifact a = new Artifact(artifact);
             ResolutionResult result = service.resolve(a.getGroupId(),
                                                       a.getArtifactId(),
-                                                      "jar",
+                                                      a.getType(),
                                                       a.getClassifier(),
                                                       a.getVersion(),
                                                       remoteRepositories);
@@ -133,7 +133,7 @@ public class AetherResolver implements Resolver {
      */
     @Override
     public Collection<RemoteRepository> getRemoteRepositories() {
-        List<org.sonatype.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();
+        List<org.sonatype.aether.repository.RemoteRepository> repos = service.getRemoteRepositories(null);
         List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
 
         for(org.sonatype.aether.repository.RemoteRepository r : repos)
