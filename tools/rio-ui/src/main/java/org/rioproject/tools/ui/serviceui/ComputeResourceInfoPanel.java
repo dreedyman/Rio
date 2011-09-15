@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,23 @@
  */
 package org.rioproject.tools.ui.serviceui;
 
-import org.rioproject.entry.ApplianceInfo;
+import org.rioproject.entry.ComputeResourceInfo;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * The ApplianceInfoPanel is a JPanel that details information about the
- * ApplianceInfo entry object
+ * The ComputeResourceInfoPanel is a JPanel that details information about the
+ * ComputeResourceInfo entry object
  *
- * @see org.rioproject.entry.ApplianceInfo
+ * @see org.rioproject.entry.ComputeResourceInfo
  *
  * @author Dennis Reedy
  */
-public class ApplianceInfoPanel extends JPanel {
-    JTextField jvmVendor, jvmVersion, hostaddr, hostname, osinfo, osversion, arch;
+public class ComputeResourceInfoPanel extends JPanel {
+    JTextField jvmVendor, jvmVersion, hostaddr, hostname, osinfo, arch;
 
-    public ApplianceInfoPanel() {
+    public ComputeResourceInfoPanel() {
         super();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -81,7 +81,7 @@ public class ApplianceInfoPanel extends JPanel {
         add(Box.createVerticalGlue());
     }
 
-    public void setApplianceInfo(ApplianceInfo info) {
+    public void setApplianceInfo(ComputeResourceInfo info) {
         if (info == null) {
             jvmVersion.setText("Unknown");
             jvmVendor.setText("Unknown");
