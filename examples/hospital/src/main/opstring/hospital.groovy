@@ -9,8 +9,8 @@ deployment(name: 'Hospital') {
         logger 'org.rioproject.gnostic.drools', Level.FINEST
     }*/
 
-    artifact id: 'service', 'org.rioproject.examples.hospital:hospital-service:2.0.1'
-    artifact id: 'service-dl', 'org.rioproject.examples.hospital:hospital-api:2.0.1'
+    artifact id: 'service', 'org.rioproject.examples.hospital:hospital-service:2.0.2'
+    artifact id: 'service-dl', 'org.rioproject.examples.hospital:hospital-api:2.0.2'
 
     service(name: 'Admission') {
         interfaces {
@@ -65,7 +65,7 @@ deployment(name: 'Hospital') {
     rules {
         rule {
             resource 'DoctorRule, AvailableBedRule'
-            ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.0.1'
+            ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.0.2'
             serviceFeed(name: "Doctors") {
                 watches "numPatients"
             }

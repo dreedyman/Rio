@@ -4,8 +4,8 @@ deployment(name:'Calculator') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
     
-    artifact id:'service', 'org.rioproject.examples.calculator:calculator-service:2.0.1'
-    artifact id:'service-dl', 'org.rioproject.examples.calculator:calculator-api:2.0.1'
+    artifact id:'service', 'org.rioproject.examples.calculator:calculator-service:2.0.2'
+    artifact id:'service-dl', 'org.rioproject.examples.calculator:calculator-api:2.0.2'
 
     service(name: 'Calculator') {
         interfaces {

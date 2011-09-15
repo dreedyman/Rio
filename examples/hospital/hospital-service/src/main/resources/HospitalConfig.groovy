@@ -28,7 +28,7 @@ class HospitalConfig {
             Resolver r = ResolverHelper.getResolver()
             String uiClass = 'org.rioproject.examples.hospital.ui.HospitalIntro'
             def classpath = []
-            for(String s : r.getClassPathFor("org.rioproject.examples.hospital:hospital-ui:2.0.1")) {
+            for(String s : r.getClassPathFor("org.rioproject.examples.hospital:hospital-ui:2.0.2")) {
                 if(s.startsWith(ResolverHelper.M2_HOME))
                     s = s.substring(ResolverHelper.M2_HOME.length()+1)
                 classpath << s
