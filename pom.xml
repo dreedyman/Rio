@@ -370,14 +370,15 @@
     </build>
 
     <modules>
-        <module>plugins/maven-rio-plugin</module>
-        <module>plugins/rio-archetype</module>
+        <module>rio-plugins/maven-rio-plugin</module>
+        <module>rio-plugins/rio-archetype</module>
         <module>boot</module>
         <module>rio-api</module>
         <module>rio-lib</module>
-        <module>resolver/resolver-api</module>
-        <module>resolver/resolver-aether</module>
-        <module>resolver/resolver-project</module>
+        <module>rio-platform</module>
+        <module>rio-resolver/resolver-api</module>
+        <module>rio-resolver/resolver-aether</module>
+        <module>rio-resolver/resolver-project</module>
         <module>cybernode/cybernode-api</module>
         <module>cybernode/cybernode-proxy</module>
         <module>cybernode/cybernode-service</module>
@@ -386,13 +387,13 @@
         <module>monitor/monitor-api</module>
         <module>monitor/monitor-proxy</module>
         <module>monitor/monitor-service</module>
-        <module>tools/rio-cli</module>
-        <module>tools/rio-ui</module>
-        <module>tools/webster</module>
+        <module>rio-tools/rio-cli</module>
+        <module>rio-tools/rio-ui</module>
+        <module>rio-tools/webster</module>
+        <module>rio-tools/watch-ui</module>
         <module>rio-test</module>
         <module>examples</module>
         <module>distribution</module>
-        <module>watch-ui</module>
     </modules>
 
     <properties>
