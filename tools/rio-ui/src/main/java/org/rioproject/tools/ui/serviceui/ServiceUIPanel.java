@@ -24,7 +24,7 @@ import net.jini.lookup.ui.factory.JComponentFactory;
 import net.jini.lookup.ui.factory.JDialogFactory;
 import net.jini.lookup.ui.factory.JFrameFactory;
 import net.jini.lookup.ui.factory.JWindowFactory;
-import org.rioproject.entry.ApplianceInfo;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.serviceui.UILoader;
 import org.rioproject.ui.Util;
 
@@ -88,7 +88,7 @@ public class ServiceUIPanel extends JPanel {
             svcName = item.service.getClass().getName();
         }
 
-        ApplianceInfo aInfo = getApplianceInfo(attrs);
+        ComputeResourceInfo aInfo = getApplianceInfo(attrs);
 
         java.util.Timer taskTimer = new java.util.Timer(true);
         long now = System.currentTimeMillis();
@@ -153,7 +153,7 @@ public class ServiceUIPanel extends JPanel {
         }
 
         if(aInfo!=null) {
-            ApplianceInfoPanel aInfoPanel = new ApplianceInfoPanel();
+            ComputeResourceInfoPanel aInfoPanel = new ComputeResourceInfoPanel();
             aInfoPanel.setApplianceInfo(aInfo);
             tabpane.add("Host Attributes", aInfoPanel);
         }
@@ -368,10 +368,10 @@ public class ServiceUIPanel extends JPanel {
         }
     }
 
-    ApplianceInfo getApplianceInfo(Entry[] attrs) {
+    ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
-            if (attr instanceof ApplianceInfo) {
-                return (ApplianceInfo) attr;
+            if (attr instanceof ComputeResourceInfo) {
+                return (ComputeResourceInfo) attr;
             }
         }
         return(null);

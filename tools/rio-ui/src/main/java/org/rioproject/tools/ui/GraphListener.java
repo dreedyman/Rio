@@ -17,9 +17,9 @@ package org.rioproject.tools.ui;
 
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.entry.ApplianceInfo;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.ui.Util;
@@ -79,7 +79,7 @@ public class GraphListener extends ControlAdapter {
                 buff.append("\n");
             }
             if (node.getServiceItem() != null) {
-                ApplianceInfo aInfo =
+                ComputeResourceInfo aInfo =
                     Util.getApplianceInfo(node.getServiceItem().attributeSets);
                 if(aInfo!=null) {
                     if (aInfo.osName != null && aInfo.osName.length() > 0) {

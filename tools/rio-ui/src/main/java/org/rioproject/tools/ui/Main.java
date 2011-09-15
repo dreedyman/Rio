@@ -162,9 +162,11 @@ public class Main extends JFrame {
                     isArtifact = true;
                     lastArtifact = chosen;
                 } catch(Exception e) {
-                    /* dont need to print stack trace here */
+                    /* don't need to print stack trace here */
                 }
-                if(isArtifact) {
+
+                /* If deploying an artifact or the oar is http based, deploy */
+                if(isArtifact || chosen.startsWith("http")) {
                     final ServiceItem item = monitorCache.lookup(null);
                     SwingDeployHelper.deploy(chosen, item, frame);
                 } else {
@@ -177,7 +179,7 @@ public class Main extends JFrame {
                             if(opStringFile.getName().endsWith("oar")) {
                                 OAR oar = new OAR(opStringFile);
                                 opstrings = oar.loadOperationalStrings();
-                                // TODO embed webster and stream the OAR
+                                // TODO: embed webster and stream the OAR
                             } else {
                                 opstrings = parseOperationalString(opStringFile);
                             }

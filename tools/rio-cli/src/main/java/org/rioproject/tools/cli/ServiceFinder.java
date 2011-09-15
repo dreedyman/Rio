@@ -34,7 +34,7 @@ import net.jini.lookup.entry.Name;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.cybernode.Cybernode;
-import org.rioproject.entry.ApplianceInfo;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.tools.discovery.RecordingDiscoveryListener;
@@ -360,7 +360,7 @@ public class ServiceFinder {
 
         /**
          * If the input ServiceItem has an 
-         * {@link org.rioproject.entry.ApplianceInfo} and the hostname or address 
+         * {@link org.rioproject.entry.ComputeResourceInfo} and the hostname or address
          * matches an array element in the <code>hostNames</code> array, return 
          * <code>true</code>
          * 
@@ -395,12 +395,12 @@ public class ServiceFinder {
         }
 
         /**
-         * Determine if the attribute collecton contains an ApplianceInfo which
+         * Determine if the attribute collecton contains an ComputeResourceInfo which
          * matches an element in the hostNames array
          * 
          * @param attrs Array of Entry objects
          * 
-         * @return If an ApplianceInfo is found in the collection and and the
+         * @return If an ComputeResourceInfo is found in the collection and and the
          * hostname or address matches an array element in the
          * <code>hostNames</code> array, return <code>true</code>, otherwise,
          * return <code>false</code>
@@ -409,7 +409,7 @@ public class ServiceFinder {
             Host host = getHost(attrs);
             if(host!=null)
                 return(checkHosts(host));
-            ApplianceInfo ai = getApplianceInfo(attrs);
+            ComputeResourceInfo ai = getApplianceInfo(attrs);
             if(ai!=null)
                 return(checkHosts(ai));
             return(false);
@@ -418,12 +418,12 @@ public class ServiceFinder {
         /**
          * Check the hostNames list
          *
-         * @param aInfo The ApplianceInfo entry to check
+         * @param aInfo The ComputeResourceInfo entry to check
          *
-         * @return If the hostname in the ApplianceInfo is in the known
+         * @return If the hostname in the ComputeResourceInfo is in the known
          * hostnames, return true
          */
-        boolean checkHosts(ApplianceInfo aInfo) {
+        boolean checkHosts(ComputeResourceInfo aInfo) {
             boolean found = false;
             for (String hostName : hostNames) {
                 if (hostName.equalsIgnoreCase(aInfo.hostAddress) ||
@@ -678,7 +678,7 @@ public class ServiceFinder {
                         sInfo.setHost(host.hostName);
                         updateHost();
                     } else {
-                        ApplianceInfo ai = getApplianceInfo(item.attributeSets);
+                        ComputeResourceInfo ai = getApplianceInfo(item.attributeSets);
                         if(ai != null) {
                             if(ai.hostName.equals(ai.hostAddress))
                                 sInfo.setHost(ai.hostName);
@@ -817,29 +817,29 @@ public class ServiceFinder {
     }
 
     /**
-     * Get the ApplianceInfo attribute
+     * Get the ComputeResourceInfo attribute
      *
      * @param attrs An array of attributes to search
      *
-     * @return If found, the ApplianceInfo entry
+     * @return If found, the ComputeResourceInfo entry
      */
-    public static ApplianceInfo getApplianceInfo(Entry[] attrs) {
-        ApplianceInfo ai = null;
+    public static ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
+        ComputeResourceInfo ai = null;
         for (Entry attr : attrs) {
             if (attr.getClass()
                 .getName()
-                .equals(ApplianceInfo.class.getName())) {
-                if (attr instanceof ApplianceInfo) {
-                    ai = (ApplianceInfo) attr;
+                .equals(ComputeResourceInfo.class.getName())) {
+                if (attr instanceof ComputeResourceInfo) {
+                    ai = (ComputeResourceInfo) attr;
                     break;
                 } else {
                     /*
                      * This addresses the issue where the discovered service
-                     * has an ApplianceInfo but there is a class loading
+                     * has an ComputeResourceInfo but there is a class loading
                      * problem, which results in the classes being loaded by sibling
                      * class loaders, and assignability doesnt work.
                      */
-                    ai = new ApplianceInfo();
+                    ai = new ComputeResourceInfo();
                     try {
                         Field ha = attr.getClass().getDeclaredField(
                             "hostAddress");
@@ -870,12 +870,12 @@ public class ServiceFinder {
         Object admin = ((Administrable)proxy).getAdmin();
         return(adminProxyPreparer.prepareProxy(admin));
         /*
-        if(CLI.getInstance().getLoginContext()!=null) {
+        if(CLI.getResolver().getLoginContext()!=null) {
             final Object temp = admin;
                try {
                 admin =
                     Subject.doAsPrivileged(
-                        CLI.getInstance().getLoginContext().getSubject(),
+                        CLI.getResolver().getLoginContext().getSubject(),
                         new PrivilegedExceptionAction() {
                             public Object run() throws Exception {
                                 return(adminProxyPreparer.prepareProxy(temp));

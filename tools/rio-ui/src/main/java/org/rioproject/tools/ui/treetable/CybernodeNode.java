@@ -19,7 +19,7 @@ import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
-import org.rioproject.entry.ApplianceInfo;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.system.ComputeResourceUtilization;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -56,8 +56,8 @@ public class CybernodeNode extends DefaultMutableTreeNode
         if (hostName == null) {
             if (cru == null) {
                 for (Entry e : item.attributeSets) {
-                    if (e instanceof ApplianceInfo) {
-                        hostName = ((ApplianceInfo) e).hostName;
+                    if (e instanceof ComputeResourceInfo) {
+                        hostName = ((ComputeResourceInfo) e).hostName;
                         break;
                     }
                 }
