@@ -16,5 +16,5 @@
 package org.rioproject.test.bean;
 
 
-interface ServiceBeanServiceInterface extends org.rioproject.servicecore.Service {
+interface ServiceBeanServiceInterface extends org.rioproject.resources.servicecore.Service {
 }

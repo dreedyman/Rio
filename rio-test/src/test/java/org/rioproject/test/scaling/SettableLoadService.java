@@ -15,7 +15,7 @@
  */
 package org.rioproject.test.scaling;
 
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 
 import java.rmi.RemoteException;
 
