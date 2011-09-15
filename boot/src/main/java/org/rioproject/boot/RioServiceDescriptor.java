@@ -24,6 +24,9 @@ import net.jini.security.ProxyPreparer;
 import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.config.PlatformCapabilityConfig;
+import org.rioproject.loader.ClassAnnotator;
+import org.rioproject.loader.CommonClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +49,7 @@ import java.util.logging.Logger;
 /**
  * The RioServiceDescriptor class is a utility that conforms to the Jini&trade;
  * technology ServiceStarter framework, and will start a service using the
- * {@link org.rioproject.boot.CommonClassLoader} as a shared, non-activatable, 
+ * {@link org.rioproject.loader.CommonClassLoader} as a shared, non-activatable,
  * in-process service. Clients construct this object with the details of the 
  * service to be launched, then call <code>create</code> to launch the service in 
  * invoking object's VM.
@@ -307,7 +310,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
 
         ClassAnnotator annotator = new ClassAnnotator(ClassLoaderUtil.getCodebaseURLs(getCodebase()));
 
-        ServiceClassLoader serviceCL =                 
+        ServiceClassLoader serviceCL =
             new ServiceClassLoader(ServiceClassLoader.getURIs(
                                    ClassLoaderUtil.getClasspathURLs(getClasspath())),
                                    annotator,

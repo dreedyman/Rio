@@ -47,7 +47,7 @@ import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
 import org.rioproject.boot.BootUtil;
-import org.rioproject.boot.ServiceClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;

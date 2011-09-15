@@ -15,7 +15,7 @@
  */
 package org.rioproject.log;
 
-import org.rioproject.boot.ServiceClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;

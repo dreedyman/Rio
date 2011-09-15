@@ -21,6 +21,9 @@ import com.sun.jini.start.SharedActivationPolicyPermission;
 import net.jini.export.ProxyAccessor;
 import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
+import org.rioproject.loader.ClassAnnotator;
+import org.rioproject.loader.CommonClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
@@ -132,7 +135,7 @@ public class ActivateWrapper implements Remote, Serializable {
          * 
          * @serial
          */
-        public final MarshalledObject data;
+        public final MarshalledObject<String[]> data;
 
         /*
          * Trivial constructor.
@@ -142,7 +145,7 @@ public class ActivateWrapper implements Remote, Serializable {
                             URL[] exportLocation, 
                             URL[] commonJARs,
                             String policy, 
-                            MarshalledObject data) {
+                            MarshalledObject<String[]> data) {
             //TODO - clone non-String objects?
             this.className = className;
             this.importLocation = importLocation;
@@ -177,16 +180,16 @@ public class ActivateWrapper implements Remote, Serializable {
      * <UL>
      * <LI>Retrieves an <code>ActivateDesc</code> from the provided
      * <code>data</code> parameter.
-     * <LI>creates a {@link ServiceClassLoader} using the import and
+     * <LI>creates a {@link org.rioproject.loader.ServiceClassLoader} using the import and
      * export codebases obtained from the provided <code>ActivateDesc</code>,
      * <LI>checks the import codebase(s) for the required
      * <code>SharedActivationPolicyPermission</code>
-     * <LI>associates the newly created {@link ServiceClassLoader} and
+     * <LI>associates the newly created {@link org.rioproject.loader.ServiceClassLoader} and
      * the corresponding policy file obtained from the <code>ActivateDesc</code>
      * with the <code>AggregatePolicyProvider</code>
      * <LI>loads the "wrapped" activatable object's class and calls its
      * activation constructor with the context classloader set to the newly
-     * created {@link ServiceClassLoader}.
+     * created {@link org.rioproject.loader.ServiceClassLoader}.
      * <LI>resets the context class loader to the original context classloader
      * </UL>
      * The first instance of this class will also replace the VM's existing
@@ -198,17 +201,17 @@ public class ActivateWrapper implements Remote, Serializable {
      *
      * @throws Exception of any errors occur
      *
-     * @see ServiceClassLoader
+     * @see org.rioproject.loader.ServiceClassLoader
      * @see com.sun.jini.start.AggregatePolicyProvider
      * @see com.sun.jini.start.SharedActivationPolicyPermission
      * @see java.security.Policy
      */
-    public ActivateWrapper(ActivationID id, MarshalledObject data)
+    public ActivateWrapper(ActivationID id, MarshalledObject<ActivateDesc> data)
     throws Exception {
         logger.entering(ActivateWrapper.class.getName(),
                         "ActivateWrapper",
                         new Object[]{id, data});
-        ActivateDesc desc = (ActivateDesc)data.get();
+        ActivateDesc desc = data.get();
         logger.log(Level.FINEST, "ActivateDesc: {0}", desc);
 
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
@@ -222,7 +225,7 @@ public class ActivateWrapper implements Remote, Serializable {
         try {
             
             cl = new ServiceClassLoader(ServiceClassLoader.getURIs(
-                                                           desc.importLocation),
+                                                                      desc.importLocation),
                                         new ClassAnnotator(desc.exportLocation),
                                         commonCL);            
             if(logger.isLoggable(Level.FINEST))
@@ -316,6 +319,11 @@ public class ActivateWrapper implements Remote, Serializable {
      * Activatable.register()} for activatable objects that want to use this
      * wrapper mechanism.
      * 
+     * @param gid  The ActivationGroupID
+     * @param desc The ActivateDesc
+     * @param restart Whteher to restart
+     * @param sys The ActivationSystem
+     *
      * @return activation ID of the registered service
      * @throws ActivationException if there was a problem registering the
      * activatable class with the activation system
@@ -330,9 +338,9 @@ public class ActivateWrapper implements Remote, Serializable {
         logger.entering(ActivateWrapper.class.getName(),
                         "register",
                         new Object[]{gid, desc, restart, sys});
-        MarshalledObject data;
+        MarshalledObject<ActivateDesc> data;
         try {
-            data = new MarshalledObject(desc);
+            data = new MarshalledObject<ActivateDesc>(desc);
         } catch(Exception e) {
             MarshalException me = new MarshalException("marshalling ActivateDesc",
                                                        e);
@@ -400,7 +408,7 @@ public class ActivateWrapper implements Remote, Serializable {
         } else if(urls.length == 1) {
             return urls[0].toExternalForm();
         } else {
-            StringBuffer path = new StringBuffer(urls[0].toExternalForm());
+            StringBuilder path = new StringBuilder(urls[0].toExternalForm());
             for(int i = 1; i < urls.length; i++) {
                 path.append(' ');
                 path.append(urls[i].toExternalForm());
