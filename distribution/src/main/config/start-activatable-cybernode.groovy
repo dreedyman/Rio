@@ -13,7 +13,7 @@ class StartActivatableCybernodeConfig extends ActivatableConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         String cybernodeClasspath = ServiceDescriptorUtil.getCybernodeClasspath()
-        String cybernodeCodebase = ServiceDescriptorUtil.getCybernodeCodebase("http://${host}:${port}")
+        String cybernodeCodebase = ServiceDescriptorUtil.getCybernodeCodebase()
             
         def configArgs = ["${rioHome}/config/common.groovy",
                           "${rioHome}/config/cybernode.groovy",
