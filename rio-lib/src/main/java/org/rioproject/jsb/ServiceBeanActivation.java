@@ -27,14 +27,14 @@ import net.jini.id.UuidFactory;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.ServiceBeanControlException;
-import org.rioproject.boot.CommonClassLoader;
+import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.boot.MulticastStatus;
 import org.rioproject.cybernode.ServiceAdvertiser;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.rmi.RegistryUtil;
-import org.rioproject.boot.ServiceClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
@@ -50,6 +50,7 @@ import org.rioproject.watch.ThresholdValues;
 import javax.security.auth.Subject;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
@@ -135,32 +136,32 @@ public class ServiceBeanActivation {
          * export codebase will be returned by the getURLs() method since
          * getURLs() is overridden to return configured export codebase
          */
-        java.net.URL[] urls = ((java.net.URLClassLoader)loader).getURLs();
+        URL[] urls = ((URLClassLoader)loader).getURLs();
         if(urls.length==0)
-           throw new RuntimeException("Unknown Export Codebase");
-        String exportCodebase = urls[0].toExternalForm();
-        if(exportCodebase.contains(".jar")) {
-            int index = exportCodebase.lastIndexOf('/');
-            if(index != -1)
-                exportCodebase = exportCodebase.substring(0, index+1);
-        } else {
-            throw new RuntimeException("Cannot determine export codebase from "+exportCodebase);
-        }
+            throw new RuntimeException("Unknown Export Codebase");
 
-        /* TODO: If the exportCodebase starts with httpmd, replace httpmd with
-         * http. Need to figure out a mechanism to use the httpmd in a better
-         * way */
-        if(exportCodebase.startsWith("httpmd")) {
-            exportCodebase = "http" + exportCodebase.substring(6);
-        }
-        ClassBundle exportBundle = new ClassBundle("");
-        exportBundle.setCodebase(exportCodebase);
-        for (URL url : urls) {
-            String jar = url.getFile();
-            int index = jar.lastIndexOf('/');
-            if (index != -1)
-                jar = jar.substring(1);
-            exportBundle.addJAR(jar);
+        ClassBundle exportBundle;
+        String exportCodebase = urls[0].toExternalForm();
+        if(!exportCodebase.startsWith("artifact:")) {
+            if(exportCodebase.contains(".jar")) {
+                int index = exportCodebase.lastIndexOf('/');
+                if(index != -1)
+                    exportCodebase = exportCodebase.substring(0, index+1);
+            } else {
+                throw new RuntimeException("Cannot determine export codebase from "+exportCodebase);
+            }
+            exportBundle = new ClassBundle("");
+            exportBundle.setCodebase(exportCodebase);
+            for (URL url : urls) {
+                String jar = url.getFile();
+                int index = jar.lastIndexOf('/');
+                if (index != -1)
+                    jar = jar.substring(1);
+                exportBundle.addJAR(jar);
+            }
+        } else {
+            exportBundle = new ClassBundle("");
+            exportBundle.setArtifact(exportCodebase);
         }
 
         /* Get the FaultDetectionHandler */
