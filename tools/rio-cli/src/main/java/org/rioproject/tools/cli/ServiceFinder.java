@@ -409,9 +409,9 @@ public class ServiceFinder {
             Host host = getHost(attrs);
             if(host!=null)
                 return(checkHosts(host));
-            ComputeResourceInfo ai = getApplianceInfo(attrs);
-            if(ai!=null)
-                return(checkHosts(ai));
+            ComputeResourceInfo computeResourceInfo = getComputeResourceInfo(attrs);
+            if(computeResourceInfo!=null)
+                return(checkHosts(computeResourceInfo));
             return(false);
         }
 
@@ -678,7 +678,7 @@ public class ServiceFinder {
                         sInfo.setHost(host.hostName);
                         updateHost();
                     } else {
-                        ComputeResourceInfo ai = getApplianceInfo(item.attributeSets);
+                        ComputeResourceInfo ai = getComputeResourceInfo(item.attributeSets);
                         if(ai != null) {
                             if(ai.hostName.equals(ai.hostAddress))
                                 sInfo.setHost(ai.hostName);
@@ -823,14 +823,14 @@ public class ServiceFinder {
      *
      * @return If found, the ComputeResourceInfo entry
      */
-    public static ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
-        ComputeResourceInfo ai = null;
+    public static ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
+        ComputeResourceInfo computeResourceInfo = null;
         for (Entry attr : attrs) {
             if (attr.getClass()
                 .getName()
                 .equals(ComputeResourceInfo.class.getName())) {
                 if (attr instanceof ComputeResourceInfo) {
-                    ai = (ComputeResourceInfo) attr;
+                    computeResourceInfo = (ComputeResourceInfo) attr;
                     break;
                 } else {
                     /*
@@ -839,14 +839,14 @@ public class ServiceFinder {
                      * problem, which results in the classes being loaded by sibling
                      * class loaders, and assignability doesnt work.
                      */
-                    ai = new ComputeResourceInfo();
+                    computeResourceInfo = new ComputeResourceInfo();
                     try {
                         Field ha = attr.getClass().getDeclaredField(
                             "hostAddress");
                         Field hn = attr.getClass().getDeclaredField(
                             "hostName");
-                        ai.hostAddress = (String) ha.get(attr);
-                        ai.hostName = (String) hn.get(attr);
+                        computeResourceInfo.hostAddress = (String) ha.get(attr);
+                        computeResourceInfo.hostName = (String) hn.get(attr);
                         break;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -854,7 +854,7 @@ public class ServiceFinder {
                 }
             }
         }
-        return (ai);
+        return (computeResourceInfo);
     }
 
     /**
