@@ -1,0 +1,126 @@
+<settings>
+    <mirrors>
+        <mirror>
+            <id>grok</id>
+            <mirrorOf>west,!bar-not-mirrored</mirrorOf>
+            <url>http://voldemort:8088/nexus/content/groups/public</url>
+        </mirror>
+
+        <mirror>
+            <id>splat</id>
+            <mirrorOf>east,north</mirrorOf>
+            <url>http://blutarsky:8088/nexus/content/groups/public</url>
+        </mirror>
+
+        <mirror>
+            <id>nexus</id>
+            <mirrorOf>external:*,!jane-not-mirrored</mirrorOf>
+            <url>http://external:8081/nexus/content/groups/public</url>
+        </mirror>
+        
+    </mirrors>
+    <profiles>
+        <profile>
+            <id>test1</id>
+            <repositories>
+                <repository>
+                    <id>fraz</id>
+                    <url>http://central</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>bar-not-mirrored</id>
+                    <url>file://HARRY.POTTER</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>local-file-system-repo-not-mirrored</id>
+                    <url>file://local.file.system</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>localhost-repo-not-mirrored</id>
+                    <url>http://localhost:80801/repo</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>west</id>
+                    <url>http://central</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>east</id>
+                    <url>http://central</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>north</id>
+                    <url>http://central</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+                <repository>
+                    <id>jane-not-mirrored</id>
+                    <url>http://NOT.MIRRORED.COM</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+
+            </repositories>
+            
+        </profile>
+        <profile>
+            <id>test1</id>
+
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <!--make the profile active all the time -->
+        <activeProfile>test1</activeProfile>
+    </activeProfiles>
+</settings>
