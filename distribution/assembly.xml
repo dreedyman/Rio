@@ -115,7 +115,6 @@
                 <exclude>org.rioproject.monitor:monitor-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
                 <exclude>org.rioproject:rio-api:jar</exclude>
-                <exclude>org.rioproject:rio-lookup-entry:jar</exclude>
                 <exclude>org.rioproject:watch-ui</exclude>
                 <exclude>junit:junit</exclude>
                 <exclude>ant:*</exclude>
@@ -168,7 +167,6 @@
                 <include>org.rioproject.monitor:monitor-api:jar</include>
                 <include>org.rioproject.monitor:monitor-proxy:jar</include>
                 <include>org.rioproject:rio-api:jar</include>
-                <include>org.rioproject:rio-lookup-entry:jar</include>
                 <include>org.rioproject:watch-ui</include>
                 <!--<include>org.rioproject:gnostic-api:jar</include>-->
             </includes>
