@@ -17,6 +17,11 @@
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-platform</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>net.jini</groupId>
@@ -63,7 +68,7 @@
 							<Implementation-Version>${project.version}</Implementation-Version>
 						    <Rio-Version>${project.version}</Rio-Version>
 						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
-						    <Class-Path>resolver-api.jar start.jar</Class-Path>
+						    <Class-Path>resolver-api.jar rio-platform.jar start.jar</Class-Path>
 						    <Premain-Class>org.rioproject.boot.InstrumentationHook</Premain-Class>
 						</manifestEntries>
                     </archive>
