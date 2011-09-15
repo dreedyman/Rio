@@ -19,6 +19,13 @@
         <url>https://rio.dev.java.net/source/browse/rio/trunk/examples/springbean</url>
     </scm>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-platform</artifactId>
+        </dependency>
+    </dependencies>
+
     <modules>
         <module>springbean-api</module>
         <module>springbean-service</module>

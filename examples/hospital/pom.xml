@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>org.rioproject</groupId>
-            <artifactId>rio-lib</artifactId>
+            <artifactId>rio-platform</artifactId>
         </dependency>
 
         <dependency>

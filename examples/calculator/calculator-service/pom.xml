@@ -22,6 +22,11 @@
          
         <dependency>
             <groupId>org.rioproject</groupId>
+            <artifactId>rio-lib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject</groupId>
             <artifactId>rio-test</artifactId>
             <scope>test</scope>
         </dependency>

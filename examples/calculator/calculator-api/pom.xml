@@ -11,5 +11,14 @@
     <groupId>org.rioproject.examples.calculator</groupId>
     <artifactId>calculator-api</artifactId>
     <name>Example :: Calculator API</name>
+<!--
+    <dependencies>
+
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-api</artifactId>
+        </dependency>
+
+    </dependencies>-->
 
 </project>

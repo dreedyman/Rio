@@ -52,6 +52,18 @@
         <dependencies>
             <dependency>
                 <groupId>org.rioproject</groupId>
+                <artifactId>rio-platform</artifactId>
+                <version>${rio.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.rioproject</groupId>
+                <artifactId>rio-api</artifactId>
+                <version>${rio.version}</version>
+            </dependency>
+
+             <dependency>
+                <groupId>org.rioproject</groupId>
                 <artifactId>rio-lib</artifactId>
                 <version>${rio.version}</version>
             </dependency>
