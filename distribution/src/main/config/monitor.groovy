@@ -63,8 +63,8 @@ class MonitorConfig {
         def entry = []
         if(codebase!=null) {
             try {
-                System.setProperty("org.rioproject.resolver.prune.platform", "false")
-                Resolver r = ResolverHelper.getInstance()
+                System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "false")
+                Resolver r = ResolverHelper.getResolver()
                 String uiClass = 'org.rioproject.tools.ui.ServiceUIWrapper'
                 def classpath = []
                 for(String s : r.getClassPathFor("org.rioproject:rio-ui:${RioVersion.VERSION}")) {
@@ -74,7 +74,7 @@ class MonitorConfig {
                 }
                 entry = [UIDescriptorFactory.getJFrameDesc(codebase, classpath as String[], uiClass)]
             } finally {
-                System.setProperty("org.rioproject.resolver.prune.platform", "true")
+                System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "true")
             }
         }
         return entry as Entry[]
