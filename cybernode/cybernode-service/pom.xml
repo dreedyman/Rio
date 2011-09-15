@@ -48,6 +48,7 @@
             <groupId>org.hyperic</groupId>
             <artifactId>sigar-dist</artifactId>
             <type>zip</type>
+            <optional>true</optional>
         </dependency>
     
     </dependencies>
