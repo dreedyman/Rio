@@ -1274,8 +1274,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     }
 
     private URL[] getUIJars() throws MalformedURLException {
-        return new URL[]{new URL(context.getExportCodebase()+"cybernode-ui.jar"),
-                         new URL(context.getExportCodebase()+"watch-ui.jar")};
+        return new URL[]{new URL("artifact:org.rioproject.cybernode:cybernode-ui:"+RioVersion.VERSION),
+                         new URL("artifact:org.rioproject:watch-ui:"+RioVersion.VERSION)};
     }
 
     /**
