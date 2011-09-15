@@ -889,7 +889,7 @@ class OpStringParserTest extends GroovyTestCase {
         assertEquals 31, geometryService.componentBundle.JARNames.size()
         assertEquals 'lib/gomez/worker.jar', geometryService.componentBundle.JARNames[0]
 
-        assertEquals 1, geometryService.componentBundle.getRawSharedComponents().size()
+        assertEquals 1, geometryService.componentBundle.getSharedComponents().size()
 
         /* RIO-174 */
         assertEquals 1, geometryService.exportBundles.length

@@ -23,6 +23,7 @@ import org.rioproject.config.DynamicConfiguration;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,8 +51,7 @@ public class WatchTest {
      */
     private String expectedView;
 
-
-    /**
+   /**
      * Constructs a <code>WatchTest</code>.
      *
      * @param clazz the <code>Watch</code>-derived class to be tested
@@ -61,6 +61,8 @@ public class WatchTest {
     public WatchTest(Class clazz, String expectedView) {
         this.clazz = clazz;
         this.expectedView = expectedView;
+        if (System.getSecurityManager() == null)
+            System.setSecurityManager(new RMISecurityManager());
     }
 
     /**
