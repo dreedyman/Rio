@@ -29,7 +29,7 @@ import net.jini.lookup.entry.ServiceInfo;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
-import org.rioproject.boot.ServiceClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.deploy.DeployAdmin;
