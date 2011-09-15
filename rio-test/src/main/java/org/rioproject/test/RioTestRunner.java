@@ -228,7 +228,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        sb.append("Test Configuration for "+testClassName);
+        sb.append("Test Configuration for ").append(testClassName);
         sb.append("\n");
         sb.append("==========================================");
         sb.append("\n");
