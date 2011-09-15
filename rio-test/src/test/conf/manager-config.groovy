@@ -11,6 +11,7 @@ manager {
     inheritOptions = true
 
     jvmOptions='''
+        -Djava.protocol.handler.pkgs=org.rioproject.url
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${RIO_HOME}${/}logs
         -DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME}
