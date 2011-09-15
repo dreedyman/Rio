@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Class-Path: emory-util-io.jar emory-util-security.jar
