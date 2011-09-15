@@ -26,7 +26,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 import org.rioproject.examples.hospital.CalculablePatient;
 import org.rioproject.examples.hospital.Patient;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.WatchDataSource;
 

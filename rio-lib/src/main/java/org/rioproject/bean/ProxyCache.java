@@ -16,7 +16,7 @@
 package org.rioproject.bean;
 
 import org.rioproject.bean.proxy.PackagedMethod;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;

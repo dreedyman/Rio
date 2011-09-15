@@ -27,7 +27,6 @@ import net.jini.security.ProxyPreparer;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;
-import org.rioproject.servicecore.Service;
 import org.rioproject.watch.WatchDataSource;
 import org.rioproject.watch.WatchRegistry;
 

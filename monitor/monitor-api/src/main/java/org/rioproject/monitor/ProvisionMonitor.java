@@ -17,7 +17,7 @@ package org.rioproject.monitor;
 
 import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.deploy.ServiceBeanInstantiator;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 
 import java.io.IOException;
 import java.io.Serializable;

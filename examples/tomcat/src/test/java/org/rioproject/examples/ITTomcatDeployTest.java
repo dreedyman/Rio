@@ -18,7 +18,7 @@ package org.rioproject.examples;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;

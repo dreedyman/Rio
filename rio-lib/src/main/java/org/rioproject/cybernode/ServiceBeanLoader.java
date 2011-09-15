@@ -592,7 +592,7 @@ public class ServiceBeanLoader {
                      * case where a service is just implemented as a pojo with
                      * no custom remote methods, and is just exported using Rio
                      * infrastructure support
-                     * (through the org.rioproject.servicecore.Service interface).
+                     * (through the org.rioproject.resources.servicecore.Service interface).
                      *
                      * If there is no declared artifact, we sail through since
                      * the ServiceElement would have been constructed with the

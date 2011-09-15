@@ -32,7 +32,7 @@ import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 import org.rioproject.admin.ServiceAdmin;
 import org.rioproject.resources.util.RMIServiceNameHelper;
 import org.rioproject.sla.RuleMap;

@@ -26,7 +26,7 @@ import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.examples.hospital.*;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 import org.rioproject.admin.ServiceAdmin;
 
 import javax.swing.*;

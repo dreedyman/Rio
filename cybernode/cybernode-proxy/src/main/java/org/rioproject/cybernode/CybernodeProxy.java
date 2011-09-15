@@ -32,7 +32,7 @@ import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.Schedule;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.servicecore.AbstractProxy;
+import org.rioproject.resources.servicecore.AbstractProxy;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;

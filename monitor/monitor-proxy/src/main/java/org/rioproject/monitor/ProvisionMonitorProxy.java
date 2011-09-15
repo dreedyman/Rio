@@ -28,7 +28,7 @@ import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.deploy.DeployedService;
-import org.rioproject.servicecore.AbstractProxy;
+import org.rioproject.resources.servicecore.AbstractProxy;
 import org.rioproject.system.ResourceCapability;
 
 import java.io.IOException;

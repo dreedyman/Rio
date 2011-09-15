@@ -43,7 +43,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
     private BeanDelegator(Object service, Object bean, ClassLoader loader) throws ClassNotFoundException {
         this.service = service;
         this.bean = bean;
-        String interfaceName = "org.rioproject.servicecore.Service";
+        String interfaceName = "org.rioproject.resources.servicecore.Service";
         Class interfaceClass = Class.forName(interfaceName, false, loader);
         Method[] methods = interfaceClass.getMethods();
         for(Method method : methods) {

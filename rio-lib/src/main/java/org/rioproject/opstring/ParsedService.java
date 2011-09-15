@@ -25,7 +25,7 @@ import org.rioproject.core.provision.StagedData;
 import org.rioproject.core.provision.SystemRequirements.SystemComponent;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.log.LoggerConfig;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 
 import java.util.*;
 

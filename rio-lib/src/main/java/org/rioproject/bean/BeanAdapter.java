@@ -25,7 +25,7 @@ import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBean;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.jsb.ServiceBeanAdapter;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 
 import javax.management.*;
 import java.io.IOException;

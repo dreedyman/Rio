@@ -141,12 +141,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                             // Optional Args
                             LifeCycle lifeCycle,
                             String... serverConfigArgs) {
-        if(codebase == null
-           || policy == null
-           || classpath == null
-           || implClassName == null)
-            throw new NullPointerException("Codebase, policy, classpath, and "
-                                           + "implementation cannot be null");
+        if(codebase == null || policy == null || classpath == null || implClassName == null)
+            throw new NullPointerException("Codebase, policy, classpath, and implementation cannot be null");
         this.codebase = codebase;
         this.policy = policy;
         this.classpath = setClasspath(classpath);
@@ -176,12 +172,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                 String implClassName,
                                 // Optional Args
                                 String... serverConfigArgs) {
-        this(codebase, 
-             policy, 
-             classpath, 
-             implClassName,
-             null,
-             serverConfigArgs);
+        this(codebase, policy, classpath, implClassName, null, serverConfigArgs);
     }
     
     /**
@@ -314,23 +305,17 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         final Thread currentThread = Thread.currentThread();
         ClassLoader currentClassLoader = currentThread.getContextClassLoader();
 
-        ClassAnnotator annotator = new ClassAnnotator(
-            ClassLoaderUtil.getCodebaseURLs(getCodebase()));
+        ClassAnnotator annotator = new ClassAnnotator(ClassLoaderUtil.getCodebaseURLs(getCodebase()));
 
-        ServiceClassLoader jsbCL =                 
+        ServiceClassLoader serviceCL =                 
             new ServiceClassLoader(ServiceClassLoader.getURIs(
                                    ClassLoaderUtil.getClasspathURLs(getClasspath())),
                                    annotator,
                                    commonCL);
         if(logger.isLoggable(Level.FINE))
-            ClassLoaderUtil.displayClassLoaderTree(jsbCL);
-        /*
-        ServiceClassLoader jsbCL =
-            new ServiceClassLoader(ClassLoaderUtil.getClasspathURLs(getClasspath()),
-                                   annotator,
-                                   commonCL);
-          */
-        currentThread.setContextClassLoader(jsbCL);
+            ClassLoaderUtil.displayClassLoaderTree(serviceCL);
+        
+        currentThread.setContextClassLoader(serviceCL);
         /* Get the ProxyPreparer */
         ProxyPreparer servicePreparer = 
             (ProxyPreparer)Config.getNonNullEntry(config,
@@ -353,7 +338,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 new DynamicPolicyProvider(
                                           new PolicyFileProvider(getPolicy()));
             LoaderSplitPolicyProvider splitServicePolicy = 
-                new LoaderSplitPolicyProvider(jsbCL,
+                new LoaderSplitPolicyProvider(serviceCL,
                                               service_policy,
                                               new DynamicPolicyProvider(
                                                              initialGlobalPolicy));
@@ -365,13 +350,13 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             splitServicePolicy.grant(RioServiceDescriptor.class,
                                      null, /* Principal[] */
                                      new Permission[]{new AllPermission()});
-            globalPolicy.setPolicy(jsbCL, splitServicePolicy);
+            globalPolicy.setPolicy(serviceCL, splitServicePolicy);
         }
         Object impl;
         try {
 
             Class implClass;
-            implClass = Class.forName(getImplClassName(), false, jsbCL);
+            implClass = Class.forName(getImplClassName(), false, serviceCL);
             if(logger.isLoggable(Level.FINEST))
                 logger.finest("Attempting to get implementation constructor");
             Constructor constructor = implClass.getDeclaredConstructor(actTypes);
