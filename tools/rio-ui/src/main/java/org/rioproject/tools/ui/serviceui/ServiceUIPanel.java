@@ -39,7 +39,7 @@ import java.util.TimerTask;
 
 /**
  * The ServiceUIPanel class aggregates service ui objects that have been
- * added as attributes to a service's attribute set throug a JTabbedPane.
+ * added as attributes to a service's attribute set using a JTabbedPane.
  * The ServiceUIPanel looks for all UI entries that have a role of Admin set.
  *
  * <p> The ServiceUIPanel class additionally has some built in panels that it
@@ -88,16 +88,16 @@ public class ServiceUIPanel extends JPanel {
             svcName = item.service.getClass().getName();
         }
 
-        ComputeResourceInfo aInfo = getApplianceInfo(attrs);
+        ComputeResourceInfo computeResourceInfo = getComputeResourceInfo(attrs);
 
         java.util.Timer taskTimer = new java.util.Timer(true);
         long now = System.currentTimeMillis();
         UIComponentFetcher uiFetcher = new UIComponentFetcher();
         WaitingToLoadTask waitingToLoadTask;
-        if(aInfo!=null)
+        if(computeResourceInfo!=null)
             waitingToLoadTask = new WaitingToLoadTask(svcName,
-                                                      aInfo.hostName,
-                                                      aInfo.hostAddress);
+                                                      computeResourceInfo.hostName,
+                                                      computeResourceInfo.hostAddress);
         else
             waitingToLoadTask = new WaitingToLoadTask(svcName,
                                                       "unknown",
@@ -152,10 +152,10 @@ public class ServiceUIPanel extends JPanel {
             tabpane.add("Service Information", svcTypePanel);
         }
 
-        if(aInfo!=null) {
-            ComputeResourceInfoPanel aInfoPanel = new ComputeResourceInfoPanel();
-            aInfoPanel.setApplianceInfo(aInfo);
-            tabpane.add("Host Attributes", aInfoPanel);
+        if(computeResourceInfo!=null) {
+            ComputeResourceInfoPanel computeResourceInfoPanel = new ComputeResourceInfoPanel();
+            computeResourceInfoPanel.setComputeResourceInfo(computeResourceInfo);
+            tabpane.add("Host Attributes", computeResourceInfoPanel);
         }
 
         JPanel buttonPanel = new JPanel();
@@ -368,7 +368,7 @@ public class ServiceUIPanel extends JPanel {
         }
     }
 
-    ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
+    ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ComputeResourceInfo) {
                 return (ComputeResourceInfo) attr;

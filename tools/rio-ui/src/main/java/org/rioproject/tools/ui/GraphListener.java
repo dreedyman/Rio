@@ -80,7 +80,7 @@ public class GraphListener extends ControlAdapter {
             }
             if (node.getServiceItem() != null) {
                 ComputeResourceInfo aInfo =
-                    Util.getApplianceInfo(node.getServiceItem().attributeSets);
+                    Util.getComputeResourceInfo(node.getServiceItem().attributeSets);
                 if(aInfo!=null) {
                     if (aInfo.osName != null && aInfo.osName.length() > 0) {
                         buff.append("Operating System=");

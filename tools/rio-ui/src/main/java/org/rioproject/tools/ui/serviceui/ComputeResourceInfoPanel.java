@@ -42,9 +42,7 @@ public class ComputeResourceInfoPanel extends JPanel {
         jvm.setLayout(new GridLayout(0, 2, 4, 4));
 
         jvm.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
-                "JVM Information"),
+            BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "JVM Information"),
             BorderFactory.createEmptyBorder(6, 6, 6, 6)));
 
         jvmVendor = createAttrTextField();
@@ -56,9 +54,7 @@ public class ComputeResourceInfoPanel extends JPanel {
         jvm.add(jvmVendor);
 
         appl.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(),
-                "Host Attributes"),
+            BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Host Attributes"),
             BorderFactory.createEmptyBorder(6, 6, 6, 6)));
 
         hostname = createAttrTextField();
@@ -81,7 +77,7 @@ public class ComputeResourceInfoPanel extends JPanel {
         add(Box.createVerticalGlue());
     }
 
-    public void setApplianceInfo(ComputeResourceInfo info) {
+    public void setComputeResourceInfo(ComputeResourceInfo info) {
         if (info == null) {
             jvmVersion.setText("Unknown");
             jvmVendor.setText("Unknown");
