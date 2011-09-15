@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.servicecore;
+package org.rioproject.resources.servicecore;
 
 import net.jini.admin.Administrable;
 import org.rioproject.admin.MonitorableService;
