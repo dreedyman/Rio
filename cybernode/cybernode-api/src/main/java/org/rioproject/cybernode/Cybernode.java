@@ -17,7 +17,7 @@ package org.rioproject.cybernode;
 
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.opstring.Schedule;
-import org.rioproject.servicecore.Service;
+import org.rioproject.resources.servicecore.Service;
 
 import java.rmi.RemoteException;
 
