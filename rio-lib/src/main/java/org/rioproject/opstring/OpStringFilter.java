@@ -47,7 +47,7 @@ public class OpStringFilter implements ServiceItemFilter {
      * <code>true</code>
      * 
      * Additionally, if the input ServiceItem does not have the
-     * {@link org.rioproject.entry.OperationalStringEntry} in it's attribute set, 
+     * {@link org.rioproject.entry.OperationalStringEntry} in it's attribute set,
      * return <code>true</code>. This supports intended semantics to discover 
      * external services which may match the 
      * {@link net.jini.core.lookup.ServiceTemplate}

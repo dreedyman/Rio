@@ -129,7 +129,6 @@ public class MemoryPool extends MeasurableCapability {
 
     }
 
-
     double calculateUtilization(MeasuredResource mRes) {
         count++;
         tempUtilization += mRes.getValue();
