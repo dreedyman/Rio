@@ -21,7 +21,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
-import org.rioproject.loader.ServiceClassLoader;
 import edu.emory.mathcs.util.classloader.URIClassLoader;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
