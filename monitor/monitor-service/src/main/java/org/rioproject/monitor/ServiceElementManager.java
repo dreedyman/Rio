@@ -1632,7 +1632,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 }
             }
 
-            ComputeResourceInfo ai = getApplianceInfo(item.attributeSets);
+            ComputeResourceInfo ai = getComputeResourceInfo(item.attributeSets);
             if(ai!=null) {
                 hostAddress = ai.hostAddress;
             }
@@ -2249,9 +2249,9 @@ public class ServiceElementManager implements InstanceIDManager {
      * 
      * @param attrs Array of Entry objects
      * 
-     * @return ApplianceInfo
+     * @return ComputeResourceInfo
      */
-    ComputeResourceInfo getApplianceInfo(Entry[] attrs) {
+    ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ComputeResourceInfo) {
                 return (ComputeResourceInfo) attr;
