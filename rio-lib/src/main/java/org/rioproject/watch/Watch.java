@@ -215,7 +215,11 @@ public class Watch implements WatchMBean {
     public double getLastCalculableValue() {
         double value = 0;
         try {
-            Calculable lastCalculable = watchDataSource.getLastCalculable();
+            Calculable lastCalculable;
+            if(localRef != null)
+                lastCalculable = localRef.getLastCalculable();
+            else
+                lastCalculable = watchDataSource.getLastCalculable();
             if(lastCalculable != null) {
                 value = lastCalculable.getValue();
             }
@@ -233,11 +237,14 @@ public class Watch implements WatchMBean {
     @SuppressWarnings("unchecked")
     public TabularData getCalculables(){
         try {
-            Calculable[] calculables = watchDataSource.getCalculable();
+            Calculable[] calculables;
+            if(localRef != null)
+                calculables = localRef.getCalculable();
+            else
+                calculables = watchDataSource.getCalculable();
             if (calculables == null || calculables.length == 0) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("No Calculables Available From Data Source:" +
-                                getId());
+                    logger.fine("No Calculables Available From Data Source:" +getId());
                 return null;
             }
             CompositeType type = JMXUtil.createCompositeType(
@@ -251,12 +258,9 @@ public class Watch implements WatchMBean {
                     type,
                     new String[]{"when"}
             );
-            TabularDataSupport tabularDataSupport =
-                    new TabularDataSupport(tabularType);
+            TabularDataSupport tabularDataSupport = new TabularDataSupport(tabularType);
             for (Calculable calculable : calculables) {
-                CompositeData compositeData =
-                    new CompositeDataSupport(type,
-                                             JMXUtil.toMap(calculable));
+                CompositeData compositeData = new CompositeDataSupport(type, JMXUtil.toMap(calculable));
                 tabularDataSupport.put(compositeData);
             }
             return tabularDataSupport;
@@ -278,10 +282,14 @@ public class Watch implements WatchMBean {
      * @see org.rioproject.watch.WatchMBean#clear
      */
     public void clear(){
-        try {
-            watchDataSource.clear();
-        } catch (RemoteException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+        if(localRef != null) {
+            localRef.clear();
+        } else {
+            try {
+                watchDataSource.clear();
+            } catch (RemoteException e) {
+                logger.log(Level.WARNING, e.toString(), e);
+            }
         }
     }
 
