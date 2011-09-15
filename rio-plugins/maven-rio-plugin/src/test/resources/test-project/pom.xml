@@ -1,0 +1,76 @@
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>CustomerService</artifactId>
+    <name>Customer Service</name>
+    <packaging>oar</packaging>
+    <version>1.0.0</version>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>boot</artifactId>
+            <version>4.2</version>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>rio</id>
+            <url>http://www.rio-project.org/maven2</url>
+        </repository>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public</url>
+            <releases/>
+        </repository>
+        <repository>
+            <id>github-maven-releases</id>
+            <name>S3 Release Repository</name>
+            <url>http://jramsdale.github.com.s3.amazonaws.com/maven/releases</url>
+            <releases/>
+        </repository>
+        <repository>
+            <id>github-maven-snapshots</id>
+            <name>S3 Snapshot Repository</name>
+            <url>http://jramsdale.github.com.s3.amazonaws.com/maven/snapshots</url>
+            <snapshots/>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rio-plugin</artifactId>
+
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- BEGIN default values set by Maven mechanism -->
+                    <project implementation="org.rioproject.tools.maven.ProjectStub"/>
+                    <!-- END default values set by Maven mechanism -->
+                    <opstring>opstring/phony.groovy</opstring>
+                    <createJar>
+                        <classifier>dl</classifier>
+                        <in>com.vibrantmedia.customerservice.mozart</in>
+                        <topclasses>
+                            <topClass>com.vibrantmedia.customerservice.mozart.CustomerService</topClass>
+                        </topclasses>
+                    </createJar>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
