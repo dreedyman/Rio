@@ -87,9 +87,9 @@ public class AetherResolver implements Resolver {
                                                       remoteRepositories);
             classPath = produceClassPathFromResolutionResult(result);
         } catch (RepositoryException e) {
-            throw new ResolverException("While trying to resolve "+artifact, e);
+            throw new ResolverException(e.getLocalizedMessage());
         } catch (SettingsBuildingException e) {
-            throw new ResolverException("Error reading local Maven configuration", e);
+            throw new ResolverException("Error reading local Maven configuration: "+e.getLocalizedMessage());
         }
         return classPath;
     }
@@ -105,7 +105,7 @@ public class AetherResolver implements Resolver {
         } catch (ArtifactResolutionException e) {
             throw new ResolverException("Error locating "+artifact+": "+e.getLocalizedMessage());
         } catch (MalformedURLException e) {
-            throw new ResolverException("Error creating URL for resolved artifact "+artifact, e);
+            throw new ResolverException("Error creating URL for resolved artifact "+artifact+": "+e.getLocalizedMessage());
         }
         return location;
     }
@@ -123,7 +123,7 @@ public class AetherResolver implements Resolver {
         } catch (ArtifactResolutionException e) {
             throw new ResolverException("Error locating "+artifact+": "+e.getLocalizedMessage());
         } catch (MalformedURLException e) {
-            throw new ResolverException("Error creating URL for resolved artifact "+artifact, e);
+            throw new ResolverException("Error creating URL for resolved artifact "+artifact+": "+e.getLocalizedMessage());
         }
         return location;
     }
