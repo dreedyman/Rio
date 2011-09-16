@@ -15,11 +15,18 @@
  */
 package org.rioproject.resolver;
 
-import org.rioproject.resolver.maven2.Repository
-import java.util.logging.Logger
-import java.util.logging.Level
-import org.rioproject.loader.CommonClassLoader
-import org.rioproject.config.Constants
+import org.rioproject.resolver.maven2.Repository;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * <p>A helper that provides utilities for obtaining and working with a
@@ -36,17 +43,16 @@ import org.rioproject.config.Constants
  *     <code>$RIO_HOME/lib/resolver/resolver-aether.jar</code> will be used
  * </ul>
  * <p>Refer to {@link ResolverHelper#getResolver} for details on determining the class to instantiate.</p>
+ *
+ * @author Dennis Reedy
  */
-class ResolverHelper {
+public class ResolverHelper {
     static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
-    static String M2_HOME_URI = Repository.getLocalRepository().toURI().toString()
-    static URLClassLoader resolverLoader
-    static final Logger logger = Logger.getLogger(ResolverHelper.class.getName())
+    static String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
+    static URLClassLoader resolverLoader;
+    static final Logger logger = Logger.getLogger(ResolverHelper.class.getName());
+    public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
 
-    public static List<Resolver> getAllResolvers() {
-        def resolvers = [getResolver()]
-        return resolvers
-    }
 
     /**
      * Resolve the classpath with the local Maven repository as the codebase
@@ -54,10 +60,13 @@ class ResolverHelper {
      * @param artifact The artifact to resolve
      * @param resolver The {@link Resolver} to use
      * @param repositories The repositories to use for resolution
+     *
+     * @return The classpath for the artifact
+     *
+     * @throws ResolverException If there are exceptions resolving the artifact
      */
-
-    def static String[] resolve(String artifact, Resolver resolver, RemoteRepository[] repositories) {
-        return resolve(artifact, resolver, repositories, (String) M2_HOME_URI);
+    public static String[] resolve(String artifact, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
+        return resolve(artifact, resolver, repositories, M2_HOME_URI);
     }
 
     /**
@@ -68,37 +77,41 @@ class ResolverHelper {
      * @param repositories The repositories to use for resolution
      * @param codebase The codebase to set for jars that are located
      * in the local Maven repository.
+     *
+     * @return The classpath for the artifact
+     *
+     * @throws ResolverException If there are exceptions resolving the artifact
      */
-    def static String[] resolve(String artifact,
-                                Resolver resolver,
-                                RemoteRepository[] repositories,
-                                String codebase) {
+    public static String[] resolve(String artifact,
+                                   Resolver resolver,
+                                   RemoteRepository[] repositories,
+                                   String codebase) throws ResolverException {
         List<String> jars = new ArrayList<String>();
         if (artifact != null) {
-            String[] classPath = resolver.getClassPathFor(artifact, (RemoteRepository[])repositories);
+            String[] classPath = resolver.getClassPathFor(artifact, repositories);
             for (String jar : classPath) {
-                String s = null
+                String s = null;
                 if(jar.startsWith(M2_HOME)) {
-                    String jarPart = jar.substring(M2_HOME.length())
+                    String jarPart = jar.substring(M2_HOME.length());
                     if(codebase.endsWith("/") && jarPart.startsWith(File.separator))
-                        jarPart = jarPart.substring(1, jarPart.length())
+                        jarPart = jarPart.substring(1, jarPart.length());
                     if(codebase.startsWith("http:"))
-                        jarPart = handleWindowsHTTP(jarPart)
-                    s = codebase+jarPart
+                        jarPart = handleWindowsHTTP(jarPart);
+                    s = codebase+jarPart;
                 } else {
-                    File jarFile = new File(jar)
+                    File jarFile = new File(jar);
                     if(jarFile.exists())
-                        s = jarFile.toURI().toString()
+                        s = jarFile.toURI().toString();
                     else
-                        println "[WARNING] ${jarFile.path} NOT FOUND"
+                        System.err.println("[WARNING] "+jarFile.getPath()+" NOT FOUND");
                 }
                 if(s!=null)
                     jars.add(handleWindows(s));
             }
         }
         if(logger.isLoggable(Level.FINE))
-            logger.fine "Artifact: ${artifact}, resolved jars ${jars}"
-        return jars.toArray(new String[jars.size()])
+            logger.fine("Artifact: "+artifact+", resolved jars "+jars);
+        return jars.toArray(new String[jars.size()]);
     }
 
     /**
@@ -115,25 +128,29 @@ class ResolverHelper {
      * @throws ResolverException if there are problems loading the resource
      */
     public static synchronized Resolver getResolver() throws ResolverException {
-        File resolverJar = new File(getResolverJarFile())
+        File resolverJar = new File(getResolverJarFile());
         if(resolverLoader==null)
-            resolverLoader = new URLClassLoader([resolverJar.toURI().toURL()] as URL[],
-                                                CommonClassLoader.instance)
+            try {
+                resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
+                                                    Thread.currentThread().getContextClassLoader());
+            } catch (MalformedURLException e) {
+                throw new ResolverException("Creating ClassLoader to load "+resolverJar.getPath(), e);
+            }
         return getResolver(resolverLoader);
     }
 
     private static String getResolverJarFile() {
-        String resolverJarFile = System.getProperty(Constants.RESOLVER_JAR)
+        String resolverJarFile = System.getProperty(RESOLVER_JAR);
         if(resolverJarFile==null) {
             if(System.getProperty("RIO_HOME")==null)
-                throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar")
-            String resolverJarName = "resolver-aether.jar"
-            String resolverLibDir = "${System.getProperty("RIO_HOME")}${File.separator}lib${File.separator}resolver"
-            resolverJarFile = "${resolverLibDir}${File.separator}${resolverJarName}"
+                throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar");
+            String resolverJarName = "resolver-aether.jar";
+            String resolverLibDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator+"resolver";
+            resolverJarFile = resolverLibDir+File.separator+resolverJarName;
         }
         if(logger.isLoggable(Level.FINE))
-            logger.fine "#######################\n$resolverJarFile\n#######################"
-        return resolverJarFile
+            logger.fine("#######################\n"+resolverJarFile+"\n#######################");
+        return resolverJarFile;
     }
 
     /**
@@ -157,11 +174,13 @@ class ResolverHelper {
         try {
             r = doGetResolver(resourceLoader);
             if(logger.isLoggable(Level.FINE))
-                logger.fine "Selected Resolver: " +(r==null?"No Resolver configuration found":"${r.getClass().name}")
+                logger.fine("Selected Resolver: " +(r==null?"No Resolver configuration found":r.getClass().getName()));
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
             }
         } catch (Exception e) {
+            if(e instanceof ResolverException)
+                throw (ResolverException)e;
             throw new ResolverException("Creating Resolver", e);
         }
         return r;
@@ -174,15 +193,15 @@ class ResolverHelper {
         Resolver resolver = null;
         ServiceLoader<Resolver> loader =  ServiceLoader.load(Resolver.class, cl);
         if(logger.isLoggable(Level.FINE)) {
-            StringBuilder sb = new StringBuilder()
-            int num = 0
+            StringBuilder sb = new StringBuilder();
+            int num = 0;
             for(Resolver r : loader) {
                 if(sb.length()>0)
-                    sb.append(", ")
-                sb.append(r.getClass().name)
-                num++
+                    sb.append(", ");
+                sb.append(r.getClass().getName());
+                num++;
             }            
-            logger.fine "Found ($num) Resolvers: [${sb.toString()}]"
+            logger.fine("Found "+num+" Resolvers: ["+sb.toString()+"]");
         }
         for(Resolver r : loader) {
             if(r!=null) {
@@ -195,10 +214,10 @@ class ResolverHelper {
     /*
      * Convert windows path names if needed
      */
-    def static String handleWindows(String s) {
+    public static String handleWindows(String s) {
         if (System.getProperty("os.name").startsWith("Windows")) {
             if(s.startsWith("/"))
-                s = s.substring(1, s.length())
+                s = s.substring(1, s.length());
             if(s.startsWith("file:"))
                 s = s.replace('/', '\\');
         }
@@ -211,6 +230,6 @@ class ResolverHelper {
     private static String handleWindowsHTTP(String s) {
         if (System.getProperty("os.name").startsWith("Windows"))
             s = s.replace('\\', '/');
-        return s
+        return s;
     }
 }

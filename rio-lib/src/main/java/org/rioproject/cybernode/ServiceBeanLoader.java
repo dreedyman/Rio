@@ -44,6 +44,7 @@ import org.rioproject.jsb.*;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
+import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.rmi.ResolvingLoader;
 import org.rioproject.system.ComputeResource;
@@ -513,9 +514,14 @@ public class ServiceBeanLoader {
                                                             "cannot be instantiated, the Cybernode " +
                                                             "does not support persistent provisioning, and the " +
                                                             "service requires artifact resolution for "+implArtifact);
-                    String[] jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
-                                                           resolver,
-                                                           elem.getRemoteRepositories());
+                    String[] jars;
+                    try {
+                        jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
+                                                               resolver,
+                                                               elem.getRemoteRepositories());
+                    } catch (ResolverException e) {
+                        throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", e);
+                    }
                     List<URL> urls = new ArrayList<URL>();
                     for(String jar: jars) {
                         if(jar!=null)
@@ -552,16 +558,21 @@ public class ServiceBeanLoader {
             if(exportArtifact!=null && resolver!=null) {
             //if(exportArtifact!=null && resolver!=null) {
                 for(ClassBundle cb : elem.getExportBundles()) {
-                    /*String[] jars = */ResolverHelper.resolve(cb.getArtifact(),
-                                                           resolver,
-                                                           elem.getRemoteRepositories()/*,
-                                                           localCodebase*/);
+                    String[] jars;
+                    try {
+                        jars = ResolverHelper.resolve(cb.getArtifact(),
+                                                      resolver,
+                                                      elem.getRemoteRepositories()/*,
+                                                               localCodebase*/);
+                    } catch (ResolverException e) {
+                        throw new ServiceBeanInstantiationException("Could not resolve codebase artifact", e);
+                    }
                     for(RemoteRepository r : elem.getRemoteRepositories())
                         dlPR.addRepositoryUrl(r.getUrl());
-                    /*for(String jar: jars) {
+                    for(String jar: jars) {
                         if(jar!=null)
-                            exportURLs.add(new URL(jar));
-                    }*/
+                            System.out.println("FIX ME "+jar);
+                    }
                 }
                 //dlPR.setJars(exportURLs.toArray(new URL[exportURLs.size()]));
             } else {
