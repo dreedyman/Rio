@@ -175,6 +175,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     }
 
     private static boolean isDescendantOf(ClassLoader toCheck, ClassLoader loader) {
+        if(toCheck==null)
+            return false;
         if(toCheck.equals(loader))
             return true;
         boolean descendantOf = false;
