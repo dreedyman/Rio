@@ -9,7 +9,7 @@ deployment(name: 'Workflow Example') {
      * in each service bean declaration */
     artifact id: 'service-impl',   'org.rioproject.examples.workflow:workflow-service:2.0.2'
     artifact id: 'service-dl',     'org.rioproject.examples.workflow:workflow-api:2.0.2'
-    artifact id: 'outrigger-dl',   'com.sun.jini:outrigger:dl:2.1'
+    artifact id: 'outrigger-dl',   'com.sun.jini:outrigger:jar:dl:2.1'
     artifact id: 'outrigger-impl', 'com.sun.jini:outrigger:2.1'
 
     ['New Worker'    : 'NEW',
