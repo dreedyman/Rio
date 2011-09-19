@@ -89,7 +89,7 @@
 
         <!-- tool configs -->
         <fileSet>
-            <directory>${basedir}/../tools/src/main/conf</directory>
+            <directory>${basedir}/../rio-tools/src/main/conf</directory>
             <outputDirectory>/config</outputDirectory>
             <includes>
                 <include>**/*</include>
