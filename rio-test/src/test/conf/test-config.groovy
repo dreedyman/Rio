@@ -103,6 +103,14 @@ ServiceEventLogTest {
     numLookups = 1
 }
 
+PermGenTest {
+    groups = "PermGenTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'org.rioproject.test:simple:2.0'
+}
+
 OutOfMemoryTest {
     groups = "OutOfMemoryTest"
     numCybernodes = 1
