@@ -44,6 +44,7 @@ import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
+import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
 import org.rioproject.boot.BootUtil;
@@ -620,8 +621,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             uiDescriptor =
                 UIDescriptorFactory.getUIDescriptor(
                     AdminUI.ROLE,
-                    new UIComponentFactory(new URL(context.getExportCodebase()
-                                                   + "watch-ui.jar"),
+                    new UIComponentFactory(new URL("artifact:org.rioproject:watch-ui:"+RioVersion.VERSION),
                                            "org.rioproject.watch.AccumulatorViewer"));
         }
         return uiDescriptor;
@@ -1403,7 +1403,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                                         Object object)
         throws IllegalArgumentException {
         getNotificationBroadcasterSupport().addNotificationListener(
-            listener, filter, object);
+                                                                       listener, filter, object);
     }
 
     public void removeNotificationListener(NotificationListener listener)
