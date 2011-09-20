@@ -126,10 +126,9 @@ class GroovyConfig implements Configuration {
     def clear() {
         visited.clear()
         if(groovyConfigs!=null) {
-            for(Map.Entry<String, GroovyObject> entry : groovyConfigs)  {
-                println "===> REMOVING ${entry.value.class.getName()}"
-                //InvokerHelper.removeClass(entry.value.class)
-            }
+            /*for(Map.Entry<String, GroovyObject> entry : groovyConfigs)  {
+                InvokerHelper.removeClass(entry.value.class)
+            }*/
             groovyConfigs.clear()
             groovyConfigs = null
         }
