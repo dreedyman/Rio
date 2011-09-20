@@ -318,16 +318,33 @@ class TestManager {
                              opStringToDeploy
         URL opStringURL
         if(Artifact.isArtifact(opStringToDeploy)) {
-            opStringURL = ResolverHelper.getResolver().getLocation(opStringToDeploy, "oar")
-            if(opStringURL==null)
-                throw new OperationalStringException("Artifact "+opStringToDeploy+" not resolvable");
-            OAR oar = new OAR(new File(opStringURL.toURI()));
-            ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
-            return deploy(oar.loadOperationalStrings()[0], monitor)
+            return deploy(opStringToDeploy)
         } else {
             opStringURL = new File(opStringToDeploy).toURI().toURL()
         }
         return deploy(opStringURL)
+    }
+
+    /**
+     * Deploys an OperationalString OAR artifact
+     *
+     * @param opstring The OperationalString artifact
+     *
+     * @return The OperationalStringManager that is managing the OperationalString or null if the
+     * opstring is not an artifact
+     */
+    OperationalStringManager deploy(String opstring) {
+        if(Artifact.isArtifact(opstring)) {
+            URL opStringURL = ResolverHelper.getResolver().getLocation(opstring, "oar")
+            if(opStringURL==null)
+                throw new OperationalStringException("Artifact "+opstring+" not resolvable");
+            OAR oar = new OAR(new File(opStringURL.toURI()));
+            ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
+            return deploy(oar.loadOperationalStrings()[0], monitor)
+        } else {
+            println "The [${opstring}] is not an artifact"
+        }
+        return null
     }
 
     /**
