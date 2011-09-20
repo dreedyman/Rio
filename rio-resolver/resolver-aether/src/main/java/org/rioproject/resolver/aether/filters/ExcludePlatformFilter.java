@@ -35,6 +35,7 @@ public class ExcludePlatformFilter implements DependencyFilter {
         if (prunePlatform) {
             excludes.add("org.rioproject:rio");
             excludes.add("org.rioproject:rio-lib");
+            excludes.add("org.rioproject:rio-platform");
             excludes.add("org.codehaus.groovy:groovy-all");
             excludes.add("net.jini:jsk-platform");
         }
