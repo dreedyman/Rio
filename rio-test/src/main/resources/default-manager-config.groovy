@@ -26,6 +26,7 @@ manager {
     inheritOptions = true
 
     jvmOptions = '''
+        -javaagent:${RIO_HOME}${/}lib${/}boot.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
         -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts
         -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
