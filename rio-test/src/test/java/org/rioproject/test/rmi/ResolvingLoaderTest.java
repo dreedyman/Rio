@@ -65,6 +65,34 @@ public class ResolvingLoaderTest {
     }
 
     @Test
+    public void testGetClassLoaderAndCheckURLsAreFileBased() throws MalformedURLException, ClassNotFoundException {
+        ResolvingLoader loader = new ResolvingLoader();
+        assertNotNull(loader);
+        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2");
+        assertNotNull(classLoader);
+        assertTrue("Returned ClassLoader should be an instanceof URLClassLoader", classLoader instanceof URLClassLoader);
+        for(URL u : ((URLClassLoader)classLoader).getURLs())
+            assertTrue(u.getProtocol().equals("file"));
+    }
+
+    @Test
+    public void testGetClassLoaderWith2Artifacts() throws MalformedURLException, ClassNotFoundException {
+        ResolvingLoader loader = new ResolvingLoader();
+        assertNotNull(loader);
+        ClassLoader sysCL = ClassLoader.getSystemClassLoader();
+        StringBuilder sb = new StringBuilder();
+        sb.append("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2");
+        sb.append(" ");
+        sb.append("artifact:org.rioproject/rio-api/"+RioVersion.VERSION+";http://www.rio-project.org/maven2");
+        ClassLoader classLoader = loader.getClassLoader(sb.toString());
+        assertNotNull(classLoader);
+        assertTrue("Returned ClassLoader should not be the same as the system ClassLoader", !(classLoader.equals(sysCL)));
+        assertTrue("Returned ClassLoader should be an instanceof URLClassLoader", classLoader instanceof URLClassLoader);
+        Class c = classLoader.loadClass("com.sun.jini.reggie.ConstrainableAdminProxy");
+        assertNotNull(c);
+    }
+
+    @Test
     public void testGetClassAnnotation() throws MalformedURLException, ClassNotFoundException {
         URL[] u = new URL[]{new URL("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2")};
         URLClassLoader cl = new URLClassLoader(u);
