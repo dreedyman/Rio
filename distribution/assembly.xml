@@ -63,7 +63,7 @@
             <outputDirectory>/policy</outputDirectory>
         </fileSet>
 
-        <!-- service configs -->
+        <!-- Configuration files -->
         <fileSet>
             <directory>${basedir}/src/main/config</directory>
             <outputDirectory>/config</outputDirectory>
@@ -85,17 +85,6 @@
                 <exclude>junit.jar</exclude>
                 <exclude>log4j.jar</exclude>
             </excludes>
-        </fileSet>
-
-        <!-- tool configs -->
-        <fileSet>
-            <directory>${basedir}/../rio-tools/src/main/conf</directory>
-            <outputDirectory>/config</outputDirectory>
-            <includes>
-                <include>**/*</include>
-            </includes>
-            <filtered>true</filtered>
-            <useDefaultExcludes>true</useDefaultExcludes>
         </fileSet>
 
     </fileSets>
