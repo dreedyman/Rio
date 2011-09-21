@@ -69,25 +69,20 @@ public class SimpleForkTest {
             Assert.assertNotNull(opstring);
             Assert.assertEquals(1, opstring.getServices().length);
             ServiceElement elem = opstring.getServices()[0];
-            Assert.assertNotNull("Expected a non-null ExecDescriptor",
-                                 elem.getExecDescriptor());
+            Assert.assertNotNull("Expected a non-null ExecDescriptor", elem.getExecDescriptor());
             testManager.waitForDeployment(mgr);
             String jvmVersion = System.getProperty("java.version");
             if(jvmVersion.contains("1.5")) {
-                logger.info("The JMX Attach APIs require Java 6 or above. " +
-                            "You are running Java "+jvmVersion);
+                logger.info("The JMX Attach APIs require Java 6 or above. You are running Java "+jvmVersion);
             } else {
                 MBeanServerConnection mbsc = attach();
                 Assert.assertNotNull("Expected a MBeanServerConnection", mbsc);
                 verifyJVMArgs(mbsc, elem.getExecDescriptor());
             }
-            ServiceBeanInstance[] instances =
-                cybernode.getServiceBeanInstances(opstring.getServices()[0]);
+            ServiceBeanInstance[] instances = cybernode.getServiceBeanInstances(opstring.getServices()[0]);
             Assert.assertEquals(1, instances.length);
             Fork fork = (Fork)instances[0].getService();
-            Assert.assertTrue("Expected verify() to " +
-                              "return true, check service log for details",
-                              fork.verify());
+            Assert.assertTrue("Expected verify() to return true, check service log for details", fork.verify());
             testManager.undeploy(opstring.getName());
         } catch(Exception e) {
             thrown = e;
@@ -122,7 +117,7 @@ public class SimpleForkTest {
         long forkedPID = -1;
         String[] managedVMs = JMXConnectionUtil.listManagedVMs();
         for(String managedVM : managedVMs) {
-            if(managedVM.indexOf("start-service-bean-exec")!=-1) {
+            if(managedVM.contains("start-service-bean-exec")) {
                 String pid = managedVM.substring(0, managedVM.indexOf(" "));
                 forkedPID = Long.valueOf(pid);
                 break;
@@ -136,15 +131,12 @@ public class SimpleForkTest {
                 logger.info("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
             } catch(Exception e) {
                 logger.log(Level.WARNING,
-                           "Could not attach to the exec'd " +
-                           "JVM with pid: "+forkedPID+", " +
-                           "continue service execution",
+                           "Could not attach to the exec'd JVM with pid: "+forkedPID+", continue service execution",
                            e);
             }
         } else {
-            logger.info("Could not obtain actual pid of " +
-                        "exec'd process, process cpu and " +
-                        "java memory utilization are not available");
+            logger.info("Could not obtain actual pid of exec'd process, " +
+                        "process cpu and java memory utilization are not available");
         }
 
         return mbsc;
