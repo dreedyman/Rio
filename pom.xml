@@ -37,11 +37,6 @@
         <url>https://github.com/dreedyman/Rio</url>
     </scm>
 
-    <!--<ciManagement>
-        <system>teamcity</system>
-        <url>http://ci.rio-project.org</url>
-    </ciManagement>-->
-
     <reporting>
         <excludeDefaults>true</excludeDefaults>
         <plugins>        
@@ -265,12 +260,6 @@
             </dependency>
 
             <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib-nodep</artifactId>
-                <version>2.2</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>1.0</version>
@@ -379,14 +368,14 @@
         <module>rio-resolver/resolver-api</module>
         <module>rio-resolver/resolver-aether</module>
         <module>rio-resolver/resolver-project</module>
-	<module>rio-services/cybernode/cybernode-api</module>
-	<module>rio-services/cybernode/cybernode-proxy</module>
-	<module>rio-services/cybernode/cybernode-service</module>
-	<module>rio-services/cybernode/cybernode-ui</module>
-	<module>rio-services/gnostic</module>
-	<module>rio-services/monitor/monitor-api</module>
-	<module>rio-services/monitor/monitor-proxy</module>
-	<module>rio-services/monitor/monitor-service</module>
+        <module>rio-services/cybernode/cybernode-api</module>
+        <module>rio-services/cybernode/cybernode-proxy</module>
+        <module>rio-services/cybernode/cybernode-service</module>
+        <module>rio-services/cybernode/cybernode-ui</module>
+        <module>rio-services/gnostic</module>
+        <module>rio-services/monitor/monitor-api</module>
+        <module>rio-services/monitor/monitor-proxy</module>
+        <module>rio-services/monitor/monitor-service</module>
         <module>rio-tools/rio-cli</module>
         <module>rio-tools/rio-ui</module>
         <module>rio-tools/webster</module>
