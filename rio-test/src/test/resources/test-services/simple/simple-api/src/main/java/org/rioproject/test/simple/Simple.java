@@ -17,6 +17,6 @@ package org.rioproject.test.simple;
 
 import java.rmi.RemoteException;
 
-public interface SimpleAPI {
+public interface Simple {
     String hello(String message) throws RemoteException;
 }

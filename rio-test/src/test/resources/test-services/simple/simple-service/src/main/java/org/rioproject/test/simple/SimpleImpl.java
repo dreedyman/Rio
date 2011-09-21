@@ -25,7 +25,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SimpleImplementation implements SimpleAPI {
+public class SimpleImpl implements Simple {
     String food;
     int visitorNumber = 1;
     Random rand = new Random(60);

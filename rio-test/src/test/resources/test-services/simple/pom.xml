@@ -11,6 +11,7 @@
     <modules>
         <module>simple-api</module>
         <module>simple-service</module>
+        <module>simple-logging-service</module>
     </modules>
 
       <pluginRepositories>

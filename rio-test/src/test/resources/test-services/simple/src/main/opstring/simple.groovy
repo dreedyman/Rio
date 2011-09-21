@@ -8,10 +8,10 @@ deployment(name:'Simple Test') {
 
     service(name: 'Simple Simon') {
         interfaces {
-            classes 'org.rioproject.test.simple.SimpleAPI'
+            classes 'org.rioproject.test.simple.Simple'
             artifact ref:'service-dl'
         }
-        implementation(class: 'org.rioproject.test.simple.SimpleImplementation') {
+        implementation(class: 'org.rioproject.test.simple.SimpleImpl') {
             artifact ref:'service'
         }
 
