@@ -147,7 +147,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     @SuppressWarnings("unchecked")
     private static void findAndRemove(ClassLoader loader, Map loaderTable) {
-        Map<ClassLoader, Object> toRemove = new HashMap<ClassLoader, Object>();
+        //Map<ClassLoader, Object> toRemove = new HashMap<ClassLoader, Object>();
         for(Object o : loaderTable.entrySet()) {
             Map.Entry entry = (Map.Entry) o;
             Object key = entry.getKey();
@@ -157,7 +157,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 ClassLoader toCheck = (ClassLoader) parentField.get(key);
                 if (isDescendantOf(toCheck, loader)) {
                     parentField.set(key, null);
-                    toRemove.put(toCheck, key);
+                    //toRemove.put(toCheck, key);
                 }
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
@@ -166,12 +166,12 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             }
         }
 
-        for(Map.Entry<ClassLoader, Object> entry : toRemove.entrySet()) {
-            System.out.println("===> REMOVED "+entry.getKey());
-            loaderTable.remove(entry.getValue());
+        //for(Map.Entry<ClassLoader, Object> entry : toRemove.entrySet()) {
+            //System.out.println("===> REMOVED "+entry.getKey());
+            //loaderTable.remove(entry.getValue());
             //System.err.println("LoaderEntry: " + loaderEntry);
             //loaderEntry.removed = true;
-        }
+        //}
     }
 
     private static boolean isDescendantOf(ClassLoader toCheck, ClassLoader loader) {
