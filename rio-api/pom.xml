@@ -12,6 +12,12 @@
     <artifactId>rio-api</artifactId>
     <name>Module :: Rio API</name>
     <packaging>jar</packaging>
+    <description>
+        The rio-api module contains the classes that clients will use to communicate to back-end Rio services,
+        retrieve service attributes from, and also contains interfaces that service-side modules provide concrete
+        implementations for. Additionally, the rio-api artifact should be included by services as a dependency
+        when developing smart proxies.
+    </description>
 
     <dependencies>
 
