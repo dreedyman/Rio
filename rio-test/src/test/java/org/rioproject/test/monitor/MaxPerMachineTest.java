@@ -128,7 +128,7 @@ public class MaxPerMachineTest  {
         OpStringLoader loader = new OpStringLoader();
         OperationalString[] opstrings =
             loader.parseOperationalString(
-                new File("src/test/resources/simple_opstring.groovy"));
+                new File("src/test/resources/opstring/simple_opstring.groovy"));
         org.junit.Assert.assertEquals(1, opstrings.length);
         OpString opstring = (OpString)opstrings[0];
         org.junit.Assert.assertEquals(1, opstring.getServices().length);
@@ -275,7 +275,7 @@ public class MaxPerMachineTest  {
         OpStringLoader loader = new OpStringLoader();
         OperationalString[] opstrings =
             loader.parseOperationalString(
-                new File("src/test/resources/simple_opstring.groovy"));
+                new File("src/test/resources/opstring/simple_opstring.groovy"));
         org.junit.Assert.assertEquals(1, opstrings.length);
         OpString opstring = (OpString)opstrings[0];
         org.junit.Assert.assertEquals(1, opstring.getServices().length);

@@ -8,7 +8,7 @@ SimpleDeployTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'src/test/resources/simple_opstring.groovy'
+    opstring = 'src/test/resources/opstring/simple_opstring.groovy'
     //harvest = true
     //testManager = new org.rioproject.test.TestManager(true)
 }
@@ -19,7 +19,7 @@ SLAThresholdEventNotificationTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'src/test/resources/slathresholdeventnotify.groovy'
+    opstring = 'src/test/resources/opstring/slathresholdeventnotify.groovy'
     autoDeploy = true
     //testManager = new org.rioproject.test.TestManager(true)
 }
@@ -29,7 +29,7 @@ SystemWatchAccessorTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'src/test/resources/scaling_service_test.groovy'
+    opstring = 'src/test/resources/opstring/scaling_service_test.groovy'
     autoDeploy = true
 }
 
@@ -38,7 +38,7 @@ ForkedServicePreDestroyTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'src/test/resources/fork.groovy'
+    opstring = 'src/test/resources/opstring/fork.groovy'
     autoDeploy = true
     //harvest = true
 }
@@ -48,7 +48,7 @@ SimpleForkTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'src/test/resources/fork.groovy'
+    opstring = 'src/test/resources/opstring/fork.groovy'
     autoDeploy = true
     //harvest = true
 }
@@ -58,7 +58,7 @@ DeployMapTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'src/test/resources/simple_opstring.groovy'
+    opstring = 'src/test/resources/opstring/simple_opstring.groovy'
     autoDeploy = true
 }
 
@@ -80,7 +80,7 @@ HarvesterTest {
     numLookups = 1
     numMonitors = 1
     numCybernodes = 2
-    opstring = 'src/test/resources/harvester.groovy'
+    opstring = 'src/test/resources/opstring/harvester.groovy'
     autoDeploy = true
 }
 
@@ -108,7 +108,7 @@ PermGenTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
-    opstring = 'org.rioproject.test:simple:2.0'
+    opstring = 'src/test/resources/opstring/simple_opstring.groovy'
 }
 
 OutOfMemoryTest {

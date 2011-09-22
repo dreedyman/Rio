@@ -123,7 +123,7 @@ public class BackupTest  {
             Assert.assertNotNull("Cybernode proxy should not be null", cybernode);
 
         // 2. DEPLOY OPSTRING
-        testManager.deploy(new File("src/test/resources/simple_opstring.groovy"),
+        testManager.deploy(new File("src/test/resources/opstring/simple_opstring.groovy"),
                        pms.get(0));
         
         // 3. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
@@ -233,7 +233,7 @@ public class BackupTest  {
 
         
         // 3. DEPLOY OPSTRING
-        testManager.deploy(new File("src/test/resources/simple_opstring.groovy"));
+        testManager.deploy(new File("src/test/resources/opstring/simple_opstring.groovy"));
         
         // 4. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
         //TODO : port Dummy.class

@@ -49,7 +49,13 @@ public class OutOfMemoryTest {
         Assert.assertTrue(items.length>0);
         Listener l= new Listener();
         Throwable thrown = null;
-        OperationalStringManager mgr = testManager.deploy(new File("target"+File.separator+"test-classes"+File.separator+"outofmemory_test.groovy"));
+        File opstring = new File(System.getProperty("user.dir")+File.separator+
+                                    "src"+File.separator+
+                                    "test"+File.separator+
+                                    "resources"+File.separator+
+                                    "opstring"+File.separator+
+                                    "outofmemory_test.groovy");
+        OperationalStringManager mgr = testManager.deploy(opstring);
         OutOfMemory outOfMemory = (OutOfMemory)testManager.waitForService(OutOfMemory.class);
         try {
             BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), l);

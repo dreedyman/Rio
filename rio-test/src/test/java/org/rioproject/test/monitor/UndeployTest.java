@@ -102,7 +102,7 @@ public class UndeployTest  {
         OpStringLoader loader = new OpStringLoader();
         OperationalString[] opstrings =
             loader.parseOperationalString(
-                new File("src/test/resources/simple_opstring.groovy"));
+                new File("src/test/resources/opstring/simple_opstring.groovy"));
         Assert.assertEquals(1, opstrings.length);
         OpString opstring = (OpString)opstrings[0];
         Assert.assertEquals(1, opstring.getServices().length);

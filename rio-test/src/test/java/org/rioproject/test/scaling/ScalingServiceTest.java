@@ -119,7 +119,7 @@ public class ScalingServiceTest {
         Assert.assertNotNull(testManager);
 
         // 2. DEPLOY OPSTRING
-        testManager.deploy(new File("src/test/resources/scaling_service_test.groovy"));
+        testManager.deploy(new File("src/test/resources/opstring/scaling_service_test.groovy"));
 
         // 3. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();
@@ -181,7 +181,7 @@ public class ScalingServiceTest {
         Assert.assertNotNull(testManager);
 
         // 2. DEPLOY OPSTRING
-        testManager.deploy(new File("src/test/resources/scaling_service_test.groovy"));
+        testManager.deploy(new File("src/test/resources/opstring/scaling_service_test.groovy"));
 
         // 3. ASSERTION: ONE SERVICE INSTANCE SHOULD APPEAR
         ServiceDiscoveryManager sdm = testManager.getServiceDiscoveryManager();

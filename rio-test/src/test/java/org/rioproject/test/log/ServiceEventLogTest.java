@@ -58,6 +58,7 @@ public class ServiceEventLogTest {
                                     "src"+File.separator+
                                     "test"+File.separator+
                                     "resources"+File.separator+
+                                    "opstring"+File.separator+
                                     "logging_simple_opstring.groovy");
         Assert.assertNotNull(opstring);
         testManager.deploy(opstring);
@@ -94,6 +95,7 @@ public class ServiceEventLogTest {
                                     "src"+File.separator+
                                     "test"+File.separator+
                                     "resources"+File.separator+
+                                    "opstring"+File.separator+
                                     "logging_simple_forked_opstring.groovy");
         Assert.assertNotNull(opstring);
         OperationalStringManager mgr = testManager.deploy(opstring);

@@ -229,7 +229,7 @@ public class AssociationFutureTest {
     @Test
     public void testWithDeploy() {
         //LogUtil.setLogger("org.rioproject.associations", Level.ALL);
-        File opstring = new File("src/test/resources/space.groovy");
+        File opstring = new File("src/test/resources/opstring/space.groovy");
         Assert.assertNotNull(opstring);
         /*testManager.startReggie();
         testManager.startProvisionMonitor();
