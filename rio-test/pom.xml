@@ -112,10 +112,10 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <exec dir="${basedir}/src/test/resources/simple-project"
+                                <exec dir="${basedir}/src/test/resources/test-services"
                                       executable="mvn"
                                       failonerror="true">
-                                    <arg line="-q clean install"/>
+                                    <arg line="-q clean install -Dmaven.test.skip"/>
                                 </exec>
                             </tasks>
                         </configuration>
