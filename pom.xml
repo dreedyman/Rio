@@ -361,7 +361,7 @@
     <modules>
         <module>rio-plugins/maven-rio-plugin</module>
         <module>rio-plugins/rio-archetype</module>
-        <module>boot</module>
+        <module>rio-start</module>
         <module>rio-api</module>
         <module>rio-lib</module>
         <module>rio-platform</module>
