@@ -89,24 +89,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3</version>
-              <configuration>
-                  <archive>                
-                      <manifestEntries>
-	                        <Main-Class>org.rioproject.tools.ui.Main</Main-Class>
-							<Implementation-Title>Rio Project</Implementation-Title>
-							<Implementation-Version>${project.version}</Implementation-Version>
-						    <Rio-Version>${project.version}</Rio-Version>
-						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
-						    <Class-Path>rio-start.jar rio-lib.jar webster.jar prefuse.jar groovy-all.jar</Class-Path>
-						</manifestEntries>
-                  </archive>
-              </configuration>
-          </plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
