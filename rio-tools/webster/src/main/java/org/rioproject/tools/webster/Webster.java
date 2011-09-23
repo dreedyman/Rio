@@ -318,7 +318,7 @@ public class Webster implements Runnable {
      * @return The roots Webster is serving as a semicolon delimited String
      */
     public String getRoots() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i = 0; i < websterRoot.length; i++) {
             if(i > 0)
                 buffer.append(";");
@@ -449,7 +449,7 @@ public class Webster implements Runnable {
                     int port = s.getPort();
                     String from = s.getInetAddress().getHostAddress()+":"+port;
                     if(debug) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         buff.append("From: ").append(from).append(", ");
                         if(soTimeout > 0)
                             buff.append("SO_TIMEOUT: ").append(soTimeout).append(", ");
@@ -457,7 +457,7 @@ public class Webster implements Runnable {
                         System.out.println(buff.toString());
                     }
                     if(logger.isLoggable(Level.FINE)) {
-                        StringBuffer buff = new StringBuffer();
+                        StringBuilder buff = new StringBuilder();
                         buff.append("From: ").append(from).append(", ");
                         if(soTimeout > 0)
                             buff.append("SO_TIMEOUT: ").append(soTimeout).append(", ");
@@ -583,7 +583,7 @@ public class Webster implements Runnable {
     } // end of loadMimes
 
     protected File parseFileName(String filename) {
-        StringBuffer fn = new StringBuffer(filename);
+        StringBuilder fn = new StringBuilder(filename);
         for (int i = 0; i < fn.length(); i++) {
             if (fn.charAt(i) == '/')
                 fn.replace(i, i + 1, File.separator);
@@ -668,8 +668,8 @@ public class Webster implements Runnable {
         }
 
         public void run() {
-            StringBuffer dirData = new StringBuffer();
-            StringBuffer logData = new StringBuffer();
+            StringBuilder dirData = new StringBuilder();
+            StringBuilder logData = new StringBuilder();
             try {
                 File getFile = parseFileName(fileName);
                 logData.append("Do HEAD: input=")
@@ -766,8 +766,8 @@ public class Webster implements Runnable {
         }
 
         public void run() {
-            StringBuffer dirData = new StringBuffer();
-            StringBuffer logData = new StringBuffer();
+            StringBuilder dirData = new StringBuilder();
+            StringBuilder logData = new StringBuilder();
             DataInputStream requestedFile = null;
             try {
                 File getFile = parseFileName(fileName);
