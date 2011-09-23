@@ -125,8 +125,8 @@ if [ "$start" = "1" ]; then
         fi
         USER_OPTS="-DRIO_NATIVE_DIR=$RIO_NATIVE_DIR $USER_OPTS"
     fi
-    classpath="-cp `toNative $RIO_LIB/boot.jar:$RIO_LIB/resolver-api.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar`"
-    agentpath="-javaagent:`toNative $RIO_LIB/boot.jar`"
+    classpath="-cp `toNative $RIO_LIB/rio-start.jar:$RIO_LIB/resolver-api.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar`"
+    agentpath="-javaagent:`toNative $RIO_LIB/rio-start.jar`"
     launchTarget=com.sun.jini.start.ServiceStarter
     if [ -z "$1" ] ; then
         echo "A service to start is required, exiting"

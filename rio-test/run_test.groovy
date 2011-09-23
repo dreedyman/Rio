@@ -91,7 +91,7 @@ final classpath = { ->
     
     /* Add core jars */
     cp.addAll(scanner("${distLib}", ['jsk-platform.jar', 'jsk-lib.jar', 'start.jar']))
-    cp.addAll(scanner("${distLib}", ['boot.jar', 'rio.jar', 'rio-test.jar', 'webster.jar', 'groovy-all.jar', 'cglib-nodep.jar', 'prefuse.jar', 'cybernode.jar', 'rio-cli.jar']))    
+    cp.addAll(scanner("${distLib}", ['rio-start.jar', 'rio.jar', 'rio-test.jar', 'webster.jar', 'groovy-all.jar', 'cglib-nodep.jar', 'prefuse.jar', 'cybernode.jar', 'rio-cli.jar']))
 
     /* Add JUnit and Hyperic jars */
     ["${repo}/junit/junit/4.8.2/"   : '*.jar',

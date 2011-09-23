@@ -21,7 +21,7 @@ import org.rioproject.config.Constants
 */
 manager {
     execClassPath =
-        '${RIO_HOME}${/}lib${/}boot.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+        '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
 
     inheritOptions = true
 

@@ -54,8 +54,8 @@ set RIO_LOG_DIR="%RIO_HOME%"\logs\
 if "%RIO_NATIVE_DIR%" == "" set RIO_NATIVE_DIR="%RIO_HOME%"\lib\native
 set PATH=%PATH%;"%RIO_NATIVE_DIR%"
 
-set classpath=-cp "%RIO_HOME%\lib\boot.jar";"%RIO_HOME%\lib\start.jar";"%JAVA_HOME%\lib\tools.jar";"%RIO_HOME%\lib\groovy-all.jar";
-set agentpath=-javaagent:"%RIO_HOME%\lib\boot.jar"
+set classpath=-cp "%RIO_HOME%\lib\rio-start.jar";"%RIO_HOME%\lib\start.jar";"%JAVA_HOME%\lib\tools.jar";"%RIO_HOME%\lib\groovy-all.jar";
+set agentpath=-javaagent:"%RIO_HOME%\lib\rio-start.jar"
 
 set launchTarget=com.sun.jini.start.ServiceStarter
 

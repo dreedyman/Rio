@@ -21,12 +21,12 @@ import org.rioproject.config.Constants
 manager {
     
     execClassPath =
-        '${RIO_HOME}${/}lib${/}boot.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+        '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
 
     inheritOptions = true
 
     jvmOptions='''
-        -javaagent:${RIO_HOME}${/}lib${/}boot.jar
+        -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${RIO_HOME}${/}logs

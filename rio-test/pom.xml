@@ -126,7 +126,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-javaagent:${basedir}/../distribution/target/rio-${project.version}/lib/boot.jar</argLine>
+                    <argLine>-javaagent:${basedir}/../distribution/target/rio-${project.version}/lib/rio-start.jar</argLine>
                     <systemProperties>
                         <property>
                             <name>RIO_HOME</name>

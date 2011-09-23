@@ -9,8 +9,8 @@
         <version>5.0-SNAPSHOT</version>
     </parent>
     <groupId>org.rioproject</groupId>
-    <artifactId>boot</artifactId>
-    <name>Module :: Boot</name>
+    <artifactId>rio-start</artifactId>
+    <name>Module :: Rio service starters</name>
     <packaging>jar</packaging>
     <description>
         Provides boot strapping support for starting services.

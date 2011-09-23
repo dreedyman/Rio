@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  <span style="font-weight: bold;">AppCL</span> - Contains the main()
 class of the container. Main-Class in
 manifest points to <span style="font-family: monospace;">com.sun.jini.start.ServiceStarter</span><br>
-Classpath:&nbsp; boot.jar, start.jar, jsk-platform.jar<br>
+Classpath:&nbsp; rio-start.jar, start.jar, jsk-platform.jar<br>
 Codebase: none<br>
 <br>
 <span style="font-weight: bold;">CommonClassLoader</span> - Contains
@@ -76,7 +76,7 @@ Codebase: "serviceX-dl.jar rio-api.jar jsk-lib-dl.jar"<br>
  @author Dennis Reedy
  */
 public class CommonClassLoader extends URLClassLoader {
-    private static final String COMPONENT = "org.rioproject.boot";
+    private static final String COMPONENT = "org.rioproject.loader";
     private static Logger logger = Logger.getLogger(COMPONENT);
     private static final Map<String, URL[]> components = new HashMap<String, URL[]>();
     private static CommonClassLoader instance;
