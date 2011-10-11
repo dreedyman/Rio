@@ -47,7 +47,7 @@ import java.util.logging.Level;
  * @author Dennis Reedy
  */
 public class ResolverHelper {
-    static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
+    public static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
     static String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
     static URLClassLoader resolverLoader;
     static final Logger logger = Logger.getLogger(ResolverHelper.class.getName());
