@@ -48,11 +48,12 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
 
     @SuppressWarnings("unchecked")
     public T getService() {
-        //return getAssociation().getService();
-        T service;
+        T service = null;
         synchronized(serviceList) {
-            ServiceItem item = serviceList.get(0);
-            service = (T)item.service;
+            if(serviceList.size()>0) {
+                ServiceItem item = serviceList.get(0);
+                service = (T)item.service;
+            }
         }
         return service;
     }
