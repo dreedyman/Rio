@@ -196,9 +196,9 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
                         Map map = opMgr.doUpdateOperationalString(opString);
                         opStringMangerController.dumpOpStringError(map);
                     }
-                } else {
-                    //undeploy(opString.getName(), false);
-                }
+                } /*else {
+                    undeploy(opString.getName(), false);
+                }*/
             } catch (Exception ex) {
                 logger.log(Level.WARNING, "Processing updated OperationalStrings", ex);
             }
