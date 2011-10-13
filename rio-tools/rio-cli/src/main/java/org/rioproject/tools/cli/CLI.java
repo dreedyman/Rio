@@ -546,9 +546,6 @@ public class CLI {
                 throw new NullPointerException("Must have an output PrintStream");
             if(br==null)
                 br = new BufferedReader(new InputStreamReader(System.in));
-            if(input.equals("stop")) {
-
-            }
             StringTokenizer tok = new StringTokenizer(input);
             /* first token is "destroy" */
             tok.nextToken();
@@ -1332,9 +1329,7 @@ public class CLI {
             }
             rioLog = new File(logDir, "rio.log");
             if(rioLog.exists()) {
-                if(rioLog.delete()) {
-                    /**/
-                }
+                rioLog.delete();
             }
             if(logDir.exists()) {
                 try {
@@ -1356,8 +1351,7 @@ public class CLI {
                     buff.append("\n");
                     buff.append("    ").append(key).append("=").append(value);
                 }
-                System.err.println("Added System Properties "+
-                                   "{"+buff.toString()+"\n}");
+                System.err.println("Added System Properties {"+buff.toString()+"\n}");
             }
         }
     }
