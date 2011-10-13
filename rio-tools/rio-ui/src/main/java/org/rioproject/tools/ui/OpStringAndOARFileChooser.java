@@ -160,9 +160,6 @@ public class OpStringAndOARFileChooser {
                 Component c = event.getOppositeComponent();
                 if(!(c instanceof JButton && ((JButton)c).getText().equals("Deploy")))
                     lastFocused = LastFocused.other;
-                else {
-
-                }
             }
         });
         if(lastArtifact!=null) {
