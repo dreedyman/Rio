@@ -616,10 +616,8 @@ public class Webster implements Runnable {
                         for (String aChildren : children) {
                             expandedRoots.add(prefix + aChildren + suffix);
                         }
-                    } else {
-                        // Eat the root entry if it's wildcarded and doesn't
-                        // exist
                     }
+                    // Eat the root entry if it's wildcarded and doesn't exist
                 } else {
                     expandedRoots.add(root);
                 }
