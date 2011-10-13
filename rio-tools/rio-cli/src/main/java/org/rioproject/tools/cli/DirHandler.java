@@ -102,11 +102,8 @@ public class DirHandler implements OptionHandler {
                 /* First token is "cd" */
                 tok.nextToken();
                 String value = tok.nextToken();
-                if(value.endsWith("*")) {
-
-                } else {
+                if(!value.endsWith("*"))
                     changeDir(value, out);
-                }
             } else {
                 if(br==null)
                     br = new BufferedReader(new InputStreamReader(System.in));
