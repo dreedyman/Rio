@@ -149,12 +149,6 @@ public class DispatchEventHandler extends EventHandler {
                                        e);
                     }
                 }
-            } catch (Throwable t) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.WARNING, format(
-                               "DispatchEventHandler.fire() [%s]",
-                               descriptor.toString()),
-                               t);
             }
         }
         sequenceNumber++;

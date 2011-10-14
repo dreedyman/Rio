@@ -60,10 +60,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class BasicEventConsumer
-    implements
-        EventConsumer,
-        ServerProxyTrust  {
+public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     /** The remote ref (e.g. stub or dynamic proxy) for the BasicEventConsumer */
     private EventConsumer eventConsumer;
     /** The Exporter for the BasicEventConsumer */
@@ -262,8 +259,8 @@ public class BasicEventConsumer
         if(eventConsumer != null) {
             try {
                 exporter.unexport(true);
-            } catch(Throwable t) {
-                logger.log(Level.WARNING, "EventConsumer not unexported", t);
+            } catch(IllegalStateException e) {
+                logger.log(Level.WARNING, "EventConsumer not unexported", e);
             }
         }
     }
@@ -499,9 +496,9 @@ public class BasicEventConsumer
                     }
                 }
 
-            } catch(Throwable t) {
+            } catch(Exception e) {
                 /* Determine if we should even try to reconnect */
-                if(!ThrowableUtil.isRetryable(t)) {
+                if(!ThrowableUtil.isRetryable(e)) {
                     logger.log(Level.WARNING,
                                "EventLeaseManager ID={0}, Unrecoverable " +
                                "Exception getting EventRegistration",
@@ -511,7 +508,7 @@ public class BasicEventConsumer
                         logger.log(Level.FINEST,
                                    "Unrecoverable Exception getting "+
                                    "EventRegistration for "+eDesc.toString(),
-                                   t);
+                                   e);
                     break;
                 } else {
                     if(retryWait>0) {

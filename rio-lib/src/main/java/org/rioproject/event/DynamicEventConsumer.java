@@ -151,9 +151,9 @@ public class DynamicEventConsumer extends BasicEventConsumer {
         if(sdm!=null) {
             try {
                 sdm.terminate();
-            } catch (Throwable t) {
+            } catch (IllegalStateException t) {
                 logger.log(Level.WARNING, "Terminating SDM", t);
-            }            
+            }
         } 
         super.terminate();
     }
@@ -163,8 +163,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      * discovered EventProducer instances that match we should register with
      * them
      */
-    public boolean register(RemoteServiceEventListener listener,
-                            MarshalledObject handback) {
+    public boolean register(RemoteServiceEventListener listener, MarshalledObject handback) {
         this.handback = handback;
         boolean added = super.register(listener, handback);
         try {
@@ -178,20 +177,6 @@ public class DynamicEventConsumer extends BasicEventConsumer {
             logger.log(Level.SEVERE, "Register RemoteServiceEventListener", e);
         }
         return (added);
-    }
-
-    /**
-     * Returns an array of all EventProducer proxy objects that have been
-     * discovered
-     * 
-     * @return An array of EventProducer proxy objects
-     */
-    public EventProducer[] getEventProducers() {
-        ServiceItem[] items = lCache.lookup(null, Integer.MAX_VALUE);
-        EventProducer[] producers = new EventProducer[items.length];
-        for(int i = 0; i < items.length; i++)
-            producers[i] = (EventProducer)items[i].service;
-        return (producers);
     }
     
     /**
@@ -209,9 +194,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                 if(item != null && item.service != null) {
                     if(logger.isLoggable(Level.FINEST)) {
                         String name = item.service.getClass().getName();
-                        logger.log(Level.FINEST,
-                                   "EventProducer discovered {0}",
-                                   name);
+                        logger.log(Level.FINEST, "EventProducer discovered {0}", name);
                     }
                     FaultDetectionHandler<ServiceID> fdh = null;
                     if(item.service instanceof Administrable) {
@@ -220,12 +203,9 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                             if(admin instanceof ServiceBeanAdmin) {
                                 ServiceBeanAdmin sbAdmin = (ServiceBeanAdmin)admin;                
                                 ClassBundle fdhBundle =
-                                    sbAdmin.getServiceElement().
-                                    getFaultDetectionHandlerBundle();
+                                    sbAdmin.getServiceElement().getFaultDetectionHandlerBundle();
                                 fdh = FaultDetectionHandlerFactory.
-                                          getFaultDetectionHandler(
-                                            fdhBundle, 
-                                            item.service.getClass().getClassLoader());                                
+                                          getFaultDetectionHandler(fdhBundle,item.service.getClass().getClassLoader());
                             } else {
                                 if(logger.isLoggable(Level.FINEST)) {
                                     String name = item.service.getClass().getName();
@@ -264,8 +244,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                     
                     ServiceFaultListener faultListener;
                     if(fdh!=null) {
-                        faultListener = new ServiceFaultListener(false, 
-                                                                 item.serviceID);
+                        faultListener = new ServiceFaultListener(false, item.serviceID);
                         fdh.register(faultListener);
                         fdhTable.put(item.serviceID, fdh);
                         fdh.monitor(item.service, item.serviceID, lCache);                        
@@ -273,12 +252,10 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                     if(eventSubscribers.size() > 0)
                         register(item);
                 } else {
-                    logger.log(Level.WARNING,
-                               "Unable to register EventProducer {0}",
-                               item);
+                    logger.log(Level.WARNING, "Unable to register EventProducer {0}", item);
                 }
-            } catch(Throwable t) {
-                logger.log(Level.SEVERE, "Adding EventProducer", t);
+            } catch(Exception e) {
+                logger.log(Level.SEVERE, "Adding EventProducer", e);
             }
         }              
     }
