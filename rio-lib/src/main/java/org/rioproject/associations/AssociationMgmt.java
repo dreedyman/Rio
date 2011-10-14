@@ -671,11 +671,7 @@ public class AssociationMgmt implements AssociationManagement {
             if(numRequires > 0) {
                 AssociationType aType = assoc.getAssociationType();
 
-                // LOGIC CAN BE IMPROVED !!!
-                if(aType != AssociationType.REQUIRES &&
-                   requiredAssociations.contains(assoc)) {
-
-                } else {
+                if(aType.equals(AssociationType.REQUIRES) && !requiredAssociations.contains(assoc)) {
                     requiredAssociations.add(assoc);
                     if(associationInjector!=null)
                         associationInjector.discovered(assoc, service);
