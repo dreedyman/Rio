@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.test.associations;
+package org.rioproject.associations;
 
 import junit.framework.Assert;
 import net.jini.core.lookup.ServiceItem;
