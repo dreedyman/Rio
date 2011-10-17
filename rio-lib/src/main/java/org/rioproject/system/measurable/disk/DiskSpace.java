@@ -37,8 +37,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class DiskSpace extends MeasurableCapability implements DiskSpaceMBean {
-    public static final String VIEW = 
-        "org.rioproject.system.measurable.disk.CalculableDiskSpaceView";
+    public static final String VIEW = "org.rioproject.system.disk.CalculableDiskSpaceView";
     /** Iteration value for calculating utilization of sampleSize >1 */
     private int count;
     /** Temporary value for used diskspace*/

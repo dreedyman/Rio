@@ -41,8 +41,7 @@ public class MemoryPool extends MeasurableCapability {
     private MeasurableMonitor<MemoryPoolUtilization> monitor;
     /** Component for Configuration and Logging */
     private static final String COMPONENT = "org.rioproject.system.memory.pool";
-    private static final String VIEW =
-        "org.rioproject.system.measurable.memory.pool.CalculableMemoryPoolView";
+    private static final String VIEW = "org.rioproject.system.memory.CalculableMemoryPoolView";
     static Logger logger = Logger.getLogger(COMPONENT);
 
     /**

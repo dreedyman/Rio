@@ -47,7 +47,7 @@ public class Memory extends MeasurableCapability {
     private double tempUtilization;
     /** Computed utilization value */
     private double utilization;
-    private static final String VIEW = "org.rioproject.system.measurable.memory.CalculableMemoryView";
+    private static final String VIEW = "org.rioproject.system.memory.CalculableMemoryView";
     /** Total memory arena */
     double totalArena;
     /** Component for Configuration and Logging */

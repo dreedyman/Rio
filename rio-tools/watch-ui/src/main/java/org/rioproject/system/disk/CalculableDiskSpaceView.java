@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.system.measurable.disk;
+package org.rioproject.system.disk;
 
+import org.rioproject.system.measurable.disk.CalculableDiskSpace;
 import org.rioproject.watch.CalculableDisplayAttributes;
 import org.rioproject.watch.DefaultCalculableView;
 import org.rioproject.watch.FontDescriptor;

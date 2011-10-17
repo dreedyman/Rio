@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.system.measurable.memory;
+package org.rioproject.system.memory;
 
+import org.rioproject.system.measurable.memory.CalculableMemory;
 import org.rioproject.watch.CalculableDisplayAttributes;
 import org.rioproject.watch.DefaultCalculableView;
 import org.rioproject.watch.FontDescriptor;

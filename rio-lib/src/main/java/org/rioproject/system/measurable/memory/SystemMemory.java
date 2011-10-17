@@ -21,8 +21,6 @@ import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.system.MeasuredResource;
 
-import java.util.logging.Logger;
-
 /**
  * The SystemMemory object measures the memory utilization for a physical
  * machine
@@ -30,17 +28,11 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class SystemMemory extends Memory {
-    private static final String VIEW =
-        "org.rioproject.system.measurable.memory.CalculableSystemMemoryView";
+    private static final String VIEW = "org.rioproject.system.memory.CalculableSystemMemoryView";
     /**
      * Component for Configuration and Logging
      */
-    private static final String COMPONENT =
-        "org.rioproject.system.measurable.systemMemory";
-    /**
-     * A Logger for this class
-     */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    private static final String COMPONENT = "org.rioproject.system.measurable.systemMemory";
 
     /**
      * Construct a Memory object

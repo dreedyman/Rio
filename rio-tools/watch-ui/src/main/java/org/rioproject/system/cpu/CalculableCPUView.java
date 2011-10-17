@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.system.measurable.cpu;
+package org.rioproject.system.cpu;
 
+import org.rioproject.system.measurable.cpu.CalculableCPU;
 import org.rioproject.watch.CalculableDisplayAttributes;
 import org.rioproject.watch.DefaultCalculableView;
 import org.rioproject.watch.FontDescriptor;
