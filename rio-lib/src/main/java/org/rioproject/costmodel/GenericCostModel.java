@@ -124,32 +124,4 @@ public class GenericCostModel implements ResourceCostModel {
         }
         return (boundaries);
     }
-
-    public static void main(String[] args) {
-        GenericCostModel gcm = new GenericCostModel(0.01);
-        gcm.addTimeBoundary(new TimeBoundary(5, 10, TimeBoundary.SECONDS));
-        gcm.addTimeBoundary(new TimeBoundary(5, 100, TimeBoundary.MINUTES));
-        gcm.addTimeBoundary(new TimeBoundary(5, 1000, TimeBoundary.HOURS));
-        gcm.addTimeBoundary(new TimeBoundary(5, 10000, TimeBoundary.DAYS));
-        System.out.println("Testing " + gcm.getClass().getName() + "\n");
-        System.out.println(gcm.getDescription());
-        long twoSeconds = 1000 * 2;
-        long sixMinutes = 1000 * 60 * 6;
-        long twoHours = 1000 * 60 * 60 * 2;
-        long sixHours = 1000 * 60 * 60 * 6;
-        long twoDays = 1000 * 60 * 60 * 24 * 2;
-        long tenDays = 1000 * 60 * 60 * 24 * 10;
-        System.out.println("Cost per unit for 2 seconds : "
-                           + gcm.getCostPerUnit(twoSeconds));
-        System.out.println("Cost per unit for 6 minutes : "
-                           + gcm.getCostPerUnit(sixMinutes));
-        System.out.println("Cost per unit for 2 hours   : "
-                           + gcm.getCostPerUnit(twoHours));
-        System.out.println("Cost per unit for 6 hours   : "
-                           + gcm.getCostPerUnit(sixHours));
-        System.out.println("Cost per unit for 2 days    : "
-                           + gcm.getCostPerUnit(twoDays));
-        System.out.println("Cost per unit for 10 days   : "
-                           + gcm.getCostPerUnit(tenDays));
-    }
 }

@@ -446,6 +446,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         return (eReg);
     }
 
+
     /**
      * Connect to the EventProducer and get a Lease
      *
