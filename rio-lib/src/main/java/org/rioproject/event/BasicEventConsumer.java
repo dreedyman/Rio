@@ -119,20 +119,6 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         this(null, listener, null, null);
     }
 
-
-    /**
-     * Create a BasicEventConsumer with an EventDescriptor
-     *
-     * @param edTemplate The EventDescriptor template
-     * @param config Configuration object
-     *
-     * @throws Exception If the BasicEventConsumer cannot be created
-     */
-    public BasicEventConsumer(EventDescriptor edTemplate,
-                              Configuration config) throws Exception {
-        this(edTemplate, null, null, config);
-    }
-
     /**
      * Create a BasicEventConsumer with an EventDescriptor and a
      * RemoteServiceEventListener
@@ -315,13 +301,18 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * takes
      *
      * @param watchRegistry The WatchDataSourceRegistry to register the watch
+     *
+     * @return The Watch
      */
-    public void createWatch(WatchDataSourceRegistry watchRegistry) {
+    public Watch createWatch(WatchDataSourceRegistry watchRegistry) {
         if(watchRegistry == null)
-            throw new NullPointerException("watchRegistry is null");
+            throw new IllegalArgumentException("watchRegistry is null");
+        if(responseWatch!=null)
+            return responseWatch;
         responseWatch = new StopWatch(RESPONSE_WATCH, config);
         this.watchRegistry = watchRegistry;
         watchRegistry.register(responseWatch);
+        return responseWatch;
     }
 
     /**
@@ -446,7 +437,6 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         return (eReg);
     }
 
-
     /**
      * Connect to the EventProducer and get a Lease
      *
@@ -497,9 +487,9 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                     }
                 }
 
-            } catch(Exception e) {
+            } catch(Exception t) {
                 /* Determine if we should even try to reconnect */
-                if(!ThrowableUtil.isRetryable(e)) {
+                if(!ThrowableUtil.isRetryable(t)) {
                     logger.log(Level.WARNING,
                                "EventLeaseManager ID={0}, Unrecoverable " +
                                "Exception getting EventRegistration",
@@ -509,7 +499,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                         logger.log(Level.FINEST,
                                    "Unrecoverable Exception getting "+
                                    "EventRegistration for "+eDesc.toString(),
-                                   e);
+                                   t);
                     break;
                 } else {
                     if(retryWait>0) {
@@ -689,7 +679,6 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         }
     }
 
-    //private boolean removeWeakReference(WeakReference wr) {
     private boolean removeListener(RemoteServiceEventListener l) {
         boolean removed = eventSubscribers.remove(l);
         if(removed) {
