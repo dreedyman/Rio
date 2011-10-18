@@ -200,7 +200,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * pending or in-progress calls; if false, only unexports the LandlordLessor
      * if there are no pending or in-progress calls
      *
-     * @return True or false if the unexport was succesful
+     * @return True or false if the unexport was successful
      */
     public boolean stop(boolean force) {
         super.stop();
@@ -243,32 +243,30 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * @return The new duration the lease should have
      */
     public long renew(Uuid cookie, long extension) throws LeaseDeniedException,
-    UnknownLeaseException {
+                                                          UnknownLeaseException {
         LeasedResource resource = getLeasedResource(cookie);
         long granted;
         if (resource == null)
-            throw new UnknownLeaseException("No lease for cookie: " + cookie);        
-        synchronized (resource) {
-            long now = System.currentTimeMillis();
-            if (resource.getExpiration() <= now) {                
-                UnknownLeaseException e = 
-                    new UnknownLeaseException("Lease has already expired");
-                if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Lease has already expired by ["+
-                                  (now-resource.getExpiration())+"] millis, "+
-                                  "["+(now-resource.getExpiration())/1000+"] "+
-                                  "seconds");                
-                    logger.throwing(this.getClass().getName(), "renew", e);
-                }
-                throw e;
+            throw new UnknownLeaseException("No lease for cookie: " + cookie);
+        long now = System.currentTimeMillis();
+        if (resource.getExpiration() <= now) {
+            UnknownLeaseException e =
+                new UnknownLeaseException("Lease has already expired");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.finest("Lease has already expired by ["+
+                              (now-resource.getExpiration())+"] milliseconds, "+
+                              "["+(now-resource.getExpiration())/1000+"] "+
+                              "seconds");
+                logger.throwing(this.getClass().getName(), "renew", e);
             }
-            LeasePeriodPolicy.Result leasePeriod = leasePolicy.renew(resource,
-                                                                     extension);
-            resource.setExpiration(leasePeriod.expiration);
-            granted = leasePeriod.duration;
-            addLeasedResource(resource);
-            notifyLeaseRenewal(resource);
+            throw e;
         }
+        LeasePeriodPolicy.Result leasePeriod = leasePolicy.renew(resource,
+                                                                 extension);
+        resource.setExpiration(leasePeriod.expiration);
+        granted = leasePeriod.duration;
+        addLeasedResource(resource);
+        notifyLeaseRenewal(resource);
         return (granted);        
     }
 
