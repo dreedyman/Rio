@@ -36,7 +36,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
- * A @link java.util.logging.Handler} that publishes {@link ServiceLogEvent}s
+ * A {@link java.util.logging.Handler} that publishes {@link ServiceLogEvent}s
  * to interested consumers when a {@link java.util.logging.LogRecord} of
  * interest is logged.
  *
