@@ -350,8 +350,14 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         pane.setLayout(new BorderLayout(8, 8));
         pane.add(scrollPane, BorderLayout.CENTER);
         JButton dismiss = new JButton("Close");
+        dismiss.setToolTipText("Close the details dialog");
+        JButton details = new JButton("Show Details");
+        details.setToolTipText("Show stack trace for the Exception");
         dismiss.addActionListener(new Util.DisposeActionListener(dialog));
         JPanel buttonPane = new JPanel();
+        details.addActionListener(new ShowDetailsListener(thrown, (JFrame)parent, label));
+        if(thrown!=null)
+            buttonPane.add(details);
         buttonPane.add(dismiss);
         pane.add(buttonPane, BorderLayout.SOUTH);
         dialog.getContentPane().add(pane);
@@ -369,9 +375,45 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         if(t==null)
             exception = "No Exception";
         else
-            exception = "<html><body><font color=red>"+t.getClass().getName()+"</font></body></html>";
+            exception = "<html><body>" +
+                        "<font face=monospace><font size=3><font color=red>" +
+                        t.getClass().getName()+
+                        "</font></font></font>" +
+                        "</body></html>";
         return exception;
     }
+
+    private void showDetails(JFrame parent, String label, Throwable thrown) {
+        Throwable cause = thrown.getCause();
+        if(cause != null) {
+            Throwable nested = cause.getCause();
+            Util.showError((nested==null?cause:nested),
+                           parent,
+                           "Stacktrace for "+label);
+        } else {
+            Util.showError(thrown,
+                           parent,
+                           "Stacktrace for " + label);
+        }
+    }
+
+    class ShowDetailsListener implements ActionListener  {
+        Throwable thrown;
+        JFrame parent;
+        String label;
+
+        ShowDetailsListener(Throwable thrown, JFrame parent, String label) {
+            this.thrown = thrown;
+            this.parent = parent;
+            this.label = label;
+        }
+
+        public void actionPerformed(ActionEvent actionEvent) {
+            showDetails(parent, label, thrown);
+        }
+    }
+
+
 
     class DetailsRowListener extends MouseAdapter {
         JTable table;
@@ -392,17 +434,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                 int row = table.rowAtPoint(new Point(e.getX(), e.getY()));
                 String field = (String)table.getModel().getValueAt(row, 0);
                 if(field.equals("Exception") && thrown!=null) {
-                    Throwable cause = thrown.getCause();
-                    if(cause != null) {
-                        Throwable nested = cause.getCause();
-                        Util.showError((nested==null?cause:nested),
-                                       parent,
-                                       "Stacktrace for "+label);
-                    } else {
-                        Util.showError(thrown,
-                                       parent,
-                                       "Stacktrace for " + label);
-                    }
+                    showDetails(parent, label, thrown);
                 }
             }
         }
