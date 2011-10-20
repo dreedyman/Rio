@@ -206,12 +206,13 @@ public class Util {
             e.getCause() instanceof UnsupportedConstraintException) {
             e = e.getCause();
             JOptionPane.showMessageDialog(null,
-                                          "<html>" +
-                                          "Exception: <font color=red>" +
+                                          "<html><font face=monospace><font size=3>" +
+                                          "Exception: " +
                                           e.getClass().getName() +
-                                          "</font><br><br> " +
+                                          "<br><br> " +
                                           "You do not have permission to perform " +
-                                          "the action</html>",
+                                          "the action" +
+                                          "</font></font></html>",
                                           "Action Denied",
                                           JOptionPane.OK_OPTION);
             return;
@@ -221,16 +222,16 @@ public class Util {
             e = e.getCause();
         StackTraceElement[] trace = e.getStackTrace();
         for (StackTraceElement aTrace : trace)
-            buffer.append("at ").append(aTrace).append("<br>");
+            buffer.append("&nbsp;&nbsp;&nbsp;&nbsp;at ").append(aTrace).append("<br>");
 
-        showError("<html>Exception : <font color=red>" +
-                  e.getClass().getName() + "</font>" +
+        showError("<html><font face=monospace><font size=3>" +
+                  "Exception : " +
+                  e.getClass().getName() +
                   " : " +
-                  "<font color=blue>" +
-                  e.getLocalizedMessage() + "</font>" +
+                  e.getLocalizedMessage() +
                   "<br>" +
                   buffer.toString() +
-                  "</html>",
+                  "</font></font></html>",
                   comp,
                   title);
     }
