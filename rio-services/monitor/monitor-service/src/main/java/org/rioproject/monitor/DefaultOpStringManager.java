@@ -479,10 +479,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     }
 
     private RemoteRepository[] getRemoteRepositories() {
-        RemoteRepository[] remoteRepositories = null;
+        Collection<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
         if (oar != null)
-            remoteRepositories = oar.getRepositories().toArray(new RemoteRepository[oar.getRepositories().size()]);
-        return remoteRepositories;
+            remoteRepositories.addAll(oar.getRepositories());
+        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
     }
 
     /**
@@ -1490,7 +1490,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      */
     public TrustVerifier getProxyVerifier() {
         if (logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");
+            logger.entering(DefaultOpStringManager.class.getName(), "getProxyVerifier");
         return (new BasicProxyTrustVerifier(proxy));
     }
 
