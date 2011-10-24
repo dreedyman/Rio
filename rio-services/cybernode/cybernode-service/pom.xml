@@ -18,6 +18,12 @@
 
         <dependency>
             <groupId>org.rioproject</groupId>
+            <artifactId>rio-start</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject</groupId>
             <artifactId>rio-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
