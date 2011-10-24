@@ -18,7 +18,11 @@
             <id>rio</id>
             <url>http://www.rio-project.org/maven2</url>
         </pluginRepository>
-    </pluginRepositories>
+      </pluginRepositories>
+
+    <properties>
+        <rio.version>5.0-SNAPSHOT</rio.version>
+    </properties>
 
     <build>
         <plugins>

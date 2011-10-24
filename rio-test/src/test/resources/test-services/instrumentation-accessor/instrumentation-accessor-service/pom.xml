@@ -23,7 +23,14 @@
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-lib</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>${rio.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-start</artifactId>
+            <version>${rio.version}</version>
         </dependency>
 
     </dependencies>

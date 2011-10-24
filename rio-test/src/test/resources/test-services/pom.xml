@@ -11,6 +11,6 @@
     <modules>
         <module>simple</module>
         <module>instrumentation-accessor</module>
-  </modules>
+    </modules>
 
 </project>
