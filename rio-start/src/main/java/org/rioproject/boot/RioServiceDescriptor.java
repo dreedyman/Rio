@@ -40,6 +40,7 @@ import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -401,7 +402,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      */
     private String setClasspath(String cp) {
         StringBuilder buff = new StringBuilder();
-        for(String s : BootUtil.toArray(cp, ","+File.pathSeparator)) {
+        for(String s : toArray(cp, ","+File.pathSeparator)) {
             buff.append(s);
             File f = new File(s);
             try {
@@ -425,7 +426,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 }
                 String values = (String)attributes.get(new Attributes.Name("Class-Path"));
                 if(values!=null) {
-                    for(String v : BootUtil.toArray(values)) {
+                    for(String v : toArray(values, " ,"+ File.pathSeparator)) {
                         buff.append(File.pathSeparator);
                         String name = jarPath+v;
                         File add = new File(name);
@@ -441,6 +442,16 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         return buff.toString();
     }
 
+    private String[] toArray(String arg, String delim) {
+        StringTokenizer tok = new StringTokenizer(arg, delim);
+        String[] array = new String[tok.countTokens()];
+        int i=0;
+        while(tok.hasMoreTokens()) {
+            array[i] = tok.nextToken();
+            i++;
+        }
+        return(array);
+    }
 
     public String toString() {
         return "RioServiceDescriptor " +
