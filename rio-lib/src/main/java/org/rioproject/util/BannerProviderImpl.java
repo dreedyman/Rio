@@ -23,13 +23,13 @@ import org.rioproject.RioVersion;
 public class BannerProviderImpl implements BannerProvider {
 
     public String getBanner(String service) {
-        StringBuffer banner = new StringBuffer();
+        StringBuilder banner = new StringBuilder();
         banner.append("\n");
         banner.append("____ _ ____\n");
-        banner.append("|__/ | |  |   "+service+"\n");
-        banner.append("|  \\ | |__|   Version: "+ RioVersion.VERSION+", Build: "+RioVersion.getBuildNumber()+"\n");
+        banner.append("|__/ | |  |   ").append(service).append("\n");
+        banner.append("|  \\ | |__|   Version: ").append(RioVersion.VERSION).append(", Build: ").append(RioVersion.getBuildNumber()).append("\n");
         banner.append("\n");
-        banner.append("Rio Home: "+System.getProperty("RIO_HOME"));
+        banner.append("Rio Home: ").append(System.getProperty("RIO_HOME"));
         return banner.toString();
     }
 }
