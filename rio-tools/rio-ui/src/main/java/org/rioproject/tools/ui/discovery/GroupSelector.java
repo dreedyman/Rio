@@ -99,7 +99,6 @@ public class GroupSelector extends JPanel {
         });
         dismiss.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                System.out.println("++++++ " + dialog.getSize().toString());
                 dialog.dispose();
             }
         });
