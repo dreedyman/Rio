@@ -23,7 +23,7 @@ import org.drools.logger.KnowledgeRuntimeLoggerFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 import org.drools.template.ObjectDataCompiler;
-import org.rioproject.boot.BootUtil;
+import org.rioproject.resources.util.StringUtil;
 import org.rioproject.sla.RuleMap;
 import org.rioproject.sla.SLA;
 import org.rioproject.watch.Calculable;
@@ -69,7 +69,7 @@ public class DroolsCEPManager implements CEPSession {
 
             List<String> rules = new ArrayList<String>();
             boolean classPathResource = false;
-            for (String rule : BootUtil.toArray(ruleDef.getResource(), " ,")) {
+            for (String rule : StringUtil.toArray(ruleDef.getResource(), " ,")) {
                 logger.info("PROCESSING: " + rule);
                 if (rule.startsWith("http")) {
                     resources.put(ResourceFactory.newUrlResource(rule),

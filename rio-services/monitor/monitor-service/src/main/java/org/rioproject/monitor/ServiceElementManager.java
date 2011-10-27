@@ -16,7 +16,6 @@
 package org.rioproject.monitor;
 
 import com.sun.jini.admin.DestroyAdmin;
-import com.sun.jini.start.ClassLoaderUtil;
 import net.jini.admin.Administrable;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationProvider;
@@ -1870,7 +1869,6 @@ public class ServiceElementManager implements InstanceIDManager {
                                           "["+hostAddress+"]. Attempts will be " +
                                           "made to resolve the serviceID of this " +
                                           "service. "+sb.toString());
-                        ClassLoaderUtil.displayContextClassLoaderTree();
                         ambiguousServices.put(proxy, hostAddress);
                     }
                 } catch(Exception e) {

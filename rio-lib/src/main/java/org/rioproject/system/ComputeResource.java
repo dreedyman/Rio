@@ -20,11 +20,11 @@ import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.core.provision.DownloadRecord;
 import org.rioproject.core.provision.StagedSoftware;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
+import org.rioproject.resources.util.StringUtil;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityWriter;
 import org.rioproject.system.measurable.MeasurableCapability;
@@ -319,7 +319,7 @@ public class ComputeResource extends Observable {
                         String[] classpath;
                         if(pCap.getPath().endsWith(".jar") ||
                            pCap.getPath().endsWith(".zip")) {
-                            classpath = BootUtil.toArray(pCap.getPath());
+                            classpath = StringUtil.toArray(pCap.getPath());
                         } else {
                             String cp = pCap.getPath();
                             File f = new File(cp);

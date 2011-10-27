@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.config;
+package org.rioproject.util;
 
 /**
  * Property helper
@@ -70,7 +70,7 @@ public class PropertyHelper {
         String end = delimeters[1];
         int s = 0;
         int e  ;
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         while((e = arg.indexOf(start, s)) >= 0) {
             String str = arg.substring(e+start.length());
             int n = str.indexOf(end);

@@ -27,6 +27,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>rio-start</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -44,11 +45,13 @@
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-compress</artifactId>
+            <optional>true</optional>
         </dependency>
 
 		<dependency>
 		    <groupId>net.jini</groupId>
 		    <artifactId>start</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

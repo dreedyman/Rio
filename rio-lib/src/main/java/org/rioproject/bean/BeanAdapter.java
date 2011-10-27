@@ -20,11 +20,11 @@ import net.jini.export.Exporter;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.rioproject.bean.proxy.BeanDelegator;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBean;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.jsb.ServiceBeanAdapter;
+import org.rioproject.net.HostUtil;
 import org.rioproject.resources.servicecore.Service;
 
 import javax.management.*;
@@ -466,8 +466,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                                       Exporter.class,
                                                       null);
         if(exporter==null) {
-            String host =
-                BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+            String host = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
             exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(host, 0),
                                              new BeanInvocationLayerFactory(),
                                              false,

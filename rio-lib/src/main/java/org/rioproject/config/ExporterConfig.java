@@ -23,7 +23,7 @@ import net.jini.export.Exporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.BasicILFactory;
-import org.rioproject.boot.BootUtil;
+import org.rioproject.net.HostUtil;
 
 import java.net.UnknownHostException;
 
@@ -69,22 +69,14 @@ public class ExporterConfig {
      * @throws ConfigurationException If there are errors reading the
      * configuration
      */
-    public static Exporter getExporter(Configuration config,
-                                       String component,
-                                       String entry,
-                                       Exporter defaultExporter) 
+    public static Exporter getExporter(Configuration config, String component, String entry, Exporter defaultExporter)
     throws ConfigurationException {
         
-        final Exporter exporter = 
-            (Exporter)config.getEntry(DEFAULT_COMPONENT, 
-                                      ENTRY_NAME, 
-                                      Exporter.class,
-                                      defaultExporter);
-        return((Exporter)Config.getNonNullEntry(config, 
-                                                component,
-                                                entry, 
-                                                Exporter.class, 
-                                                exporter));
+        final Exporter exporter =  (Exporter)config.getEntry(DEFAULT_COMPONENT,
+                                                             ENTRY_NAME,
+                                                             Exporter.class,
+                                                             defaultExporter);
+        return((Exporter)Config.getNonNullEntry(config, component, entry, Exporter.class, exporter));
     }
 
     /**
@@ -99,7 +91,7 @@ public class ExporterConfig {
      * If the special <tt>org.rioproject.defaultExporter</tt>  entry cannot be
      * found, the following Exporter will be used:
      * <pre>
-     *  String address = BootUtil.getHostAddressFromProperty(&quot;java.rmi.server.hostname&quot;);
+     *  String address = HostUtil.getHostAddressFromProperty(&quot;java.rmi.server.hostname&quot;);
      *  exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
      *                                   new BasicILFactory(),
      *                                   false,
@@ -120,38 +112,25 @@ public class ExporterConfig {
      * @throws ConfigurationException If there are errors reading the
      * configuration
      */
-    public static Exporter getExporter(Configuration config,
-                                       String component,
-                                       String entry)
-    throws ConfigurationException {
+    public static Exporter getExporter(Configuration config, String component, String entry)
+        throws ConfigurationException {
 
-        Exporter exporter = (Exporter)config.getEntry(component,
-                                                      entry,
-                                                      Exporter.class,
-                                                      null);
+        Exporter exporter = (Exporter)config.getEntry(component, entry, Exporter.class, null);
         if (exporter != null) {
             return exporter;
         }
-        exporter = (Exporter)config.getEntry(DEFAULT_COMPONENT,
-                                             ENTRY_NAME,
-                                             Exporter.class,
-                                             null);
+        exporter = (Exporter)config.getEntry(DEFAULT_COMPONENT, ENTRY_NAME, Exporter.class, null);
         if (exporter != null) {
             return exporter;
         }
         try {
-            String address =
-                BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address,
-                                                                           0),
+            String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
                                              new BasicILFactory(),
                                              false,
                                              true);
         } catch (UnknownHostException e) {
-            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
-                                             new BasicILFactory(),
-                                             false,
-                                             true);
+            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory(), false, true);
         }
 
         return exporter;

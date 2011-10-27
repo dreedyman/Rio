@@ -47,12 +47,12 @@ import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.entry.ComputeResourceInfo;
+import org.rioproject.net.HostUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.*;
 import org.rioproject.entry.OperationalStringEntry;
@@ -1256,8 +1256,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         if(config==null)
             throw new NullPointerException("config is null");
         Exporter exporter;
-        String address =
-            BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         final Exporter defaultExporter =
             new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
                                   new BasicILFactory(),
@@ -1353,8 +1352,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     protected Exporter getAdminExporter() throws
                                           ConfigurationException,
                                           UnknownHostException {
-        String address =
-            BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         Exporter basicExporter =
             new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
                                   new BasicILFactory(),

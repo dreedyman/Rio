@@ -19,8 +19,8 @@ import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.entry.Host;
 import org.rioproject.associations.Association;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.config.Constants;
+import org.rioproject.net.HostUtil;
 import org.rioproject.resources.util.ThrowableUtil;
 
 import java.util.ArrayList;
@@ -62,8 +62,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     public void setAssociation(Association<T> association) {
         this.association = association;
         try {
-            hostAddress =
-                BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+            hostAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
             for(ServiceItem item : association.getServiceItems()) {
                 add(item);
             }

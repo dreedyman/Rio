@@ -15,10 +15,7 @@
  */
 package org.rioproject.resolver.aether;
 
-import org.apache.maven.repository.internal.DefaultArtifactDescriptorReader;
-import org.apache.maven.repository.internal.DefaultVersionRangeResolver;
-import org.apache.maven.repository.internal.DefaultVersionResolver;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.repository.internal.*;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Settings;
@@ -42,10 +39,8 @@ import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyFilter;
-import org.sonatype.aether.impl.ArtifactDescriptorReader;
-import org.sonatype.aether.impl.VersionRangeResolver;
-import org.sonatype.aether.impl.VersionResolver;
-import org.sonatype.aether.impl.internal.DefaultServiceLocator;
+import org.sonatype.aether.impl.*;
+import org.apache.maven.repository.internal.DefaultServiceLocator;
 import org.sonatype.aether.installation.InstallRequest;
 import org.sonatype.aether.installation.InstallationException;
 import org.sonatype.aether.repository.LocalRepository;
@@ -132,7 +127,6 @@ public class AetherService {
     public String getLocalRepositoryLocation() {
         String localRepositoryLocation = effectiveSettings.getLocalRepository();
         if (localRepositoryLocation == null) {
-
             localRepositoryLocation = System.getProperty("user.home") +
                                       File.separator +
                                       ".m2" +
@@ -158,7 +152,6 @@ public class AetherService {
     public ResolutionResult resolve(String groupId, String artifactId, String version)
         throws DependencyCollectionException, DependencyResolutionException, SettingsBuildingException {
         return resolve(groupId, artifactId, "jar", version);
-
     }
 
     /**
@@ -203,7 +196,6 @@ public class AetherService {
                                     String version) throws DependencyCollectionException,
                                                            DependencyResolutionException,
                                                            SettingsBuildingException {
-
         return resolve(groupId, artifactId, extension, classifier, version, getRemoteRepositories(null));
     }
 
@@ -256,29 +248,34 @@ public class AetherService {
      * @param artifactId The artifact identifier of the artifact, may be {@code null}.
      * @param version The version of the artifact, may be {@code null}.
      * @param pomFile The pom File, can not be {@code null}.
-     * @param artifactFile The file for the project's artifact, may be {@code null}.
+     * @param artifactFile The file for the project's artifact, may be {@code null}. If null, the <i>type</i> of the
+     * artifact is determined to be <code>.pom</code>. Otherwise the type is obtained from the
+     * <code>artifactFile</code>'s extension
      *
      * @throws InstallationException if the requested installation is unsuccessful
+     * @throws IllegalArgumentException if the groupId, artifactId, version or pomFile is null.
      */
     public void install(String groupId, String artifactId, String version, File pomFile, File artifactFile)
         throws InstallationException {
 
         InstallRequest installRequest = new InstallRequest();
-
         if(artifactFile!=null) {
-            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", "jar", version);
+            String name = artifactFile.getName();
+            String type = name.substring(artifactFile.getName().lastIndexOf(".")+1, name.length());
+            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", type, version);
             jarArtifact = jarArtifact.setFile(artifactFile);
-
             Artifact pomArtifact = new SubArtifact(jarArtifact, "", "pom");
             pomArtifact = pomArtifact.setFile(pomFile);
-            installRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
+            installRequest = installRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
         } else {
             Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "", "pom", version);
             pomArtifact = pomArtifact.setFile(pomFile);
-            installRequest.addArtifact(pomArtifact);
+            installRequest = installRequest.addArtifact(pomArtifact);
         }
         repositorySystem.install(repositorySystemSession, installRequest);
     }
+
+
 
     protected DependencyFilter getDependencyFilter(Artifact a) {
         Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();

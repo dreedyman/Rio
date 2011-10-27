@@ -18,13 +18,13 @@ package org.rioproject.cybernode;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resources.client.LookupCachePool;
+import org.rioproject.resources.util.StringUtil;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
@@ -303,7 +303,7 @@ public class StaticCybernode {
     }
 
     private static String[] parseBeans(String beans) {
-        return BootUtil.toArray(beans);
+        return StringUtil.toArray(beans);
     }
 
     private ServiceElement makeServiceElement(String implClass) {

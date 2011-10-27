@@ -17,7 +17,7 @@ package org.rioproject.jmx;
 
 import com.sun.tools.attach.*;
 import net.jini.config.Configuration;
-import org.rioproject.boot.BootUtil;
+import org.rioproject.net.HostUtil;
 import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 
@@ -108,8 +108,7 @@ public class JMXConnectionUtil {
             throw new Exception("Unable to create the JMXConnectorServer");
         }
 
-        String defaultAddress =
-            BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        String defaultAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
 
         String hostAddress = (String) config.getEntry(COMPONENT,
                                                       "hostAddress",

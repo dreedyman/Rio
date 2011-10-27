@@ -25,12 +25,12 @@ import org.drools.io.impl.ResourceChangeScannerImpl;
 import org.rioproject.associations.*;
 import org.rioproject.bean.Initialized;
 import org.rioproject.bean.PreDestroy;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.resources.util.StringUtil;
 import org.rioproject.sla.RuleMap;
 
 import java.io.InputStream;
@@ -365,7 +365,7 @@ public class GnosticImpl implements Gnostic {
                                     "["+ruleClassPath+"]: "+sb.toString());
                     }
                 } else {
-                    classPath = BootUtil.toArray(ruleClassPath, " ,");
+                    classPath = StringUtil.toArray(ruleClassPath, " ,");
                 }
                 URI[] uris = new URI[classPath.length];
                 for (int i = 0; i < classPath.length; i++) {

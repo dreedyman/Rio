@@ -15,7 +15,7 @@
  */
 package org.rioproject.system.capability;
 
-import org.rioproject.boot.BootUtil;
+import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.loader.CommonClassLoader;
 
 import java.net.MalformedURLException;
@@ -54,7 +54,7 @@ public class PlatformCapabilityLoader {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
         List<URL> loadables = new ArrayList<URL>();
-        URL[] urls = BootUtil.toURLs(classPath);
+        URL[] urls = PlatformCapabilityConfig.toURLs(classPath);
         for (URL url : urls) {
             boolean loaded = false;
             for (URL loadedURL : loadedURLs) {

@@ -34,7 +34,6 @@ import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
-import org.rioproject.boot.BootUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
@@ -51,6 +50,7 @@ import org.rioproject.jsb.JSBManager;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanActivation.LifeCycleManager;
 import org.rioproject.jsb.ServiceBeanAdapter;
+import org.rioproject.net.HostUtil;
 import org.rioproject.opstring.*;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.persistence.PersistentStore;
@@ -536,8 +536,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
         if(registryPort!=0) {
             try {
-                String address =
-                    BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+                String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
                 Registry registry = LocateRegistry.getRegistry(address,
                                                                registryPort);
                 try {
@@ -745,7 +744,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         initializeComputeResource(computeResource);
 
         if(logger.isLoggable(Level.FINER)) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("Service Limit : ").append(serviceLimit).append("\n");
             sb.append("System Capabilities\n");
             MeasurableCapability[] mCaps =
@@ -785,8 +784,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             
             for (PlatformCapability pCap : pCaps) {
                 boolean convert = false;
-                if(pCap.getClass().getName().indexOf("StorageCapability")!=-1 ||
-                    pCap.getClass().getName().indexOf("Memory")!=-1) {
+                if(pCap.getClass().getName().contains("StorageCapability") ||
+                   pCap.getClass().getName().contains("Memory")) {
                     convert = true;
                 }
                 sb.append("\t")
@@ -796,7 +795,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 for (String key : keys) {
                     Object value = pCap.getValue(key);
                     if(convert && value instanceof Double) {
-                        if(pCap.getClass().getName().indexOf("StorageCapability")!=-1) {
+                        if(pCap.getClass().getName().contains("StorageCapability")) {
                             double d = ((Double)value)/GB;
                             value = nf.format(d)+" GB";
                         } else {
@@ -1059,7 +1058,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         void dumpOpStringError(Map errorMap) {
             if(!errorMap.isEmpty()) {
                 Set keys = errorMap.keySet();
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append("+========================+\n");
                 //int i = 0;
                 for (Object comp : keys) {

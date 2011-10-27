@@ -18,7 +18,6 @@ package org.rioproject.tools.harvest
 import net.jini.jeri.BasicJeriExporter
 import net.jini.jeri.BasicILFactory
 import net.jini.jeri.tcp.TcpServerEndpoint
-import org.rioproject.boot.BootUtil
 import org.rioproject.config.Constants
 import net.jini.export.Exporter
 import java.rmi.Remote
@@ -33,6 +32,7 @@ import net.jini.discovery.DiscoveryManagement
 import java.util.logging.Logger
 import java.util.logging.Level
 import org.rioproject.deploy.ProvisionManager
+import org.rioproject.net.HostUtil
 
 /**
  * Provides an implementation of  {@link Harvester}
@@ -49,7 +49,7 @@ class HarvesterBean implements Harvester {
     }
 
     def export() {
-        String address = BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
+        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
         System.setProperty("java.rmi.server.codebase", "")
         Exporter exporter =
             new BasicJeriExporter(TcpServerEndpoint.getInstance(address,0),
@@ -77,7 +77,7 @@ class HarvesterBean implements Harvester {
     }
 
     HarvesterSession connect() {
-        String address = BootUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
+        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
         ServerSocket server = new ServerSocket(0, 50, InetAddress.getByName(address))
         HarvesterSession hSession =
         new HarvesterSession(server.localPort,
