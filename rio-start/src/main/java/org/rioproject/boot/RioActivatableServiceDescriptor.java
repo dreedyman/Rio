@@ -23,6 +23,7 @@ import net.jini.config.Configuration;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.config.PlatformCapabilityConfig;
+import org.rioproject.config.PlatformLoader;
 
 import java.io.*;
 import java.net.URL;

@@ -20,17 +20,13 @@ import com.sun.jini.start.NonActivatableServiceDescriptor;
 import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
-import org.rioproject.resolver.Artifact;
-import org.rioproject.resolver.Resolver;
+import org.rioproject.net.HostUtil;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.resolver.maven2.Repository;
 
 import java.io.*;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides utilities to obtain {@link com.sun.jini.start.ServiceDescriptor} instances
@@ -41,6 +37,12 @@ import java.util.jar.JarFile;
 public class ServiceDescriptorUtil {
     /* Port value obtained from invoking the getStartupPort() method */
     private static int port = 0;
+
+    /*
+     * Cannot instantiate this utility
+     */
+    private ServiceDescriptorUtil() {
+    }
 
     static int getStartupPort() throws IOException {
         if(port==0) {
@@ -159,8 +161,7 @@ public class ServiceDescriptorUtil {
         if(debug) {
             System.setProperty("org.rioproject.tools.webster.debug", "1");
         }
-        String address =
-            BootUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+        String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
         return(new NonActivatableServiceDescriptor("",
                                                    policy,
                                                    webster,
@@ -193,21 +194,23 @@ public class ServiceDescriptorUtil {
         String cybernodeCodebase = "artifact:org.rioproject.cybernode/cybernode-proxy/"+ RioVersion.VERSION;
         String implClass = "org.rioproject.cybernode.CybernodeImpl";
         return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
-
     }
 
-    public static String getCybernodeClasspath() {
+    public static String getCybernodeClasspath() throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
-        String[] jars;
+        List<String> jarList = new ArrayList<String>();
+        jarList.add("cybernode-service.jar");
         if(System.getProperty("RIO_TEST_ATTACH")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
-            jars = new String[]{"cybernode-service.jar", "rio-test.jar"};
-        } else {
-            jars = new String[]{"cybernode-service.jar"};
+            jarList.add("rio-test.jar");
         }
-        return makePath(rioHome+File.separator+"lib", jars);
+        StringBuilder classPath = new StringBuilder();
+        classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
+        classPath.append(File.pathSeparator);
+        classPath.append(getProxyClassPath("org.rioproject.cybernode:cybernode-proxy:"+RioVersion.VERSION));
+        return classPath.toString();
     }
 
     public static String getCybernodeCodebase() {
@@ -241,22 +244,41 @@ public class ServiceDescriptorUtil {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
-        String[] jars;
+        List<String> jarList = new ArrayList<String>();
+        jarList.add("monitor-service.jar");
         if(System.getProperty("RIO_TEST_ATTACH")!=null) {
+            System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
+            jarList.add("rio-test.jar");
+        }
+        StringBuilder classPath = new StringBuilder();
+        classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
+        classPath.append(File.pathSeparator);
+        classPath.append(getProxyClassPath("org.rioproject.monitor:monitor-proxy:" +RioVersion.VERSION));
+        String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
+        String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
+
+        return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
+
+        /*if(System.getProperty("RIO_TEST_ATTACH")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
             jars = new String[]{"monitor-service.jar", "rio-test.jar"};
         } else {
             jars = new String[]{"monitor-service.jar"};
         }
-        File libDlDir = new File(rioHome+File.separator+"lib-dl");
-        install("org.rioproject", "rio-api", RioVersion.VERSION, null, new File(libDlDir, "rio-api.jar"));
-        install("org.rioproject.monitor", "monitor-api", RioVersion.VERSION, null, new File(libDlDir, "monitor-api.jar"));
-        install("org.rioproject.monitor", "monitor-proxy", RioVersion.VERSION, null, new File(libDlDir, "monitor-proxy.jar"));
-
         String monitorClasspath = makePath(rioHome+File.separator+"lib", jars);
         String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
         String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
-        return (new RioServiceDescriptor(monitorCodebase, policy, monitorClasspath, implClass, monitorConfig));
+        return (new RioServiceDescriptor(monitorCodebase, policy, monitorClasspath, implClass, monitorConfig));*/
+    }
+
+    private static String getProxyClassPath(String proxy) throws IOException {
+        String[] proxyClassPath;
+        try {
+            proxyClassPath = ResolverHelper.getResolver().getClassPathFor(proxy);
+        } catch (ResolverException e) {
+            throw new IOException("Unable to resolve "+proxy, e);
+        }
+        return makePath(proxyClassPath);
     }
 
     /**
@@ -278,10 +300,6 @@ public class ServiceDescriptorUtil {
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         String reggieClasspath = rioHome+File.separator+"lib"+File.separator+"reggie.jar";
-        File pomDir = new File(rioHome+File.separator+"config"+File.separator+"poms");
-        File libDlDir = new File(rioHome+File.separator+"lib-dl");
-        install("net.jini", "jsk-dl", "2.1", new File(pomDir, "jsk-dl.pom"), new File(libDlDir, "jsk-dl.jar"));
-        install("com.sun.jini", "reggie-dl", "2.1", new File(pomDir, "reggie-dl.pom"), new File(libDlDir, "reggie-dl.jar"));
         String reggieCodebase = "artifact:com.sun.jini/reggie-dl/2.1";
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
@@ -297,121 +315,13 @@ public class ServiceDescriptorUtil {
         return sb.toString();
     }
 
-    static void install() throws IOException {
-        String rioHome = System.getProperty("RIO_HOME");
-        if(rioHome == null)
-            throw new RuntimeException("RIO_HOME property not declared");
-        Map<Artifact, String> rioArtifactJars = new HashMap<Artifact, String>();
-        rioArtifactJars.put(new Artifact("org.rioproject.cybernode:cybernode-api:"+RioVersion.VERSION),   "cybernode-api.jar");
-        rioArtifactJars.put(new Artifact("org.rioproject.cybernode:cybernode-proxy:"+RioVersion.VERSION), "cybernode-proxy.jar");
-        rioArtifactJars.put(new Artifact("org.rioproject.cybernode:cybernode-ui:"+RioVersion.VERSION),    "cybernode-ui.jar");
-        rioArtifactJars.put(new Artifact("org.rioproject.monitor:monitor-api:"+RioVersion.VERSION),       "monitor-api.jar");
-        rioArtifactJars.put(new Artifact("org.rioproject.monitor:monitor-proxy:"+RioVersion.VERSION),     "monitor-proxy.jar");
-        rioArtifactJars.put(new Artifact("org.rioproject:rio-api:"+RioVersion.VERSION),                   "rio-api.jar");
-        rioArtifactJars.put(new Artifact("org.rioproject.watch-ui:"+RioVersion.VERSION),                  "watch-ui.jar");
-
-
-        File libDlDir = new File(rioHome+File.separator+"lib-dl");
-        for(Map.Entry<Artifact, String> entry : rioArtifactJars.entrySet()) {
-            Artifact a = entry.getKey();
-            install(a.getGroupId(), a.getArtifactId(), a.getVersion(), null, new File(libDlDir, entry.getValue()));
-        }
-
-        File pomDir = new File(rioHome+File.separator+"config"+File.separator+"poms");
-        Map<File, Map<Artifact, String>> pomArtifactJars = new HashMap<File, Map<Artifact, String>>();
-        pomArtifactJars.put(new File(pomDir, "jmx-lookup.pom"), createMap("net.jini.lookup:jmx-lookup:2.1", "jmx-lookup.jar"));
-        pomArtifactJars.put(new File(pomDir, "jsk-dl.pom"),     createMap("net.jini:jsk-dl:2.1",            "jsk-dl.jar"));
-        pomArtifactJars.put(new File(pomDir, "reggie-dl.pom"),  createMap("com.sun.jini:reggie-dl:2.1",     "reggie-dl.jar"));
-        pomArtifactJars.put(new File(pomDir, "serviceui.pom"),  createMap("net.jini.lookup:serviceui:2.1",  "serviceui.jar"));
-        for(Map.Entry<File, Map<Artifact, String>> entry : pomArtifactJars.entrySet()) {
-            File pom = entry.getKey();
-            for(Map.Entry<Artifact, String> entry2 : entry.getValue().entrySet()) {
-                Artifact a = entry2.getKey();
-                install(a.getGroupId(), a.getArtifactId(), a.getVersion(), pom, new File(libDlDir, entry2.getValue()));
-            }
-        }
-    }
-
-    private static Map<Artifact, String> createMap(String a, String j) {
-        Map<Artifact, String> map = new HashMap<Artifact, String>();
-        map.put(new Artifact(a), j);
-        return map;
-    }
-
-    static void install(String groupId, String artifactId, String version, File pomFile, File artifactFile) throws IOException {
-        File localRepository = Repository.getLocalRepository();
+    protected static String makePath(String... jars) {
         StringBuilder sb = new StringBuilder();
-        sb.append(groupId.replaceAll("\\.", File.separator));
-        sb.append(File.separator);
-        sb.append(artifactId);
-        sb.append(File.separator);
-        sb.append(version);
-        sb.append(File.separator);
-
-        int ndx = artifactFile.getName().lastIndexOf(".");
-        String jarName = artifactFile.getName().substring(0, ndx);
-        sb.append(jarName).append("-").append(version).append(".jar");
-        File jar = new File(localRepository, sb.toString());
-        if(jar.exists())
-            return;
-
-        /*
-         * Look for the pom in the artifact jar. Once we find it, read it in, then write it out as a temp file
-         */
-        if(pomFile==null) {
-            String line;
-            List<String> pomListing = new ArrayList<String>();
-            JarFile jarFile = new JarFile(artifactFile);
-            sb.delete(0, sb.length());
-            sb.append("META-INF/maven/").append(groupId).append("/").append(artifactId).append("/").append("pom.xml");
-            JarEntry pomEntry = jarFile.getJarEntry(sb.toString());
-            if(pomEntry==null) {
-                System.err.println("Unable to find jar entry ["+sb.toString()+"], in ["+artifactFile.getPath()+"], " +
-                                   "cannot install "+groupId+":"+artifactId+":"+version);
-                return;
-            }
-            InputStream is = jarFile.getInputStream(pomEntry);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            while((line = br.readLine())!=null) {
-                pomListing.add(line);
-            }
-            File tempPom = File.createTempFile(groupId+"-"+artifactId, ".pom");
-            tempPom.deleteOnExit();
-            Writer output = new BufferedWriter(new FileWriter(tempPom));
-            try {
-                for(String s : pomListing)
-                    output.write(s);
-            }
-            finally {
-                is.close();
-                output.close();
-            }
-            pomFile = tempPom;
+        for(String jar : jars) {
+            if(sb.length()>0)
+                sb.append(File.pathSeparator);
+            sb.append(jar);
         }
-        try {
-            Resolver r = ResolverHelper.getResolver();
-            ClassLoader resolverLoader = r.getClass().getClassLoader();
-            ClassLoader cCL = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(resolverLoader);
-            try {
-                Class aetherService = resolverLoader.loadClass("org.rioproject.resolver.aether.AetherService");
-                Method getDefaultInstance = aetherService.getDeclaredMethod("getDefaultInstance");
-                Object aetherServiceInstance = getDefaultInstance.invoke(null);
-                Method install = aetherService.getDeclaredMethod("install",
-                                                                 String.class,
-                                                                 String.class,
-                                                                 String.class,
-                                                                 File.class,
-                                                                 File.class);
-                install.invoke(aetherServiceInstance, groupId, artifactId, version, pomFile,  artifactFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                Thread.currentThread().setContextClassLoader(cCL);
-            }
-        } catch (ResolverException e) {
-            e.printStackTrace();
-        }
+        return sb.toString();
     }
-
 }
