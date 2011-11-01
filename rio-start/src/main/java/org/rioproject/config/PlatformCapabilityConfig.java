@@ -15,11 +15,11 @@
  */
 package org.rioproject.config;
 
-import org.rioproject.boot.BootUtil;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
@@ -34,20 +34,11 @@ public class PlatformCapabilityConfig {
     String path;
     String nativeLib;
     String common="yes";
-    static String DEFAULT_PLATFORM_CLASS =
-        "org.rioproject.system.capability.software.SoftwareSupport";
+    static String DEFAULT_PLATFORM_CLASS = "org.rioproject.system.capability.software.SoftwareSupport";
     String platformClass =DEFAULT_PLATFORM_CLASS;
     String costModelClass;
 
     public PlatformCapabilityConfig() {
-    }
-
-    public PlatformCapabilityConfig(String name,
-                                    String version,
-                                    String classpath) {
-        this.name = name;
-        this.version = version;
-        this.classpath = classpath;
     }
 
     public PlatformCapabilityConfig(String name,
@@ -108,7 +99,7 @@ public class PlatformCapabilityConfig {
 
     public URL[] getClasspathURLs() throws MalformedURLException {
         String[] classpath = getClasspath();
-        return(BootUtil.toURLs(classpath));
+        return(toURLs(classpath));
     }
 
     public void setClasspath(String classpath) {
@@ -168,5 +159,69 @@ public class PlatformCapabilityConfig {
                ", platformClass='" + platformClass + '\'' +
                ", costModelClass='" + costModelClass + '\'' +
                '}';
+    }
+
+    /**
+     * Will return an array of URLs based on the input String array. If the array
+     * element is a file, the fully qualified file path must be provided. If the
+     * array element is a directory, a fully qualified directory path must be
+     * provided, and the directory will be searched for all .jar and .zip files
+     *
+     * @param elements A String array of fully qualified directory path
+     *
+     * @return An URL[] elements
+     *
+     * @throws MalformedURLException if any of the elements cannot be converted
+     */
+    public static URL[] toURLs(String[] elements)throws MalformedURLException {
+        ArrayList<URL> list = new ArrayList<URL>();
+        if(elements!=null) {
+            for (String el : elements) {
+                File element = new File(el);
+                if (element.isDirectory()) {
+                    URL[] urls = scanDirectory(el);
+                    list.addAll(Arrays.asList(urls));
+                } else {
+                    list.add(element.toURI().toURL());
+                }
+            }
+        }
+        return(list.toArray(new URL[list.size()]));
+    }
+
+    /**
+     * Will return an array of URLs for all .jar and .zip files in the directory,
+     * including the directory itself
+     *
+     * @param dirPath A fully qualified directory path
+     *
+     * @return A URL[] for all .jar and .zip files in the directory,
+     *  including the directory itself
+     *
+     * @throws MalformedURLException If elements in the directory cannot be
+     * created into a URL
+     */
+    public static URL[] scanDirectory(String dirPath) throws MalformedURLException {
+        File dir = new File(dirPath);
+        if(!dir.isDirectory())
+            throw new IllegalArgumentException(dirPath+" is not a directory");
+        if(!dir.canRead())
+            throw new IllegalArgumentException("No read permissions for "+dirPath);
+        File[] files = dir.listFiles();
+        ArrayList<URL> list = new ArrayList<URL>();
+
+        list.add(dir.toURI().toURL());
+
+        for (File file : files) {
+            if (file.getName().endsWith(".jar") ||
+                file.getName().endsWith(".JAR") ||
+                file.getName().endsWith(".zip") ||
+                file.getName().endsWith(".ZIP")) {
+
+                if (file.isFile())
+                    list.add(file.toURI().toURL());
+            }
+        }
+        return(list.toArray(new URL[list.size()]));
     }
 }
