@@ -49,6 +49,11 @@ if "%1"=="" goto noService
 set starterConfig=%RIO_HOME%\config\start-%1.groovy
 if not exist "%starterConfig%" goto noStarter
 shift
+
+rem Call the install script, do not assume that Groovy has been installed.
+set groovyClasspath=-cp "%RIO_HOME%\lib\groovy-all.jar"
+"%JAVA_HOME%\bin\java" %groovyClasspath% org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain "%RIO_HOME%\bin\install.groovy" "%JAVA_HOME%" "%RIO_HOME%"
+
 echo starter config [%starterConfig%]
 set RIO_LOG_DIR="%RIO_HOME%"\logs\
 if "%RIO_NATIVE_DIR%" == "" set RIO_NATIVE_DIR="%RIO_HOME%"\lib\native
@@ -59,7 +64,7 @@ set agentpath=-javaagent:"%RIO_HOME%\lib\rio-start.jar"
 
 set launchTarget=com.sun.jini.start.ServiceStarter
 
-"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.protocol.handler.pkgs=net.jini.url -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
+"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
 goto end
 
 :noStarter

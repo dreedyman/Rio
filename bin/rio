@@ -78,6 +78,12 @@ toWindows() {
     cygpath -pw "$@"
 }
 
+# Call the install script, do not assume that Groovy has been installed.
+installRioToLocalRepository() {
+    groovyClasspath="-cp `toNative $RIO_LIB/groovy-all.jar`"
+    ""$JAVACMD"" $groovyClasspath org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain \
+    $scriptDir/install.groovy $JAVA_HOME $RIO_HOME
+}
 
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1
@@ -104,6 +110,10 @@ fi
 # If the command is to start the Rio services, invoke the ServiceStarter
 # Otherwise invoke the CLI
 if [ "$start" = "1" ]; then
+
+    # Run installer first
+    installRioToLocalRepository
+
     if [ -z "$RIO_NATIVE_DIR" ] ; then
         RIO_NATIVE_DIR="`toNative $RIO_LIB/native`"
     fi
