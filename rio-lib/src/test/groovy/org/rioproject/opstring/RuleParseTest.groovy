@@ -18,7 +18,6 @@ package org.rioproject.opstring
 import org.rioproject.sla.RuleMap
 import org.rioproject.sla.RuleMap.ServiceDefinition
 import org.rioproject.sla.RuleMap.RuleDefinition
-import org.rioproject.boot.BootUtil;
 
 /**
  * Test rule parsing
@@ -62,7 +61,7 @@ class RuleParseTest extends GroovyTestCase {
         assertTrue "There should be a \'Memory\' watch", "Memory" in watches        
         RuleDefinition ruleDef2 = ruleMap2.getRuleDefinition()
         assertNotNull ruleDef2
-        def resources = BootUtil.toArray(ruleDef2.resource, " ,")
+        def resources = toArray(ruleDef2.resource, " ,")
         assertEquals "There should be 2 resources", resources.length, 2
         assertNull ruleDef2.ruleClassPath
     }
@@ -102,7 +101,7 @@ class RuleParseTest extends GroovyTestCase {
         assertTrue "There should be a \'Memory\' watch", "Memory" in watches
         RuleDefinition ruleDef2 = ruleMap2.getRuleDefinition()
         assertNotNull ruleDef2
-        def resources = BootUtil.toArray(ruleDef2.resource, " ,")
+        def resources = toArray(ruleDef2.resource, " ,")
         assertEquals "There should be 2 resources", resources.length, 2
         assertNull ruleDef2.ruleClassPath
     }
@@ -130,5 +129,16 @@ class RuleParseTest extends GroovyTestCase {
         assertEquals "org.rioproject.examples:events:dl:1.0", ruleDef1.ruleClassPath
         assertEquals "There should be 1 service watch", serviceDef1.get(0).watches.size(), 1
         assertEquals "Service watch should be \'notification\'", serviceDef1.get(0).watches.get(0), "notification"
+    }
+
+    String[] toArray(String arg, String delim) {
+        StringTokenizer tok = new StringTokenizer(arg, delim);
+        String[] array = new String[tok.countTokens()];
+        int i=0;
+        while(tok.hasMoreTokens()) {
+            array[i] = tok.nextToken();
+            i++;
+        }
+        return(array);
     }
 }
