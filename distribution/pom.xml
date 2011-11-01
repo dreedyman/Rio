@@ -93,6 +93,18 @@
             <version>${project.version}</version>
         </dependency>
 
+         <dependency>
+            <groupId>${project.groupId}.gnostic</groupId>
+            <artifactId>gnostic-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.gnostic</groupId>
+            <artifactId>gnostic-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.sun.jini</groupId>
             <artifactId>reggie</artifactId>

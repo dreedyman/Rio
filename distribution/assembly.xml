@@ -7,6 +7,20 @@
         <!--<format>zip</format>-->
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+        <!-- Copy the project's parent pom so we can correctly install Rio jars into the local repository -->
+        <file>
+            <source>${basedir}/../pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>rio-main.pom</destName>
+        </file>
+        <!-- Copy the Gnostic pom so we can correctly install Gnostic jars into the local repository -->
+        <file>
+            <source>${basedir}/../rio-services/gnostic/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>rio-gnostic.pom</destName>
+        </file>
+    </files>
     <fileSets>
 
         <fileSet>
@@ -101,6 +115,7 @@
                 <exclude>org.rioproject.cybernode:cybernode-api:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-proxy:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-ui:jar</exclude>
+                <exclude>org.rioproject.gnostic:gnostic-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
                 <exclude>org.rioproject:rio-api:jar</exclude>
@@ -119,6 +134,12 @@
                 <exclude>org.apache.maven.wagon:*</exclude>
                 <exclude>org.codehaus.plexus:*</exclude>
                 <exclude>nekohtml:*</exclude>
+                <!-- The following exclusions are for gnostic and it's dependencies -->
+                <exclude>org.codehaus.janino:*</exclude>
+                <exclude>org.drools:*</exclude>
+                <exclude>antlr:*</exclude>
+                <exclude>org.eclipse.jdt.core.compiler:*</exclude>
+                <exclude>org.mvel:*</exclude>
             </excludes>
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
@@ -153,6 +174,7 @@
                 <include>org.rioproject.cybernode:cybernode-api:jar</include>
                 <include>org.rioproject.cybernode:cybernode-proxy:jar</include>
                 <include>org.rioproject.cybernode:cybernode-ui:jar</include>
+                <include>org.rioproject.gnostic:gnostic-api:jar</include>
                 <include>org.rioproject.monitor:monitor-api:jar</include>
                 <include>org.rioproject.monitor:monitor-proxy:jar</include>
                 <include>org.rioproject:rio-api:jar</include>
