@@ -79,7 +79,7 @@ public class ServiceClassLoader extends URIClassLoader implements ClassAnnotatio
     }
 
     /**
-     * Get the {@link org.rioproject.boot.ClassAnnotator} created at construction
+     * Get the {@link org.rioproject.loader.ClassAnnotator} created at construction
      * time
      *
      * @return The ClassAnnotator
@@ -113,7 +113,7 @@ public class ServiceClassLoader extends URIClassLoader implements ClassAnnotatio
 
     /**
      * Get the URLs to be used for class annotations as determined by the
-     * {@link org.rioproject.boot.ClassAnnotator}
+     * {@link org.rioproject.loader.ClassAnnotator}
      */
     public URL[] getURLs() {
         return(annotator.getURLs());
@@ -160,7 +160,7 @@ public class ServiceClassLoader extends URIClassLoader implements ClassAnnotatio
 
     /**
      * Get the class annotations as determined by the
-     * {@link org.rioproject.boot.ClassAnnotator}
+     * {@link org.rioproject.loader.ClassAnnotator}
      *
      * @see net.jini.loader.ClassAnnotation#getClassAnnotation
      */
