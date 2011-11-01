@@ -19,6 +19,7 @@ import org.rioproject.resolver.maven2.Repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -222,6 +223,21 @@ public class ResolverHelper {
                 s = s.replace('/', '\\');
         }
         return s;
+    }
+
+    /**
+     * Set logging on or off for a {@link Resolver}
+     *
+     * @param resolver The {@link Resolver} to interact with
+     * @param choice To turn logging on, set to <code>true</code>. To turn logging off, set to <code>false</code>
+     */
+    public static void setLogging(Resolver resolver, boolean choice) {
+        try {
+            Method setLogResults = resolver.getClass().getDeclaredMethod("setLogResults", boolean.class);
+            setLogResults.invoke(resolver, choice);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     /*

@@ -21,7 +21,6 @@ import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.url.artifact.ArtifactURLConfiguration;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -48,7 +47,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     static {
         try {
             resolver = ResolverHelper.getResolver();
-            turnOffLogging();
+            ResolverHelper.setLogging(resolver, false);
         } catch (ResolverException e) {
             throw new RuntimeException(e);
         }
@@ -189,15 +188,5 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             parent = parent.getParent();
         }
         return descendantOf;
-    }
-
-    private static void turnOffLogging() {
-        try {
-            Method setLogResults = resolver.getClass().getDeclaredMethod("setLogResults", boolean.class);
-            setLogResults.invoke(resolver, false);
-        } catch (Exception e) {
-            // ignore
-            e.printStackTrace();
-        }
     }
 }
