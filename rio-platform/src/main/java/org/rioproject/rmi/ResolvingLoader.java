@@ -20,10 +20,9 @@ import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.url.artifact.ArtifactURLConfiguration;
 
+import java.io.File;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.RMIClassLoaderSpi;
 import java.util.*;
@@ -121,11 +120,10 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                         ArtifactURLConfiguration artifactURLConfiguration = new ArtifactURLConfiguration(path);
                         String[] cp = resolver.getClassPathFor(artifactURLConfiguration.getArtifact(),
                                                                artifactURLConfiguration.getRepositories());
-
                         for(String s : cp) {
                             if(builder.length()>0)
                                 builder.append(" ");
-                            builder.append(new URL("file://"+s).toExternalForm());
+                            builder.append(new File(s).toURI().toURL().toExternalForm());
                         }
                     }
                     adaptedCodebase = builder.toString();
