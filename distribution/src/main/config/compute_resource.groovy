@@ -2,7 +2,6 @@
  * Configuration for a ComputeResource
  */
 
-import org.rioproject.boot.BootUtil
 import org.rioproject.config.Component
 import org.rioproject.watch.ThresholdValues
 import org.rioproject.system.measurable.memory.pool.MemoryPool
@@ -10,6 +9,7 @@ import net.jini.config.Configuration
 import java.lang.management.MemoryPoolMXBean
 import java.lang.management.ManagementFactory
 import java.lang.management.MemoryType
+import org.rioproject.net.HostUtil
 
 /*
  * Declare ComputeResource properties
@@ -17,7 +17,7 @@ import java.lang.management.MemoryType
 @Component('org.rioproject.system')
 class ComputeResourceConfig {
     InetAddress getAddress() {
-        String host = BootUtil.getHostAddressFromProperty("java.rmi.server.hostname")
+        String host = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
         return InetAddress.getByName(host)
     }
 

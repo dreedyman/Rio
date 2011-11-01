@@ -1,10 +1,10 @@
 /*
  * Configuration for a Lookup Service
  */
-import org.rioproject.boot.BootUtil 
 import org.rioproject.config.Component
 import org.rioproject.config.Constants
 import net.jini.export.Exporter
+import org.rioproject.net.HostUtil
 
 @Component('com.sun.jini.reggie')
 class ReggieConfig {
@@ -17,7 +17,7 @@ class ReggieConfig {
     }
 
     String getUnicastDiscoveryHost() {
-        return BootUtil.getHostAddress()
+        return HostUtil.getHostAddress()
     }
 
     Exporter getServerExporter() {

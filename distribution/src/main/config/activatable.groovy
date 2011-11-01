@@ -1,5 +1,4 @@
-
-import org.rioproject.boot.BootUtil
+import org.rioproject.net.HostUtil
 
 /**
  * This configuration is used as a base class for activatable service
@@ -9,7 +8,7 @@ class ActivatableConfig {
     String rioHome = System.getProperty('RIO_HOME')    
     String policyFile = "${rioHome}/policy/policy.all"
     String port = '9010'
-    String host = BootUtil.getHostAddressFromProperty('java.rmi.server.hostname')
+    String host = HostUtil.getHostAddressFromProperty('java.rmi.server.hostname')
 
     String getGroupClasspath() {
         return rioHome+'/lib/boot.jar'+File.pathSeparator+

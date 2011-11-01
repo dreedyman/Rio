@@ -1,0 +1,10 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.jini</groupId>
+  <artifactId>jsk-platform</artifactId>
+  <name>Jini Starter Kit Platform Jar</name>
+  <version>2.1</version>
+  <inceptionYear>2005</inceptionYear>
+  <organization />
+  <build />
+</project>

@@ -7,13 +7,13 @@ import org.rioproject.config.Component
 import net.jini.jeri.BasicILFactory
 import net.jini.jeri.BasicJeriExporter
 import net.jini.jeri.tcp.TcpServerEndpoint
-import org.rioproject.boot.BootUtil
 import net.jini.export.Exporter
 import org.rioproject.net.PortRangeServerSocketFactory
 import javax.net.ServerSocketFactory
 import org.rioproject.bean.BeanInvocationLayerFactory
 import net.jini.jeri.ServerEndpoint
 import org.rioproject.config.Constants
+import org.rioproject.net.HostUtil
 
 /*
  * The exporter to declare as the *default* exporter for services and utilities
@@ -25,7 +25,7 @@ class ExporterConfig {
     }
 
     static ServerEndpoint getServerEndpoint() {
-        String host = BootUtil.getHostAddressFromProperty("java.rmi.server.hostname")
+        String host = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
         String range = System.getProperty(Constants.PORT_RANGE)
         ServerSocketFactory factory = null
         if(range!=null) {
