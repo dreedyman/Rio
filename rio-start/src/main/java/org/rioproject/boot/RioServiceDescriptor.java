@@ -24,6 +24,7 @@ import net.jini.security.ProxyPreparer;
 import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.config.PlatformCapabilityConfig;
+import org.rioproject.config.PlatformLoader;
 import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
@@ -275,10 +276,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             urlList.addAll(Arrays.asList(urls));
         }
 
-        String platformDir = (String)config.getEntry(COMPONENT,
-                                                     "platformDir",
-                                                     String.class,
-                                                     defaultDir);
+        String platformDir = (String)config.getEntry(COMPONENT, "platformDir", String.class, defaultDir);
 
         caps = platformLoader.parsePlatform(platformDir);
         for (PlatformCapabilityConfig cap : caps) {
@@ -402,7 +400,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      */
     private String setClasspath(String cp) {
         StringBuilder buff = new StringBuilder();
-        for(String s : toArray(cp, ","+File.pathSeparator)) {
+        for(String s : toArray(cp, "," + File.pathSeparator)) {
             buff.append(s);
             File f = new File(s);
             try {
@@ -426,7 +424,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 }
                 String values = (String)attributes.get(new Attributes.Name("Class-Path"));
                 if(values!=null) {
-                    for(String v : toArray(values, " ,"+ File.pathSeparator)) {
+                    for(String v : toArray(values, " ," + File.pathSeparator)) {
                         buff.append(File.pathSeparator);
                         String name = jarPath+v;
                         File add = new File(name);
