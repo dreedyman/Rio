@@ -19,6 +19,8 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import org.rioproject.RioVersion;
+import org.rioproject.resolver.Resolver;
+import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.util.PropertyHelper;
 import org.w3c.dom.*;
 
@@ -337,11 +339,20 @@ public class PlatformLoader {
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig();
         File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio-lib.jar");
+        Resolver resolver = ResolverHelper.getResolver();
+        ResolverHelper.setLogging(resolver, false);
+        String[] rioAPIClassPath = resolver.getClassPathFor("org.rioproject:rio-api:"+RioVersion.VERSION);
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");
         rioCap.setName("Rio");
         rioCap.setVersion(RioVersion.VERSION);
-        rioCap.setClasspath(rioJar.getAbsolutePath()+File.pathSeparator);
+        StringBuilder rioClassPath = new StringBuilder();
+        rioClassPath.append(rioJar.getAbsolutePath());
+        for(String s : rioAPIClassPath) {
+            rioClassPath.append(File.pathSeparator);
+            rioClassPath.append(s);
+        }
+        rioCap.setClasspath(rioClassPath.toString());
 
         PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig();
         File jskLibJar = new File(rioHomeDir, "lib"+File.separator+"jsk-lib.jar");

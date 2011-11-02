@@ -21,6 +21,7 @@ import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
+import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 
@@ -258,23 +259,14 @@ public class ServiceDescriptorUtil {
         String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
 
         return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
-
-        /*if(System.getProperty("RIO_TEST_ATTACH")!=null) {
-            System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
-            jars = new String[]{"monitor-service.jar", "rio-test.jar"};
-        } else {
-            jars = new String[]{"monitor-service.jar"};
-        }
-        String monitorClasspath = makePath(rioHome+File.separator+"lib", jars);
-        String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
-        String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
-        return (new RioServiceDescriptor(monitorCodebase, policy, monitorClasspath, implClass, monitorConfig));*/
     }
 
     private static String getProxyClassPath(String proxy) throws IOException {
         String[] proxyClassPath;
         try {
-            proxyClassPath = ResolverHelper.getResolver().getClassPathFor(proxy);
+            Resolver resolver = ResolverHelper.getResolver();
+            ResolverHelper.setLogging(resolver, false);
+            proxyClassPath = resolver.getClassPathFor(proxy);
         } catch (ResolverException e) {
             throw new IOException("Unable to resolve "+proxy, e);
         }
