@@ -163,7 +163,7 @@ public class BeanHelper {
     public static Method getAnnotatedMethod(Object bean,
                                              Class<? extends Annotation> annClass) {
         Method m = null;
-        if(annClass!=null) {
+        if(bean!=null && annClass!=null) {
             Method[] methods = bean.getClass().getMethods();
             for (Method method : methods) {
                 if(method.getAnnotation(annClass)!=null) {
