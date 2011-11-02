@@ -19,7 +19,7 @@ import org.rioproject.config.Constants
  * Configuration properties used to launch Rio services from the test framework
  */
 manager {
-    
+
     execClassPath =
         '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
 

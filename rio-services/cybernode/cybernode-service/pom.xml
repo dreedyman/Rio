@@ -43,7 +43,12 @@
 		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
         </dependency>
-        
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.hyperic</groupId>
             <artifactId>sigar-dist</artifactId>
