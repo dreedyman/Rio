@@ -401,6 +401,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     private String setClasspath(String cp) {
         StringBuilder buff = new StringBuilder();
         for(String s : toArray(cp, "," + File.pathSeparator)) {
+            if(buff.length()>0 && !buff.toString().endsWith(File.pathSeparator))
+                buff.append(File.pathSeparator);
             buff.append(s);
             File f = new File(s);
             try {
