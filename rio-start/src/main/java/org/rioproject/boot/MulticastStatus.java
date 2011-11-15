@@ -33,7 +33,7 @@ public class MulticastStatus {
      * announcement can be sent. Note that it is still possible that multicast
      * does not work outside the host.
      *
-     * @param timeout The timeout to use hen checking the status
+     * @param timeout The timeout to use when checking the status
      *
      * @throws IOException If there are errors interfacing ith the network
      * @throws IllegalArgumentException if the timeout is < 0
