@@ -125,10 +125,8 @@ public class LookupCachePool {
      * DiscoveryManagementPool
      *
      * @throws IOException If discovery management cannot be created
-     * @throws ConfigurationException If the Jini configuration cannot be used
      */
-    public LookupCache getLookupCache(DiscoveryManagement dMgr, ServiceTemplate template) throws IOException,
-                                                                                                 ConfigurationException {
+    public LookupCache getLookupCache(DiscoveryManagement dMgr, ServiceTemplate template) throws IOException {
         if(!(dMgr instanceof DiscoveryManagementPool.SharedDiscoveryManager)) {
             logger.warning("The DiscoveryManagement instance pass was not " +
                            "created by the "+
@@ -163,17 +161,21 @@ public class LookupCachePool {
      * @return A ServiceDiscoveryManager object based on the provided parameters
      *
      * @throws IOException If discovery management cannot be created
-     * @throws ConfigurationException If the Jini configuration cannot be used
      */
     public LookupCache getLookupCache(String sharedName, 
                                       String[] groups,
                                       LookupLocator[] locators,
                                       ServiceTemplate template) 
-    throws IOException, ConfigurationException {
+    throws IOException {
         
         if(template==null)
             throw new NullPointerException("template is null");
-        SDMWrapper sdmWrapper = getSDMWrapper(sharedName, groups, locators);
+        SDMWrapper sdmWrapper;
+        try {
+            sdmWrapper = getSDMWrapper(sharedName, groups, locators);
+        } catch(ConfigurationException e) {
+            throw new IOException("Configuration problem creating a SDMWrapper", e);
+        }
         return(sdmWrapper.getLookupCache(template, true));
     }
     
