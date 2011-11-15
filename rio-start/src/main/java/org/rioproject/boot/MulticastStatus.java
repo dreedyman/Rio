@@ -36,6 +36,7 @@ public class MulticastStatus {
      * @param timeout The timeout to use hen checking the status
      *
      * @throws IOException If there are errors interfacing ith the network
+     * @throws IllegalArgumentException if the timeout is < 0
      */
     public static void checkMulticast(final int timeout) throws IOException {
         if(timeout < 0)
@@ -49,15 +50,10 @@ public class MulticastStatus {
         msocket.setTimeToLive(1); // XXX - could it be 0 ?
         msocket.joinGroup(group);
         msocket.setSoTimeout(timeout);
-        final String message = MulticastStatus.class.getName()
-                               + ".ping("
-                               + System.currentTimeMillis()
-                               + ")";
-        final byte[] messageBytes = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(messageBytes,
-                                                   messageBytes.length,
-                                                   group,
-                                                   port);
+        StringBuilder builder = new StringBuilder();
+        builder.append(MulticastStatus.class.getName()).append(".ping(").append(System.currentTimeMillis()).append(")");
+        final byte[] messageBytes = builder.toString().getBytes();
+        DatagramPacket packet = new DatagramPacket(messageBytes, messageBytes.length, group, port);
 
         final Boolean[] received = new Boolean[]{Boolean.FALSE};
         /**
@@ -98,30 +94,37 @@ public class MulticastStatus {
         // Start sending packets every 500 msec until the timeout expires
         // or a packet is received
         do {
-            msocket.send(packet);
-            synchronized(lock) {
-                if(received[0]) {
-                    msocket.leaveGroup(group);
-                    msocket.close();
-                    return;
-                }
-            }
             try {
-                Thread.sleep(500);
-            } catch(InterruptedException e) {
-                e.printStackTrace();
+                msocket.send(packet);
+                synchronized(lock) {
+                    if(received[0]) {
+                        msocket.leaveGroup(group);
+                        msocket.close();
+                        return;
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
+                throw new IOException("Problem creating or sending multicast packets", e);
+            } finally {
+                msocket.leaveGroup(group);
+                msocket.close();
             }
         } while (System.currentTimeMillis() < endMillis);
-        msocket.leaveGroup(group);
-        msocket.close();
+
         throw new IOException("Multicast packets were not received in the allotted time");
     }
 
     public static void main(String[] args) {
         try {
             checkMulticast(1000 * 5);
-            System.out.println("Multicast check successful");
+            System.out.println("======================\nMulticast check successful\n======================");
         } catch(IOException ioe) {
+            System.out.println("======================\nMulticast check FAILED\n======================");
             ioe.printStackTrace();
         }
     }
