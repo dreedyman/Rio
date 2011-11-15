@@ -89,18 +89,16 @@ public class DiscoveryManagementPool {
     /**
      * Set the Configuration property
      * 
-     * @param conf The Configuration to use when creating
+     * @param configuration The Configuration to use when creating
      * DiscoveryManagementPool instances
      */
-    public void setConfiguration(Configuration conf) {
-        defaultConfig = conf;
+    public void setConfiguration(Configuration configuration) {
+        defaultConfig = configuration;
         if(logger.isLoggable(Level.FINE)) {
             if(defaultConfig==null)
                 logger.fine("Set null configuration for DiscoveryManagementPool");
             else
-                logger.log(Level.FINE,
-                           "Set configuration for DiscoveryManagementPool {0}",
-                           new Object[] {defaultConfig});
+                logger.log(Level.FINE, "Set configuration for DiscoveryManagementPool {0}", new Object[] {defaultConfig});
         } 
     }
 
@@ -130,12 +128,9 @@ public class DiscoveryManagementPool {
      *
      * @throws IOException If the DiscoveryManagement instance cannot be created
      */
-    public DiscoveryManagement getDiscoveryManager(String sharedName)
-    throws IOException {
-        String[] groups =
-            JiniClient.parseGroups(System.getProperty(Constants.GROUPS_PROPERTY_NAME));
-        LookupLocator[] locators =
-            JiniClient.parseLocators(System.getProperty(Constants.LOCATOR_PROPERTY_NAME));
+    public DiscoveryManagement getDiscoveryManager(String sharedName) throws IOException {
+        String[] groups = JiniClient.parseGroups(System.getProperty(Constants.GROUPS_PROPERTY_NAME));
+        LookupLocator[] locators = JiniClient.parseLocators(System.getProperty(Constants.LOCATOR_PROPERTY_NAME));
         return(getDiscoveryManager(sharedName, groups, locators, null, defaultConfig));
     }
 
@@ -163,8 +158,7 @@ public class DiscoveryManagementPool {
      */
     public DiscoveryManagement getDiscoveryManager(String sharedName,
                                                    String[] groups,
-                                                   LookupLocator[] locators)
-    throws IOException {
+                                                   LookupLocator[] locators) throws IOException {
         return(getDiscoveryManager(sharedName, groups, locators, null, defaultConfig));
     }
 
@@ -201,8 +195,7 @@ public class DiscoveryManagementPool {
                                                    String[] groups, 
                                                    LookupLocator[] locators, 
                                                    DiscoveryListener listener,
-                                                   Configuration config) 
-    throws IOException {
+                                                   Configuration config) throws IOException {
         
         LookupDiscoveryManager ldm  ;
         synchronized(this) {
@@ -211,21 +204,14 @@ public class DiscoveryManagementPool {
                 discoControl = new DiscoveryControl(sharedName);
                 pool.add(discoControl);
                 if(logger.isLoggable(Level.FINE)) 
-                    logger.log(Level.FINE,
-                               "Create new DiscoveryControl for [{0}]",
-                               new Object[] {sharedName});
+                    logger.log(Level.FINE, "Create new DiscoveryControl for [{0}]", new Object[] {sharedName});
             } else {
                 if(logger.isLoggable(Level.FINE)) 
-                    logger.log(Level.FINE,
-                               "DiscoveryControl obtained for [{0}]",
-                               new Object[] {sharedName});                
+                    logger.log(Level.FINE, "DiscoveryControl obtained for [{0}]", new Object[] {sharedName});
             }
             ldm = discoControl.getLookupDiscoveryManager(groups, locators);        
             if(ldm==null) {
-                ldm = discoControl.createLookupDiscoveryManager(groups, 
-                                                                locators, 
-                                                                listener,
-                                                                config);            
+                ldm = discoControl.createLookupDiscoveryManager(groups, locators, listener, config);
             } else {
                 ((SharedDiscoveryManager)ldm).incrementRefCounter();
                 if(listener!=null)
@@ -268,8 +254,7 @@ public class DiscoveryManagementPool {
      */
     public static class DiscoveryControl {
         String sharedName;
-        final List<SharedDiscoveryManager> pool =
-            Collections.synchronizedList(new ArrayList<SharedDiscoveryManager>());
+        final List<SharedDiscoveryManager> pool = Collections.synchronizedList(new ArrayList<SharedDiscoveryManager>());
         
         DiscoveryControl(String sharedName) {
             this.sharedName = sharedName;
@@ -311,17 +296,14 @@ public class DiscoveryManagementPool {
         /*
          * Create a LookupDiscoveryManager instance
          */
-        LookupDiscoveryManager createLookupDiscoveryManager(
-                                                      String[] groups, 
-                                                      LookupLocator[] locators, 
-                                                      DiscoveryListener listener,
-                                                      Configuration config) 
-        throws IOException {
+        LookupDiscoveryManager createLookupDiscoveryManager(String[] groups,
+                                                            LookupLocator[] locators,
+                                                            DiscoveryListener listener,
+                                                            Configuration config) throws IOException {
             if(logger.isLoggable(Level.FINE)) {
                 StringBuilder buffer = new StringBuilder();
                 if(groups==null) {
-                    buffer.append("Create new SharedDiscoveryManager for "+
-                                  "ALL_GROUPS");
+                    buffer.append("Create new SharedDiscoveryManager for ALL_GROUPS");
                 } else {
                     buffer.append("Create new SharedDiscoveryManager for groups [");
                     for(int i=0; i<groups.length; i++) {
@@ -340,13 +322,11 @@ public class DiscoveryManagementPool {
                     logger.fine(buffer.toString());
                 } else {
                     buffer.append("using config {0}");
-                    logger.log(Level.FINE,
-                               buffer.toString(),
-                               new Object[] {config.toString()});
+                    logger.log(Level.FINE, buffer.toString(), new Object[] {config.toString()});
                 }
             }
 
-            SharedDiscoveryManager ldm = null;
+            SharedDiscoveryManager ldm;
             config = (config==null?EmptyConfiguration.INSTANCE:config);
             String className = SharedDiscoveryManager.class.getName();
             try {
@@ -356,28 +336,19 @@ public class DiscoveryManagementPool {
                                                     SharedDiscoveryManager.class.getName());
             } catch (ConfigurationException e) {
                 logger.log(Level.WARNING,
-                           "Error obtaining the "+
-                           COMPONENT+".sharedDiscoveryManager property, " +
+                           "Error obtaining the "+COMPONENT+".sharedDiscoveryManager property, " +
                            "defaulting to "+className,
                            e);
             }
 
             try {
-                ldm = createSharedDiscoveryManager(className,
-                                                   groups,
-                                                   locators,
-                                                   listener,
-                                                   config);
+                ldm = createSharedDiscoveryManager(className, groups, locators, listener, config);
             } catch (ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Creating SharedDiscoveryManager with Configuration",
-                           e);
-                ldm = createSharedDiscoveryManager(className,
-                                                   groups,
-                                                   locators,
-                                                   listener);
-            } catch (Exception e) {
+                logger.log(Level.WARNING, "Creating SharedDiscoveryManager with Configuration", e);
+                ldm = createSharedDiscoveryManager(className, groups, locators, listener);
+            } catch (IOException e) {
                 logger.log(Level.WARNING, "Could not create SharedDiscoveryManager", e);
+                throw e;
             }
             if(ldm!=null)
                 ldm.incrementRefCounter();
@@ -416,13 +387,9 @@ public class DiscoveryManagementPool {
                 thrown = e;
             }
             if(thrown!=null) {
-                logger.log(Level.WARNING,
-                           "Could not create "+classname+", defaulting to "+
-                           SharedDiscoveryManager.class.getName(), thrown);
-                ldm = new SharedDiscoveryManager(this,
-                                                 groups,
-                                                 locators,
-                                                 listener);
+                logger.log(Level.WARNING, "Could not create "+classname+", defaulting to "+
+                                          SharedDiscoveryManager.class.getName(), thrown);
+                ldm = new SharedDiscoveryManager(this, groups, locators, listener);
             }
             return ldm;
         }
@@ -444,11 +411,7 @@ public class DiscoveryManagementPool {
                                                            LookupLocator[].class,
                                                            DiscoveryListener.class,
                                                            Configuration.class);
-                ldm = (SharedDiscoveryManager)cons.newInstance(this,
-                                                               groups,
-                                                               locators,
-                                                               listener,
-                                                               config);
+                ldm = (SharedDiscoveryManager)cons.newInstance(this, groups, locators, listener, config);
             } catch (ClassNotFoundException e) {
                 thrown = e;
             } catch (IllegalAccessException e) {
@@ -464,11 +427,7 @@ public class DiscoveryManagementPool {
                 logger.log(Level.WARNING,
                            "Could not create "+classname+", defaulting to "+
                            SharedDiscoveryManager.class.getName(), thrown);
-                ldm = new SharedDiscoveryManager(this,
-                                                 groups,
-                                                 locators,
-                                                 listener,
-                                                 config);
+                ldm = new SharedDiscoveryManager(this, groups, locators, listener, config);
             }
             return ldm;
         }
@@ -491,8 +450,7 @@ public class DiscoveryManagementPool {
          * Get a LookupDiscoveryManager instances based on the groups and locators
          * If a match cannot be found return null
          */
-        LookupDiscoveryManager getLookupDiscoveryManager(String[] groupsToMatch,
-                                                         LookupLocator[] locatorsToMatch) {
+        LookupDiscoveryManager getLookupDiscoveryManager(String[] groupsToMatch, LookupLocator[] locatorsToMatch) {
             SharedDiscoveryManager[] dms;
             synchronized(pool) {
                 dms = pool.toArray(new SharedDiscoveryManager[pool.size()]);
@@ -500,15 +458,13 @@ public class DiscoveryManagementPool {
             for(LookupDiscoveryManager ldm : dms) {
                 String[] groups = ldm.getGroups();
                 /* If both are set to ALL_GROUPS we have a match */
-                if(groupsToMatch == LookupDiscovery.ALL_GROUPS &&
-                        groups == LookupDiscovery.ALL_GROUPS) {
+                if(groupsToMatch == LookupDiscovery.ALL_GROUPS && groups == LookupDiscovery.ALL_GROUPS) {
                     if(matchLocators(locatorsToMatch, ldm)) {
                         return(ldm);
                     }
                 }
                 /* If one or the other is set to ALL_GROUPS keep looking */
-                if(groupsToMatch == LookupDiscovery.ALL_GROUPS ||
-                        groups == LookupDiscovery.ALL_GROUPS)
+                if(groupsToMatch == LookupDiscovery.ALL_GROUPS || groups == LookupDiscovery.ALL_GROUPS)
                     continue;
                 /* If both have the same "set", check for equivalence */
                 if(groupsToMatch.length == groups.length) {
@@ -530,8 +486,7 @@ public class DiscoveryManagementPool {
         /*
          * Determine if the locators match
          */
-        boolean matchLocators(LookupLocator[] locatorsToMatch, 
-                              LookupDiscoveryManager ldm) {
+        boolean matchLocators(LookupLocator[] locatorsToMatch, LookupDiscoveryManager ldm) {
             boolean matched=false;
             LookupLocator[] locators = ldm.getLocators();
             if(locatorsToMatch == null && locators == null)
@@ -566,11 +521,10 @@ public class DiscoveryManagementPool {
         private AtomicInteger refCounter = new AtomicInteger();
         private DiscoveryControl discoControl;
         
-        public SharedDiscoveryManager(DiscoveryControl discoControl, 
-                                      String[] groups,  
+        public SharedDiscoveryManager(DiscoveryControl discoControl,
+                                      String[] groups,
                                       LookupLocator[] locators,
-                                      DiscoveryListener listener)
-        throws IOException {
+                                      DiscoveryListener listener) throws IOException {
             super(groups, locators, listener);
             this.discoControl = discoControl;
         }
@@ -579,8 +533,7 @@ public class DiscoveryManagementPool {
                                       String[] groups,  
                                       LookupLocator[] locators,
                                       DiscoveryListener listener,
-                                      Configuration config)
-        throws IOException, ConfigurationException {
+                                      Configuration config) throws IOException, ConfigurationException {
             super(groups, locators, listener, config);
             this.discoControl = discoControl;
         }
