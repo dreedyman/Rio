@@ -23,7 +23,6 @@ import net.jini.config.ConfigurationFile
 import java.util.logging.Logger
 import java.util.logging.Level
 import java.lang.reflect.Constructor
-import org.codehaus.groovy.runtime.InvokerHelper
 
 /**
  * Provides support for Groovy based configuration.
@@ -63,7 +62,7 @@ class GroovyConfig implements Configuration {
         args.each { arg ->
             if(arg.endsWith(".groovy")) {
                 if(logger.isLoggable(Level.FINE))
-                logger.fine(arg)
+                    logger.fine(arg)
             } else {
                 StringBuffer buffer = new StringBuffer()
                 args.each { a ->
@@ -116,8 +115,8 @@ class GroovyConfig implements Configuration {
                 }
                 if(logger.isLoggable(Level.FINE))
                     logger.fine 'Time to parse '+groovyFile+' : '+
-                                (System.currentTimeMillis()-t0)+' '+
-                                'milliseconds'
+                                 (System.currentTimeMillis()-t0)+' '+
+                                 'milliseconds'
             }
         }
         gcl = null
@@ -231,8 +230,8 @@ class GroovyConfig implements Configuration {
                 if(logger.isLoggable(Level.FINEST))
                     logger.log(Level.FINEST,
                                "${e.getClass().getName()}: looking for configuration entry "+
-                               "[${component}.${name}] in GroovyObject "+
-                               groovyConfig)
+                                 "[${component}.${name}] in GroovyObject "+
+                                 groovyConfig)
                 if(defaultValue==NO_DEFAULT) {
                     throw new NoSuchEntryException("entry not found for "+
                                                    "component: "+component +", "+
