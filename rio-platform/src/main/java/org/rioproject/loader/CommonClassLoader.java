@@ -23,8 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The CommonClassLoader is created by the {@link org.rioproject.boot.RioServiceDescriptor} or
- * {@link org.rioproject.boot.RioActivatableServiceDescriptor} when starting a Rio 
+ * The CommonClassLoader is created by the <code>RioServiceDescriptor</code> when starting a Rio
  * service and contains common declared platform JARs to be made available to its 
  * children.
  * 
@@ -118,7 +117,7 @@ public class CommonClassLoader extends URLClassLoader {
                     buffer.append(", ");
                 buffer.append(urls[i].toExternalForm());
             }
-            logger.log(Level.FINEST, 
+            logger.log(Level.FINEST,
                        "Context ClassLoader={0} URLs={1}",
                        new Object[] {cl.toString(),
                                      buffer.toString()
@@ -241,7 +240,7 @@ public class CommonClassLoader extends URLClassLoader {
                             buffer.append(":");
                         buffer.append(codebase[i].toExternalForm());
                     }
-                    logger.log(Level.FINEST, 
+                    logger.log(Level.FINEST,
                                "Component "+name+" has "+
                                "already been registered with a "+
                                "codebase of "+buffer.toString());
