@@ -21,7 +21,6 @@ import org.rioproject.config.Constants;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -139,8 +138,7 @@ public class RegistryUtil {
             if(System.getProperty(Constants.REGISTRY_PORT)==null) {
                 int port = getRegistry(config);
                 if(port>0)
-                    System.setProperty(Constants.REGISTRY_PORT,
-                                       Integer.toString(port));
+                    System.setProperty(Constants.REGISTRY_PORT, Integer.toString(port));
             }
         }
     }
