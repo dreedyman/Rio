@@ -62,6 +62,7 @@ import org.rioproject.tools.ui.treetable.CybernodeNode;
 import org.rioproject.tools.ui.util.SwingDeployHelper;
 import org.rioproject.tools.ui.util.SwingWorker;
 import org.rioproject.tools.webster.InternalWebster;
+import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -70,6 +71,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.security.PrivilegedExceptionAction;
@@ -1365,6 +1367,14 @@ public class Main extends JFrame {
                     if(MacUIHelper.isMacOS()) {
                         MacUIHelper.setSystemProperties();                        
                     }
+
+                    /* If the artifact URL has not been configured, set it up */
+                    try {
+                        new URL("artifact:foo");
+                    } catch (MalformedURLException e) {
+                        URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
+                    }
+
                     InternalWebster.startWebster("sdm-dl.jar");
                     Main.redirect();
                     return new Main(config, true, props);
