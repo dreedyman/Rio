@@ -16,7 +16,6 @@
 package org.rioproject.examples.calculator.service;
 
 import org.rioproject.examples.calculator.*;
-import org.rioproject.jsb.ServiceBeanAdapter;
 
 import java.rmi.RemoteException;
 
