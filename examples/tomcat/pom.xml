@@ -8,7 +8,6 @@
     </parent>
     <groupId>org.rioproject.examples</groupId>
     <artifactId>tomcat</artifactId>
-    <version>2.0.2</version>
     <packaging>oar</packaging>
     <name>Example :: Tomcat</name>
 

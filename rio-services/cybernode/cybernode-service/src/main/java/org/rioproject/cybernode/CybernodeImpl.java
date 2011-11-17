@@ -301,7 +301,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     public TrustVerifier getProxyVerifier() {
         if (logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");        
+            logger.entering(this.getClass().getName(), "getProxyVerifier");
         return (new CybernodeProxy.Verifier(getExportedProxy()));
     }
 
