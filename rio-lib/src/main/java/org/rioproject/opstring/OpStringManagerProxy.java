@@ -206,7 +206,6 @@ public class OpStringManagerProxy {
             }
         }
 
-        @SuppressWarnings("unchecked")
         public void serviceRemoved(ServiceDiscoveryEvent event) {
             ServiceItem item = event.getPreEventServiceItem();
             ProvisionManager m = (ProvisionManager)item.service;

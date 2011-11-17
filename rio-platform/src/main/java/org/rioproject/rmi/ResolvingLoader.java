@@ -142,7 +142,6 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         return adaptedCodebase;
     }
 
-    @SuppressWarnings("unchecked")
     private static void findAndRemove(ClassLoader loader, Map loaderTable) {
         //Map<ClassLoader, Object> toRemove = new HashMap<ClassLoader, Object>();
         for(Object o : loaderTable.entrySet()) {

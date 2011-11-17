@@ -1106,7 +1106,6 @@ public class Main extends JFrame {
             return(list.toArray(new ProvisionMonitorEvent[list.size()]));
         }
 
-        @SuppressWarnings("unchecked")
         void refreshCybernodes(ProvisionMonitorEvent pme) {
 			if (pme == null)
 				System.err.println("refreshCybernodes(): Null " +
