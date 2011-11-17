@@ -20,7 +20,6 @@ import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
-import org.rioproject.watch.*;
 
 import java.util.*;
 

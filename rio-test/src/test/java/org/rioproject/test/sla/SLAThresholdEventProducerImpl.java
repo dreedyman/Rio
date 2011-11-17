@@ -15,7 +15,6 @@
  */
 package org.rioproject.test.sla;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

@@ -15,8 +15,6 @@
  */
 package org.rioproject.url.artifact;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 

@@ -15,8 +15,6 @@
  */
 package org.rioproject.system.measurable.memory.pool;
 
-import org.rioproject.system.measurable.memory.ProcessMemoryUtilization;
-import org.rioproject.system.measurable.memory.SystemMemoryUtilization;
 import org.rioproject.watch.Calculable;
 
 /**

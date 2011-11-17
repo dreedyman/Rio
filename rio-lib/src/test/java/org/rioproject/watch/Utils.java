@@ -16,7 +16,6 @@
 package org.rioproject.watch;
 
 import junit.framework.Assert;
-import org.rioproject.config.Constants;
 import org.rioproject.watch.WatchDataSource;
 
 import java.io.File;

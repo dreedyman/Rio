@@ -3,7 +3,6 @@ package org.rioproject.monitor;
 import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import org.rioproject.event.DispatchEventHandler;
-import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
 import org.rioproject.monitor.tasks.ProvisionMonitorEventTask;
 

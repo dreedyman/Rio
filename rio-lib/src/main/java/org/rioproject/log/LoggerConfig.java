@@ -18,7 +18,6 @@ package org.rioproject.log;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.*;
