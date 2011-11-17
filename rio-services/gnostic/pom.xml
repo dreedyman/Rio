@@ -9,7 +9,6 @@
         <version>5.0-SNAPSHOT</version>
 	<relativePath>../../pom.xml</relativePath>
     </parent>
-    <groupId>org.rioproject</groupId>
     <artifactId>gnostic</artifactId>
     <name>Module :: Gnostic</name>
     <packaging>pom</packaging>

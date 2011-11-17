@@ -9,15 +9,8 @@
     </parent>
     <groupId>org.rioproject.examples</groupId>
     <artifactId>springbean</artifactId>
-    <version>2.0.2</version>
     <packaging>pom</packaging>
     <name>Example :: SpringBean</name>
-
-    <scm>
-        <connection>scm:svn:https://rio.dev.java.net/svn/rio/trunk/examples/springbean --username guest</connection>
-        <developerConnection>scm:svn:https://rio.dev.java.net/svn/rio/trunk/examples/springbean --username username</developerConnection>
-        <url>https://rio.dev.java.net/source/browse/rio/trunk/examples/springbean</url>
-    </scm>
 
     <dependencies>
         <dependency>
