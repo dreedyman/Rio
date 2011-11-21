@@ -24,17 +24,13 @@
             <p>
                 The Rio Resolver currently resolves artifacts using configured
                 Maven 2 repositories. Using the declaration(s) found in Maven
-                POMs and settings. The Rio Resolver is not provided by Maven, the Rio
-                Resolver simply uses Maven repositories to obtain declared
+                POMs and settings. The Rio Resolver is implemented using Aether,
+                and the Rio Resolver simply uses Maven repositories to obtain declared
                 artifacts and dependencies.
             </p>
 
             <p>
-                Why not use Maven to resolve artifacts and dependencies for
-                service provisioning?
-            </p>
-            <p>
-                We want to abstract the underlying dependency
+                The Rio Resolver abstracts the underlying dependency
                 resolution implementation in order to give the flexibility to
                 potentially support other repository based dependency management
                 approaches. <br/><br/>
@@ -48,12 +44,12 @@
             <div class="section"><h3>Artifact Declaration</h3></div>
             <p>
                 Artifacts are referenced in abstract terms
-                (<tt>groupId:artifactId:[classifier:]version</tt>), rather than a (logical) file
+                (<tt>groupId:artifactId[:type[:classifier]]:version</tt>), rather than a (logical) file
                 path. This is the big difference with the use
                 of artifacts in opstrings with Rio. Previously, you declared jars as
                 resources for both the interface and service implementation classes. With the
                 introduction of artifact declaration in opstrings, you now just declare the
-                <tt>groupId:artifactId:[classifier:]version</tt> instead.
+                <tt>ggroupId:artifactId[:type[:classifier]]:version</tt> instead.
             </p>
             <p>
                 The benefits here are that the declared artifact, it's dependencies
@@ -155,33 +151,8 @@
                         Although not a dependency <i>scope</i>, dependencies declared
                         as optional are automatically excluded.
                     </li>
-                </ul>            
+                </ul>
 
-            <div class="section"><h3>Limitations</h3></div>
-            The Rio Resolver is not a replacement for Maven artifact resolution. It does
-            not do all the things that an embedded Maven resolver would provide. The
-            current known limitations are as follows:
-            <ul>
-                <li>
-                    No wagon support. The Rio resolver only provides simple HTTP
-                    based downloading of artifacts.
-                </li>
-                <li>
-                    No <tt>settings.xml</tt> proxy configuration support.
-                </li>
-                <li>
-                    Profiles declared in <tt>settings.xml</tt> only have activation support
-                    if they are configured to have <tt>activeByDefault</tt> set to <tt>true</tt>,
-                    or if activation is triggered by a system property being set.
-                </li>
-                <li>
-                    No support for <b>import</b> scope. This scope is only used on a
-                    dependency of type pom in the <tt>&lt;dependencyManagement&gt;</tt>
-                    section. It indicates that the specified POM should be replaced
-                    with the dependencies in that POM's
-                    <tt>&lt;dependencyManagement&gt;</tt> section.
-                </li>
-            </ul>
         </section>
     </body>
  </document>

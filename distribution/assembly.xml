@@ -26,8 +26,8 @@
         <fileSet>
             <directory>${basedir}/..</directory>
             <includes>
-                <include>LICENSE</include>
-                <include>NOTICE</include>
+                <include>LICENSE.txt</include>
+                <include>NOTICE.txt</include>
                 <include>index.html</include>
             </includes>
             <outputDirectory>/</outputDirectory>

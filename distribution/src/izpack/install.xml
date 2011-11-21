@@ -28,7 +28,16 @@ Rio installation file.
 	The gui preferences indication.
 	Sets the installer window to 640x480. It will not be able to change the size.
 	-->
-	<guiprefs width="640" height="480" resizable="no"/>
+    <guiprefs height="480" resizable="no" width="680">
+        <modifier key="labelYGap" value="12"/>
+        <modifier key="layoutAnchor" value="CENTER"/>
+        <modifier key="useHeadingPanel" value="yes"/>
+        <modifier key="useHeadingForSummary" value="yes"/>
+        <modifier key="headingLineCount" value="2"/>
+        <modifier key="headingFontSize" value="1.5"/>
+        <modifier key="headingPanelCounter" value="text"/>
+        <modifier key="headingPanelCounterPos" value="inHeading"/>
+    </guiprefs>
 
 	<!-- 
 	The locale section.
@@ -36,27 +45,6 @@ Rio installation file.
 	<locale>
 		<langpack iso3="eng"/>
 		<langpack iso3="fra"/>
-		<langpack iso3="spa"/>
-		<langpack iso3="deu"/>
-		<langpack iso3="cat"/>
-		<langpack iso3="chn"/>
-		<langpack iso3="cze"/>
-		<langpack iso3="dan"/>       
-		<langpack iso3="fin"/>
-		<langpack iso3="hun"/>
-		<langpack iso3="ita"/>
-		<langpack iso3="jpn"/>
-		<langpack iso3="mys"/>
-		<langpack iso3="ned"/>
-		<langpack iso3="nor"/>
-		<langpack iso3="pol"/>
-		<langpack iso3="por"/>
-		<langpack iso3="rom"/>
-		<langpack iso3="rus"/>
-		<langpack iso3="scg"/>
-		<langpack iso3="svk"/>
-		<langpack iso3="swe"/>
-		<langpack iso3="ukr"/>
 	</locale>
 
 	<native type="izpack" name="ShellLink.dll"/>
@@ -66,10 +54,11 @@ Rio installation file.
 	The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.
 	-->
 	<resources>
-		<res id="HTMLInfoPanel.info" src="../../rio-${pom.version}/NOTICE"/>
-		<res id="LicencePanel.licence" src="../../rio-${pom.version}/LICENSE"/>
+		<res id="HTMLInfoPanel.info" src="../../rio-${pom.version}/NOTICE.txt"/>
+		<res id="LicencePanel.licence" src="../../rio-${pom.version}/LICENSE.txt"/>
         <res id="TargetPanel.dir.windows" src="windows-install-path.txt"/>
 		<res id="installer.langsel.img" src="../../../src/izpack/rio.png"/>
+        <res id="Installer.image" src="../../../src/izpack/rio-side-banner.png"/>
 		<res id="shortcutSpec.xml" src="shortcutSpec.xml"/>
 		<res id="userInputSpec.xml" src="userInputSpec.xml"/>
 		<res id="userInputLang.xml_eng" src="userInputLang.xml_eng"/>
@@ -108,15 +97,15 @@ Rio installation file.
                 <include name="bin/rio" os="unix"/>
                 <include name="bin/rio-ui" os="unix"/>
 				<include name="bin/startall" os="unix"/>
-				<include name="bin/webster" os="unix"/>
+				<include name="bin/install.groovy"/>
 				<include name="config/**/*"/>
 				<include name="deploy/readme.txt"/>
 				<include name="policy/**/*"/>
 				<include name="lib/**/*"/>
 				<include name="lib-dl/**/*"/>
 				<include name="logs/readme.txt"/>
-				<include name="NOTICE"/>
-				<include name="LICENSE"/>
+				<include name="NOTICE.txt"/>
+				<include name="LICENSE.txt"/>
 				<include name="index.html"/> 
 			</fileset>
             <executable targetfile="$INSTALL_PATH/bin/cybernode" os="unix"/>
@@ -124,7 +113,7 @@ Rio installation file.
             <executable targetfile="$INSTALL_PATH/bin/rio" os="unix"/>
             <executable targetfile="$INSTALL_PATH/bin/rio-ui" os="unix"/>
 			<executable targetfile="$INSTALL_PATH/bin/startall" os="unix"/>
-			<executable targetfile="$INSTALL_PATH/bin/webster" os="unix"/>
+			<executable targetfile="$INSTALL_PATH/bin/install.groovy" os="unix"/>
 		</pack>
 		<pack name="Rio Docs" installGroups="All,Rio Core" required="no">
 			<description>Rio Documentation</description>
