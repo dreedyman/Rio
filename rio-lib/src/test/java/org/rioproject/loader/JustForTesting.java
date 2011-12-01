@@ -18,5 +18,5 @@ package org.rioproject.loader;
 /**
  * Dummy class used for testing
  */
-public class TestClass {
+public class JustForTesting {
 }

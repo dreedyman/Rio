@@ -27,7 +27,7 @@ import java.io.File;
 public class ClassBundleLoaderTest {
     @Test
     public void testLoadClass() throws Exception {
-        ClassBundle classBundle = new ClassBundle(TestClass.class.getName());
+        ClassBundle classBundle = new ClassBundle(JustForTesting.class.getName());
         classBundle.setCodebase(System.getProperty("user.dir")+File.separator+
                                 "target"+File.separator+
                                 "test-classes"+File.separator);
