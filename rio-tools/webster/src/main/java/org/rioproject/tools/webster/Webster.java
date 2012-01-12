@@ -583,6 +583,7 @@ public class Webster implements Runnable {
     } // end of loadMimes
 
     protected File parseFileName(String filename) {
+        filename = filename.replace("%20", " ");
         StringBuilder fn = new StringBuilder(filename);
         for (int i = 0; i < fn.length(); i++) {
             if (fn.charAt(i) == '/')
