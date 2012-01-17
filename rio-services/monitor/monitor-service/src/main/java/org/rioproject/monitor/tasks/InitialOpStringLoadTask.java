@@ -15,8 +15,6 @@
  */
 package org.rioproject.monitor.tasks;
 
-import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.OpStringMangerController;
 import org.rioproject.monitor.ProvisionMonitor;
@@ -35,20 +33,19 @@ import java.util.logging.Logger;
  * Scheduled Task which will load configured OperationalString files
  */
 public class InitialOpStringLoadTask extends TimerTask {
-    private Configuration config;
     private ProvisionMonitorPeer provisionMonitorPeer;
     private StateManager stateManager;
     private DeployAdmin deployAdmin;
     private OpStringMangerController opStringMangerController;
+    private String[] initialOpStrings;
     static Logger logger = Logger.getLogger(InitialOpStringLoadTask.class.getName());
-    static final String CONFIG_COMPONENT = "org.rioproject.monitor";
 
-    public InitialOpStringLoadTask(Configuration config,
+    public InitialOpStringLoadTask(String[] initialOpStrings,
                                    DeployAdmin deployAdmin,
                                    ProvisionMonitorPeer provisionMonitorPeer,
                                    OpStringMangerController opStringMangerController,
                                    StateManager stateManager) {
-        this.config = config;
+        this.initialOpStrings = initialOpStrings;
         this.provisionMonitorPeer = provisionMonitorPeer;
         this.deployAdmin = deployAdmin;
         this.opStringMangerController = opStringMangerController;
@@ -59,69 +56,37 @@ public class InitialOpStringLoadTask extends TimerTask {
      * The action to be performed by this timer task.
      */
     public void run() {
-        loadInitialOpStrings(config);
-    }
+        if (stateManager!=null && stateManager.inRecovery())
+            return;
+        try {
+            /*
+             * Wait for all peers to be in a "ready" state. Once this
+             * method returns begin our own initialOpStrings and OARs
+             * deployment, setting the PeerInfo state to
+             * LOADING_INITIAL_DEPLOYMENTS.
+             */
+            waitForPeers();
+            ProvisionMonitor.PeerInfo peerInfo = provisionMonitorPeer.doGetPeerInfo();
+            peerInfo.setInitialDeploymentLoadState(ProvisionMonitor.PeerInfo.LOADING_INITIAL_DEPLOYMENTS);
 
-    void loadInitialOpStrings(Configuration config) {
-        if (stateManager!=null && !stateManager.inRecovery()) {
-            String[] initialOpStrings = new String[]{};
-            try {
-                initialOpStrings =
-                    (String[]) config.getEntry(CONFIG_COMPONENT,
-                                               "initialOpStrings",
-                                               String[].class,
-                                               initialOpStrings);
-                if (logger.isLoggable(Level.FINE)) {
-                    if (initialOpStrings.length > 0) {
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < initialOpStrings.length; i++) {
-                            if (i < 0)
-                                sb.append(", ");
-                            sb.append(initialOpStrings[i]);
-                        }
-                        logger.fine("Loading initialOpStrings " +
-                                    "[" + sb.toString() + "]");
-                    } else {
-                        logger.fine("No initialOpStrings to load");
-                    }
+            /* Load initialOpStrings */
+            for (String initialOpString : initialOpStrings) {
+                URL opstringURL;
+                try {
+                    if (initialOpString.startsWith("http:"))
+                        opstringURL = new URL(initialOpString);
+                    else
+                        opstringURL = new File(initialOpString).toURI().toURL();
+                    Map errorMap = deployAdmin.deploy(opstringURL, null);
+                    opStringMangerController.dumpOpStringError(errorMap);
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING, "Loading OperationalString : " +initialOpString, t);
                 }
-            } catch (ConfigurationException e) {
-                logger.log(Level.WARNING, "Getting initialOpStrings", e);
             }
-            try {
-                /*
-                * Wait for all peers to be in a "ready" state. Once this
-                * method returns begin our own initialOpStrings and OARs
-                * deployment, setting the PeerInfo state to
-                * LOADING_INITIAL_DEPLOYMENTS.
-                */
-                waitForPeers();
-                ProvisionMonitor.PeerInfo peerInfo = provisionMonitorPeer.doGetPeerInfo();
-                peerInfo.setInitialDeploymentLoadState(ProvisionMonitor.PeerInfo.LOADING_INITIAL_DEPLOYMENTS);
 
-                /* Load initialOpStrings */
-                for (String initialOpString : initialOpStrings) {
-                    URL opstringURL;
-                    try {
-                        if (initialOpString.startsWith("http:"))
-                            opstringURL = new URL(initialOpString);
-                        else
-                            opstringURL =
-                                new File(initialOpString).toURI().toURL();
-                        Map errorMap = deployAdmin.deploy(opstringURL, null);
-                        opStringMangerController.dumpOpStringError(errorMap);
-                    } catch (Throwable t) {
-                        logger.log(Level.WARNING,
-                                   "Loading OperationalString : " +
-                                   initialOpString,
-                                   t);
-                    }
-                }
-
-            } finally {
-                ProvisionMonitor.PeerInfo peerInfo = provisionMonitorPeer.doGetPeerInfo();
-                peerInfo.setInitialDeploymentLoadState(ProvisionMonitor.PeerInfo.LOADED_INITIAL_DEPLOYMENTS);
-            }
+        } finally {
+            ProvisionMonitor.PeerInfo peerInfo = provisionMonitorPeer.doGetPeerInfo();
+            peerInfo.setInitialDeploymentLoadState(ProvisionMonitor.PeerInfo.LOADED_INITIAL_DEPLOYMENTS);
         }
     }
 
@@ -143,7 +108,7 @@ public class InitialOpStringLoadTask extends TimerTask {
         boolean peersReady = false;
         while (!peersReady) {
             int numPeersReady = 0;
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             b.append("ProvisionMonitor Peer verification\n");
             for (int i = 0; i < peers.length; i++) {
                 if (i > 0)

@@ -947,17 +947,37 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             if(logger.isLoggable(Level.CONFIG))
                 logger.config("initialOpStringLoadDelay="+initialOpStringLoadDelay);
 
+            String[] initialOpStrings = new String[]{};
+            try {
+                initialOpStrings = (String[]) config.getEntry(CONFIG_COMPONENT,
+                                                              "initialOpStrings",
+                                                              String[].class,
+                                                              initialOpStrings);
+            } catch(Throwable t) {
+                logger.log(Level.WARNING, "Exception getting initialOpStrings", t);
+            }
+            if(logger.isLoggable(Level.CONFIG)) {
+                StringBuilder builder = new StringBuilder();
+                for(String s : initialOpStrings) {
+                    if(builder.length()>0)
+                        builder.append(", ");
+                    builder.append(s);
+                }
+                logger.config("initialOpStrings=["+builder+"]");
+            }
+
             /*
              * Schedule the task to Load any configured OperationalStrings
              */
             long now = System.currentTimeMillis();
             DeployAdmin dAdmin = getLocalDeployAdmin();
-            taskTimer.schedule(new InitialOpStringLoadTask(config,
-                                                           dAdmin,
-                                                           provisionMonitorPeer,
-                                                           opStringMangerController,
-                                                           stateManager),
-                               new Date(now+initialOpStringLoadDelay));
+            if(initialOpStrings.length>0)
+                taskTimer.schedule(new InitialOpStringLoadTask(initialOpStrings,
+                                                               dAdmin,
+                                                               provisionMonitorPeer,
+                                                               opStringMangerController,
+                                                               stateManager),
+                                   new Date(now+initialOpStringLoadDelay));
             /*
             * If we were booted without a serviceID (perhaps using RMI
             * Activation), then create one
