@@ -944,8 +944,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             } catch(Throwable t) {
                 logger.log(Level.WARNING, "Exception getting initialOpStringLoadDelay", t);
             }
-            if(logger.isLoggable(Level.CONFIG))
-                logger.config("initialOpStringLoadDelay="+initialOpStringLoadDelay);
 
             String[] initialOpStrings = new String[]{};
             try {
@@ -963,7 +961,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                         builder.append(", ");
                     builder.append(s);
                 }
-                logger.config("initialOpStrings=["+builder+"]");
+                logger.config("initialOpStrings=["+builder.toString()+"], " +
+                              "initialOpStringLoadDelay="+initialOpStringLoadDelay);
             }
 
             /*
