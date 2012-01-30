@@ -188,7 +188,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
     void destroy() {
         try {
             adapter.getComputeResource().deleteObserver(computeResourceObserver);
-            lCache.removeListener(this);
+            if(lCache!=null)
+                lCache.removeListener(this);
             cancelRegistrations();
             synchronized(provisioners) {
                 provisioners.clear();
