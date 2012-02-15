@@ -77,8 +77,6 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                       "Configuration",
                       "Loggers"};
     private static String instanceLabelText = "Instances";
-    private static String NO_VALUE="--";
-    private static String NOT_DECLARED = "{not declared}";
     private JButton more;
     private OperationalStringManager opMgr;
     private Component parent;
@@ -308,21 +306,17 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                 int column = serviceAttributeTable.getSelectedColumn();
                 int row = serviceAttributeTable.getSelectedRow();
                 if(column==2) {
-                    JDialog dialog = new JDialog((JFrame)null,
-                                                 "Property Details",
-                                                 true);
+                    JDialog dialog = new JDialog((JFrame)null, "Property Details", true);
                     Details details = new Details(dialog);
-                    StringBuffer buffer = new StringBuffer();
+                    StringBuilder buffer = new StringBuilder();
                     buffer.append("<html>");
                     buffer.append("<body>");
                     buffer.append("<strong>");
-                    buffer.append(
-                            serviceAttributeTable.getModel().getValueAt(row, 0));
+                    buffer.append(serviceAttributeTable.getModel().getValueAt(row, 0));
                     buffer.append("</strong>");
                     buffer.append("<br><br>");
                     ServiceAttributeTableItem item =
-                        (ServiceAttributeTableItem)serviceAttributeTable.
-                                                   getModel().getValueAt(row, 1);
+                        (ServiceAttributeTableItem)serviceAttributeTable.getModel().getValueAt(row, 1);
                     if(item.detailsComponent instanceof String[]) {
                         String[] sArray = (String[])item.detailsComponent;
                         for (String aSArray : sArray) {
@@ -334,10 +328,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                         Map map = (Map)item.detailsComponent;
                         Set keys = map.keySet();
                         for (Object key : keys) {
-                            buffer.append(key)
-                                .append(" = ")
-                                .append(map.get(key))
-                                .append("<br>");
+                            buffer.append(key).append(" = ").append(map.get(key)).append("<br>");
                         }
                     } else if(item.detailsComponent instanceof SLA[]) {
                         SLA[] slas = (SLA[])item.detailsComponent;
@@ -348,13 +339,10 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                         LoggerConfig[] loggerConfigs =
                             (LoggerConfig[])item.detailsComponent;
                         for (LoggerConfig loggerConfig : loggerConfigs) {
-                            buffer.append(loggerConfig.toString()).append(
-                                "<br><br>");
+                            buffer.append(loggerConfig.toString()).append("<br><br>");
                         }
-                    } else if(item.detailsComponent instanceof
-                                                        AssociationDescriptor[]) {
-                        AssociationDescriptor[] aDescs =
-                            (AssociationDescriptor[])item.detailsComponent;
+                    } else if(item.detailsComponent instanceof AssociationDescriptor[]) {
+                        AssociationDescriptor[] aDescs = (AssociationDescriptor[])item.detailsComponent;
                         for (AssociationDescriptor aDesc : aDescs)
                             buffer.append(aDesc.toString()).append("<br>");
                     } else if(item.detailsComponent instanceof ClassBundle) {
@@ -364,8 +352,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                         if(args!=null) {
                             for (Object arg : args) {
                                 if (arg instanceof String[]) {
-                                    buffer.append("<br><strong>" +
-                                                  "Configuration</strong><br>");
+                                    buffer.append("<br><strong>Configuration</strong><br>");
                                     String[] config = (String[]) arg;
                                     for (String aConfig : config) {
                                         if (aConfig.equals("-"))
@@ -434,14 +421,11 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                     break;
                 }
             }
-            showServiceElement(sElem,
-                               opMgr.getServiceBeanInstances(sElem),
-                               opMgr);
+            showServiceElement(sElem, opMgr.getServiceBeanInstances(sElem), opMgr);
             invalidate();
         } catch(java.rmi.NoSuchObjectException e) {
             /* Reset all panels */
-            DefaultTableModel tableModel =
-                (DefaultTableModel)serviceAttributeTable.getModel();
+            DefaultTableModel tableModel = (DefaultTableModel)serviceAttributeTable.getModel();
             cleanTable(tableModel);
             tableModel = (DefaultTableModel)exportJARTable.getModel();
             cleanTable(tableModel);
@@ -463,8 +447,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
         this.sElem = sElem;
         this.opMgr = opMgr;
         setInstanceTableLabel(sElem, (DefaultTableModel)instanceTable.getModel());
-        DefaultTableModel tableModel =
-            (DefaultTableModel)serviceAttributeTable.getModel();
+        DefaultTableModel tableModel = (DefaultTableModel)serviceAttributeTable.getModel();
         cleanTable(tableModel);
         String value="";
         ServiceAttributeTableItem tableItem = null;
@@ -491,6 +474,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
          "Loggers"
          */
         boolean addMore = false;
+        String NOT_DECLARED = "{not declared}";
         for(int i=0; i<serviceElementProps.length; i++) {
             switch(i) {
                 case 0: /* Interfaces */
@@ -526,8 +510,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                     addMore = false;
                     break;
                 case 4: /* Locators */
-                    LookupLocator[] locators = sElem.getServiceBeanConfig().
-                                                     getLocators();
+                    LookupLocator[] locators = sElem.getServiceBeanConfig().getLocators();
                     if(locators!=null && locators.length>0) {
                         String[] s = new String[locators.length];
                         for(int j=0; j<s.length; j++)
@@ -551,16 +534,14 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                         String[] ids = s.getSystemThresholdIDs();
                         String[] sysThresholds = new String[ids.length];
                         if(ids.length>0) {
-                            StringBuffer buff = new StringBuffer();
+                            StringBuilder buff = new StringBuilder();
                             for(int j=0; j<ids.length; j++) {
                                 if(j>0)
                                     buff.append(", ");
-                                ThresholdValues tVal =
-                                    s.getSystemThresholdValue(ids[j]);
-                                sysThresholds[j] =
-                                    "ID="+ids[j]+" "+
-                                    "High="+tVal.getHighThreshold()+" "+
-                                    "Low="+tVal.getLowThreshold();
+                                ThresholdValues tVal = s.getSystemThresholdValue(ids[j]);
+                                sysThresholds[j] = "ID="+ids[j]+" "+
+                                                   "High="+tVal.getHighThreshold()+" "+
+                                                   "Low="+tVal.getLowThreshold();
                                 buff.append("[").append(sysThresholds[j]).append("]");
                             }
                             value = buff.toString();
@@ -671,11 +652,9 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                 case 16: /* Parameters */
                     tableItem = new ServiceAttributeTableItem();
                     if(sElem.getServiceBeanConfig().getInitParameters().size()>0) {
-                        value =
-                            sElem.getServiceBeanConfig().getInitParameters().toString();
+                        value = sElem.getServiceBeanConfig().getInitParameters().toString();
                         addMore = true;
-                        tableItem.detailsComponent =
-                            sElem.getServiceBeanConfig().getInitParameters();
+                        tableItem.detailsComponent = sElem.getServiceBeanConfig().getInitParameters();
                     } else {
                         addMore = false;
                     }
@@ -711,8 +690,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                     break;
                 case 19: /* Loggers */
                     tableItem = new ServiceAttributeTableItem();
-                    java.util.Map map =
-                        sElem.getServiceBeanConfig().getConfigurationParameters();
+                    java.util.Map map = sElem.getServiceBeanConfig().getConfigurationParameters();
                     LoggerConfig[] loggerConfigs =
                         (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
                     if(loggerConfigs == null) {
@@ -730,10 +708,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             Object toAdd = new JLabel("");
             if(addMore)
                 toAdd = more;
-            tableModel.insertRow(i, new Object[] {serviceElementProps[i],
-                                                  tableItem,
-                                                  //value,
-                                                  toAdd});
+            tableModel.insertRow(i, new Object[] {serviceElementProps[i], tableItem, toAdd});
         }
         tableModel = (DefaultTableModel)exportJARTable.getModel();
         cleanTable(tableModel);
@@ -743,6 +718,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
         } catch(MalformedURLException e) {
             Util.showError(e, null, "Error getting export URLs for service");
         }
+        String NO_VALUE = "--";
         if(jars.length==0)
             tableModel.insertRow(0, new Object[] {"Not Available", NO_VALUE, "", ""});
         else {
@@ -785,7 +761,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
     }
 
     void setInstanceTableLabel(ServiceElement sElem, DefaultTableModel tableModel) {
-        StringBuffer suffix = new StringBuffer();
+        StringBuilder suffix = new StringBuilder();
 
         if(sElem.getProvisionType()==ProvisionType.DYNAMIC) {
             suffix.append("Planned (")
@@ -918,8 +894,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             textArea = new javax.swing.JEditorPane();
             textArea.setEditable(false);
             textArea.setContentType("text/html");
-            java.awt.GridBagConstraints gridBagConstraints =
-                new java.awt.GridBagConstraints();
+            java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
             gridBagConstraints.gridx = 0;
             gridBagConstraints.gridy = 0;
             gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -991,7 +966,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
      * Convert an Array od SLA instances to a String
      */
     String flattenSLAs(SLA[] slas) {
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
         for(int i=0; i<slas.length; i++) {
             if(i>0)
                 buff.append(", ");
@@ -1006,7 +981,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
     String flatten(String[] in) {
         if (in == null)
             return "";
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
         for(int i=0; i<in.length; i++) {
             if(i>0)
                 buff.append(", ");
@@ -1283,7 +1258,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
     }
     // </editor-fold>//GEN-END:initComponents
 
-    private void serviceRedeployActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serviceRedeployActionPerformed
+    private void serviceRedeployActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }//GEN-LAST:event_serviceRedeployActionPerformed
 
