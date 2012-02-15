@@ -34,6 +34,7 @@ fi
 RIO_HOME=`cd "$RIO_HOME" && pwd`
 
 RIO_LIB=$RIO_HOME/lib
+RIO_LIB_DL=$RIO_HOME/lib-dl
 
 # Check for JAVA_HOME
 if [ -z "$JAVA_HOME" ] ; then
@@ -187,7 +188,7 @@ else
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
     cliExt="$RIO_HOME/config/tools.groovy"
     launchTarget=org.rioproject.tools.cli.CLI
-    classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar`"
+    classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB_DL/rio-api.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar`"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \

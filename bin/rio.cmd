@@ -32,7 +32,7 @@ rem set cliExt="%RIO_HOME%"\config\rio_cli.groovy
 rem set cliExt=""
 set command_line=%*
 set launchTarget=org.rioproject.tools.cli.CLI
-set classpath=-cp "%RIO_HOME%\lib\rio-cli.jar";"%RIO_LIB%\jsk-lib.jar";"%RIO_LIB%\jsk-platform.jar";"%RIO_HOME%\lib\groovy-all.jar";
+set classpath=-cp "%RIO_HOME%\lib\rio-cli.jar";"%RIO_HOME%\lib-dl\rio-api.jar";"%RIO_LIB%\jsk-lib.jar";"%RIO_LIB%\jsk-platform.jar";"%RIO_HOME%\lib\groovy-all.jar";
 set props="-DRIO_HOME=%RIO_HOME%"
 "%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -DRIO_HOME="%RIO_HOME%" -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
 goto end
