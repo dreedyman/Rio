@@ -35,11 +35,10 @@ public class ClassBundleLoader {
     private static Logger logger = Logger.getLogger(ClassBundleLoader.class.getName());
 
     /**
-     * Load the class using the provided JAR resources. If there are no JARs
-     * resources for the class the current context ClassLoader will be used to
-     * load the class. If there are JAR resources, a new ClassLoader will be
-     * created each time this method is invoked, setting the delegating
-     * ClassLoader to the contextClassLoader
+     * Load the class using resources in the {@code ClassBundle}. If there are no
+     * resources for the class the parent ClassLoader will be used to load the
+     * class. If there are resources (jars), a new ClassLoader will be created,
+     * setting the delegating ClassLoader to the contextClassLoader
      *
      * @param bundle The ClassBundle to load
      * @return A new Class instance each time this method is invoked
@@ -70,10 +69,9 @@ public class ClassBundleLoader {
     }
 
     /**
-     * Load the class using the provided JAR resources. If there are no JARs
+     * Load the class using resources in the {@code ClassBundle}. If there are no
      * resources for the class the parent ClassLoader will be used to load the
-     * class. If there are JAR resources, a new ClassLoader will be created
-     * each time this method is invoked.
+     * class. If there are resources (jars), a new ClassLoader will be created.
      *
      * @param parent Parent ClassLoader to use for delegation.
      * @param bundle The ClassBundle to load
@@ -92,7 +90,7 @@ public class ClassBundleLoader {
         ClassLoader loader = parent;
         String className =  bundle.getClassName();
         URL[] urls = bundle.getJARs();
-        if(urls != null && urls.length > 0) {
+        if(urls.length > 0) {
             try {
                 loader = new URIClassLoader(ServiceClassLoader.getURIs(urls), parent);
             } catch (URISyntaxException e) {
