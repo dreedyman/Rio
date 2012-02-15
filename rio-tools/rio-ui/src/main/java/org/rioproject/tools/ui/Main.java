@@ -809,7 +809,7 @@ public class Main extends JFrame {
                                                 Constants.DEFAULT_THREAD_POOL_SIZE,
                                                 Constants.MIN_THREAD_POOL_SIZE,
                                                 Constants.MAX_THREAD_POOL_SIZE);
-        service = Executors.newFixedThreadPool(threadPoolSize);
+        service = Executors.newCachedThreadPool();
         for(int i=0; i<threadPoolSize; i++) {
             service.submit(new ServiceItemFetcher());
         }
@@ -1054,6 +1054,7 @@ public class Main extends JFrame {
                     graphView.removeOpString(pme.getOperationalStringName());
                     break;
                 case SERVICE_PROVISIONED:
+                case EXTERNAL_SERVICE_DISCOVERED:
                     handleServiceProvisioned(pme);
                     graphView.setOpStringState(pme.getOperationalStringName());
                     refreshCybernodes(pme);
@@ -1111,12 +1112,9 @@ public class Main extends JFrame {
         @SuppressWarnings("unchecked")
         void refreshCybernodes(ProvisionMonitorEvent pme) {
 			if (pme == null)
-				System.err.println("refreshCybernodes(): Null " +
-                                   "ProvisionMonitorEvent!!");
+				System.err.println("refreshCybernodes(): Null ProvisionMonitorEvent!!");
 			else if (pme.getServiceBeanInstance() == null) {
-                System.err.println("refreshCybernodes(): Can't fetch " +
-                                   "ServiceBeanInstance from " +
-                                   "ProvisionMonitorEvent");
+                System.err.println("refreshCybernodes(): Can't fetch ServiceBeanInstance from ProvisionMonitorEvent");
 
             } else
             	cup.updateCybernodesAt(pme.getServiceBeanInstance().getHostAddress());
@@ -1224,10 +1222,7 @@ public class Main extends JFrame {
     public static void redirect() {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null) {
-            String location =
-                    Main.class.getProtectionDomain()
-                            .getCodeSource()
-                            .getLocation().toExternalForm();
+            String location = Main.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
             /*
              * Strip the file: off
              */
