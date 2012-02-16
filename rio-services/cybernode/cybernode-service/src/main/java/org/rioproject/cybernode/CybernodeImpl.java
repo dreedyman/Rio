@@ -880,7 +880,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Get the schedule which will control when the Cybernode will make
          * itself available as an asset */
         availabilitySchedule = (Schedule)config.getEntry(getConfigComponent(),
-                                                         "availablitySchedule",
+                                                         "availabilitySchedule",
                                                          Schedule.class,
                                                          new Schedule());
         doEnlist(availabilitySchedule);
@@ -1180,6 +1180,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * availability schedule to control when it registers and unregisters to
      * discovered Provision Manager instances
      *
+     * <p>If the <code>Schedule</code>is <code>null</code>, the Cybernode will 
+     * not add itself as a resource</p>
+     *
      * If the Cybernode is already enlisted, this method will have
      * no effect
      *
@@ -1191,24 +1194,24 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 logger.fine("Already enlisted");
             return;
         }
-        if(schedule==null)
-            throw new IllegalArgumentException("schedule is null");
+        if(schedule==null) {
+            if(logger.isLoggable(Level.INFO))
+                logger.info("Configured for no availability, will not register for service provisioning");
+            setEnlisted(false);
+            return;
+        }
         Date startDate = schedule.getStartDate();
         long now = System.currentTimeMillis();
         long delay = startDate.getTime()-now;
         boolean scheduled = false;
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Availability schedule "+
-                        "Start Date=["+startDate.toString()+"], "+
-                        "Available for="+
-                        "["+
-                        TimeUtil.format(schedule.getDuration())+
-                        "], "+
-                        "Time not available="+
-                        "["+
-                        TimeUtil.format(schedule.getRepeatInterval())+
-                        "], "+
-                        "Time till start ["+TimeUtil.format(delay)+"]");
+        if(logger.isLoggable(Level.FINE)) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("Availability schedule Start Date=[").append(startDate.toString()).append("]")
+                .append("Available for=[").append(TimeUtil.format(schedule.getDuration())).append("]")
+                .append("Time not available=[").append(TimeUtil.format(schedule.getRepeatInterval())).append("]")
+                .append("Time till start [").append(TimeUtil.format(delay)).append("]");
+            logger.fine(builder.toString());
+        }            
         if(delay>0 || schedule.getDuration()>0) {
             RegistrationTask registrationTask = new RegistrationTask(schedule);
             addRegistrationTask(registrationTask);
@@ -1226,12 +1229,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             if(logger.isLoggable(Level.INFO))
                 logger.info("Configured for constant availability");
             try {
-                svcConsumer.initializeProvisionDiscovery(
-                                              context.getDiscoveryManagement());
+                svcConsumer.initializeProvisionDiscovery(context.getDiscoveryManagement());
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Initializing Provision discovery",
-                           e);
+                logger.log(Level.WARNING, "Initializing Provision discovery", e);
             }
         }
         setEnlisted(true);

@@ -35,7 +35,6 @@ public class UIComponentFactory implements JComponentFactory, Serializable {
     static final long serialVersionUID = 1L;
     private String className;
     private URL[] exportURL;
-    private transient URLClassLoader uiLoader;
 
     public UIComponentFactory(URL exportUrl, String className) {
         this.className = className;
@@ -54,7 +53,7 @@ public class UIComponentFactory implements JComponentFactory, Serializable {
         ClassLoader cl = ((ServiceItem)roleObject).service.getClass().getClassLoader();
         JComponent component = null;
         try {
-            uiLoader = URLClassLoader.newInstance(exportURL, cl);
+            final URLClassLoader uiLoader = new URLClassLoader(exportURL, cl);
             final Thread currentThread = Thread.currentThread();
             final ClassLoader parentLoader = 
                 AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {

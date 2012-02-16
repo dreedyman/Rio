@@ -89,25 +89,31 @@ public class ResolverHelper {
                                    String codebase) throws ResolverException {
         List<String> jars = new ArrayList<String>();
         if (artifact != null) {
-            String[] classPath = resolver.getClassPathFor(artifact, repositories);
-            for (String jar : classPath) {
-                String s = null;
-                if(jar.startsWith(M2_HOME)) {
-                    String jarPart = jar.substring(M2_HOME.length());
-                    if(codebase.endsWith("/") && jarPart.startsWith(File.separator))
-                        jarPart = jarPart.substring(1, jarPart.length());
-                    if(codebase.startsWith("http:"))
-                        jarPart = handleWindowsHTTP(jarPart);
-                    s = codebase+jarPart;
-                } else {
-                    File jarFile = new File(jar);
-                    if(jarFile.exists())
-                        s = jarFile.toURI().toString();
-                    else
-                        System.err.println("[WARNING] "+jarFile.getPath()+" NOT FOUND");
+            String[] artifactParts = artifact.split(" ");
+            for(String artifactPart : artifactParts) {
+                String[] classPath = resolver.getClassPathFor(artifactPart, repositories);
+                for (String jar : classPath) {
+                    String s = null;
+                    if(jar.startsWith(M2_HOME)) {
+                        String jarPart = jar.substring(M2_HOME.length());
+                        if(codebase.endsWith("/") && jarPart.startsWith(File.separator))
+                            jarPart = jarPart.substring(1, jarPart.length());
+                        if(codebase.startsWith("http:"))
+                            jarPart = handleWindowsHTTP(jarPart);
+                        s = codebase+jarPart;
+                    } else {
+                        File jarFile = new File(jar);
+                        if(jarFile.exists())
+                            s = jarFile.toURI().toString();
+                        else
+                            System.err.println("[WARNING] "+jarFile.getPath()+" NOT FOUND");
+                    }
+                    if(s!=null) {
+                        s = handleWindows(s);
+                        if(!jars.contains(s))
+                            jars.add(s);
+                    }
                 }
-                if(s!=null)
-                    jars.add(handleWindows(s));
             }
         }
         if(logger.isLoggable(Level.FINE))

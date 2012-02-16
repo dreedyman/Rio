@@ -827,7 +827,7 @@ public class ComputeResource extends Observable {
                 (SystemCapabilitiesLoader)config.getEntry(COMPONENT, 
                                                           "systemCapabilitiesLoader", 
                                                           SystemCapabilitiesLoader.class, 
-                                                          new SystemCapabilities()); 
+                                                          new SystemCapabilities());
             /* Get the PlatformCapability instances */
             PlatformCapability[] pCaps =
                 systemCapabilitiesLoader.getPlatformCapabilities(config);

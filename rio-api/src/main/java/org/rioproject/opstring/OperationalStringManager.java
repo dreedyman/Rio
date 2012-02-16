@@ -20,9 +20,11 @@ import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.deploy.DeploymentMap;
 import org.rioproject.deploy.ServiceStatement;
+import org.rioproject.resolver.RemoteRepository;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -88,7 +90,7 @@ public interface OperationalStringManager extends Remote {
 
     /**
      * Update the OperationalString that the <tt>OperationalStringManager</tt> is managing.
-     * This involves updating ServiceElement instances, which may include the additon 
+     * This involves updating ServiceElement instances, which may include the addition
      * and or removal of ServiceElements in the OperationalString 
      * 
      * If the input OperationalString includes nested OperationalStrings, and the 
@@ -141,8 +143,7 @@ public interface OperationalStringManager extends Remote {
      *
      * @throws RemoteException If communication errors occur
      */
-    ServiceElement getServiceElement(String[] interfaces, String name)
-        throws RemoteException;
+    ServiceElement getServiceElement(String[] interfaces, String name) throws RemoteException;
 
     /**
      * This method will add a ServiceElement to an OperationalString. Based on
@@ -157,8 +158,7 @@ public interface OperationalStringManager extends Remote {
      * ServiceElement
      * @throws RemoteException If communication errors occur
      */
-    void addServiceElement(ServiceElement sElem)
-        throws OperationalStringException, RemoteException;
+    void addServiceElement(ServiceElement sElem) throws OperationalStringException, RemoteException;
 
     /**
      * This method will add a ServiceElement to an OperationalString. Based on
@@ -177,8 +177,8 @@ public interface OperationalStringManager extends Remote {
      * ServiceElement
      * @throws RemoteException If communication errors occur
      */
-    void addServiceElement(ServiceElement sElem, ServiceProvisionListener listener)
-        throws OperationalStringException, RemoteException;
+    void addServiceElement(ServiceElement sElem, ServiceProvisionListener listener) throws OperationalStringException, 
+                                                                                           RemoteException;
 
     /**
      * This method will modify the ServiceElement attributes of a ServiceElement
@@ -192,8 +192,7 @@ public interface OperationalStringManager extends Remote {
      * ServiceElement
      * @throws RemoteException If communication errors occur
      */
-    void update(ServiceElement sElem)
-        throws OperationalStringException, RemoteException;
+    void update(ServiceElement sElem) throws OperationalStringException, RemoteException;
 
     /**
      * This method will remove a ServiceElement from an OperationalString and
@@ -207,8 +206,8 @@ public interface OperationalStringManager extends Remote {
      * being managed by the <tt>OperationalStringManager</tt>
      * @throws RemoteException If communication errors occur
      */
-    void removeServiceElement(ServiceElement sElem, boolean destroy)
-        throws OperationalStringException, RemoteException;
+    void removeServiceElement(ServiceElement sElem, boolean destroy) throws OperationalStringException, 
+                                                                            RemoteException;
 
     /**
      * Get the ServiceBeanInstance objects for a ServiceElement
@@ -223,8 +222,8 @@ public interface OperationalStringManager extends Remote {
      * <tt>OperationalStringManager</tt>
      * @throws RemoteException If communication errors occur
      */
-    ServiceBeanInstance[] getServiceBeanInstances(ServiceElement sElem)
-        throws OperationalStringException, RemoteException;
+    ServiceBeanInstance[] getServiceBeanInstances(ServiceElement sElem) throws OperationalStringException, 
+                                                                               RemoteException;
 
     /**
      * Relocate (move) a ServiceBean instance to another
@@ -248,9 +247,7 @@ public interface OperationalStringManager extends Remote {
      * @throws NullPointerException if the instance is <code>null</code>
      * @throws RemoteException If communication errors occur
      */
-    void relocate(ServiceBeanInstance instance,
-                  ServiceProvisionListener listener,
-                  Uuid uuid)
+    void relocate(ServiceBeanInstance instance, ServiceProvisionListener listener, Uuid uuid)
         throws OperationalStringException, RemoteException;
 
     /**
@@ -278,9 +275,7 @@ public interface OperationalStringManager extends Remote {
      * is not the managing <tt>OperationalStringManager</tt> for the OperationalString)
      * @throws RemoteException If communication errors occur
      */
-    void increment(ServiceElement sElem,
-                   boolean permanent,
-                   ServiceProvisionListener listener)
+    void increment(ServiceElement sElem, boolean permanent, ServiceProvisionListener listener)
         throws OperationalStringException, RemoteException;
 
     /**
@@ -305,9 +300,7 @@ public interface OperationalStringManager extends Remote {
      * managed by the <tt>OperationalStringManager</tt>
      * @throws RemoteException If communication errors occur
      */
-    void decrement(ServiceBeanInstance instance,
-                   boolean mandate,
-                   boolean destroy)
+    void decrement(ServiceBeanInstance instance, boolean mandate, boolean destroy)
         throws OperationalStringException, RemoteException;
 
     /**
@@ -362,8 +355,7 @@ public interface OperationalStringManager extends Remote {
      * {@link org.rioproject.opstring.ServiceElement.ProvisionType#DYNAMIC}, -1 will
      * be returned
      */
-    int trim(ServiceElement sElem, int trimUp)
-        throws OperationalStringException, RemoteException;
+    int trim(ServiceElement sElem, int trimUp) throws OperationalStringException, RemoteException;
 
     /**
      * Update a ServiceBeanInstance
@@ -376,8 +368,7 @@ public interface OperationalStringManager extends Remote {
      * managed by the <tt>OperationalStringManager</tt>
      * @throws RemoteException If communication errors occur
      */
-    void update(ServiceBeanInstance instance)
-        throws OperationalStringException, RemoteException;
+    void update(ServiceBeanInstance instance) throws OperationalStringException, RemoteException;
 
     /**
      * Redeploy an OperationalString, ServiceElement or ServiceBeanInstance. This
@@ -477,4 +468,14 @@ public interface OperationalStringManager extends Remote {
      * @throws RemoteException If communication errors occur
      */
     DeploymentMap getDeploymentMap() throws RemoteException;
+
+    /**
+     * Get the {@code RemoteRepository}s used the resolve service artifacts
+     * 
+     * @return An array of {@code RemoteRepository}s used the resolve service artifacts. A new array is created
+     * each time. If there are no {@code RemoteRepository}s, a zero-length array is returned.
+     *
+     * @throws RemoteException If communication errors occur
+     */
+    RemoteRepository[] getRemoteRepositories() throws RemoteException;
 }

@@ -173,6 +173,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             }
         }
     }
+    
+    OAR getOAR() {
+        return oar;
+    }
 
     void setServiceProxy(ProvisionMonitor serviceProxy) {
         this.serviceProxy = serviceProxy;
@@ -470,15 +474,14 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             throw new OperationalStringException("Verifying deployment for [" + newOpString.getName() + "]", e);
         }
         Map<String, Throwable> map = doUpdateOperationalString(newOpString);
-        ProvisionMonitorEvent event =
-            new ProvisionMonitorEvent(serviceProxy,
-                                      ProvisionMonitorEvent.Action.OPSTRING_UPDATED,
-                                      doGetOperationalString());
+        ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
+                                                                ProvisionMonitorEvent.Action.OPSTRING_UPDATED,
+                                                                doGetOperationalString());
         eventProcessor.processEvent(event);
         return (map);
     }
 
-    private RemoteRepository[] getRemoteRepositories() {
+    public RemoteRepository[] getRemoteRepositories() {
         Collection<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
         if (oar != null)
             remoteRepositories.addAll(oar.getRepositories());
@@ -738,10 +741,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         try {
             doAddServiceElement(sElem, listener);
             stateChanged(false);
-            ProvisionMonitorEvent event =
-                new ProvisionMonitorEvent(serviceProxy,
-                                          ProvisionMonitorEvent.Action.SERVICE_ELEMENT_ADDED,
-                                          sElem);
+            ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
+                                                                    ProvisionMonitorEvent.Action.SERVICE_ELEMENT_ADDED,
+                                                                    sElem);
             eventProcessor.processEvent(event);
 
         } catch (Throwable t) {
@@ -750,6 +752,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (logger.isLoggable(Level.FINE))
             logger.log(Level.FINE, "Added service [" + sElem.getOperationalStringName() + "/" + sElem.getName() + "]");
     }
+
 
     /**
     * @see OpStringManager#doAddServiceElement(ServiceElement, ServiceProvisionListener)
@@ -1133,7 +1136,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     public OperationalString doGetOperationalString() {
         OpString opstr = new OpString(opString.getName(), opString.loadedFrom());
         opstr.setDeployed(deployStatus);
-        opstr.setSchedule(opString.getSchedule());
+        //opstr.setSchedule(opString.getSchedule());
         for (ServiceElementManager mgr : svcElemMgrs) {
             opstr.addService(mgr.getServiceElement());
         }
@@ -1304,11 +1307,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             throw new OperationalStringException("Cannot redeploy an " +
                                                  "OperationalString with a " +
                                                  "status of Scheduled");
-        Date lastDeployDate = deployDateList.get(lastIndex);
-        if (opString.getSchedule().getDuration() != Schedule.INDEFINITE &&
+        //Date lastDeployDate = deployDateList.get(lastIndex);
+        /*if (opString.getSchedule().getDuration() != Schedule.INDEFINITE &&
             (delay >
              (lastDeployDate.getTime() + opString.getSchedule().getDuration())))
-            throw new OperationalStringException("delay is too long");
+            throw new OperationalStringException("delay is too long");*/
 
         RedeploymentTask scheduledTask = getScheduledRedeploymentTask(sElem, instance);
         if (scheduledTask != null) {

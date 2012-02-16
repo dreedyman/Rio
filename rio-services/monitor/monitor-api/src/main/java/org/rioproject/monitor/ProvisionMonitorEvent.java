@@ -20,9 +20,13 @@ import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
+import org.rioproject.resolver.RemoteRepository;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class is used to communicate state changes on OperationalString and 
@@ -79,7 +83,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
         OPSTRING_MGR_CHANGED,
         /** Indicates that this event has been created and sent as a result of a
          * service termination */
-        SERVICE_TERMINATED
+        SERVICE_TERMINATED,
+        /** Indicates that an external service has been discovered */
+        EXTERNAL_SERVICE_DISCOVERED
     }
     /** The action for the event */
     private Action action;
@@ -93,6 +99,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     private Object[] redeploymentParms;
     /** The ServiceBeanInstance. May be null */
     private ServiceBeanInstance instance;
+    private final Collection<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
 
     /**
      * Create a ProvisionMonitorEvent for a ServiceElement add, remove or change
@@ -102,9 +109,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * @param action The type of ProvisionMonitorEvent
      * @param sElem The ServiceElement that changed
      */
-    public ProvisionMonitorEvent(Object source,
-                                 Action action,
-                                 ServiceElement sElem) {
+    public ProvisionMonitorEvent(Object source, Action action, ServiceElement sElem) {
         super(source);
         if(sElem==null)
             throw new NullPointerException("sElem is null");
@@ -114,16 +119,14 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     }
 
     /**
-     * Create a ProvisionMonitorEvent for an OperationalString deployment or
-     * undeployment, update or OperationaStringManager change
+     * Create a ProvisionMonitorEvent for an OperationalString deployment, undeployment, update,
+     * or OperationaStringManager change
      *
      * @param source The source (originator) of the event
      * @param action The action the event represents
      * @param opString The OperationalString undeployed
      */
-    public ProvisionMonitorEvent(Object source,
-                                 Action action,
-                                 OperationalString opString) {
+    public ProvisionMonitorEvent(Object source, Action action, OperationalString opString) {
         super(source);
         if(opString==null)
             throw new NullPointerException("opString is null");
@@ -140,9 +143,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * @param opStringName The name of the OperationalString 
      * @param instance The ServiceBeanInstance that changed
      */
-    public ProvisionMonitorEvent(Object source, 
-                                 String opStringName,
-                                 ServiceBeanInstance instance) {
+    public ProvisionMonitorEvent(Object source, String opStringName, ServiceBeanInstance instance) {
         super(source);
         if(opStringName==null)
             throw new NullPointerException("opStringName cannot be null");
@@ -198,7 +199,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
         if(opStringName==null)
             throw new NullPointerException("opStringName cannot be null");
         if(args==null)
-            throw new NullPointerException("redeploymentParms cannot be null");        
+            throw new NullPointerException("redeployment args cannot be null");
         this.action = Action.REDEPLOY_REQUEST;
         this.opStringName = opStringName;
         this.sElem = sElem;
@@ -280,6 +281,14 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      */
     public static EventDescriptor getEventDescriptor(){
         return(new EventDescriptor(ProvisionMonitorEvent.class, ID));
+    }
+
+    public RemoteRepository[] getRemoteRepositories() {
+        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+    }
+    
+    public void setRemoteRepositories(RemoteRepository[] repositories) {
+        Collections.addAll(this.remoteRepositories, repositories);
     }
 
     @Override

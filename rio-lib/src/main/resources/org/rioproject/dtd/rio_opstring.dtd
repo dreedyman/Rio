@@ -129,7 +129,7 @@ capabilities
                         (%Discovery; | %Common; ) )*)>
 <!ATTLIST ServiceBean Name CDATA #REQUIRED>
 <!ATTLIST ServiceBean MatchOnName (yes | no) "yes">
-<!ATTLIST ServiceBean ProvisionType (dynamic | fixed ) "dynamic">
+<!ATTLIST ServiceBean ProvisionType (dynamic | fixed | external) "dynamic">
 <!ATTLIST ServiceBean AutoAdvertise (yes | no) "yes">
 <!ATTLIST ServiceBean DiscoveryManagementPooling (yes | no) "yes">
 <!ATTLIST ServiceBean Fork (yes | no) "no">

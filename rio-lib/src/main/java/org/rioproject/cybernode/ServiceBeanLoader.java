@@ -42,7 +42,6 @@ import org.rioproject.core.jsb.ServiceBeanFactory;
 import org.rioproject.core.jsb.ServiceBeanManager;
 import org.rioproject.jsb.*;
 import org.rioproject.log.LoggerConfig;
-import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
@@ -251,24 +250,32 @@ public class ServiceBeanLoader {
         /*
          * Provision service jars
          */
-        URL[] exports;
-        URL[] implJARs;
-        try {
-            Resolver resolver = ResolverHelper.getResolver();
-            boolean install = computeResource.getPersistentProvisioning();
-            Map<String, ProvisionedResources> serviceResources = provisionService(sElem, resolver, install);
-            ProvisionedResources dlPR = serviceResources.get("dl");
-            ProvisionedResources implPR = serviceResources.get("impl");
-            if(dlPR.getJars().length==0 && dlPR.getArtifact()!=null) {
-                String convertedArtifact = dlPR.getArtifact().replaceAll(":", "/");
-                // TODO: if the repositories is default maven central, still need to add?
-                exports = new URL[]{new URL("artifact:"+convertedArtifact+dlPR.getRepositories())};
-            } else {
-                exports = dlPR.getJars();
+        URL[] exports = new URL[0];
+        URL[] implJARs = new URL[0];
+        if(System.getProperty("StaticCybernode")==null) {
+            try {
+                Resolver resolver = ResolverHelper.getResolver();
+                boolean install = computeResource.getPersistentProvisioning();
+                Map<String, ProvisionedResources> serviceResources = provisionService(sElem, resolver, install);
+                ProvisionedResources dlPR = serviceResources.get("dl");
+                ProvisionedResources implPR = serviceResources.get("impl");
+                if(dlPR.getJars().length==0 && dlPR.getArtifact()!=null) {
+                    String convertedArtifact = dlPR.getArtifact().replaceAll(":", "/");
+                    String[] artifactParts = convertedArtifact.split(" ");
+                    List<URL> exportURLList = new ArrayList<URL>();
+                    for(String artifactPart : artifactParts) {
+                        // TODO: if the repositories is default maven central, still need to add?
+                        exportURLList.add(new URL("artifact:"+artifactPart+dlPR.getRepositories()));
+                    }
+                    exports = exportURLList.toArray(new URL[exportURLList.size()]);
+                } else {
+                    exports = dlPR.getJars();
+                }
+                implJARs = implPR.getJars();
+            } catch(Exception e) {
+                throw new ServiceBeanInstantiationException("Unable to provision JARs for " +
+                                                            "service ["+sElem.getName()+"]", e);
             }
-            implJARs = implPR.getJars();
-        } catch(Exception e) {
-            throw new ServiceBeanInstantiationException("Unable to provision JARs for service ["+sElem.getName()+"]", e);
         }
 
         /*
@@ -287,8 +294,8 @@ public class ServiceBeanLoader {
                     }
                 }
             } catch(MalformedURLException e) {
-                throw new ServiceBeanInstantiationException("Unable to load SharedComponents for ["+sElem.getName()+"]",
-                                                    e);
+                throw new ServiceBeanInstantiationException("Unable to load SharedComponents for " +
+                                                            "service ["+sElem.getName()+"]", e);
             }
         }
 
@@ -500,7 +507,7 @@ public class ServiceBeanLoader {
         throws MalformedURLException, ServiceBeanInstantiationException {
 
         Map<String, ProvisionedResources> map = new HashMap<String, ProvisionedResources>();
-        URL[] implJARs;
+        URL[] implJARs = null;
         String implArtifact = (elem.getComponentBundle()!=null?
                                elem.getComponentBundle().getArtifact(): null);
         ProvisionedResources implPR = getProvisionedResources(implArtifact);
@@ -508,38 +515,41 @@ public class ServiceBeanLoader {
         if(implPR==null) {
             implPR = new ProvisionedResources(implArtifact);
             if(elem.getComponentBundle()!=null) {
-                if(elem.getComponentBundle().getArtifact()!=null && resolver!=null) {
-                    if(!supportsInstallation)
-                        throw new ServiceBeanInstantiationException("Service ["+elem.getName()+"] " +
-                                                            "cannot be instantiated, the Cybernode " +
-                                                            "does not support persistent provisioning, and the " +
-                                                            "service requires artifact resolution for "+implArtifact);
-                    String[] jars;
-                    try {
-                        jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
-                                                               resolver,
-                                                               elem.getRemoteRepositories());
-                    } catch (ResolverException e) {
-                        throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", e);
+                if(System.getProperty("StaticCybernode")==null) {
+                    if(elem.getComponentBundle().getArtifact()!=null && resolver!=null) {
+                        if(!supportsInstallation)
+                            throw new ServiceBeanInstantiationException("Service ["+elem.getName()+"] " +
+                                                                        "cannot be instantiated, the Cybernode " +
+                                                                        "does not support persistent provisioning, " +
+                                                                        "and the service requires artifact resolution " +
+                                                                        "for "+implArtifact);
+                        String[] jars;
+                        try {
+                            jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
+                                                          resolver,
+                                                          elem.getRemoteRepositories());
+                        } catch (ResolverException e) {
+                            throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", e);
+                        }
+                        List<URL> urls = new ArrayList<URL>();
+                        for(String jar: jars) {
+                            if(jar!=null)
+                                urls.add(new URL(jar));
+                        }
+                        implJARs = urls.toArray(new URL[urls.size()]);
+                    } else {
+                        /* RIO-228 */
+                        if(System.getProperty("StaticCybernode")!=null)
+                            implJARs = new URL[0];
+                        else
+                            implJARs = elem.getComponentBundle().getJARs();
                     }
-                    List<URL> urls = new ArrayList<URL>();
-                    for(String jar: jars) {
-                        if(jar!=null)
-                            urls.add(new URL(jar));
-                    }
-                    implJARs = urls.toArray(new URL[urls.size()]);
-                } else {
-                    /* RIO-228 */
-                    if(System.getProperty("StaticCybernode")!=null)
-                        implJARs = new URL[0];
-                    else
-                        implJARs = elem.getComponentBundle().getJARs();
                 }
             } else {
                 implJARs = new URL[0];
             }
-
-            implPR.setJars(implJARs);
+            if(implJARs!=null)
+                implPR.setJars(implJARs);
         }
 
         String exportArtifact = null;
@@ -550,45 +560,18 @@ public class ServiceBeanLoader {
             }
         }
         ProvisionedResources dlPR = getProvisionedResources(exportArtifact);
-        //String localCodebase = System.getProperty(Constants.CODESERVER);
         if(dlPR==null) {
             dlPR = new ProvisionedResources(exportArtifact);
-            //List<URL> exportURLs = new ArrayList<URL>();
-            //if(exportArtifact!=null && resolver!=null && localCodebase!=null) {
-            if(exportArtifact!=null && resolver!=null) {
-            //if(exportArtifact!=null && resolver!=null) {
-                for(ClassBundle cb : elem.getExportBundles()) {
-                    String[] jars;
-                    try {
-                        jars = ResolverHelper.resolve(cb.getArtifact(),
-                                                      resolver,
-                                                      elem.getRemoteRepositories()/*,
-                                                               localCodebase*/);
-                    } catch (ResolverException e) {
-                        throw new ServiceBeanInstantiationException("Could not resolve codebase artifact", e);
-                    }
-                    for(RemoteRepository r : elem.getRemoteRepositories())
-                        dlPR.addRepositoryUrl(r.getUrl());
-                    for(String jar: jars) {
-                        if(jar!=null)
-                            System.out.println("FIX ME "+jar);
-                    }
-                }
-                //dlPR.setJars(exportURLs.toArray(new URL[exportURLs.size()]));
-            } else {
-                if(System.getProperty("StaticCybernode")==null)
-                    dlPR.setJars(elem.getExportURLs());
-            }
+            dlPR.setJars(elem.getExportURLs());
         }
 
-        /* RIO-228 */
-        if(System.getProperty("StaticCybernode")==null) {
-            /* Check the dlPR jars for requisite jar inclusion */
-
-            // TODO instead of checking for requisite jars, should check for requisite artifact
-            String[] requisiteExports = new String[]{"rio-api.jar", "jsk-dl.jar", "jmx-lookup.jar", "serviceui.jar"};
-            //String libDLDir = new File(System.getProperty("RIO_HOME")+ File.separator+"lib-dl").toURI().toString();
-
+        /*
+         * If we are instantiating a service that does not use artifact deployment,
+         * then we must check the dlPR jars for requisite jar inclusion
+         */
+        if(exportArtifact==null) {
+            String localCodebase = System.getProperty(Constants.CODESERVER);
+            String[] requisiteExports = new String[]{"rio-dl.jar", "jsk-dl.jar"};
             for(String export : requisiteExports) {
                 boolean found = false;
                 for(URL u : dlPR.getJars()) {
@@ -599,28 +582,24 @@ public class ServiceBeanLoader {
                 }
                 if(!found) {
                     /* We check if the impl has an artifact, not the dl. The
-                     * dl may not declare an artifact. This accounts for the
-                     * case where a service is just implemented as a pojo with
-                     * no custom remote methods, and is just exported using Rio
-                     * infrastructure support
-                     * (through the org.rioproject.resources.servicecore.Service interface).
-                     *
-                     * If there is no declared artifact, we sail through since
-                     * the ServiceElement would have been constructed with the
-                     * default platform export jars as part of it's creation.
-                     */
+                    * dl may not declare an artifact. This accounts for the
+                    * case where a service is just implemented as a pojo with
+                    * no custom remote methods, and is just exported using Rio
+                    * infrastructure support
+                    * (through the org.rioproject.resources.servicecore.Service
+                    * interface).
+                    *
+                    * If there is no declared artifact, we sail through since
+                    * the ServiceElement would have been constructed with the
+                    * default platform export jars as part of it's creation.
+                    */
                     if(implPR.getArtifact()!=null) {
-                        /*if(localCodebase!=null) {
+                        if(localCodebase!=null) {
                             if(!localCodebase.endsWith("/"))
                                 localCodebase = localCodebase+"/";
                             dlPR.addJar(new URL(localCodebase+export));
-                        }*/
+                        }
                     }
-                    /*if(implPR.getArtifact()!=null) {
-                        if(!libDLDir.endsWith("/"))
-                            libDLDir = libDLDir+"/";
-                        dlPR.addJar(new URL(libDLDir+export));
-                    }*/
                 }
             }
         }
@@ -633,10 +612,10 @@ public class ServiceBeanLoader {
             sb.append("impl jars: ");
             sb.append(implPR.getJarsAsString());
             sb.append(", ");
-            if(exportArtifact!=null)
+            if(dlPR.getArtifact()!=null)
                 sb.append("export artifact: [").append(dlPR.getArtifact()).append("] ");
             sb.append("export jars: ");
-                sb.append(dlPR.getJarsAsString());
+            sb.append(dlPR.getJarsAsString());
             logger.fine(sb.toString());
         }
 
@@ -705,6 +684,10 @@ public class ServiceBeanLoader {
 
         void setJars(URL[] jars) {
             jarList.addAll(Arrays.asList(jars));
+        }
+
+        void addJar(URL jar) {
+            jarList.add(jar);
         }
 
         URL[] getJars() {

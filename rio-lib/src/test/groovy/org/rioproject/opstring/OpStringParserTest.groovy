@@ -41,6 +41,22 @@ class OpStringParserTest extends GroovyTestCase {
     def OpStringParser xmlParser = new XmlOpStringParser()
     def OpStringParser dslParser = new GroovyDSLOpStringParser()
 
+    void testExternal() {
+        File file = new File("src/test/resources/opstrings/external.groovy")
+        def opstrings = dslParser.parse(file,     // opstring
+                                        null,     // parent classloader
+                                        false,    // verify
+                                        null,     // defaultExportJars
+                                        null,     // defaultGroups
+                                        null)     // loadPath
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = (OpString)opstrings[0]
+        ServiceElement[] elems = opstring.getServices()
+        assertEquals "There should be 1 service", 1, elems.length
+        assertEquals("Expected ${ServiceElement.ProvisionType.EXTERNAL}, got ${elems[0].provisionType}",
+                     elems[0].provisionType, ServiceElement.ProvisionType.EXTERNAL)
+    }
+
     void testLocators() {
         File file = new File("src/test/resources/opstrings/locators.groovy")
         def opstrings = dslParser.parse(file,     // opstring

@@ -306,6 +306,8 @@ public class OpStringMangerController {
             ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
                                                                     ProvisionMonitorEvent.Action.OPSTRING_DEPLOYED,
                                                                     opMgr.doGetOperationalString());
+            if(opMgr.getOAR()!=null)
+                event.setRemoteRepositories(opMgr.getRemoteRepositories());
             eventProcessor.processEvent(event);
         }
         return (opMgr);

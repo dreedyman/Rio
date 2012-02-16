@@ -38,6 +38,7 @@ import java.util.*;
 public class ParsedService extends GlobalAttrs{
     public static final String DYNAMIC="dynamic";
     public static final String FIXED="fixed";
+    public static final String EXTERNAL="external";
     /** Default array of export jar names */
     public static final String[] DEFAULT_EXPORT_JARS = new String[]{"rio-api.jar",
                                                                     "jsk-dl.jar",
@@ -447,6 +448,8 @@ public class ParsedService extends GlobalAttrs{
             provisionType = ProvisionType.DYNAMIC;
         else if (FIXED.equals(value))
             provisionType = ProvisionType.FIXED;
+        else if (EXTERNAL.equals(value))
+            provisionType = ProvisionType.EXTERNAL;
         else
             throw new IllegalArgumentException(value+" : unknown provision type");
     }

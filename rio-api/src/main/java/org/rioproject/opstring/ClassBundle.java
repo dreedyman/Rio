@@ -45,8 +45,7 @@ public class ClassBundle implements Serializable {
     /**
      * Collection of jar names
      */
-    private List<String> jarNames =
-        Collections.synchronizedList(new ArrayList<String>());
+    private List<String> jarNames = Collections.synchronizedList(new ArrayList<String>());
     /**
      * An artifact ID
      */
@@ -60,8 +59,7 @@ public class ClassBundle implements Serializable {
     /**
      * A table of method names to Class[] objects
      */
-    private Map<String, Object[]> methodObjectTable =
-        Collections.synchronizedMap(new HashMap<String, Object[]>());
+    private Map<String, Object[]> methodObjectTable = Collections.synchronizedMap(new HashMap<String, Object[]>());
     private static Logger logger = Logger.getLogger(ClassBundle.class.getName());
 
     /**
@@ -115,8 +113,8 @@ public class ClassBundle implements Serializable {
      * @param codebase The codebase to set
      */
     public void setCodebase(String codebase) {
-        if(codebase!=null) {
-            this.codebase = codebase;
+        this.codebase = codebase;
+        if(this.codebase!=null) {
             if(!this.codebase.endsWith("/"))
                 this.codebase = this.codebase+"/";
         }
@@ -182,9 +180,10 @@ public class ClassBundle implements Serializable {
     /**
      * Set JARs to the ClassBundle.
      * 
-     * @param jars Jar names to add
+     * @param jars Jar names to set
      */
     public void setJARs(String... jars) {
+        jarNames.clear();
         addJARs(jars);
     }
 
@@ -427,58 +426,6 @@ public class ClassBundle implements Serializable {
     }    
 
     /*
-     * Custom serialization is needed, to provide backwards compatibility
-     *
-    private synchronized void writeObject(ObjectOutputStream oStream)
-    throws IOException {
-        oStream.defaultWriteObject();
-        if(jarResources.size()==0 && codebase!=null) {
-            URL[] urls = urlsFromJARs(getJARNames());
-            jarResources.addAll(Arrays.asList(urls));
-        }
-    }
-    */
-    /*
-     * Custom deserialization is needed.
-     *
-    private void readObject(ObjectInputStream oStream)
-    throws IOException, ClassNotFoundException {
-        oStream.defaultReadObject();
-        if(jarNames==null)
-            jarNames = new ArrayList<String>();
-        if(jarNames.size()==0) {
-            URL[] urls = jarResources.toArray(new URL[jarResources.size()]);
-            if(urls.length>0) {
-                String exportCodebase = urls[0].toExternalForm();
-                if(exportCodebase.indexOf(".jar") != -1) {
-                    int index = exportCodebase.lastIndexOf('/');
-                    if(index != -1) {
-                        exportCodebase = exportCodebase.substring(0, index+1);
-                        setCodebase(exportCodebase);
-                    }
-                }
-                for (URL url : urls) {
-                    String jar = getJarPart(url);
-                    jarNames.add(jar);
-                }
-            }
-        }
-    }
-    */
-
-    /*
-     * Get the jar part from the url
-     /
-    private String getJarPart(URL url) {
-        String s = url.toExternalForm();
-        int ndx = s.lastIndexOf("/");
-        if(ndx == -1)
-            return ("");
-        return (s.substring(ndx+1));
-    }
-    */
-
-    /*
      * Expand any properties in the codebase String. Properties are declared
      * with the pattern of : <code>$[property]</code>
      *
@@ -525,7 +472,7 @@ public class ClassBundle implements Serializable {
         ClassBundle cb = new ClassBundle();
         for(ClassBundle bundle : bundles) {
             cb.setArtifact(bundle.getArtifact());
-            cb.setJARs(bundle.getJARNames());
+            cb.addJARs(bundle.getJARNames());
             cb.addSharedComponents(bundle.sharedComponents);
             cb.setCodebase(bundle.getCodebase());
             cb.setClassName(bundle.getClassName());

@@ -139,6 +139,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         } else {
             adaptedCodebase = codebase;
         }
+
         return adaptedCodebase;
     }
 

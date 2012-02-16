@@ -208,9 +208,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
      * zero-length array will be returned.
      */
     public PlatformCapability[] getPlatformCapabilities(Configuration config) {
-        Vector<PlatformCapability> platforms = new Vector<PlatformCapability>();
-
-        try {                        
+        List<PlatformCapability> platforms = new ArrayList<PlatformCapability>();
+        try {
             /* 
              * Load default platform (qualitative) capabilities
              */
@@ -239,20 +238,17 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                     j2se.setPath(javaHome);
                 platforms.add(j2se);                
             }
-
             List<PlatformCapability> platformCapabilityList = new ArrayList<PlatformCapability>();
-            PlatformCapability[] pCaps = 
-                (PlatformCapability[])config.getEntry(COMPONENT,
-                                                      "platformCapabilities",
-                                                      PlatformCapability[].class,
-                                                      new PlatformCapability[0]);
+            PlatformCapability[] pCaps = (PlatformCapability[])config.getEntry(COMPONENT,
+                                                                               "platformCapabilities",
+                                                                               PlatformCapability[].class,
+                                                                               new PlatformCapability[0]);
             platformCapabilityList.addAll(Arrays.asList(pCaps));
 
-            PlatformCapability[] addCaps =
-                (PlatformCapability[])config.getEntry(COMPONENT,
-                                                      "addPlatformCapabilities",
-                                                      PlatformCapability[].class,
-                                                      new PlatformCapability[0]);
+            PlatformCapability[] addCaps = (PlatformCapability[])config.getEntry(COMPONENT,
+                                                                                 "addPlatformCapabilities",
+                                                                                 PlatformCapability[].class,
+                                                                                 new PlatformCapability[0]);
             platformCapabilityList.addAll(Arrays.asList(addCaps));
 
             /*
@@ -261,14 +257,12 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             PlatformLoader loader = new PlatformLoader();
             pCaps = createPlatformCapabilities(loader.getDefaultPlatform(getRioHome()));
             platformCapabilityList.addAll(Arrays.asList(pCaps));
-
             /*
              * Get additional platform configurations
              */
             String platformDir = getPlatformConfigurationDirectory(config);
             if(platformDir!=null) {
-                PlatformCapability[] caps = parsePlatformConfig(loader,
-                                                                platformDir);
+                PlatformCapability[] caps = parsePlatformConfig(loader, platformDir);
                 platformCapabilityList.addAll(Arrays.asList(caps));
             } else {
                 logger.config("Unable to establish the platform " +
@@ -278,8 +272,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             /*
              * Get the final array of PlatformCapability instances
              */
-            pCaps = platformCapabilityList.toArray(
-                new PlatformCapability[platformCapabilityList.size()]);
+            pCaps = platformCapabilityList.toArray(new PlatformCapability[platformCapabilityList.size()]);
             for (PlatformCapability pCap : pCaps) {
                 if (pCap.getClass().getName().equals(RIO)) {
                     if (getRioHome() != null) {
@@ -287,8 +280,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                     }
                 }                
                 platforms.add(pCap);
-            }                        
-            
+            }
+
             /* Find out if we have loaded a StorageCapability class */                
             PlatformCapability storage = findCapability(platforms, STORAGE);
             if(storage==null) {
@@ -302,7 +295,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 memory = getPlatformCapability(MEMORY);
                 platforms.add(memory);
             }
-            
+
             /* Create NativeLibrarySupport objects */ 
             String nativeLibDirs = System.getProperty(NATIVE_LIBS);
             List<File> dirList = new ArrayList<File>();
@@ -314,12 +307,10 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                     if(dir.isDirectory() && dir.canRead()) {
                         dirList.add(dir);
                         if(logger.isLoggable(Level.FINE))
-                            logger.fine("Adding directory ["+dirName+"] to check "+
-                            "for native libraries");
+                            logger.fine("Adding directory ["+dirName+"] to check for native libraries");
                     } else {
                         logger.config("Invalid directory name or access "+
-                                      "permissions to check for native libraries " +
-                                      "["+dirName+"]. Continuing ...");
+                                      "permissions to check for native libraries ["+dirName+"]. Continuing ...");
                     }                       
                 }
                 final String libExtension = getLibExtension();
@@ -336,8 +327,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                         int index = fileName.lastIndexOf(".");
                         if (index != -1) {
                             if (logger.isLoggable(Level.FINE))
-                                logger.fine("Create NativeLibrarySupport " +
-                                            "object for [" + fileName + "]");
+                                logger.fine("Create NativeLibrarySupport object for [" + fileName + "]");
                             PlatformCapability nLib =
                                 getPlatformCapability(NATIVE_LIB_CLASS);
                             String name;
@@ -351,13 +341,12 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                             platforms.add(nLib);
                         } else {
                             if (logger.isLoggable(Level.FINE))
-                                logger.fine("Illegal Shared Library name=" +
-                                            fileName);
+                                logger.fine("Illegal Shared Library name="+fileName);
                         }
                     }
                 }
             } /* End creating NativeLibrarySupport objects */
-                        
+
         } catch(Throwable t) {
             logger.log(Level.SEVERE, "Getting PlatformCapability objects", t);
         }
@@ -444,10 +433,9 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     /*
      * Determine if a class has been loaded
      */
-    private PlatformCapability findCapability(Vector v, String name) {
+    private PlatformCapability findCapability(List<PlatformCapability> pCaps, String name) {
         PlatformCapability o = null;
-        for(Enumeration en = v.elements(); en.hasMoreElements();) {
-            PlatformCapability pCap = (PlatformCapability)en.nextElement();
+        for(PlatformCapability pCap : pCaps) {
             if(pCap.getClass().getName().equals(name)) {
                 o = pCap;
                 break;

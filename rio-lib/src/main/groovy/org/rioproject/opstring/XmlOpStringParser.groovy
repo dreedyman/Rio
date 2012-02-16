@@ -288,7 +288,7 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
                 bundles = [new ClassBundle(classNames[0], jars, sharedComponents, codebase)]
             } else {
                 def declaredBundle = new ClassBundle()
-                declaredBundle.setJARs(jars)
+                declaredBundle.addJARs(jars)
                 declaredBundle.addSharedComponents(sharedComponents)
                 declaredBundle.codebase = codebase
                 bundles = [declaredBundle]

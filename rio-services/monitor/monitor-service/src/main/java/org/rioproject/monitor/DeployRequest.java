@@ -35,6 +35,13 @@ public class DeployRequest {
             this.repositories.addAll(repositories);
     }
 
+    public DeployRequest(OperationalString opString, RemoteRepository[] repositories) {
+        operationalStrings.add(opString);
+        if(repositories!=null) {
+            Collections.addAll(this.repositories, repositories);
+        }
+    }
+
     public DeployRequest(OperationalString[] opStrings, Collection<RemoteRepository> repositories) {
         Collections.addAll(operationalStrings, opStrings);
         if(repositories!=null)

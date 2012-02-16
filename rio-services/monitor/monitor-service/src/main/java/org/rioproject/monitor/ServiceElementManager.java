@@ -441,6 +441,13 @@ public class ServiceElementManager implements InstanceIDManager {
         Class[] classes = new Class[exportBundles.length];
         for(int i = 0; i < classes.length; i++) {
             classes[i] = ClassBundleLoader.loadClass(exportBundles[i]);
+            /* Clear jars and codebase in the export bundles if the export bundles have been configured
+             * with an artifact.  This will allow downstream processing (in cybernodes) to ensure they
+             * are resolved */
+            if(exportBundles[i].getArtifact()!=null) {
+                exportBundles[i].setCodebase(null);
+                exportBundles[i].setJARs("");
+            }
         }
         return(classes);
     }
@@ -1956,9 +1963,8 @@ public class ServiceElementManager implements InstanceIDManager {
                 /**
                  * If this ServiceElementManager is active, then services will
                  * be added as they are provisioned (through the
-                 * ServiceBeanProvisionListener). Therefore only process a serviceAdded
-                 * transition in active-mode if the service is EXTERNAL, or
-                 * when in inactive (backup) mode
+                 * ServiceBeanProvisionListener). If the service is EXTERNAL, produce an event notifying
+                 * and interested listeners that the external service has been discovered.
                  */
                 if(getActive()) {
                     if(svcElement.getProvisionType()==ProvisionType.EXTERNAL) {
@@ -1966,6 +1972,14 @@ public class ServiceElementManager implements InstanceIDManager {
                             return;
                         addServiceProxy(item.service);
                         setFaultDetectionHandler(item.service, item.serviceID);
+                        /* Notify that the external service has been discovered */
+                        ProvisionMonitorEvent event =
+                            new ProvisionMonitorEvent(eventSource,
+                                                      ProvisionMonitorEvent.Action.EXTERNAL_SERVICE_DISCOVERED,
+                                                      svcElement.getOperationalStringName(),
+                                                      svcElement,
+                                                      sbi);
+                        processEvent(event);
                     }
                 } else {
                     if(alreadyDiscovered(item.service))

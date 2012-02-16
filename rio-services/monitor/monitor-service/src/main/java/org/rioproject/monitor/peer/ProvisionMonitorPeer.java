@@ -41,6 +41,7 @@ import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.monitor.*;
 import org.rioproject.monitor.tasks.PeerNotificationTask;
 import org.rioproject.opstring.*;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.system.ComputeResource;
 
@@ -97,6 +98,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     private ProvisionMonitor serviceProxy;
     private ProvisionMonitorEventProcessor eventProcessor;
     private OpStringMangerController opStringMangerController;
+    private DeploymentVerifier deploymentVerifier = new DeploymentVerifier();
 
     public void initialize() throws Exception {
         if(config==null)
@@ -127,7 +129,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
         template = new ServiceTemplate(null, new Class[] {ProvisionMonitor.class}, null);
         new Thread(this).start();
     }
-
 
 
     public void setOpStringMangerController(OpStringMangerController opStringMangerController) {
@@ -192,14 +193,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             ProvisionMonitor[] provisioners = getProvisionMonitorPeers();
             /* if we dont know about the new primary, add it into the mix */
             if(peer == null) {
-                ProvisionMonitor[] adjustedProvisioners =
-                    new ProvisionMonitor[provisioners.length + 1];
+                ProvisionMonitor[] adjustedProvisioners = new ProvisionMonitor[provisioners.length + 1];
                 if(provisioners.length > 0)
-                    System.arraycopy(provisioners,
-                                     0,
-                                     adjustedProvisioners,
-                                     0,
-                                     provisioners.length);
+                    System.arraycopy(provisioners, 0, adjustedProvisioners, 0, provisioners.length);
                 adjustedProvisioners[provisioners.length] = primary;
                 provisioners = adjustedProvisioners;
             }
@@ -265,8 +261,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     public void peerUpdated(ProvisionMonitor.PeerInfo peer) {
         if(peer == null) {
             if(peerLogger.isLoggable(Level.FINE))
-                peerLogger.log(Level.FINE,
-                               "updatePeer(): Unknown ProvisionMonitor");
+                peerLogger.log(Level.FINE, "updatePeer(): Unknown ProvisionMonitor");
             return;
         }
         synchronized(peerSet) {
@@ -276,12 +271,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
         }
         if(peerLogger.isLoggable(Level.FINE))
             peerLogger.log(Level.FINE,
-                           "ProvisionMonitorPeer: ProvisionMonitor updated "+
-                           "info :\n"
-                           + "\tcount={0}, address={1}, id={2}, ",
-                           new Object[] {peer.getBackupCount(),
-                                         peer.getAddress(),
-                                         peer.getID().toString()});
+                           "ProvisionMonitorPeer: ProvisionMonitor updated info :\n"+
+                           "\tcount={0}, address={1}, id={2}, ",
+                           new Object[] {peer.getBackupCount(), peer.getAddress(), peer.getID().toString()});
     }
 
     /**
@@ -307,8 +299,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             importOperationalStrings(((ProvisionMonitor)item.service));
             eventConsumer.register(item);
         } catch(Exception e) {
-            peerLogger.log(Level.WARNING,
-                           "Adding a ProvisionMonitor peer instance", e);
+            peerLogger.log(Level.WARNING, "Adding a ProvisionMonitor peer instance", e);
         }
         return (peer);
     }
@@ -324,10 +315,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
         try {
             item.service = peerProxyPreparer.prepareProxy(item.service);
         } catch (RemoteException e) {
-            peerLogger.log(Level.WARNING,
-                           "Could not prepare peer proxy, " +
-                           "not adding as peer",
-                           e);
+            peerLogger.log(Level.WARNING, "Could not prepare peer proxy, not adding as peer", e);
             return;
         }
 
@@ -359,19 +347,15 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             String resourceAddress = computeResource.getAddress().getHostAddress();
             String resourceHostName =  computeResource.getAddress().getHostName();
 
-            if(localBackup && !(
-                                   resourceAddress.equals(peer.getAddress()) ||
-                                   resourceHostName.equals(peer.getAddress())) ) {
+            if(localBackup && !(resourceAddress.equals(peer.getAddress()) ||
+                                resourceHostName.equals(peer.getAddress())) ) {
 
                 ProvisionMonitor currentBackup = backup;
                 if(doAssignment(peer)) {
                     try {
-                        currentBackup.removeBackupFor((ProvisionMonitor)getServiceProxy());
+                        currentBackup.removeBackupFor(getServiceProxy());
                     } catch(Exception e) {
-                        peerLogger.log(Level.WARNING,
-                                       "Adjusting backup instance away from "+
-                                       "local instance",
-                                       e);
+                        peerLogger.log(Level.WARNING, "Adjusting backup instance away from local instance", e);
                     }
                 }
             }
@@ -625,133 +609,98 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     String sAction = action.toString();
                     if(sElem == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "
-                                           + sAction + " sElem is null");
+                            peerLogger.fine("ProvisionMonitorPeer: " + sAction + " sElem is null");
                         return;
                     }
                     opStringName = sElem.getOperationalStringName();
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: " + sAction
-                                          + ", opstring: " + opStringName);
+                        peerLogger.finest("ProvisionMonitorPeer: " + sAction+ ", opstring: " + opStringName);
                     opMgr = opStringMangerController.getOpStringManager(opStringName);
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "
-                                           + sAction + " opstring ["
-                                           + opStringName + "] not found");
+                            peerLogger.fine("ProvisionMonitorPeer: " +
+                                            sAction +
+                                            " opstring [" +
+                                            opStringName +
+                                            "] not found");
                         return;
                     }
                     try {
                         opMgr.doUpdateServiceElement(sElem);
                     } catch(Exception e) {
-                        peerLogger.log(Level.WARNING,
-                                       "Updating OperationalStringManager's "+
-                                       "ServiceElement",
-                                       e);
+                        peerLogger.log(Level.WARNING, "Updating OperationalStringManager's ServiceElement", e);
                     }
                     break;
                 case SERVICE_ELEMENT_ADDED:
                     if(sElem == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_ELEMENT_ADDED sElem is null");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_ELEMENT_ADDED sElem is null");
                         return;
                     }
                     opStringName = sElem.getOperationalStringName();
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "SERVICE_ELEMENT_ADDED, opstring: "
-                                          + opStringName);
+                        peerLogger.finest("ProvisionMonitorPeer: SERVICE_ELEMENT_ADDED, opstring: "+ opStringName);
                     opMgr = opStringMangerController.getOpStringManager(opStringName);
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_ELEMENT_ADDED opstring "+
-                                           "["+opStringName+"] not found");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_ELEMENT_ADDED opstring [" +
+                                            opStringName +
+                                            "] not found");
                         return;
                     }
                     try {
                         opMgr.doAddServiceElement(sElem, null);
                     } catch(Exception e) {
-                        peerLogger.log(Level.WARNING,
-                                       "Adding ServiceElement to "+
-                                       "OperationalStringManager",
-                                       e);
+                        peerLogger.log(Level.WARNING, "Adding ServiceElement to OperationalStringManager", e);
                     }
                     break;
                 case SERVICE_ELEMENT_REMOVED:
                     if(sElem == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_ELEMENT_REMOVED sElem "+
-                                           "is null");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_ELEMENT_REMOVED sElem is null");
                         return;
                     }
                     opStringName = sElem.getOperationalStringName();
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "SERVICE_ELEMENT_REMOVED, opstring: "
-                                          + opStringName);
+                        peerLogger.finest("ProvisionMonitorPeer: SERVICE_ELEMENT_REMOVED, opstring: "+ opStringName);
                     opMgr = opStringMangerController.getOpStringManager(opStringName);
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_ELEMENT_REMOVED opstring ["
-                                           + opStringName
-                                           + "] not found");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_ELEMENT_REMOVED opstring ["
+                                            + opStringName + "] not found");
                         return;
                     }
                     try {
                         opMgr.doRemoveServiceElement(sElem, false);
                     } catch(Exception e) {
-                        peerLogger.log(Level.WARNING,
-                                       "Removing ServiceElement from "+
-                                       "OperationalStringManager",
-                                       e);
+                        peerLogger.log(Level.WARNING, "Removing ServiceElement from OperationalStringManager", e);
                     }
                     break;
                 case OPSTRING_DEPLOYED:
                     if(opString == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_DEPLOYED opstring is null");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_DEPLOYED opstring is null");
                         return;
                     }
-                    DeployAdmin deployAdmin =
-                        (DeployAdmin)remoteMonitor.getAdmin();
-                    opStringProcessor(opString, remoteMonitor, deployAdmin);
+                    DeployAdmin deployAdmin = (DeployAdmin)remoteMonitor.getAdmin();
+                    opStringProcessor(opString, remoteMonitor, deployAdmin, pme.getRemoteRepositories());
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "OPSTRING_DEPLOYED, opstring: "
-                                          + opString.getName());
+                        peerLogger.finest("ProvisionMonitorPeer: OPSTRING_DEPLOYED, opstring: "+ opString.getName());
                     break;
                 case OPSTRING_UNDEPLOYED:
                     if(opString == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_UNDEPLOYED opstring "+
-                                           "is null");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_UNDEPLOYED opstring is null");
                         return;
                     }
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "OPSTRING_UNDEPLOYED, opstring: "
-                                          + opString.getName());
+                        peerLogger.finest("ProvisionMonitorPeer: OPSTRING_UNDEPLOYED, opstring: "+ opString.getName());
                     opMgr = opStringMangerController.getOpStringManager(opString.getName());
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_UNDEPLOYED for opstring ["
-                                           + opString.getName()+"] not found");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_UNDEPLOYED for opstring [" +
+                                            opString.getName() +
+                                            "] not found");
                         return;
                     }
 
@@ -759,8 +708,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     opMgr.terminate(false);
                     synchronized(opStringTable) {
                         if(opStringTable.containsKey(remoteMonitor)) {
-                            List<OpStringManager> list =
-                                opStringTable.get(remoteMonitor);
+                            List<OpStringManager> list = opStringTable.get(remoteMonitor);
                             list.remove(opMgr);
                             opStringTable.put(remoteMonitor, list);
                         }
@@ -770,24 +718,16 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                 case OPSTRING_MGR_CHANGED:
                     if(opString == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_MGR_CHANGED opstring "+
-                                           "is null");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_MGR_CHANGED opstring is null");
                         return;
                     }
                     if(peerLogger.isLoggable(Level.FINE))
-                        peerLogger.fine("ProvisionMonitorPeer: "+
-                                        "OPSTRING_MGR_CHANGED, opstring: "
-                                        + opString.getName());
+                        peerLogger.fine("ProvisionMonitorPeer: OPSTRING_MGR_CHANGED, opstring: "+ opString.getName());
                     opMgr = opStringMangerController.getOpStringManager(opString.getName());
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_MGR_CHANGED opstring ["
-                                           + opString.getName()+"] "+
-                                           "not found");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_MGR_CHANGED opstring ["
+                                            + opString.getName() + "] not found");
                         return;
                     }
                     synchronized(opStringTable) {
@@ -800,15 +740,11 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                             list.add(opMgr);
                             opStringTable.put(remoteMonitor, list);
                             if(peerLogger.isLoggable(Level.FINE))
-                                peerLogger.fine("ProvisionMonitorPeer: "+
-                                                "Reset backup peer for ["+
-                                                opString.getName()+"] to "+
-                                                remoteMonitor.toString());
+                                peerLogger.fine("ProvisionMonitorPeer: Reset backup peer for ["+opString.getName()+"] " +
+                                                "to "+remoteMonitor.toString());
                         } else {
                             if(peerLogger.isLoggable(Level.FINE))
-                                peerLogger.fine("ProvisionMonitorPeer: "+
-                                                "Already a backup for ["+
-                                                opString.getName()+"] to "+
+                                peerLogger.fine("ProvisionMonitorPeer: Already a backup for ["+opString.getName()+"] to "+
                                                 remoteMonitor.toString());
                         }
                     }
@@ -816,22 +752,17 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                 case OPSTRING_UPDATED:
                     if(opString == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_UNDEPLOYED opstring is null");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_UNDEPLOYED opstring is null");
                         return;
                     }
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "OPSTRING_UPDATED, opstring: "
-                                          + opString.getName());
+                        peerLogger.finest("ProvisionMonitorPeer: OPSTRING_UPDATED, opstring: "+ opString.getName());
                     opMgr = opStringMangerController.getOpStringManager(opString.getName());
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "OPSTRING_UPDATED for opstring ["
-                                           + opString.getName()+"] not found");
+                            peerLogger.fine("ProvisionMonitorPeer: OPSTRING_UPDATED for opstring [" +
+                                            opString.getName() +
+                                            "] not found");
                         return;
                     }
                     opMgr.doUpdateOperationalString(opString);
@@ -841,34 +772,23 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     ServiceBeanInstance instance = pme.getServiceBeanInstance();
                     if(instance == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_BEAN_INSTANCE_UPDATED "+
-                                           "instance is null");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_BEAN_INSTANCE_UPDATED instance is null");
                         return;
                     }
                     opStringName = pme.getOperationalStringName();
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "SERVICE_BEAN_INSTANCE_UPDATED, "+
-                                          "opstring: "+ opStringName);
+                        peerLogger.finest("ProvisionMonitorPeer: SERVICE_BEAN_INSTANCE_UPDATED, opstring: "+ opStringName);
                     opMgr = opStringMangerController.getOpStringManager(opStringName);
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_BEAN_INSTANCE_UPDATED for "+
-                                           "opstring ["+opStringName+"] "+
-                                           "not found");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_BEAN_INSTANCE_UPDATED for " +
+                                            "opstring [" + opStringName + "] not found");
                         return;
                     }
                     try {
                         opMgr.doUpdateServiceBeanInstance(instance);
                     } catch(Exception e) {
-                        peerLogger.log(Level.WARNING,
-                                       "Updating OperationalStringManager's "+
-                                       "ServiceBeanInstance",
-                                       e);
+                        peerLogger.log(Level.WARNING, "Updating OperationalStringManager's ServiceBeanInstance", e);
                     }
                     break;
 
@@ -876,36 +796,26 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     instance = pme.getServiceBeanInstance();
                     if(instance == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_PROVISIONED "+
-                                           "instance is null");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_PROVISIONED instance is null");
                         return;
                     }
                     opStringName = pme.getOperationalStringName();
                     if(peerLogger.isLoggable(Level.FINEST))
-                        peerLogger.finest("ProvisionMonitorPeer: "+
-                                          "SERVICE_PROVISIONED, "+
-                                          "opstring: "+ opStringName);
+                        peerLogger.finest("ProvisionMonitorPeer: SERVICE_PROVISIONED, opstring: "+ opStringName);
                     opMgr = opStringMangerController.getOpStringManager(opStringName);
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_PROVISIONED for "+
-                                           "opstring ["+opStringName+"] "+
-                                           "OpStringManager not found");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_PROVISIONED for opstring [" +
+                                            opStringName +
+                                            "] " +
+                                            "OpStringManager not found");
                         return;
                     }
                     ServiceElementManager mgr = opMgr.getServiceElementManager(sElem);
                     if(mgr==null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "SERVICE_PROVISIONED for "+
-                                           "opstring ["+opStringName+"] "+
-                                           "ServiceElementManager "+
-                                           "not found");
+                            peerLogger.fine("ProvisionMonitorPeer: SERVICE_PROVISIONED for " +
+                                            "opstring [" + opStringName + "] ServiceElementManager not found");
                         return;
                     }
                     boolean isStarted = mgr.isStarted();
@@ -930,10 +840,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     opMgr = opStringMangerController.getOpStringManager(pme.getOperationalStringName());
                     if(opMgr == null) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "REDEPLOY_REQUEST opstring "+
-                                           "["+opStringName+"] not found");
+                            peerLogger.fine("ProvisionMonitorPeer: REDEPLOY_REQUEST opstring [" +
+                                            opStringName +
+                                            "] not found");
                         return;
                     }
                     Object[] parms = pme.getRedeploymentParms();
@@ -946,12 +855,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     long delay = redeployDate.getTime() - System.currentTimeMillis();
                     if(delay <= 0) {
                         if(peerLogger.isLoggable(Level.FINE))
-                            peerLogger.log(Level.FINE,
-                                           "ProvisionMonitorPeer: "+
-                                           "REDEPLOY_REQUEST for opstring "+
-                                           "["+opStringName+"] startTime has "+
-                                           "already passed, scheduled "+
-                                           "redeployment cancelled");
+                            peerLogger.fine("ProvisionMonitorPeer: REDEPLOY_REQUEST for opstring " +
+                                            "[" + opStringName + "] startTime has already passed, scheduled " +
+                                            "redeployment cancelled");
                     } else  {
                         opMgr.doScheduleRedeploymentTask(delay,
                                                          pme.getServiceElement(),
@@ -1027,7 +933,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             }
             for (OperationalStringManager mgr : mgrs) {
                 if (mgr.isManaging()) {
-                    opStringProcessor(mgr.getOperationalString(), peer, peerDeployAdmin);
+                    opStringProcessor(mgr.getOperationalString(), peer, peerDeployAdmin, mgr.getRemoteRepositories());
                 }
             }
         } catch(Exception e) {
@@ -1041,13 +947,17 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param opString The OperationalString to add
      * @param peer A peer ProvisionMonitor service
      * @param peerDeployAdmin The peer ProvisionMonitor DeployAdmin
+     * @param repositories A collection of {@code RemoteRepository} instances to use for the resolution of artifacts
      */
-    void opStringProcessor(OperationalString opString, ProvisionMonitor peer, DeployAdmin peerDeployAdmin) {
+    void opStringProcessor(OperationalString opString, 
+                           ProvisionMonitor peer, 
+                           DeployAdmin peerDeployAdmin, 
+                           RemoteRepository[] repositories) {
         try {
-            addPeerOpString(opString, peer, peerDeployAdmin);
+            addPeerOpString(opString, peer, peerDeployAdmin, repositories);
             OperationalString[] nested = opString.getNestedOperationalStrings();
             for (OperationalString aNested : nested)
-                opStringProcessor(aNested, peer, peerDeployAdmin);
+                opStringProcessor(aNested, peer, peerDeployAdmin, repositories);
         } catch(Exception e) {
             peerLogger.log(Level.WARNING, "Adding OperationalString ["+opString.getName()+"]", e);
         }
@@ -1059,8 +969,12 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param opString OperationalString to add
      * @param peer A peer ProvisionMonitor service
      * @param peerDeployAdmin The peer ProvisionMonitor DeployAdmin
+     * @param repositories A collection of {@code RemoteRepository} instances to use for the resolution of artifacts                        
      */
-    synchronized void addPeerOpString(OperationalString opString, ProvisionMonitor peer, DeployAdmin peerDeployAdmin) {
+    synchronized void addPeerOpString(OperationalString opString, 
+                                      ProvisionMonitor peer, 
+                                      DeployAdmin peerDeployAdmin,
+                                      RemoteRepository[] repositories) {
         Map<String, Throwable> map = new HashMap<String, Throwable>();
         try {
             boolean resolveConflict = false;
@@ -1068,13 +982,12 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                 if(peerLogger.isLoggable(Level.FINE))
                     peerLogger.log(Level.FINE,
                                    "Adding OpString [{0}] from Peer {1}",
-                                   new Object[] {opString.getName(),
-                                                 peer.toString()});
-                OpStringManager opMgr = opStringMangerController.addOperationalString(opString,
-                                                                                      map,
-                                                                                      null,
-                                                                                      peerDeployAdmin,
-                                                                                      null);
+                                   new Object[] {opString.getName(), peer.toString()});
+
+                deploymentVerifier.verifyDeploymentRequest(new DeployRequest(opString, repositories));
+
+                OpStringManager opMgr =
+                    opStringMangerController.addOperationalString(opString, map, null, peerDeployAdmin, null);
                 if(opMgr==null) {
                     resolveConflict = true;
                 } else {

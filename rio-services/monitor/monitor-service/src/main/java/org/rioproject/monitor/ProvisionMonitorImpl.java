@@ -550,7 +550,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 if(logger.isLoggable(Level.INFO))
                     logger.info("Deploying Operational String ["+opString.getName()+"]");
 
-                DeployRequest request = new DeployRequest(opString, null);
+                DeployRequest request = new DeployRequest(opString, (RemoteRepository[])null);
                 deploymentVerifier.verifyDeploymentRequest(request);
 
                 opStringMangerController.addOperationalString(opString, map, null, null, listener);

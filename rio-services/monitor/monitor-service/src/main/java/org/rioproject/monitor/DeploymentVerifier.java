@@ -94,11 +94,17 @@ public class DeploymentVerifier {
     void resolve(ClassBundle bundle, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
         if(logger.isLoggable(Level.FINE))
             logger.fine("Artifact: "+bundle.getArtifact()+", resolver: "+resolver.getClass().getName());
-        if (bundle.getArtifact() != null) {
-            String[] classPath = resolver.getClassPathFor(bundle.getArtifact(), repositories);
+        String artifact = bundle.getArtifact();
+        if (artifact != null) {
             List<String> jars = new ArrayList<String>();
-            for (String jar : classPath) {
-                jars.add(ResolverHelper.handleWindows(jar));
+            String[] artifactParts = artifact.split(" ");
+            for(String artifactPart : artifactParts) {
+                String[] classPath = resolver.getClassPathFor(artifactPart, repositories);
+                for (String jar : classPath) {
+                    jar = ResolverHelper.handleWindows(jar);
+                    if(!jars.contains(jar))
+                        jars.add(jar);
+                }
             }
             if(logger.isLoggable(Level.FINE))
                 logger.fine("Artifact: "+bundle.getArtifact()+", resolved jars "+jars);

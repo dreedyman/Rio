@@ -191,12 +191,28 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 interfaceClasses.each { builder.Interface(it) }
             }
 
-            emc.artifact = { Map attributes, String artifact ->
+            /*emc.artifact = { Map attributes, String artifact ->
                 builder.Artifact(attributes, artifact)
+            }*/
+                    
+            emc.artifact = { Map attributes, String... artifacts ->
+                StringBuilder artifactBuilder = new StringBuilder()
+                for(String artifact : artifacts) {
+                    if(artifactBuilder.length()>0)
+                        artifactBuilder.append(" ")
+                    artifactBuilder.append(artifact)
+                }
+                builder.Artifact(attributes, artifactBuilder.toString())
             }
 
-            emc.artifact = { String artifact ->
-                builder.Artifact(artifact)
+            emc.artifact = { String... artifacts ->
+                StringBuilder artifactBuilder = new StringBuilder()
+                for(String artifact : artifacts) {
+                    if(artifactBuilder.length()>0)
+                        artifactBuilder.append(" ")
+                    artifactBuilder.append(artifact)
+                }
+                builder.Artifact(artifactBuilder.toString())
             }
 
             emc.artifact = { Map attributes ->
