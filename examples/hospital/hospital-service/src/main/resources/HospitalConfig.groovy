@@ -15,28 +15,17 @@
  */
 import org.rioproject.config.Component
 import org.rioproject.entry.UIDescriptorFactory
-import org.rioproject.resolver.ResolverHelper
-import org.rioproject.resolver.Resolver
 import net.jini.core.entry.Entry
+import net.jini.lookup.ui.MainUI
+import org.rioproject.serviceui.UIComponentFactory
 
 @Component('org.rioproject.examples.hospital.service')
 class HospitalConfig {
 
     Entry[] getServiceUIs(String codebase) {
-        def entry = []
-        if(codebase!=null) {
-            Resolver r = ResolverHelper.getResolver()
-            String uiClass = 'org.rioproject.examples.hospital.ui.HospitalIntro'
-            def classpath = []
-            for(String s : r.getClassPathFor("org.rioproject.examples.hospital:hospital-ui:2.0.2")) {
-                if(s.startsWith(ResolverHelper.M2_HOME))
-                    s = s.substring(ResolverHelper.M2_HOME.length()+1)
-                classpath << s
-            }
-            entry = [UIDescriptorFactory.getJComponentDesc(codebase,
-                                                           classpath as String[],
-                                                           uiClass)]
-        }
+        String uiClass = 'org.rioproject.examples.hospital.ui.HospitalIntro'
+        URL url = new URL("artifact:org.rioproject.examples.hospital:hospital-ui:2.0.2")
+        def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIComponentFactory(url, uiClass))]
         return entry as Entry[]
     }
 }
