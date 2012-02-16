@@ -151,6 +151,8 @@ if [ "$start" = "1" ]; then
     fi
     ARGS="$starter_arg $command_line"
 
+    loggingConfig="`toNative $RIO_HOME/config/logging/rio-logging.properties`"
+
     # -------------------
     # System properties that change how Rio operates
     #
@@ -168,6 +170,7 @@ if [ "$start" = "1" ]; then
         $classpath $agentpath $libpath $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
+        -Djava.util.logging.config.file=$loggingConfig \
         -Dcom.sun.jini.jeri.tcp.useNIO=true \
         -DRIO_HOME=$RIO_HOME \
         -Dorg.rioproject.home=$RIO_HOME \

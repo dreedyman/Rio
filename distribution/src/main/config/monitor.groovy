@@ -10,13 +10,10 @@ import net.jini.jrmp.JrmpExporter
 import org.rioproject.config.Component
 import org.rioproject.config.Constants
 import org.rioproject.opstring.ClassBundle
-import org.rioproject.log.LoggerConfig
 import org.rioproject.monitor.selectors.LeastActiveSelector
 import org.rioproject.monitor.selectors.ServiceResourceSelector
 import org.rioproject.fdh.FaultDetectionHandlerFactory
 import org.rioproject.resources.client.JiniClient
-import java.util.logging.ConsoleHandler
-import org.rioproject.log.LoggerConfig.LogHandlerConfig
 import net.jini.security.BasicProxyPreparer
 import net.jini.core.constraint.InvocationConstraints
 import net.jini.constraint.BasicMethodConstraints
@@ -29,6 +26,7 @@ import org.rioproject.resolver.Resolver
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.entry.UIDescriptorFactory
 import org.rioproject.RioVersion
+
 
 /*
  * Declare Provision Monitor properties
@@ -96,25 +94,6 @@ class MonitorConfig {
                 new BasicMethodConstraints(new InvocationConstraints(new ConnectionRelativeTime(30000),
                                                                      null))
         return  new BasicProxyPreparer(false, serviceListenerConstraints, null);        
-    }
-
-    LoggerConfig[] getLoggerConfigs() {
-        def loggers = []
-        ['org.rioproject.monitor' : Level.FINER,
-         'org.rioproject.monitor.provision': Level.FINER,
-         'org.rioproject.monitor.sbi' : Level.FINE,
-         'org.rioproject.monitor.selector' : Level.OFF,
-         'org.rioproject.monitor.services' : Level.FINEST,
-
-        /*
-         'org.rioproject.monitor.peer' : Level.FINE,
-         */
-         'net.jini.lookup.JoinManager' : Level.OFF].each { name, level ->
-            loggers << new LoggerConfig(name,
-                                        level,
-                                        new LogHandlerConfig(new ConsoleHandler()))
-        }
-        return loggers as LoggerConfig[]
     }
 
     ClassBundle getFaultDetectionHandler() {

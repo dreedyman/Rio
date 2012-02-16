@@ -12,8 +12,6 @@ import org.rioproject.opstring.ClassBundle
 import org.rioproject.config.Constants
 import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler
-import org.rioproject.log.LoggerConfig.LogHandlerConfig
-import java.util.logging.ConsoleHandler
 
 /*
  * Declare Cybernode properties
@@ -59,15 +57,6 @@ class CybernodeConfig {
     LoggerConfig[] getLoggerConfigs() {
         Logger.getLogger("").addHandler new ServiceLogEventHandler()
         def loggers = []
-        ['org.rioproject.cybernode' : Level.INFO,
-            'org.rioproject.cybernode.loader' : Level.FINEST,
-            'org.rioproject.config' : Level.INFO,
-            'org.rioproject.resources.servicecore': Level.INFO,
-            'net.jini.discovery.LookupDiscovery' : Level.OFF].each { name, level ->
-            loggers << new LoggerConfig(name,
-                                        level,
-                                        new LogHandlerConfig(new ConsoleHandler()))
-        }
         return loggers as LoggerConfig[]
     }
 

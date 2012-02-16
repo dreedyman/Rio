@@ -20,6 +20,12 @@
             <outputDirectory>/config/poms</outputDirectory>
             <destName>rio-gnostic.pom</destName>
         </file>
+        <!-- Copy the logging configuration file -->
+        <file>
+            <source>${basedir}/src/main/config/logging/rio-logging.properties</source>
+            <outputDirectory>/config/logging</outputDirectory>
+            <destName>rio-logging.properties</destName>
+        </file>
     </files>
     <fileSets>
 
