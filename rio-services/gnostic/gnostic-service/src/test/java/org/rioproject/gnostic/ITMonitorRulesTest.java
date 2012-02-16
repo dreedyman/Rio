@@ -261,7 +261,6 @@ public class ITMonitorRulesTest {
         AssociationMgmt mgr;
         String serviceName;
 
-        @SuppressWarnings("unchecked")
         AssociationHelper(String serviceName,
                           Class<T> serviceClass,
                           String... groups) {

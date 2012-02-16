@@ -115,7 +115,6 @@ public class AggregatingMBean implements DynamicMBean,
         return(list);
     }
 
-    @SuppressWarnings("unchecked")
     public AttributeList setAttributes(AttributeList attributeList) {
         Attribute[] attrs =
             (Attribute[])attributeList.toArray(

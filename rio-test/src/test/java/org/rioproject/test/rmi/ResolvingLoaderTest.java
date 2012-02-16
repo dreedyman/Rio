@@ -17,7 +17,6 @@ package org.rioproject.test.rmi;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rioproject.RioVersion;

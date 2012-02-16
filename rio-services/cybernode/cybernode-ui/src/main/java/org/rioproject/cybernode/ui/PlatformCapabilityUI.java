@@ -169,7 +169,6 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
     }
 
     class PlatformCapabilityModel extends AbstractTableModel {
-        @SuppressWarnings("unchecked")
         Vector tableData = new Vector();
 
         final String[] columnNames = {"Name", "Description", "Class", "Package"};

@@ -337,7 +337,6 @@ public class ServiceBeanActivation {
         /*
          * Register the ServiceBean to the LifeCycleManager and advertise it
          */
-        @SuppressWarnings("unchecked")
         public void register(Object sbProxy, ServiceBeanContext context) throws ServiceBeanControlException {
             try {
                 if(sbProxy == null)

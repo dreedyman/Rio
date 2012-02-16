@@ -44,7 +44,6 @@ public class CybernodeUI extends JPanel implements Runnable {
     private boolean keepAlive=true;
     private transient Thread thread;
 
-    @SuppressWarnings("unchecked")
     public CybernodeUI(final Object arg) {
         super();
         getAccessibleContext().setAccessibleName("Cybernode admin");

@@ -24,7 +24,6 @@ import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.junit.Test;
 import org.rioproject.config.DynamicConfiguration;
-import org.rioproject.watch.*;
 
 import java.rmi.*;
 import java.rmi.server.ExportException;

@@ -6,7 +6,6 @@
 package edu.emory.mathcs.util.classloader;
 
 import java.net.*;
-import java.io.*;
 import java.util.*;
 
 /**

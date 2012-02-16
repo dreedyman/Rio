@@ -6,7 +6,6 @@
 package edu.emory.mathcs.util.io;
 
 import java.io.*;
-import java.util.*;
 
 /**
  * An abstraction of a plain input stream. Subinterfaces supply additional

@@ -17,13 +17,8 @@ package org.rioproject.boot;
 
 import org.rioproject.net.PortRangeServerSocketFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.URL;
-import java.util.*;
-
 
 /**
  * Provides static convenience methods for use in configuration files. This class cannot
