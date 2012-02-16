@@ -324,14 +324,13 @@ public class PlatformLoader {
      * @throws Exception if the rioHome does not exist
      */
     public PlatformCapabilityConfig[] getDefaultPlatform(String rioHome) throws Exception {
+        if(System.getProperty("StaticCybernode")!=null)
+            return new PlatformCapabilityConfig[0];
         if(rioHome==null) {
-            if(System.getProperty("StaticCybernode")!=null)
-                return new PlatformCapabilityConfig[0];
-            else
-                throw new IllegalArgumentException("RIO_HOME cannot be null. You " +
-                                                   "must set it as a system property " +
-                                                   "or it must be set in your " +
-                                                   "environment");
+            throw new IllegalArgumentException("RIO_HOME cannot be null. You " +
+                                               "must set it as a system property " +
+                                               "or it must be set in your " +
+                                               "environment");
         }
         File rioHomeDir = new File(rioHome);
         if(!rioHomeDir.exists())
