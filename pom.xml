@@ -416,7 +416,9 @@
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <profiles>
