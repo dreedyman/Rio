@@ -23,6 +23,18 @@
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-lib</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.jini</groupId>
+                    <artifactId>jsk-platform</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject.monitor</groupId>
+            <artifactId>monitor-api</artifactId>
+            <version>${rio.version}</version>
         </dependency>
 
         <dependency>
@@ -32,5 +44,34 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                <artifactSet>
+                    <excludes>
+                        <exclude>net.jini.lookup:serviceui</exclude>
+                        <exclude>net.jini:jsk-platform</exclude>
+                        <exclude>net.jini:jsk-lib</exclude>
+                        <exclude>org.rioproject:rio-platform</exclude>
+                        <exclude>org.codehaus.groovy:groovy-all</exclude>
+                    </excludes>
+                </artifactSet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

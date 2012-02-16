@@ -12,4 +12,11 @@
     <artifactId>hospital-api</artifactId>
     <name>Example :: Hospital API</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-api</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

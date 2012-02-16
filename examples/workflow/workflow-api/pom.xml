@@ -13,4 +13,12 @@
     <artifactId>workflow-api</artifactId>
     <name>Example :: Workflow API</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-api</artifactId>
+        </dependency>
+    </dependencies>
+
+
 </project>

@@ -12,4 +12,12 @@
     <artifactId>springbean-api</artifactId>
     <name>Example :: SpringBean API</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-api</artifactId>
+        </dependency>
+    </dependencies>
+
+
 </project>

@@ -25,12 +25,6 @@
             <artifactId>rio-platform</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.rioproject.monitor</groupId>
-            <artifactId>monitor-api</artifactId>
-            <version>${rio.version}</version>
-        </dependency>
-
     </dependencies>
 
     <modules>
