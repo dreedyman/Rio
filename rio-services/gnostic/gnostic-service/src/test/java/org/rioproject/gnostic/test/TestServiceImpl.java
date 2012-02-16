@@ -19,7 +19,6 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.watch.GaugeWatch;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

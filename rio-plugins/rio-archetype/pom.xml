@@ -8,7 +8,6 @@
         <version>5.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <groupId>org.rioproject</groupId>
     <artifactId>rio-archetype</artifactId>
     <name>Module :: Rio Maven Archetype</name>    
     <packaging>maven-archetype</packaging>

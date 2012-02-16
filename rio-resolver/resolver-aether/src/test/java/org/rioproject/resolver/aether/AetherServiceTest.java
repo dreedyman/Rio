@@ -3,8 +3,6 @@ package org.rioproject.resolver.aether;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 /**
  * Test the AetherService
  */

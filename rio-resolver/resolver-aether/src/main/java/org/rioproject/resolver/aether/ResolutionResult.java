@@ -16,7 +16,6 @@
 package org.rioproject.resolver.aether;
 
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.resolution.ArtifactResult;
 
 import java.util.List;

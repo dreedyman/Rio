@@ -1147,7 +1147,6 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @throws Exception if the fault detection handler cannot be attached
          */
-        @SuppressWarnings("unchecked")
         protected void serviceDiscovered(ServiceItem item) throws Exception {
             if(logger.isLoggable(Level.FINEST))
                 logger.log(Level.FINEST,
@@ -1189,7 +1188,6 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @param item The service that has failed
          */
-        @SuppressWarnings("unchecked")
         protected void notifyOnFailure(ServiceItem item) {
             if(instances >0) {
                 association.setState(Association.State.CHANGED);

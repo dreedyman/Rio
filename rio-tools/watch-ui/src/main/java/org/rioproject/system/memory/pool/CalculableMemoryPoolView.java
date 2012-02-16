@@ -15,7 +15,6 @@
  */
 package org.rioproject.system.memory.pool;
 
-import org.rioproject.system.measurable.memory.CalculableMemory;
 import org.rioproject.system.measurable.memory.pool.CalculableMemoryPool;
 import org.rioproject.watch.CalculableDisplayAttributes;
 import org.rioproject.watch.DefaultCalculableView;

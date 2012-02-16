@@ -276,7 +276,6 @@ public class GnosticImpl implements Gnostic {
     class RuleMapWorker implements Runnable {
         ProvisionMonitor monitor;
 
-        @SuppressWarnings ("unchecked")
         public void run() {
             while (true) {
                 waitForMonitor();

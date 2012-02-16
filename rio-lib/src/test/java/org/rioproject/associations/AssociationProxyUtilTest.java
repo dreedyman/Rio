@@ -18,7 +18,6 @@ package org.rioproject.associations;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.associations.*;
 
 /**
  * Test functionality of the {@link  AssociationProxyUtil}

@@ -74,7 +74,6 @@ public class ResourceCostSelector extends ServiceResourceSelector {
      * sorts the <code>Collection</code> based on the <code>Comparable</code>
      * implementation of the <code>ResourceCapability</code>
      */
-    @SuppressWarnings("unchecked")
     public static class CostComparator implements Comparator {
         public int compare(Object o1, Object o2) {
             if(!(o1 instanceof ServiceResource))
