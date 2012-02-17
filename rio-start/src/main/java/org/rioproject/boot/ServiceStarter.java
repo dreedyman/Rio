@@ -458,7 +458,6 @@ public class ServiceStarter {
      * <code>Configuration</code> object.
      *
      * @see RioServiceDescriptor
-     * @see RioActivatableServiceDescriptor
      * @see net.jini.config.Configuration
      * @see net.jini.config.ConfigurationProvider
      */
