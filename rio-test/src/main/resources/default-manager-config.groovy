@@ -28,6 +28,7 @@ manager {
     jvmOptions = '''
         -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
+        -Djava.util.logging.config.file=${RIO_HOME}${/}config${/}logging${/}rio-logging.properties
         -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts
         -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -DRIO_HOME=${RIO_HOME} -Dorg.rioproject.groups=${org.rioproject.groups}'''

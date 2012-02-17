@@ -28,6 +28,7 @@ manager {
     jvmOptions='''
         -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
+        -Djava.util.logging.config.file=${RIO_HOME}${/}config${/}logging${/}rio-logging.properties
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${RIO_HOME}${/}logs
         -DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME}
