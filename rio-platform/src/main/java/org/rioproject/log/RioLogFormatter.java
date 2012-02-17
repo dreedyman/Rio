@@ -78,7 +78,6 @@ public class RioLogFormatter extends Formatter {
         if (record.getSourceMethodName() != null) {
             sb.append(".");
             sb.append(record.getSourceMethodName());
-            sb.append("()");
         }
 
         String message = formatMessage(record);
