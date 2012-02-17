@@ -1,7 +1,6 @@
 /*
  * Configuration for a Cybernode
  */
-import java.util.logging.Level
 import org.rioproject.config.Component
 import org.rioproject.log.LoggerConfig
 import org.rioproject.fdh.FaultDetectionHandlerFactory

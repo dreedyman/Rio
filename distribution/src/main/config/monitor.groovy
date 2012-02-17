@@ -1,7 +1,6 @@
 /*
  * Configuration for a Provision Monitor
  */
-import java.util.logging.Level
 
 import net.jini.core.discovery.LookupLocator
 import net.jini.export.Exporter
@@ -22,15 +21,14 @@ import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
 import net.jini.core.entry.Entry
 import org.rioproject.boot.BootUtil
-import org.rioproject.resolver.Resolver
-import org.rioproject.resolver.ResolverHelper
 import org.rioproject.entry.UIDescriptorFactory
 import org.rioproject.RioVersion
-
+import net.jini.lookup.ui.MainUI
+import org.rioproject.serviceui.UIComponentFactory
 
 /*
- * Declare Provision Monitor properties
- */
+* Declare Provision Monitor properties
+*/
 @Component('org.rioproject.monitor')
 class MonitorConfig {
     String serviceName = 'Monitor'
@@ -58,23 +56,9 @@ class MonitorConfig {
     }
 
     Entry[] getServiceUIs(String codebase) {
-        def entry = []
-        if(codebase!=null) {
-            try {
-                System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "false")
-                Resolver r = ResolverHelper.getResolver()
-                String uiClass = 'org.rioproject.tools.ui.ServiceUIWrapper'
-                def classpath = []
-                for(String s : r.getClassPathFor("org.rioproject:rio-ui:${RioVersion.VERSION}")) {
-                    if(s.startsWith(ResolverHelper.M2_HOME))
-                        s = s.substring(ResolverHelper.M2_HOME.length()+1)
-                    classpath << s
-                }
-                entry = [UIDescriptorFactory.getJFrameDesc(codebase, classpath as String[], uiClass)]
-            } finally {
-                System.setProperty(Constants.RESOLVER_PRUNE_PLATFORM, "true")
-            }
-        }
+        String uiClass = 'org.rioproject.tools.ui.ServiceUIWrapper'
+        URL url = new URL("artifact:org.rioproject:rio-ui:${RioVersion.VERSION}")
+        def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIComponentFactory(url, uiClass))]
         return entry as Entry[]
     }
 
