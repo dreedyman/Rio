@@ -109,7 +109,7 @@ public abstract class AbstractProxy implements ReferentUuid, Service, Serializab
         throw new InvalidObjectException("No data found when attempting to de-serialize AbstractProxy instance");
     }
 
-    /* -------- Implement org.rioproject.jsb.MonitorableService methods -------- */
+    /* -------- Implement org.rioproject.admin.MonitorableService methods -------- */
     /** @see org.rioproject.admin.MonitorableService#ping */
     public void ping() throws RemoteException {
         ((MonitorableService)server).ping();
