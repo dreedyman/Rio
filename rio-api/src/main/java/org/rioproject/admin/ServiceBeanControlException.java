@@ -48,7 +48,7 @@ public class ServiceBeanControlException extends Exception {
 
     /**
      * Constructs a <code>ServiceBeanControlException</code> with the specified detail
-     * message and optional exception that was raised while controlling the JSB
+     * message and optional exception that was raised while controlling the service
      * 
      * @param s The detail message
      * @param cause The exception that was raised while controlling the JSB
@@ -58,9 +58,9 @@ public class ServiceBeanControlException extends Exception {
     }
 
     /**
-     * Prints the stack backtrace. If an exception occurred during JSB
+     * Prints the stack trace. If an exception occurred during JSB
      * instantiation it prints that exception's stack trace, or else prints the
-     * stack backtrace of this exception.
+     * stack trace of this exception.
      * 
      * @see java.lang.System#err
      */
@@ -69,19 +69,17 @@ public class ServiceBeanControlException extends Exception {
     }
 
     /**
-     * Prints the stack backtrace to the specified print stream. If an exception
-     * occurred during JSB instantiation it prints that exception's stack trace,
-     * or else prints the stack backtrace of this exception.
+     * Prints the stack trace to the specified print stream. If an exception
+     * occurred during service instantiation it prints that exception's stack trace,
+     * or else prints the stack trace of this exception.
      */
     public void printStackTrace(PrintStream ps) {
-        synchronized(ps) {
-            Throwable cause = getCause();
-            if(cause != null) {
-                ps.print("org.rioproject.jsb.ServiceBeanControlException: ");
-                cause.printStackTrace(ps);
-            } else {
-                super.printStackTrace(ps);
-            }
+        Throwable cause = getCause();
+        if(cause != null) {
+            ps.print("org.rioproject.admin.ServiceBeanControlException: ");
+            cause.printStackTrace(ps);
+        } else {
+            super.printStackTrace(ps);
         }
     }
 
@@ -94,7 +92,7 @@ public class ServiceBeanControlException extends Exception {
         synchronized(pw) {
             Throwable cause = getCause();
             if(cause != null) {
-                pw.print("org.rioproject.jsb.ServiceBeanControlException: ");
+                pw.print("org.rioproject.admin.ServiceBeanControlException: ");
                 cause.printStackTrace(pw);
             } else {
                 super.printStackTrace(pw);
