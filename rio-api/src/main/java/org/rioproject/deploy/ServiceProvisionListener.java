@@ -29,17 +29,17 @@ import java.rmi.RemoteException;
 public interface ServiceProvisionListener extends Remote {
     /**
      * Notify listener that the Service described by the ServiceBeanInstance has
-     * been provisioned succesfully
+     * been provisioned successfully
      * 
-     * @param jsbInstance The ServiceBeanInstance
+     * @param serviceBeanInstance The ServiceBeanInstance
      *
      * @throws RemoteException If communication errors occur
      */
-    void succeeded(ServiceBeanInstance jsbInstance) throws RemoteException;
+    void succeeded(ServiceBeanInstance serviceBeanInstance) throws RemoteException;
 
     /**
      * Notify listener that the Service described by the ServiceElement has
-     * not been provision succesfully
+     * not been provision successfully
      * 
      * @param sElem The ServiceElement
      * @param resubmitted Whether the  Service described by the ServiceElement
