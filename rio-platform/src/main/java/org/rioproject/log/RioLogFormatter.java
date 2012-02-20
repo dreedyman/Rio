@@ -36,7 +36,7 @@ public class RioLogFormatter extends Formatter {
     private Object args[] = new Object[1];
     private String lineSeparator = System.getProperty("line.separator");
     private boolean includePackageNames;
-    private int longest = 0;
+    private String levelFormat;
 
     public RioLogFormatter() {
         super();
@@ -50,10 +50,13 @@ public class RioLogFormatter extends Formatter {
                                      Level.FINE,
                                      Level.FINER,
                                      Level.FINEST};
+        int longest = 0;
         for(Level l : levels) {
             if(l.getLocalizedName().length()>longest)
                 longest = l.getLocalizedName().length();
         }
+
+        levelFormat = "%-"+longest+"s";
     }
 
     /**
@@ -64,8 +67,10 @@ public class RioLogFormatter extends Formatter {
      */
     public synchronized String format(LogRecord record) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-"+longest+"s", record.getLevel().getLocalizedName()));
+
+        sb.append(String.format(levelFormat, record.getLevel().getLocalizedName()));
         sb.append(" ");
+
         // Minimize memory allocations here.
         date.setTime(record.getMillis());
         args[0] = date;
@@ -77,6 +82,7 @@ public class RioLogFormatter extends Formatter {
         sb.append(text);
         sb.append(" ");
 
+       
         if (record.getSourceClassName() != null) {
             String name = record.getSourceClassName();
             if(!includePackageNames) {
@@ -97,7 +103,7 @@ public class RioLogFormatter extends Formatter {
 
         String message = formatMessage(record);
 
-        sb.append(": ");
+        sb.append(" - ");
         sb.append(message);
         sb.append(lineSeparator);
         if (record.getThrown() != null) {
