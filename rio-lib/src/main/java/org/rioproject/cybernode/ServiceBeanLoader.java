@@ -278,27 +278,6 @@ public class ServiceBeanLoader {
             }
         }
 
-        /*
-         * Load any system components prior to the loading of the Service
-         */
-        if(sElem.getComponentBundle()!=null) {
-            try {
-                Map<String, URL[]> sharedResources = sElem.getComponentBundle().getSharedComponents();
-
-                if(sharedResources.size()>0) {
-                    for (Map.Entry<String, URL[]>entry : sharedResources.entrySet()) {
-                        String name = entry.getKey();
-                        URL[] urls =  entry.getValue();
-                        if (urls != null)
-                            commonCL.addComponent(name, urls);
-                    }
-                }
-            } catch(MalformedURLException e) {
-                throw new ServiceBeanInstantiationException("Unable to load SharedComponents for " +
-                                                            "service ["+sElem.getName()+"]", e);
-            }
-        }
-
         final Thread currentThread = Thread.currentThread();
         ClassLoader currentClassLoader = currentThread.getContextClassLoader();
         try {
