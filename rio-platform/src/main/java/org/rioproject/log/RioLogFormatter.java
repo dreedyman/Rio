@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.logging.Formatter;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
@@ -35,11 +36,24 @@ public class RioLogFormatter extends Formatter {
     private Object args[] = new Object[1];
     private String lineSeparator = System.getProperty("line.separator");
     private boolean includePackageNames;
+    private int longest = 0;
 
     public RioLogFormatter() {
         super();
         /* load options from the logging properties file */
         includePackageNames = hasDeclaredSupportFor(getClass().getName() + ".includePackageNames");
+
+        Level[] levels = new Level[]{Level.SEVERE,
+                                     Level.WARNING,
+                                     Level.INFO,
+                                     Level.CONFIG,
+                                     Level.FINE,
+                                     Level.FINER,
+                                     Level.FINEST};
+        for(Level l : levels) {
+            if(l.getLocalizedName().length()>longest)
+                longest = l.getLocalizedName().length();
+        }
     }
 
     /**
@@ -50,6 +64,8 @@ public class RioLogFormatter extends Formatter {
      */
     public synchronized String format(LogRecord record) {
         StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%-"+longest+"s", record.getLevel().getLocalizedName()));
+        sb.append(" ");
         // Minimize memory allocations here.
         date.setTime(record.getMillis());
         args[0] = date;
@@ -60,8 +76,7 @@ public class RioLogFormatter extends Formatter {
         formatter.format(args, text, null);
         sb.append(text);
         sb.append(" ");
-        sb.append(record.getLevel().getLocalizedName());
-        sb.append(" ");
+
         if (record.getSourceClassName() != null) {
             String name = record.getSourceClassName();
             if(!includePackageNames) {
