@@ -254,9 +254,7 @@ public class ProvisionTask implements Runnable {
             if (thrown != null) {
                 if (!ThrowableUtil.isRetryable(thrown)) {
                     if (logger.isLoggable(Level.INFO))
-                        logger.log(Level.INFO,
-                                   "Drop {0} {1} from collection",
-                                   new Object[]{ir.getName(), ir.getInstantiator()});
+                        logger.log(Level.INFO, "Drop {0} {1} from collection", new Object[]{ir.getName(), ir.getInstantiator()});
                     context.getSelector().dropServiceResource(serviceResource);
                     result = ServiceProvisioner.PROVISION_FAILURE | ServiceProvisioner.BAD_CYBERNODE;
                 } else {
@@ -266,11 +264,9 @@ public class ProvisionTask implements Runnable {
                                             "to [" + ir.getHostAddress() + "]",
                                             thrown);
                     else
-                        logger.warning("Provisioning [" +
-                                                LoggingUtil.getLoggingName(request) + "] to " +
-                                                "[" + ir.getHostAddress() + "], " +
-                                                thrown.getClass().getName() + ": " +
-                                                thrown.getLocalizedMessage());
+                        logger.warning("Provisioning [" +LoggingUtil.getLoggingName(request) + "] to " +
+                                       "[" + ir.getHostAddress() + "], " +
+                                       thrown.getClass().getName() + ": " +thrown.getLocalizedMessage());
                 }
 
             }
