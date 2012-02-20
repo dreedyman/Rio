@@ -49,7 +49,6 @@ public class Installer {
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
         try {
             Resolver r = ResolverHelper.getResolver();
-            ResolverHelper.setLogging(r, false);
             ClassLoader resolverLoader = r.getClass().getClassLoader();
             Thread.currentThread().setContextClassLoader(resolverLoader);
             Object aetherServiceInstance = null;

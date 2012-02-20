@@ -33,6 +33,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Uses Maven 3's native dependency resolution interface, Aether.
@@ -40,7 +42,7 @@ import java.util.List;
 public class AetherResolver implements Resolver {
     private AetherService service = AetherService.getDefaultInstance();
     private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
-    private boolean logResults = true;
+    private static final Logger logger = Logger.getLogger(AetherResolver.class.getName());
 
     /**
      * {@inheritDoc}
@@ -174,10 +176,6 @@ public class AetherResolver implements Resolver {
         return remoteRepositories;
     }
 
-    public void setLogResults(boolean logResults) {
-        this.logResults = logResults;
-    }
-
     protected String[] produceClassPathFromResolutionResult(ResolutionResult result) {
         List<String> classPath = new ArrayList<String>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
@@ -190,7 +188,7 @@ public class AetherResolver implements Resolver {
             }
 
         }
-        if(logResults)
+        if(logger.isLoggable(Level.FINE))
             logResolutionResult(result);
         return classPath.toArray(new String[classPath.size()]);
     }
@@ -204,9 +202,12 @@ public class AetherResolver implements Resolver {
             resolvedList.append("  ").append(String.format("%-"+artifactLength+"s", artifactResult.getArtifact()));
             resolvedList.append(" resolved to ").append(artifactResult.getArtifact().getFile());
         }
+        String newLine = "";
         if(resolvedList.length()==0)
             resolvedList.append("  <No artifacts resolved>");
-        System.err.println("[INFO] Artifact resolution for "+result.getArtifact()+": \n"+resolvedList);
+        else
+            newLine = "\n";
+        logger.info("Artifact resolution for "+result.getArtifact()+": "+newLine+resolvedList);
     }
 
     protected RemoteRepository transformAetherRemoteRepository(org.sonatype.aether.repository.RemoteRepository r) {

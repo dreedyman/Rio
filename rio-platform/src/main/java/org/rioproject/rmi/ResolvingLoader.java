@@ -46,7 +46,6 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     static {
         try {
             resolver = ResolverHelper.getResolver();
-            ResolverHelper.setLogging(resolver, false);
         } catch (ResolverException e) {
             throw new RuntimeException(e);
         }

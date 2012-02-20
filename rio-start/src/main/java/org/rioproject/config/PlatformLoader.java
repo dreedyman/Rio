@@ -339,7 +339,6 @@ public class PlatformLoader {
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig();
         File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio-lib.jar");
         Resolver resolver = ResolverHelper.getResolver();
-        ResolverHelper.setLogging(resolver, false);
         String[] rioAPIClassPath = resolver.getClassPathFor("org.rioproject:rio-api:"+RioVersion.VERSION);
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");

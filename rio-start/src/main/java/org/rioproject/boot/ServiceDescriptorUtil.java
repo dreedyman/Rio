@@ -265,7 +265,6 @@ public class ServiceDescriptorUtil {
         String[] proxyClassPath;
         try {
             Resolver resolver = ResolverHelper.getResolver();
-            ResolverHelper.setLogging(resolver, false);
             proxyClassPath = resolver.getClassPathFor(proxy);
         } catch (ResolverException e) {
             throw new IOException("Unable to resolve "+proxy, e);
