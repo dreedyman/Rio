@@ -139,10 +139,6 @@ deployment(name:'Muves', debug:true) {
                       "lib/jscience.jar",
                       "lib/log4j-1.2.11.jar",
                       "lib/arl/arl-brlcadservice.jar"
-            sharedComponent(class: "mil.army.arl.brlcadservice.impl.BrlcadJNIWrapper") {
-                resources "lib/arl/arl-brlcadservice.jar",
-                          "lib/jscience.jar"
-            }
         }
 
 

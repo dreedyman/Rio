@@ -250,11 +250,6 @@
                     <JAR>lib/jscience.jar</JAR>
                     <JAR>lib/log4j-1.2.11.jar</JAR>
                     <JAR>lib/arl/arl-brlcadservice.jar</JAR>
-                    <SharedComponent>
-                        <ClassName>mil.army.arl.brlcadservice.impl.BrlcadJNIWrapper</ClassName>
-                        <JAR>lib/arl/arl-brlcadservice.jar</JAR>
-                        <JAR>lib/jscience.jar</JAR>
-                    </SharedComponent>
                 </Resources>
             </ImplementationClass>
 

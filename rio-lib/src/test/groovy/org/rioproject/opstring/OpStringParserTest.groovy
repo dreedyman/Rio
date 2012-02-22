@@ -41,6 +41,25 @@ class OpStringParserTest extends GroovyTestCase {
     def OpStringParser xmlParser = new XmlOpStringParser()
     def OpStringParser dslParser = new GroovyDSLOpStringParser()
 
+    void testAssociationInjectProperty() {
+        File file = new File("src/test/resources/opstrings/association_lazy.groovy")
+        def opstrings = dslParser.parse(file, null, false, null, null, null)
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = opstrings[0]
+
+
+        def calculator = opstring.services[0]
+        assertEquals "Calculator", calculator.name
+        assertEquals "calculator.Calculator", calculator.exportBundles[0].className
+        checkCalculatorClassBundles calculator.exportBundles, calculator.componentBundle
+        assertEquals "calculator.service.CalculatorImpl", calculator.componentBundle.className
+        assertEquals 1, calculator.associationDescriptors.length
+
+        assertEquals "Add", calculator.associationDescriptors[0].name
+        assertEquals AssociationType.REQUIRES, calculator.associationDescriptors[0].associationType
+        assertEquals "add", calculator.associationDescriptors[0].propertyName
+        assertEquals false, calculator.associationDescriptors[0].lazyInject
+    }
     void testExternal() {
         File file = new File("src/test/resources/opstrings/external.groovy")
         def opstrings = dslParser.parse(file,     // opstring
@@ -904,8 +923,6 @@ class OpStringParserTest extends GroovyTestCase {
         assertEquals 'mil.army.arl.brlcadservice.impl.BrlcadServiceImpl', geometryService.componentBundle.className
         assertEquals 31, geometryService.componentBundle.JARNames.size()
         assertEquals 'lib/gomez/worker.jar', geometryService.componentBundle.JARNames[0]
-
-        assertEquals 1, geometryService.componentBundle.getSharedComponents().size()
 
         /* RIO-174 */
         assertEquals 1, geometryService.exportBundles.length
