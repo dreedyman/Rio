@@ -103,6 +103,19 @@ public class AssociationInjectorTest {
         Assert.assertEquals(9, t.dosDummies.getServiceCount());
         Assert.assertEquals(8, t.tresDummies.getServiceCount());
     }
+    
+    @Test
+    public void testEagerInjection() {
+        AssociationMgmt aMgr = new AssociationMgmt();        
+        Target5 target = new Target5();
+        aMgr.setBackend(target);
+        AssociationDescriptor descriptor = createAssociationDescriptor();
+        descriptor.setLazyInject(false);
+        Association<Dummy> a = aMgr.addAssociationDescriptor(descriptor);
+        Assert.assertTrue(target.injectedCount==1);
+        Assert.assertNotNull(target.dummy);
+        Assert.assertEquals(Association.State.PENDING, target.dummy.getState());
+    }
 
     public class Target1 {
         int injectedCount;
@@ -146,6 +159,16 @@ public class AssociationInjectorTest {
                 tresDummies = dummies;
             else
                 Assert.fail("Unknown association "+dummies);
+        }
+    }
+
+    public class Target5 {
+        int injectedCount;
+        Association<Dummy> dummy;
+
+        public void setDummy(Association<Dummy> dummy) {
+            this.dummy = dummy;
+            injectedCount++;
         }
     }
 
