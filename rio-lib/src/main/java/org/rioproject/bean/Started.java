@@ -21,7 +21,7 @@ import java.lang.annotation.*;
  **
  * The Started annotation is used on a method in a bean to allow the bean
  * to be notified that it has been initialized and started, that the bean is
- * ready to accept inbound remote coomunications and the bean has been
+ * ready to accept inbound remote communications and the bean has been
  * initialized, all infrastructure and property setting have been
  * accomplished.
  *
