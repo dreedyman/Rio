@@ -107,6 +107,6 @@
         <module>springbean</module>
         <module>workflow</module>
         <module>tomcat</module>
-  </modules>
+    </modules>
 
 </project>

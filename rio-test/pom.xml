@@ -72,7 +72,7 @@
         </dependency>
 
 
-    </dependencies>    
+    </dependencies>
 
     <build>
         <plugins>
@@ -99,99 +99,12 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.3</version>
-                <executions>
-                    <execution>
-                        <id>build-test-project</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <exec dir="${basedir}/src/test/resources/test-services"
-                                      executable="mvn"
-                                      failonerror="true">
-                                    <arg line="-q clean install -Dmaven.test.skip"/>
-                                </exec>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-javaagent:${basedir}/../distribution/target/rio-${project.version}/lib/rio-start.jar</argLine>
-                    <systemProperties>
-                        <property>
-                            <name>RIO_HOME</name>
-                            <value>${basedir}/../distribution/target/rio-${project.version}</value>
-                        </property>
-                    </systemProperties>
-                    <includes>
-                        <include>**/HandlerTest.java</include>
-                        <include>**/ResolvingLoaderTestTest.java</include>
-                    </includes>
-                     <excludes>
-                        <exclude>**/PermGenTest.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <forkMode>always</forkMode>
-
-                    <systemProperties>
-                        <property>
-                            <name>RIO_HOME</name>
-                            <value>${basedir}/../distribution/target/rio-${project.version}</value>
-                        </property>
-                        <property>
-                            <name>RIO_TEST_HOME</name>
-                            <value>${basedir}</value>
-                        </property>
-                        <property>
-                            <name>org.rioproject.test.manager.config</name>
-                            <value>${basedir}/src/test/conf/manager-config.groovy</value>
-                        </property>
-                        <property>
-                            <name>org.rioproject.test.config</name>
-                            <value>${basedir}/src/test/conf/test-config.groovy</value>
-                        </property>
-                    </systemProperties>
-
-                    <includes>
-                        <include>**/*Test.java</include>
-                    </includes>
-
-                    <excludes>
-                        <exclude>**/*$*</exclude>
-                        <exclude>**/PermGenTest.java</exclude>
-                    </excludes>
-
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            
-           <plugin>
-               <groupId>org.codehaus.gmaven</groupId>
+                <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
                 <version>1.3</version>
                 <configuration>
                     <providerSelection>1.7</providerSelection>
+                    <source/>
                 </configuration>
                 <executions>
                     <execution>
@@ -219,7 +132,96 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>run-integration-test</id>
+            <activation>
+                <file>
+                    <exists>${basedir}/../distribution/target/rio.dist</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.3</version>
+                        <executions>
+                            <execution>
+                                <id>build-test-project</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <exec dir="${basedir}/src/test/resources/test-services"
+                                              executable="mvn"
+                                              failonerror="true">
+                                            <arg line="-q clean install -Dmaven.test.skip"/>
+                                        </exec>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <forkMode>always</forkMode>
+
+                            <systemProperties>
+                                <property>
+                                    <name>RIO_HOME</name>
+                                    <value>${basedir}/../distribution/target/rio-${project.version}</value>
+                                </property>
+                                <property>
+                                    <name>RIO_TEST_HOME</name>
+                                    <value>${basedir}</value>
+                                </property>
+                                <property>
+                                    <name>org.rioproject.test.manager.config</name>
+                                    <value>${basedir}/src/test/conf/manager-config.groovy</value>
+                                </property>
+                                <property>
+                                    <name>org.rioproject.test.config</name>
+                                    <value>${basedir}/src/test/conf/test-config.groovy</value>
+                                </property>
+                            </systemProperties>
+
+                            <includes>
+                                <include>**/*Test.java</include>
+                            </includes>
+
+                            <excludes>
+                                <exclude>**/*$*</exclude>
+                                <!--<exclude>**/PermGenTest.java</exclude>-->
+                            </excludes>
+
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
