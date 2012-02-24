@@ -1,0 +1,30 @@
+.gitignore
+###################
+# Maven target directories
+###################
+target/
+docs/
+rio-test/logs/
+rio-test/test.oar
+rio-test/test-repo/
+services/gnostic/src/test/resources/CounterNotification.drl
+plugins/maven-rio-plugin/src/site/
+
+#Maven Output
+###################
+*.class
+target
+
+#IDE Files   
+###################
+#IntelliJ:
+*.ipr
+*.iml
+*.iws
+
+# OS generated files #
+######################
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
