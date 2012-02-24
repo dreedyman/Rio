@@ -249,7 +249,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     public Object start(final ServiceBeanContext context) throws Exception {
         if (context == null)
-            throw new NullPointerException("ServiceBeanContext is null");
+            throw new IllegalArgumentException("ServiceBeanContext is null");
         try {
             Configuration config = context.getConfiguration();
             try {
@@ -372,7 +372,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * processing.
      * 
      * @param context The ServiceBeanContext to initialize the ServiceBean. If
-     * this parameter is null a NullPointerException is thrown
+     * this parameter is null a IllegalArgumentException is thrown
      * @param store A PersistentStore which will be used as a basis to create
      * a ServiceBeanContextManager used to manage the state of the
      * ServiceBeanContext. If this parameter is null, a
@@ -382,7 +382,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     public void initialize(ServiceBeanContext context, PersistentStore store)
             throws Exception {
         if (context == null)
-            throw new NullPointerException("ServiceBeanContext is null");
+            throw new IllegalArgumentException("ServiceBeanContext is null");
         if (store != null) {
             this.store = store;
             ServiceBeanManager jsbManager = context.getServiceBeanManager();
@@ -720,7 +720,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             if (jMgr != null)
                 jMgr.addAttributes(new Entry[]{attribute});
             else
-                throw new NullPointerException("JoinManager is null");
+                throw new IllegalArgumentException("JoinManager is null");
         }
     }
 
@@ -733,7 +733,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     public void addAttributes(Entry[] attributes) {
         if (attributes == null)
-            throw new NullPointerException("attributes are null");
+            throw new IllegalArgumentException("attributes are null");
         for (Entry attribute : attributes)
             addAttribute(attribute);
     }
@@ -1254,7 +1254,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     protected Exporter getExporter(Configuration config) throws Exception {
         if(config==null)
-            throw new NullPointerException("config is null");
+            throw new IllegalArgumentException("config is null");
         Exporter exporter;
         String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         final Exporter defaultExporter =
@@ -1309,7 +1309,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     protected Remote exportDo(Exporter exporter) throws Exception {
         if(exporter==null)
-            throw new NullPointerException("exporter is null");
+            throw new IllegalArgumentException("exporter is null");
         return(exporter.export(this));
     }
 
