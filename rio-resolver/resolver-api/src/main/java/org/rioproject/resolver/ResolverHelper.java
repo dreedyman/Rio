@@ -19,7 +19,6 @@ import org.rioproject.resolver.maven2.Repository;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -48,12 +47,18 @@ import java.util.logging.Level;
  * @author Dennis Reedy
  */
 public class ResolverHelper {
-    public static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
-    static String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
-    static URLClassLoader resolverLoader;
+    public final static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
+    static final String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
+    private static URLClassLoader resolverLoader;
     static final Logger logger = Logger.getLogger(ResolverHelper.class.getName());
     public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
 
+    /*
+     * Disallow instantiation
+     */
+    private ResolverHelper() {
+
+    }
 
     /**
      * Resolve the classpath with the local Maven repository as the codebase
@@ -96,17 +101,20 @@ public class ResolverHelper {
                     String s = null;
                     if(jar.startsWith(M2_HOME)) {
                         String jarPart = jar.substring(M2_HOME.length());
-                        if(codebase.endsWith("/") && jarPart.startsWith(File.separator))
+                        if(codebase.endsWith("/") && jarPart.startsWith(File.separator)) {
                             jarPart = jarPart.substring(1, jarPart.length());
-                        if(codebase.startsWith("http:"))
+                        }
+                        if(codebase.startsWith("http:")) {
                             jarPart = handleWindowsHTTP(jarPart);
+                        }
                         s = codebase+jarPart;
                     } else {
                         File jarFile = new File(jar);
-                        if(jarFile.exists())
+                        if(jarFile.exists()) {
                             s = jarFile.toURI().toString();
-                        else
-                            System.err.println("[WARNING] "+jarFile.getPath()+" NOT FOUND");
+                        } else {
+                            logger.warning(jarFile.getPath()+" NOT FOUND");
+                        }
                     }
                     if(s!=null) {
                         s = handleWindows(s);

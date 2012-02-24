@@ -23,14 +23,13 @@ import java.util.regex.Pattern;
  * An artifact in the form of: groupId:artifactId[:type[:classifier]]:version
  */
 public class Artifact {
-    String artifactId;
-    String groupId;
-    String version;
-    String classifier;
-    String type;
-    URL pomURL;
-    boolean loadFromProject = false;
-    
+    private String artifactId;
+    private String groupId;
+    private String version;
+    private String classifier;
+    private String type;
+    private URL pomURL;
+
     public Artifact() {
     }
 
@@ -92,11 +91,13 @@ public class Artifact {
     public String getFileName(String ext) {
         String name;
         boolean useClassifier = !(ext.equals("pom") || ext.equals("oar"));
+        boolean loadFromProject = false;
         if(pomURL==null || loadFromProject) {
-            if(useClassifier && classifier!=null)
+            if(useClassifier && classifier!=null) {
                 name = artifactId+"-"+version+"-"+classifier;
-            else
+            } else {
                 name = artifactId+"-"+version;
+            }
         } else {
             String s = pomURL.toExternalForm();
             int ndx = s.lastIndexOf("/");
@@ -113,10 +114,11 @@ public class Artifact {
 
     public String getGAV() {
         String gav;
-        if(classifier==null || classifier.length()==0)
+        if(classifier==null || classifier.length()==0) {
             gav = groupId+":"+artifactId+":"+type+":"+version;
-        else
+        } else {
             gav = groupId+":"+artifactId+":"+type+":"+classifier+":"+version;
+        }
         return gav;
     }
 
