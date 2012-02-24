@@ -255,7 +255,6 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
      * @return A List of ClassBundle objects containing values corresponding to the JAR and Native elements.
      */
     private List<ClassBundle> parseResources(el, List<String> classNames, String codebase, GlobalAttrs global) {
-        def sharedComponents = new HashMap<String, String[]>()
         logger.fine "Parsing bundle $el"
 
         if (el.'@ref') {
@@ -264,7 +263,7 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
                     logger.fine "Uh oh... What are we supposed to do in that case? Picking the first interface"
                     logger.fine "Class names are: $classNames"
                 }
-                new ClassBundle(classNames[0], it.JARNames, it.sharedComponents, it.codebase)
+                new ClassBundle(classNames[0], it.JARNames, it.codebase)
 
             }
             if (bundles == null)
@@ -272,24 +271,18 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
             return bundles
         } else {
             def jars = el.JAR.collect { it.text() } as String[]
-            el.SharedComponent.each { comp ->
-                def shJars = comp.JAR.collect { it.text() } as String[]
-                def sharedComponentClassName = comp.ClassName.text()
-                sharedComponents.put(sharedComponentClassName, shJars)
-            }
 
             /* Create the ClassBundle */
             def bundles
             if (classNames.size() > 1) {
                 bundles = classNames.collect {
-                    new ClassBundle(it, jars, sharedComponents, codebase)
+                    new ClassBundle(it, jars, codebase)
                 }
             } else if (classNames.size() == 1) {
-                bundles = [new ClassBundle(classNames[0], jars, sharedComponents, codebase)]
+                bundles = [new ClassBundle(classNames[0], jars, codebase)]
             } else {
                 def declaredBundle = new ClassBundle()
                 declaredBundle.addJARs(jars)
-                declaredBundle.addSharedComponents(sharedComponents)
                 declaredBundle.codebase = codebase
                 bundles = [declaredBundle]
             }
@@ -559,11 +552,7 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
                 }
             }
 
-            def nodeList = element.DeploymentSchedule
-            if (nodeList.size() > 0) {
-                Schedule schedule = createSchedule(nodeList[0])
-                opString.setSchedule(schedule)
-            }
+
         } else if (element.name() == "ServiceBean" ||
                    element.name() == "ServiceExec" ||
                    element.name() == "SpringBean") {

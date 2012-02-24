@@ -220,18 +220,11 @@ class GroovyDSLOpStringParser implements OpStringParser {
             }
 
             emc.resources = { String... resources ->
-                if(parent.equals('sharedComponent')) {
+                builder.Resources {
                     resources.each {
-                        if(it.endsWith(".jar"))
-                            builder.JAR(it)
-                    }
-                } else {
-                    builder.Resources {
-                        resources.each {
-                            //if(it && it.endsWith(".jar"))
-                            if(it)
-                                JAR(it)
-                        }
+                        //if(it && it.endsWith(".jar"))
+                        if(it)
+                            JAR(it)
                     }
                 }
             }
@@ -244,20 +237,6 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 builder.Resources(id: attributes.id) {
                     resources.each { JAR(it) }
                 }
-            }
-
-            emc.sharedComponent = { Map attributes, Closure cl ->
-                if(attributes.class==null)
-                    throw new DSLException("sharedComponent must provide a class")
-                def oldParent = parent
-                parent = 'sharedComponent'
-                builder.Resources {
-                    builder.SharedComponent {
-                        ClassName(attributes.class)
-                        cl()
-                    }
-                }
-                parent = oldParent
             }
 
             emc.className = { String classname ->
@@ -327,24 +306,28 @@ class GroovyDSLOpStringParser implements OpStringParser {
                                    ProxyType: attributes.proxyType,
                                    Strategy: attributes.strategy,
                                    Filter: attributes.filter,
-                                   Inject: attributes.inject)
+                                   Inject: attributes.inject,
+                                   ServiceDiscoveryTimeout: attributes.serviceDiscoveryTimeout,
+                                   ServiceDiscoveryTimeoutUnits: attributes.serviceDiscoveryTimeoutUnits)
             }
 
             emc.management = { Map attributes, Closure cl ->
+                def unitsAttr = attributes.serviceDiscoveryTimeoutUnits == null? "minutes": attributes.units
                 builder.Management(Proxy: attributes.proxy,
                                    ProxyType: attributes.proxyType,
                                    Strategy: attributes.strategy,
                                    Filter: attributes.filter,
-                                   Inject: attributes.inject) {
+                                   Inject: attributes.inject,
+                                   ServiceDiscoveryTimeout: attributes.serviceDiscoveryTimeout,
+                                   ServiceDiscoveryTimeoutUnits: unitsAttr) {
                                         cl()
                                     }
             }
 
-            emc.serviceDiscoveryTimeout = { Map attributes ->
-                def unitsAttr = attributes.unit == null? "minutes": attributes.units
-                builder.ServiceDiscoveryTimeout(timeout: attributes.timeout,
-                                                units: unitsAttr)
-            }
+            /*emc.serviceDiscoveryTimeout = { Map attributes ->
+                def unitsAttr = attributes.units == null? "minutes": attributes.units
+                builder.ServiceDiscovery(timeout: attributes.timeout, units: unitsAttr)
+            }*/
 
             emc.maintain = { Integer maintain ->
                 builder.Maintain(maintain)

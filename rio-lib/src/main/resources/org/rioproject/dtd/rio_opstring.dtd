@@ -1,51 +1,4 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!--
-The DeploymentSchedule element provides schedule information on when to
-deploy anOperationalString
--->
-<!ELEMENT DeploymentSchedule (DeployDate, Duration?, Repeats?)>
-
-<!--
-The DeployDate element specifies a Month, DayOfMonth, DayOfWeek Hour and
-Minute. If a DeployDate is not provided, the OperationalString, when deployed,
-will be deployed immediately
--->
-<!ELEMENT DeployDate EMPTY>
-<!ATTLIST DeployDate Month (January | February | March | April | May |
-                            June | July | August | September |
-                            October | November | December | novalue) "novalue">
-<!ATTLIST DeployDate DayOfMonth CDATA #IMPLIED>
-<!ATTLIST DeployDate DayOfWeek (Sunday | Monday | Tuesday | Wednesday |
-                                Thursday | Friday | Saturday | novalue) "novalue">
-<!ATTLIST DeployDate Hour CDATA #IMPLIED>
-<!ATTLIST DeployDate Minute CDATA #IMPLIED>
-<!ATTLIST DeployDate Format (AM | PM | 24H) "24H">
-
-<!--
-The Duration element allows the declaration of how long an
-OperationalString should be deployed. If not provided the duration will be
-indefinite
--->
-<!ELEMENT Duration EMPTY>
-<!ATTLIST Duration Days CDATA #IMPLIED>
-<!ATTLIST Duration Hours CDATA #IMPLIED>
-<!ATTLIST Duration Minutes CDATA #IMPLIED>
-
-<!--
-The Repeats element provides a way to declare how many times a deployment should
-repreat, and what the Interval is between repetitions. If the Interval is not
-provided the default repeat interval is used
--->
-<!ELEMENT Repeats (Interval?)>
-<!ATTLIST Repeats Count CDATA #REQUIRED>
-
-<!--
-The Interval element specifies the amount of time to wait between repetitions
--->
-<!ELEMENT Interval EMPTY>
-<!ATTLIST Interval Days CDATA #IMPLIED>
-<!ATTLIST Interval Hours CDATA #IMPLIED>
-<!ATTLIST Interval Minutes CDATA #IMPLIED>
 
 <!--
 The Codebase element specifies where service classes and resources can be
@@ -57,7 +10,7 @@ The Codebase element specifies where service classes and resources can be
 The Resources element declares one or more resources required to load a
 software component. 
 -->
-<!ELEMENT Resources (JAR | SharedComponent)* >
+<!ELEMENT Resources (JAR)* >
 <!ATTLIST Resources id CDATA #IMPLIED>
 <!ATTLIST Resources ref CDATA #IMPLIED>
 
@@ -85,12 +38,6 @@ The ClassName element specifies the name of a class
 -->
 <!ELEMENT ClassName (#PCDATA)>
 <!--
-The SharedComponent element declares the name of a Class and the codebase to
-load the class from. A SharedComponent will be loaded by the common loader for
-all services making it (and the resources it uses) available to all services
--->
-<!ELEMENT SharedComponent (ClassName, (JAR)+)>
-<!--
 An Include element is another Operational String this Operational String includes
 -->
 <!ELEMENT Include (#PCDATA)>
@@ -113,8 +60,7 @@ with a descriptive name. There can be multiple OperationalString elements in an
 opstring.
 -->
 <!ATTLIST OperationalString Name CDATA #REQUIRED>
-<!ELEMENT OperationalString ((DeploymentSchedule?),
-                             ((%Discovery; | %Common; | Codebase)*),
+<!ELEMENT OperationalString (((%Discovery; | %Common; | Codebase)*),
                              (ServiceBean | SpringBean | ServiceExec | Include)+)>
 <!--
 A ServiceBean element is a dynamic service that supports the Service Bean model.
@@ -233,16 +179,20 @@ service will be unadvertised
 <!ATTLIST Association Interface CDATA #IMPLIED>
 <!ATTLIST Association MatchOnName (yes | no) "yes">
 
-<!ELEMENT Management (Service-Discovery?)>
+<!ELEMENT Management (#PCDATA)>
 <!ATTLIST Management Proxy CDATA #IMPLIED>
 <!ATTLIST Management ProxyType (jdk | cglib) "jdk">
 <!ATTLIST Management Strategy CDATA #IMPLIED>
 <!ATTLIST Management Filter CDATA #IMPLIED>
 <!ATTLIST Management Inject (lazy | eager) "lazy">
+<!ATTLIST Management ServiceDiscoveryTimeout CDATA #IMPLIED>
+<!ATTLIST Management ServiceDiscoveryTimeoutUnits (milliseconds | seconds | minutes | hours | days |
+                                                   MILLISECONDS | SECONDS | MINUTES | HOURS | DAYS) "minutes">
 
-<!ELEMENT Service-Discovery EMPTY>
-<!ATTLIST Service-Discovery timeout CDATA #REQUIRED>
-<!ATTLIST Service-Discovery units (milliseconds | seconds | minutes | hours | days) "minutes">
+<!--<!ELEMENT ServiceDiscovery EMPTY>
+<!ATTLIST ServiceDiscovery timeout CDATA #REQUIRED>
+<!ATTLIST ServiceDiscovery units (milliseconds | seconds | minutes | hours | days |
+                                  MILLISECONDS | SECONDS | MINUTES | HOURS | DAYS) "minutes">-->
 
 <!--
 The Organization element is an optional element which allows a a deployer to

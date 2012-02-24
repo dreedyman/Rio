@@ -61,10 +61,8 @@ class AssociationHandler implements Handler {
             serviceSelectionStrategy = it.'@Strategy'
             filter = it.'@Filter'
             inject = it.'@Inject'
-            [it.get('Service-Discovery'), it.get('service-discovery')].flatten().each {
-                serviceDiscoveryTimeout = it.'@timeout'
-                serviceDiscoveryTimeUnits = it.'@units'
-            }
+            serviceDiscoveryTimeout = it.'@ServiceDiscoveryTimeout'
+            serviceDiscoveryTimeUnits = it.'@ServiceDiscoveryTimeoutUnits'
         }
 
         def sType = assoc.'@Type'
