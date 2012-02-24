@@ -52,7 +52,7 @@ public class UIDescriptorFactory {
     */
     public static UIDescriptor getJComponentDesc(String artifact, String className) throws IOException {
         if(artifact == null)
-            throw new NullPointerException("artifact is null");
+            throw new IllegalArgumentException("artifact is null");
         return (getJComponentDesc(artifact, new String[]{""}, className));
     }
 
@@ -67,7 +67,7 @@ public class UIDescriptorFactory {
      */
     public static UIDescriptor getJComponentDesc(String codebase, String jarName, String className) throws IOException {
         if(jarName == null)
-            throw new NullPointerException("jarName is null");
+            throw new IllegalArgumentException("jarName is null");
         return (getJComponentDesc(codebase, new String[]{jarName}, className));
     }
 
@@ -82,11 +82,11 @@ public class UIDescriptorFactory {
      */
     public static UIDescriptor getJComponentDesc(String codebase, String[] jars, String className) throws IOException {
         if(codebase == null)
-            throw new NullPointerException("codebase is null");
+            throw new IllegalArgumentException("codebase is null");
         if(jars == null)
-            throw new NullPointerException("jars are null");
+            throw new IllegalArgumentException("jars are null");
         if(className == null)
-            throw new NullPointerException("className is null");
+            throw new IllegalArgumentException("className is null");
         return getUIDescriptor(MainUI.ROLE, JComponentFactory.TYPE_NAME, codebase, jars, className);
     }
 
@@ -105,11 +105,11 @@ public class UIDescriptorFactory {
                                              String className)
         throws IOException {
         if(codebase == null)
-            throw new NullPointerException("codebase is null");
+            throw new IllegalArgumentException("codebase is null");
         if(jarName == null)
-            throw new NullPointerException("jarName is null");
+            throw new IllegalArgumentException("jarName is null");
         if(className == null)
-            throw new NullPointerException("className is null");
+            throw new IllegalArgumentException("className is null");
         return getUIDescriptor(MainUI.ROLE, JFrameFactory.TYPE_NAME, codebase, new String[]{jarName}, className);
     }
 
@@ -125,11 +125,11 @@ public class UIDescriptorFactory {
     public static UIDescriptor getJFrameDesc(String codebase, String[] jars, String className)
     throws IOException {
         if(codebase==null)
-            throw new NullPointerException("codebase is null");
+            throw new IllegalArgumentException("codebase is null");
         if(jars==null)
-            throw new NullPointerException("jars are null");
+            throw new IllegalArgumentException("jars are null");
         if(className==null)
-            throw new NullPointerException("className is null");
+            throw new IllegalArgumentException("className is null");
         return getUIDescriptor(MainUI.ROLE, JFrameFactory.TYPE_NAME, codebase, jars, className);
     }
     
@@ -151,15 +151,15 @@ public class UIDescriptorFactory {
                                                String[] jars,
                                                String className) throws IOException {
         if(role == null)
-            throw new NullPointerException("role is null");
+            throw new IllegalArgumentException("role is null");
         if(typeName == null)
-            throw new NullPointerException("typeName is null");
+            throw new IllegalArgumentException("typeName is null");
         if(codebase == null)
-            throw new NullPointerException("codebase is null");
+            throw new IllegalArgumentException("codebase is null");
         if(jars == null)
-            throw new NullPointerException("jars are null");
+            throw new IllegalArgumentException("jars are null");
         if(className == null)
-            throw new NullPointerException("className is null");
+            throw new IllegalArgumentException("className is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         UIFactoryTypes types  ;
@@ -209,9 +209,9 @@ public class UIDescriptorFactory {
      */
     public static UIDescriptor getUIDescriptor(String role, JComponentFactory factory) throws IOException {
         if(role==null)
-            throw new NullPointerException("role is null");
+            throw new IllegalArgumentException("role is null");
         if(factory==null)
-            throw new NullPointerException("factory is null");
+            throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JComponentFactory.TOOLKIT;
@@ -232,9 +232,9 @@ public class UIDescriptorFactory {
      */
     public static UIDescriptor getUIDescriptor(String role, JDialogFactory factory) throws IOException {
         if(role==null)
-            throw new NullPointerException("role is null");
+            throw new IllegalArgumentException("role is null");
         if(factory==null)
-            throw new NullPointerException("factory is null");
+            throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JDialogFactory.TOOLKIT;
@@ -254,9 +254,9 @@ public class UIDescriptorFactory {
      */
     public static UIDescriptor getUIDescriptor(String role, JFrameFactory factory) throws IOException {
         if(role==null)
-            throw new NullPointerException("role is null");
+            throw new IllegalArgumentException("role is null");
         if(factory==null)
-            throw new NullPointerException("factory is null");
+            throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JFrameFactory.TOOLKIT;
@@ -267,9 +267,9 @@ public class UIDescriptorFactory {
 
     public static UIDescriptor getUIDescriptor(String role, JWindowFactory factory) throws IOException {
         if(role==null)
-            throw new NullPointerException("role is null");
+            throw new IllegalArgumentException("role is null");
         if(factory==null)
-            throw new NullPointerException("factory is null");
+            throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JWindowFactory.TOOLKIT;
