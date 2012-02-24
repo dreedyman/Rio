@@ -35,7 +35,7 @@ deployment(name:'Muves', debug:true) {
 
         management proxy: "net.gomez.provider.space.SpaceProxy",
                    strategy: 'org.rioproject.associations.strategy.Utilization',
-                   serviceDiscoveryTimeout: 1, units: 'seconds'
+                   serviceDiscoveryTimeout: 1, serviceDiscoveryTimeoutUnits: 'seconds'
     }
 
     /*
