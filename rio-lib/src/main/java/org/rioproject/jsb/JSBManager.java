@@ -132,7 +132,7 @@ public class JSBManager implements ServiceBeanManager {
      */
     public void setServiceID(Uuid serviceID) {
         if(serviceID==null)
-            throw new NullPointerException("serviceID is null");
+            throw new IllegalArgumentException("serviceID is null");
         this.serviceID = serviceID;
     }
 
@@ -303,7 +303,7 @@ public class JSBManager implements ServiceBeanManager {
      */
     public void addListener(ServiceElementChangeListener l) {
         if(l == null) {
-            throw new NullPointerException("can't add null listener");
+            throw new IllegalArgumentException("can't add null listener");
         }
         synchronized(listenerList) {
             listenerList.add(l);
