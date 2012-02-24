@@ -669,8 +669,9 @@ public class DownloadManager {
                     e.printStackTrace();
                 }
             } else {
+                ZipFile zipFile = null;
                 try {
-                    ZipFile zipFile = new ZipFile(software);
+                    zipFile = new ZipFile(software);
                     Enumeration zipEntries = zipFile.entries();
                     while(zipEntries.hasMoreElements()) {
                         ZipEntry zipEntry = (ZipEntry)zipEntries.nextElement();
@@ -679,12 +680,17 @@ public class DownloadManager {
                         FileUtils.remove(file);
                     }
                 } catch (ZipException e) {
-                    logger.log(Level.SEVERE,
-                               "Error in opening zip file " +
-                               FileUtils.getFilePath(software),
-                               e);
+                    logger.log(Level.SEVERE, "Error in opening zip file " +FileUtils.getFilePath(software), e);
                 } catch(Exception e) {
                     e.printStackTrace();
+                } finally {
+                    if(zipFile!=null) {
+                        try {
+                            zipFile.close();
+                        } catch (IOException e) {
+                            logger.log(Level.SEVERE, "Could not close zip file", e);
+                        }
+                    }
                 }
             }
             removed = FileUtils.getFilePath(software);
