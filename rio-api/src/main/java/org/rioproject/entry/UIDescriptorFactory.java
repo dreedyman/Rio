@@ -23,7 +23,6 @@ import net.jini.lookup.ui.factory.JComponentFactory;
 import net.jini.lookup.ui.factory.JDialogFactory;
 import net.jini.lookup.ui.factory.JFrameFactory;
 import net.jini.lookup.ui.factory.JWindowFactory;
-import net.jini.url.httpmd.HttpmdUtil;
 import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.serviceui.UIDialogFactory;
 import org.rioproject.serviceui.UIFrameFactory;
@@ -32,7 +31,6 @@ import org.rioproject.serviceui.UIWindowFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 
 /**
