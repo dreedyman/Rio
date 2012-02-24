@@ -91,7 +91,7 @@ public class ServiceBeanActivation {
      * @return A ServiceBeanContext. A new ServiceBeanContext is created each time
      *
      * @throws Exception If a ServiceBeanContext cannot be created
-     * @throws NullPointerException If any of the arguments are null.
+     * @throws IllegalArgumentException If any of the arguments are null.
      */
     public static ServiceBeanContext getServiceBeanContext(String configComponent,
                                                            String defaultServiceName,
@@ -99,13 +99,13 @@ public class ServiceBeanActivation {
                                                            ClassLoader loader)
     throws Exception {
         if(configComponent == null)
-            throw new NullPointerException("configComponent is null");
+            throw new IllegalArgumentException("configComponent is null");
         if(defaultServiceName == null)
-            throw new NullPointerException("defaultServiceName is null");
+            throw new IllegalArgumentException("defaultServiceName is null");
         if(configArgs == null)
-            throw new NullPointerException("configArgs is null");
+            throw new IllegalArgumentException("configArgs is null");
         if(loader == null)
-            throw new NullPointerException("loader is null");
+            throw new IllegalArgumentException("loader is null");
 
         Map<String, Object> configParms = new HashMap<String, Object>();        
         Configuration config = ConfigurationProvider.getInstance(configArgs, loader);
@@ -217,18 +217,19 @@ public class ServiceBeanActivation {
      * @return  A Map of name,value pairs specifying configuration
      * attributes
      *
-     * @throws ConfigurationException if there are errors reading the configuration
+     * @throws ConfigurationException if there are errors reading the configuration 1
+     * @throws IllegalArgumentException If any of the arguments are null.
      */
     static Map<String, Object> readServiceBeanConfig(String configComponent,
                                                      String defaultServiceName,
                                                      Configuration config)
     throws ConfigurationException {
         if(configComponent == null)
-            throw new NullPointerException("configComponent is null");
+            throw new IllegalArgumentException("configComponent is null");
         if(defaultServiceName == null)
-            throw new NullPointerException("defaultServiceName is null");
+            throw new IllegalArgumentException("defaultServiceName is null");
         if(config == null)
-            throw new NullPointerException("config is null");
+            throw new IllegalArgumentException("config is null");
 
         Map<String, Object> configParms = new HashMap<String, Object>();
 
@@ -287,10 +288,11 @@ public class ServiceBeanActivation {
      *
      * @throws IOException If the multicast check is performed and it fails
      * @throws ConfigurationException if there are problems reading the configuration
+     * @throws IllegalArgumentException If the config argument is null.
      */
     static void checkUtilityConfiguration(Configuration config) throws IOException, ConfigurationException {
         if(config == null)
-            throw new NullPointerException("configArgs are null");
+            throw new IllegalArgumentException("configArgs are null");
 
         Boolean multiCheck = (Boolean)config.getEntry(BOOT_COMPONENT, "verifyMulticast", Boolean.class, false);
         if(logger.isLoggable(Level.CONFIG))
@@ -340,9 +342,9 @@ public class ServiceBeanActivation {
         public void register(Object sbProxy, ServiceBeanContext context) throws ServiceBeanControlException {
             try {
                 if(sbProxy == null)
-                    throw new NullPointerException("sbProxy is null");
+                    throw new IllegalArgumentException("sbProxy is null");
                 if(context == null)
-                    throw new NullPointerException("context is null");
+                    throw new IllegalArgumentException("context is null");
                 ServiceAdvertiser.advertise(sbProxy, context);
 
                 try {
