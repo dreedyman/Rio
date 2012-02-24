@@ -74,11 +74,11 @@ public class ServiceBeanSLAManager {
                                  EventHandler slaEventHandler)
         throws IntrospectionException {
         if(impl == null)
-            throw new NullPointerException("impl is null");
+            throw new IllegalArgumentException("impl is null");
         if(proxy == null)
-            throw new NullPointerException("proxy is null");
+            throw new IllegalArgumentException("proxy is null");
         if(context == null)
-            throw new NullPointerException("context is null");
+            throw new IllegalArgumentException("context is null");
         this.impl = impl;
         this.proxy = proxy;
         this.context = context;
