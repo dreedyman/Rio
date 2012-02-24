@@ -42,7 +42,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -239,11 +238,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             public void actionPerformed(ActionEvent ae) {
                 try {
                     ServiceBeanInstance instance =
-                        (ServiceBeanInstance)
-                                instanceTable.getModel().
-                                              getValueAt(
-                                                     instanceTable.getSelectedRow(),
-                                                     1);
+                        (ServiceBeanInstance)instanceTable.getModel().getValueAt(instanceTable.getSelectedRow(), 1);
                     opMgr.relocate(instance, null, null);
                 } catch (Exception e) {
                     Util.showError(e, parent, "Unable to relocate");
@@ -739,17 +734,10 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             setControls(false);
             tableModel.insertRow(0, new Object[] {"Not Available", NO_VALUE, "", ""});
         } else {
-            try {
-                OperationalString opString  = opMgr.getOperationalString();
-                if(opString.getStatus()==OperationalString.SCHEDULED) {
-                    increaseService.setEnabled(false);
-                    serviceElementRedeploy.setEnabled(false);
-                    setControls(false);
-                } else {
-                    increaseService.setEnabled(true);
-                    serviceElementRedeploy.setEnabled(true);
-                    setControls(false);
-                }
+            try {                
+                increaseService.setEnabled(true);
+                serviceElementRedeploy.setEnabled(true);
+                setControls(false);                
                 ClassBundle bundle = sElem.getComponentBundle();
                 if(bundle!=null)
                     addTableData(tableModel, bundle.getJARs());
@@ -831,15 +819,8 @@ public class ServiceElementPanel extends javax.swing.JPanel {
         public void actionPerformed(ActionEvent ae) {
             JDialog dialog = new JDialog((JFrame)null, "Redeploy Options", true);
             RedeployPanel redeployPanel;
-            try {
-                Date[] dates = opMgr.getDeploymentDates();
-                Date lastDeployed = dates[dates.length-1];
-                long duration =
-                    opMgr.getOperationalString().getSchedule().getDuration();
-                redeployPanel =
-                    new RedeployPanel(dialog, (duration==-1?
-                                                    duration:
-                                                    (lastDeployed.getTime()+duration)));
+            try {                                
+                redeployPanel = new RedeployPanel(dialog, -1);
             } catch (Exception e) {
                 Util.showError(e, null,
                                "Problem getting schedule duration from OpStringManager");
@@ -854,9 +835,9 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             int widthLoc = screenSize.width / 2 - width / 2;
             int heightLoc = screenSize.height / 2 - height / 2;
-            dialog.setLocation(widthLoc, heightLoc);
+            dialog.setLocationRelativeTo(parent);
             dialog.setVisible(true);
-            redeployPanel.stopTimer();
+
             if(redeployPanel.getOption()==RedeployPanel.DISMISS_OPTION)
                 return;
             try {
@@ -942,20 +923,17 @@ public class ServiceElementPanel extends javax.swing.JPanel {
      * Add row to a table which lists JARs
      */
     void addTableData(DefaultTableModel tableModel, URL[] jars) {
-        String jarName = "";
+        String jarName;
         String codebase;
         for(int i=0; i<jars.length; i++) {
             String url = jars[i].toExternalForm();
             int index = url.lastIndexOf('/');
             if(url.startsWith("http:")) {
                 jarName = url.substring(index+1);
-            }
-            if(url.startsWith("httpmd")) {
-                int semi = url.indexOf(";");
-                jarName = url.substring(index+1, semi);
-            }
-            if(url.startsWith("file:")) {
+            } else if(url.startsWith("file:")) {
                 jarName = url.substring(index+1);
+            } else {
+                jarName = url;
             }
             codebase = url.substring(0, index);
             tableModel.insertRow(i, new Object[] {jarName, codebase});

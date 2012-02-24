@@ -15,9 +15,6 @@
  */
 package org.rioproject.tools.ui.serviceui;
 
-import org.rioproject.opstring.Schedule;
-import org.rioproject.util.TimeUtil;
-
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -41,48 +38,10 @@ public class RedeployPanel extends JPanel {
     private static long DAY = HOUR*24;
     private int option;
     long calculatedRemaining;
-    private Timer timer;
 
-    public static void main(String[] args) {
-        JDialog dialog = new JDialog((JFrame)null, "Redeploy Options", true);
-        RedeployPanel redeployPanel = new RedeployPanel(dialog, 10000);
-        dialog.getContentPane().add(redeployPanel);
-        int width = 302;
-        int height = 300;
-        dialog.pack();
-        dialog.setSize(width, height);
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int widthLoc = screenSize.width / 2 - width / 2;
-        int heightLoc = screenSize.height / 2 - height / 2;
-        dialog.setLocation(widthLoc, heightLoc);
-        dialog.setVisible(true);
-        redeployPanel.stopTimer();
-        System.exit(0);
-    }
-
-    /* Creates new form JPanel */
     public RedeployPanel(final JDialog dialog, final long remaining) {
         initComponents();
         calculatedRemaining = remaining;
-        if(remaining!= Schedule.INDEFINITE) {
-            /* Create a 1-second timer and action listener for it. */
-            timer = new Timer(1000,
-                                          new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    nextDeploymentTime.setText(TimeUtil.format(calculatedRemaining));
-                    if(calculatedRemaining==0) {
-                        timer.stop();
-                        redeployButton.setEnabled(false);
-                        enableScheduling(false);
-                    } else {
-                        calculatedRemaining -= 1000;
-                    }
-                }
-            });
-            timer.start();
-        } else {
-            nextDeploymentTime.setText("Undefined");
-        }
 
         redeploymentScheduling.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
@@ -95,24 +54,7 @@ public class RedeployPanel extends JPanel {
                 }
             });
         redeployButton.addActionListener(new ActionListener() {
-                 public void actionPerformed(ActionEvent ae) {
-                     long delay = getDelay();
-                     if(calculatedRemaining!=Schedule.INDEFINITE &&
-                         delay>calculatedRemaining) {
-                         JOptionPane.showMessageDialog(dialog,
-                                                       "<html>"+
-                                                       "The Redeployment Delay "+
-                                                       "<font color=blue>["+
-                                                       TimeUtil.format(delay)+"]"+
-                                                       "</font><br>"+
-                                                       "you have requested is "+
-                                                       "greater then the<br>"+
-                                                       "deployment time remaining"+
-                                                       "</html>",
-                                                       "Redeployment Delay Error",
-                                                       JOptionPane.ERROR_MESSAGE);
-                         return;
-                     }
+                 public void actionPerformed(ActionEvent ae) {                     
                      option = REDEPLOY_OPTION;
                      dialog.dispose();
                  }
@@ -147,11 +89,6 @@ public class RedeployPanel extends JPanel {
         return(option);
     }
 
-    public void stopTimer() {
-        if(timer!=null)
-            timer.stop();
-    }
-
     public boolean getClean() {
         return(redeployClean.isSelected());
     }
@@ -177,6 +114,7 @@ public class RedeployPanel extends JPanel {
         try {
             lv = i.longValue();
         } catch(NumberFormatException e) {
+            e.printStackTrace();
         }
         return(lv);
     }
@@ -204,8 +142,6 @@ public class RedeployPanel extends JPanel {
         JLabel jLabel4 = new JLabel();
         seconds = new JSpinner();
         immediateRedeployment = new JRadioButton();
-        JLabel nextDeploymentLabel = new JLabel();
-        nextDeploymentTime = new JTextField();
         JPanel jPanel3 = new JPanel();
         redeployButton = new JButton();
         dismissButton = new JButton();
@@ -290,23 +226,6 @@ public class RedeployPanel extends JPanel {
         gridBagConstraints.insets = new Insets(4, 4, 4, 4);
         jPanel2.add(immediateRedeployment, gridBagConstraints);
 
-        nextDeploymentLabel.setText("Deployment time remaining");
-        gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new Insets(4, 4, 4, 4);
-        gridBagConstraints.anchor = GridBagConstraints.WEST;
-        jPanel2.add(nextDeploymentLabel, gridBagConstraints);
-
-        nextDeploymentTime.setEditable(false);
-        gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new Insets(4, 4, 4, 4);
-        gridBagConstraints.anchor = GridBagConstraints.WEST;
-        jPanel2.add(nextDeploymentTime, gridBagConstraints);
-
         add(jPanel2, BorderLayout.CENTER);
 
         jPanel3.setBorder(new EmptyBorder(new Insets(4, 4, 4, 4)));
@@ -329,7 +248,6 @@ public class RedeployPanel extends JPanel {
     private JCheckBox redeployClean;
     //private JCheckBox redeploySticky;
     private JSpinner minutes;
-    private JTextField nextDeploymentTime;
     private JButton redeployButton;
     private JRadioButton redeploymentScheduling;
     private JSpinner seconds;
