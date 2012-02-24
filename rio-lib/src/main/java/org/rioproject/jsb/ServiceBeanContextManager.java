@@ -155,7 +155,7 @@ public class ServiceBeanContextManager {
         // Inherit doc comment from super interface
         public void snapshot(OutputStream out) throws Exception {
             if(discoMgmt == null)
-                throw new NullPointerException("DiscoveryManagement cannot be null");
+                throw new IllegalArgumentException("DiscoveryManagement cannot be null");
             ObjectOutputStream oostream = new ObjectOutputStream(out);
             oostream.writeUTF(logDirName);
             oostream.writeObject(context);
