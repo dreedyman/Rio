@@ -15,11 +15,6 @@
  */
 package org.rioproject.system;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.util.Vector;
-
 /**
  * Utilities to help determine operating system type
  *
@@ -132,36 +127,4 @@ public class OperatingSystemType {
         return (opSys.startsWith(WINDOWS_XP));
     }
 
-
-    /**
-     * Gets a string representing the pid of this program - Java VM
-     *
-     * @return A String that corresponds to the process ID (PID) of the JVM.
-     * This method will create a shell using /bin/bash and obtain the $PPID
-     * environment variable. If the operating system type is Windows, an
-     * empty string is returned
-     *
-     * @throws IOException If the shell cannot be created
-     * @throws InterruptedException If the process wait is interrupted
-     */
-    public static String getPid() throws IOException,InterruptedException {
-        if(isWindows())
-            return "";
-        
-        Vector<String> commands=new Vector<String>();
-        commands.add("/bin/bash");
-        commands.add("-c");
-        commands.add("echo $PPID");
-        ProcessBuilder pb=new ProcessBuilder(commands);
-
-        Process pr=pb.start();
-        pr.waitFor();
-        if (pr.exitValue()==0) {
-            BufferedReader outReader=new BufferedReader(new InputStreamReader(pr.getInputStream()));
-            return outReader.readLine().trim();
-        } else {
-            System.out.println("Error while getting PID");
-            return "";
-        }
-    }
 }
