@@ -136,8 +136,7 @@ public class ProvisionFailureEventTreeModel extends AbstractTreeTableModel {
         }
     }
 
-    private void addItem(DefaultMutableTreeNode node,
-                         DefaultMutableTreeNode parent) {
+    private void addItem(DefaultMutableTreeNode node, DefaultMutableTreeNode parent) {
         insertNodeInto(node, parent, parent.getChildCount());
         treeTable.getTree().makeVisible(new TreePath(node.getPath()));
     }

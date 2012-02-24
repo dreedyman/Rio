@@ -23,8 +23,7 @@ import java.util.Date;
 /**
  * Container that holds information about a remote event
  */
-public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent>
-    extends DefaultMutableTreeNode {
+public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent> extends DefaultMutableTreeNode {
     private T event;
 
     public RemoteServiceEventNode(T event) {

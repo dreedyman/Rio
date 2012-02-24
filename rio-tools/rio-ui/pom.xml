@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
@@ -15,25 +15,25 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.rioproject</groupId>
             <artifactId>rio-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}.cybernode</groupId>
+            <groupId>org.rioproject.cybernode</groupId>
             <artifactId>cybernode-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}.monitor</groupId>
+            <groupId>org.rioproject.monitor</groupId>
             <artifactId>monitor-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
 		<dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.rioproject</groupId>
             <artifactId>webster</artifactId>
             <version>${project.version}</version>
         </dependency>

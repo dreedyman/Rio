@@ -99,9 +99,7 @@ public class CybernodeUtilizationPanel extends JPanel {
         s = props.getProperty(Constants.TREE_TABLE_AUTO_SORT);
         autoSort = (s != null && Boolean.parseBoolean(s));
 
-        String columnToSort =
-            props.getProperty(Constants.TREE_TABLE_SORTED_COLUMN_NAME,
-                              "Utilization");
+        String columnToSort = props.getProperty(Constants.TREE_TABLE_SORTED_COLUMN_NAME, "Utilization");
 
         utilizationModel = new UtilizationTreeModel(root);
         utilizationModel.tableComparator.columnName = columnToSort;
@@ -213,8 +211,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                     int ndx = treeTable.columnAtPoint(new Point(e.getX(),
                                                                 e.getY()));
                     String columnName = utilizationModel.getColumnName(ndx);
-                    utilizationModel.tableComparator.setColumnToSort(
-                        columnName);
+                    utilizationModel.tableComparator.setColumnToSort(columnName);
                     utilizationModel.sortTable();
                     e.getComponent().repaint();                    
                 }
@@ -224,12 +221,8 @@ public class CybernodeUtilizationPanel extends JPanel {
         /* Scale the up & down arrows from their original size of
          * 15 X 8 to 10 x 5, they look better as directional arrows
          * in the table header */
-        arrowUpIcon =
-            Util.getScaledImageIcon("org/rioproject/tools/ui/images/arrow-up.png",
-                                    10, 5);
-        arrowDownIcon =
-            Util.getScaledImageIcon("org/rioproject/tools/ui/images/arrow-dn.png",
-                                    10, 5);
+        arrowUpIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/arrow-up.png", 10, 5);
+        arrowDownIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/arrow-dn.png", 10, 5);
 
         /* Renders sorting direction arrows */
         iconHeaderRenderer = new TCR();
@@ -244,16 +237,13 @@ public class CybernodeUtilizationPanel extends JPanel {
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
         toolBar.setBorderPainted(false);
-        ImageIcon collapseIcon =
-            Util.getImageIcon("org/rioproject/tools/ui/images/collapseall.gif");
-        ImageIcon expandIcon =
-            Util.getImageIcon("org/rioproject/tools/ui/images/expandall.gif");
+        ImageIcon collapseIcon = Util.getImageIcon("org/rioproject/tools/ui/images/collapseall.gif");
+        ImageIcon expandIcon = Util.getImageIcon("org/rioproject/tools/ui/images/expandall.gif");
         ImageIcon refreshIcon = null;
         if(expandIcon!=null) {
-            refreshIcon =
-                Util.getScaledImageIcon("org/rioproject/tools/ui/images/view-refresh.png",
-                                        expandIcon.getIconWidth(),
-                                        expandIcon.getIconHeight());
+            refreshIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/view-refresh.png",
+                                                  expandIcon.getIconWidth(),
+                                                  expandIcon.getIconHeight());
         }
         JButton collapse = new JButton();
         collapse.setIcon(collapseIcon);
@@ -405,8 +395,7 @@ public class CybernodeUtilizationPanel extends JPanel {
             if (selectedRows != null) {
                 for (int selectedRow : selectedRows) {
                     if (row == selectedRow) {
-                        component.setForeground(UIManager.getColor(
-                            "Table.focusCellForeground"));
+                        component.setForeground(UIManager.getColor("Table.focusCellForeground"));
                         return component;
                     }
                 }
@@ -612,7 +601,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                 }
                 if(selectionPath!=null) {
                     treeTable.getTree().setSelectionPath(selectionPath);
-                }
+            }
             }
         });
     }
@@ -904,8 +893,7 @@ public class CybernodeUtilizationPanel extends JPanel {
             CybernodeNode node = getCybernodeCRU(row);
             TreePath selectionPath = treeTable.getTree().getSelectionPath();
             if (node != null) {
-                node.setComputeResourceUtilization(
-                    ((CybernodeNode)item).getComputeResourceUtilization());
+                node.setComputeResourceUtilization(((CybernodeNode)item).getComputeResourceUtilization());
                 setServices(node);
                 nodeChanged(node);
             }
@@ -997,8 +985,7 @@ public class CybernodeUtilizationPanel extends JPanel {
         void setServiceNodeUtilization(ServiceNode sNode, CybernodeAdmin cAdmin) {
             if(sNode.isForked()) {
                 try {
-                    ComputeResourceUtilization util =
-                        cAdmin.getComputeResourceUtilization(sNode.getUuid());
+                    ComputeResourceUtilization util = cAdmin.getComputeResourceUtilization(sNode.getUuid());
                     sNode.setComputeResourceUtilization(util);
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -1020,8 +1007,7 @@ public class CybernodeUtilizationPanel extends JPanel {
             this.columnName = columnName;
         }
 
-        public int compare(CybernodeNode item1,
-                           CybernodeNode item2) {
+        public int compare(CybernodeNode item1, CybernodeNode item2) {
             int order;
             ComputeResourceUtilization cru1 = item1.getComputeResourceUtilization();
             ComputeResourceUtilization cru2 = item2.getComputeResourceUtilization();

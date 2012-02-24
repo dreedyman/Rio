@@ -38,9 +38,7 @@ public class CybernodeNode extends DefaultMutableTreeNode
     String hostName;
     CybernodeAdmin admin;
 
-    public CybernodeNode(ServiceItem item,
-                        CybernodeAdmin admin,
-                        ComputeResourceUtilization cru) {
+    public CybernodeNode(ServiceItem item, CybernodeAdmin admin, ComputeResourceUtilization cru) {
         super(item);
         this.item = item;
         this.cybernode = (Cybernode) item.service;
