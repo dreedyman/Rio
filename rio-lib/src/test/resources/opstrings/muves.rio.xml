@@ -35,8 +35,7 @@
         <Association Type="opposed" Interface="net.jini.space.JavaSpace05"
                      Name="Task Space" Property="taskSpace">
             <Management Proxy="net.gomez.provider.space.SpaceProxy"
-                        Strategy="org.rioproject.associations.strategy.Utilization"
-                        ProxyType="cglib"/>
+                        Strategy="org.rioproject.associations.strategy.Utilization"/>
         </Association>
 
         <!--
@@ -49,8 +48,7 @@
         <Association Type="opposed" Interface="net.jini.space.JavaSpace05"
                      Name="Result Space">
             <Management Proxy="net.gomez.provider.space.SpaceProxy"
-                        Strategy="org.rioproject.associations.strategy.Utilization"
-                        ProxyType="cglib"/>
+                        Strategy="org.rioproject.associations.strategy.Utilization"/>
         </Association>
 
         <Logging>
