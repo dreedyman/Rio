@@ -35,24 +35,22 @@ import java.util.Vector;
  * @author Dennis Reedy
  */
 public class PlatformCapabilityUI extends JPanel implements Runnable {
-    /** The Cybernode instance */
-    Cybernode cybernode;
     /** The CybernodeAdmin instance */
-    CybernodeAdmin cybernodeAdmin;
+    private CybernodeAdmin cybernodeAdmin;
     /** JTable for PlatformCapability display */
-    JTable capabilityTable;
+    private JTable capabilityTable;
     /** The model for the table */
-    PlatformCapabilityModel dataModel;
+    private PlatformCapabilityModel dataModel;
     /** Checkbox for persistent provisioning support */
-    JCheckBox supportsProvisioning;
+    private JCheckBox supportsProvisioning;
 
     public PlatformCapabilityUI(final Object arg) {
         super();
         getAccessibleContext().setAccessibleName("Platform Capabilities");
         ServiceItem item = (ServiceItem)arg;
-        cybernode = (Cybernode)item.service;
+        Cybernode cybernode = (Cybernode) item.service;
         try {
-            cybernodeAdmin = (CybernodeAdmin)cybernode.getAdmin();
+            cybernodeAdmin = (CybernodeAdmin) cybernode.getAdmin();
         } catch (Exception e) {
             showError(e);
         }
@@ -138,10 +136,8 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
 
     public void run() {
         try {
-            supportsProvisioning.setSelected(
-                                     cybernodeAdmin.getPersistentProvisioning());
-            PlatformCapability[] pCaps =
-                                     cybernodeAdmin.getPlatformCapabilties();
+            supportsProvisioning.setSelected(cybernodeAdmin.getPersistentProvisioning());
+            PlatformCapability[] pCaps = cybernodeAdmin.getPlatformCapabilties();
             for (PlatformCapability pCap : pCaps)
                 addPlatformCapability(pCap);
         } catch(Exception e) {
@@ -169,7 +165,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
     }
 
     class PlatformCapabilityModel extends AbstractTableModel {
-        Vector tableData = new Vector();
+        private Vector tableData = new Vector();
 
         final String[] columnNames = {"Name", "Description", "Class", "Package"};
 
@@ -259,8 +255,8 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
         }        
     }
 
-    void showError(Exception e) {
-        StringBuffer buffer = new StringBuffer();
+    private void showError(Exception e) {
+        StringBuilder buffer = new StringBuilder();
         StackTraceElement[] trace = e.getStackTrace();
         for (StackTraceElement aTrace : trace)
             buffer.append("at ").append(aTrace).append("<br>");
@@ -269,14 +265,14 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
                   buffer.toString()+"</html>");
     }
 
-    void showError(String text) {
+    private void showError(String text) {
         JOptionPane.showMessageDialog(this, 
                                       text, 
                                       "System Error", 
                                       JOptionPane.ERROR_MESSAGE);
     }
 
-    void showDetails(PlatformCapability pCap) {
+    private void showDetails(PlatformCapability pCap) {
         PlatformCapabilityDetails details = new PlatformCapabilityDetails(pCap);
         if(details.changed) {
             Thread thread = new Thread(this);
@@ -289,17 +285,17 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
      * Shows the details of a PlatformCapability object
      */
     class PlatformCapabilityDetails extends JDialog {
-        final PlatformCapability pCap;
-        JPanel base;
-        JDialog instance;
-        PropertiesTable propsTable;
-        boolean changed=false;
-        JButton apply;
+        //private final PlatformCapability pCap;
+        private JPanel base;
+        //private JDialog instance;
+        private PropertiesTable propsTable;
+        private boolean changed=false;
+        private JButton apply;
 
         PlatformCapabilityDetails(final PlatformCapability pCap) {
             super((JFrame)null, "Platform PlatformCapabilityConfig Details", true);
-            this.pCap = pCap;
-            instance = this;
+            //this.pCap = pCap;
+            //instance = this;
             base = new JPanel();
             base.setLayout(new BorderLayout(2, 4));
             base.setBorder(BorderFactory.createCompoundBorder(
@@ -347,13 +343,12 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
              * and org.rioproject.system.capability.system.StorageCapability.Capacity
              * are formatted for kbytes display             
              */
-            String storageClass = 
-                "org.rioproject.system.capability.system.StorageCapability";
+            String storageClass = "org.rioproject.system.capability.system.StorageCapability";
             if(pCap.getClass().getName().equals(storageClass)) {
-                Double dVal = (Double)props.get((Object)"Available");
+                Double dVal = (Double)props.get("Available");
                 if(dVal!=null) 
                     props.put("Available", formatStorageCapabilityValue(dVal));                
-                dVal = (Double)props.get((Object)"Capacity");
+                dVal = (Double)props.get("Capacity");
                 if(dVal!=null)
                     props.put("Capacity", formatStorageCapabilityValue(dVal));
             }
@@ -437,9 +432,9 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
      * Add a Key and Value
      */
     class KeyValueDialog extends JDialog {
-        JPanel base;
-        JTextField key;
-        JTextField value;
+        private JPanel base;
+        private JTextField key;
+        private JTextField value;
 
         /*
          * Create a KeyValueDialog instance

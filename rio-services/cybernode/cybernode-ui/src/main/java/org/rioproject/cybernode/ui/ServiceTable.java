@@ -30,8 +30,8 @@ import java.util.Vector;
  * @author Dennis Reedy
  */
 public class ServiceTable extends JPanel {
-    JTable serviceTable;
-    ServiceTableModel dataModel;
+    private JTable serviceTable;
+    private ServiceTableModel dataModel;
 
     public ServiceTable(String title, boolean showPid) {
         super();
@@ -69,9 +69,9 @@ public class ServiceTable extends JPanel {
     }
 
     class ServiceTableModel extends AbstractTableModel {
-        Vector tableData = new Vector();
-        boolean showPid;
-        String[] columnNames = {"Name", "Implementation Class", "Time Active"};
+        private Vector tableData = new Vector();
+        private boolean showPid;
+        private String[] columnNames = {"Name", "Implementation Class", "Time Active"};
 
         public ServiceTableModel(boolean showPid) {
             super();

@@ -30,8 +30,8 @@ import java.util.Vector;
  * @author Dennis Reedy
  */
 public class PropertiesTable extends JPanel {
-    JTable propertiesTable;
-    PropertiesTableModel propertiesTableModel;
+    private JTable propertiesTable;
+    private PropertiesTableModel propertiesTableModel;
 
     /**
      * Create a PropertiesTable
@@ -177,9 +177,9 @@ public class PropertiesTable extends JPanel {
      * The PropertiesTableModel provides the model for the table
      */
     class PropertiesTableModel extends AbstractTableModel {
-        Vector keys = new Vector();
-        Vector values = new Vector();
-        final String[] columnNames = {"Key", "Value"};
+        private Vector keys = new Vector();
+        private Vector values = new Vector();
+        private final String[] columnNames = {"Key", "Value"};
 
         public PropertiesTableModel() {
             super();
