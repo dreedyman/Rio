@@ -50,12 +50,6 @@ public class ClassBundle implements Serializable {
      * An artifact ID
      */
     private String artifact;
-
-    /**
-     * Collection of shared components. 
-     */
-    private final Map<String, String[]> sharedComponents =
-        Collections.synchronizedMap(new HashMap<String, String[]>());
     /**
      * A table of method names to Class[] objects
      */
@@ -86,23 +80,15 @@ public class ClassBundle implements Serializable {
      * @param className The className
      * @param jarNames Array of Strings identifying resource names used to load
      * the className
-     * @param shComponents Map of class names and jar names to load the class
-     * from. A shared component will be loaded by the common loader for all
-     * services making it (and the resources it uses) available to all services
      * @param codebase The URL path used to load the class. The path will be
      * applied to all JARs in this ClassBundle
      */
-    public ClassBundle(String className,
-                       String[] jarNames,
-                       Map<String, String[]> shComponents,
-                       String codebase) {
+    public ClassBundle(String className, String[] jarNames, String codebase) {
         if(className == null)
             throw new IllegalArgumentException("className cannot be null");
         this.className = className;
         if(jarNames!=null)
             addJARs(jarNames);
-        if(shComponents!=null)
-            addSharedComponents(shComponents);
         this.codebase = codebase;
     }
 
@@ -212,17 +198,6 @@ public class ClassBundle implements Serializable {
     }
 
     /**
-     * Add a Map of shared components
-     * 
-     * @param m Map of shared components to add
-     */
-    public void addSharedComponents(Map<String, String[]> m) {
-        if(m == null)
-            return;
-        sharedComponents.putAll(m);
-    }
-
-    /**
      * Get the JAR names.
      *
      * @return A String array of the JAR names. This method will return a new
@@ -245,27 +220,6 @@ public class ClassBundle implements Serializable {
      */
     public URL[] getJARs() throws MalformedURLException {
         return (urlsFromJARs(getJARNames()));
-    }
-
-    /**
-     * Get shared component information
-     *
-     * @return A Map of the shared component information, transforming
-     * configured string urls to URLs. This method will return a new Map
-     * each time. If there are no shared components, this method will return
-     * an empty Map
-     *
-     * @throws MalformedURLException If URLs cannot be created
-     */
-    public Map<String, URL[]> getSharedComponents() throws MalformedURLException {
-        Map<String, URL[]> map = new HashMap<String, URL[]>();
-        for(Map.Entry<String, String[]> entry : sharedComponents.entrySet()) {
-            String className = entry.getKey();
-            String[] jarNames = entry.getValue();
-            URL[] urls = urlsFromJARs(jarNames);
-            map.put(className, urls);
-        }
-        return map;
     }
 
     /**
@@ -473,7 +427,6 @@ public class ClassBundle implements Serializable {
         for(ClassBundle bundle : bundles) {
             cb.setArtifact(bundle.getArtifact());
             cb.addJARs(bundle.getJARNames());
-            cb.addSharedComponents(bundle.sharedComponents);
             cb.setCodebase(bundle.getCodebase());
             cb.setClassName(bundle.getClassName());
             cb.methodObjectTable.putAll(bundle.methodObjectTable);
