@@ -78,11 +78,6 @@
             <artifactId>groovy-all</artifactId>
         </dependency>
 
-      <!--  <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-        </dependency>
--->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

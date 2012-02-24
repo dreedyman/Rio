@@ -15,11 +15,6 @@
  */
 package org.rioproject.associations;
 
-/*
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Dispatcher;
-*/
 
 import java.lang.reflect.InvocationHandler;
 
@@ -35,7 +30,7 @@ public interface AssociationProxy<T> extends AssociationListener<T> {
      *
      * @return The Association
      */
-    Association getAssociation();
+    Association<T> getAssociation();
     
     /**
      * Create an InvocationHandler
@@ -45,44 +40,6 @@ public interface AssociationProxy<T> extends AssociationListener<T> {
      * @return An InvocationHandler for use with a dynamic JDK proxy.
      */
     InvocationHandler getInvocationHandler(final Association<T> association);
-
-    /**
-     * Create an array of {@link net.sf.cglib.proxy.Callback}
-     *
-     * @param association The Association to use
-     *
-     * @return An array of {@link net.sf.cglib.proxy.Callback} for use with a
-     * generated CGLIB proxy.
-     */
-    //Callback[] getCallbacks(final Association<T> association);
-
-    /**
-     * Create a {@link net.sf.cglib.proxy.CallbackFilter}
-     *
-     * @param association The Association to use
-     *
-     * @return An array of {@link net.sf.cglib.proxy.CallbackFilter} for use
-     * with a generated CGLIB proxy.
-     */
-    //CallbackFilter getCallbackFilter(Association<T> association);
-
-    /**
-     * Create a {@link net.sf.cglib.proxy.Dispatcher}
-     *
-     * @param association The Association to use
-     *
-     * @return A {@link net.sf.cglib.proxy.Dispatcher} for use with a generated
-     * CGLIB proxy.
-     */
-    //Dispatcher getDispatcher(final Association<T> association);
-
-    /**
-     * Get the super-class when creating a concrete CGLIB proxy
-     *
-     * @return The super class to use when creating a concrete CGLIB proxy. If
-     * interfaces are being used, return null
-     */
-    Class getSuperClass();    
 
     /**
      * Set the strategy for selecting services

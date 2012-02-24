@@ -80,7 +80,6 @@ public class AssociationDescriptor implements Serializable {
      */
     private String proxyClass;
     public static final String JDK_PROXY="jdk";
-    public static final String CGLIB_PROXY="cglib";
     /**
      * The proxy type, default is JDK proxy
      */
@@ -412,14 +411,15 @@ public class AssociationDescriptor implements Serializable {
      * Set the proxy type to create for the Association
      *
      * @param proxyType The type of proxy to generate. May be null. If not
-     * null, must be either {@link AssociationDescriptor#JDK_PROXY} or
-     * {@link AssociationDescriptor#CGLIB_PROXY}.
+     * null, must be {@link AssociationDescriptor#JDK_PROXY} .
+     *
+     * @throws IllegalArgumentException if the proxyType is not {@link AssociationDescriptor#JDK_PROXY}
      */
     public void setProxyType(String proxyType) {
         if(proxyType==null) {
             this.proxyType = null;
         } else {
-            if(proxyType.equals(JDK_PROXY) || proxyType.equals(CGLIB_PROXY)) {
+            if(proxyType.equals(JDK_PROXY)) {
                 this.proxyType = proxyType;
             } else {
                 throw new IllegalArgumentException("unknown proxy type: "+proxyType);
@@ -430,9 +430,7 @@ public class AssociationDescriptor implements Serializable {
     /**
      * Get the proxy type to create for the Association
      *
-     * @return The type of proxy to generate, either
-     * {@link AssociationDescriptor#JDK_PROXY} or
-     * {@link AssociationDescriptor#CGLIB_PROXY}
+     * @return The type of proxy to generate
      */
     public String getProxyType() {
         return proxyType;
@@ -468,12 +466,12 @@ public class AssociationDescriptor implements Serializable {
     }
 
     /**
-     * Get the {@link org.rioproject.associations.ServiceSelectionStrategy}
+     * Get the {@code org.rioproject.associations.ServiceSelectionStrategy}
      * classname to use for selecting associated services.
      *
      * @return The classname of the ServiceSelectionStrategy to create. 
      * The ServiceSelectionStrategy must have a zero-arg constructor and
-     * implement {@link org.rioproject.associations.ServiceSelectionStrategy}
+     * implement {@code org.rioproject.associations.ServiceSelectionStrategy}
      */
     public String getServiceSelectionStrategy() {
         return serviceStrategyClass;

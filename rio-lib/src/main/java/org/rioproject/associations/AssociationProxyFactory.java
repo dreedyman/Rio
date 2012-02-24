@@ -15,11 +15,6 @@
  */
 package org.rioproject.associations;
 
-/*import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Dispatcher;
-import net.sf.cglib.proxy.Enhancer;*/
-
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +48,7 @@ public class AssociationProxyFactory {
                                      String strategyClassName,
                                      Association association,
                                      ClassLoader loader)
-        throws
-        ClassNotFoundException, IllegalAccessException,InstantiationException {
+        throws ClassNotFoundException, IllegalAccessException,InstantiationException {
 
         if(proxyClassName==null)
             throw new IllegalArgumentException("proxyClassName is null");
@@ -64,64 +58,38 @@ public class AssociationProxyFactory {
             throw new IllegalArgumentException("association is null");        
         Object proxy;
 
-        final ClassLoader currentCL =
-            Thread.currentThread().getContextClassLoader();
+        final ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(loader);
 
             Class aProxyClass = loader.loadClass(proxyClassName);
             AssociationProxyType aProxyType =
-                    (AssociationProxyType) aProxyClass.getAnnotation(
-                            AssociationProxyType.class);
+                (AssociationProxyType) aProxyClass.getAnnotation(AssociationProxyType.class);
             boolean createJdkProxy;
             if(aProxyType!=null) {
-                createJdkProxy =
-                        aProxyType.type().equals(AssociationProxyType.Type.JDK);                
+                createJdkProxy = aProxyType.type().equals(AssociationProxyType.Type.JDK);
             } else {
                 createJdkProxy =
-                        association.getAssociationDescriptor()
-                                .getProxyType()
-                                .equals(AssociationDescriptor.JDK_PROXY);
+                    association.getAssociationDescriptor().getProxyType().equals(AssociationDescriptor.JDK_PROXY);
             }
             AssociationProxy aProxy = (AssociationProxy)aProxyClass.newInstance();
 
-            List<Class> list =
-                loadAssociatedInterfaces(association.getAssociationDescriptor(),
-                                         loader);
+            List<Class> list = loadAssociatedInterfaces(association.getAssociationDescriptor(), loader);
             aProxy.setProxyInterfaces(list.toArray(new Class[list.size()]));
             list.add(AssociationProxy.class);
 
             if(strategyClassName!=null) {
                 ServiceSelectionStrategy strategy =
-                    (ServiceSelectionStrategy)loader.loadClass(strategyClassName)
-                        .newInstance();
+                    (ServiceSelectionStrategy)loader.loadClass(strategyClassName).newInstance();
                 strategy.setAssociation(association);
                 aProxy.setServiceSelectionStrategy(strategy);
             }
 
             Class[] interfaces = list.toArray(new Class[list.size()]);
             if (createJdkProxy) {
-                proxy = Proxy.newProxyInstance(loader,
-                                               interfaces,
-                                               aProxy.getInvocationHandler(association));
+                proxy = Proxy.newProxyInstance(loader, interfaces, aProxy.getInvocationHandler(association));
             } else {
-                /*Enhancer enhancer = new Enhancer();
-                enhancer.setInterfaces(interfaces);
-                if(aProxy.getSuperClass()!=null)
-                    enhancer.setSuperclass(aProxy.getSuperClass());
-                enhancer.setUseFactory(false);
-                enhancer.setUseCache(false);
-                Dispatcher dispatcher = aProxy.getDispatcher(association);
-                if(dispatcher!=null)
-                    enhancer.setCallback(dispatcher);
-                CallbackFilter callbackFilter =
-                    aProxy.getCallbackFilter(association);
-                if(callbackFilter!=null)
-                    enhancer.setCallbackFilter(callbackFilter);
-                Callback[] callbacks = aProxy.getCallbacks(association);
-                if(callbacks!=null)
-                    enhancer.setCallbacks(callbacks);
-                proxy = enhancer.create();*/throw new IllegalArgumentException("cglib no longer supported");
+                throw new IllegalArgumentException("CGLIB no longer supported");
             }
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
@@ -132,8 +100,7 @@ public class AssociationProxyFactory {
     /*
      * Load interfaces from an AssociationDescriptor
      */
-    private static List<Class> loadAssociatedInterfaces(AssociationDescriptor a,
-                                                        ClassLoader cl)
+    private static List<Class> loadAssociatedInterfaces(AssociationDescriptor a, ClassLoader cl)
         throws ClassNotFoundException {
         List<Class> l = new ArrayList<Class>();
         String[] iNames = a.getInterfaceNames();
