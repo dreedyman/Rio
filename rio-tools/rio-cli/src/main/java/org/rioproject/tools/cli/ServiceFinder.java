@@ -52,23 +52,22 @@ import java.util.concurrent.*;
  * @author Dennis Reedy
  */
 public class ServiceFinder {
-    ServiceDiscoveryManager sdm;
-    LookupCache allServicesCache;
-    LookupCache cybernodeCache;
-    LookupCache monitorCache;
-    ServiceTemplate allServices;
-    ServiceTemplate cybernodeServices;
-    ServiceTemplate monitorServices;
+    private ServiceDiscoveryManager sdm;
+    private LookupCache allServicesCache;
+    private LookupCache cybernodeCache;
+    private LookupCache monitorCache;
+    private ServiceTemplate allServices;
+    private ServiceTemplate cybernodeServices;
+    private ServiceTemplate monitorServices;
     /** Collection of service info  */
-    final List<ServiceInfo> serviceInfo = new ArrayList<ServiceInfo>();
+    private final List<ServiceInfo> serviceInfo = new ArrayList<ServiceInfo>();
     /** ThreadPool for fetching service information */
-    Executor serviceInfoFetchPool;
+    private Executor serviceInfoFetchPool;
     /** Table of ServiceInfo and InfoFetchStats */
-    final Map<ServiceInfo, InfoFetchStat> serviceInfoFetchMap =
-        new HashMap<ServiceInfo, InfoFetchStat>();
-    RecordingDiscoveryListener recordingDiscoveryListener;
-    ProxyPreparer proxyPreparer;
-    ProxyPreparer adminProxyPreparer;
+    private final Map<ServiceInfo, InfoFetchStat> serviceInfoFetchMap = new HashMap<ServiceInfo, InfoFetchStat>();
+    private RecordingDiscoveryListener recordingDiscoveryListener;
+    private ProxyPreparer proxyPreparer;
+    private ProxyPreparer adminProxyPreparer;
 
     /**
      * Create a ServiceFinder
@@ -81,52 +80,33 @@ public class ServiceFinder {
      * @throws ConfigurationException If problems are encountered accessing
      * the configuration
      */
-    public ServiceFinder(String[] groups,
-                         LookupLocator[] locators,
-                         Configuration config)
-        throws IOException, ConfigurationException {
+    public ServiceFinder(String[] groups, LookupLocator[] locators, Configuration config) throws IOException,
+                                                                                                 ConfigurationException {
 
-        proxyPreparer =
-            (ProxyPreparer)config.getEntry(CLI.CONFIG_COMPONENT,
-                                           "proxyPreparer",
-                                           ProxyPreparer.class,
-                                           new BasicProxyPreparer());
-        adminProxyPreparer =
-            (ProxyPreparer)config.getEntry(CLI.CONFIG_COMPONENT,
-                                           "adminProxyPreparer",
-                                           ProxyPreparer.class,
-                                           new BasicProxyPreparer());
-        int serviceInfoPoolSize =
-            (Integer) config.getEntry(CLI.CONFIG_COMPONENT,
-                                      "serviceInfoPoolSize",
-                                      int.class,
-                                      5);
+        proxyPreparer = (ProxyPreparer)config.getEntry(CLI.CONFIG_COMPONENT,
+                                                       "proxyPreparer",
+                                                       ProxyPreparer.class,
+                                                       new BasicProxyPreparer());
+        adminProxyPreparer = (ProxyPreparer)config.getEntry(CLI.CONFIG_COMPONENT,
+                                                            "adminProxyPreparer",
+                                                            ProxyPreparer.class,
+                                                            new BasicProxyPreparer());
+        int serviceInfoPoolSize = (Integer) config.getEntry(CLI.CONFIG_COMPONENT, "serviceInfoPoolSize", int.class, 5);
         serviceInfoFetchPool = Executors.newFixedThreadPool(serviceInfoPoolSize);
 
         DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
-        DiscoveryManagement discoMgr = discoPool.getDiscoveryManager("cli",
-                                                                     groups,
-                                                                     locators,
-                                                                     null,
-                                                                     config);
+        DiscoveryManagement discoMgr = discoPool.getDiscoveryManager("cli", groups, locators, null, config);
         //LookupDiscoveryManager discoMgr =
         //    new LookupDiscoveryManager(groups, locators, null, lookupConfig);
         recordingDiscoveryListener = new RecordingDiscoveryListener(discoMgr);
         discoMgr.addDiscoveryListener(recordingDiscoveryListener);
-        sdm = new ServiceDiscoveryManager(discoMgr,
-                                          new LeaseRenewalManager());
+        sdm = new ServiceDiscoveryManager(discoMgr, new LeaseRenewalManager());
 
         allServices = new ServiceTemplate(null, null, null);
-        cybernodeServices = new ServiceTemplate(null,
-                                                new Class[] {Cybernode.class},
-                                                null);
-        monitorServices = new ServiceTemplate(null,
-                                              new Class[] {ProvisionMonitor.class},
-                                              null);
+        cybernodeServices = new ServiceTemplate(null, new Class[] {Cybernode.class}, null);
+        monitorServices = new ServiceTemplate(null, new Class[] {ProvisionMonitor.class}, null);
         if(!CLI.getInstance().commandLine) {
-            allServicesCache = sdm.createLookupCache(allServices,
-                                                     null,
-                                                     new ServiceListener());
+            allServicesCache = sdm.createLookupCache(allServices, null, new ServiceListener());
             cybernodeCache = sdm.createLookupCache(cybernodeServices, null, null);
             monitorCache = sdm.createLookupCache(monitorServices, null, null);
         }
@@ -157,27 +137,19 @@ public class ServiceFinder {
         ServiceItem[] results = new ServiceItem[0];
         try {
             ServiceItemFilter filter = null;
-            if((machines!=null && machines.length>0) ||
-               attrs!=null && attrs.length>0)
+            if((machines!=null && machines.length>0) || attrs!=null && attrs.length>0)
                 filter = new ServiceFilter(machines, attrs);
             if(!CLI.getInstance().commandLine) {
                 results = allServicesCache.lookup(filter, Integer.MAX_VALUE);
                 if(results.length==0)
-                    System.out.println("num lookups "+
-                                       getDiscoveryManagement().getRegistrars().
-                                                                length+
+                    System.out.println("num lookups "+ getDiscoveryManagement().getRegistrars().length+
                                        ", total services "+results.length);
                 else
                     System.out.println("total services "+results.length);
             } else {
-                long timeOut =
-                    (Long) CLI.getInstance().settings.get(CLI.DISCOVERY_TIMEOUT);
+                long timeOut = (Long) CLI.getInstance().settings.get(CLI.DISCOVERY_TIMEOUT);
                 long t0 = System.currentTimeMillis();
-                results = sdm.lookup(allServices,
-                                     1,
-                                     Integer.MAX_VALUE,
-                                     filter,
-                                     timeOut);
+                results = sdm.lookup(allServices, 1, Integer.MAX_VALUE, filter, timeOut);
                 long t1 = System.currentTimeMillis();
                 System.out.println("total "+results.length);
                 System.out.println("discovery time "+(t1-t0)+" millis, "+
@@ -214,11 +186,7 @@ public class ServiceFinder {
                 long timeOut =
                     (Long) CLI.getInstance().settings.get(CLI.DISCOVERY_TIMEOUT);
                 long t0 = System.currentTimeMillis();
-                results = sdm.lookup(cybernodeServices,
-                                     1,
-                                     Integer.MAX_VALUE,
-                                     filter,
-                                     timeOut);
+                results = sdm.lookup(cybernodeServices, 1, Integer.MAX_VALUE, filter, timeOut);
                 long t1 = System.currentTimeMillis();
                 System.out.println("total "+results.length);
                 System.out.println("discovery time "+(t1-t0)+" millis, "+
@@ -262,8 +230,7 @@ public class ServiceFinder {
         ServiceItem[] results = new ServiceItem[0];
         try {
             ServiceItemFilter filter = null;
-            if((machines!=null && machines.length>0) ||
-               attrs!=null && attrs.length>0)
+            if((machines!=null && machines.length>0) || attrs!=null && attrs.length>0)
                 filter = new ServiceFilter(machines, attrs);
             if(!CLI.getInstance().commandLine) {
                 results = monitorCache.lookup(filter, Integer.MAX_VALUE);
@@ -271,14 +238,9 @@ public class ServiceFinder {
                     System.out.println("total "+results.length);
                 }
             } else {
-                long timeOut =
-                    (Long) CLI.getInstance().settings.get(CLI.DISCOVERY_TIMEOUT);
+                long timeOut = (Long) CLI.getInstance().settings.get(CLI.DISCOVERY_TIMEOUT);
                 long t0 = System.currentTimeMillis();
-                results = sdm.lookup(monitorServices,
-                                     1,
-                                     Integer.MAX_VALUE,
-                                     filter,
-                                     timeOut);
+                results = sdm.lookup(monitorServices, 1, Integer.MAX_VALUE, filter, timeOut);
                 if(verbose) {
                     long t1 = System.currentTimeMillis();
                     System.out.println("total "+results.length);
@@ -352,10 +314,12 @@ public class ServiceFinder {
                 this.hostNames = new String[0];
             else
                 this.hostNames = hostNames;
-            if(attrs==null)
+            if(attrs==null) {
                 this.attrs = new Entry[0];
-            else
-                this.attrs = attrs;
+            } else {
+                this.attrs = new Entry[attrs.length];
+                System.arraycopy(attrs, 0, this.attrs, 0, attrs.length);
+            }
         }
 
         /**
@@ -373,9 +337,7 @@ public class ServiceFinder {
             } else {
                 if(item.service instanceof ServiceRegistrar) {
                     try {
-                        String host =
-                            ((ServiceRegistrar)item.service).
-                                getLocator().getHost();
+                        String host = ((ServiceRegistrar)item.service).getLocator().getHost();
                         for (String hostName : hostNames) {
                             if (hostName.equalsIgnoreCase(host)) {
                                 matched = true;
@@ -426,8 +388,7 @@ public class ServiceFinder {
         boolean checkHosts(ComputeResourceInfo aInfo) {
             boolean found = false;
             for (String hostName : hostNames) {
-                if (hostName.equalsIgnoreCase(aInfo.hostAddress) ||
-                    hostName.equalsIgnoreCase(aInfo.hostName)) {
+                if (hostName.equalsIgnoreCase(aInfo.hostAddress) || hostName.equalsIgnoreCase(aInfo.hostName)) {
                     found = true;
                 }
             }
@@ -503,7 +464,7 @@ public class ServiceFinder {
                 Throwable cause = t;
                 if(t.getCause()!=null)
                     cause = t.getCause();
-                System.out.println("Unable to adminster service, exception " +
+                System.out.println("Unable to administer service, exception " +
                                    "preparing proxy ["+
                                    cause.getClass().getName()+": "+
                                    cause.getMessage()+
@@ -536,7 +497,6 @@ public class ServiceFinder {
                 }
             }
         }
-
     }
 
     /**
@@ -601,7 +561,8 @@ public class ServiceFinder {
          * Set the groups
          */
         void setGroups(String[] g) {
-            groups = g;
+            groups = new String[g.length];
+            System.arraycopy(g, 0, groups, 0, g.length);
         }
 
         /*
@@ -646,10 +607,6 @@ public class ServiceFinder {
             this.sInfo = sInfo;
         }
 
-        public void run() {
-
-        }
-
         void updateHost() {
             InfoFetchStat ifs;
             synchronized(serviceInfoFetchMap) {
@@ -665,8 +622,7 @@ public class ServiceFinder {
                 ServiceItem item = sInfo.getServiceItem();
                 if(item.service instanceof ServiceRegistrar) {
                     try {
-                        LookupLocator loc =
-                            ((ServiceRegistrar)item.service).getLocator();
+                        LookupLocator loc = ((ServiceRegistrar)item.service).getLocator();
                         sInfo.setHost(loc.getHost()+":"+loc.getPort());
                         updateHost();
                     } catch(RemoteException e) {
@@ -700,23 +656,19 @@ public class ServiceFinder {
                         /* If no groups were returned and the Administrable object
                          * additionally implements DiscoveryAdmin
                          */
-                        if(groups!=null &&
-                           groups.length == 0 &&
-                           (admin instanceof DiscoveryAdmin))
+                        if(groups!=null && groups.length == 0 && (admin instanceof DiscoveryAdmin))
                             groups = ((DiscoveryAdmin)admin).getMemberGroups();
 
                         if(groups == DiscoveryGroupManagement.ALL_GROUPS)
                             groups = new String[]{"ALL_GROUPS"};
                         sInfo.setGroups(groups);
                     } catch(RemoteException e) {
-                        System.err.println("EXCEPTION GETTING GROUPS FOR "+
-                                           "["+sInfo.getServiceName()+"]");
+                        System.err.println("EXCEPTION GETTING GROUPS FOR ["+sInfo.getServiceName()+"]");
                         e.printStackTrace();
                     }
                 }
             } catch (Throwable t) {
-                System.err.println("EXCEPTION GETTING ServiceInfo FOR "+
-                                   "["+sInfo.getServiceName()+"]");
+                System.err.println("EXCEPTION GETTING ServiceInfo FOR ["+sInfo.getServiceName()+"]");
                 t.printStackTrace();
             } finally {
                 long t1 = System.currentTimeMillis();
@@ -803,8 +755,7 @@ public class ServiceFinder {
                      */
                     host = new Host();
                     try {
-                        Field hn =
-                            attr.getClass().getDeclaredField("hostName");
+                        Field hn = attr.getClass().getDeclaredField("hostName");
                         host.hostName = (String) hn.get(attr);
                         break;
                     } catch (Exception e) {
@@ -826,9 +777,7 @@ public class ServiceFinder {
     public static ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
         ComputeResourceInfo computeResourceInfo = null;
         for (Entry attr : attrs) {
-            if (attr.getClass()
-                .getName()
-                .equals(ComputeResourceInfo.class.getName())) {
+            if (attr.getClass().getName().equals(ComputeResourceInfo.class.getName())) {
                 if (attr instanceof ComputeResourceInfo) {
                     computeResourceInfo = (ComputeResourceInfo) attr;
                     break;
@@ -841,10 +790,8 @@ public class ServiceFinder {
                      */
                     computeResourceInfo = new ComputeResourceInfo();
                     try {
-                        Field ha = attr.getClass().getDeclaredField(
-                            "hostAddress");
-                        Field hn = attr.getClass().getDeclaredField(
-                            "hostName");
+                        Field ha = attr.getClass().getDeclaredField("hostAddress");
+                        Field hn = attr.getClass().getDeclaredField("hostName");
                         computeResourceInfo.hostAddress = (String) ha.get(attr);
                         computeResourceInfo.hostName = (String) hn.get(attr);
                         break;
