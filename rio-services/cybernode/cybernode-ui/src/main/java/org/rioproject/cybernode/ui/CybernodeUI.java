@@ -60,11 +60,8 @@ public class CybernodeUI extends JPanel implements Runnable {
         //idTable = new Hashtable();
         JPanel qPanel = new JPanel();
         qPanel.setLayout(new BoxLayout(qPanel, BoxLayout.X_AXIS));
-        qPanel.setBorder(
-                        BorderFactory.createCompoundBorder(
-                             BorderFactory.createTitledBorder(
-                                    BorderFactory.createEtchedBorder(),
-                                    "Compute Resource"),
+        qPanel.setBorder(BorderFactory.createCompoundBorder(
+                             BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Compute Resource"),
                              BorderFactory.createEmptyBorder(6, 6, 6, 6)));
         qPanel.add(new JLabel("Description"));
         qPanel.add(Box.createHorizontalStrut(8));
@@ -87,9 +84,7 @@ public class CybernodeUI extends JPanel implements Runnable {
         JPanel cPanel = new JPanel();
         cPanel.setLayout(new GridLayout(0, 3, 4, 4));
         cPanel.setBorder(BorderFactory.createCompoundBorder(
-                             BorderFactory.createTitledBorder(
-                                       BorderFactory.createEtchedBorder(),
-                             "Cybernode Attributes"),
+                             BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Cybernode Attributes"),
                              BorderFactory.createEmptyBorder(6, 6, 6, 6)));
 
         maxSvcCount = new JTextField();
@@ -184,11 +179,11 @@ public class CybernodeUI extends JPanel implements Runnable {
         ServiceRecord[] records =
             cybernode.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
         for (ServiceRecord record : records) {
-            if(record.getServiceElement().forkService() ||
-               record.getServiceElement().getExecDescriptor()!=null)
+            if(record.getServiceElement().forkService() || record.getServiceElement().getExecDescriptor()!=null) {
                 execServiceTable.addService(record);
-            else
+            } else {
                 serviceTable.addService(record);
+            }
         }
         currentSvcCount.setText(getCybernodeCount().toString());
         Double utilization = cybernodeAdmin.getUtilization();
@@ -250,8 +245,8 @@ public class CybernodeUI extends JPanel implements Runnable {
                 Integer count = cybernodeAdmin.getServiceLimit();
                 String s = maxSvcCount.getText();
                 try {
-                    newCount = new Integer(s);
-                } catch(Throwable t) {
+                    newCount = Integer.valueOf(s);
+                } catch(Exception e) {
                     showError("You must enter a valid number");
                     return;
                 }
@@ -300,9 +295,9 @@ public class CybernodeUI extends JPanel implements Runnable {
         if (e.getCause() != null)
             e = e.getCause();
         StackTraceElement[] trace = e.getStackTrace();
-        for (StackTraceElement aTrace : trace)
+        for (StackTraceElement aTrace : trace) {
             buffer.append("at ").append(aTrace).append("<br>");
-
+        }
         showError("<html>Exception : <font color=red>" +
                   e.getClass().getName() + "</font>" +
                   " : " +
@@ -324,12 +319,13 @@ public class CybernodeUI extends JPanel implements Runnable {
      */
     public static void showError(String text, Component comp, String title) {
         JDialog dialog;
-        if (comp instanceof Dialog)
+        if (comp instanceof Dialog) {
             dialog = new JDialog((Dialog) comp);
-        else if (comp instanceof Frame)
+        } else if (comp instanceof Frame) {
             dialog = new JDialog((Frame) comp);
-        else
+        } else {
             dialog = new JDialog();
+        }
         JEditorPane errorPane = new JEditorPane();
         errorPane.setEditable(false);
         errorPane.setContentType("text/html");

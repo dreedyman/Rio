@@ -138,8 +138,9 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
         try {
             supportsProvisioning.setSelected(cybernodeAdmin.getPersistentProvisioning());
             PlatformCapability[] pCaps = cybernodeAdmin.getPlatformCapabilties();
-            for (PlatformCapability pCap : pCaps)
+            for (PlatformCapability pCap : pCaps) {
                 addPlatformCapability(pCap);
+            }
         } catch(Exception e) {
             showError(e);
         }
@@ -258,8 +259,9 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
     private void showError(Exception e) {
         StringBuilder buffer = new StringBuilder();
         StackTraceElement[] trace = e.getStackTrace();
-        for (StackTraceElement aTrace : trace)
+        for (StackTraceElement aTrace : trace) {
             buffer.append("at ").append(aTrace).append("<br>");
+        }
         showError("<html>Exception : <font color=red>"+
                   e.getClass().getName()+"</font><br>"+
                   buffer.toString()+"</html>");
@@ -384,7 +386,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
          *
          * @return An un-editable JTextField
          */
-        JTextField  createTextField(String text) {
+        private JTextField  createTextField(String text) {
             JTextField tf = new JTextField(text);
             tf.setEditable(false);
             return(tf);
@@ -397,7 +399,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
          * 
          * @return A formatted String value for kbytes
          */
-        String formatStorageCapabilityValue(Double dVal) {
+        private String formatStorageCapabilityValue(Double dVal) {
             String result = dVal.toString();
             try {
                 double value = dVal /1024;

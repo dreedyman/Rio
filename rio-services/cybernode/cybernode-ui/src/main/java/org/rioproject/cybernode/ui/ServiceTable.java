@@ -22,7 +22,7 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * A table of services that a Cybernode has created
@@ -69,7 +69,7 @@ public class ServiceTable extends JPanel {
     }
 
     class ServiceTableModel extends AbstractTableModel {
-        private Vector tableData = new Vector();
+        private java.util.List<ServiceRecord> tableData = new ArrayList<ServiceRecord>();
         private boolean showPid;
         private String[] columnNames = {"Name", "Implementation Class", "Time Active"};
 
@@ -82,7 +82,7 @@ public class ServiceTable extends JPanel {
 
         public Object getValueAt(int index, int columnIndex) {
             try {
-                ServiceRecord record = (ServiceRecord)tableData.elementAt(index);
+                ServiceRecord record = tableData.get(index);
                 if(showPid) {
                     switch(columnIndex) {
                         case 0:
@@ -116,15 +116,14 @@ public class ServiceTable extends JPanel {
             return(null);
         }
 
-        @SuppressWarnings("unchecked")
-        public void addItem(Object item) {
+        public void addItem(ServiceRecord item) {
             int rowNum = tableData.size();
-            tableData.insertElementAt(item, rowNum);
+            tableData.set(rowNum, item);
             fireTableRowsInserted(rowNum, rowNum);
         }
 
         public void removeItem(int row) {
-            tableData.removeElementAt(row);
+            tableData.remove(row);
             fireTableDataChanged();
         }
 
@@ -134,7 +133,7 @@ public class ServiceTable extends JPanel {
         }
 
         public Object getItem(int row) {
-            return(tableData.elementAt(row));
+            return(tableData.get(row));
         }
 
         public int getColumnCount() {
@@ -149,9 +148,8 @@ public class ServiceTable extends JPanel {
             return(columnNames[column]);
         }
 
-        @SuppressWarnings("unchecked")
-        public void setValueAt(Object item, int rowNum) {
-            tableData.setElementAt(item, rowNum);
+        public void setValueAt(ServiceRecord item, int rowNum) {
+            tableData.set(rowNum, item);
             fireTableRowsUpdated(rowNum, rowNum);
         }
     }   

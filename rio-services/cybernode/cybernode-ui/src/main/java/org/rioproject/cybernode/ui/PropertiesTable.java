@@ -20,9 +20,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * The PropertiesTable displays a Properties object in a JTable
@@ -70,7 +68,7 @@ public class PropertiesTable extends JPanel {
      */
     public void setProperties(Properties props) {
         if(props == null)
-            throw new NullPointerException("props is null");
+            throw new IllegalArgumentException("props is null");
         propertiesTableModel.setData(props);
     }
 
@@ -82,9 +80,9 @@ public class PropertiesTable extends JPanel {
      */
     void addMapping(String key, String value) {
         if(key == null)
-            throw new NullPointerException("key is null");
+            throw new IllegalArgumentException("key is null");
         if(value == null)
-            throw new NullPointerException("value is null");
+            throw new IllegalArgumentException("value is null");
         propertiesTableModel.addKeyValue(key, value);
     }
 
@@ -118,7 +116,7 @@ public class PropertiesTable extends JPanel {
      */
     void setKey(String key, int row) {
         if(key == null)
-            throw new NullPointerException("key is null");
+            throw new IllegalArgumentException("key is null");
         propertiesTableModel.setValueAt(key, row, 0);
     }
 
@@ -130,7 +128,7 @@ public class PropertiesTable extends JPanel {
      */
     void setValue(String value, int row) {
         if(value == null)
-            throw new NullPointerException("value is null");
+            throw new IllegalArgumentException("value is null");
         propertiesTableModel.setValueAt(value, row, 1);
     }
 
@@ -177,8 +175,8 @@ public class PropertiesTable extends JPanel {
      * The PropertiesTableModel provides the model for the table
      */
     class PropertiesTableModel extends AbstractTableModel {
-        private Vector keys = new Vector();
-        private Vector values = new Vector();
+        private java.util.List<String> keys = new ArrayList<String>();
+        private java.util.List<String> values = new ArrayList<String>();
         private final String[] columnNames = {"Key", "Value"};
 
         public PropertiesTableModel() {
@@ -188,11 +186,13 @@ public class PropertiesTable extends JPanel {
         @SuppressWarnings("unchecked")
         void setData(Properties props) {
             keys.clear();
-            for(Enumeration e = props.propertyNames(); e.hasMoreElements();)
-                keys.add(e.nextElement());
+            for(Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+                keys.add((String) e.nextElement());
+            }
             values.clear();
-            for(Enumeration e = keys.elements(); e.hasMoreElements();)
-                values.add(props.getProperty((String)e.nextElement()));
+            for(String key : keys) {
+                values.add(props.getProperty(key));
+            }
             fireTableDataChanged();
         }
 
@@ -206,7 +206,7 @@ public class PropertiesTable extends JPanel {
         @SuppressWarnings("unchecked")
         public void setValueAt(Object value, int row, int column) {
             if(column == 1) {
-                values.set(row, value);
+                values.set(row, (String) value);
                 fireTableRowsUpdated(row, row);
             } else {
                 super.setValueAt(value, row, column);
@@ -217,11 +217,11 @@ public class PropertiesTable extends JPanel {
             try {
                 switch (column) {
                     case 0 :
-                        return (keys.elementAt(row));
+                        return (keys.get(row));
                     case 1 :
-                        return (values.elementAt(row));
+                        return (values.get(row));
                 }
-            } catch(Throwable t) {
+            } catch(Exception e) {
                 System.out.println("bad row number : " + row);
             }
             return (null);
@@ -258,8 +258,9 @@ public class PropertiesTable extends JPanel {
 
         Properties getProperties() {
             Properties props = new Properties();
-            for(int i = 0; i < keys.size(); i++)
+            for(int i = 0; i < keys.size(); i++) {
                 props.put(keys.get(i), values.get(i));
+            }
             return (props);
         }
     }
