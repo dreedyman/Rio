@@ -683,9 +683,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                     case OperationalString.INTACT:
                         sStatus = "Intact";
                         break;
-                    case OperationalString.SCHEDULED:
-                        sStatus = "Scheduled";
-                        break;
                 }
                 String role = (mgr.isActive() ? "Primary" : "Backup");
                 Object[] data = new Object[]{mgr.getName(), sStatus, role, deployed};

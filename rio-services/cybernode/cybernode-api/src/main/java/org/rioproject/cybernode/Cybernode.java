@@ -31,44 +31,33 @@ import java.rmi.RemoteException;
  * @author Dennis Reedy
  */
 public interface Cybernode extends ServiceBeanInstantiator, Service {
-    /**
-     * Get the availability schedule for the Cybernode. The Cybernode
-     * registers and unregisters to discovered Provision Manager instances
-     * based on the declared schedule. If there is not schedule, the Cybernode
-     * is always available
-     *
-     * @return A {org.rioproject.opstring.Schedule} object if the Cybernode
-     * has been configured with an availability schedule, otherwise return
-     * <code>null</code>
-     *
-     * @throws java.rmi.RemoteException If communication errors occur
-     */
+    @Deprecated
     Schedule getSchedule() throws RemoteException;
 
     /**
      * Have the Cybernode add itself as a resource which can be used to
-     * instantiate dynamic application services. Once a Cybernode is enlisted,
-     * it will use the provided availability schedule to control when it
-     * registers and unregisters to discovered Provision Manager instances
+     * instantiate dynamic application services.
      *
-     * If the Cybernode is already enlisted, this method will have
+     * <p></p>If the Cybernode is already enlisted, this method will have
      * no effect
      *
-     * @param schedule The availability schedule for the Cybernode. The
-     * Cybernode registers and unregisters to discovered Provision Manager
-     * instances based on the declared schedule. The schedule must not be
-     * <code>null</code>
      *
      * @throws NullPointerException If the schedule parameter is <code>null</code>
      * @throws RemoteException If communication errors occur
      */
+    void enlist() throws RemoteException;
+
+    /**
+     * @deprecated Use enlist() instead
+     */
+    @Deprecated
     void enlist(Schedule schedule) throws RemoteException;
 
     /**
      * Have the Cybernode remove itself as a resource which that can be used
      * to instantiate dynamic application services.
      *
-     * If the Cybernode is already released, this method will have
+     * <p></p>If the Cybernode is already released, this method will have
      * no effect
      *
      * @param terminateServices If this parameter is <code>true</code>, all

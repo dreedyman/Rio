@@ -34,8 +34,9 @@ public interface OperationalString {
      */
     public static final int UNDEPLOYED = 0;
     /**
-     * Indicates the OperationalString is scheduled for deployment
+     * @deprecated No longer supported
      */
+    @Deprecated
     public static final int SCHEDULED = 1;
     /**
      * Indicates the OperationalString is deployed
@@ -78,14 +79,12 @@ public interface OperationalString {
     int getStatus();
 
     /**
-     * Set the OperationalString as being scheduled, deployed or undeployed
+     * Set the OperationalString as being deployed or undeployed
      * 
-     * @param deployed Either {@link OperationalString#SCHEDULED},
-     * {@link OperationalString#DEPLOYED} or {@link OperationalString#UNDEPLOYED}
+     * @param deployed Either {@link OperationalString#DEPLOYED} or {@link OperationalString#UNDEPLOYED}
      *
      * @throws IllegalStateException if the deployed parameter is not
-     * {@link OperationalString#SCHEDULED}, {@link OperationalString#DEPLOYED} or
-     * {@link OperationalString#UNDEPLOYED}
+     * {@link OperationalString#DEPLOYED} or {@link OperationalString#UNDEPLOYED}
      */
     void setDeployed(int deployed);
 
@@ -142,53 +141,8 @@ public interface OperationalString {
     URL loadedFrom();
 
     /**
-     * Get the {@link Schedule} for the OperationalString
-     * <p>
-     * Scheduling of an OperationalString is part of the OperationalString itself,
-     * the schedule is an optional declarative attribute, and if not declared the
-     * OperationalString will be deployed immediately. The following properties
-     * describe the Schedule :
-     * <ul>
-     * <li>The time to deploy the OperationalString
-     * <li>How long it should be deployed for
-     * <li>How many times deployment should be repeated
-     * <li>The repeatInterval between deployment executions
-     * </ul>
-     * <b>Declaring a Schedule </b> <br>
-     * A Schedule can be declared in an OperationalString XML document as follows :
-     * <br>
-     * <br>
-     * <div style="margin-left: 40px;"> <span style="font-family:
-     * monospace;">&lt;DeploymentSchedule&gt; </span> <br style="font-family:
-     * monospace;"> <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;
-     * &lt;DeployDate DayOfWeek="Thursday" Hour="8" Minute="30" Format="PM"/&gt;
-     * </span> <br style="font-family: monospace;">
-     * <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp; &lt;Duration
-     * Minutes="30"/&gt; </span> <br style="font-family: monospace;">
-     * <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp; &lt;Repeats
-     * Count="10"&gt; </span> <br style="font-family: monospace;">
-     * <span style="font-family:
-     * monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;Interval
-     * Days="1" Hours="1" Minutes="1"/&gt; </span> <br style="font-family:
-     * monospace;"> <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;
-     * &lt;/Repeats&gt; </span> <br style="font-family: monospace;">
-     * <span style="font-family: monospace;">&nbsp;&lt;/DeploymentSchedule&gt;
-     * </span> <br>
-     * </div>
-     * <p>
-     * This DeploymentSchedule produces the following:
-     * <ul>
-     * <li>Deploy the OperationalString every Thursday at 8:30 PM
-     * <li>The OperationalString shall remain deployed for 30 minutes
-     * <li>The OperationalString deployment repeats 10 times, waiting 1 day, 1 hour
-     * and 1 minute between deployments
-     * </ul>
-     * <p>
-     * Once the DeploymentSchedule element is parsed, a Schedule object is created 
-     * and set to the enclosing {@link  OperationalString object.
-     * 
-     * @return The Schedule for the OperationalString, providing context on
-     * declared start date, duration, repeat count and repeat interval
+     * @deprecated No Longer supported
      */
+    @Deprecated
     Schedule getSchedule();
 }

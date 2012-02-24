@@ -403,8 +403,7 @@ public interface OperationalStringManager extends Remote {
                   ServiceBeanInstance instance,
                   boolean clean,
                   long delay,
-                  ServiceProvisionListener listener)
-        throws OperationalStringException, RemoteException;
+                  ServiceProvisionListener listener) throws OperationalStringException, RemoteException;
 
     /**
      * Redeploy an OperationalString, ServiceElement or ServiceBeanInstance. This
@@ -447,8 +446,7 @@ public interface OperationalStringManager extends Remote {
                   boolean clean,
                   boolean sticky,
                   long delay,
-                  ServiceProvisionListener listener)
-        throws OperationalStringException, RemoteException;    
+                  ServiceProvisionListener listener) throws OperationalStringException, RemoteException;
 
     /**
      * Get the {@link org.rioproject.deploy.ServiceStatement}s for

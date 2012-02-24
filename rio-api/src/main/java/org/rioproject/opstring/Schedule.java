@@ -26,7 +26,9 @@ import java.util.GregorianCalendar;
  * when take place, and how long that activity should remain active.
  *
  * @author Dennis Reedy
+ * @deprecated This class is no longer used in Rio, has been kept here for compatibility
  */
+@Deprecated
 public class Schedule implements Serializable {
     static final long serialVersionUID=2L;
     /** The month to schedule an activity */

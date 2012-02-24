@@ -16,7 +16,6 @@
 package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.opstring.Schedule;
 import org.rioproject.cybernode.Cybernode;
 
 import java.io.BufferedReader;
@@ -142,7 +141,7 @@ public class EnlistmentHandler  {
 
     private static void handleAction(Cybernode cybernode, String action) throws RemoteException {
         if(action.equals(ENLIST))
-            cybernode.enlist(new Schedule());
+            cybernode.enlist();
         else
             cybernode.release(true);
 

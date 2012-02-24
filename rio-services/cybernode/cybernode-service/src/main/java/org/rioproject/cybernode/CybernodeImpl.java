@@ -57,7 +57,6 @@ import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.persistence.SnapshotHandler;
 import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.resources.util.ThrowableUtil;
-import org.rioproject.util.TimeUtil;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.ComputeResource;
@@ -115,7 +114,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     static String configComponent = CONFIG_COMPONENT;
     /** Instance of a ServiceBeanContainer */
     ServiceBeanContainer container;
-    /** If the Cybernode has been configured wih an availability Schedule, and
+    /** If the Cybernode has been configured an an instantiation resource, and
      * the Cybernode removes itself as an asset, this property determines whether
      * instantiated services should be terminated upon unregistration */
     boolean serviceTerminationOnUnregister=true;
@@ -159,11 +158,6 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     private LifeCycle lifeCycle;
     /** Flag to indicate if the Cybernode is enlisted */
     private boolean enlisted=false;
-    /** The availability schedule for the Cybernode */
-    private Schedule availabilitySchedule;
-    /** A List of scheduled TimerTasks */
-    List<TimerTask> schedulingTaskList =
-        Collections.synchronizedList(new ArrayList<TimerTask>());
     private ServiceRecordUpdateTask serviceRecordUpdateTask;
     private int registryPort;
 
@@ -868,35 +862,27 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
         /* Get the property that determines whether instantiated services
          * should be terminated upon unregistration */
-        serviceTerminationOnUnregister =
-        (Boolean) config.getEntry(getConfigComponent(),
-                                  "serviceTerminationOnUnregister",
-                                  Boolean.class,
-                                  Boolean.TRUE);
+        serviceTerminationOnUnregister = (Boolean) config.getEntry(getConfigComponent(),
+                                                                   "serviceTerminationOnUnregister",
+                                                                   Boolean.class,
+                                                                   Boolean.TRUE);
         if(logger.isLoggable(Level.FINE))
-            logger.fine("serviceTerminationOnUnregister="+
-                        serviceTerminationOnUnregister);
+            logger.fine("serviceTerminationOnUnregister="+serviceTerminationOnUnregister);
 
-        /* Get the schedule which will control when the Cybernode will make
-         * itself available as an asset */
-        availabilitySchedule = (Schedule)config.getEntry(getConfigComponent(),
-                                                         "availabilitySchedule",
-                                                         Schedule.class,
-                                                         new Schedule());
-        doEnlist(availabilitySchedule);
+        /* Get whether the Cybernode will make itself available as an asset */
+        boolean doEnlist = (Boolean)config.getEntry(getConfigComponent(), "enlist", Boolean.class, true);
+        if(doEnlist)
+            doEnlist();
 
         /* Create a computeResourcePolicyHandler to watch for thresholds
          * being crossed */
-        new ComputeResourcePolicyHandler(computeResource,
-                                         getSLAEventHandler());
+        new ComputeResourcePolicyHandler(computeResource, getSLAEventHandler());
 
         /* Ensure we have a serviceID */
         if(serviceID==null) {
             if(logger.isLoggable(Level.FINE))
-                logger.fine("Creating new ServiceID from UUID="+
-                            getUuid().toString());
-            serviceID = new ServiceID(getUuid().getMostSignificantBits(),
-                                      getUuid().getLeastSignificantBits());
+                logger.fine("Creating new ServiceID from UUID="+ getUuid().toString());
+            serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
         }
 
         loadInitialServices(context.getConfiguration());
@@ -985,33 +971,27 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             /* Load initial services */
             String[] initialServices = new String[] {};
             try {
-                initialServices =
-                    (String[])config.getEntry(getConfigComponent(),
-                                              "initialServices",
-                                              String[].class,
-                                              initialServices);
+                initialServices = (String[])config.getEntry(getConfigComponent(),
+                                                            "initialServices",
+                                                            String[].class,
+                                                            initialServices);
             } catch(ConfigurationException e) {
                 logger.log(Level.WARNING, "Getting initialServices", e);
             }
 
             if(logger.isLoggable(Level.CONFIG))
-                logger.config("Loading ["+initialServices.length+"] " +
-                              "initialServices");
+                logger.config("Loading ["+initialServices.length+"] " +"initialServices");
             for (String initialService : initialServices) {
                 URL deploymentURL;
                 try {
                     if (initialService.startsWith("http:"))
                         deploymentURL = new URL(initialService);
                     else
-                        deploymentURL =
-                            new File(initialService).toURI().toURL();
+                        deploymentURL = new File(initialService).toURI().toURL();
                     Map errorMap = load(deploymentURL);
                     dumpOpStringError(errorMap);
                 } catch (Throwable t) {
-                    logger.log(Level.SEVERE,
-                               "Loading initial services : " +
-                               initialService,
-                               t);
+                    logger.log(Level.SEVERE, "Loading initial services : " + initialService, t);
                 }
             }
         }
@@ -1025,16 +1005,12 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             HashMap map = new HashMap();
             try {
                 /* Get the OperationalString loader */
-                OpStringLoader opStringLoader =
-                    new OpStringLoader(this.getClass().getClassLoader());
-                OperationalString[] opStrings =
-                    opStringLoader.parseOperationalString(deploymentURL);
+                OpStringLoader opStringLoader = new OpStringLoader(this.getClass().getClassLoader());
+                OperationalString[] opStrings = opStringLoader.parseOperationalString(deploymentURL);
                 if(opStrings != null) {
                     for (OperationalString opString : opStrings) {
                         if (logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE,
-                                       "Activating Deployment " +
-                                       "[" + opString.getName() + "]");
+                            logger.log(Level.FINE, "Activating Deployment " +"[" + opString.getName() + "]");
                         ServiceElement[] services = opString.getServices();
                         for (ServiceElement service : services) {
                             activate(service);
@@ -1042,9 +1018,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     }
                 }
             } catch(Throwable t) {
-                logger.log(Level.WARNING,
-                           "Activating OperationalString",
-                           t);
+                logger.log(Level.WARNING, "Activating OperationalString", t);
             }
             return (map);
         }
@@ -1065,8 +1039,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     sb.append("Component: ").append(comp);
                     Object o = errorMap.get(comp);
                     if (o instanceof Throwable) {
-                        StackTraceElement[] stes =
-                            ((Throwable) o).getStackTrace();
+                        StackTraceElement[] stes = ((Throwable) o).getStackTrace();
                         for (StackTraceElement ste : stes) {
                             sb.append("\tat ").append(ste).append("\n");
                         }
@@ -1085,14 +1058,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * Create a ServiceProvisionEvent and instantiate the ServiceElement
      */
     private void activate(ServiceElement sElem) {
-        ServiceProvisionEvent spe =
-            new ServiceProvisionEvent(getServiceProxy(), null, sElem);
+        ServiceProvisionEvent spe = new ServiceProvisionEvent(getServiceProxy(), null, sElem);
         try {
             instantiate(spe);
         } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       "Activating service ["+sElem.getName()+"]",
-                       t);
+            logger.log(Level.WARNING, "Activating service ["+sElem.getName()+"]", t);
         }
     }
 
@@ -1113,127 +1083,26 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     }
 
     /**
-     * Get the availability schedule
-     *
-     * @return The Schedule for availability
-     */
-    protected Schedule getAvailabilitySchedule() {
-        Schedule sched;
-        synchronized(this) {
-            sched = availabilitySchedule;
-
-        }
-        return(sched);
-    }
-
-    /**
-     * Set the availability schedule
-     *
-     * @param sched The Schedule for availability
-     */
-    protected void setAvailabilitySchedule(Schedule sched) {
-        synchronized(this) {
-            availabilitySchedule = sched;
-        }
-    }
-
-    /**
-     * Get all in process TimerTask instances that are specific to availability
-     * scheduling for registration to monitor instances
-     *
-     * @return Array of in process TimerTask instances. If there are no
-     * TimerTask instances return a zero-length array
-     */
-    protected TimerTask[] getRegistrationTasks() {
-        return(schedulingTaskList.toArray(
-            new TimerTask[schedulingTaskList.size()]));
-    }
-
-    /**
-     * Add a TimerTask to the Collection of TimerTasks
-     *
-     * @param task The TimerTask
-     */
-    protected void addRegistrationTask(TimerTask task) {
-        if(task!=null) {
-            if(task instanceof RegistrationTask ||
-               task instanceof UnRegistrationTask)
-            schedulingTaskList.add(task);
-        }
-    }
-
-    /**
-     * Remove a TimerTask from Collection of scheduled TimerTask
-     * instances
-     *
-     * @param task The TimerTask to remove
-     */
-    protected void removeRegistrationTask(TimerTask task) {
-        if(task!=null)
-            schedulingTaskList.remove(task);
-    }
-
-    /**
      * Have the Cybernode add itself as a resource which can be
-     * used to instantiate dynamic application services. Once
-     * a Cybernode is enlisted, it will use the provided
-     * availability schedule to control when it registers and unregisters to
-     * discovered Provision Manager instances
-     *
-     * <p>If the <code>Schedule</code>is <code>null</code>, the Cybernode will 
-     * not add itself as a resource</p>
+     * used to instantiate dynamic application services.
      *
      * If the Cybernode is already enlisted, this method will have
      * no effect
-     *
-     * @param schedule The Schedule to use for enlistment
      */
-    protected void doEnlist(Schedule schedule) {
+    protected void doEnlist() {
         if(isEnlisted()) {
             if(logger.isLoggable(Level.FINE))
                 logger.fine("Already enlisted");
             return;
         }
-        if(schedule==null) {
-            if(logger.isLoggable(Level.INFO))
-                logger.info("Configured for no availability, will not register for service provisioning");
-            setEnlisted(false);
-            return;
-        }
-        Date startDate = schedule.getStartDate();
-        long now = System.currentTimeMillis();
-        long delay = startDate.getTime()-now;
-        boolean scheduled = false;
-        if(logger.isLoggable(Level.FINE)) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Availability schedule Start Date=[").append(startDate.toString()).append("]")
-                .append("Available for=[").append(TimeUtil.format(schedule.getDuration())).append("]")
-                .append("Time not available=[").append(TimeUtil.format(schedule.getRepeatInterval())).append("]")
-                .append("Time till start [").append(TimeUtil.format(delay)).append("]");
-            logger.fine(builder.toString());
-        }            
-        if(delay>0 || schedule.getDuration()>0) {
-            RegistrationTask registrationTask = new RegistrationTask(schedule);
-            addRegistrationTask(registrationTask);
-            if(schedule.getDuration()>0)
-                taskTimer.scheduleAtFixedRate(registrationTask,
-                                              startDate,
-                                              schedule.getDuration() +
-                                              schedule.getRepeatInterval());
-            else
-                taskTimer.schedule(registrationTask, startDate);
-            scheduled=true;
+        if(logger.isLoggable(Level.INFO))
+            logger.info("Configured as an instantiation resource");
+        try {
+            svcConsumer.initializeProvisionDiscovery(context.getDiscoveryManagement());
+        } catch(Exception e) {
+            logger.log(Level.WARNING, "Initializing Provision discovery", e);
         }
 
-        if(!scheduled) {
-            if(logger.isLoggable(Level.INFO))
-                logger.info("Configured for constant availability");
-            try {
-                svcConsumer.initializeProvisionDiscovery(context.getDiscoveryManagement());
-            } catch(Exception e) {
-                logger.log(Level.WARNING, "Initializing Provision discovery", e);
-            }
-        }
         setEnlisted(true);
     }
 
@@ -1479,8 +1348,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @param statusType The StatusType
      */
     void setChanged(StatusType statusType) {
-        joiner.modifyAttributes(new Entry[]{new BasicStatus()},
-                                new Entry[]{new BasicStatus(statusType)});
+        joiner.modifyAttributes(new Entry[]{new BasicStatus()}, new Entry[]{new BasicStatus(statusType)});
     }
 
     /**
@@ -1594,105 +1462,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         }
     }
 
-    /**
-     * Scheduled Task which will control Cybernode registration to ProvisionMonitor
-     * instances
-     */
-    class RegistrationTask extends TimerTask {
-        int repeats;
-        Schedule schedule;
-
-        RegistrationTask(Schedule schedule) {
-            this.schedule = schedule;
-        }
-
-        /**
-         * The action to be performed by this timer task.
-         */
-        public void run() {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Register to Provision Monitor instances");
-
-            try {
-                svcConsumer.initializeProvisionDiscovery(
-                                                 context.getDiscoveryManagement());
-            } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Initializing ServiceConsumer",
-                           e);
-            }
-
-            repeats++;
-            if(schedule.getRepeatCount()!= Schedule.INDEFINITE &&
-               repeats > schedule.getRepeatCount()) {
-
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Repeat count ["+schedule.getRepeatCount()+"] "+
-                                "reached, cancel RegistrationTask");
-                cancel();
-                UnRegistrationTask unRegisterTask =
-                    new UnRegistrationTask(true);
-                addRegistrationTask(unRegisterTask);
-                long sheduledUnRegistration =
-                    schedule.getDuration()+System.currentTimeMillis();
-                taskTimer.schedule(unRegisterTask,
-                                   new Date(sheduledUnRegistration));
-            } else {
-                if(schedule.getDuration()!=Schedule.INDEFINITE) {
-                    UnRegistrationTask unRegisterTask = new UnRegistrationTask();
-                    addRegistrationTask(unRegisterTask);
-                    long sheduledUnRegistration =
-                        schedule.getDuration()+System.currentTimeMillis();
-                    taskTimer.schedule(unRegisterTask,
-                                       new Date(sheduledUnRegistration));
-                }
-            }
-        }
-
-        public boolean cancel() {
-            removeRegistrationTask(this);
-            return(super.cancel());
-        }
-    }
-
-    /**
-     * Scheduled Task which will disengage from all registered provisioners
-     */
-    class UnRegistrationTask extends TimerTask {
-        boolean isLast = false;
-
-        UnRegistrationTask() {
-            this(false);
-        }
-
-        UnRegistrationTask(boolean isLast) {
-            this.isLast = isLast;
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Create new UnRegistrationTask");
-        }
-
-        /**
-         * The action to be performed by this timer task.
-         */
-        public void run() {
-            doRelease();
-            if(isLast)
-                setEnlisted(false);
-            cancel();
-        }
-
-        public boolean cancel() {
-            removeRegistrationTask(this);
-            return(super.cancel());
-        }
-    }
-
-    private
 
     /**
      * If deadlocked threads are detected fire SLAThresholdEvents
      */
-    class DeadlockedThreadPolicyHandler implements ThresholdListener {
+    private class DeadlockedThreadPolicyHandler implements ThresholdListener {
 
         public String getID() {
             return "Thread Deadlock Detector";
@@ -1702,9 +1476,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             // implemented for interface compatibility
         }
 
-        public void notify(Calculable calculable,
-                           ThresholdValues thresholdValues,
-                           int type) {
+        public void notify(Calculable calculable, ThresholdValues thresholdValues, int type) {
             double[] range = new double[]{
                 thresholdValues.getCurrentLowThreshold(),
                 thresholdValues.getCurrentHighThreshold()
@@ -1713,18 +1485,16 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             SLA sla = new SLA(calculable.getId(), range);
             try {
                 ServiceBeanInstance instance = makeServiceBeanInstance();
-                SLAThresholdEvent event =
-                    new SLAThresholdEvent(proxy,
-                                          context.getServiceElement(),
-                                          instance,
-                                          calculable,
-                                          sla,
-                                          "Cybernode Thread Deadlock " +
-                                          "Policy Handler",
-                                          instance.getHostAddress(),
-                                          type);
-                thresholdTaskPool.execute(new SLAThresholdEventTask(event,
-                                                                    getSLAEventHandler()));
+                SLAThresholdEvent event = new SLAThresholdEvent(proxy,
+                                                                context.getServiceElement(),
+                                                                instance,
+                                                                calculable,
+                                                                sla,
+                                                                "Cybernode Thread Deadlock " +
+                                                                "Policy Handler",
+                                                                instance.getHostAddress(),
+                                                                type);
+                thresholdTaskPool.execute(new SLAThresholdEventTask(event, getSLAEventHandler()));
             } catch(Exception e) {
                 logger.log(Level.WARNING,
                            "Could not send a SLA Threshold Notification as a " +
@@ -1910,36 +1680,38 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * --------------------*/
 
     /*
-     * @see org.rioproject.cybernode.Cybernode#getSchedule()
+     * @see org.rioproject.cybernode.Cybernode#enlist
      */
-    public Schedule getSchedule() {
-        return(getAvailabilitySchedule());
+    public void enlist() {
+        doEnlist();
     }
 
-    /*
-     * @see org.rioproject.cybernode.Cybernode#enlist(org.rioproject.opstring.Schedule)
-     */
-    public void enlist(Schedule schedule) {
-        doEnlist(schedule);
+    @Deprecated
+    public void enlist(Schedule s) {
+        logger.warning("Schedule is ignored for enlisting");
+        doEnlist();
+    }
+
+    @Deprecated
+    public Schedule getSchedule() {
+        logger.warning("Returning null for Schedule, operation no longer supported");
+        return null;
     }
 
     /*
      * @see org.rioproject.cybernode.Cybernode#release(boolean)
      */
     public void release(boolean terminateServices) {
-        TimerTask[] registrationTasks = getRegistrationTasks();
-        for (TimerTask registrationTask : registrationTasks)
-            registrationTask.cancel();
         doRelease();
         setEnlisted(false);
     }
 
     private void doRelease() {
         if(logger.isLoggable(Level.INFO))
-                logger.info("Unregister from ProvisionMonitor instances ");
-            svcConsumer.destroy();
-            if(serviceTerminationOnUnregister)
-                container.terminateServices();
+            logger.info("Unregister from ProvisionMonitor instances ");
+        svcConsumer.destroy();
+        if(serviceTerminationOnUnregister)
+            container.terminateServices();
     }
 
     /*---------------------

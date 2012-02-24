@@ -79,16 +79,19 @@ class CybernodeProxy extends AbstractProxy implements Cybernode, Serializable {
 
     /* -------- Implement Cybernode methods -------- */
 
-    /** @see Cybernode#getSchedule() */
-    public Schedule getSchedule() throws RemoteException {
-        return(cybernodeProxy.getSchedule());
+    /** @see Cybernode#enlist()  */
+    public void enlist() throws RemoteException {
+        cybernodeProxy.enlist();
     }
 
-    /** @see Cybernode#enlist(org.rioproject.opstring.Schedule)  */
-    public void enlist(Schedule schedule) throws RemoteException {
-        if(schedule==null)
-            throw new IllegalArgumentException("schedule is null");
-        cybernodeProxy.enlist(schedule);
+    @Deprecated
+    public void enlist(Schedule s) throws RemoteException {
+        cybernodeProxy.enlist();
+    }
+
+    @Deprecated
+    public Schedule getSchedule() throws RemoteException {
+        return null;
     }
 
     /** @see Cybernode#release(boolean) */

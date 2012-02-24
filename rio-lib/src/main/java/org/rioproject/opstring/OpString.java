@@ -39,8 +39,6 @@ public class OpString implements OperationalString, Serializable {
     private int deployedStatus = OperationalString.UNDEPLOYED;
     /** The URL OperationalString was loaded from */
     private URL loadedFrom;
-    /** The Schedule for this OperationalString */
-    private Schedule schedule = new Schedule();
 
     /** 
      * Create an OpString 
@@ -344,17 +342,18 @@ public class OpString implements OperationalString, Serializable {
      *
      * @param schedule the Schedule for this OperationalString
      */
-    public void setSchedule(Schedule schedule) {
+    /*public void setSchedule(Schedule schedule) {
         if(schedule == null)
             throw new NullPointerException("schedule is null");
         this.schedule = schedule;
-    }
+    }*/
     
     /**
-     * @see OperationalString#getSchedule()
+     * @deprecated
      */
+    @Deprecated
     public Schedule getSchedule() {
-        return(schedule);
+        return(null);
     }
 
     /**

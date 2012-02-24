@@ -375,46 +375,20 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @throws java.rmi.RemoteException If the DeployAdmin cannot be obtained
      */
     void startManager(ServiceProvisionListener listener, Map knownInstanceMap) throws RemoteException {
-        boolean scheduled = false;
-        Schedule schedule = opString.getSchedule();
-        Date startDate = schedule.getStartDate();
-        long now = System.currentTimeMillis();
-        long delay = startDate.getTime() - now;
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("OperationalString [" + getName() + "] " +
-                          "Start Date=[" + startDate.toString() + "], " +
-                          "Delay [" + delay + "]");
-        if (delay > 0 || schedule.getDuration() > 0) {
-            DeployAdmin deployAdmin = (DeployAdmin)serviceProxy.getAdmin();
-            DeploymentTask deploymentTask = new DeploymentTask(this, deployAdmin);
-            addTask(deploymentTask);
-            if (schedule.getDuration() > 0)
-                TaskTimer.getInstance().scheduleAtFixedRate(deploymentTask,
-                                                            startDate,
-                                                            (schedule.getDuration() +
-                                                             schedule.getRepeatInterval()));
-            else
-                TaskTimer.getInstance().schedule(deploymentTask, startDate);
-            scheduled = true;
-            setDeploymentStatus(OperationalString.SCHEDULED);
-        }
-
-        if (!scheduled) {
-            addDeploymentDate(new Date(System.currentTimeMillis()));
-            setDeploymentStatus(OperationalString.DEPLOYED);
-            ServiceElementManager[] mgrs = getServiceElementManagers();
-            for (ServiceElementManager mgr : mgrs) {
-                ServiceElement elem = mgr.getServiceElement();
-                ServiceBeanInstance[] instances = (ServiceBeanInstance[]) knownInstanceMap.get(elem);
-                try {
-                    int alreadyRunning = mgr.startManager(listener, instances);
-                    if (alreadyRunning > 0) {
-                        updateServiceElements(new ServiceElement[]{
-                                                                      mgr.getServiceElement()});
-                    }
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Starting ServiceElementManager", e);
+        addDeploymentDate(new Date(System.currentTimeMillis()));
+        setDeploymentStatus(OperationalString.DEPLOYED);
+        ServiceElementManager[] mgrs = getServiceElementManagers();
+        for (ServiceElementManager mgr : mgrs) {
+            ServiceElement elem = mgr.getServiceElement();
+            ServiceBeanInstance[] instances = (ServiceBeanInstance[]) knownInstanceMap.get(elem);
+            try {
+                int alreadyRunning = mgr.startManager(listener, instances);
+                if (alreadyRunning > 0) {
+                    updateServiceElements(new ServiceElement[]{
+                                                                  mgr.getServiceElement()});
                 }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Starting ServiceElementManager", e);
             }
         }
     }
@@ -727,15 +701,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
         if (sElem.getOperationalStringName() == null)
-            throw new IllegalArgumentException("ServiceElement must have an " +
-                                               "OperationalString name");
+            throw new IllegalArgumentException("ServiceElement must have an OperationalString name");
         if (!sElem.getOperationalStringName().equals(opString.getName()))
-            throw new IllegalArgumentException("ServiceElement has wrong " +
-                                               "OperationalString name. " +
-                                               "Provided " +
-                                               "[" + sElem.getOperationalStringName() + "], " +
-                                               "should be " +
-                                               "[" + opString.getName() + "]");
+            throw new IllegalArgumentException("ServiceElement has wrong OperationalString name. " +
+                                               "Provided " +"[" + sElem.getOperationalStringName() + "], " +
+                                               "should be [" + opString.getName() + "]");
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
         try {
@@ -913,9 +883,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
 
         ServiceElementManager svcElemMgr = getServiceElementManager(instance);
         if (svcElemMgr == null)
-            throw new OperationalStringException("Unmanaged ServiceBeanInstance " +
-                                                 "[" + instance.toString() + "]",
-                                                 false);
+            throw new OperationalStringException("Unmanaged ServiceBeanInstance [" + instance.toString() + "]", false);
         svcElemMgr.update(instance);
         return (svcElemMgr.getServiceElement());
     }
@@ -945,13 +913,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                                     changed);
             eventProcessor.processEvent(event);
         } catch (Throwable t) {
-            logger.warning("Incrementing ServiceElement " +
-                           "[" + sElem.getName() + "] [" +
-                           t.getClass().getName() + ":" + t.getMessage() + "]");
-            throw new OperationalStringException("Incrementing " +
-                                                 "ServiceElement " +
-                                                 "[" + sElem.getName() + "]",
-                                                 t);
+            String message = "Incrementing ServiceElement [" + sElem.getName() +"] " +
+                             "["+t.getClass().getName() + ":" + t.getMessage() + "]";
+            logger.warning(message);
+            throw new OperationalStringException(message, t);
         }
     }
 
@@ -1026,12 +991,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                     destroy);
         stateChanged(false);
         updateServiceElements(new ServiceElement[]{sElem});
-        ProvisionMonitorEvent event =
-            new ProvisionMonitorEvent(serviceProxy,
-                                      ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED,
-                                      sElem.getOperationalStringName(),
-                                      sElem,
-                                      instance);
+        ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
+                                                                ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED,
+                                                                sElem.getOperationalStringName(),
+                                                                sElem,
+                                                                instance);
         eventProcessor.processEvent(event);
     }
 
@@ -1136,7 +1100,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     public OperationalString doGetOperationalString() {
         OpString opstr = new OpString(opString.getName(), opString.loadedFrom());
         opstr.setDeployed(deployStatus);
-        //opstr.setSchedule(opString.getSchedule());
         for (ServiceElementManager mgr : svcElemMgrs) {
             opstr.addService(mgr.getServiceElement());
         }
@@ -1169,8 +1132,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                          boolean clean,
                          boolean sticky,
                          long delay,
-                         ServiceProvisionListener listener)
-        throws OperationalStringException {
+                         ServiceProvisionListener listener) throws OperationalStringException {
 
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
@@ -1189,12 +1151,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
 
         if (delay > 0) {
-            doScheduleRedeploymentTask(delay,
-                                       sElem,     /* ServiceElement */
-                                       instance,  /* ServiceBeanInstance */
-                                       clean,
-                                       sticky,
-                                       listener);
+            doScheduleRedeploymentTask(delay, sElem, instance, clean, sticky, listener);
         } else {
             if (sElem == null && instance == null)
                 doRedeploy(clean, sticky, listener);
@@ -1252,20 +1209,15 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         RedeploymentTask scheduledTask = null;
         if (sElem != null) {
             svcElemMgr = getServiceElementManager(sElem);
-            scheduledTask = getScheduledRedeploymentTask(sElem,
-                                                         null);
+            scheduledTask = getScheduledRedeploymentTask(sElem, null);
         } else if (instance != null) {
             svcElemMgr = getServiceElementManager(instance);
-            scheduledTask = getScheduledRedeploymentTask(null,
-                                                         instance);
+            scheduledTask = getScheduledRedeploymentTask(null, instance);
         }
 
         if (svcElemMgr == null) {
-            String message;
-            if (sElem == null)
-                message = "Unmanaged ServiceElement";
-            else
-                message = "Unmanaged ServiceElement [" + sElem.getName() + "]";
+            String message =
+                sElem==null? "Unmanaged ServiceElement" :"Unmanaged ServiceElement [" + sElem.getName() + "]";
             throw new OperationalStringException(message);
         }
 
@@ -1300,19 +1252,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                            ServiceBeanInstance instance,
                                            boolean clean,
                                            boolean sticky,
-                                           ServiceProvisionListener listener)
-        throws OperationalStringException {
-        int lastIndex = deployDateList.size() - 1;
-        if (lastIndex < 0 || opString.getStatus() == OperationalString.SCHEDULED)
-            throw new OperationalStringException("Cannot redeploy an " +
-                                                 "OperationalString with a " +
-                                                 "status of Scheduled");
-        //Date lastDeployDate = deployDateList.get(lastIndex);
-        /*if (opString.getSchedule().getDuration() != Schedule.INDEFINITE &&
-            (delay >
-             (lastDeployDate.getTime() + opString.getSchedule().getDuration())))
-            throw new OperationalStringException("delay is too long");*/
-
+                                           ServiceProvisionListener listener) throws OperationalStringException {
         RedeploymentTask scheduledTask = getScheduledRedeploymentTask(sElem, instance);
         if (scheduledTask != null) {
             long exec = (scheduledTask.scheduledExecutionTime() - System.currentTimeMillis()) / 1000;
@@ -1335,13 +1275,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         eventProcessor.processEvent(event);
 
         if (logger.isLoggable(Level.FINEST)) {
-            String name = (instance == null ?
-                           sElem.getName() :
-                           instance.getServiceBeanConfig().getName());
-            String item = (instance == null ?
-                           "ServiceElement" : "ServiceBeanInstance");
-            logger.finest("Schedule [" + name + "] " + item + " " +
-                          "redeploy in [" + delay + "] millis");
+            String name = (instance == null ? sElem.getName() : instance.getServiceBeanConfig().getName());
+            String item = (instance == null ? "ServiceElement" : "ServiceBeanInstance");
+            logger.finest("Schedule [" + name + "] " + item + " redeploy in [" + delay + "] millis");
         }
     }
 
@@ -1350,11 +1286,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * theServiceBeanInstance.
      *
      * @param sElem    the ServiceElement to check
-     * @param instance The coresponding ServiceBeanInstance
+     * @param instance The corresponding ServiceBeanInstance
      * @return The scheduled RedeploymentTask, or null if not found
      */
-    RedeploymentTask getScheduledRedeploymentTask(ServiceElement sElem,
-                                                  ServiceBeanInstance instance) {
+    RedeploymentTask getScheduledRedeploymentTask(ServiceElement sElem, ServiceBeanInstance instance) {
         TimerTask[] tasks = getTasks();
         RedeploymentTask scheduledTask = null;
         for (TimerTask task : tasks) {
