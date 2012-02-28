@@ -17,7 +17,7 @@ class ReggieConfig {
     }
 
     String getUnicastDiscoveryHost() {
-        return HostUtil.getHostAddress()
+        return HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
     }
 
     Exporter getServerExporter() {
