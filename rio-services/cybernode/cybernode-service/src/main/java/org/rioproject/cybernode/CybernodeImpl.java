@@ -988,8 +988,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                         deploymentURL = new URL(initialService);
                     else
                         deploymentURL = new File(initialService).toURI().toURL();
-                    Map errorMap = load(deploymentURL);
-                    dumpOpStringError(errorMap);
+                    load(deploymentURL);
                 } catch (Throwable t) {
                     logger.log(Level.SEVERE, "Loading initial services : " + initialService, t);
                 }
@@ -999,10 +998,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /*
          * Load and activate services
          */
-        Map load(URL deploymentURL) {
+        void load(URL deploymentURL) {
             if(deploymentURL == null)
                 throw new IllegalArgumentException("Deployment URL cannot be null");
-            HashMap map = new HashMap();
             try {
                 /* Get the OperationalString loader */
                 OpStringLoader opStringLoader = new OpStringLoader(this.getClass().getClassLoader());
@@ -1019,37 +1017,6 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 }
             } catch(Throwable t) {
                 logger.log(Level.WARNING, "Activating OperationalString", t);
-            }
-            return (map);
-        }
-
-        /**
-         * Dump an error map associated with the loading and/or addition of an
-         * OperationalString
-         *
-         * @param errorMap The map containing exceptions
-         */
-        void dumpOpStringError(Map errorMap) {
-            if(!errorMap.isEmpty()) {
-                Set keys = errorMap.keySet();
-                StringBuilder sb = new StringBuilder();
-                sb.append("+========================+\n");
-                //int i = 0;
-                for (Object comp : keys) {
-                    sb.append("Component: ").append(comp);
-                    Object o = errorMap.get(comp);
-                    if (o instanceof Throwable) {
-                        StackTraceElement[] stes = ((Throwable) o).getStackTrace();
-                        for (StackTraceElement ste : stes) {
-                            sb.append("\tat ").append(ste).append("\n");
-                        }
-                    } else {
-                        sb.append(" ").append(o.toString());
-                    }
-                }
-                sb.append("\n+========================+");
-                if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE, sb.toString());
             }
         }
     }
@@ -1136,9 +1103,10 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             build="0";
         return(new ServiceInfo(context.getServiceElement().getName(),
                                "",
+                               "Rio Project",
+                               RioVersion.VERSION+" Build "+build,
                                "",
-                               "v"+ RioVersion.VERSION+" Build "+build,
-                               "",""));
+                               ""));
     }
 
     private URL[] getUIJars() throws MalformedURLException {
@@ -1566,7 +1534,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                         "collection");
                             System.gc();
                         }
-                        if(calculable.getId().indexOf("Perm Gen")!=-1) {
+                        if(calculable.getId().contains("Perm Gen")) {
                             logger.info("Perm Gen has breached with utilization > "+
                                             thresholdValues.getCurrentHighThreshold());
                             //if(isEnlisted())
