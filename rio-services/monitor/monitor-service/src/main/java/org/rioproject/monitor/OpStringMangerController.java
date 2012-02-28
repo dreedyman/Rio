@@ -179,10 +179,12 @@ public class OpStringMangerController {
             ProvisionMonitor peerMon = peer.getService();
             try {
                 DeployAdmin dAdmin = (DeployAdmin) peerMon.getAdmin();
-                OperationalStringManager mgr = dAdmin.getOperationalStringManager(opStringName);
-                if (mgr.isManaging()) {
-                    primary = dAdmin;
-                    break;
+                if(dAdmin.hasDeployed(opStringName)) {
+                    OperationalStringManager mgr = dAdmin.getOperationalStringManager(opStringName);
+                    if (mgr.isManaging()) {
+                        primary = dAdmin;
+                        break;
+                    }
                 }
             } catch (RemoteException e) {
                 if (logger.isLoggable(Level.FINE))

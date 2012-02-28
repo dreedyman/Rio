@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.maven;
+package org.rioproject.tools.maven
+
+import java.util.concurrent.Future
+import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService;
 
 /**
  * Provides utility for starting processes
@@ -24,18 +28,25 @@ class ExecHelper {
     }
 
     public static void doExec(String command, boolean wait) {
+        doExec(command, wait, false)
+    }
+
+    public static void doExec(String command, boolean wait, boolean redirect) {
         Process process = command.execute()
         if(wait) {
             process.consumeProcessOutputStream(System.out)
             process.consumeProcessErrorStream(System.err)
-            process.waitFor()
+            if(redirect) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                final Future piper = executor.submit(new Piper(process))
+                process.waitFor()
+                piper.cancel(true)
+                executor.shutdownNow()
+            }
         }
     }
 
-    public static void doExec(String command,
-                              List<String> envp,
-                              File workingDir,
-                              boolean wait) {
+    public static void doExec(String command, List<String> envp, File workingDir, boolean wait) {
         Process process = command.execute(envp, workingDir)
         if(wait) {
             process.consumeProcessOutputStream(System.out)
@@ -43,4 +54,25 @@ class ExecHelper {
             process.waitFor()
         }
     }
+
+    private static class Piper implements Runnable {
+        Process process;
+
+        Piper(Process process) {
+            this.process = process
+        }
+
+        void run() {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            while(!Thread.currentThread().isInterrupted()) {
+                String input = br.readLine();
+                if(input != null && input.length()>0) {
+                    process.withWriter { writer ->
+                        writer << input
+                    }
+                }
+            } 
+        }
+    }
+    
 }

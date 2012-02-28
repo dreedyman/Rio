@@ -60,25 +60,7 @@
             <artifactId>classdepandjar</artifactId>
             <version>4.0</version>
         </dependency>
-         <!--
-        <dependency>
-            <groupId>org.rioproject.resolver</groupId>
-            <artifactId>resolver-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>2.0.8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>3.0.3</version>
-        </dependency>
-         -->
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>

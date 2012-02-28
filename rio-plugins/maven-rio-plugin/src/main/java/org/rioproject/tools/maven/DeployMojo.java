@@ -58,6 +58,6 @@ public class DeployMojo extends AbstractRioMojo {
         if(group!=null)
             groups="groups="+group;
 
-        ExecHelper.doExec(getRioCommand()+" deploy -uv -t=30000 "+groups+" "+opstring);
+        ExecHelper.doExec(getRioCommand()+" deploy -uv -t=30000 "+groups+" "+opstring, true, true);
     }
 }
