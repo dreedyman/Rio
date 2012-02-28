@@ -1,7 +1,6 @@
 /*
- * This configuration is used by the com.sun.jini.start utility to start a
- * ProvisionMonitor, including an embedded Webster and
- * a Jini Lookup Service
+ * This configuration is used to start a ProvisionMonitor, including an embedded Webster and
+ * a Lookup Service
  */
 
 import org.rioproject.config.Component

@@ -1,6 +1,5 @@
 /*
- * This configuration is used by the com.sun.jini.start utility to start a
- * Lookup Service, and an embedded Webster
+ * This configuration is used to start a Lookup Service, and an embedded Webster
  */
 
 import org.rioproject.config.Component
