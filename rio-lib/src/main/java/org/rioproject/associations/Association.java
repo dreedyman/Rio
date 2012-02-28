@@ -415,18 +415,22 @@ public class Association<T> implements Iterable<T> {
     }
 
     private void notifyServiceAdd(T service) {
+        List<AssociationServiceListener<T>> listeners = new ArrayList<AssociationServiceListener<T>>();
         synchronized(aListeners) {
-            for(AssociationServiceListener<T> a : aListeners) {
-                a.serviceAdded(service);
-            }
+            listeners.addAll(aListeners);
+        }
+        for(AssociationServiceListener<T> a : listeners) {
+            a.serviceAdded(service);
         }
     }
 
     private void notifyServiceRemoved(T service) {
+        List<AssociationServiceListener<T>> listeners = new ArrayList<AssociationServiceListener<T>>();
         synchronized(aListeners) {
-            for(AssociationServiceListener<T> a : aListeners) {
-                a.serviceRemoved(service);
-            }
+            listeners.addAll(aListeners);
+        }
+        for(AssociationServiceListener<T> a : listeners) {
+            a.serviceRemoved(service);
         }
     }
 

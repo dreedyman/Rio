@@ -23,7 +23,7 @@ package org.rioproject.associations;
  *
  * @author Dennis Reedy
  */
-public interface ServiceSelectionStrategy<T> extends AssociationListener<T> {
+public interface ServiceSelectionStrategy<T> extends AssociationServiceListener<T> {
     /**
      * Set the association
      *

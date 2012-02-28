@@ -38,15 +38,14 @@ public abstract class AbstractServiceSelectionStrategy<T> implements
 
     public abstract T getService();
 
+    public void serviceAdded(T service) {
+    }
+
+    public void serviceRemoved(T service) {
+    }
+
     public void terminate() {
     }
 
-    public void discovered(Association<T> association, T service) {
-    }
 
-    public void changed(Association<T> association, T service) {
-    }
-
-    public void broken(Association<T> association, T service) {
-    }
 }

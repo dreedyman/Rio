@@ -45,6 +45,7 @@ import java.net.UnknownHostException;
 public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     private String hostAddress;
     private final List<ServiceItem> serviceList = new ArrayList<ServiceItem>();
+    static final Logger logger = Logger.getLogger(FailOver.class.getName());
 
     @SuppressWarnings("unchecked")
     public T getService() {
@@ -67,25 +68,32 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
                 add(item);
             }
         } catch (UnknownHostException e) {
-            Logger.getAnonymousLogger().log(Level.WARNING,
-                                            "Unable to obtain host address",
-                                            ThrowableUtil.getRootCause(e));
+            logger.log(Level.WARNING, "Unable to obtain host address", ThrowableUtil.getRootCause(e));
         }
     }
 
     @Override
-    public void discovered(Association<T> association, T service) {
-        add(association.getServiceItem(service));
+    public void serviceAdded(T service) {
+        ServiceItem item = association.getServiceItem(service);
+        if(item!=null) {
+            add(item);
+        } else {
+            logger.warning("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
+            synchronized(serviceList) {
+                serviceList.clear();
+                for(ServiceItem serviceItem : association.getServiceItems())
+                    add(serviceItem);
+            }
+        }
     }
 
     @Override
-    public void changed(Association<T> association, T service) {
-        remove(service);
-    }
-
-    @Override
-    public void broken(Association<T> association, T service) {
-        remove(service);
+    public void serviceRemoved(T service) {
+        if(service!=null) {
+            remove(service);
+        } else {
+            logger.warning("The service is null, cannot remove from "+FailOver.class.getName());
+        }
     }
 
     /*

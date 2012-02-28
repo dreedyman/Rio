@@ -119,22 +119,22 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     }
 
     @Override
-    public void discovered(Association<T> association, T service) {
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Service discovered");
-        addService(association.getServiceItem(service));
-    }
-
-    @Override
-    public void changed(Association<T> association, T service) {
-        if(removeService(service)) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Service removed");
+    public void serviceAdded(T service) {
+        ServiceItem item = association.getServiceItem(service);
+        if(item!=null) {
+            addService(item);
+        } else {
+            logger.warning("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
+            synchronized(services) {
+                services.clear();
+                for(ServiceItem serviceItem : association.getServiceItems())
+                    addService(serviceItem);
+            }
         }
     }
 
     @Override
-    public void broken(Association<T> association, T service) {
+    public void serviceRemoved(T service) {
         if(removeService(service)){
             if(logger.isLoggable(Level.FINE))
                 logger.fine("Service removed, " +

@@ -16,6 +16,7 @@
 package org.rioproject.associations;
 
 import junit.framework.Assert;
+import net.jini.core.lookup.ServiceItem;
 import org.junit.Test;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
@@ -36,8 +37,11 @@ public class AssociationInjectorTest {
         Association<Dummy> a = new Association<Dummy>(createAssociationDescriptor());
         Target1 t = new Target1();
         AssociationInjector<Dummy> ai = new AssociationInjector<Dummy>(t);
-        for(int i=0; i<10; i++)
-            ai.discovered(a, new DummyImpl(i));
+        for(int i=0; i<10; i++) {
+            Dummy dummy = new DummyImpl(i);
+            a.addServiceItem(AssociationUtils.makeServiceItem(dummy));
+            ai.discovered(a, dummy);
+        }
         Assert.assertEquals(1, t.injectedCount);
     }
 
@@ -85,8 +89,12 @@ public class AssociationInjectorTest {
         Association<Dummy> a = new Association<Dummy>(createAssociationDescriptor());
         Target3 t = new Target3();
         AssociationInjector<Dummy> ai = new AssociationInjector<Dummy>(t);
-        for(int i=0; i<10; i++)
-            ai.discovered(a, new DummyImpl(i));
+        for(int i=0; i<10; i++) {
+            Dummy dummy = new DummyImpl(i);
+            ServiceItem item = AssociationUtils.makeServiceItem(dummy);
+            a.addServiceItem(item);
+            ai.discovered(a, dummy);
+        }
         Assert.assertEquals(1, t.injectedCount);
     }
 
