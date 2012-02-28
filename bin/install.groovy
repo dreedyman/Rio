@@ -9,7 +9,7 @@ String javaHome = args[0]
 String rioHome = args[1]
 
 if (javaHome == null || javaHome.length() == 0) {
-    System.err.println("The location of the Java must be set")
+    System.err.println("The location of Java must be set")
     System.exit(2)
 }
 StringBuilder java = new StringBuilder()
