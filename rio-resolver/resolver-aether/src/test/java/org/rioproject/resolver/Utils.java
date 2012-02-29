@@ -79,8 +79,11 @@ public class Utils {
 
     public static File saveM2Settings() throws IOException {
         File settings = getM2Settings();
-        File saveOrigSettings = new File(System.getProperty("user.home"), ".m2/settings.xml.sav");
-        FileUtils.copy(settings, saveOrigSettings);
+        File saveOrigSettings = null;
+        if(settings.exists()) {
+            saveOrigSettings = new File(System.getProperty("user.home"), ".m2/settings.xml.sav");
+            FileUtils.copy(settings, saveOrigSettings);
+        }
         return saveOrigSettings;
     }
 

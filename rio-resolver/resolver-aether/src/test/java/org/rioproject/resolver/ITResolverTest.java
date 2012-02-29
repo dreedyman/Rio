@@ -15,7 +15,9 @@
  */
 package org.rioproject.resolver;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.resolver.aether.AetherResolver;
 import org.rioproject.resolver.maven2.Repository;
@@ -29,13 +31,27 @@ import java.util.List;
  * Test maven resolver
  */
 public class ITResolverTest {
+    File saveOriginalSettings;
+
+    @Before
+    public void saveOriginalSettings() throws IOException {
+        saveOriginalSettings = Utils.saveM2Settings();
+    }
+
+    @After
+    public void restoreOriginalSettings() throws IOException {
+        if(saveOriginalSettings!=null) {
+            FileUtils.copy(saveOriginalSettings, Utils.getM2Settings());
+        } else {
+            FileUtils.remove(Utils.getM2Settings());
+        }
+    }
+
     @Test
     public void testJskLibResolution() throws ResolverException {
         File testRepo;
-        File saveOrigSettings = null;
         Throwable thrown = null;
         try {
-            saveOrigSettings = Utils.saveM2Settings();
             Utils.writeLocalM2RepoSettings();
             Resolver r = new AetherResolver();
             testRepo = Repository.getLocalRepository();
@@ -53,16 +69,7 @@ public class ITResolverTest {
                 sb.append(s);
             }
             Assert.assertEquals(jskPlatformJar.getAbsolutePath(), sb.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-            thrown = e;
         } finally {
-            try {
-                Assert.assertNotNull(saveOrigSettings);
-                FileUtils.copy(saveOrigSettings, Utils.getM2Settings());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             Assert.assertNull(thrown);
         }
     }
@@ -70,10 +77,8 @@ public class ITResolverTest {
     @Test
     public void testGroovyResolution() throws ResolverException {
         File testRepo;
-        File saveOrigSettings = null;
         Throwable thrown = null;
         try {
-            saveOrigSettings = Utils.saveM2Settings();
             Utils.writeLocalM2RepoSettings();
             testRepo = Repository.getLocalRepository();
             if(testRepo.exists())
@@ -83,16 +88,7 @@ public class ITResolverTest {
             Assert.assertNotNull(loc);
             File groovyJar = new File(testRepo, "org/codehaus/groovy/groovy-all/1.6.2/groovy-all-1.6.2.jar");
             Assert.assertTrue(groovyJar.exists());
-        } catch (IOException e) {
-            e.printStackTrace();
-            thrown = e;
         } finally {
-            try {
-                Assert.assertNotNull(saveOrigSettings);
-                FileUtils.copy(saveOrigSettings, Utils.getM2Settings());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             Assert.assertNull(thrown);
         }
     }
@@ -100,27 +96,13 @@ public class ITResolverTest {
     @Test
     public void testWithSettings() throws ResolverException {
         File testRepo;
-        File saveOrigSettings = null;
-        try {
-            saveOrigSettings = Utils.saveM2Settings();
-            Utils.writeLocalM2RepoSettings();
-            testRepo = Repository.getLocalRepository();
-            if(testRepo.exists())
-                FileUtils.remove(testRepo);
-            Resolver r = new AetherResolver();
-            List<String> cp = getClassPathFor("com.sun.jini:outrigger:jar:dl:2.1", r);
-            Assert.assertTrue(cp.size()==1);
-           
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                Assert.assertNotNull(saveOrigSettings);
-                FileUtils.copy(saveOrigSettings, Utils.getM2Settings());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Utils.writeLocalM2RepoSettings();
+        testRepo = Repository.getLocalRepository();
+        if(testRepo.exists())
+            FileUtils.remove(testRepo);
+        Resolver r = new AetherResolver();
+        List<String> cp = getClassPathFor("com.sun.jini:outrigger:jar:dl:2.1", r);
+        Assert.assertTrue(cp.size()==1);
     }
 
     private List<String> getClassPathFor(String artifact, Resolver r) throws ResolverException {
