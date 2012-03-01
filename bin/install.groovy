@@ -1,12 +1,26 @@
 #!/usr/bin/env groovy
 
-if (args.length !=2) {
-    System.err.println("You must provide the location of Rio and Java home")
+String javaHome=null
+String rioHome=null
+
+if (args.length ==0) {
+    javaHome = System.getenv("JAVA_HOME")
+    rioHome = System.getenv("RIO_HOME")
+} else if(args.length==2) {
+    javaHome = args[0]
+    rioHome = args[1]    
+} else {
+    StringBuilder builder = new StringBuilder()
+    builder.append("When calling the install script with arguments, you must provide the location ")
+    builder.append("of Rio and Java home. ").append("\n")
+    builder.append("You may alternatley call the install script with no arguments, ")
+    builder.append("and the environment will be checked ").append("\n")
+    builder.append("for the existence of JAVA_HOME and RIO_HOME").append("\n\n")
+    builder.append("\tinstall.groovy [java-home-location rio-home-location]")
+    builder.append("\n")
+    System.err.println(builder.toString())
     System.exit(2)
 }
-
-String javaHome = args[0]
-String rioHome = args[1]
 
 if (javaHome == null || javaHome.length() == 0) {
     System.err.println("The location of Java must be set")
