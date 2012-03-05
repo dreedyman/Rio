@@ -109,15 +109,7 @@ public class CLI {
      */
     protected synchronized static void ensureSecurityManager() {
         if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new RMISecurityManager());        
-            /*
-            System.setSecurityManager(new RMISecurityManager() {
-                public void checkPermission(Permission perm) {
-                }
-                public void checkPermission(Permission perm, Object context) {
-                }
-            });
-            */
+            System.setSecurityManager(new RMISecurityManager());
         }
     }
 
@@ -165,14 +157,14 @@ public class CLI {
         buffer.append("\t\tDestroy a specific service " +
                       "(prompted), or all services\n\n");
 
-        buffer.append("\tdeploy opstring [-t=deploy-timeout] [-icuv]\n");
+        buffer.append("\tdeploy opstring [-t=deploy-timeout] [-icuvr]\n");
         buffer.append("\t\tDeploy an application\n");
         buffer.append("\t\t\t-i\tTurns off interactive prompting\n");
         buffer.append("\t\t\t-c\tVerifies codebase\n");
         buffer.append("\t\t\t-u\tAutomatically update deployments\n");
         buffer.append("\t\t\t-v\tVerbose mode\n");
-        buffer.append("\t\t\t-t\tTime in milliseconds to wait for " +
-                      "deployment status\n\n");
+        buffer.append("\t\t\t-t\tTime in milliseconds to wait for deployment status\n\n");
+        buffer.append("\t\t\t-r\tRepositories to use for the resolution of artifacts\n\n");
 
         buffer.append("\tundeploy opstring\n");
         buffer.append("\t\tUndeploy an application\n\n");
