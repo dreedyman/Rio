@@ -1,4 +1,4 @@
-import net.jini.space.JavaSpace05
+
 import org.rioproject.config.Constants
 
 deployment(name: 'Workflow Example') {
@@ -9,8 +9,8 @@ deployment(name: 'Workflow Example') {
      * in each service bean declaration */
     artifact id: 'service-impl',   'org.rioproject.examples.workflow:workflow-service:2.0.2'
     artifact id: 'service-dl',     'org.rioproject.examples.workflow:workflow-api:2.0.2'
-    artifact id: 'outrigger-dl',   'com.sun.jini:outrigger:jar:dl:2.1'
-    artifact id: 'outrigger-impl', 'com.sun.jini:outrigger:2.1'
+    artifact id: 'outrigger-dl',   'com.sun.jini:outrigger-dl:2.1.1'
+    artifact id: 'outrigger-impl', 'com.sun.jini:outrigger:2.1.1'
 
     ['New Worker'    : 'NEW',
      'Pending Worker': 'PENDING',
@@ -27,7 +27,7 @@ deployment(name: 'Workflow Example') {
             }
 
             association(type: "requires",
-                serviceType: JavaSpace05.name,
+                serviceType: "net.jini.space.JavaSpace05",
                 property: "javaSpace", name: "Workflow Space")
 
             maintain 1
@@ -45,7 +45,7 @@ deployment(name: 'Workflow Example') {
         }
 
         association(type: "requires",
-                    serviceType: JavaSpace05.name,
+                    serviceType: "net.jini.space.JavaSpace05",
                     property: "javaSpace", name: "Workflow Space")
 
         maintain 1

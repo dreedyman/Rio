@@ -94,13 +94,15 @@ public class Installer {
             install(gnosticParent, new File(pomDir, "rio-gnostic.pom"), null, aetherServiceInstance);
             Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
             install(gnosticService, null, new File(libDir, "gnostic-service.jar"), aetherServiceInstance);
+            
+            String jiniVersion = "2.1.1";
 
             /* Install third party jars */
-            Artifact jskPlatform = new Artifact("net.jini:jsk-platform:2.1");
+            Artifact jskPlatform = new Artifact("net.jini:jsk-platform:"+jiniVersion);
             Artifact jmxLookup = new Artifact("net.jini.lookup:jmx-lookup:2.1");
-            Artifact jskDL = new Artifact("net.jini:jsk-dl:2.1");
-            Artifact reggieDL = new Artifact("com.sun.jini:reggie-dl:2.1");
-            Artifact serviceUI = new Artifact("net.jini.lookup:serviceui:2.1");
+            Artifact jskDL = new Artifact("net.jini:jsk-dl:"+jiniVersion);
+            Artifact reggieDL = new Artifact("com.sun.jini:reggie-dl:"+jiniVersion);
+            Artifact serviceUI = new Artifact("net.jini.lookup:serviceui:"+jiniVersion);
 
             install(jskPlatform, new File(pomDir, "jsk-platform.pom"), new File(libDir, "jsk-platform.jar"), aetherServiceInstance);
             install(jmxLookup, new File(pomDir, "jmx-lookup.pom"), new File(libDlDir, "jmx-lookup.jar"), aetherServiceInstance);

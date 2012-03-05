@@ -56,7 +56,7 @@ public class ResolvingLoaderTest {
         ResolvingLoader loader = new ResolvingLoader();
         assertNotNull(loader);
         ClassLoader sysCL = ClassLoader.getSystemClassLoader();
-        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2");
+        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie-dl//2.1.1;http://www.rio-project.org/maven2");
         assertNotNull(classLoader);
         assertTrue("Returned ClassLoader should not be the same as the system ClassLoader", !(classLoader.equals(sysCL)));
         Class c = classLoader.loadClass("com.sun.jini.reggie.ConstrainableAdminProxy");
@@ -67,7 +67,8 @@ public class ResolvingLoaderTest {
     public void testGetClassLoaderAndCheckURLsAreFileBased() throws MalformedURLException, ClassNotFoundException {
         ResolvingLoader loader = new ResolvingLoader();
         assertNotNull(loader);
-        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2");
+        /*ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2");*/
+        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie-dl/2.1.1;http://www.rio-project.org/maven2");
         assertNotNull(classLoader);
         assertTrue("Returned ClassLoader should be an instanceof URLClassLoader", classLoader instanceof URLClassLoader);
         for(URL u : ((URLClassLoader)classLoader).getURLs())
@@ -93,7 +94,7 @@ public class ResolvingLoaderTest {
 
     @Test
     public void testGetClassAnnotation() throws MalformedURLException, ClassNotFoundException {
-        URL[] u = new URL[]{new URL("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2")};
+        URL[] u = new URL[]{new URL("artifact:com.sun.jini/reggie-dl/2.1.1;http://www.rio-project.org/maven2")};
         URLClassLoader cl = new URLClassLoader(u);
         ResolvingLoader loader = new ResolvingLoader();
         Class<?> c = cl.loadClass("com.sun.jini.reggie.ConstrainableAdminProxy");
