@@ -380,10 +380,9 @@ public class AetherService {
                 central = new RemoteRepository("central", "default", mirror.getUrl());
             }
         }
-        if(!repositories.contains(central))
-            repositories.add(central);
-        /*if(!haveRio)
-            repositories.add(new RemoteRepository("rio", "default", "http://www.rio-project.org/maven2/"));*/
+        /*if(!repositories.contains(central))
+            repositories.add(central);*/
+
         return repositories;
     }
 
