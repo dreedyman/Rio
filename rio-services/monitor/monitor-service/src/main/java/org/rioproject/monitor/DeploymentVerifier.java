@@ -27,6 +27,7 @@ import org.rioproject.resolver.ResolverHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +48,24 @@ public class DeploymentVerifier {
     public void verifyOperationalString(OperationalString opString, RemoteRepository[] repositories)
         throws ResolverException, IOException {
         Resolver resolver = ResolverHelper.getResolver();
-        for(ServiceElement service : opString.getServices()) {
+        for(ServiceElement service : opString.getServices()) {            
+            if(service.getRemoteRepositories().length>0) {
+                List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+                Collections.addAll(remoteRepositories, repositories);
+                for(RemoteRepository r : service.getRemoteRepositories()) {
+                    boolean add = true;
+                    for(RemoteRepository known : repositories) {
+                        if(known.getUrl().equals(r.getUrl())) {
+                            add = false;
+                            break;
+                        }
+                    }
+                    if(add) {
+                        remoteRepositories.add(r);
+                    }
+                }
+                repositories = remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+            }
             verifyOperationalStringService(service, resolver, repositories);
         }
         for(OperationalString nested : opString.getNestedOperationalStrings())
