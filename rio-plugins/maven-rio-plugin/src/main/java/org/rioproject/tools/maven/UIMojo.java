@@ -17,6 +17,7 @@ package org.rioproject.tools.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
+import javax.sound.midi.SysexMessage;
 import java.io.File;
 
 /**
@@ -44,10 +45,12 @@ public class UIMojo extends AbstractRioMojo {
         String osName = System.getProperty("os.name");
         if(osName.startsWith("Mac"))
             options = "-Xdock:name=Rio";
-        String rioLib = getRioHome()+"lib"+File.separator;
+        String rioHome = getRioHome();
+        String rioLib = rioHome+"lib"+File.separator;
         String groups = "";
         if(group!=null)
             groups="-Dorg.rioproject.groups="+group;
-        ExecHelper.doExec("java "+options+" "+groups+" -jar "+rioLib+"rio-ui.jar", false);
+        
+        ExecHelper.doExec("java -DRIO_HOME="+rioHome+" "+options+" "+groups+" -jar "+rioLib+"rio-ui.jar", false);
     }
 }
