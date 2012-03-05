@@ -22,14 +22,13 @@ import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.tools.webster.Webster;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Utility for dealing with Monitor deploy, undeploy and redeploys
@@ -78,7 +77,15 @@ public class MonitorControl {
                         } catch (NumberFormatException e) {
                             return (getUsage());
                         }
-
+                    } else if (value.startsWith("-r")) {
+                        StringTokenizer tok1 = new StringTokenizer(value, " =");
+                        if (tok1.countTokens() < 2)
+                            return (getUsage());
+                        /* First token will be "-r" */
+                        tok1.nextToken();
+                        /* Next token must be the repositories value */
+                        value = tok1.nextToken();
+                        deployOptions.repositories = value;
                     } else if (value.startsWith("-")) {
                         /* strip the "-" off */
                         value = value.substring(1);
@@ -89,7 +96,7 @@ public class MonitorControl {
                                 deployOptions.update = true;
                             } else if (value.startsWith("v")) {
                                 deployOptions.verbose = true;
-                            } else {
+                            }else {
                                 return (getUsage());
                             }
                             value = value.substring(1);
@@ -110,6 +117,18 @@ public class MonitorControl {
                     deploy = loadDeployment(deployment);
                     if (deploy == null) {
                         return (deployment + ": Cannot find file ["+deployment+"]\n");
+                    }
+                    if(deployOptions.repositories!=null) {
+                        String[] parts = deployOptions.repositories.split(";");
+                        List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+                        for(String part : parts) {
+                            RemoteRepository r = new RemoteRepository();
+                            r.setUrl(part);
+                            remoteRepositories.add(r);
+                        }
+                        for(ServiceElement service : deploy.getServices()) {
+                            service.setRemoteRepositories(remoteRepositories);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -336,6 +355,7 @@ public class MonitorControl {
             b.append("\n");
             b.append("usage: deploy opstring " +
                      "[-t=deploy-timeout] " +
+                     "[-r=repository][;repository]]" +
                      "[-iuv]");
             b.append("\n");
             b.append("\n");
@@ -347,6 +367,8 @@ public class MonitorControl {
             b.append("\n");
             b.append("-t\tTime in milliseconds to wait for deployment status");
             b.append("\n");
+            b.append("-r\tRepositories to use for the resolution of artifacts");
+            b.append("\n");
             return (b.toString());
         }
 
@@ -357,6 +379,7 @@ public class MonitorControl {
         long deployTimeout;
         boolean verbose;
         boolean update;
+        String repositories;
 
         long getDeployTimeout() {
             return (deployTimeout);
@@ -641,15 +664,12 @@ public class MonitorControl {
      *
      * @throws Exception If there are any errors
      */
-    static OperationalString loadDeployment(String deployment)
-        throws Exception {
+    static OperationalString loadDeployment(String deployment) throws Exception {
         OperationalString deploy = null;
         File deployFile = getDeploymentFile(deployment);
         if (deployFile.exists()) {
-            OpStringLoader opStringLoader =
-                new OpStringLoader(CLI.class.getClassLoader());
-            OperationalString[] opstrings =
-                opStringLoader.parseOperationalString(deployFile);
+            OpStringLoader opStringLoader = new OpStringLoader(CLI.class.getClassLoader());
+            OperationalString[] opstrings = opStringLoader.parseOperationalString(deployFile);
             deploy = opstrings[0];
         }
         return (deploy);
