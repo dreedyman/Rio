@@ -98,8 +98,9 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
                         replicate(calculable);
                     }
                 } catch(IOException e) {
-                    logger.log(Level.WARNING, "Cannot archive: ", e);
+                    logger.log(Level.WARNING, "Cannot replicate: ", e);
                 } catch (InterruptedException e) {
+                    logger.log(Level.WARNING, "ReplicatorTask interrupted", e);
                 }
             }
 
@@ -131,7 +132,7 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
 
     private synchronized void init() {
         if(execService==null) {
-            execService = Executors.newFixedThreadPool(1);
+            execService = Executors.newCachedThreadPool();
             execService.submit(new ReplicatorTask());
         }
     }

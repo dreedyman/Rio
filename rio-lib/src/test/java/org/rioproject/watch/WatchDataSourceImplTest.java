@@ -414,17 +414,16 @@ public class WatchDataSourceImplTest {
      */
     @Test public void testClear() throws Exception {
         final int DCS = WatchDataSourceImpl.DEFAULT_COLLECTION_SIZE;
-        int count = DCS;
         WatchDataSourceImpl impl = new WatchDataSourceImpl();
         impl.setID("watch");
         impl.setConfiguration(EmptyConfiguration.INSTANCE);
 
-        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < DCS; j++) {
             impl.addCalculable(new Calculable());
         }
         DataSourceMonitor mon = new DataSourceMonitor(impl);
-        mon.waitFor(count);
-        int expected = Math.min(count, DCS);
+        mon.waitFor(DCS);
+        int expected = Math.min(DCS, DCS);
         Assert.assertEquals(expected, impl.getCalculable().length);
 
         impl.clear();
@@ -440,18 +439,17 @@ public class WatchDataSourceImplTest {
      */
     @Test public void testGetCurrentSize() throws Exception {
         final int DCS = WatchDataSourceImpl.DEFAULT_COLLECTION_SIZE;
-        int count = DCS;
         WatchDataSourceImpl impl = new WatchDataSourceImpl();
         impl.setID("watch");
         impl.setConfiguration(EmptyConfiguration.INSTANCE);
 
-        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < DCS; j++) {
             impl.addCalculable(new Calculable());
         }
         DataSourceMonitor mon = new DataSourceMonitor(impl);
-        mon.waitFor(count);
+        mon.waitFor(DCS);
 
-        int expected = Math.min(count, DCS);
+        int expected = Math.min(DCS, DCS);
         Assert.assertEquals(expected, impl.getCurrentSize());
 
         impl.close();
@@ -517,8 +515,7 @@ public class WatchDataSourceImplTest {
                 if (nullCalculable) {
                     try {
                         impl.addCalculable(null);
-                        Assert.fail("IllegalArgumentException expected but"
-                                    + " not thrown");
+                        Assert.fail("IllegalArgumentException expected but not thrown");
                     } catch (IllegalArgumentException e) {
                     }
                 } else {
@@ -532,10 +529,8 @@ public class WatchDataSourceImplTest {
                 // Replicator should have all the data
                 System.out.println(
                     "WDS size=" + impl.getCurrentSize() + ", " +
-                    "Replicator ("+wdrClass.substring(wdrClass.indexOf("$")+1,
-                                                      wdrClass.length())+") " +
-                    "size=" + wdr.calculables().size() +
-                    ", expected size=" + expected.size());
+                    "Replicator ("+wdrClass.substring(wdrClass.indexOf("$")+1,wdrClass.length())+") " +
+                    "size=" + wdr.calculables().size() +", expected size=" + expected.size());
                 Assert.assertEquals(expected.size(), wdr.calculables().size());
                 Utils.assertEqualContents(expected, wdr.calculables());                
 
@@ -606,18 +601,17 @@ public class WatchDataSourceImplTest {
      */
     @Test public void testGetCalculable1() throws Exception {
         final int DCS = WatchDataSourceImpl.DEFAULT_COLLECTION_SIZE;
-        int count = DCS;
         WatchDataSourceImpl impl = new WatchDataSourceImpl();
         impl.setID("watch");
         impl.setConfiguration(EmptyConfiguration.INSTANCE);
         List<Calculable> expected = new ArrayList<Calculable>();
-        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < DCS; j++) {
             Calculable c = new Calculable();
             impl.addCalculable(c);
             expected.add(c);
         }
         DataSourceMonitor mon = new DataSourceMonitor(impl);
-        mon.waitFor(count);
+        mon.waitFor(DCS);
 
         int off = Math.max(expected.size() - DCS, 0);
         expected = expected.subList(off, expected.size());
@@ -634,18 +628,17 @@ public class WatchDataSourceImplTest {
      */
     @Test public void testGetLastCalculable1() throws Exception {
         final int DCS = WatchDataSourceImpl.DEFAULT_COLLECTION_SIZE;
-        int count = DCS;
         WatchDataSourceImpl impl = new WatchDataSourceImpl();
         impl.setID("watch");
         impl.setConfiguration(EmptyConfiguration.INSTANCE);
         Calculable expected = null;
-        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < DCS; j++) {
             Calculable c = new Calculable();
             impl.addCalculable(c);
             expected = c;
         }
         DataSourceMonitor mon = new DataSourceMonitor(impl);
-        mon.waitFor(count);
+        mon.waitFor(DCS);
 
         Assert.assertSame(expected, impl.getLastCalculable());
 
@@ -996,7 +989,7 @@ public class WatchDataSourceImplTest {
         }
 
         WatchDataReplicator getWatchDataReplicator() throws ExportException {
-            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
+            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance("127.0.0.1", 0),
                                              new BasicILFactory(),
                                              false,
                                              true);

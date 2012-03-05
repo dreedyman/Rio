@@ -372,17 +372,18 @@ public class AetherService {
                 }
             }
         }
-        RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
-        List<Mirror> mirrors = effectiveSettings.getMirrors();
-        for (Mirror mirror : mirrors) {
-            if (mirror.getMirrorOf().equals("*") || mirror.getMirrorOf().equals("central")) {
-                System.out.println("[AetherService] Using mirror for central: " + mirror.getUrl());
-                central = new RemoteRepository("central", "default", mirror.getUrl());
+        if(repositories.size()>0) {
+            RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
+            List<Mirror> mirrors = effectiveSettings.getMirrors();
+            for (Mirror mirror : mirrors) {
+                if (mirror.getMirrorOf().equals("*") || mirror.getMirrorOf().equals("central")) {
+                    System.out.println("[AetherService] Using mirror for central: " + mirror.getUrl());
+                    central = new RemoteRepository("central", "default", mirror.getUrl());
+                }
             }
+            if(!repositories.contains(central))
+                repositories.add(central);
         }
-        /*if(!repositories.contains(central))
-            repositories.add(central);*/
-
         return repositories;
     }
 
