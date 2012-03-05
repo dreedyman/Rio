@@ -117,7 +117,7 @@
                 <exclude>net.jini:jsk-dl</exclude>
                 <exclude>net.jini.lookup:jmx-lookup</exclude>
                 <exclude>net.jini.lookup:serviceui</exclude>
-                <exclude>com.sun.jini:reggie:jar:dl</exclude>
+                <exclude>com.sun.jini:reggie-dl</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-api:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-proxy:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-ui:jar</exclude>
@@ -151,27 +151,28 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <!-- Get jsk-dl.jar, jmx-lookup.jar and serviceui.jar into the lib-dl directory -->
+        <!-- Get jsk-dl.jar, jmx-lookup.jar, reggie-dl.jar and serviceui.jar into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>net.jini:jsk-dl</include>
                 <include>net.jini.lookup:jmx-lookup</include>
                 <include>net.jini.lookup:serviceui</include>
+                <include>com.sun.jini:reggie-dl</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <!-- Get reggie-dl.jar and put into the lib-dl directory -->
-        <dependencySet>
+        <!--<dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
-                <include>com.sun.jini:reggie:jar:dl</include>
+                <include>com.sun.jini:reggie-dl</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}-dl.${artifact.extension}</outputFileNameMapping>
-        </dependencySet>
+        </dependencySet>-->
 
         <!-- The rest of the service download (-api, -proxy and -ui) jars go into the lib-dl directory -->
         <dependencySet>
