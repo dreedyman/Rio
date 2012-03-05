@@ -88,28 +88,30 @@ class PermGenTest {
         log("UNDEPLOY ${mgr.operationalString.name}")
         testManager.undeploy(mgr.operationalString.name)
 
-        checkStillLoaded("org.rioproject.test.simple.Simple",
-                         "org.rioproject.test.simple.SimpleImpl",
-                         memoryMXBean,
-                         permGen,
-                         instrumentor)
+        boolean stillLoaded = checkStillLoaded("org.rioproject.test.simple.Simple",
+                                               "org.rioproject.test.simple.SimpleImpl",
+                                               memoryMXBean,
+                                               permGen,
+                                               instrumentor)
 
         log("UNDEPLOY ${mgr2.operationalString.name}")
         testManager.undeploy(mgr2.operationalString.name)
 
-        for(int i=0; i<420; i++) {
+        assertFalse(stillLoaded)
+
+        /*for(int i=0; i<420; i++) {
             if(i%30==0)
                 println "${String.format('%-5s', "[${i}]")} ${getPermGen(permGen)}"
             Thread.sleep(1000)
-        }
+        }*/
     }
 
-    private void checkStillLoaded(String api, String impl, def memoryMXBean, WatchDataSource permGen, def instrumentor) {
+    private boolean checkStillLoaded(String api, String impl, def memoryMXBean, WatchDataSource permGen, def instrumentor) {
         long start = System.currentTimeMillis()
         int iteration = 0
         boolean apiStillLoaded = true
         boolean implStillLoaded = true
-        while(apiStillLoaded || implStillLoaded) {
+        while((apiStillLoaded || implStillLoaded) && iteration < 600) {
             if(iteration%30==0) {
                 memoryMXBean.gc()
                 if(apiStillLoaded) {
@@ -134,6 +136,8 @@ class PermGenTest {
             iteration++
         }
         println "Time to unload classes: ${org.rioproject.util.TimeUtil.format(System.currentTimeMillis()-start)}"
+        println "apiStillLoaded: ${apiStillLoaded}, implStillLoaded: ${implStillLoaded} "+(apiStillLoaded && implStillLoaded)
+        return apiStillLoaded && implStillLoaded
     }
 
     private static void log(String s) {
