@@ -95,9 +95,13 @@ public class OarMojo extends ClassDepAndJarMojo {
         List<Repository> remoteRepositories = new ArrayList<Repository>();
         try {
             for(Object o : project.getRemoteArtifactRepositories()) {
-                Repository repository = new Repository();
                 Method getId = o.getClass().getMethod("getId");
-                repository.setId((String) getId.invoke(o));
+                String id = (String) getId.invoke(o);
+                if(id.equals("central"))
+                    continue;
+                Repository repository = new Repository();
+                repository.setId(id);
+                                
                 Method getUrl = o.getClass().getMethod("getUrl");
                 repository.setUrl((String) getUrl.invoke(o));
 
@@ -107,8 +111,7 @@ public class OarMojo extends ClassDepAndJarMojo {
 
                 repository.setReleases(repositoryPolicySupported(o, "getReleases"));
                 repository.setReleaseUpdatePolicy(repositoryPolicyUpdatePolicy(o, false));
-                repository.setReleaseChecksumPolicy(repositoryPolicyChecksumPolicy(o, false));
-
+                repository.setReleaseChecksumPolicy(repositoryPolicyChecksumPolicy(o, false));                
                 remoteRepositories.add(repository);
             }
         } catch(NoSuchMethodException e) {

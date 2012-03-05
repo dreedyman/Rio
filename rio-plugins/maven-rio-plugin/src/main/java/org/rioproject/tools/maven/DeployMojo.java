@@ -19,6 +19,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Deploys a Rio OpString
@@ -45,6 +47,27 @@ public class DeployMojo extends AbstractRioMojo {
     private String group;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        StringBuilder repositoryBuilder = new StringBuilder();
+        for(Object o : project.getRemoteArtifactRepositories()) {
+            try {
+                Method getId = o.getClass().getMethod("getId");
+                String id = (String) getId.invoke(o);
+                if(id.equals("central"))
+                    continue;
+                Method getUrl = o.getClass().getMethod("getUrl");
+                String repositoryUrl = (String) getUrl.invoke(o);
+                if(repositoryBuilder.length()>0)
+                    repositoryBuilder.append(";");
+                repositoryBuilder.append(repositoryUrl);
+            } catch(NoSuchMethodException e) {
+                throw new MojoExecutionException("Building Repository list", e);
+            } catch (InvocationTargetException e) {
+                throw new MojoExecutionException("Building Repository list", e);
+            } catch (IllegalAccessException e) {
+                throw new MojoExecutionException("Building Repository list", e);
+            }
+        }
+        
         if(!project.isExecutionRoot()) {
             getLog().debug("Project not the execution root, do not execute");
             return;
@@ -57,7 +80,12 @@ public class DeployMojo extends AbstractRioMojo {
         String groups = "";
         if(group!=null)
             groups="groups="+group;
+        if(repositoryBuilder.length()>0) {
+            repositoryBuilder.insert(0, " -r=");
+        }
 
-        ExecHelper.doExec(getRioCommand()+" deploy -uv -t=30000 "+groups+" "+opstring, true, true);
+        ExecHelper.doExec(getRioCommand()+" deploy -uv -t=30000 "+groups+" "+opstring+repositoryBuilder.toString(),
+                          true,
+                          true);
     }
 }
