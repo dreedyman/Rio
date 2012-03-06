@@ -69,6 +69,12 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <forkMode>always</forkMode>
+                            <systemProperties>
+                                <property>
+                                    <name>RIO_HOME</name>
+                                    <value>${basedir}/../../distribution/target/rio-${rio.version}</value>
+                                </property>
+                            </systemProperties>
                         </configuration>
                         <executions>
                             <execution>

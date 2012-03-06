@@ -74,6 +74,10 @@
                                     <name>opstring</name>
                                     <value>../src/main/opstring/calculator.groovy</value>
                                 </property>
+                                <property>
+                                    <name>RIO_HOME</name>
+                                    <value>${basedir}/../../../distribution/target/rio-${rio.version}</value>
+                                </property>
                             </systemProperties>
                         </configuration>
                         <executions>
