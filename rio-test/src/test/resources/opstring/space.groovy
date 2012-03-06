@@ -4,8 +4,8 @@ deployment(name: 'Spaced') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    artifact id: 'outrigger-dl', "com.sun.jini:outrigger:jar:dl:2.1"
-    artifact id: 'outrigger-impl', "com.sun.jini:outrigger:2.1"
+    artifact id: 'outrigger-dl', "com.sun.jini:outrigger-dl:2.1.1;http://www.rio-project.org/maven2"
+    artifact id: 'outrigger-impl', "com.sun.jini:outrigger:2.1.1"
 
     service(name: 'Spaced Out') {
         interfaces {
