@@ -78,35 +78,35 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     /** Indicates a JSB cannot be provisioned */
     public static final int BAD_CYBERNODE = 1 << 2;
     /** The Landlord that will manage leases for ServiceInstantiation resources */
-    LandlordLessor landlord;
+    private LandlordLessor landlord;
     /** ProvisionEvent sequence number */
-    AtomicInteger serviceProvisionEventSequenceNumber = new AtomicInteger(0);
+    private AtomicInteger serviceProvisionEventSequenceNumber = new AtomicInteger(0);
     /** EventRegistration sequence number */
-    AtomicInteger eventRegistrationSequenceNumber = new AtomicInteger(0);
+    private AtomicInteger eventRegistrationSequenceNumber = new AtomicInteger(0);
     /** Event source */
-    Object eventSource;
+    private Object eventSource;
     /** EventHandler to fire ProvisionFailureEvent notifications */
-    EventHandler failureHandler;
+    private EventHandler failureHandler;
     /** Executor for provision processing */
-    ThreadPoolExecutor provisioningPool;
+    private ThreadPoolExecutor provisioningPool;
     /** Default number of maximum Threads to have in the ThreadPool */
-    static final int DEFAULT_MAX_THREADS = 10;
+    private static final int DEFAULT_MAX_THREADS = 10;
     /** Executor for provision failure event processing */
-    ThreadPoolExecutor provisionFailurePool;
+    private ThreadPoolExecutor provisionFailurePool;
     /** Collection of in-process provision attempts */
-    final List<ServiceElement> inProcess = Collections.synchronizedList(new ArrayList<ServiceElement>());
+    private final List<ServiceElement> inProcess = Collections.synchronizedList(new ArrayList<ServiceElement>());
     /** A Watch to measure provision time */
-    GaugeWatch watch;
+    private GaugeWatch watch;
     /** Manages pending provision dispatch requests for provision types of auto */
-    final PendingManager pendingMgr;
+    private final PendingManager pendingMgr;
     /** Manages provision dispatch requests for provision types of station */
-    final FixedServiceManager fixedServiceManager;
+    private final FixedServiceManager fixedServiceManager;
     /** Manages the selection of ServiceResource objects for provisioning requests */
-    final ServiceResourceSelector selector;
+    private final ServiceResourceSelector selector;
     /** ProxyPreparer for ServiceInstantiator proxies */
-    ProxyPreparer instantiatorPreparer;
+    private ProxyPreparer instantiatorPreparer;
     /** Logger instance */
-    static final Logger logger = Logger.getLogger("org.rioproject.monitor");
+    private static final Logger logger = Logger.getLogger("org.rioproject.monitor");
     private boolean terminating = false;
     private boolean terminated = false;
 
@@ -152,11 +152,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                       new FixedLeasePeriodPolicy(DEFAULT_MAX_LEASE_TIME,
                                                                                  DEFAULT_LEASE_TIME));
         /* Get the ProxyPreparer for ServiceInstantiator instances */
-        instantiatorPreparer =
-            (ProxyPreparer)config.getEntry(ProvisionMonitorImpl.CONFIG_COMPONENT,
-                                           "instantiatorPreparer",
-                                           ProxyPreparer.class,
-                                           new BasicProxyPreparer());
+        instantiatorPreparer = (ProxyPreparer)config.getEntry(ProvisionMonitorImpl.CONFIG_COMPONENT,
+                                                              "instantiatorPreparer",
+                                                              ProxyPreparer.class,
+                                                              new BasicProxyPreparer());
 
         /* Create a ThreadPool for provisioning notification */
         provisioningPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(provisioningPoolMaxThreads);
@@ -169,11 +168,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         landlord.addLeaseListener(new LeaseMonitor());
 
         /* Get the ServiceResourceSelector */
-        selector = (ServiceResourceSelector)config.getEntry(
-                                               ProvisionMonitorImpl.CONFIG_COMPONENT,
-                                               "serviceResourceSelector",
-                                               ServiceResourceSelector.class,
-                                               new RoundRobinSelector());
+        selector = (ServiceResourceSelector)config.getEntry(ProvisionMonitorImpl.CONFIG_COMPONENT,
+                                                            "serviceResourceSelector",
+                                                            ServiceResourceSelector.class,
+                                                            new RoundRobinSelector());
         selector.setLandlordLessor(landlord);
         if(logger.isLoggable(Level.FINEST))
             logger.finest("ServiceResourceSelector : " + selector.getClass().getName());
@@ -333,8 +331,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     void handleFeedback(ServiceBeanInstantiator resource,
                         ResourceCapability updatedCapabilities,
                         List<DeployedService> deployedServices,
-                        int serviceLimit)
-    throws UnknownLeaseException, RemoteException {
+                        int serviceLimit) throws UnknownLeaseException, RemoteException {
 
         if(resource instanceof RemoteMethodControl)
             resource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
