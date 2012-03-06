@@ -48,25 +48,10 @@ public class DeploymentVerifier {
     public void verifyOperationalString(OperationalString opString, RemoteRepository[] repositories)
         throws ResolverException, IOException {
         Resolver resolver = ResolverHelper.getResolver();
-        for(ServiceElement service : opString.getServices()) {            
-            if(service.getRemoteRepositories().length>0) {
-                List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
-                Collections.addAll(remoteRepositories, repositories);
-                for(RemoteRepository r : service.getRemoteRepositories()) {
-                    boolean add = true;
-                    for(RemoteRepository known : repositories) {
-                        if(known.getUrl().equals(r.getUrl())) {
-                            add = false;
-                            break;
-                        }
-                    }
-                    if(add) {
-                        remoteRepositories.add(r);
-                    }
-                }
-                repositories = remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
-            }
-            verifyOperationalStringService(service, resolver, repositories);
+        for(ServiceElement service : opString.getServices()) {
+            verifyOperationalStringService(service,
+                                           resolver,
+                                           mergeRepositories(repositories, service.getRemoteRepositories()));
         }
         for(OperationalString nested : opString.getNestedOperationalStrings())
             verifyOperationalString(nested, repositories);
@@ -129,5 +114,23 @@ public class DeploymentVerifier {
             bundle.setCodebase("file://");
             bundle.setJARs(jars.toArray(new String[jars.size()]));
         }
+    }
+
+    RemoteRepository[] mergeRepositories(RemoteRepository[] r1, RemoteRepository[] r2) {
+        List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+        Collections.addAll(remoteRepositories, r1);
+        for(RemoteRepository r : r2) {
+            boolean add = true;
+            for(RemoteRepository known : r1) {
+                if(known.getUrl().equals(r.getUrl())) {
+                    add = false;
+                    break;
+                }
+            }
+            if(add) {
+                remoteRepositories.add(r);
+            }
+        }
+        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
     }
 }
