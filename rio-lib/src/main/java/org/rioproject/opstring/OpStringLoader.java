@@ -19,6 +19,8 @@ package org.rioproject.opstring;
 import net.jini.core.discovery.LookupLocator;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.config.Constants;
+import org.rioproject.resolver.RemoteRepository;
+import org.rioproject.url.artifact.ArtifactURLConfiguration;
 import org.rioproject.util.PropertyHelper;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -31,10 +33,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -294,13 +293,45 @@ public class OpStringLoader {
         if(fdhBundle==null)
             fdhBundle = getDefaultFDH();
 
-        ServiceElement elem =
-            new ServiceElement(parsedSvc.getProvisionType(),
-                               sbConfig,
-                               parsedSvc.getServiceLevelAgreements(),
-                               parsedSvc.getInterfaceBundles(),
-                               fdhBundle,
-                               parsedSvc.getComponentBundle());
+        ClassBundle[] interfaceBundles = parsedSvc.getInterfaceBundles();
+        List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+        for(ClassBundle interfaceBundle : interfaceBundles) {
+            if(interfaceBundle.getArtifact()!=null) {
+                ArtifactURLConfiguration artifactURLConfiguration = 
+                    new ArtifactURLConfiguration(interfaceBundle.getArtifact());
+                interfaceBundle.setArtifact(artifactURLConfiguration.getArtifact());
+                if(artifactURLConfiguration.getRepositories().length>0) {
+                    Collections.addAll(remoteRepositories, artifactURLConfiguration.getRepositories());
+                }
+            }
+        }
+        if(parsedSvc.getComponentBundle().getArtifact()!=null) {
+            ArtifactURLConfiguration artifactURLConfiguration =
+                new ArtifactURLConfiguration(parsedSvc.getComponentBundle().getArtifact());
+            parsedSvc.getComponentBundle().setArtifact(artifactURLConfiguration.getArtifact());
+            if(artifactURLConfiguration.getRepositories().length>0) {
+                for(RemoteRepository r : remoteRepositories) {
+                    boolean add = true;
+                    for(RemoteRepository r2 : artifactURLConfiguration.getRepositories()) {
+                        if(r2.getUrl().equals(r.getUrl())) {
+                            add = false;
+                            break;
+                        }
+                    }
+                    if(add) {
+                        remoteRepositories.add(r);
+                    }
+                }
+            }
+        }
+
+        ServiceElement elem = new ServiceElement(parsedSvc.getProvisionType(),
+                                                 sbConfig,
+                                                 parsedSvc.getServiceLevelAgreements(),
+                                                 interfaceBundles,
+                                                 fdhBundle,
+                                                 parsedSvc.getComponentBundle());
+        elem.setRemoteRepositories(remoteRepositories);
         String maintain = parsedSvc.getMaintain();
         if(maintain==null)
             maintain = "0";
