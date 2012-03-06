@@ -98,9 +98,10 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
                         replicate(calculable);
                     }
                 } catch(IOException e) {
-                    logger.log(Level.WARNING, "Cannot replicate: ", e);
+                    logger.log(Level.WARNING, "Replication communication failure: ", e);
                 } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "ReplicatorTask interrupted", e);
+                    //logger.log(Level.WARNING, "ReplicatorTask interrupted", e);
+                    Thread.currentThread().interrupt();
                 }
             }
 

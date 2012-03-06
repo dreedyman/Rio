@@ -468,10 +468,8 @@ public class WatchDataSourceImplTest {
     private void doTestAddCalculable(String wdrClass) throws Exception {
         final int DCS = WatchDataSourceImpl.DEFAULT_COLLECTION_SIZE;
         final int MCS = WatchDataSourceImpl.MAX_COLLECTION_SIZE;
-        final Integer[] collectionSizes = ArrayUtils.asObjects(new int[] {
-                1, DCS, MCS});
-        Object[][] combinations = ArrayUtils.combinations(new Object[][]
-                {collectionSizes, booleanAxis});
+        final Integer[] collectionSizes = ArrayUtils.asObjects(new int[] {1, DCS, MCS});
+        Object[][] combinations = ArrayUtils.combinations(new Object[][] {collectionSizes, booleanAxis});
         for (Object[] combination : combinations) {
             int collectionSize = (Integer) combination[0];
             boolean nullCalculable = (Boolean) combination[1];
@@ -488,8 +486,7 @@ public class WatchDataSourceImplTest {
                 else
                     wdr = new LoggingWatchDataReplicator();
                 DynamicConfiguration config = new DynamicConfiguration();
-                config.setEntry("org.rioproject.watch", "collectionSize",
-                                collectionSize);
+                config.setEntry("org.rioproject.watch", "collectionSize", collectionSize);
 
                 WatchDataSourceImpl impl = new WatchDataSourceImpl();
                 impl.setID("watch");
@@ -524,13 +521,23 @@ public class WatchDataSourceImplTest {
                     expected.add(c);
                 }
 
-                impl.close();
-                
+                long waited = 0;
+                if(wdrClass.equals(RemoteWDR.class.getName())) {
+                    int maxIterations = 5000;
+                    int iteration = 0;
+                    long current = System.currentTimeMillis();
+                    while(expected.size()!=wdr.calculables().size() && iteration<maxIterations) {
+                        Utils.sleep(1);
+                        iteration++;
+                    }
+                    waited = System.currentTimeMillis()-current;
+                }
                 // Replicator should have all the data
                 System.out.println(
                     "WDS size=" + impl.getCurrentSize() + ", " +
                     "Replicator ("+wdrClass.substring(wdrClass.indexOf("$")+1,wdrClass.length())+") " +
-                    "size=" + wdr.calculables().size() +", expected size=" + expected.size());
+                    "size=" + wdr.calculables().size() +", expected size=" + expected.size()+
+                    (waited==0?"":", waited="+waited+" ms"));
                 Assert.assertEquals(expected.size(), wdr.calculables().size());
                 Utils.assertEqualContents(expected, wdr.calculables());                
 
@@ -989,7 +996,7 @@ public class WatchDataSourceImplTest {
         }
 
         WatchDataReplicator getWatchDataReplicator() throws ExportException {
-            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance("127.0.0.1", 0),
+            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
                                              new BasicILFactory(),
                                              false,
                                              true);
@@ -1007,7 +1014,7 @@ public class WatchDataSourceImplTest {
 
         @Override
         public void close() {
-            //exporter.unexport(true);
+            exporter.unexport(true);
             super.close();
         }
     }
