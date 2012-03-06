@@ -21,7 +21,6 @@ import net.jini.space.JavaSpace05;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.associations.*;
-import org.rioproject.config.Constants;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -228,12 +227,9 @@ public class AssociationFutureTest {
 
     @Test
     public void testWithDeploy() {
-        //LogUtil.setLogger("org.rioproject.associations", Level.ALL);
         File opstring = new File("src/test/resources/opstring/space.groovy");
         Assert.assertNotNull(opstring);
-        /*testManager.startReggie();
-        testManager.startProvisionMonitor();
-        testManager.startCybernode();*/
+
         testManager.deploy(opstring);
         AssociationDescriptor ad = AssociationDescriptor.create("Spaced Out", JavaSpace05.class, "AssociationFutureTest");
         AssociationMgmt mgr = new AssociationMgmt();
