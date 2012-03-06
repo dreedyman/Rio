@@ -126,9 +126,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * @param serviceID Unique identifier for the ServiceBean
      * @param container The ServiceBeanContainer
      */
-    public JSBDelegate(Object identifier,
-                       Uuid serviceID,
-                       ServiceBeanContainer container) {
+    public JSBDelegate(Object identifier, Uuid serviceID, ServiceBeanContainer container) {
         this.identifier = identifier;
         this.serviceID = serviceID;
         this.container = container;
@@ -136,15 +134,12 @@ public class JSBDelegate implements ServiceBeanDelegate {
         ServiceCostCalculator defaultCostCalculator = new ServiceCostCalculator();
         Configuration config = container.getSharedConfiguration();
         try {
-            serviceCostCalculator =
-                (ServiceCostCalculator)config.getEntry(CybernodeImpl.CONFIG_COMPONENT,
-                                                       "serviceCostCalculator",
-                                                       ServiceCostCalculator.class,
-                                                       defaultCostCalculator);
+            serviceCostCalculator = (ServiceCostCalculator)config.getEntry(CybernodeImpl.CONFIG_COMPONENT,
+                                                                           "serviceCostCalculator",
+                                                                           ServiceCostCalculator.class,
+                                                                           defaultCostCalculator);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Getting ServiceCostCalculator, using default",
-                       e);
+            logger.log(Level.WARNING, "Getting ServiceCostCalculator, using default", e);
             serviceCostCalculator = defaultCostCalculator;
         }
         serviceCostCalculator.setComputeResource(container.getComputeResource());
@@ -175,18 +170,14 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     long now = System.currentTimeMillis();
                     if(lastServiceRecordUpdate!=0)
                         serviceRecord.setUpdated();
-                    long diff = (lastServiceRecordUpdate==0?0:
-                                 now-lastServiceRecordUpdate);
-                    ResourceCost[] resourceCosts =
-                        serviceCostCalculator.calculateCosts(diff);
-                    for (ResourceCost resourceCost : resourceCosts)
+                    long diff = (lastServiceRecordUpdate==0 ? 0 : now-lastServiceRecordUpdate);
+                    ResourceCost[] resourceCosts = serviceCostCalculator.calculateCosts(diff);
+                    for (ResourceCost resourceCost : resourceCosts) {
                         serviceRecord.addResourceCost(resourceCost);
+                    }
                     lastServiceRecordUpdate = now;
                 } catch (Throwable t) {
-                    logger.log(Level.WARNING,
-                               "Calculating resource costs for " +
-                               "["+sElem.getName()+"]",
-                               t);
+                    logger.log(Level.WARNING, "Calculating resource costs for ["+sElem.getName()+"]", t);
                 }
             }
         }
@@ -225,9 +216,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 execManager.getServiceBeanExecutor().update(newElem, opMgr);
                 return true;
             } catch (RemoteException e) {
-                logger.log(Level.WARNING,
-                           "Updating forked service ["+sElem.getName()+"]",
-                           e);
+                logger.log(Level.WARNING, "Updating forked service ["+sElem.getName()+"]", e);
                 return false;
             }
         }
@@ -238,29 +227,23 @@ public class JSBDelegate implements ServiceBeanDelegate {
         synchronized(this) {
             if(serviceProxy==null) {
                 if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Cannot update ["+sElem.getName()+"], " +
-                                  "Proxy is null");
+                    logger.finest("Cannot update ["+sElem.getName()+"], Proxy is null");
                 return(false);
             }
             /* Preserve instanceID */
             Long instanceID = sElem.getServiceBeanConfig().getInstanceID();
             if(instanceID!=null) {
                 sElem =
-                    ServiceElementUtil.prepareInstanceID(newElem,
-                                                         true,
-                                                         instanceID);
+                    ServiceElementUtil.prepareInstanceID(newElem, true, instanceID);
             } else {
                 sElem = ServiceElementUtil.copyServiceElement(newElem);
-                logger.log(Level.WARNING, "No instanceID for " +
-                                          "["+sElem.getName()+"] "+
-                                          "to update");
+                logger.warning("No instanceID for ["+sElem.getName()+"] to update");
             }
 
             if(context instanceof JSBContext) {
                 ((JSBContext)context).setServiceElement(sElem);
             } else {
-                logger.warning("Cannot update ["+sElem.getName()+"], "+
-                               "Unknown ServiceBeanContext type "+
+                logger.warning("Cannot update ["+sElem.getName()+"], Unknown ServiceBeanContext type "+
                                "["+context.getClass().getName()+"]");
                 return(false);
             }
@@ -273,10 +256,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     jsbMgr.setOperationalStringManager(opMgr);
                 }                
             } else {
-                logger.warning("Cannot update ["+sElem.getName()+"], "+
-                               "Unknown ServiceBeanManager type "+
-                               "["+context.getServiceBeanManager().
-                                           getClass().getName()+"]");
+                logger.warning("Cannot update ["+sElem.getName()+"], Unknown ServiceBeanManager type "+
+                               "["+context.getServiceBeanManager().getClass().getName()+"]");
                 return(false);
             }
         }
@@ -288,7 +269,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * 
      * @return The ServiceBeanInstance
      *
-     * @throws org.rioproject.deploy.ServiceBeanInstantiationException if there are erros loading the service
+     * @throws org.rioproject.deploy.ServiceBeanInstantiationException if there are errors loading the service
      * bean
      */
     public ServiceBeanInstance load() throws ServiceBeanInstantiationException {
@@ -321,25 +302,21 @@ public class JSBDelegate implements ServiceBeanDelegate {
             throw new ServiceBeanControlException("Cannot advertise ["+sElem.getName()+"], Proxy is null");
         }
         if(terminated || terminating)
-            throw new ServiceBeanControlException("advertising service "+
-                                          "while in the process "+
-                                          "of terminating");
+            throw new ServiceBeanControlException("advertising service while in the process of terminating");
         /* If any of the associations are of type requires, service
          * advertisement is managed by AssociationManagement */
         for (Association assoc : context.getAssociationManagement().getAssociations()) {
             if (assoc.getAssociationType()== AssociationType.REQUIRES) {
                 if (logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE,
-                               sElem.getName() + " has at least one requires " +
-                               "Association, advertisement managed by " +
-                               "AssociationManagement");
+                    logger.fine(sElem.getName() + " has at least one requires Association, advertisement managed by " +
+                                "AssociationManagement");
                 return;
             }
         }
         try {
             ServiceAdvertiser.advertise(serviceProxy, context);
             if(logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE, sElem.getName()+": advertised");
+                logger.fine(sElem.getName()+": advertised");
         } catch(ServiceBeanControlException e) {
             logger.log(Level.WARNING,
                        "Could not advertise "+sElem.getName()+", continue on");
@@ -401,23 +378,18 @@ public class JSBDelegate implements ServiceBeanDelegate {
                             Object adminObject = admin.getAdmin();
 
                             if(adminObject instanceof DestroyAdmin) {
-                                DestroyAdmin destroyAdmin =
-                                    (DestroyAdmin)adminObject;
+                                DestroyAdmin destroyAdmin = (DestroyAdmin)adminObject;
                                 destroyAdmin.destroy();
                                 setDiscarded();
                                 //container.discarded(identifier);
                                 terminated = true;
                             } else {
                                 if(logger.isLoggable(Level.FINE))
-                                    logger.log(Level.FINE,
-                                               "No DestroyAdmin capabilities for "+
-                                               serviceProxy.getClass().getName());
+                                    logger.fine("No DestroyAdmin capabilities for "+serviceProxy.getClass().getName());
                             }
                         } else {
                             if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
-                                           "No Administrable capabilities for "+
-                                           serviceProxy.getClass().getName());
+                                logger.fine("No Administrable capabilities for "+serviceProxy.getClass().getName());
                         }
                     } catch(Throwable t) {
                         logger.log(Level.SEVERE, "Terminating ServiceBean", t);
@@ -434,8 +406,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             }
 
             /* Unprovision any installed platform capability components */
-            PlatformCapability[] pCaps =
-                stagedDataManager.removeInstalledPlatformCapabilities(false);
+            PlatformCapability[] pCaps = stagedDataManager.removeInstalledPlatformCapabilities(false);
             for(PlatformCapability pCap : pCaps) {
                 unregisterPlatformCapability(pCap);
             }
@@ -462,8 +433,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * @throws org.rioproject.deploy.ServiceBeanInstantiationException if there are errors creating the
      * service bean
      */
-    protected void startServiceBean(final ServiceElement sElem,
-                                    final OperationalStringManager opStringMgr)
+    protected void startServiceBean(final ServiceElement sElem, final OperationalStringManager opStringMgr)
     throws ServiceBeanInstantiationException {
         /*
         threadGroup = new ThreadGroup("ServiceBeanThreadGroup:"+sElem.getName()) {
@@ -488,8 +458,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                          * data staging, perform the stagedData/installation */
                         stagedDataManager.download();
 
-                        installedPlatformCapabilities.addAll(
-                            stagedDataManager.getInstalledPlatformCapabilities());
+                        installedPlatformCapabilities.addAll(stagedDataManager.getInstalledPlatformCapabilities());
                         for(PlatformCapability pCap : installedPlatformCapabilities) {
                             pCap.incrementUsage();
                         }
@@ -497,20 +466,12 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
                     /* Check if we are forking a service bean */
                     if(sElem.forkService() && !runningForked()) {
-                        execManager = new ServiceBeanExecManager(identifier,
-                                                                 sElem,
-                                                                 container);
+                        execManager = new ServiceBeanExecManager(identifier, sElem, container);
                         try {
                             /* Get matched PlatformCapability instances to apply */
-                            PlatformCapability[] pCaps =
-                                computeResource.getPlatformCapabilities();
-                            PlatformCapability[] matched =
-                                ServiceElementUtil.getMatchedPlatformCapabilities(sElem,
-                                                                                  pCaps);
-                            instance = execManager.exec(sElem,
-                                                        opStringMgr,
-                                                        new JSBDiscardManager(),
-                                                        matched);
+                            PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
+                            PlatformCapability[] matched = ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
+                            instance = execManager.exec(sElem, opStringMgr, new JSBDiscardManager(), matched);
                             serviceRecord = execManager.getServiceRecord();
                         } catch (Exception e) {
                             abortThrowable = e;
@@ -521,11 +482,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         JSBDiscardManager discardManager = new JSBDiscardManager();
 
                         /* Create the ServiceBeanManager */
-                        JSBManager jsbManager =
-                            new JSBManager(sElem,
-                                           opStringMgr,
-                                           computeResource.getAddress().getHostAddress(),
-                                           container.getUuid());
+                        JSBManager jsbManager = new JSBManager(sElem,
+                                                               opStringMgr,
+                                                               computeResource.getAddress().getHostAddress(),
+                                                               container.getUuid());
                         jsbManager.setDiscardManager(discardManager);
                         jsbManager.setServiceID(serviceID);
                         /*
@@ -585,8 +545,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                                                                           serviceProxy,
                                                                           context,
                                                                           slaEventHandler);
-                        serviceBeanSLAManager.addSLAs(
-                            sElem.getServiceLevelAgreements().getServiceSLAs());
+                        serviceBeanSLAManager.addSLAs(sElem.getServiceLevelAgreements().getServiceSLAs());
                         serviceBeanSLAManager.createSLAThresholdEventAdapter();
 
                         /* Invoke postInitialize lifecycle method if defined
@@ -597,8 +556,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         instance = new ServiceBeanInstance(serviceID,
                                                            loadResult.getMarshalledInstance(),
                                                            context.getServiceBeanConfig(),
-                                                           container.getComputeResource().getAddress().
-                                                               getHostAddress(),
+                                                           container.getComputeResource().getAddress().getHostAddress(),
                                                            container.getUuid());
 
                         /* Create the ServiceRecord */
@@ -618,13 +576,18 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
                 } catch(Throwable t) {
                     StringBuilder buff = new StringBuilder();
+                    String label = "classpath";
                     if(sElem.getComponentBundle()!=null) {
-                        String[] jars = sElem.getComponentBundle().getJARNames();
-                        for(int i=0; i<jars.length; i++) {
-                            if(i>0)
-                                buff.append(", ");
-                            buff.append(sElem.getComponentBundle().
-                                getCodebase()).append(jars[i]);
+                        if(sElem.getComponentBundle().getArtifact()==null) {
+                            String[] jars = sElem.getComponentBundle().getJARNames();
+                            for(int i=0; i<jars.length; i++) {
+                                if(i>0)
+                                    buff.append(", ");
+                                buff.append(sElem.getComponentBundle().getCodebase()).append(jars[i]);
+                            }
+                        } else {
+                            label = "artifact";
+                            buff.append(sElem.getComponentBundle().getArtifact());
                         }
                     } else {
                         buff.append("<unknown>");
@@ -635,9 +598,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                          System.out.println("===> "+sElem.getName()+", MISSING:"+e.getMethod());
                     }
                     logger.log(Level.SEVERE,
-                               "Failed to load the ServiceBean "+
-                               "["+sElem.getName()+"] "+
-                               "classpath ["+buff.toString()+"]",
+                               "Failed to load the ServiceBean ["+sElem.getName()+"] "+label+" ["+buff.toString()+"]",
                                abortThrowable);
                     container.remove(identifier);
                 }
@@ -649,12 +610,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
             if(logger.isLoggable(Level.FINEST))
                 logger.finest("ServiceBean ["+sElem.getName()+"] start thread completed");
         } catch(InterruptedException e) {
-            logger.log(Level.WARNING,
-                       "ServiceBean ["+sElem.getName()+"] start Thread interrupted",
-                       e);
+            logger.log(Level.WARNING, "ServiceBean ["+sElem.getName()+"] start Thread interrupted", e);
         } finally {
             starting = false;
-            //Thread.currentThread().setContextClassLoader(tccl);
         }
 
         try {
@@ -662,9 +620,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
              * we will not have a loadResult.impl of the service if it has been
              * forked/exec'd */
             if(loadResult!=null && loadResult.getImpl()!=null)
-                BeanHelper.invokeLifeCycle(Started.class,
-                                           "postStart",
-                                           loadResult.getImpl());
+                BeanHelper.invokeLifeCycle(Started.class, "postStart", loadResult.getImpl());
         } catch (Exception e) {
             logger.log(Level.WARNING,
                        "Failed to invoke the postStart() lifecycle method on " +
@@ -694,10 +650,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     new ServiceBeanInstantiationException.ExceptionDescriptor(abortThrowable.getClass().getName(),
                                                                       abortThrowable.getLocalizedMessage(),
                                                                       abortThrowable.getStackTrace());
-                toThrow = new ServiceBeanInstantiationException("ServiceBean ["+sElem.getName()+"] "+
-                                                        "instantiation failed",
-                                                        exDesc,
-                                                        true);
+                toThrow = new ServiceBeanInstantiationException("ServiceBean ["+sElem.getName()+"] instantiation failed",
+                                                                exDesc,
+                                                                true);
             }
             stagedDataManager.removeInstalledPlatformCapabilities();
             throw toThrow;
@@ -753,17 +708,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
         try {
             if(context==null)
                 return;
-            ObjectName objectName =
-                JMXUtil.getObjectName(context,
-                                      "",
-                                      "PlatformCapability",
-                                      pCap.getName());
+            ObjectName objectName = JMXUtil.getObjectName(context, "", "PlatformCapability", pCap.getName());
             MBeanServerFactory.getMBeanServer().unregisterMBean(objectName);
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Unregistering PlatformCapability "+
-                       "["+pCap.getName()+"]:"+e.toString(),
-                       e);
+            logger.log(Level.WARNING, "Unregistering PlatformCapability ["+pCap.getName()+"]:"+e.toString(), e);
         }
     }
 
@@ -785,8 +733,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             }
         }
         if(serviceRecord==null) {
-            logger.warning("Discarding ["+sElem.getName()+"] service, " +
-                           "has no ServiceRecord");
+            logger.warning("Discarding ["+sElem.getName()+"] service, has no ServiceRecord");
             return;
         }
         synchronized(serviceRecordLock) {
@@ -809,8 +756,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
          */
         public void changed(ServiceElement preElem, ServiceElement postElem) {
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] "+
-                              "ServiceElementChangeManager notified");
+                logger.finest("["+context.getServiceElement().getName()+"] ServiceElementChangeManager notified");
             /* ------------------------------------------*
              *  SLA Update Processing
              * ------------------------------------------*/
@@ -825,21 +771,14 @@ public class JSBDelegate implements ServiceBeanDelegate {
             /* --- Update Logging --- */
             if(ServiceElementUtil.hasDifferentLoggerConfig(preElem, postElem)) {
                 Map map = postElem.getServiceBeanConfig().getConfigurationParameters();
-                LoggerConfig[] newLoggerConfigs =
-                    (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+                LoggerConfig[] newLoggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
                 map = preElem.getServiceBeanConfig().getConfigurationParameters();
-                LoggerConfig[] currentLoggerConfigs =
-                    (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+                LoggerConfig[] currentLoggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
                 for (LoggerConfig newLoggerConfig : newLoggerConfigs) {
-                    if (LoggerConfig.isNewLogger(newLoggerConfig,
-                                                 currentLoggerConfigs)) {
+                    if (LoggerConfig.isNewLogger(newLoggerConfig, currentLoggerConfigs)) {
                         newLoggerConfig.getLogger();
-                    } else if (LoggerConfig.levelChanged(newLoggerConfig,
-                                                         currentLoggerConfigs)) {
-                        Logger.getLogger(newLoggerConfig.getLoggerName()).
-                            setLevel(
-                                newLoggerConfig.
-                                    getLoggerLevel());
+                    } else if (LoggerConfig.levelChanged(newLoggerConfig, currentLoggerConfigs)) {
+                        Logger.getLogger(newLoggerConfig.getLoggerName()).setLevel(newLoggerConfig.getLoggerLevel());
                     }
                 }
             }
@@ -852,8 +791,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             if(ServiceElementUtil.hasDifferentGroups(preElem, postElem) ||
                ServiceElementUtil.hasDifferentLocators(preElem, postElem)) {
                 if(logger.isLoggable(Level.FINEST))
-                    logger.finest("["+context.getServiceElement().getName()+"] "+
-                                  "Discovery has changed");
+                    logger.finest("["+context.getServiceElement().getName()+"] Discovery has changed");
                 if(serviceProxy instanceof Administrable) {
                     try {
                         Administrable admin = (Administrable)serviceProxy;
@@ -862,30 +800,22 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         if(adminObject instanceof JoinAdmin) {
                             JoinAdmin joinAdmin = (JoinAdmin)adminObject;
                             /* Update groups if they have changed */
-                            if(ServiceElementUtil.hasDifferentGroups(preElem,
-                                                                     postElem)) {
-                                joinAdmin.setLookupGroups(
-                                       postElem.getServiceBeanConfig().getGroups());
+                            if(ServiceElementUtil.hasDifferentGroups(preElem, postElem)) {
+                                joinAdmin.setLookupGroups(postElem.getServiceBeanConfig().getGroups());
                             }
                             /* Update locators if they have changed */
-                            if(ServiceElementUtil.hasDifferentLocators(preElem,
-                                                                       postElem))
-                                joinAdmin.setLookupLocators(
-                                       postElem.getServiceBeanConfig().getLocators());
+                            if(ServiceElementUtil.hasDifferentLocators(preElem, postElem))
+                                joinAdmin.setLookupLocators(postElem.getServiceBeanConfig().getLocators());
                         } else {
                             if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
-                                           "No JoinAdmin capabilities for "+
-                                           context.getServiceElement().getName());
+                                logger.fine("No JoinAdmin capabilities for "+ context.getServiceElement().getName());
                         }
                     } catch(RemoteException e) {
                         logger.log(Level.SEVERE, "Modifying Discovery attributes", e);
                     }
                 } else {
                     if(logger.isLoggable(Level.FINE))
-                        logger.log(Level.FINE,
-                                   "No Administrable capabilities for "+
-                                   serviceProxy.getClass().getName());
+                        logger.fine("No Administrable capabilities for "+serviceProxy.getClass().getName());
                 }
                 /* --- End Update Discovery --- */
             }
@@ -918,6 +848,5 @@ public class JSBDelegate implements ServiceBeanDelegate {
             return(true);
         }
     }
-
 
 }
