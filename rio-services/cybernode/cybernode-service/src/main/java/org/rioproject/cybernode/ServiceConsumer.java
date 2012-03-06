@@ -110,9 +110,9 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                     int serviceLimit,
                     Configuration config) throws ConfigurationException {
         if(adapter == null)
-            throw new NullPointerException("CybernodeAdapter is null");
+            throw new IllegalArgumentException("CybernodeAdapter is null");
         if(config == null)
-            throw new NullPointerException("config is null");
+            throw new IllegalArgumentException("config is null");
         this.adapter = adapter;
         this.config = config;
         /* Establish the lease duration */
@@ -171,12 +171,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @throws IOException if discovery cannot be initialized
      * @throws ConfigurationException if the configuration cannot be used
      */
-    void initializeProvisionDiscovery(DiscoveryManagement dm) throws
-        IOException, ConfigurationException {
-        ServiceTemplate template =
-            new ServiceTemplate(null,
-                                new Class[] {ProvisionManager.class},
-                                null);
+    void initializeProvisionDiscovery(DiscoveryManagement dm) throws IOException, ConfigurationException {
+        ServiceTemplate template = new ServiceTemplate(null, new Class[] {ProvisionManager.class}, null);
         LookupCachePool lcPool = LookupCachePool.getInstance();
         lCache = lcPool.getLookupCache(dm, template);
         lCache.addListener(this);
@@ -230,9 +226,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         synchronized(provisioners) {
             if(provisioners.contains(item.serviceID))
                 return;
-            logger.log(Level.INFO, 
-                       "ProvisionManager discovered {0}",
-                       new Object[] {item.service.toString()});
+            logger.log(Level.INFO, "ProvisionManager discovered {0}", new Object[] {item.service.toString()});
             provisioners.add(item.serviceID);
         }
         register(item);
@@ -249,8 +243,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         try {
             ((Administrable)item.service).getAdmin();            
         } catch (RemoteException e) {
-            removeProvisionManager((ProvisionManager)item.service,
-                                   item.serviceID);
+            removeProvisionManager((ProvisionManager)item.service, item.serviceID);
         }
     }
 
@@ -262,10 +255,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         synchronized(provisioners) {
             if(provisioners.remove(sid)) {
                 if (logger.isLoggable(Level.INFO))
-                    logger.log(Level.INFO,
-                               "Dropping ProvisionManager, now connected " +
-                               "to ["+provisioners.size()+"] " +
-                               "ProvisionMonitor instances");
+                    logger.info("Dropping ProvisionManager, now connected to ["+provisioners.size()+"] " +
+                                "ProvisionMonitor instances");
             }
         }
         cancelRegistration(pm);
@@ -280,23 +271,23 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         try {
             if(haveRegistration(item)) {
                 if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Already registered to "+item.service);
+                    logger.finest("Already registered to "+item.service);
                 return;                
             }
             ProvisionManager provisioner = (ProvisionManager)provisionerPreparer.prepareProxy(item.service);
             if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "ServiceConsumer - prepared ProvisionManager proxy: "+provisioner.toString());
+                logger.finest("ServiceConsumer - prepared ProvisionManager proxy: "+provisioner.toString());
             ResourceCapability rCap = adapter.getResourceCapability();
             if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "ResourceCapability "+rCap);
+                logger.finest("ResourceCapability "+rCap);
 
             Lease lease = connect(provisioner);
             if(lease==null) {
-                logger.log(Level.WARNING, "Unable to register to ProvisionManager "+provisioner.toString());
+                logger.warning("Unable to register to ProvisionManager "+provisioner.toString());
                 return;
             }            
             leaseTable.put(item.service, new ProvisionLeaseManager(lease, provisioner, item.serviceID));
-            logger.log(Level.INFO, "Registered to a ProvisionManager");
+            logger.info("Registered to a ProvisionManager");
                         
         } catch(Throwable t) {
             provisioners.remove(item.serviceID);
