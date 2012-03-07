@@ -39,11 +39,11 @@ public class CybernodeAdapter {
                             CybernodeImpl impl,
                             ComputeResource computeResource) {
         if (instantiator == null)
-            throw new NullPointerException("instantiator is null");
+            throw new IllegalArgumentException("instantiator is null");
         if (impl == null)
-            throw new NullPointerException("impl is null");
+            throw new IllegalArgumentException("impl is null");
         if (computeResource == null)
-            throw new NullPointerException("computeResource is null");
+            throw new IllegalArgumentException("computeResource is null");
         this.instantiator = instantiator;
         this.impl = impl;
         this.computeResource = computeResource;
