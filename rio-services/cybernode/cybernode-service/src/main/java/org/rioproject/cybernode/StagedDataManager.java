@@ -40,11 +40,9 @@ import java.io.File;
 public class StagedDataManager {
     /** Collection of PlatformCapability instances that have been installed
      * by the JSBDelegate */
-    private final Collection<PlatformCapability> installedPlatformCapabilities =
-        new ArrayList<PlatformCapability>();
+    private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<PlatformCapability>();
     private final List<DownloadRecord> dlRecords = new ArrayList<DownloadRecord>();
-    private final Map<StagedData, DownloadRecord[]> downloadedArtifacts =
-        new HashMap<StagedData, DownloadRecord[]>();
+    private final Map<StagedData, DownloadRecord[]> downloadedArtifacts = new HashMap<StagedData, DownloadRecord[]>();
     private ServiceElement sElem;
     private ComputeResource computeResource;
     /** Logger */
@@ -182,8 +180,7 @@ public class StagedDataManager {
         install(installableComponents);
 
         /* Verify missing components. If there are any, go get them */
-        Collection<SystemRequirements.SystemComponent> missing =
-            verifyPlatformCapabilities();
+        Collection<SystemRequirements.SystemComponent> missing = verifyPlatformCapabilities();
         if(missing.size()>0) {
             install(missing);
             logger.info("Missing requirements have been provisioned");
@@ -197,34 +194,26 @@ public class StagedDataManager {
                 dlRec = dlManager.download();
                 dlRecords.add(dlRec);
             } else {
-                String provisionRoot =
-                    computeResource.getPersistentProvisioningRoot();
-                DownloadManager dlManager =
-                    new DownloadManager(provisionRoot, data);
+                String provisionRoot = computeResource.getPersistentProvisioningRoot();
+                DownloadManager dlManager = new DownloadManager(provisionRoot, data);
                 dlRec = dlManager.download();
                 dlRecords.add(dlRec);
             }
             if (data.getPerms() != null) {
                 if (OperatingSystemType.isWindows()) {
-                    logger.warning("Cannot apply permissions " +
-                                   "[" + data.getPerms() + "] to " +
-                                   "StagedData on Windows");
+                    logger.warning("Cannot apply permissions [" + data.getPerms() + "] to StagedData on Windows");
                 } else {
                     File toChmod;
-                    StringBuffer perms = new StringBuffer();
+                    StringBuilder perms = new StringBuilder();
                     if (dlRec.unarchived()) {
                         toChmod = new File(dlRec.getPath());
                         perms.append("-R ");
                     } else {
-                        toChmod =
-                            new File(FileUtils.makeFileName(
-                                dlRec.getPath(), dlRec.getName()));
+                        toChmod = new File(FileUtils.makeFileName(dlRec.getPath(), dlRec.getName()));
                     }
                     perms.append(data.getPerms());
-                    logger.info("Applying permissions " +
-                                "[" + perms.toString() + "] to " +
-                                "data staged at " +
-                                "[" + FileUtils.getFilePath(toChmod) + "]");
+                    logger.info("Applying permissions [" + perms.toString() + "] to " +
+                                "data staged at [" + FileUtils.getFilePath(toChmod) + "]");
                     Util.chmod(toChmod, perms.toString());
                 }
             }
@@ -243,12 +232,10 @@ public class StagedDataManager {
     public Collection<SystemRequirements.SystemComponent> verifyPlatformCapabilities() {
         if(sElem==null)
             throw new IllegalStateException("ServiceElement has not been set");
-        PlatformCapability[] platformCapabilities =
-            computeResource.getPlatformCapabilities();
+        PlatformCapability[] platformCapabilities = computeResource.getPlatformCapabilities();
         SystemRequirements.SystemComponent[] jsbRequirements =
             sElem.getServiceLevelAgreements().getSystemRequirements().getSystemComponents();
-        ArrayList<SystemRequirements.SystemComponent> missing =
-            new ArrayList<SystemRequirements.SystemComponent>();
+        ArrayList<SystemRequirements.SystemComponent> missing = new ArrayList<SystemRequirements.SystemComponent>();
 
         /*
          * If there are no PlatformCapability requirements we can return
@@ -283,7 +270,9 @@ public class StagedDataManager {
                         do {
                             try {
                                 Thread.sleep(500);
-                            } catch (InterruptedException e) {}
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                         } while(computeResource.removalInProcess(pCap));
                     }
                     break;
@@ -322,10 +311,9 @@ public class StagedDataManager {
                     computeResource.getPlatformCapabilityNameTable();
                 className = pCapMap.get(sysComp.getName());
             }
-            PlatformCapability pCap =
-                JSBContext.createPlatformCapability(className,
-                                                    sysComp.getClasspath(),
-                                                    sysComp.getAttributes());
+            PlatformCapability pCap = JSBContext.createPlatformCapability(className,
+                                                                          sysComp.getClasspath(),
+                                                                          sysComp.getAttributes());
             installedPlatformCapabilities.add(pCap);
             StagedSoftware[] staged = sysComp.getStagedSoftware();
             for (StagedSoftware sw : staged) {
