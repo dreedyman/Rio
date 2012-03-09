@@ -19,6 +19,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -36,13 +38,14 @@ public class RioLogFormatter extends Formatter {
     private Object args[] = new Object[1];
     private String lineSeparator = System.getProperty("line.separator");
     private boolean includePackageNames;
+    private boolean colorize;
     private String levelFormat;
+    private final Map<Level, StringColorizer.Color> levelColorMap = new HashMap<Level, StringColorizer.Color>();
 
     public RioLogFormatter() {
         super();
-        /* load options from the logging properties file */
-        includePackageNames = hasDeclaredSupportFor(getClass().getName() + ".includePackageNames");
 
+        /* Create the formatter for the levles, get the longest localized name */
         Level[] levels = new Level[]{Level.SEVERE,
                                      Level.WARNING,
                                      Level.INFO,
@@ -55,8 +58,25 @@ public class RioLogFormatter extends Formatter {
             if(l.getLocalizedName().length()>longest)
                 longest = l.getLocalizedName().length();
         }
-
         levelFormat = "%-"+longest+"s";
+
+        /* load options from the logging properties file */
+        includePackageNames = hasDeclaredSupportFor(getClass().getName() + ".includePackageNames");
+        colorize = !System.getProperty("os.name").startsWith("Win") &&
+                   hasDeclaredSupportFor(getClass().getName() + ".colorize");
+
+        /* If we have colorization support, determine if we have mapping colors */
+        if(colorize) {
+            for(Level l : levels) {
+                String property = LogManager.getLogManager().getProperty(getClass().getName()+"."+l.getName());
+                if(property!=null) {
+                    StringColorizer.Color color = StringColorizer.getColor(property);
+                    if(color!=null) {
+                        levelColorMap.put(l, color);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -116,7 +136,17 @@ public class RioLogFormatter extends Formatter {
             } catch (Exception ex) {
             }
         }
-        return sb.toString();
+        String formattedRecord;
+        if(colorize) {
+            StringColorizer.Color color = levelColorMap.get(record.getLevel());
+            if(color!=null)
+                formattedRecord = StringColorizer.colorize(sb.toString(), color);
+            else
+                formattedRecord = sb.toString();
+        } else {
+            formattedRecord = sb.toString();
+        }
+        return formattedRecord;
     }
 
     private boolean hasDeclaredSupportFor(String property) {
