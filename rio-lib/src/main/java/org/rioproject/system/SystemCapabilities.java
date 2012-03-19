@@ -265,8 +265,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 PlatformCapability[] caps = parsePlatformConfig(loader, platformDir);
                 platformCapabilityList.addAll(Arrays.asList(caps));
             } else {
-                logger.config("Unable to establish the platform " +
-                              "configuration directory, most likely RIO_HOME is not set.");
+                logger.warning("Unable to establish the platform " +
+                               "configuration directory, most likely RIO_HOME is not set.");
             }
 
             /*
@@ -306,11 +306,11 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                     File dir = new File(dirName);
                     if(dir.isDirectory() && dir.canRead()) {
                         dirList.add(dir);
-                        if(logger.isLoggable(Level.FINE))
-                            logger.fine("Adding directory ["+dirName+"] to check for native libraries");
+                        if(logger.isLoggable(Level.CONFIG))
+                            logger.config("Adding directory ["+dirName+"] to check for native libraries");
                     } else {
-                        logger.config("Invalid directory name or access "+
-                                      "permissions to check for native libraries ["+dirName+"]. Continuing ...");
+                        logger.warning("Invalid directory name or access "+
+                                       "permissions to check for native libraries ["+dirName+"]. Continuing ...");
                     }                       
                 }
                 final String libExtension = getLibExtension();
@@ -326,22 +326,21 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                         String fileName = file.getName();
                         int index = fileName.lastIndexOf(".");
                         if (index != -1) {
-                            if (logger.isLoggable(Level.FINE))
-                                logger.fine("Create NativeLibrarySupport object for [" + fileName + "]");
-                            PlatformCapability nLib =
-                                getPlatformCapability(NATIVE_LIB_CLASS);
+                            if (logger.isLoggable(Level.CONFIG))
+                                logger.config("Create NativeLibrarySupport object for [" + fileName + "]");
+                            PlatformCapability nLib = getPlatformCapability(NATIVE_LIB_CLASS);
                             String name;
-                            if (!OperatingSystemType.isWindows())
+                            if (!OperatingSystemType.isWindows()) {
                                 name = fileName.substring(3, index);
-                            else
+                            } else {
                                 name = fileName.substring(0, index);
+                            }
                             nLib.define("Name", name);
                             nLib.define("FileName", fileName);
                             nLib.setPath(dir.getCanonicalPath());
                             platforms.add(nLib);
                         } else {
-                            if (logger.isLoggable(Level.FINE))
-                                logger.fine("Illegal Shared Library name="+fileName);
+                            logger.warning("Illegal Shared Library name="+fileName);
                         }
                     }
                 }
