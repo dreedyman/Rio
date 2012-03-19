@@ -40,13 +40,12 @@ class CybernodeConfig {
     }
 
     String getServiceLogRootDirectory() {
-        String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                                           System.getProperty('user.name'))
-        String logDir = '/tmp/logs/rio/'
+        String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
         String opSys = System.getProperty('os.name')
-        if(opSys.startsWith("Windows"))
-            logDir = '${java.io.tmpdir}/logs/rio/'
-        return logDir+logExt
+        String rootLogDir = opSys.startsWith("Windows")?'${java.io.tmpdir}':'/tmp'
+        String name = System.getProperty('user.name')
+
+        return "${rootLogDir}/${name}/logs/${logExt}"
     }
 
     String getNativeLibDirectory() {
