@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class ComputeResource extends Observable {
-    /** Name to use when getting Configuration values and to get the Looger */
+    /** Name to use when getting Configuration values and to get the Logger */
     static final String COMPONENT = "org.rioproject.system";
     static Logger logger = Logger.getLogger(COMPONENT);
     /** 
@@ -68,20 +68,18 @@ public class ComputeResource extends Observable {
      * associated with this <code>ComputeResource</code>, and is used to define 
      * base platform capabilities and resources. 
      */
-    private final List<PlatformCapability> platformCapabilities =
-        new ArrayList<PlatformCapability>();
+    private final List<PlatformCapability> platformCapabilities = new ArrayList<PlatformCapability>();
     /**
      * A collection of <tt>PlatformCapability</tt> instances being
      * provisioned/installed
      */
-    private final List<PlatformCapability> platformCapabilityPending =
-        new ArrayList<PlatformCapability>();
+    private final List<PlatformCapability> platformCapabilityPending = new ArrayList<PlatformCapability>();
     /** 
      * The <code>measurables</code> defines a <code>Collection</code> of 
      * <code>MeasurableCapabilities</code> which are specific types of measurable 
      * mechanism(s) associated with this <code>ComputeResource</code>
      */
-    private final Vector<MeasurableCapability> measurables = new Vector<MeasurableCapability>();
+    private final List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
     /**
      * The CapabilityChannel is an inner class which becomes an Observer to 
      * MeasurableCapability components and ends up notifying the ComputeResource to 
@@ -109,7 +107,7 @@ public class ComputeResource extends Observable {
     /**
      * PlatformCapability name table
      */
-    private Map<String, String> platformCapabilityNameTable;
+    private final Map<String, String> platformCapabilityNameTable = new HashMap<String, String>();
     private final List<PlatformCapability> removals = new ArrayList<PlatformCapability>();
     private SystemCapabilitiesLoader systemCapabilitiesLoader;
 
@@ -120,8 +118,7 @@ public class ComputeResource extends Observable {
      * ComputeResource's configuration object
      * @throws UnknownHostException If the local host cannot be obtained
      */
-    public ComputeResource() throws ConfigurationException,
-                                    UnknownHostException {
+    public ComputeResource() throws ConfigurationException, UnknownHostException {
         this(EmptyConfiguration.INSTANCE);
     }
 
@@ -135,8 +132,7 @@ public class ComputeResource extends Observable {
      * @throws UnknownHostException If the local host cannot be obtained
      * @throws IllegalArgumentException If the config is null
      */
-    public ComputeResource(Configuration config)
-        throws ConfigurationException, UnknownHostException {
+    public ComputeResource(Configuration config) throws ConfigurationException, UnknownHostException {
         if(config==null)
             throw new IllegalArgumentException("config is null");
 
@@ -149,17 +145,13 @@ public class ComputeResource extends Observable {
                                                InetAddress.class,
                                                InetAddress.getLocalHost());
         String defaultDescription = address.getHostName()+" "+system;
-        description = (String)config.getEntry(COMPONENT,
-                                              "description",
-                                              String.class,
-                                              defaultDescription);
-        long reportInterval =
-        Config.getLongEntry(config,
-                            COMPONENT,
-                            "reportInterval",
-                            CapabilityChannel.DEFAULT_REPORT_INTERVAL,
-                            1000,
-                            Long.MAX_VALUE);
+        description = (String)config.getEntry(COMPONENT, "description", String.class, defaultDescription);
+        long reportInterval = Config.getLongEntry(config,
+                                                  COMPONENT,
+                                                  "reportInterval",
+                                                  CapabilityChannel.DEFAULT_REPORT_INTERVAL,
+                                                  1000,
+                                                  Long.MAX_VALUE);
         capabilityChannel.setReportInterval(reportInterval);
     }
     
@@ -389,40 +381,39 @@ public class ComputeResource extends Observable {
     }
 
     /**
-     * Update a <code>PlatformCapability</code> object. Updating a 
+     * Update a <code>PlatformCapability</code> object. Updating a
      * <code>PlatformCapability</code> component has the following semantic:
      *
-     * <p>If the <code>PlatformCapability</code> object <code>Class</code> exists 
-     * in the collection of <code>PlatformCapability</code> components, the 
-     * existing <code>PlatformCapability</code> will be updated with the new 
-     * <code>PlatformCapability</code> mappings. If the 
+     * <p>If the <code>PlatformCapability</code> object <code>Class</code> exists
+     * in the collection of <code>PlatformCapability</code> components, the
+     * existing <code>PlatformCapability</code> will be updated with the new
+     * <code>PlatformCapability</code> mappings. If the
      * <code>PlatformCapability</code> object <code>Class</code> cannot be found,
      * it will be added to the collection.
      *
-     * <p>Updating a <code>PlatformCapability</code> component causes the state of 
-     * this object to change, triggering the notification of all registered 
+     * <p>Updating a <code>PlatformCapability</code> component causes the state of
+     * this object to change, triggering the notification of all registered
      * <code>Observer</code> instances
      *
      * @param capability The PlatformCapability to add
      *
      * @throws Exception If there are errors updating the PlatformCapability
      */
-    public void updatePlatformCapability(PlatformCapability capability) 
-    throws Exception {
+    public void updatePlatformCapability(PlatformCapability capability) throws Exception {
         removePlatformCapability(capability, false);
         addPlatformCapability(capability);
     }
 
     /**
-     * Remove a <code>PlatformCapability</code> object. The removal of a 
-     * <code>PlatformCapability</code> component causes the state of this object to 
-     * change, triggering the notification of all registered <code>Observer</code> 
+     * Remove a <code>PlatformCapability</code> object. The removal of a
+     * <code>PlatformCapability</code> component causes the state of this object to
+     * change, triggering the notification of all registered <code>Observer</code>
      * instances
      *
      * @param pCap The PlatformCapability to remove
      * @param clean If this value is true and if the PlatformCapability has a
      * DownloadRecord defined (was provisioned during the time this Cybernode
-     * was running) then remove the PlatformCapability from the system.  
+     * was running) then remove the PlatformCapability from the system.
      *
      * @return True if removed, false otherwise
      */
@@ -434,7 +425,7 @@ public class ComputeResource extends Observable {
         try {
             if(clean) {
                 DownloadRecord[] downloadRecords = pCap.getDownloadRecords();
-                StringBuffer buff = new StringBuffer();
+                StringBuilder buff = new StringBuilder();
                 if(downloadRecords.length > 0 && logger.isLoggable(Level.INFO))
                     buff.append(
                         "Removing StagedSoftware for PlatformCapability: [")
@@ -449,7 +440,7 @@ public class ComputeResource extends Observable {
                 if(pCap.getConfigurationFile()!=null) {
                     File configFile = new File(pCap.getConfigurationFile());
                     if(configFile.exists()) {
-                        if(configFile.delete())                
+                        if(configFile.delete())
                             logger.info("Removed PlatformCapability " +
                                         "["+pCap.getName()+"] " +
                                         "configuration file: "+
@@ -478,8 +469,7 @@ public class ComputeResource extends Observable {
      *
      * @param pCap The <tt>PlatformCapability</tt> to check
      *
-     * @return True if the <tt>PlatformCapability</tt> is currently in the
-     * process of being removed
+     * @return True if the <tt>PlatformCapability</tt> is currently in the process of being removed
      */
     public boolean removalInProcess(PlatformCapability pCap) {
         boolean beingRemoved;
@@ -738,7 +728,7 @@ public class ComputeResource extends Observable {
      * Set the persistentProvisioning property
      * 
      * @param  persistentProvisioning True if the ComputeResource supports 
-     * persistent provisioning, false otherise
+     * persistent provisioning, false otherwise
      */
     public void setPersistentProvisioning(boolean persistentProvisioning) {
         boolean changed=false;
@@ -843,8 +833,7 @@ public class ComputeResource extends Observable {
                 addPlatformCapability(pCap);
             }
 
-            platformCapabilityNameTable =
-                systemCapabilitiesLoader.getPlatformCapabilityNameTable();
+            platformCapabilityNameTable.putAll(systemCapabilitiesLoader.getPlatformCapabilityNameTable());
             
             /* Initialize the CapabilityChannel */
             capabilityChannel.init();
@@ -902,7 +891,7 @@ public class ComputeResource extends Observable {
         
         void init() {
             if(channelThread==null) {
-                channelThread = new Thread(this, "CapabililityChannel");
+                channelThread = new Thread(this, "CapabilityChannel");
                 channelThread.setDaemon(true);
                 channelThread.start();
             } else {
@@ -985,7 +974,7 @@ public class ComputeResource extends Observable {
             while(run) {
                 try {
                     /* resetTime will be set if the channel's report interval
-                     * has been reset. This will avoid an unecessary update */
+                     * has been reset. This will avoid an unnecessary update */
                     if(resetTime<=System.currentTimeMillis()) {
                         if(getHasChanged()) {
                             stateChange();
