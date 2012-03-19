@@ -15,8 +15,6 @@
  */
 package org.rioproject.opstring;
 
-import org.rioproject.util.PropertyHelper;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -45,7 +43,7 @@ public class ClassBundle implements Serializable {
     /**
      * Collection of jar names
      */
-    private List<String> jarNames = Collections.synchronizedList(new ArrayList<String>());
+    private final List<String> jarNames = Collections.synchronizedList(new ArrayList<String>());
     /**
      * An artifact ID
      */
@@ -53,7 +51,7 @@ public class ClassBundle implements Serializable {
     /**
      * A table of method names to Class[] objects
      */
-    private Map<String, Object[]> methodObjectTable = Collections.synchronizedMap(new HashMap<String, Object[]>());
+    private final Map<String, Object[]> methodObjectTable = Collections.synchronizedMap(new HashMap<String, Object[]>());
     private static Logger logger = Logger.getLogger(ClassBundle.class.getName());
 
     /**
@@ -394,11 +392,10 @@ public class ClassBundle implements Serializable {
     private String translateCodebase() {
         if(codebase==null)
             return(codebase);
-        String translated = PropertyHelper.expandProperties(codebase, PropertyHelper.RUNTIME);
-        if(System.getProperty("os.name").startsWith("Win") && translated.startsWith("file://")) {
-            translated = "file:/"+translated.substring(7);
+        if(System.getProperty("os.name").startsWith("Win") && codebase.startsWith("file://")) {
+            codebase = "file:/"+codebase.substring(7);
         }
-        return(translated);
+        return(codebase);
     }    
 
     /**
