@@ -169,8 +169,8 @@ public class StagedData implements Serializable {
      */
     public URL getLocationURL() throws MalformedURLException {
         if(locationURL==null) {
-            if(location.indexOf(PropertyHelper.PARSETIME[0])!=-1 ||
-               location.indexOf(PropertyHelper.RUNTIME[0])!=-1) {
+            if(location.contains(PropertyHelper.PARSETIME[0]) ||
+               location.contains(PropertyHelper.RUNTIME[0])) {
                 location = PropertyHelper.expandProperties(location, PropertyHelper.PARSETIME);
                 location = PropertyHelper.expandProperties(location, PropertyHelper.RUNTIME);
             }
