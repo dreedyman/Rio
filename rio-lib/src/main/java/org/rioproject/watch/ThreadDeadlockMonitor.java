@@ -36,13 +36,13 @@ public class ThreadDeadlockMonitor {
 
     public void setThreadMXBean(ThreadMXBean threadMXBean) {
         this.threadMXBean = threadMXBean;
+        if(logger.isLoggable(Level.INFO))
+            logger.info("ThreadMXBean set, monitoring current JVM for thread deadlocks");
     }
 
     public Calculable getThreadDeadlockCalculable() {
         int deadlockCount = findDeadlockedThreads();
-        Calculable metric = new Calculable(ID,
-                                           deadlockCount,
-                                           System.currentTimeMillis());
+        Calculable metric = new Calculable(ID, deadlockCount, System.currentTimeMillis());
         if(deadlockCount>0) {
             String detail = formatDeadlockedThreadInfo();
             metric.setDetail(detail);
@@ -68,7 +68,7 @@ public class ThreadDeadlockMonitor {
     }
 
     private String formatDeadlockedThreadInfo() {
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
         Set<Map.Entry<Long, ThreadInfo>> entrySet;
         synchronized(deadlockedThreads) {
             entrySet = deadlockedThreads.entrySet();
@@ -110,17 +110,13 @@ public class ThreadDeadlockMonitor {
 
     private int findDeadlockedThreads() {
         if(threadMXBean==null) {
-            if(logger.isLoggable(Level.INFO))
-                logger.info("Creating ThreadMXBean from ManagementFactory, " +
-                            "monitoring current JVM");
-            threadMXBean = ManagementFactory.getThreadMXBean();
+            setThreadMXBean(ManagementFactory.getThreadMXBean());
         }
         long[] ids = threadMXBean.findMonitorDeadlockedThreads();
         if(ids != null && ids.length > 0) {
             for(Long l : ids) {
                 if(!knowsAbout(l)) {
-                    ThreadInfo ti =
-                        threadMXBean.getThreadInfo(l, Integer.MAX_VALUE);
+                    ThreadInfo ti = threadMXBean.getThreadInfo(l, Integer.MAX_VALUE);
                     synchronized(deadlockedThreads) {
                         deadlockedThreads.put(l, ti);
                     }
