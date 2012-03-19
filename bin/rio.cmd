@@ -46,6 +46,7 @@ goto end
 rem Get the service starter
 shift
 if "%1"=="" goto noService
+set service=%1
 set starterConfig=%RIO_HOME%\config\start-%1.groovy
 if not exist "%starterConfig%" goto noStarter
 shift
@@ -66,7 +67,7 @@ set launchTarget=com.sun.jini.start.ServiceStarter
 
 set loggingConfig="%RIO_HOME%\config\logging\rio-logging.properties"
 
-"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.util.logging.config.file=%loggingConfig% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
+"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.util.logging.config.file=%loggingConfig% -Dorg.rioproject.service=%service% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
 goto end
 
 :noStarter
