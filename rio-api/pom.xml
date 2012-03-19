@@ -42,6 +42,12 @@
         </dependency>
 
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>rio-platform</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.jini</groupId>
             <artifactId>jsk-platform</artifactId>
         </dependency>
