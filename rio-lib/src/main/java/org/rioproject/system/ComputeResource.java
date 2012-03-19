@@ -53,7 +53,7 @@ public class ComputeResource extends Observable {
     /** Name to use when getting Configuration values and to get the Logger */
     static final String COMPONENT = "org.rioproject.system";
     static Logger logger = Logger.getLogger(COMPONENT);
-    /** 
+    /**                                                              w
      * A description of the <code>ComputeResource</code> 
      */
     private String description;
