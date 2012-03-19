@@ -376,7 +376,7 @@ public class ServiceBeanConfig implements Serializable {
     private String replace(String str, String pattern, String replace) {
         int s = 0;
         int e;
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         while((e = str.indexOf(pattern, s)) >= 0) {
             result.append(str.substring(s, e));
@@ -388,7 +388,7 @@ public class ServiceBeanConfig implements Serializable {
     }
 
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("configComponent=").append(configParms.get(COMPONENT)).append("\n");
         buffer.append("serviceName=").append(configParms.get(NAME)).append("\n");
         buffer.append("organization=" + "").append(configParms.get(ORGANIZATION)).append("\n");
