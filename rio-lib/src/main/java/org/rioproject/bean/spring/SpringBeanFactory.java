@@ -33,16 +33,6 @@ import java.util.logging.Logger;
  * for remote invocations and administration by adapting the POJO into the
  * framework using the Spring framework.
  *
- * <p>Declaring this bean factory is done as follows:
- * <pre>
- * &lt;Configuration&gt;
- *     &lt;Component Name="service.load"&gt;
- *         &lt;Parameter Name="serviceBeanFactory"
- *                    Value="new org.rioproject.bean.spring.SpringBeanFactory()"/&gt;
- *     &lt;/Component&gt;
- * &lt;/Configuration&gt;
- * </pre>
- *
  * @see org.rioproject.core.jsb.ServiceBeanFactory
  * @see org.rioproject.bean.BeanFactory
  *
@@ -75,22 +65,19 @@ public class SpringBeanFactory extends BeanFactory {
         String codebase =
             context.getServiceElement().getExportBundles()[0].getCodebase();
         for(int i=0; i<configs.length; i++) {
-            if(configs[i].indexOf(CODEBASE_TOK+"/")!=-1) {
+            if(configs[i].contains(CODEBASE_TOK + "/")) {
                 configs[i] = replace(configs[i], CODEBASE_TOK+"/", codebase);
                 useCodebase = true;
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("Loading application context " +
-                                "["+configs[i]+"]");
-            } else if (configs[i].indexOf(CLASSPATH_TOK+"/")!=-1) {
+                    logger.fine("Loading application context ["+configs[i]+"]");
+            } else if (configs[i].contains(CLASSPATH_TOK + "/")) {
                 configs[i] = replace(configs[i], CLASSPATH_TOK+"/", codebase);
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("Loading application context " +
-                                "["+configs[i]+"]");
+                    logger.fine("Loading application context ["+configs[i]+"]");
             } else {
                 configs[i] = replace(configs[i], CODEBASE_TOK, codebase);
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("Loading application context "+
-                                "["+configs[i]+"]");
+                    logger.fine("Loading application context ["+configs[i]+"]");
             }
         }
         final Thread currentThread = Thread.currentThread();
@@ -111,29 +98,20 @@ public class SpringBeanFactory extends BeanFactory {
         ctx.setClassLoader(cCL);
         */
 
-        Class ctxClass =
-            Class.forName(
-                "org.springframework.context.support.GenericApplicationContext",
-                true,
-                cCL);
+        Class ctxClass = Class.forName( "org.springframework.context.support.GenericApplicationContext", true, cCL);
         Object ctx = ctxClass.newInstance();
 
-        Method ctx_setClassLoader = ctxClass.getMethod("setClassLoader",
-                                                       ClassLoader.class);
+        Method ctx_setClassLoader = ctxClass.getMethod("setClassLoader", ClassLoader.class);
         ctx_setClassLoader.invoke(ctx, cCL);
 
         //XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
-        Class xmlReaderClass =
-            Class.forName(
-                "org.springframework.beans.factory.xml.XmlBeanDefinitionReader",
-                true,
-                cCL);
+        Class xmlReaderClass = Class.forName( "org.springframework.beans.factory.xml.XmlBeanDefinitionReader", true, cCL);
         Constructor[] cons = xmlReaderClass.getConstructors();
         Object xmlReader = null;
         for (Constructor con : cons) {
             Class[] types = con.getParameterTypes();
             if (types.length == 1 &&
-                types[0].getName().indexOf("BeanDefinitionRegistry") != -1) {
+                types[0].getName().contains("BeanDefinitionRegistry")) {
                 xmlReader = con.newInstance(ctx);
                 break;
             }
@@ -145,8 +123,7 @@ public class SpringBeanFactory extends BeanFactory {
             if (method.getName().equals("loadBeanDefinitions")) {
                 Class[] types = method.getParameterTypes();
                 for (Class type : types) {
-                    if (type.getName().equals(
-                        "org.springframework.core.io.Resource")) {
+                    if (type.getName().equals("org.springframework.core.io.Resource")) {
                         xmlReader_loadBeanDefinitions = method;
                         break;
                     }
@@ -164,8 +141,7 @@ public class SpringBeanFactory extends BeanFactory {
         }
         
         Class resourceClass = Class.forName(resourceClassName, true, cCL);
-        Constructor resourceCons =
-            resourceClass.getConstructor(String.class);
+        Constructor resourceCons = resourceClass.getConstructor(String.class);
 
         for (String config : configs) {
             Object resource = resourceCons.newInstance(config);
@@ -185,18 +161,13 @@ public class SpringBeanFactory extends BeanFactory {
 
         ServiceBeanManager mgr = context.getServiceBeanManager();
         if(mgr instanceof JSBManager) {
-            SpringDiscardManager sdm =
-                new SpringDiscardManager(ctx,
-                                         context.getServiceBeanManager().
-                                             getDiscardManager());
+            SpringDiscardManager sdm = new SpringDiscardManager(ctx, context.getServiceBeanManager().getDiscardManager());
             ((JSBManager)mgr).setDiscardManager(sdm);
         } else {
-            logger.warning("Unable to set Spring DiscardManager, " +
-                           "unrecognized ServiceBeanManager");
+            logger.warning("Unable to set Spring DiscardManager, unrecognized ServiceBeanManager");
         }
         String beanName = context.getServiceElement().getName();
-        Method ctx_getBean = ctxClass.getMethod("getBean",
-                                                String.class);
+        Method ctx_getBean = ctxClass.getMethod("getBean", String.class);
         Object bean = ctx_getBean.invoke(ctx, beanName);
         return(bean);
 
@@ -210,7 +181,7 @@ public class SpringBeanFactory extends BeanFactory {
     String replace(String str, String pattern, String replace) {
         int s = 0;
         int e;
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         while((e = str.indexOf(pattern, s)) >= 0) {
             result.append(str.substring(s, e));
