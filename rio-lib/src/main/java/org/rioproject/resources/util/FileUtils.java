@@ -76,8 +76,11 @@ public class FileUtils {
      * Remove a File
      *
      * @param file A File object to remove
+     *
+     * @return {@code} true if the file has been removed {@code} false if not.
      */
-    public static void remove(File file) {
+    public static boolean remove(File file) {
+        boolean removed;
         if(file.isDirectory()) {
             File[] files = file.listFiles();
             for (File f : files) {
@@ -94,7 +97,8 @@ public class FileUtils {
                     }
                 }
             }
-            if(file.delete()) {
+            removed = file.delete();
+            if(removed) {
                 if(logger.isLoggable(Level.FINE))
                     logger.log(Level.FINE,
                                "Removed "+ getFilePath(file));
@@ -103,7 +107,8 @@ public class FileUtils {
                     logger.warning("Unable to remove "+ getFilePath(file));
             }
         } else {
-            if(file.delete()) {
+            removed = file.delete();
+            if(removed) {
                 if(logger.isLoggable(Level.FINE))
                     logger.log(Level.FINE, "Removed "+ getFilePath(file));
             } else {
@@ -111,6 +116,7 @@ public class FileUtils {
                     logger.warning("Unable to remove "+ getFilePath(file));
             }
         }
+        return removed;
     }
 
     /**
