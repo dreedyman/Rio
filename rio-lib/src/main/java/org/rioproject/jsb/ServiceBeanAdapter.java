@@ -214,8 +214,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     protected ObjectName objectName;
     /* MBean server we are registered to */
     protected MBeanServer mbeanServer;
-    protected final List<MBeanNotificationInfo> mbeanNoticationInfoList =
-        new ArrayList<MBeanNotificationInfo>();
+    protected final List<MBeanNotificationInfo> mbeanNoticationInfoList = new ArrayList<MBeanNotificationInfo>();
     protected SLAThresholdEventAdapter slaThresholdEventAdapter;
 
     /**
@@ -229,8 +228,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         else
             serviceBeanComponent = getClass().getName();
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("Set configuration component name as : "+
-                          serviceBeanComponent);
+            logger.finest("Set configuration component name as : "+serviceBeanComponent);
     }
 
     /**
@@ -253,11 +251,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         try {
             Configuration config = context.getConfiguration();
             try {
-                loginContext =
-                    (LoginContext)Config.getNonNullEntry(config,
-                                                         serviceBeanComponent,
-                                                         "loginContext",
-                                                         LoginContext.class);
+                loginContext = (LoginContext)Config.getNonNullEntry(config,
+                                                                    serviceBeanComponent,
+                                                                    "loginContext",
+                                                                    LoginContext.class);
             } catch (NoSuchEntryException e) {
                 // leave null
             }
@@ -272,11 +269,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                 loginContext.login();
                 try {
                     if(context instanceof JSBContext)
-                        ((JSBContext)context).setSubject(
-                                                     loginContext.getSubject());
-                    Subject.doAsPrivileged(loginContext.getSubject(),
-                                           doStart,
-                                           null);
+                        ((JSBContext)context).setSubject(loginContext.getSubject());
+                    Subject.doAsPrivileged(loginContext.getSubject(), doStart, null);
                 } catch (PrivilegedActionException e) {
                     throw e.getCause();
                 }
@@ -333,8 +327,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             if(context instanceof JSBContext)
                 setEventTable(((JSBContext)context).getEventTable());
             else
-                logger.warning("Cannot set EventTable, " +
-                               "context not a JSBContext");
+                logger.warning("Cannot set EventTable, context not a JSBContext");
             exporter = getExporter(context.getConfiguration());
             serviceBeanRemoteRef = exportDo(exporter);
             /* Initialize the ServiceBean */
@@ -388,10 +381,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             ServiceBeanManager jsbManager = context.getServiceBeanManager();
             contextMgr = new ServiceBeanContextManager(context);
             snapshotter = new SnapshotThread(this.getClass().getName());
-            ServiceBeanContext restoredContext =
-                contextMgr.restoreContext(store);
-            this.context =
-                (restoredContext == null ? context : restoredContext);
+            ServiceBeanContext restoredContext = contextMgr.restoreContext(store);
+            this.context = (restoredContext == null ? context : restoredContext);
             ((JSBContext) this.context).setServiceBeanManager(jsbManager);
             snapshotter.start();
         } else {
@@ -437,8 +428,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                 ServiceLogEventHandler s = (ServiceLogEventHandler)h;
                 if(s.getSource()==null) {
                     EventDescriptor serviceLogEventDescriptor = ServiceLogEvent.getEventDescriptor();
-                    EventHandler serviceLogEventHandler =
-                        new DispatchEventHandler(serviceLogEventDescriptor, config);
+                    EventHandler serviceLogEventHandler = new DispatchEventHandler(serviceLogEventDescriptor, config);
                     getEventTable().put(serviceLogEventDescriptor.eventID, serviceLogEventHandler);
                     s.setEventHandler(serviceLogEventHandler);
                     s.setSource((EventProducer)getExportedProxy());
@@ -448,16 +438,12 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
         }
 
-        this.computeResource =
-            context.getComputeResourceManager().getComputeResource();
+        this.computeResource = context.getComputeResourceManager().getComputeResource();
         /*
         * Create the ComputeResource observer object that will listen for
         * changes to the ComputeResource component
         */
-        computeResourceObserver =
-            new ComputeResourceObserver(computeResource,
-                                        context,
-                                        slaEventHandler);
+        computeResourceObserver = new ComputeResourceObserver(computeResource, context, slaEventHandler);
         computeResourceObserver.setSource(getServiceProxy());
         /*
          * Create a ServiceElementChangeManager to listen for updates to the
@@ -488,21 +474,14 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     protected void initializeJMX(ServiceBeanContext context) throws Exception {
         ObjectName objectName = createObjectName(context);
-        MBeanServer mbeanServer =
-            org.rioproject.jmx.MBeanServerFactory.getMBeanServer();
+        MBeanServer mbeanServer = org.rioproject.jmx.MBeanServerFactory.getMBeanServer();
         registerMBean(objectName, mbeanServer);
 
         //translate events to notifications
-        slaThresholdEventAdapter =
-            new SLAThresholdEventAdapter(objectName,
-                                         getNotificationBroadcasterSupport());
-        register(SLAThresholdEvent.getEventDescriptor(),
-                 slaThresholdEventAdapter,
-                 null,
-                 Long.MAX_VALUE);
+        slaThresholdEventAdapter = new SLAThresholdEventAdapter(objectName, getNotificationBroadcasterSupport());
+        register(SLAThresholdEvent.getEventDescriptor(), slaThresholdEventAdapter, null, Long.MAX_VALUE);
         //register notification info
-        mbeanNoticationInfoList.add(
-            slaThresholdEventAdapter.getNotificationInfo());
+        mbeanNoticationInfoList.add(slaThresholdEventAdapter.getNotificationInfo());
         if(context.getServiceElement().forkService() &&
            System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME)!=null) {
             addAttributes(JMXUtil.getJMXConnectionEntries(context.getConfiguration()));
@@ -519,11 +498,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * @throws MBeanRegistrationException If the bean is already registered
      * @throws InstanceAlreadyExistsException If the instance already exists
      */
-    protected void registerMBean(ObjectName oName,
-                                 MBeanServer mbeanServer)
-    throws NotCompliantMBeanException,
-           MBeanRegistrationException,
-           InstanceAlreadyExistsException {        
+    protected void registerMBean(ObjectName oName, MBeanServer mbeanServer)
+    throws NotCompliantMBeanException, MBeanRegistrationException, InstanceAlreadyExistsException {
         mbeanServer.registerMBean(this, oName);
     }
 
@@ -549,15 +525,12 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * Create JMX ObjectName used for MBeanServer registration
      *
      * @param context The ServiceBeanContext to use
-     * @return ObjectName used for registeration
+     * @return ObjectName used for registration
      * @throws MalformedObjectNameException If there are errors creating the
      * JMX object name
      */
-    protected ObjectName createObjectName(ServiceBeanContext context)
-        throws MalformedObjectNameException {
-        return JMXUtil.getObjectName(context,
-                                     serviceBeanComponent,
-                                     context.getServiceElement().getName());
+    protected ObjectName createObjectName(ServiceBeanContext context) throws MalformedObjectNameException {
+        return JMXUtil.getObjectName(context, serviceBeanComponent, context.getServiceElement().getName());
     }
 
     /**
@@ -565,8 +538,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      *
      * @see javax.management.MBeanRegistration#preRegister(javax.management.MBeanServer, javax.management.ObjectName)
      */
-    public ObjectName preRegister(MBeanServer mBeanServer,
-                                  ObjectName objectName) throws Exception {
+    public ObjectName preRegister(MBeanServer mBeanServer, ObjectName objectName) throws Exception {
         this.objectName = objectName;
         this.mbeanServer = mBeanServer;
         return objectName;
@@ -743,37 +715,31 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     public void advertise() throws IOException {
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST,
-                       "["+context.getServiceElement().getName()+"] "+
-                       "ServiceBeanAdapter.advertise()");
+            logger.finest("["+context.getServiceElement().getName()+"] ServiceBeanAdapter.advertise()");
         }
         if (jsbState.getState() == ServiceBeanState.ADVERTISED) {
             if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
-                           "Already advertised "+
-                           "["+context.getServiceElement().getName()+"]");
+                logger.finest("Already advertised ["+context.getServiceElement().getName()+"]");
             }
             return;
         }
         if (logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                       "["+context.getServiceElement().getName()+"] "+
-                       "verify transition");
+            logger.finest("["+context.getServiceElement().getName()+"] verify transition");
         jsbState.verifyTransition(ServiceBeanState.ADVERTISED);
 
         ArrayList<Entry> attrList = new ArrayList<Entry>();
 
         /* 1. Add a UIDescriptor for the AccumulatorViewer */
         Entry watchUI = getWatchUI();
-        if(watchUI!=null)
+        if(watchUI!=null) {
             attrList.add(watchUI);
+        }
         /*
          * Add attributes from the ServiceBeanContext to the collection of
          * attributes the Joiner utility maintains 
          */
         /* 2. Create and add OperationalStringEntry */
-        String opStringName =
-            context.getServiceElement().getOperationalStringName();
+        String opStringName = context.getServiceElement().getOperationalStringName();
         if (opStringName != null)
             attrList.add(new OperationalStringEntry(opStringName));
         /* 3. Create and add ComputeResourceInfo */
@@ -786,8 +752,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         /* 5. Create and add Name */
         Name name = new Name(context.getServiceElement().getName());
         attrList.add(name);
-        String comment =
-            context.getServiceElement().getServiceBeanConfig().getComment();
+        String comment = context.getServiceElement().getServiceBeanConfig().getComment();
         /* 6. Create and add Comment */
         if (comment != null)
             attrList.add(new Comment(comment));
@@ -812,9 +777,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         }
 
         if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                       "["+context.getServiceElement().getName()+"] " +
-                       "do the join");
+            logger.finest("["+context.getServiceElement().getName()+"] do the join");
         LeaseRenewalManager lrm = null;
         /*
          * The advertise call may be invoked via the MBeanServer. If it is, the
@@ -848,9 +811,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
             lrm = new LeaseRenewalManager(context.getConfiguration());
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Creating LeaseRenewalManager",
-                       e);
+            logger.log(Level.WARNING, "Creating LeaseRenewalManager", e);
             lrm = new LeaseRenewalManager();
         } finally {
             if(swapCLs) {
@@ -869,8 +830,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             /* Create the ServiceID */
             if (logger.isLoggable(Level.FINE))
                 logger.fine("Create ServiceID from UUID " + uuid.toString());
-            serviceID = new ServiceID(uuid.getMostSignificantBits(),
-                                      uuid.getLeastSignificantBits());
+            serviceID = new ServiceID(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
 
         }
         joiner.asyncJoin(getServiceProxy(),
@@ -879,9 +839,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                          context.getDiscoveryManagement(),
                          lrm);
         if (logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                       "["+context.getServiceElement().getName()+
-                       "] set state to ADVERTISED");
+            logger.log(Level.FINEST, "["+context.getServiceElement().getName()+"] set state to ADVERTISED");
         jsbState.setState(ServiceBeanState.ADVERTISED);
     }
 
@@ -970,9 +928,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             try {
                 activationSystem.unregisterObject(activationID);
             } catch (Exception e) {
-                logger.log(Level.WARNING,
-                           "Exception calling ActivationSystem.unregisterObject",
-                           e);
+                logger.log(Level.WARNING, "Exception calling ActivationSystem.unregisterObject", e);
             }
         }
         UnexportTask unexportTask = new UnexportTask(exporter, force);
@@ -1000,9 +956,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                 logger.log(Level.INFO, "ActivationGroup.inactive failed, "
                                        + e.getLocalizedMessage() + ", service is stopped");
             } catch (RemoteException e) {
-                logger.log(Level.WARNING,
-                           "Calling ActivationGroup.inactive",
-                           e);
+                logger.log(Level.WARNING, "Calling ActivationGroup.inactive", e);
             }
         }
     }
@@ -1018,11 +972,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             if(admin == null) {
                 Exporter adminExporter = getAdminExporter();
                 if (contextMgr != null)
-                    admin =
-                        new ServiceAdminImpl(this,
-                                             adminExporter,
-                                             contextMgr.
-                                               getContextAttributeLogHandler());
+                    admin = new ServiceAdminImpl(this, adminExporter, contextMgr.getContextAttributeLogHandler());
                 else
                     admin = new ServiceAdminImpl(this, adminExporter);
             }
@@ -1055,22 +1005,31 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#destroy(boolean)
      */
     public void destroy(boolean force) {
+        if(logger.isLoggable(Level.FINEST))
+            logger.entering(this.getClass().getName(), "destroy");
         if (inShutdown)
             return;
         inShutdown = true;
         if (snapshotter != null)
             snapshotter.interrupt();
+
         if (computeResourceObserver != null) {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("["+context.getServiceElement().getName()+"] Disconnect from ComputeResource");
             computeResourceObserver.setIgnore(true);
             computeResourceObserver.disconnect();
         }
         /* Unregister the ServiceElement observer */
         if(sElemChangeMgr!=null) {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("["+context.getServiceElement().getName()+"] Unregister from ServiceElement observer");
             context.getServiceBeanManager().removeListener(sElemChangeMgr);
             sElemChangeMgr = null;
         }
 
         if (slaEventHandler != null) {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("["+context.getServiceElement().getName()+"] Terminate the SLAEventHandler");
             slaEventHandler.terminate();
             slaEventHandler = null;
         }
@@ -1083,14 +1042,19 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* No longer discoverable */
         try {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("["+context.getServiceElement().getName()+"] Unadvertise service");
             unadvertise();
         } catch (IllegalStateException e) {
-            logger.log(Level.WARNING, "Unadvertising ServiceBean", e);
+            logger.log(Level.WARNING, "Unadvertising service", e);
         }
 
         /* Terminate AssociationManagement */        
-        if(context!=null && context.getAssociationManagement()!=null)
+        if(context!=null && context.getAssociationManagement()!=null) {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("["+context.getServiceElement().getName()+"] Terminate AssociationManagement");
             context.getAssociationManagement().terminate();
+        }
 
         /* If any PlatformCapability instances were added, remove them */
         if(context instanceof JSBContext)
@@ -1100,23 +1064,26 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         /* If we're sending heartbeats, stop them */
         if (heartbeatClient != null) {
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Terminating HeartbeatClient");
+                logger.finest("["+context.getServiceElement().getName()+"] Terminating HeartbeatClient");
             heartbeatClient.terminate();
         }
 
         /* Terminate DiscoveryManagement */
         try {
-            if(context!=null && context.getDiscoveryManagement()!=null)
+            if(context!=null && context.getDiscoveryManagement()!=null) {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("["+context.getServiceElement().getName()+"] Terminating DiscoveryManagement");
                 context.getDiscoveryManagement().terminate();
+            }
         } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       "DiscoveryManagement termination",
-                       t);
+            logger.log(Level.WARNING, "DiscoveryManagement termination", t);
         }
 
         /* Unexport the ServiceAdmin */
         if (admin != null) {
             try {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("["+context.getServiceElement().getName()+"] Unexport the ServiceAdmin");
                 admin.unexport(true);
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Unexporting ServiceAdminImpl", e);
@@ -1125,8 +1092,11 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* Unexport the service */
         try {
-            if(System.getProperty("StaticCybernode")==null)
+            if(System.getProperty("StaticCybernode")==null) {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("["+context.getServiceElement().getName()+"] Unexport the service");
                 stop(force);
+            }
         } catch (IllegalStateException e) {
             logger.log(Level.WARNING, "Stopping ServiceBean", e);
         }
@@ -1145,16 +1115,20 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* Discard */
         if(context!=null) {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("["+context.getServiceElement().getName()+"] Discard the service");
             ServiceBeanManager serviceBeanManager = context.getServiceBeanManager();
             if(serviceBeanManager != null) {
                 DiscardManager discardMgr = serviceBeanManager.getDiscardManager();
                 if (discardMgr != null) {
                     discardMgr.discard();
                 } else {
-                    logger.warning("DiscardManager is null, unable to discard");
+                    logger.warning("["+context.getServiceElement().getName()+"] " +
+                                   "DiscardManager is null, unable to discard");
                 }
             } else {
-                logger.warning("ServiceBeanManager is null, unable to discard");
+                logger.warning("["+context.getServiceElement().getName()+"] " +
+                               "ServiceBeanManager is null, unable to discard");
             }
             context = null;
         }
@@ -1166,13 +1140,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     /**
      * @see org.rioproject.admin.MonitorableService#monitor
      */
-    public Lease monitor(long duration) throws LeaseDeniedException,
-                                               RemoteException {
+    public Lease monitor(long duration) throws LeaseDeniedException {
         if (duration <= 0)
-            throw new LeaseDeniedException("lease duration of [" + duration
-                                           + "] is invalid");
-        String phonyResource = this.getClass().getName() + ":"
-                               + System.currentTimeMillis();
+            throw new LeaseDeniedException("lease duration of ["+duration+"] is invalid");
+        String phonyResource = this.getClass().getName() + ":"+ System.currentTimeMillis();
         ServiceResource serviceResource = new ServiceResource(phonyResource);
         Lease lease = monitorLandlord.newLease(serviceResource, duration);
         return (lease);
@@ -1181,8 +1152,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     /**
      * @see org.rioproject.admin.MonitorableService#startHeartbeat
      */
-    public void startHeartbeat(String[] configArgs)
-            throws ConfigurationException, RemoteException {
+    public void startHeartbeat(String[] configArgs) throws ConfigurationException {
         if (heartbeatClient == null)
             heartbeatClient = new HeartbeatClient(uuid);
         heartbeatClient.addHeartbeatServer(configArgs);
@@ -1191,7 +1161,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     /**
      * @see org.rioproject.admin.MonitorableService#ping
      */
-    public void ping() throws RemoteException {
+    public void ping() {
     }
 
     /**
@@ -1201,18 +1171,17 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         if (uuid != null)
             return (uuid);
         ServiceBeanManager mgr = context.getServiceBeanManager();
-            uuid = mgr.getServiceID();
+        uuid = mgr.getServiceID();
         if (uuid == null) {
             if (logger.isLoggable(Level.FINE))
                 logger.fine("UUID is unknown, generate new UUID");
             uuid = UuidFactory.generate();
             if (mgr instanceof JSBManager) {
-            ((JSBManager)mgr).setServiceID(uuid);
-        } else {
-            if (logger.isLoggable(Level.FINE))
-                logger.fine("ServiceBeanManager is not a JSBManager, " +
-                            "cannot set UUID");
-        }
+                ((JSBManager)mgr).setServiceID(uuid);
+            } else {
+                if (logger.isLoggable(Level.FINE))
+                    logger.fine("ServiceBeanManager is not a JSBManager, cannot set UUID");
+            }
         }
         return (uuid);
     }
@@ -1223,9 +1192,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * @return The Uuid of the Cybernode
      */
     public Uuid getServiceBeanInstantiatorUuid() {
-        return(context.getServiceBeanManager()
-                      .getServiceBeanInstance()
-                      .getServiceBeanInstantiatorID());
+        return(context.getServiceBeanManager().getServiceBeanInstance().getServiceBeanInstantiatorID());
     }
     /**
      * Get the JoinManager created by the Joiner utility
@@ -1257,42 +1224,33 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             throw new IllegalArgumentException("config is null");
         Exporter exporter;
         String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        final Exporter defaultExporter =
-            new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
-                                  new BasicILFactory(),
-                                  false,
-                                  true);
+        final Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
+                                                               new BasicILFactory(),
+                                                               false,
+                                                               true);
         if(isActivatable() && activationID != null) {
-            ProxyPreparer activationIdPreparer =
-                (ProxyPreparer)Config.getNonNullEntry(config,
-                                                      serviceBeanComponent,
-                                                      "activationIdPreparer",
-                                                      ProxyPreparer.class,
-                                                      new BasicProxyPreparer());
+            ProxyPreparer activationIdPreparer = (ProxyPreparer)Config.getNonNullEntry(config,
+                                                                                       serviceBeanComponent,
+                                                                                       "activationIdPreparer",
+                                                                                       ProxyPreparer.class,
+                                                                                       new BasicProxyPreparer());
             ProxyPreparer activationSystemPreparer =
                 (ProxyPreparer)Config.getNonNullEntry(config,
                                                       serviceBeanComponent,
                                                       "activationSystemPreparer",
                                                       ProxyPreparer.class,
                                                       new BasicProxyPreparer());
-            this.activationID =
-                (ActivationID)activationIdPreparer.prepareProxy(activationID);
-            activationSystem =
-                (ActivationSystem)activationSystemPreparer.prepareProxy(
-                    ActivationGroup.getSystem());
-            exporter =
-                (Exporter)Config.getNonNullEntry(config,
-                                                 serviceBeanComponent,
-                                                 "serverExporter",
-                                                 Exporter.class,
-                                                 new ActivationExporter(activationID,
-                                                                        defaultExporter),
-                                                 activationID);
+            this.activationID = (ActivationID)activationIdPreparer.prepareProxy(activationID);
+            activationSystem = (ActivationSystem)activationSystemPreparer.prepareProxy(ActivationGroup.getSystem());
+            
+            exporter = (Exporter)Config.getNonNullEntry(config,
+                                                        serviceBeanComponent,
+                                                        "serverExporter",
+                                                        Exporter.class,
+                                                        new ActivationExporter(activationID, defaultExporter),
+                                                        activationID);
         } else {
-            exporter = ExporterConfig.getExporter(config,
-                                                  serviceBeanComponent,
-                                                  "serverExporter",
-                                                  defaultExporter);
+            exporter = ExporterConfig.getExporter(config, serviceBeanComponent, "serverExporter", defaultExporter);
         }
         return(exporter);
     }
@@ -1349,23 +1307,19 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * configuration
      * @throws UnknownHostException If the host is unknown
      */
-    protected Exporter getAdminExporter() throws
-                                          ConfigurationException,
-                                          UnknownHostException {
+    protected Exporter getAdminExporter() throws ConfigurationException, UnknownHostException {
         String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        Exporter basicExporter =
-            new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
-                                  new BasicILFactory(),
-                                  false,
-                                  true);
-        Exporter adminExporter =
-            ExporterConfig.getExporter(context.getConfiguration(),
-                                       serviceBeanComponent,
-                                       "adminExporter",
-                                       basicExporter);
+        Exporter basicExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
+                                                       new BasicILFactory(),
+                                                       false,
+                                                       true);
+        Exporter adminExporter = ExporterConfig.getExporter(context.getConfiguration(),
+                                                            serviceBeanComponent,
+                                                            "adminExporter",
+                                                            basicExporter);
         if(logger.isLoggable(Level.FINER))
-            logger.finer("["+context.getServiceElement().getName()+"] " +
-                         "using admin exporter: "+adminExporter.toString());
+            logger.finer("["+context.getServiceElement().getName()+"] using admin exporter: "+
+                         adminExporter.toString());
         return(adminExporter);
     }
 
@@ -1380,38 +1334,28 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      */
     private boolean isActivatable() {
         try {
-            this.getClass().getConstructor(
-                ActivationID.class, MarshalledObject.class);
+            this.getClass().getConstructor(ActivationID.class, MarshalledObject.class);
             return (true);
         } catch (NoSuchMethodException e) {
             return (false);
         }
     }
 
-    public void removeNotificationListener(NotificationListener listener,
-                                           NotificationFilter filter,
-                                           Object object)
+    public void removeNotificationListener(NotificationListener listener, NotificationFilter filter, Object object)
             throws ListenerNotFoundException {
-        getNotificationBroadcasterSupport().removeNotificationListener(
-            listener, filter, object);
+        getNotificationBroadcasterSupport().removeNotificationListener(listener, filter, object);
     }
 
-    public void addNotificationListener(NotificationListener listener,
-                                        NotificationFilter filter,
-                                        Object object)
-        throws IllegalArgumentException {
-        getNotificationBroadcasterSupport().addNotificationListener(
-                                                                       listener, filter, object);
+    public void addNotificationListener(NotificationListener listener, NotificationFilter filter, Object object) {
+        getNotificationBroadcasterSupport().addNotificationListener(listener, filter, object);
     }
 
-    public void removeNotificationListener(NotificationListener listener)
-        throws ListenerNotFoundException {
+    public void removeNotificationListener(NotificationListener listener) throws ListenerNotFoundException {
         getNotificationBroadcasterSupport().removeNotificationListener(listener);
     }
 
     public MBeanNotificationInfo[] getNotificationInfo() {
-        return (mbeanNoticationInfoList.toArray(
-            new MBeanNotificationInfo[mbeanNoticationInfoList.size()]));
+        return (mbeanNoticationInfoList.toArray(new MBeanNotificationInfo[mbeanNoticationInfoList.size()]));
     }
 
     public NotificationBroadcasterSupport getNotificationBroadcasterSupport() {
@@ -1471,8 +1415,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                              * yield here results in a very tight loop
                              * (plus there may be no other runnable threads)
                              */
-                            final long sleepTime =
-                                Math.min(unexportRetryDelay, end_time-now);
+                            final long sleepTime = Math.min(unexportRetryDelay, end_time-now);
 
                             /* sleepTime must > 0, unexportRetryDelay is
                              * > 0 and if now >= end_time we would have
@@ -1483,11 +1426,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                         } catch(InterruptedException e) {
                             // should never happen, but if it does break
                             // and fall through to force = true case
-                            logger.log(Level.INFO,
-                                       "exception encountered "+
-                                       "unexport retry delay sleep, "+
-                                       ", continuing",
-                                       e);
+                            logger.log(Level.INFO, "exception encountered unexport retry delay sleep, continuing", e);
                             break;
                         }
                     }
@@ -1499,9 +1438,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
             if(logger.isLoggable(Level.FINEST)) {
                 long end = System.currentTimeMillis();
-                logger.finest("Unexported "+
-                              context.getServiceElement().getName()+", " +
-                              "["+unexported+"] time alloted : "+(end-start));
+                logger.finest("Unexported "+context.getServiceElement().getName()+", " +
+                              "["+unexported+"] time allotted : "+(end-start)+" milliseconds");
             }
         }
 
@@ -1540,10 +1478,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                         suiList.add(aCurrent);
                 }
                 Entry[] suiEntries = suiList.toArray(new Entry[suiList.size()]);
-                if(ServiceElementUtil.hasDifferentServiceUIs(
-                                                     suiEntries,
-                                                     postElem,
-                                                     context.getExportCodebase())) {
+                if(ServiceElementUtil.hasDifferentServiceUIs(suiEntries, postElem, context.getExportCodebase())) {
                     try {
                         /* Using the current attribute collection, remove all 
                          * ServiceUI entries, then add the new entries and modify 
@@ -1551,8 +1486,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                          */
                         ArrayList<Entry> eList = new ArrayList<Entry>();
                         for (Entry aCurrent : current) {
-                            if (!(aCurrent instanceof
-                                UIDescriptor)) {
+                            if (!(aCurrent instanceof UIDescriptor)) {
                                 eList.add(aCurrent);
                             }
                         }
@@ -1560,21 +1494,15 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                         try {
                             eList.add(getWatchUI());
                         } catch(Exception e1) {
-                            logger.log(Level.WARNING,
-                                       "Getting Watch UI",
-                                       e1);
+                            logger.log(Level.WARNING, "Getting Watch UI", e1);
                         }
-                        String[] args =
-                            ConfigHelper.getConfigArgs(
-                                postElem.getServiceBeanConfig().getConfigArgs());
-                        Configuration config =
-                            ConfigurationProvider.getInstance(args);
-                        Entry[] serviceUIs =
-                            (Entry[])config.getEntry(serviceBeanComponent,
-                                                     "serviceUIs",
-                                                     Entry[].class,
-                                                     new Entry[0],
-                                                     context.getExportCodebase());
+                        String[] args = ConfigHelper.getConfigArgs(postElem.getServiceBeanConfig().getConfigArgs());
+                        Configuration config = ConfigurationProvider.getInstance(args);
+                        Entry[] serviceUIs = (Entry[])config.getEntry(serviceBeanComponent,
+                                                                      "serviceUIs",
+                                                                      Entry[].class,
+                                                                      new Entry[0],
+                                                                      context.getExportCodebase());
                         /* Add configured seviceUIs */
                         eList.addAll(Arrays.asList(serviceUIs));
 
@@ -1584,13 +1512,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                         if(joiner.getJoinManager()!=null)
                             joiner.getJoinManager().setAttributes(attrs);
                     } catch (ConfigurationException e) {
-                        logger.log(Level.WARNING,
-                                   "Getting or Applying modified ServiceUIs",
-                                   e);
+                        logger.log(Level.WARNING, "Getting or Applying modified ServiceUIs", e);
                     } catch (IOException e) {
-                        logger.log(Level.WARNING,
-                                   "Getting or Applying modified ServiceUIs",
-                                   e);
+                        logger.log(Level.WARNING, "Getting or Applying modified ServiceUIs", e);
                     }
                 }
             }
