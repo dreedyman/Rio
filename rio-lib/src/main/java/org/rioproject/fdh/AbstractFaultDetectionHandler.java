@@ -118,7 +118,11 @@ public abstract class AbstractFaultDetectionHandler
         if(lCache != null) {
             this.lCache = lCache;
             fdhListener = new FDHListener();
-            this.lCache.addListener(fdhListener);
+            try {
+                this.lCache.addListener(fdhListener);
+            } catch(IllegalStateException e) {
+                throw new Exception("Unable to set the FaultDetectionListener", e);
+            }
         }
         serviceMonitor = getServiceMonitor();        
     }
