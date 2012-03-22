@@ -197,7 +197,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                 throw new ConfigurationException("Creating configuration", e);
             }
             if(logger.isLoggable(Level.FINER)) {
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 for(String s : args) {
                     if(sb.length()>0)
                         sb.append("\n");
