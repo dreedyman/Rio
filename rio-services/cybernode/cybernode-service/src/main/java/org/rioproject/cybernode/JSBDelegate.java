@@ -114,8 +114,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private ServiceBeanExecManager execManager;
     private final Collection<PlatformCapability> installedPlatformCapabilities =
         new ArrayList<PlatformCapability>();
+    private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
-    static Logger logger = CybernodeImpl.logger;
+    private static Logger logger = Logger.getLogger(CONFIG_COMPONENT);
     /** Result from loading the service */
     protected ServiceBeanLoader.Result loadResult;
 
@@ -126,7 +127,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * @param serviceID Unique identifier for the ServiceBean
      * @param container The ServiceBeanContainer
      */
-    public JSBDelegate(Object identifier, Uuid serviceID, ServiceBeanContainer container) {
+    public JSBDelegate(Integer identifier, Uuid serviceID, ServiceBeanContainer container) {
         this.identifier = identifier;
         this.serviceID = serviceID;
         this.container = container;
@@ -134,7 +135,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         ServiceCostCalculator defaultCostCalculator = new ServiceCostCalculator();
         Configuration config = container.getSharedConfiguration();
         try {
-            serviceCostCalculator = (ServiceCostCalculator)config.getEntry(CybernodeImpl.CONFIG_COMPONENT,
+            serviceCostCalculator = (ServiceCostCalculator)config.getEntry(CONFIG_COMPONENT,
                                                                            "serviceCostCalculator",
                                                                            ServiceCostCalculator.class,
                                                                            defaultCostCalculator);
@@ -560,7 +561,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                                                            container.getUuid());
 
                         /* Create the ServiceRecord */
-                        synchronized(this) {
+                        synchronized(serviceRecordLock) {
                             serviceRecord = new ServiceRecord(serviceID,
                                                               sElem,
                                                               container.getComputeResource().getAddress().getHostName());
