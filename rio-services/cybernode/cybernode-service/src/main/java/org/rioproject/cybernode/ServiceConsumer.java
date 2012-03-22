@@ -59,41 +59,39 @@ import java.util.logging.Logger;
 public class ServiceConsumer extends ServiceDiscoveryAdapter {
     /** The maximum number of services the Cybernode has been configured to 
      * instantiate */
-    int serviceLimit;
-    CybernodeAdapter adapter;
+    private int serviceLimit;
+    private final CybernodeAdapter adapter;
     /** Table of Lease instances to manage */
-    final Hashtable<Object, ProvisionLeaseManager> leaseTable;
+    private final Hashtable<Object, ProvisionLeaseManager> leaseTable;
     /** Collection of ProvisionMonitor instances */
-    final List<ServiceID> provisioners =
-        Collections.synchronizedList(new ArrayList<ServiceID>());
+    private final List<ServiceID> provisioners = Collections.synchronizedList(new ArrayList<ServiceID>());
     /** LookupCache for ProvisionMonitor instances */
-    LookupCache lCache;
+    private LookupCache lCache;
     /**
      * The duration of the Lease requested by the ServiceInstantiator to
      * ProvisionManager instances
      */
-    long provisionerLeaseDuration;
+    private long provisionerLeaseDuration;
     /**
      * The number of times to attempt to reconnect to a ProvisionManager
      * instance if that instance could not be reached for Lease renewal.
      */
-    int provisionerRetryCount;
+    private int provisionerRetryCount;
     /**
      * The length of time (in milliseconds) to wait before attempting to
      * reconnect to a ProvisionManager instance if that instance could not be
      * reached for LeaseRenewal
      */
-    long provisionerRetryDelay;
+    private long provisionerRetryDelay;
     /** ProxyPreparer for ProvisionManager proxies */
-    ProxyPreparer provisionerPreparer;
-    /** Configuration object */
-    Configuration config;
+    private ProxyPreparer provisionerPreparer;
     /** Observer for ComputeResource changes */
-    ComputeResourceObserver computeResourceObserver;
+    private ComputeResourceObserver computeResourceObserver;
     /* Flag to indicate we are destroyed */
-    boolean destroyed = false;
+    private boolean destroyed = false;
+    private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
-    static Logger logger = CybernodeImpl.logger;
+    private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
 
     /**
      * Construct a ServiceConsumer
@@ -106,21 +104,18 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      *
      * @throws ConfigurationException if errors occur accessing the configuration
      */
-    ServiceConsumer(CybernodeAdapter adapter,
-                    int serviceLimit,
-                    Configuration config) throws ConfigurationException {
+    ServiceConsumer(CybernodeAdapter adapter, int serviceLimit, Configuration config) throws ConfigurationException {
         if(adapter == null)
             throw new IllegalArgumentException("CybernodeAdapter is null");
         if(config == null)
             throw new IllegalArgumentException("config is null");
         this.adapter = adapter;
-        this.config = config;
         /* Establish the lease duration */
         long ONE_MINUTE = 1000*60;
         long DEFAULT_LEASE_TIME = ONE_MINUTE*30; /* 30 minutes */
         long MIN_LEASE_TIME = 10*1000; /* 10 seconds */
-        provisionerLeaseDuration = Config.getLongEntry(config, 
-                                                       CybernodeImpl.CONFIG_COMPONENT,
+        provisionerLeaseDuration = Config.getLongEntry(config,
+                                                       CONFIG_COMPONENT,
                                                        "provisionerLeaseDuration", 
                                                        DEFAULT_LEASE_TIME, 
                                                        MIN_LEASE_TIME, 
@@ -129,7 +124,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         int DEFAULT_RETRY_COUNT = 3;
         int MIN_RETRY_COUNT = 0;
         provisionerRetryCount = Config.getIntEntry(config, 
-                                                   CybernodeImpl.CONFIG_COMPONENT,
+                                                   CONFIG_COMPONENT,
                                                    "provisionerRetryCount", 
                                                    DEFAULT_RETRY_COUNT, 
                                                    MIN_RETRY_COUNT, 
@@ -138,7 +133,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         long DEFAULT_RETRY_DELAY = 1000; /* 1 second */
         long MIN_RETRY_DELAY = 0; 
         provisionerRetryDelay = Config.getLongEntry(config, 
-                                                    CybernodeImpl.CONFIG_COMPONENT,
+                                                    CONFIG_COMPONENT,
                                                     "provisionerRetryDelay", 
                                                     DEFAULT_RETRY_DELAY, 
                                                     MIN_RETRY_DELAY, 
@@ -151,11 +146,10 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                                      provisionerRetryDelay});
         
         /* Get the ProxyPreparer for discovered ProvisionMonitor instances */
-        provisionerPreparer = 
-            (ProxyPreparer)config.getEntry(CybernodeImpl.CONFIG_COMPONENT,
-                                           "provisionerPreparer", 
-                                           ProxyPreparer.class,
-                                           new BasicProxyPreparer());
+        provisionerPreparer = (ProxyPreparer)config.getEntry(CONFIG_COMPONENT,
+                                                             "provisionerPreparer",
+                                                             ProxyPreparer.class,
+                                                             new BasicProxyPreparer());
         if(logger.isLoggable(Level.FINEST))
             logger.log(Level.FINEST, "ProxyPreparer={0}", provisionerPreparer);
         leaseTable = new Hashtable<Object, ProvisionLeaseManager>();
@@ -374,8 +368,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             try {
                 mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Throwable t) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Updating ProvisionManager", t);
+                //if (logger.isLoggable(Level.FINEST))
+                    logger.log(Level.WARNING, "Updating ProvisionManager", t);
                 boolean connected = false;
 
                 /* Determine if we should even try to reconnect */
