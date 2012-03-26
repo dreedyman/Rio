@@ -136,7 +136,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
 
     /**
      * Delegates to {@link BlockJUnit4ClassRunner#createTest()} to create the test
-     * @see BlockJUnit4ClassRunner#createTest(), first checks for TestManager injection
+     * {@link BlockJUnit4ClassRunner#createTest()}, first checks for TestManager injection
      */
     @Override
     protected Object createTest() throws Exception {
