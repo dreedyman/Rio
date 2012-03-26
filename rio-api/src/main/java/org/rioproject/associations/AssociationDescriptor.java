@@ -575,7 +575,7 @@ public class AssociationDescriptor implements Serializable {
      * @param name The service name
      * @param setter The setter property to use when injecting
      * @param serviceClass The service's exported proxy class
-     * @param type, The type of Association to create
+     * @param type The type of Association to create
      * @param groups Discovery groups to use
      *
      * @return An AssociationDescriptor
