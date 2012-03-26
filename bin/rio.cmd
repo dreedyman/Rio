@@ -38,7 +38,7 @@ set props="-DRIO_HOME=%RIO_HOME%"
 goto end
 
 :create-project
-mvn archetype:generate -DarchetypeGroupId=org.rioproject -DarchetypeGroupId=org.rioproject -DarchetypeRepository=http://www.rio-project.org/maven2 -DarchetypeVersion=4.0
+mvn archetype:generate -DarchetypeGroupId=org.rioproject -DarchetypeGroupId=org.rioproject -DarchetypeRepository=http://www.rio-project.org/maven2 -DarchetypeVersion=5.0-SNAPSHOT
 goto end
 
 :start
