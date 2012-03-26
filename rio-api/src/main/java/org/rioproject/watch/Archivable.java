@@ -19,7 +19,7 @@ package org.rioproject.watch;
  * Used to archive {@link org.rioproject.watch.Calculable} entries
  * added to a ${@link org.rioproject.watch.WatchDataSource}.
  *
- * @Deprecated Use {@link WatchDataReplicator} instead
+ * @deprecated Use {@link WatchDataReplicator} instead
  */
 public interface Archivable extends WatchDataReplicator {
 
