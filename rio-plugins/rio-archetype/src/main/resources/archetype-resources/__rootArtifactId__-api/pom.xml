@@ -6,11 +6,18 @@
     <parent>
         <groupId>${groupId}</groupId>
         <artifactId>${rootArtifactId}</artifactId>
-        <version>${project.version}</version>
+        <version>${version}</version>
     </parent>
 
     <groupId>${groupId}.${rootArtifactId}</groupId>
     <artifactId>${rootArtifactId}-api</artifactId>
     <name>Project :: ${service} API</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-api</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
