@@ -26,6 +26,6 @@ import java.lang.annotation.*;
 @Target (ElementType.TYPE)
 @Retention (RetentionPolicy.RUNTIME)
 public @interface AssociationProxyType {
-    public enum Type {JDK, CGLIB};    
+    public enum Type {JDK, CGLIB}
     Type type() default Type.JDK;
 }
