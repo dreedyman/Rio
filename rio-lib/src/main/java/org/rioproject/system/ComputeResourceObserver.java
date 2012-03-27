@@ -75,13 +75,8 @@ public class ComputeResourceObserver implements Observer {
      * A SLA constructed to represent the ComputeResource utilizationLimit 
      */
     private SLA utilizationSLA;
-    /**
-     * Description for this utility
-     */
-    private static String DESCRIPTION = "ComputeResource Utilization Listener";
     /** A Logger for this component */
     private static Logger logger = Logger.getLogger("org.rioproject.system");
-
 
     /**
      * Construct a new ComputeResourceObserver
@@ -161,37 +156,34 @@ public class ComputeResourceObserver implements Observer {
             return;
         /* ComputeResource object has changed */
         if(!(o instanceof ComputeResource)) {
-            logger.warning("ComputeResourceObserver: Observable update is not a "+
-                           "ComputeResource, detach");
+            logger.warning("ComputeResourceObserver: Observable update is not a ComputeResource, detach");
             disconnect();
             return;
         }
         try {
             ResourceCapability resourceCapability = (ResourceCapability)arg;
-            double currentUtilization = resourceCapability.getUtilization();                        
+            double currentUtilization = resourceCapability.getUtilization();
 
+            /*
+             Description for this utility
+            */
+            String DESCRIPTION = "ComputeResource Utilization Listener";
             if(currentUtilization > utilizationLimit && !computeCostBreached) {
                 computeCostBreached = true;
                 long now = System.currentTimeMillis();
-                Calculable calc = new Calculable("ComputeResource.Utilization", 
-                                                 currentUtilization, 
-                                                 now);
+                Calculable calc = new Calculable("ComputeResource.Utilization", currentUtilization, now);
                 try {
-                    String hostAddress = computeResource.getAddress().
-                                                         getHostAddress();
-                    ServiceBeanInstance instance =
-                        context.getServiceBeanManager().getServiceBeanInstance();
+                    String hostAddress = computeResource.getAddress().getHostAddress();
+                    ServiceBeanInstance instance = context.getServiceBeanManager().getServiceBeanInstance();
 
-                    SLAThresholdEvent event = 
-                        new SLAThresholdEvent(
-                                      source,
-                                      context.getServiceElement(),
-                                      instance,
-                                      calc,
-                                      utilizationSLA,
-                                      DESCRIPTION,
-                                      hostAddress,
-                                      SLAThresholdEvent.BREACHED);
+                    SLAThresholdEvent event = new SLAThresholdEvent(source,
+                                                                    context.getServiceElement(),
+                                                                    instance,
+                                                                    calc,
+                                                                    utilizationSLA,
+                                                                    DESCRIPTION,
+                                                                    hostAddress,
+                                                                    SLAThresholdEvent.BREACHED);
                     new Thread(new SLAThresholdEventTask(event)).start();
                 } catch(Throwable t) {
                     if(t.getCause()!=null)
@@ -207,25 +199,19 @@ public class ComputeResourceObserver implements Observer {
             if(currentUtilization < utilizationLimit && computeCostBreached) {
                 computeCostBreached = false;
                 long now = System.currentTimeMillis();
-                Calculable calc = new Calculable("ComputeResource.Utilization", 
-                                                 currentUtilization, 
-                                                 now);
+                Calculable calc = new Calculable("ComputeResource.Utilization", currentUtilization, now);
                 try {
-                    String hostAddress = computeResource.getAddress().
-                                                         getHostAddress();
-                    ServiceBeanInstance instance =
-                        context.getServiceBeanManager().getServiceBeanInstance();
+                    String hostAddress = computeResource.getAddress().getHostAddress();
+                    ServiceBeanInstance instance = context.getServiceBeanManager().getServiceBeanInstance();
 
-                    SLAThresholdEvent event =
-                        new SLAThresholdEvent(
-                                      source,
-                                      context.getServiceElement(),
-                                      instance,
-                                      calc,
-                                      utilizationSLA,
-                                      DESCRIPTION,
-                                      hostAddress,
-                                      SLAThresholdEvent.CLEARED);
+                    SLAThresholdEvent event = new SLAThresholdEvent(source,
+                                                                    context.getServiceElement(),
+                                                                    instance,
+                                                                    calc,
+                                                                    utilizationSLA,
+                                                                    DESCRIPTION,
+                                                                    hostAddress,
+                                                                    SLAThresholdEvent.CLEARED);
                     new Thread(new SLAThresholdEventTask(event)).start();
                 } catch(Throwable t) {
                     //if(t.getCause()!=null)
@@ -241,9 +227,7 @@ public class ComputeResourceObserver implements Observer {
         } catch(Throwable t) {
             if(t.getCause()!=null)
                 t = t.getCause();
-            logger.log(Level.WARNING,
-                       "Processing notify from ComputeResource",
-                       t);
+            logger.log(Level.WARNING, "Processing notify from ComputeResource", t);
         }
     }
 
@@ -262,9 +246,7 @@ public class ComputeResourceObserver implements Observer {
             try {
                 eventHandler.fire(event);
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Exception notifying SLAThresholdEvent consumers",
-                           e);
+                logger.log(Level.WARNING, "Exception notifying SLAThresholdEvent consumers", e);
             }
 
         }
