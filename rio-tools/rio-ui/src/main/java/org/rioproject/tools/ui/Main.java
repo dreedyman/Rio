@@ -88,38 +88,36 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Reedy
  */
 public class Main extends JFrame {
-    final static long startTime = System.currentTimeMillis();
-    JSplitPane splitPane;
-    File lastDir = new File(System.getProperty("user.dir"));
-    Configuration config;
+    private final static long startTime = System.currentTimeMillis();
+    private JSplitPane splitPane;
+    private File lastDir = new File(System.getProperty("user.dir"));
+    private Configuration config;
     /** A DiscoveryListener that will record lookup service discovery/discard times */
-	RecordingDiscoveryListener recordingListener;
+    private RecordingDiscoveryListener recordingListener;
 	/** LookupDiscovery for discovering all groups */
-	LookupDiscovery lookupDiscovery;
-    static JiniClient jiniClient;
-    ServiceDiscoveryManager sdm;
-    CybernodeUtilizationPanel cup;
+    private LookupDiscovery lookupDiscovery;
+    private static JiniClient jiniClient;
+    private ServiceDiscoveryManager sdm;
+    private CybernodeUtilizationPanel cup;
     /** A task to control ComputeResourceUtilization refreshes */
-    ComputeResourceUtilizationTask cruTask;
+    private ComputeResourceUtilizationTask cruTask;
     /** Scheduler for Cybernode utilization gathering */
-    ScheduledExecutorService scheduler;
+    private ScheduledExecutorService scheduler;
     private ExecutorService service;
-    LookupCache monitorCache;
-    JButton deploy;
-    final GraphView graphView;
-    JPanel controls;
-    final Main frame;
-    ColorManager colorManager;
-    UtilizationColumnManager utilizationColumnManager;
-    ImageIcon westIcon;
-    ImageIcon westSelectedIcon;
-    ImageIcon northIcon;
-    ImageIcon northSelectedIcon;
-    int cybernodeRefreshRate;
-    UtilitiesPanel utilities;
-    String lastArtifact = null;
-    BasicEventConsumer clientEventConsumer;
-    ProvisionClientEventConsumer provisionClientEventConsumer;
+    private LookupCache monitorCache;
+    private JButton deploy;
+    private final GraphView graphView;
+    private final Main frame;
+    private ColorManager colorManager;
+    private UtilizationColumnManager utilizationColumnManager;
+    private ImageIcon westIcon;
+    private ImageIcon westSelectedIcon;
+    private ImageIcon northIcon;
+    private ImageIcon northSelectedIcon;
+    private int cybernodeRefreshRate;
+    private UtilitiesPanel utilities;
+    private String lastArtifact = null;
+    private BasicEventConsumer clientEventConsumer;
 
     public Main(Configuration config, final boolean exitOnClose, Properties startupProps) {
         this.config = config;
@@ -330,7 +328,7 @@ public class Main extends JFrame {
         //toolBar.setPreferredSize(new Dimension(Integer.MAX_VALUE, 24));
         toolBar.setMinimumSize(new Dimension(8, 24));
 
-        controls = new JPanel();
+        JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
         controls.setBorder(BorderFactory.createEtchedBorder());
         //controls.add(colorChooser);
@@ -386,7 +384,7 @@ public class Main extends JFrame {
         Container content = getContentPane();
         content.add(splitPane);
         Dimension dim = splitPane.getTopComponent().getSize();
-        dim.height = dim.height-controls.getSize().height;
+        dim.height = dim.height- controls.getSize().height;
         graphView.setPreferredSize(dim);
         graphView.setSize(dim);
         graphView.showProgressPanel();
@@ -849,7 +847,7 @@ public class Main extends JFrame {
         ServiceTemplate cybernodes = new ServiceTemplate(null, new Class[]{Cybernode.class}, null);
         sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(), new LeaseRenewalManager(), config);
         ServiceWatcher watcher = new ServiceWatcher();
-        provisionClientEventConsumer = new ProvisionClientEventConsumer();
+        ProvisionClientEventConsumer provisionClientEventConsumer = new ProvisionClientEventConsumer();
         clientEventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(),
                                                      provisionClientEventConsumer,
                                                      config);
