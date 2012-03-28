@@ -16,7 +16,7 @@
 package org.rioproject.test.instrumentation;
 
 import org.rioproject.bean.Started;
-import org.rioproject.boot.InstrumentationHook;
+import org.rioproject.boot.AgentHook;
 
 import java.lang.instrument.Instrumentation;
 
@@ -25,7 +25,7 @@ public class Impl implements API {
 
     @Started
     public void started() {
-        instrumentation = InstrumentationHook.getInstrumentation();
+        instrumentation = AgentHook.getInstrumentation();
     }
 
     public boolean isClassNameLoaded(String className) {
