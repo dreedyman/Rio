@@ -25,6 +25,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
+import org.rioproject.log.RioLogFormatter;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -34,6 +35,8 @@ import java.lang.reflect.Modifier;
 import java.rmi.RMISecurityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +52,14 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         Utils.checkSecurityPolicy();
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new RMISecurityManager());
+        }
+        if(System.getProperty("java.util.logging.config.file")==null) {
+            Logger rootLogger = Logger.getLogger("");
+            for(Handler h : rootLogger.getHandlers()) {
+                if(h instanceof ConsoleHandler) {
+                    h.setFormatter(new RioLogFormatter());
+                }
+            }
         }
     }
     TestManager testManager;
