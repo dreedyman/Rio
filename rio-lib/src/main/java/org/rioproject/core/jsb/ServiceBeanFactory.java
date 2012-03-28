@@ -55,6 +55,11 @@ public interface ServiceBeanFactory {
         public Object getProxy() {
             return proxy;
         }
+
+        @Override
+        public String toString() {
+            return "impl=" + impl +", proxy=" + proxy;
+        }
     }
     
     /**

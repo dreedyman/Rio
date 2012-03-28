@@ -214,7 +214,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     protected ObjectName objectName;
     /* MBean server we are registered to */
     protected MBeanServer mbeanServer;
-    protected final List<MBeanNotificationInfo> mbeanNoticationInfoList = new ArrayList<MBeanNotificationInfo>();
+    protected final List<MBeanNotificationInfo> mbeanNoticationInfoList =new ArrayList<MBeanNotificationInfo>();
     protected SLAThresholdEventAdapter slaThresholdEventAdapter;
 
     /**
