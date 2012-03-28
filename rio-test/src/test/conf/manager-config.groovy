@@ -21,30 +21,27 @@ import org.rioproject.config.Constants
 manager {
 
     execClassPath =
-        '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+        '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib${/}resolver-api.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
 
     inheritOptions = true
+
+    /* Get the directory that the logging FileHandler will create the service log.  */
+    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
+    String opSys = System.getProperty('os.name')
+    String rootLogDir = opSys.startsWith("Windows")?'${java.io.tmpdir}':'/tmp'
+    String name = System.getProperty('user.name')
+
+    log = "${rootLogDir}/${name}/logs/${logExt}/"
 
     jvmOptions='''
         -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
         -Djava.util.logging.config.file=${RIO_HOME}${/}config${/}logging${/}rio-logging.properties
+        -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
-        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${RIO_HOME}${/}logs
         -DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME}
-        -Dorg.rioproject.home=${RIO_HOME} -Dorg.rioproject.groups=${org.rioproject.groups}'''
-
-    /* The ${service} token will be replaced by the name of the starter file.
-     * For start-reggie the service name will be reggie, for start-monitor the
-     * service name will be monitor, etc ... */
-    String logDir = '/tmp/logs'
-    String opSys = System.getProperty('os.name')
-    if(opSys.startsWith("Windows"))
-        logDir = '${java.io.tmpdir}'
-    
-    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                                       System.getProperty('user.name'))
-    log = logDir+'${/}rio${/}'+logExt+'${/}${service}.log'
+        -Dorg.rioproject.groups=${org.rioproject.groups}
+        -Dorg.rioproject.service=${service}'''
 
     /*
      * Remove any previously created service log files
