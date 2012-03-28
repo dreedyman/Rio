@@ -18,6 +18,7 @@ package org.rioproject.test.simple;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.bean.Initialized;
+import org.rioproject.bean.PreDestroy;
 
 import java.rmi.RemoteException;
 import java.util.Map;
@@ -36,40 +37,46 @@ public class SimpleImpl implements Simple {
         if(food==null)
             throw new RuntimeException("Have not been initialized");
         if(logger.isLoggable(Level.FINE)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("***********\n");
-            sb.append("Initialized\n");
-            sb.append("***********");
-            logger.fine(sb.toString());
+            logger.fine("******** (2) Initialized");
         }
     }
 
     public void setConfiguration(Configuration config) {
         try {
             food = (String)config.getEntry("bean", "food", String.class);
-            logger.fine("\n############\nBean gets to eat "+food+"\n############");
+            if(logger.isLoggable(Level.FINE))
+                logger.fine("******** (1) Configuration gets set first");
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("*********** Bean gets to eat " + food);
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }
     }
 
     public void setParameters(Map<String, Object> params) {
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isLoggable(Level.FINEST)) {
             StringBuilder sb = new StringBuilder();
             sb.append("***********\n");
             for(Map.Entry<String, Object> entry : params.entrySet()) {
                 sb.append(entry.getKey()+" = "+entry.getValue()+"\n");
             }
+            logger.finest(sb.toString());
         }
     }
 
     public String getFood() {
         return food;
     }
+    
+    @PreDestroy
+    public void later() {
+        if(logger.isLoggable(Level.FINER))
+            logger.finer("********** PreDestroy");
+    }
 
     public String hello(String message) throws RemoteException {
         System.out.println("Client says hello : "+message);
-        return("Hello vistor : "+visitorNumber++);
+        return("Hello visitor : "+visitorNumber++);
     }
 
     public int getGauge() {
@@ -78,6 +85,6 @@ public class SimpleImpl implements Simple {
     }
 
     public String goodbye() {
-        return "goobye "+visitorNumber++;
+        return "goodbye "+visitorNumber++;
     }
 }
