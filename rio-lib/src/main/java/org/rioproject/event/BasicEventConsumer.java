@@ -44,6 +44,8 @@ import org.rioproject.watch.WatchDataSourceRegistry;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,10 +71,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     private ProxyPreparer eventLeasePreparer;
     protected final List<RemoteServiceEventListener> eventSubscribers =
         Collections.synchronizedList(new ArrayList<RemoteServiceEventListener>());
-    protected final Hashtable<ServiceID, EventLeaseManager> leaseTable =
-        new Hashtable<ServiceID, EventLeaseManager>();
-    protected final Map<Long, EventRegistration> eventRegistrationTable =
-        new Hashtable<Long, EventRegistration>();
+    protected final Hashtable<ServiceID, EventLeaseManager> leaseTable = new Hashtable<ServiceID, EventLeaseManager>();
+    protected final Map<Long, EventRegistration> eventRegistrationTable = new Hashtable<Long, EventRegistration>();
     protected EventDescriptor edTemplate;
     protected int received = 0;
     protected long sktime, ektime;
@@ -94,7 +94,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     static Logger logger = Logger.getLogger(COMPONENT);
     /** EventLeaseManager id token */
     static int token = 0;
-    Configuration config;
+    private Configuration config;
+    private ExecutorService service;
 
     /**
      * Create a BasicEventConsumer with an EventDescriptor
@@ -114,8 +115,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(RemoteServiceEventListener listener)
-    throws Exception {
+    public BasicEventConsumer(RemoteServiceEventListener listener) throws Exception {
         this(null, listener, null, null);
     }
 
@@ -128,9 +128,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(EventDescriptor edTemplate,
-                              RemoteServiceEventListener listener)
-    throws Exception {
+    public BasicEventConsumer(EventDescriptor edTemplate, RemoteServiceEventListener listener) throws Exception {
         this(edTemplate, listener, null, null);
     }
 
@@ -146,8 +144,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      */
     public BasicEventConsumer(EventDescriptor edTemplate,
                               RemoteServiceEventListener listener,
-                              Configuration config)
-    throws Exception {
+                              Configuration config) throws Exception {
         this(edTemplate, listener, null, config);
     }
 
@@ -167,11 +164,10 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                               RemoteServiceEventListener listener,
                               MarshalledObject handback,
                               Configuration config) throws Exception {
-        Exporter defaultExporter =
-            new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
-                                  new BasicILFactory(),
-                                  false,
-                                  true);
+        Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
+                                                         new BasicILFactory(),
+                                                         false,
+                                                         true);
         ProxyPreparer basicLeasePreparer = new BasicProxyPreparer();
 
         if(config == null)
@@ -201,6 +197,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                                             DEFAULT_CONNECT_RETRY_COUNT, // default
                                             0,                           // min
                                             5);                          // max
+
         retryWait = Config.getLongEntry(config,
                                         COMPONENT,
                                         "retryWait",
@@ -213,12 +210,12 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         this.edTemplate = edTemplate;
         if(logger.isLoggable(Level.FINEST)) {
             if(edTemplate!=null)
-                logger.finest("Create BasicEventConsumer for EventDescriptor : "+
-                              edTemplate.toString());
+                logger.finest("Create BasicEventConsumer for EventDescriptor : "+edTemplate.toString());
         }
         this.handback = handback;
         if(listener != null)
             register(listener);
+        service = Executors.newCachedThreadPool();
     }
 
     /**
@@ -230,6 +227,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * will also destroy the response time watch if it was created
      */
     public void terminate() {
+        if(service!=null)
+            service.shutdownNow();
         /* Deregister all listeners */
         RemoteServiceEventListener[] listeners = getListeners();
         for (RemoteServiceEventListener listener : listeners) {
@@ -577,7 +576,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         if(!(rEvent instanceof RemoteServiceEvent))
             throw new UnknownEventException("Unsupported event class");
         RemoteServiceEvent rsEvent = (RemoteServiceEvent)rEvent;
-        long startTime = System.currentTimeMillis();
+        service.submit(new ClientNotification(rsEvent));
+        /*long startTime = System.currentTimeMillis();
         if(logger.isLoggable(Level.FINEST)) {
             logger.finest("Received RemoteEvent ["
                           + rEvent.getClass().getName()
@@ -589,8 +589,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         RemoteServiceEventListener[] listeners = getListeners();
         for (RemoteServiceEventListener listener : listeners) {
             if (logger.isLoggable(Level.FINEST))
-                logger.finest("Notify subscriber [" +
-                              listener.getClass().getName() + "]");
+                logger.finest("Notify subscriber ["+listener.getClass().getName() + "]");
             listener.notify(rsEvent);
             received++;
             printStats();
@@ -600,7 +599,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             long now = System.currentTimeMillis();
             long elapsed = now - startTime;
             responseWatch.setElapsedTime(elapsed, now);
-        }
+        }*/
     }
 
     /**
@@ -710,8 +709,42 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @return An array of all registered RemoteServiceEventListener objects
      */
     protected RemoteServiceEventListener[] getListeners() {
-        return eventSubscribers.toArray(
-                new RemoteServiceEventListener[eventSubscribers.size()]);
+        return eventSubscribers.toArray(new RemoteServiceEventListener[eventSubscribers.size()]);
+    }
+
+    /**
+     * Notify client asynchronously
+     */
+    class ClientNotification implements Runnable {
+        RemoteServiceEvent rsEvent;
+
+        ClientNotification(RemoteServiceEvent rsEvent) {
+            this.rsEvent = rsEvent;
+        }
+
+        public void run() {
+            long startTime = System.currentTimeMillis();
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.finest("Received RemoteServiceEvent ["
+                              + rsEvent.getClass().getName()
+                              + "], Number of subscribers : "+ eventSubscribers.size());
+            }
+
+            RemoteServiceEventListener[] listeners = getListeners();
+            for (RemoteServiceEventListener listener : listeners) {
+                if (logger.isLoggable(Level.FINEST))
+                    logger.finest("Notify subscriber ["+listener.getClass().getName() + "]");
+                listener.notify(rsEvent);
+                received++;
+                printStats();
+            }
+
+            if(responseWatch != null) {
+                long now = System.currentTimeMillis();
+                long elapsed = now - startTime;
+                responseWatch.setElapsedTime(elapsed, now);
+            }
+        }
     }
 
     /**
