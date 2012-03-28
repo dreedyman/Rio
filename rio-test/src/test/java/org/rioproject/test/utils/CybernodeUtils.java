@@ -87,14 +87,12 @@ public class CybernodeUtils {
      *          while attempting to access one of the Cybernodes from
      *          the specified list.
      */
-    public static int[] calcServices(Cybernode[] cybernodes, Class type)
-            throws RemoteException {
+    public static int[] calcServices(Cybernode[] cybernodes, Class type) throws RemoteException {
 
         int[] res = new int[cybernodes.length];
         for (int i = 0; i < cybernodes.length; i++) {
             Cybernode cybernode = cybernodes[i];
-            ServiceRecord[] records = cybernode.getServiceRecords(
-                    ServiceRecord.ACTIVE_SERVICE_RECORD);
+            ServiceRecord[] records = cybernode.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
             for (ServiceRecord record : records) {
                 ServiceElement element = record.getServiceElement();
                 ClassBundle[] exportBundles = element.getExportBundles();
@@ -109,8 +107,7 @@ public class CybernodeUtils {
         return res;
     }
 
-    public static int[] calcServices(List<Cybernode> cybernodes, Class type)
-        throws RemoteException {
+    public static int[] calcServices(List<Cybernode> cybernodes, Class type) throws RemoteException {
         Cybernode[] cnodes = cybernodes.toArray(new Cybernode[cybernodes.size()]);
         return calcServices(cnodes, type);
 

@@ -98,43 +98,40 @@ public class MaintainTest {
     /*
      * Tests a combination.
      */
-    private void testCombination(boolean fixed,
-                                 int maintain,
-                                 ProvisionMonitor monitor,
-                                 ServiceMonitor cyberMon)
-            throws Exception {
+    private void testCombination(boolean fixed, int maintain, ProvisionMonitor monitor, ServiceMonitor<Cybernode> cyberMon)
+        throws Exception {
 
-        logger.log(Level.INFO, "Test combination:"
-                + " [fixed=" + fixed + ", maintain=" + maintain + "]");
-
+        logger.info("\n" +
+                    "------------------------------------------------\n" +
+                    "Test combination: [fixed=" + fixed + ", maintain=" + maintain + "]\n" +
+                    "------------------------------------------------");
         testManager.undeployAll(monitor);
-
         int prevMaintainInt = 0;
 
         // Prepare OpString
         OpStringLoader loader = new OpStringLoader();
         OperationalString[] opstrings =
-            loader.parseOperationalString(
-                new File("src/test/resources/opstring/simple_opstring.groovy"));
+            loader.parseOperationalString(new File("src/test/resources/opstring/simple_opstring.groovy"));
         org.junit.Assert.assertEquals(1, opstrings.length);
         OpString opstring = (OpString)opstrings[0];
+        logger.info("Loaded "+opstring.getName());
         org.junit.Assert.assertEquals(1, opstring.getServices().length);
         ServiceElement service = opstring.getServices()[0];
-        service.setProvisionType(fixed?
-                                 ServiceElement.ProvisionType.FIXED:
-                                 ServiceElement.ProvisionType.DYNAMIC);
+        service.setProvisionType(fixed? ServiceElement.ProvisionType.FIXED : ServiceElement.ProvisionType.DYNAMIC);
         if (maintain < 0) {
             try {
                 service.setPlanned(maintain);
-                Assert.fail("IllegalArgumentException expected"
-                            + " but not thrown");
+                Assert.fail("IllegalArgumentException expected but not thrown");
             } catch (IllegalArgumentException e) {
             }
-
+            logger.info("checkState, prevFixed: "+prevFixed+", prevMaintainInt: "+prevMaintainInt+", cybernode service count: "+cyberMon.getServices().size());
             checkState(prevFixed, prevMaintainInt, cyberMon.getServices());
         } else {
+            logger.info(service.getName()+" set planned="+maintain);
             service.setPlanned(maintain);
+            logger.info("Deploy "+opstring.getName());
             testManager.deploy(opstring, monitor);
+            logger.info("Deployed "+opstring.getName());
             checkState(fixed, maintain, cyberMon.getServices());
             prevFixed = fixed;
             prevMaintainInt = maintain;
@@ -144,9 +141,7 @@ public class MaintainTest {
     /*
      * Checks that the current state of the system is as expected.
      */
-    private void checkState(boolean fixed,
-                            int maintain,
-                            final List<Cybernode> cybernodes) throws Exception {
+    private void checkState(boolean fixed, int maintain, final List<Cybernode> cybernodes) throws Exception {
 
         final boolean dynamic = !fixed;
         final int maintainF = Math.max(maintain, 0);
@@ -156,8 +151,7 @@ public class MaintainTest {
             public boolean test() {
                 int[] counts;
                 try {
-                    counts = CybernodeUtils.calcServices(cybernodes,
-                                                         Simple.class);
+                    counts = CybernodeUtils.calcServices(cybernodes, Simple.class);
                 } catch (RemoteException e) {
                     logger.log(Level.SEVERE, "Error calculating services", e);
                     return false;

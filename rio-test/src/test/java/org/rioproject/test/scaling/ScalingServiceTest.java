@@ -111,6 +111,8 @@ public class ScalingServiceTest {
         for(Object cybernode : cyberMon.getServices())
             testManager.stopCybernode(cybernode);
         Assert.assertEquals((long)0, (long)cyberMon.getCount());
+        boolean undeployed = testManager.undeploy("Scaling Service Test");
+        Assert.assertTrue(undeployed);
     }
 
     @Test
