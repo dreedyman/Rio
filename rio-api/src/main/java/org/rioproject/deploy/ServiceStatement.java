@@ -36,8 +36,7 @@ public class ServiceStatement implements Serializable {
     /**
      * A Map of ServiceRecord instances
      */
-    private final Map<Uuid, List<ServiceRecord>> serviceRecords =
-        new HashMap<Uuid, List<ServiceRecord>>();
+    private final Map<Uuid, List<ServiceRecord>> serviceRecords = new HashMap<Uuid, List<ServiceRecord>>();
 
     /**
      * Create a ServiceStatement
@@ -190,34 +189,27 @@ public class ServiceStatement implements Serializable {
      */
     public ServiceRecord[] getServiceRecords(Uuid sbid, Uuid instantiatorID) {
         return (filterServiceRecords(sbid,
-                                     getServiceRecords(instantiatorID,
-                                                       ServiceRecord.ACTIVE_SERVICE_RECORD
-                                                                                                                                                                                                                            | ServiceRecord.INACTIVE_SERVICE_RECORD)));
+                                     getServiceRecords(instantiatorID, ServiceRecord.ACTIVE_SERVICE_RECORD
+                                                                       | ServiceRecord.INACTIVE_SERVICE_RECORD)));
     }
 
     /*
      * Filter ServiceRecord instances based on type
      */
-    private ServiceRecord[] filterServiceRecords(int type,
-                                                 ServiceRecord[] records) {
-        if(type == 0
-           || type != (type & (ServiceRecord.ACTIVE_SERVICE_RECORD | 
-                               ServiceRecord.INACTIVE_SERVICE_RECORD)))
+    private ServiceRecord[] filterServiceRecords(int type, ServiceRecord[] records) {
+        if(type == 0 || type != (type & (ServiceRecord.ACTIVE_SERVICE_RECORD | ServiceRecord.INACTIVE_SERVICE_RECORD)))
             throw new IllegalArgumentException("invalid recordType");
-        if(((type & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0)
-           && ((type & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0)) {
+        if(((type & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) && ((type & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0)) {
             return (records);
         }
         ArrayList<ServiceRecord> list = new ArrayList<ServiceRecord>();
         for (ServiceRecord record : records) {
             if ((type & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) {
-                if ((record.getType() &
-                     ServiceRecord.ACTIVE_SERVICE_RECORD) != 0)
+                if ((record.getType() & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0)
                     list.add(record);
             }
             if ((type & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0) {
-                if ((record.getType() &
-                     ServiceRecord.INACTIVE_SERVICE_RECORD) != 0)
+                if ((record.getType() & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0)
                     list.add(record);
             }
         }
@@ -227,8 +219,7 @@ public class ServiceStatement implements Serializable {
     /*
      * Filter ServiceRecord instances based on an identifier
      */
-    private ServiceRecord[] filterServiceRecords(Uuid identifier,
-                                                 ServiceRecord[] records) {
+    private ServiceRecord[] filterServiceRecords(Uuid identifier, ServiceRecord[] records) {
         ArrayList<ServiceRecord> list = new ArrayList<ServiceRecord>();
         for (ServiceRecord record : records) {
             if (record.getServiceID().equals(identifier))
