@@ -26,9 +26,9 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 /**
- * The TransientServiceStatementManager provides an implementation of the
- * ServiceStatementManager, setting and accessing ServiceStatement instances in
- * a List
+ * The {@code TransientServiceStatementManager} provides an implementation of the
+ * {@link ServiceStatementManager}, setting and accessing {@link ServiceStatement} instances in
+ * a {@code Map}.
  *
  * @author Dennis Reedy
  */
