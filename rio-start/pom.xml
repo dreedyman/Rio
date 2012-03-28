@@ -67,7 +67,7 @@
 						    <Rio-Version>${project.version}</Rio-Version>
 						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
 						    <Class-Path>resolver-api.jar rio-platform.jar start.jar</Class-Path>
-						    <Premain-Class>org.rioproject.boot.InstrumentationHook</Premain-Class>
+						    <Premain-Class>org.rioproject.boot.AgentHook</Premain-Class>
 						</manifestEntries>
                     </archive>
                 </configuration>

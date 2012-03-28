@@ -22,15 +22,15 @@ import java.lang.instrument.Instrumentation;
  *
  * @author Dennis Reedy
  */
-public class InstrumentationHook {
-    static Instrumentation inst;
+public class AgentHook {
+    static Instrumentation instrumentation;
 
     public static Instrumentation getInstrumentation() {
-        return(inst);
+        return(instrumentation);
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
-        InstrumentationHook.inst = inst;
+        instrumentation = inst;
+        LogAgent.redirectIfNecessary();
     }
-
 }
