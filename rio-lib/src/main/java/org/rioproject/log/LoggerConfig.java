@@ -18,6 +18,8 @@ package org.rioproject.log;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.*;
@@ -75,12 +77,10 @@ public class LoggerConfig implements Serializable {
      * @param loggerName The Logger name
      * @param level Set the log level specifying which message levels will be
      * logged by the logger
-     * @param logHandlerConfigs An Array of LogHandlerConfig instances
+     * @param handlerConfigs An Array of LogHandlerConfig instances
      */
-    public LoggerConfig(String loggerName,
-                        Level level,
-                        LogHandlerConfig... logHandlerConfigs) {
-        this(loggerName, level, true, null, logHandlerConfigs);
+    public LoggerConfig(String loggerName, Level level, LogHandlerConfig... handlerConfigs) {
+        this(loggerName, level, true, null, handlerConfigs);
     }
 
     /**
@@ -93,13 +93,10 @@ public class LoggerConfig implements Serializable {
      * its output to it's parent Logger. This means that any LogRecords will
      * also be written to the parent's Handlers, and potentially to its parent,
      * recursively up the namespace
-     * @param logHandlerConfigs An Array of LogHandlerConfig instances
+     * @param handlerConfigs An Array of LogHandlerConfig instances
      */
-    public LoggerConfig(String loggerName, 
-                        Level level,
-                        boolean useParentHandlers, 
-                        LogHandlerConfig... logHandlerConfigs) {
-        this(loggerName, level, useParentHandlers, null, logHandlerConfigs);
+    public LoggerConfig(String loggerName, Level level, boolean useParentHandlers, LogHandlerConfig... handlerConfigs) {
+        this(loggerName, level, useParentHandlers, null, handlerConfigs);
     }
 
     /**
@@ -114,13 +111,13 @@ public class LoggerConfig implements Serializable {
      * recursively up the namespace
      * @param resourceBundleName Name of ResourceBundle to be used for
      * localizing messages for the logger
-     * @param logHandlerConfigs An Array of LogHandlerConfig instances
+     * @param handlerConfigs An Array of LogHandlerConfig instances
      */
     public LoggerConfig(String loggerName, 
                         Level level,
                         boolean useParentHandlers, 
                         String resourceBundleName,
-                        LogHandlerConfig... logHandlerConfigs) {
+                        LogHandlerConfig... handlerConfigs) {
         if(loggerName == null)
             throw new IllegalArgumentException("loggerName is null");
         if(level == null)
@@ -129,9 +126,15 @@ public class LoggerConfig implements Serializable {
         this.level = level;
         this.resourceBundleName = resourceBundleName;
         this.useParentHandlers = useParentHandlers;
-        if(logHandlerConfigs != null) {
-            handlers = new LogHandlerConfig[logHandlerConfigs.length];
-            System.arraycopy(logHandlerConfigs, 0, handlers, 0, handlers.length);
+        if(handlerConfigs != null) {
+            handlers = new LogHandlerConfig[handlerConfigs.length];
+            System.arraycopy(handlerConfigs, 0, handlers, 0, handlers.length);
+        } else {
+            if(!useParentHandlers) {
+                throw new IllegalArgumentException("The logger must include a Handler " +
+                                                   "if it will not delegate to parent handlers.");
+            }
+            handlers = new LogHandlerConfig[0];
         }
     }
 
@@ -156,20 +159,10 @@ public class LoggerConfig implements Serializable {
         logger = LogManager.getLogManager().getLogger(loggerName);
         if(logger==null) {
             if(resourceBundleName != null) {
-                if(myLogger.isLoggable(Level.FINEST))
-                    myLogger.finest("Creating Logger ["+loggerName+"] "+
-                                    "with Resource Bundle ["+
-                                    resourceBundleName+ "]");
                 logger = Logger.getLogger(loggerName, resourceBundleName);
             } else {
-                if(myLogger.isLoggable(Level.FINEST))
-                    myLogger.finest("Creating Logger [" + loggerName + "]");
                 logger = Logger.getLogger(loggerName);
             }
-            if(myLogger.isLoggable(Level.FINEST))
-                myLogger.finest("Logger ["+loggerName+"] "+
-                                "uses parent handlers : "+ useParentHandlers);
-            logger.setUseParentHandlers(useParentHandlers);
         }
 
         /*
@@ -177,9 +170,12 @@ public class LoggerConfig implements Serializable {
          * the level for all named logger instances
          */
         if(myLogger.isLoggable(Level.FINEST))
-            myLogger.finest("Logger ["+loggerName+"] "+
-                            "Level set to : "+level.getName());
+            myLogger.finest("Logger ["+loggerName+"] Level set to : "+level.getName());
         logger.setLevel(level);
+
+        if(myLogger.isLoggable(Level.FINEST))
+            myLogger.finest("Logger ["+loggerName+"] uses parent handlers : "+ useParentHandlers);
+        logger.setUseParentHandlers(useParentHandlers);
 
         if(handlers.length>0) {
             for (LogHandlerConfig h : handlers) {
@@ -188,54 +184,36 @@ public class LoggerConfig implements Serializable {
                     boolean handlerClassAssociated = false;
                     Handler[] currentHandlers = logger.getHandlers();
                     for (Handler currentHandler : currentHandlers) {
-                        if (currentHandler.getClass().
-                            getName().equals(candidateHandler)) {
+                        if (currentHandler.getClass().getName().equals(candidateHandler)) {
                             handlerClassAssociated = true;
                             break;
                         }
                     }
                     if (!handlerClassAssociated) {
                         if (myLogger.isLoggable(Level.FINEST))
-                            myLogger.finest("Logger [" + loggerName + "] " +
-                                            "adding Handler [" +
-                                            h.getHandlerClassName() + "]");
+                            myLogger.finest("Logger ["+loggerName+"] adding Handler ["+h.getHandlerClassName()+"]");
                         Handler handler = h.getHandler();
-                        if(h.getLevel()==null)
+                        if(h.getLevel()==null)  {
                             handler.setLevel(level);
-                        else
+                        } else {
                             handler.setLevel(h.getLevel());
+                        }
                         if (logger.getUseParentHandlers()) {
                             handlerFilter = new HandlerFilter(logger, handler);
                             handler.setFilter(handlerFilter);
                         }
                         logger.addHandler(handler);
-                    } else {
-                        if (myLogger.isLoggable(Level.FINEST))
-                            myLogger.finest(
-                                "Logger [" + loggerName + "] has Handler " +
-                                "[" + h.getHandlerClassName() +
-                                "] associated");
                     }
                 } catch (Throwable t) {
-                    myLogger.log(Level.SEVERE,
-                                 "Getting Handler " +
-                                 "[" + h.getHandlerClassName() + "] " +
-                                 "for Logger [" + loggerName + "]",
+                    myLogger.log(Level.WARNING,
+                                 "Getting Handler [" + h.getHandlerClassName() + "] for Logger [" + loggerName + "]",
                                  (t.getCause() == null ? t : t.getCause()));
                 }
             }
         } else {
-            if(logger.getHandlers().length==0 && !logger.getUseParentHandlers()) {
-                Handler h = new ConsoleHandler();
-                h.setLevel(level);
-                logger.addHandler(h);
-            } else {
-                for(Handler h : logger.getHandlers()) {
-                    h.setLevel(level);
-                }
-            }
+            List<Handler> handlers = collectHandlers(logger);
+            setHandlerLevel(handlers, level);
         }
-
         return (logger);
     }
 
@@ -296,22 +274,16 @@ public class LoggerConfig implements Serializable {
 
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("Logger=").
-               append(loggerName).
-               append(", Level=").
-               append(level).append(", UseParentHandlers=").
-               append(useParentHandlers).
-               append("\n");
+        buffer.append("Logger=").append(loggerName)
+            .append(", Level=").append(level)
+            .append(", UseParentHandlers=").append(useParentHandlers).append("\n");
         for (LogHandlerConfig handler : handlers) {
-            buffer.append("Handler=").
-                append(handler.getHandlerClassName());
-
-            if (handler.formatterClassName != null)
-                buffer.append(", Formatter=").
-                    append(handler.formatterClassName).
-                    append("\n");
-            else
+            buffer.append("Handler=").append(handler.getHandlerClassName());
+            if (handler.formatterClassName != null) {
+                buffer.append(", Formatter=").append(handler.formatterClassName).append("\n");
+            } else {
                 buffer.append("\n");
+            }
         }
         return (buffer.toString());
     }
@@ -323,8 +295,7 @@ public class LoggerConfig implements Serializable {
      * @param loggerConfigs The current LoggerConfig
      * @return True if the Logger is new, false otherwise
      */
-    public static boolean isNewLogger(LoggerConfig lConf, 
-                                      LoggerConfig[] loggerConfigs) {           
+    public static boolean isNewLogger(LoggerConfig lConf, LoggerConfig[] loggerConfigs) {
         boolean matched = false;
         for (LoggerConfig loggerConfig : loggerConfigs) {
             if (loggerConfig.getLoggerName().equals(lConf.getLoggerName())) {
@@ -341,8 +312,7 @@ public class LoggerConfig implements Serializable {
      * @param loggerConfigs The current LoggerConfig
      * @return True if the Level requires changing, false otherwise
      */
-    public static boolean levelChanged(LoggerConfig lConf, 
-                                       LoggerConfig[] loggerConfigs) {
+    public static boolean levelChanged(LoggerConfig lConf, LoggerConfig[] loggerConfigs) {
         boolean levelChanged = false;
         for (LoggerConfig loggerConfig : loggerConfigs) {
             if (loggerConfig.getLoggerName().equals(lConf.getLoggerName())) {
@@ -390,6 +360,26 @@ public class LoggerConfig implements Serializable {
                     temp = l;
             }
             return(true);
+        }
+    }
+
+    private List<Handler> collectHandlers(Logger l) {
+        List<Handler> handlers = new ArrayList<Handler>();
+        if(l.getHandlers().length>0) {
+            Collections.addAll(handlers, l.getHandlers());
+        }
+        if(l.getUseParentHandlers() && l.getParent()!=null) {
+            handlers.addAll(collectHandlers(l.getParent()));
+        }
+        return handlers;
+    }
+
+    private void setHandlerLevel(List<Handler> handlers, Level level) {
+        for(Handler h : handlers) {
+            Level was = h.getLevel();
+            if(level.intValue()<h.getLevel().intValue()) {
+                h.setLevel(level);
+            }
         }
     }
 
