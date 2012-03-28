@@ -23,6 +23,7 @@ import net.jini.config.ConfigurationFile
 import java.util.logging.Logger
 import java.util.logging.Level
 import java.lang.reflect.Constructor
+import org.rioproject.log.GroovyLogger
 
 /**
  * Provides support for Groovy based configuration.
@@ -33,7 +34,7 @@ class GroovyConfig implements Configuration {
     private Map<String, GroovyObject> groovyConfigs = new HashMap<String, GroovyObject>()
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
-    private static Logger logger = Logger.getLogger(GroovyConfig.class.getPackage().name)
+    private def logger = new GroovyLogger(GroovyConfig.class.getPackage().name)
 
     GroovyConfig(String gFile) {
         File f = new File(gFile)

@@ -31,6 +31,7 @@ import org.rioproject.system.capability.software.SoftwareSupport
 import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 import org.rioproject.opstring.handlers.*
+import org.rioproject.log.GroovyLogger
 
 /**
  * Handles the parsing of an XML OperationalString
@@ -52,7 +53,7 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
     def final Map<String, ClassBundle> resourceMap = new HashMap<String, ClassBundle>();
     def final Map<String, SystemRequirements> sysRequirementsMap = new HashMap<String, SystemRequirements>()
     /** A suitable Logger */
-    def logger = Logger.getLogger("org.rioproject.opstring")
+    def logger = new GroovyLogger("org.rioproject.opstring")
     def handlers = [
             'associations':           new AssociationsHandler(parser: this),
             'association':            new AssociationHandler(),

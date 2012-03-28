@@ -20,6 +20,7 @@ import org.rioproject.core.provision.StagedSoftware
 import org.rioproject.core.provision.StagedSoftware.PostInstallAttributes
 import org.rioproject.opstring.OpStringParser
 import java.util.logging.Logger
+import org.rioproject.log.GroovyLogger
 
 /**
  * Handles the parsing for StagedSoftware elements
@@ -29,7 +30,7 @@ import java.util.logging.Logger
 class SoftwareLoadHandler implements Handler {
     def OpStringParser parser
     /** A suitable Logger */
-    def logger = Logger.getLogger("org.rioproject.opstring")
+    def logger = new GroovyLogger("org.rioproject.opstring")
     
     public parse(Object element, Object options) {
         logger.fine "Parsing SoftwareLoad $element"

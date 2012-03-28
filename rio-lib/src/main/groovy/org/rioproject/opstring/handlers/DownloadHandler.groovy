@@ -17,6 +17,7 @@ package org.rioproject.opstring.handlers
 
 import org.rioproject.core.provision.StagedData
 import java.util.logging.Logger
+import org.rioproject.log.GroovyLogger
 
 /**
  * Handles the parsing for Download elements
@@ -25,7 +26,7 @@ import java.util.logging.Logger
  */
 class DownloadHandler implements Handler {
     /** A suitable Logger */
-    def logger = Logger.getLogger("org.rioproject.opstring")
+    def logger = new GroovyLogger("org.rioproject.opstring")
 
     public parse(Object element, Object options) {
         logger.fine "Parsing download from $element"

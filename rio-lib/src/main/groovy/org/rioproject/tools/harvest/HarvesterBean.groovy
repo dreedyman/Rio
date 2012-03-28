@@ -29,10 +29,10 @@ import net.jini.id.UuidFactory
 import net.jini.lookup.entry.Name
 import net.jini.lookup.JoinManager
 import net.jini.discovery.DiscoveryManagement
-import java.util.logging.Logger
 import java.util.logging.Level
 import org.rioproject.deploy.ProvisionManager
 import org.rioproject.net.HostUtil
+import org.rioproject.log.GroovyLogger
 
 /**
  * Provides an implementation of  {@link Harvester}
@@ -41,7 +41,7 @@ class HarvesterBean implements Harvester {
     JoinManager joiner
     ProvisionManager monitor
     final List<HarvesterSession> agentsHandled = new ArrayList<HarvesterSession>()
-    final Logger logger = Logger.getLogger(HarvesterBean.class.getName())
+    def logger = new GroovyLogger(HarvesterBean.class.getName())
     String harvestDir
 
     def HarvesterBean(DiscoveryManagement dMgr) {

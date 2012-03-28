@@ -16,6 +16,7 @@
 package org.rioproject.opstring.handlers
 
 import java.util.logging.Logger
+import org.rioproject.log.GroovyLogger
 
 /**
  * Handles the parsing for the Parameters element
@@ -24,7 +25,7 @@ import java.util.logging.Logger
  */
 class ParametersHandler implements Handler {
     /** A suitable Logger */
-    def logger = Logger.getLogger("org.rioproject.opstring")
+    def logger = new GroovyLogger("org.rioproject.opstring")
 
     public parse(Object element, Object options) {
         logger.fine "Parsing parameters $element"

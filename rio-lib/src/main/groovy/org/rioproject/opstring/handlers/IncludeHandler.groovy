@@ -19,6 +19,7 @@ import org.rioproject.opstring.OpString
 import org.rioproject.opstring.OpStringParser
 import java.util.logging.Logger
 import java.util.logging.Level
+import org.rioproject.log.GroovyLogger
 
 /**
  * Handles the parsing for the Include element
@@ -28,7 +29,7 @@ import java.util.logging.Level
 class IncludeHandler implements Handler {
     def OpStringParser parser;
     /** A suitable Logger */
-    def logger = Logger.getLogger("org.rioproject.opstring")
+    def logger = new GroovyLogger("org.rioproject.opstring")
     def visited = new ArrayList()
     //def sourceMap = new HashMap()
 

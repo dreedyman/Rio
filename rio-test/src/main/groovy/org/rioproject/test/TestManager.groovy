@@ -50,13 +50,16 @@ import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resolver.Artifact
 import org.rioproject.resources.servicecore.ServiceStopHandler
 import org.rioproject.opstring.OAR
+import org.rioproject.resources.util.FileUtils
+import java.util.logging.Level
+import org.rioproject.log.GroovyLogger
 
 /**
  * Simplifies the running of core Rio services
  */
 class TestManager {
     static final String TEST_HOSTS = 'org.rioproject.test.hosts'
-    static Logger logger = Logger.getLogger(TestManager.class.getPackage().name);
+    def logger = GroovyLogger.getLogger(TestManager.class.getPackage().name);
     List<Webster> websters = new ArrayList<Webster>()
     List<Process> processes = new ArrayList<Process>()
     JiniClient client
@@ -104,9 +107,15 @@ class TestManager {
             if(logs.exists()) {
                 logs.eachLine { line ->
                     File f = new File((String)line)
-                    if(f.exists())
-                        f.delete()
-
+                    if(f.exists()) {
+                        if(FileUtils.remove(f)) {
+                            if(logger.isLoggable(Level.FINE))
+                            logger.fine "Removed ${f.name}"
+                        } else {
+                            if(logger.isLoggable(Level.FINE))
+                                logger.fine "Could not remove ${f.name}, check permissions"
+                        }
+                    }
                 }
                 logs.delete()
             }
@@ -416,13 +425,13 @@ class TestManager {
      *
      * @param name The name of a deployed OperationalString
      */
-    def undeploy(String name) {
+    boolean undeploy(String name) {
         ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
         if(items.length==0) {
             println "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
-            return
+            return false
         }
-        undeploy(name, (ProvisionMonitor)items[0].service)
+        return undeploy(name, (ProvisionMonitor)items[0].service)
     }
 
     /**
@@ -431,12 +440,13 @@ class TestManager {
      * @param name The name of a deployed OperationalString
      * @param monitor The ProvisionMonitor instance to perform the undeployment
      */
-    def undeploy(String name, ProvisionMonitor monitor) {
+    boolean undeploy(String name, ProvisionMonitor monitor) {
         if(monitor!=null) {
             DeployAdmin dAdmin = (DeployAdmin)monitor.admin
-            dAdmin.undeploy(name)
+            return dAdmin.undeploy(name)
         } else {
             println "Cannot undeploy ${name}, ProvisionMonitor provided is null"
+            return false
         }
     }
 
@@ -447,13 +457,14 @@ class TestManager {
      */
     def undeployAll(ProvisionMonitor monitor) {
         DeployAdmin deployAdmin = (DeployAdmin) monitor.getAdmin();
-        OperationalStringManager[] opStringMgrs =
-                deployAdmin.getOperationalStringManagers();
+        OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers();
         for (OperationalStringManager mgr : opStringMgrs) {
             String opStringName = mgr.getOperationalString().name
+            logger.finer "Undeploying ${opStringName} ..."
             deployAdmin.undeploy(opStringName);
+            logger.finer "Undeployed ${opStringName}"
+            }
         }
-    }
 
     /**
      * Get the OperationalStringManager for an OperationalString that was configured to be autoDeployed
@@ -603,56 +614,37 @@ class TestManager {
     
     private void exec(String starter) {
         String classpath = "${PropertyHelper.expandProperties(config.manager.execClassPath)}"
-        String jvmOptions = "${PropertyHelper.expandProperties(config.manager.jvmOptions)}"
+        String service = starter.substring(starter.lastIndexOf("-")+1)
+        service = service.substring(0, service.indexOf("."))
+        String jvmOptions = Util.replace("${config.manager.jvmOptions}", '${service}', service)
+        jvmOptions = "${PropertyHelper.expandProperties(jvmOptions)}"
         if(config.manager.inheritOptions)
             jvmOptions = JVMOptionChecker.getJVMInputArgs(jvmOptions)
         jvmOptions = jvmOptions+' -D'+Constants.RIO_TEST_EXEC_DIR+'='+System.getProperty("user.dir")
-        String logFile = null
+        String logDir = null        
         String mainClass = "${config.manager.mainClass}"
         if(config.manager.log.size()>0) {
-            String service = starter.substring(starter.lastIndexOf("-")+1)
-            service = service.substring(0, service.indexOf("."))
-            logFile = Util.replace("${config.manager.log}", '${service}', service)
-            logFile = "${PropertyHelper.expandProperties(logFile)}"
-            File f = new File(logFile)
-            if(f.exists()) {
-                int i=1
-                /* Get extension */
-                String ext = f.getName()
-                ext = ext.substring(ext.lastIndexOf("."))
-                File dir = f.getParentFile()
-                while(f.exists()) {
-                    f = new File(dir, service+"-${i++}$ext")
-                }
-                logFile = f.canonicalPath
-            } else {
-                File parent = f.getParentFile()
-                if(!parent.exists())
-                    parent.mkdirs()
+            logDir = config.manager.log
+            File f = new File(logDir)
+            if(!f.exists()) {
+                f.mkdirs()
+                File createdLogsFile = getAndCreateCreatedLogsFile(testConfig.component)
+                createdLogsFile.append(logDir+'\n')
             }
-            File createdLogsFile = getAndCreateCreatedLogsFile(testConfig.component)
-            createdLogsFile.append(logFile+'\n')
-            logger.info "Output will be sent to [${logFile}]"
-        }                
-
-        String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpath+' '+mainClass+' '+starter
-
-        //if(logger.isLoggable(Level.FINE))
-            logger.info "Exec command line: ${cmdLine}"
-        //else
-        //    logger.info "Exec starter ${starter}"
-        Process process = Runtime.runtime.exec(cmdLine)
-        if(logFile) {
-            def fos= new FileOutputStream(logFile)
-            process.consumeProcessOutputStream(fos)
-            process.consumeProcessErrorStream(fos)
-        } else {
-            process.consumeProcessOutputStream(System.out)
-            process.consumeProcessErrorStream(System.err)
         }
+
+        jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir
+        String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpath+' '+mainClass+' '+starter
+        logger.info "Logging for $service will be sent to ${logDir}"
+        if(logger.isLoggable(Level.INFO)) {
+            logger.info "Starting ${service}, using starter config [${starter}]"
+        } else if(logger.isLoggable(Level.FINE)) {
+            logger.fine "Exec command line: ${cmdLine}"
+        }
+        Process process = Runtime.runtime.exec(cmdLine)
         processes.add(process)
     }
-
+    
     /**
      * Wait for a deployment to complete. This means to wait for all services
      * declared to activate and join the network

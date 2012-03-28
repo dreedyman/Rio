@@ -20,6 +20,7 @@ import java.util.logging.Logger
 import org.rioproject.associations.AssociationDescriptor
 import org.rioproject.associations.AssociationType
 import org.rioproject.opstring.ParsedService
+import org.rioproject.log.GroovyLogger
 
 /**
  * Handles the parsing for Association elements
@@ -35,7 +36,7 @@ class AssociationHandler implements Handler {
                 'isolated':     AssociationType.ISOLATED
         ]
     /** A suitable Logger */
-    def logger = Logger.getLogger("org.rioproject.opstring")
+    def logger = new GroovyLogger("org.rioproject.opstring")
 
     def parse(assoc, options) {
         logger.fine "Parsing association '${assoc.'@Name'}'"

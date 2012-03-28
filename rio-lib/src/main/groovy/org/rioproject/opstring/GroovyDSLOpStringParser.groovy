@@ -20,10 +20,10 @@ import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.Manifest
 import java.util.logging.Level
-import java.util.logging.Logger
 import org.rioproject.RioVersion
 import org.rioproject.resolver.Resolver
 import org.rioproject.resolver.ResolverHelper
+import org.rioproject.log.GroovyLogger
 
 /**
  * A parser that handles the Groovy Domain Specific Language support for Rio
@@ -34,7 +34,7 @@ import org.rioproject.resolver.ResolverHelper
 class GroovyDSLOpStringParser implements OpStringParser {
     Map<String, List<OpString>> nestedTable = new HashMap<String, List<OpString>>()
     def OpStringParser xmlParser = new XmlOpStringParser()
-    def logger = Logger.getLogger(getClass().name);
+    def logger = new GroovyLogger(getClass().name);
 
     public List<OpString> parse(Object source,
                                 ClassLoader loader,
@@ -593,15 +593,11 @@ class GroovyDSLOpStringParser implements OpStringParser {
             }
 
             emc.logger = { String name ->
-                builder.Logger(Name: name, Level:Level.INFO) {
-                    builder.Handler(ClassName: handler, Level:Level.INFO)
-                }
+                builder.Logger(Name: name, Level:Level.INFO)
             }
 
             emc.logger = { String name, Level level ->
-                builder.Logger(Name: name, Level:level.toString()) {
-                    builder.Handler(ClassName: 'java.util.logging.ConsoleHandler', Level:level.toString())
-                }
+                builder.Logger(Name: name, Level:level.toString())
             }
 
             emc.logger = { String name, String handler, Level level ->
