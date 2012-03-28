@@ -40,19 +40,12 @@ public class RioLogFormatter extends Formatter {
     private boolean includePackageNames;
     private boolean colorize;
     private String levelFormat;
+    private final Level[] levels = new Level[]{Level.SEVERE, Level.WARNING, Level.INFO,
+                                               Level.CONFIG, Level.FINE, Level.FINER, Level.FINEST};
     private final Map<Level, StringColorizer.Color> levelColorMap = new HashMap<Level, StringColorizer.Color>();
 
     public RioLogFormatter() {
         super();
-
-        /* Create the formatter for the levles, get the longest localized name */
-        Level[] levels = new Level[]{Level.SEVERE,
-                                     Level.WARNING,
-                                     Level.INFO,
-                                     Level.CONFIG,
-                                     Level.FINE,
-                                     Level.FINER,
-                                     Level.FINEST};
         int longest = 0;
         for(Level l : levels) {
             if(l.getLocalizedName().length()>longest)
@@ -64,8 +57,12 @@ public class RioLogFormatter extends Formatter {
         includePackageNames = hasDeclaredSupportFor(getClass().getName() + ".includePackageNames");
         colorize = !System.getProperty("os.name").startsWith("Win") &&
                    hasDeclaredSupportFor(getClass().getName() + ".colorize");
-
         /* If we have colorization support, determine if we have mapping colors */
+        setColorization(colorize);
+    }
+
+    void setColorization(boolean colorize) {
+        this.colorize = colorize;
         if(colorize) {
             for(Level l : levels) {
                 String property = LogManager.getLogManager().getProperty(getClass().getName()+"."+l.getName());
