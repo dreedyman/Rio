@@ -16,6 +16,8 @@
 package org.rioproject.log;
 
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.util.logging.*;
 
 /**
@@ -65,7 +67,7 @@ public class FileHandler extends java.util.logging.FileHandler {
         LogManager manager = LogManager.getLogManager();
         String propertyBase = FileHandler.class.getName();
         String pattern = manager.getProperty(propertyBase+".pattern");
-        int limit = getIntProperty(manager, propertyBase + ".limit", 0);
+        int limit = getLimitProperty(manager, propertyBase + ".limit", 0);
         if (limit < 0) {
             limit = 0;
         }
@@ -77,26 +79,72 @@ public class FileHandler extends java.util.logging.FileHandler {
         String encoding = manager.getProperty(propertyBase+".encoding");
         String logDirectory = System.getProperty("RIO_LOG_DIR");
         String service = System.getProperty("org.rioproject.service");
-        if(logDirectory!=null)
-            pattern = replace(pattern, "${RIO_LOG_DIR}", logDirectory);        
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        String pid = name;
+        int ndx = name.indexOf("@");
+        if(ndx>=1) {
+            pid = name.substring(0, ndx);
+        }
+        if(logDirectory!=null) {
+            File dir = new File(logDirectory);
+            if(!dir.exists()) {
+                dir.mkdirs();
+            }
+            pattern = replace(pattern, "${RIO_LOG_DIR}", logDirectory);
+        }
         if(service!=null)
             pattern = replace(pattern, "${org.rioproject.service}", service);
+
+        pattern = replace(pattern, "%pid", pid);
+        pattern = replace(pattern, "%name", name);
 
         return new Configuration(limit, count, append, pattern, encoding);
     }
 
-    static int getIntProperty(LogManager manager, String name, int defaultValue) {
-        String val = manager.getProperty(name);
+    static int getLimitProperty(LogManager manager, String name, int defaultValue) {
+        double KB = 1024;
+        /** Megabytes */
+        double MB = Math.pow(KB, 2);
+        /** Gigabytes */
+        double GB = Math.pow(KB, 3);
+
+        String val = manager.getProperty(name).trim();
         if (val == null) {
             return defaultValue;
         }
+        if(val.endsWith("M") || val.endsWith("MB")) {
+            int ndx = val.indexOf("M");
+            val = val.substring(0, ndx);
+            int result = getInteger(val, defaultValue);
+            return (int) (result*MB);
+        }
+        if(val.endsWith("G") || val.endsWith("GB")) {
+            int ndx = val.indexOf("G");
+            val = val.substring(0, ndx);
+            int result = getInteger(val, defaultValue);
+            return (int) (result*GB);
+        }
+
+        return getInteger(val, defaultValue);
+    }
+
+    
+    static int getIntProperty(LogManager manager, String name, int defaultValue) {
+        String val = manager.getProperty(name).trim();
+        if (val == null) {
+            return defaultValue;
+        }
+        return getInteger(val, defaultValue);
+    }
+    
+    static int getInteger(String s, int defaultValue) {
         try {
-            return Integer.parseInt(val.trim());
+            return Integer.parseInt(s.trim());
         } catch (Exception ex) {
             return defaultValue;
         }
     }
-
+        
     static boolean getBooleanProperty(LogManager manager, String name, boolean defaultValue) {
         String val = manager.getProperty(name);
         if (val == null) {
