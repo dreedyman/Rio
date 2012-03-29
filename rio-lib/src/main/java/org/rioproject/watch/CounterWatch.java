@@ -20,7 +20,7 @@ import net.jini.config.Configuration;
 
 /**
  * A CounterWatch provides a mechanism to count a monotonically increasing
- * non-negative value of an arbitrary occurance of something over time
+ * non-negative value of an arbitrary occurrence of something over time.
  */
 public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
     public static final String VIEW = "org.rioproject.watch.CounterCalculableView";
@@ -101,23 +101,5 @@ public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
      */
     public void decrement(long value) {
         setCounter(getCounter() - value);
-    }
-
-    public static void main(String[] args) {
-        CounterWatch cw = new CounterWatch("foo");
-        System.out.println("counter = "+cw.getCounter());
-        cw.decrement();
-        System.out.println("decrement = "+cw.getCounter());
-        cw.increment();
-        System.out.println("increment = "+cw.getCounter());
-        cw.increment(5);
-        System.out.println("increment 5 = "+cw.getCounter());
-        cw.increment(50);
-        System.out.println("increment 50 = "+cw.getCounter());
-        cw.decrement(50);
-        System.out.println("decrement 50 = "+cw.getCounter());
-        cw.decrement(5);
-        System.out.println("decrement 5 = "+cw.getCounter());
-        System.exit(0);
     }
 }
