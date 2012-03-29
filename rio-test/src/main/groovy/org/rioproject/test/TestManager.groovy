@@ -15,7 +15,6 @@
  */
 package org.rioproject.test
 
-import java.util.logging.Logger
 import net.jini.config.Configuration
 import net.jini.core.entry.Entry
 import net.jini.core.lookup.ServiceItem
@@ -59,7 +58,7 @@ import org.rioproject.log.GroovyLogger
  */
 class TestManager {
     static final String TEST_HOSTS = 'org.rioproject.test.hosts'
-    def logger = GroovyLogger.getLogger(TestManager.class.getPackage().name);
+    def logger = new GroovyLogger(TestManager.class.getPackage().name);
     List<Webster> websters = new ArrayList<Webster>()
     List<Process> processes = new ArrayList<Process>()
     JiniClient client
