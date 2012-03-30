@@ -789,16 +789,12 @@ public class ServiceElementManager implements InstanceIDManager {
             } catch(Exception e) {
                 mgrLogger.log(Level.WARNING, "Getting service proxy", e);
             }
-            if(proxy!=null)
-                destroyService(proxy,
-                               instances[i].getServiceBeanID(),
-                               true);
+            if(proxy!=null) {
+                destroyService(proxy, instances[i].getServiceBeanID(), true);
+            }
         }
         if(mgrLogger.isLoggable(Level.FINE))
-            mgrLogger.log(Level.FINE,
-                          "Completed ["+svcElement.getOperationalStringName()+
-                          "/"+svcElement.getName()+"] "+
-                          "service termination");
+            mgrLogger.log(Level.FINE, "Completed ["+LoggingUtil.getLoggingName(svcElement)+"] service termination");
     }
 
     /**
@@ -813,20 +809,21 @@ public class ServiceElementManager implements InstanceIDManager {
     boolean destroyService(Object service, Uuid serviceUuid, boolean clean) {
         boolean terminated = false;
         try {
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("Obtaining DestroyAdmin for ["+LoggingUtil.getLoggingName(svcElement)+"]");
             Administrable admin = (Administrable)service;
             DestroyAdmin destroyAdmin = (DestroyAdmin)admin.getAdmin();
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("DestroyAdmin obtained, destroy the service ["+LoggingUtil.getLoggingName(svcElement)+"]");
             destroyAdmin.destroy();
+            logger.finest("The service ["+LoggingUtil.getLoggingName(svcElement)+"] has been destroyed");
             terminated = true;
         } catch(Exception e) {
-            //if(mgrLogger.isLoggable(Level.FINEST)) {
-                mgrLogger.log(Level.WARNING, "Destroying Service ["+LoggingUtil.getLoggingName(svcElement)+"]", e);
-            /*} else {
-                Throwable t = ThrowableUtil.getRootCause(e);
-                mgrLogger.warning("Destroying Service " +
-                                  "["+LoggingUtil.getLoggingName(svcElement)+"]\n"+
-                                  t.getClass().getName()+": "+
-                                  t.getLocalizedMessage());
-            }*/
+            if(mgrLogger.isLoggable(Level.FINE)) {
+                mgrLogger.log(Level.FINE,
+                              "Problem destroying Service ["+LoggingUtil.getLoggingName(svcElement)+"]",
+                              e);
+            }
             
             if(!ThrowableUtil.isRetryable(e)) {
                 if(mgrLogger.isLoggable(Level.FINE))
@@ -839,10 +836,11 @@ public class ServiceElementManager implements InstanceIDManager {
             }
         }
         ServiceBeanInstance instance;
-        if(clean)
+        if(clean) {
             instance = cleanService(service, serviceUuid, true);
-        else
+        } else {
             instance = getServiceBeanInstance(serviceUuid);
+        }
         /* Notify that a service has been terminated */
         ProvisionMonitorEvent event = new ProvisionMonitorEvent(eventSource,
                                                                 ProvisionMonitorEvent.Action.SERVICE_TERMINATED,
