@@ -37,9 +37,7 @@ public class CalculableMemory extends Calculable {
      * @param utilization The utilization for the Calculable Record
      * @param when The time when the recorded utilization was captured
      */
-    public CalculableMemory(String id,
-                            double utilization,
-                            long when) {
+    public CalculableMemory(String id, double utilization, long when) {
         super(id, utilization, when);
     }
 
@@ -51,22 +49,10 @@ public class CalculableMemory extends Calculable {
      * @param memoryUtilization Contains details for JVM memory utilization
      * @param when The time when the recorded utilization was captured
      */
-    public CalculableMemory(String id,
-                            double utilization,
-                            ProcessMemoryUtilization memoryUtilization,
-                            long when) {
+    public CalculableMemory(String id, double utilization, ProcessMemoryUtilization memoryUtilization, long when) {
         super(id, utilization, when);
         this.memoryUtilization = memoryUtilization;
     }
-
-    /**
-     * Getter for property totalMemory.
-     *
-     * @return Value of property totalMemory.
-     */
-    //public ProcessMemoryUtilization getProcessMemoryUtilization() {
-    //    return (memoryUtilization);
-    //}
 
     /**
      * Getter for property totalMemory.
@@ -101,7 +87,7 @@ public class CalculableMemory extends Calculable {
      * @return a string representation of the object.
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("CalculableMemory {");
         sb.append(" total=").append(getTotalMemory());
         sb.append(", used=").append(getUsedMemory());

@@ -76,13 +76,11 @@ public class CalculableDiskSpace extends Calculable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("CalculableDiskSpace {").
-            append("capacity: "+getCapacity()).append(", ").
-            append("available: "+getAvailable()).append(", ").
+            append("capacity: ").append(getCapacity()).append(", ").
+            append("available: ").append(getAvailable()).append(", ").
             append("}");
         return sb.toString();
     }
-
-
 
     /**
      * Gets an archival representation for this Calculable

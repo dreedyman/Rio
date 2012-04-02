@@ -20,7 +20,6 @@ import org.rioproject.watch.ThresholdValues;
 
 import java.io.Serializable;
 
-
 /**
  * Measured Disk statistics
  */
@@ -38,9 +37,7 @@ public class DiskSpaceUtilization extends MeasuredResource
      * @param total The total system disk utilization
      * @param tVals ThresholdValues for the DiskSpaceUtilization
      */
-    public DiskSpaceUtilization(String identifier,
-                                double total,
-                                ThresholdValues tVals) {
+    public DiskSpaceUtilization(String identifier, double total, ThresholdValues tVals) {
         super(identifier, total, tVals);
     }
 

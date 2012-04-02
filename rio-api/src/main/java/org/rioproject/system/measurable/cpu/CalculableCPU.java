@@ -30,7 +30,7 @@ public class CalculableCPU extends Calculable {
      * Creates new CalculableCPU
      *
      * @param id the identifier for this Calculable record
-     * @param value utilizatiion to record
+     * @param value utilization to record
      * @param when the time when the recorded value was captured
      */
     public CalculableCPU(String id, double value, long when) {
