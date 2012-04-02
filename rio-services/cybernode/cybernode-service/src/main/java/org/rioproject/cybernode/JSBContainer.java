@@ -18,15 +18,15 @@ package org.rioproject.cybernode;
 import net.jini.config.Configuration;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.deploy.ServiceRecord;
+import org.rioproject.deploy.*;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventHandler;
 import org.rioproject.system.ComputeResource;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,30 +37,29 @@ import java.util.logging.Logger;
  */
 public class JSBContainer implements ServiceBeanContainer {
     /** identifier token */
-    static int token = 0;
+    private final AtomicInteger token = new AtomicInteger(0);
     /** Whether or not we are in a shutdown mode */
-    static boolean shutdownSequence = false;
+    private final AtomicBoolean shutdownSequence = new AtomicBoolean(false);
     /** The ComputeResource attribute associated to this ServiceBeanContainer */
-    ComputeResource computeResource;
+    private ComputeResource computeResource;
     /** Collection of ServiceBeanDelegates */
-    final Map<Object, ServiceBeanDelegate> controllerMap =
-        new HashMap<Object, ServiceBeanDelegate>();
+    private final Map<Object, ServiceBeanDelegate> controllerMap = new HashMap<Object, ServiceBeanDelegate>();
     /**
      * Count of activations that have registered with controllerMap but activate
      * routine has not finished.
      */
-    private int activationInProcessCount = 0;
-    /** Uuiid for the container */
+    private AtomicInteger activationInProcessCount = new AtomicInteger(0);
+    /** Uuid for the container */
     private Uuid uuid;
     /** Collection of ServiceBeanContainerListeners */
-    final List<ServiceBeanContainerListener> listeners =
+    private final List<ServiceBeanContainerListener> listeners =
         Collections.synchronizedList(new ArrayList<ServiceBeanContainerListener>());
     /** Configuration object, which is also used as the shared configuration */
-    Configuration config;
+    private Configuration config;
     /** Configuration files for the shared configuration*/
     private final List<String> configurationFiles = new ArrayList<String>();
     /** Logger */
-    static Logger logger = CybernodeImpl.logger;
+    private static final Logger logger = Logger.getLogger("org.rioproject.cybernode");
 
     /**
      * Create a new ServiceBeanContainer
@@ -117,7 +116,7 @@ public class JSBContainer implements ServiceBeanContainer {
      * Terminate the ServiceBeanContainer
      */
     public void terminate() {
-        shutdownSequence = true;
+        shutdownSequence.set(true);
         terminateServices();
     }
     
@@ -130,8 +129,9 @@ public class JSBContainer implements ServiceBeanContainer {
             Collection<ServiceBeanDelegate> controllers = controllerMap.values();
             delegates = controllers.toArray(new ServiceBeanDelegate[controllers.size()]);
         }
-        for (ServiceBeanDelegate delegate : delegates)
+        for (ServiceBeanDelegate delegate : delegates) {
             delegate.terminate();
+        }
         synchronized(controllerMap) {
             controllerMap.clear();
         }
@@ -149,8 +149,9 @@ public class JSBContainer implements ServiceBeanContainer {
         }
         for (ServiceBeanDelegate delegate : delegates) {
             ServiceRecord record = delegate.getServiceRecord();
-            if (record != null)
+            if (record != null) {
                 list.add(record);
+            }
         }
         return (list.toArray(new ServiceRecord[list.size()]));
     }
@@ -170,9 +171,7 @@ public class JSBContainer implements ServiceBeanContainer {
      * @see org.rioproject.cybernode.ServiceBeanContainer#getActivationInProcessCount()
      */
     public int getActivationInProcessCount() {
-        synchronized(controllerMap) {
-            return activationInProcessCount;
-        }
+        return activationInProcessCount.get();
     }
     
     /**
@@ -183,18 +182,15 @@ public class JSBContainer implements ServiceBeanContainer {
                                         EventHandler slaEventHandler)
     throws ServiceBeanInstantiationException {
         Uuid serviceID = UuidFactory.generate();
-        Object identifier;
-        synchronized(JSBContainer.class) {
-            identifier = token++;
-        }
+        Integer identifier = token.incrementAndGet();
+
         JSBDelegate delegate = new JSBDelegate(identifier, serviceID, this);
         delegate.setOperationalStringManager(opStringMgr);
         delegate.setServiceElement(sElem);
         delegate.setEventHandler(slaEventHandler);
-
         synchronized(controllerMap) {
             controllerMap.put(identifier, delegate);
-            activationInProcessCount++;
+            activationInProcessCount.incrementAndGet();
         }
         boolean started = false;
         ServiceBeanInstance loadedInstance = null;
@@ -203,13 +199,13 @@ public class JSBContainer implements ServiceBeanContainer {
             started = true;
             /* notification to shutdown may have come in the middle of
              * service creation, if it did, terminate */
-            if(shutdownSequence) {
+            if(shutdownSequence.get()) {
                 delegate.terminate();
-                throw new ServiceBeanInstantiationException("Resource unavailable, "+
-                                                    "shutting down");
+                throw new ServiceBeanInstantiationException("Resource unavailable, shutting down");
             }
-            if(sElem.getAutoAdvertise())
+            if(sElem.getAutoAdvertise()) {
                 delegate.advertise();
+            }
 
         } catch(ServiceBeanInstantiationException e) {
             if(started)
@@ -219,17 +215,10 @@ public class JSBContainer implements ServiceBeanContainer {
         } catch(Throwable t) {
             if(started)
                 discarded(identifier);
-            logger.log(Level.SEVERE,
-                       "Activating ServiceBean ["+sElem.getName()+"]",
-                       t);
-            throw new ServiceBeanInstantiationException("ServiceBean ["
-                                                + sElem.getName()
-                                                + "] "
-                                                + "load failed", t, true);
+            logger.log(Level.SEVERE, "Activating service "+ CybernodeLogUtil.logName(sElem), t);
+            throw new ServiceBeanInstantiationException("Service "+ CybernodeLogUtil.logName(sElem)+ " load failed", t, true);
         } finally {
-            synchronized(controllerMap) {
-                activationInProcessCount--;
-            }
+            activationInProcessCount.decrementAndGet();
         }
         return (loadedInstance);
     }
@@ -237,17 +226,19 @@ public class JSBContainer implements ServiceBeanContainer {
     /**
      * @see org.rioproject.cybernode.ServiceBeanContainer#update
      */
-    public void update(ServiceElement[] sElems, 
-                       OperationalStringManager opStringMgr) {
-        if(sElems==null)
-            throw new NullPointerException("sElems is null");
-        if(opStringMgr==null)
-            throw new NullPointerException("opStringMgr is null");
+    public void update(ServiceElement[] elements,  OperationalStringManager opStringMgr) {
+        if(elements==null) {
+            throw new IllegalArgumentException("elements is null");
+        }
+        if(opStringMgr==null) {
+            throw new IllegalArgumentException("opStringMgr is null");
+        }
 
-        for (ServiceElement sElem : sElems) {
-            ServiceBeanDelegate[] delegates = getDelegates(sElem);
-            for (ServiceBeanDelegate delegate : delegates)
-                delegate.update(sElem, opStringMgr);
+        for (ServiceElement element : elements) {
+            ServiceBeanDelegate[] delegates = getDelegates(element);
+            for (ServiceBeanDelegate delegate : delegates) {
+                delegate.update(element, opStringMgr);
+            }
         }
     }
 
@@ -258,10 +249,10 @@ public class JSBContainer implements ServiceBeanContainer {
         List<ServiceBeanInstance> list = new ArrayList<ServiceBeanInstance>();
         ServiceBeanDelegate[] delegates = getDelegates(element);
         for (ServiceBeanDelegate delegate : delegates) {
-            ServiceBeanInstance instance =
-                delegate.getServiceBeanInstance();
-            if (instance != null)
+            ServiceBeanInstance instance = delegate.getServiceBeanInstance();
+            if (instance != null) {
                 list.add(instance);
+            }
         }
         return (list.toArray(new ServiceBeanInstance[list.size()]));
     }
@@ -277,13 +268,14 @@ public class JSBContainer implements ServiceBeanContainer {
     /*
     * Get all ServiceBeanDelegate instances for a ServiceElement
     */
-    public ServiceBeanDelegate[] getDelegates(ServiceElement sElem) {
+    public ServiceBeanDelegate[] getDelegates(ServiceElement element) {
         ServiceBeanDelegate[] delegates = getDelegates();
-        if(sElem!=null) {
+        if(element!=null) {
             ArrayList<ServiceBeanDelegate> list = new ArrayList<ServiceBeanDelegate>();
             for (ServiceBeanDelegate delegate : delegates) {
-                if (delegate.getServiceElement().equals(sElem))
+                if (delegate.getServiceElement().equals(element)) {
                     list.add(delegate);
+                }
             }
             delegates = list.toArray(new ServiceBeanDelegate[list.size()]);
         }
@@ -298,8 +290,9 @@ public class JSBContainer implements ServiceBeanContainer {
         synchronized(controllerMap) {
             delegate = controllerMap.get(identifier);
         }
-        if(delegate == null)
+        if(delegate == null) {
             return;
+        }
         ServiceRecord record = delegate.getServiceRecord();
         if(record==null) {
             logger.warning("ServiceRecord for " +
@@ -328,7 +321,7 @@ public class JSBContainer implements ServiceBeanContainer {
      * @see org.rioproject.cybernode.ServiceBeanContainer#remove(Object)
      */
     public void remove(Object identifier) {
-        if(shutdownSequence)
+        if(shutdownSequence.get())
             return;
         synchronized(controllerMap) {
             controllerMap.remove(identifier);
@@ -369,7 +362,7 @@ public class JSBContainer implements ServiceBeanContainer {
      */
     void notifyOnInstantiation(ServiceRecord serviceRecord) {
         ServiceBeanContainerListener[] scl;
-        synchronized(this) {
+        synchronized(listeners) {
             scl = listeners.toArray(new ServiceBeanContainerListener[listeners.size()]);
         }
         for(ServiceBeanContainerListener l : scl)
@@ -383,8 +376,7 @@ public class JSBContainer implements ServiceBeanContainer {
     void notifyOnDiscard(ServiceRecord serviceRecord) {
         Object[] arrLocal = listeners.toArray();
         for(int i = arrLocal.length - 1; i >= 0; i--)
-            ((ServiceBeanContainerListener)arrLocal[i]).
-                                               serviceDiscarded(serviceRecord);
+            ((ServiceBeanContainerListener)arrLocal[i]).serviceDiscarded(serviceRecord);
     }
 
     ServiceBeanDelegate[] getDelegates() {
@@ -393,7 +385,6 @@ public class JSBContainer implements ServiceBeanContainer {
             Collection<ServiceBeanDelegate> controllers = controllerMap.values();
             delegates = controllers.toArray(new ServiceBeanDelegate[controllers.size()]);
         }
-
         return delegates;
     }
 
