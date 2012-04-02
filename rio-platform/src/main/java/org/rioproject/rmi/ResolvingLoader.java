@@ -142,7 +142,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         return adaptedCodebase;
     }
 
-    private static void findAndRemove(ClassLoader loader, Map loaderTable) {
+    private synchronized static void findAndRemove(ClassLoader loader, Map loaderTable) {
         //Map<ClassLoader, Object> toRemove = new HashMap<ClassLoader, Object>();
         for(Object o : loaderTable.entrySet()) {
             Map.Entry entry = (Map.Entry) o;
