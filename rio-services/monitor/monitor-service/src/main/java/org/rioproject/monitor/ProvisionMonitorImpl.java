@@ -154,15 +154,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @throws Exception If bootstrapping fails
      */
     protected void bootstrap(String[] configArgs) throws Exception {
-        try {
-            context = ServiceBeanActivation.getServiceBeanContext(CONFIG_COMPONENT,
-                                                                  "ProvisionMonitor",
-                                                                  configArgs,
-                                                                  getClass().getClassLoader());
-        } catch(Exception e) {
-            logger.log(Level.SEVERE, "Getting ServiceElement", e);
-            throw e;
-        }
+        context = ServiceBeanActivation.getServiceBeanContext(CONFIG_COMPONENT,
+                                                              "ProvisionMonitor",
+                                                              configArgs,
+                                                              getClass().getClassLoader());
         BannerProvider bannerProvider =
             (BannerProvider)context.getConfiguration().getEntry(CONFIG_COMPONENT,
                                                                 "bannerProvider",
@@ -587,6 +582,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     public boolean undeploy(String name, boolean terminate) throws OperationalStringException  {
         if(name == null)
             throw new IllegalArgumentException("name cannot be null");
+        logger.info("Undeploying "+name);
         URL artifactURL = getArtifactURL(name);
         if(artifactURL!=null) {
             try {
@@ -599,6 +595,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         }
         boolean undeployed = false;
         OpStringManager opMgr = opStringMangerController.getOpStringManager(name);
+        if(logger.isLoggable(Level.FINEST)) {
+            logger.finest("OpStringManager: "+opMgr);
+        }
         if(opMgr == null || (!opMgr.isActive())) {
             try {
                 DeployAdmin dAdmin = opStringMangerController.getPrimaryDeployAdmin(name);
@@ -619,9 +618,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         } else {
             opMgr.setDeploymentStatus(OperationalString.UNDEPLOYED);
             OperationalString opString = opMgr.doGetOperationalString();
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.finest("Terminating Operational String ["+opString.getName()+"]");
+            }
             OperationalString[] terminated = opMgr.terminate(terminate);
-            if(logger.isLoggable(Level.INFO))
-                logger.log(Level.INFO, "Undeployed Operational String ["+opString.getName()+"]");
+            logger.info("Undeployed Operational String ["+opString.getName()+"]");
             if(stateManager!=null)
                 stateManager.stateChanged(opMgr, true);
             undeployed = true;

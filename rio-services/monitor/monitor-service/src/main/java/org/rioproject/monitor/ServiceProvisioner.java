@@ -89,8 +89,6 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     private EventHandler failureHandler;
     /** Executor for provision processing */
     private ThreadPoolExecutor provisioningPool;
-    /** Default number of maximum Threads to have in the ThreadPool */
-    private static final int DEFAULT_MAX_THREADS = 10;
     /** Executor for provision failure event processing */
     private ThreadPoolExecutor provisionFailurePool;
     /** Collection of in-process provision attempts */
@@ -105,8 +103,9 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     private final ServiceResourceSelector selector;
     /** ProxyPreparer for ServiceInstantiator proxies */
     private ProxyPreparer instantiatorPreparer;
+    private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** Logger instance */
-    private static final Logger logger = Logger.getLogger("org.rioproject.monitor");
+    private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
     private boolean terminating = false;
     private boolean terminated = false;
 
@@ -125,50 +124,43 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                        EventHandler failureHandler,
                        GaugeWatch watch) throws Exception {
         if(config==null)
-            throw new NullPointerException("config is null");
+            throw new IllegalArgumentException("config is null");
         if(failureHandler==null)
-            throw new NullPointerException("failureHandler is null");
+            throw new IllegalArgumentException("failureHandler is null");
         long ONE_MINUTE = 1000 * 60;
         /* 5 minute default Lease time */
         long DEFAULT_LEASE_TIME = ONE_MINUTE*5;
         /* 1 day max lease time */
         long DEFAULT_MAX_LEASE_TIME = ONE_MINUTE*60*24;
-        /* Get the maximum amount of Threads to create for the ThreadPools */
-        int provisioningPoolMaxThreads = Config.getIntEntry(config,
-                                                            ProvisionMonitorImpl.CONFIG_COMPONENT,
-                                                            "provisioningPoolMaxThreads",
-                                                            DEFAULT_MAX_THREADS,
-                                                            1,
-                                                            500);
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("MaxThreads={" + provisioningPoolMaxThreads + "}");
 
         /* Get the Lease policy */
         LeasePeriodPolicy provisionerLeasePolicy =
             (LeasePeriodPolicy)Config.getNonNullEntry(config,
-                                                      ProvisionMonitorImpl.CONFIG_COMPONENT,
+                                                      CONFIG_COMPONENT,
                                                       "provisionerLeasePeriodPolicy",
                                                       LeasePeriodPolicy.class,
                                                       new FixedLeasePeriodPolicy(DEFAULT_MAX_LEASE_TIME,
                                                                                  DEFAULT_LEASE_TIME));
         /* Get the ProxyPreparer for ServiceInstantiator instances */
-        instantiatorPreparer = (ProxyPreparer)config.getEntry(ProvisionMonitorImpl.CONFIG_COMPONENT,
+        instantiatorPreparer = (ProxyPreparer)config.getEntry(CONFIG_COMPONENT,
                                                               "instantiatorPreparer",
                                                               ProxyPreparer.class,
                                                               new BasicProxyPreparer());
 
         /* Create a ThreadPool for provisioning notification */
-        provisioningPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(provisioningPoolMaxThreads);
+        //provisioningPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(provisioningPoolMaxThreads);
+        provisioningPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
         /* Create a ThreadPool for provision failure notification */
-        provisionFailurePool = (ThreadPoolExecutor) Executors.newFixedThreadPool(provisioningPoolMaxThreads);
+        //provisionFailurePool = (ThreadPoolExecutor) Executors.newFixedThreadPool(provisioningPoolMaxThreads);
+        provisionFailurePool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
         /* Create the LandlordLessor */
         landlord = new LandlordLessor(config, provisionerLeasePolicy);
         landlord.addLeaseListener(new LeaseMonitor());
 
         /* Get the ServiceResourceSelector */
-        selector = (ServiceResourceSelector)config.getEntry(ProvisionMonitorImpl.CONFIG_COMPONENT,
+        selector = (ServiceResourceSelector)config.getEntry(CONFIG_COMPONENT,
                                                             "serviceResourceSelector",
                                                             ServiceResourceSelector.class,
                                                             new RoundRobinSelector());
@@ -181,7 +173,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         this.failureHandler = failureHandler;
 
         pendingMgr = new PendingManager(getServiceProvisionContext(null, null));
-        fixedServiceManager = new FixedServiceManager(getServiceProvisionContext(null, null), pendingMgr);
+        fixedServiceManager = new FixedServiceManager(getServiceProvisionContext(null, null));
     }
 
     ServiceProvisionContext getServiceProvisionContext(ProvisionRequest request, ServiceResource serviceResource) {
@@ -327,12 +319,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @throws RemoteException if the ServiceBeanInstantiator proxy fails
      * preparation
      */
-
     void handleFeedback(ServiceBeanInstantiator resource,
                         ResourceCapability updatedCapabilities,
                         List<DeployedService> deployedServices,
                         int serviceLimit) throws UnknownLeaseException, RemoteException {
-
         if(resource instanceof RemoteMethodControl)
             resource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
         ServiceResource[] svcResources = selector.getServiceResources();
@@ -341,30 +331,50 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         boolean updated = false;
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
-            if(logger.isLoggable(Level.FINEST))
+            if(logger.isLoggable(Level.FINEST)) {
                 logger.log(Level.FINEST,
-                           "Update from [{0}:{1}] updatedCapabilities: {2}, serviceLimit {3}",
+                           "Update from [{0}:{1}], current serviceCount {2}, serviceLimit {3}",
                            new Object[] {ir.getHostAddress(),
                                          resource.toString(),
-                                         updatedCapabilities,
+                                         deployedServices.size(),
                                          serviceLimit
                            });
+            }
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest("Checking for InstantiatorResource match");
             if(ir.getInstantiator().equals(resource)) {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("Matched InstantiatorResource");
                 if(!landlord.ensure(svcResource))
                     throw new UnknownLeaseException("No matching Lease found");
                 updated = true;
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("Set updated resource capabilities");
                 ir.setResourceCapability(updatedCapabilities);
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("Set serviceLimit to "+serviceLimit);
                 ir.setServiceLimit(serviceLimit);
                 try {
+                    if(logger.isLoggable(Level.FINEST)) {
+                        logger.finest("Set deployedServices, was: "+ir.getServiceCount()+", " +
+                                      "updated count is now: "+deployedServices.size());
+                    }
                     ir.setDeployedServices(deployedServices);
                 } catch (Throwable t) {
                     logger.log(Level.WARNING, "Getting ServiceRecords", t);
                 }
                 /* Process all provision types of Fixed first */
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("Process the "+fixedServiceManager.getType());
                 fixedServiceManager.process(svcResource);
                 /* See if any dynamic provision types are pending */
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("Process the "+pendingMgr.getType());
                 pendingMgr.process();
                 break;
+            } else {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest("Did not match InstantiatorResource");
             }
         }
 
@@ -419,9 +429,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                  * listener */
                 if(request.svcProvisionListener!=null) {
                     try {
-                        request.svcProvisionListener.failed(
-                                                      request.sElem,
-                                                      true);
+                        request.svcProvisionListener.failed(request.sElem, true);
                     } catch(NoSuchObjectException e) {
                         logger.log(Level.WARNING,
                                    "ServiceBeanInstantiatorListener failure notification did not succeed, "+
