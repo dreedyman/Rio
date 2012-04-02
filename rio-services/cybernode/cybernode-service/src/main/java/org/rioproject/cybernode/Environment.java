@@ -16,12 +16,12 @@
 package org.rioproject.cybernode;
 
 import net.jini.config.Configuration;
+import net.jini.config.ConfigurationException;
 import org.rioproject.deploy.ServiceStatementManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -54,28 +54,21 @@ public class Environment {
      * @return A ServiceStatementManager based on the environment
      */
     static ServiceStatementManager getServiceStatementManager(Configuration config) {
-        ServiceStatementManager defaultServiceStatementManager = 
-            new TransientServiceStatementManager(config);
+        ServiceStatementManager defaultServiceStatementManager = new TransientServiceStatementManager(config);
         ServiceStatementManager serviceStatementManager;
         try {
-            serviceStatementManager = 
-                (ServiceStatementManager)config.getEntry(
-                                                  CybernodeImpl.getConfigComponent(), 
-                                                  "serviceStatementManager", 
-                                                  ServiceStatementManager.class, 
-                                                  defaultServiceStatementManager,
-                                                  config);
-        } catch(Throwable t) {
-            logger.log(Level.WARNING, 
-                       "Exception getting ServiceStatementManager", 
-                       t);
+            serviceStatementManager = (ServiceStatementManager)config.getEntry(CybernodeImpl.getConfigComponent(),
+                                                                               "serviceStatementManager",
+                                                                               ServiceStatementManager.class,
+                                                                               defaultServiceStatementManager,
+                                                                               config);
+        } catch(ConfigurationException e) {
+            logger.log(Level.WARNING, "Exception getting ServiceStatementManager", e);
             serviceStatementManager = defaultServiceStatementManager;
         }
 
         if(logger.isLoggable(Level.FINE))
-            logger.log(Level.FINE, 
-                       "Using ServiceStatementManager : "+
-                       serviceStatementManager.getClass().getName());
+            logger.config("Using ServiceStatementManager : " + serviceStatementManager.getClass().getName());
         return(serviceStatementManager);
     }
 
@@ -87,20 +80,15 @@ public class Environment {
      * 
      * @return The root directory to provision software to
      */
-    public static String setupProvisionRoot(boolean provisionEnabled, 
-                                            Configuration config) throws IOException {
-        String provisionRoot = getRioHomeDirectory()+
-                                   "system"+
-                                   File.separator+
-                                   "external";
+    public static String setupProvisionRoot(boolean provisionEnabled,  Configuration config) throws IOException {
+        String provisionRoot = getRioHomeDirectory()+"system"+File.separator+"external";
         try {
-            provisionRoot = 
-                (String)config.getEntry(CybernodeImpl.getConfigComponent(), 
-                                        "provisionRoot", 
-                                        String.class, 
-                                        provisionRoot);
-        } catch(Throwable t) {
-            logger.log(Level.WARNING, "Exception getting provisionRoot", t);
+            provisionRoot = (String)config.getEntry(CybernodeImpl.getConfigComponent(), 
+                                                    "provisionRoot", 
+                                                    String.class, 
+                                                    provisionRoot);
+        } catch(ConfigurationException e) {
+            logger.log(Level.WARNING, "Exception getting provisionRoot", e);
         }
         if(provisionEnabled) {
             File provisionDir = new File(provisionRoot);
@@ -118,46 +106,36 @@ public class Environment {
      * @return A space delimited String of directory names to load native 
      * libraries from
      */
-    static String setupNativeLibraryDirectories(Configuration config) 
-    throws IOException {
-        String nativeLibPath = System.getProperty("RIO_NATIVE_DIR");
-        if(nativeLibPath==null) {
-            logger.config("The RIO_NATIVE_DIR system property has not " +
-                          "been defined. The setup for native " +
-                          "library directories and the creation of " +
-                          "NativeLibrarySupport objects is skipped.");
-            return null;
-        }
-
+    static String setupNativeLibraryDirectories(Configuration config) throws IOException {
         List<String> nativeDirs = new ArrayList<String>();
-        nativeDirs.addAll(Arrays.asList(toStringArray(nativeLibPath)));
         try {
-            String configuredNativeDirs =
-                (String)config.getEntry(CybernodeImpl.getConfigComponent(),
-                                          "nativeLibDirectory", 
-                                          String.class,
-                                          nativeLibPath);
-            if(!configuredNativeDirs.equals(nativeLibPath)) {
+            String configuredNativeDirs = (String)config.getEntry(CybernodeImpl.getConfigComponent(),
+                                                                  "nativeLibDirectory", 
+                                                                  String.class,
+                                                                  null);
+            if(configuredNativeDirs!=null) {
                 String[] dirs = toStringArray(configuredNativeDirs);
                 for(String dir : dirs) {
                     if(!nativeDirs.contains(dir))
                         nativeDirs.add(dir);
                 }
             }
-        } catch(Throwable t) {
-            logger.log(Level.WARNING,
-                       "Exception getting configured nativeLibDirectories",
-                       t);
+        } catch(ConfigurationException e) {
+            logger.log(Level.WARNING, "Exception getting configured nativeLibDirectories", e);
         }
-        StringBuffer buffer = new StringBuffer();
-        String[] dirs = nativeDirs.toArray(new String[nativeDirs.size()]);
-        for(int i=0; i<dirs.length; i++) {
-            File nativeDirectory = new File(dirs[i]);
-            if(i>0)
-                buffer.append(" ");
-            buffer.append(nativeDirectory.getCanonicalPath());
+        String nativeLibDirs = null;
+        if(nativeDirs.size()>0) {
+            StringBuilder buffer = new StringBuilder();
+            String[] dirs = nativeDirs.toArray(new String[nativeDirs.size()]);
+            for(int i=0; i<dirs.length; i++) {
+                File nativeDirectory = new File(dirs[i]);
+                if(i>0)
+                    buffer.append(" ");
+                buffer.append(nativeDirectory.getCanonicalPath());
+            }
+            nativeLibDirs = buffer.toString();
         }
-        return(buffer.toString());
+        return nativeLibDirs;
     }
     
 
@@ -171,18 +149,14 @@ public class Environment {
      * @throws IOException if there are errors accessing the file system
      */
     public static File setupRecordRoot(Configuration config) throws IOException {
-        String recordDir =
-                getRioHomeDirectory()+
-                        "logs"+
-                        File.separator+
-                        "records";
+        String recordDir = getRioHomeDirectory()+"logs"+File.separator+"records";
         try {
             recordDir = (String)config.getEntry(CybernodeImpl.getConfigComponent(), 
                                                 "recordDirectory", 
                                                 String.class, 
                                                 recordDir);
-        } catch(Throwable t) {
-            logger.log(Level.WARNING, "Exception getting recordDirectory", t);
+        } catch(ConfigurationException e) {
+            logger.log(Level.WARNING, "Exception getting recordDirectory", e);
         }
         File recordRoot = new File(recordDir);        
         checkAccess(recordRoot);
@@ -214,8 +188,7 @@ public class Environment {
         if(!rioPath.exists()) {
             if(rioPath.mkdir()) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE, 
-                               "Created home directory ["+rioHome+"]");
+                    logger.fine("Created home directory ["+rioHome+"]");
             }
         }
         if(!rioHome.endsWith(File.separator))
@@ -246,9 +219,7 @@ public class Environment {
         if(!directory.exists()) {
             if(directory.mkdirs()) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE, 
-                               "Created directory "+
-                               "["+directory.getCanonicalPath()+"]");
+                    logger.fine("Created directory ["+directory.getCanonicalPath()+"]");
             } else {
                 throw new IOException("Could not create directory " +
                                       "["+directory.getCanonicalPath()+"], " +
