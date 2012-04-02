@@ -19,7 +19,6 @@ import com.sun.jini.admin.DestroyAdmin;
 import com.sun.jini.start.LifeCycle;
 import groovy.lang.MissingMethodException;
 import net.jini.admin.Administrable;
-import net.jini.admin.JoinAdmin;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.id.Uuid;
@@ -33,7 +32,6 @@ import org.rioproject.bean.Started;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.core.jsb.ServiceElementChangeListener;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.cybernode.exec.ServiceBeanExecManager;
@@ -44,14 +42,11 @@ import org.rioproject.exec.ServiceExecutor;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
 import org.rioproject.jsb.*;
-import org.rioproject.log.LoggerConfig;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.sla.SLAThresholdEvent;
-import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.capability.PlatformCapability;
@@ -528,8 +523,6 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         }
                         associationManagement.setServiceBeanContainer(container);
                         associationManagement.setServiceBeanContext(context);
-                        sElemChangeMgr = new ServiceElementChangeManager();
-                        context.getServiceBeanManager().addListener(sElemChangeMgr);
 
                         if(context instanceof JSBContext) {
                             EventHandler eH = ((JSBContext)context).getEventTable().get(SLAThresholdEvent.ID);
@@ -549,6 +542,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         serviceBeanSLAManager.addSLAs(sElem.getServiceLevelAgreements().getServiceSLAs());
                         serviceBeanSLAManager.createSLAThresholdEventAdapter();
 
+                        sElemChangeMgr = new ServiceElementChangeManager(context, serviceBeanSLAManager, serviceProxy);
+                        context.getServiceBeanManager().addListener(sElemChangeMgr);
+
+
                         /* Invoke postInitialize lifecycle method if defined
                          * (RIO-141) */
                         BeanHelper.invokeLifeCycle(Initialized.class, "postInitialize", loadResult.getImpl());
@@ -561,11 +558,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
                                                            container.getUuid());
 
                         /* Create the ServiceRecord */
-                        synchronized(serviceRecordLock) {
-                            serviceRecord = new ServiceRecord(serviceID,
-                                                              sElem,
-                                                              container.getComputeResource().getAddress().getHostName());
-                        }
+                        serviceRecord = new ServiceRecord(serviceID,
+                                                          sElem,
+                                                          container.getComputeResource().getAddress().getHostName());
                     }
 
                     /* If we have not aborted, continue ... */
@@ -720,7 +715,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * Set discarded attributes in the ServiceRecord
      */
     private void setDiscarded() {
-        /* check if the service si "starting" this may happen if service
+        /* check if the service is "starting" this may happen if service
          * creation is aborted before the start thread completes */
         if(starting) {
             int iterations = 0;
@@ -747,81 +742,6 @@ public class JSBDelegate implements ServiceBeanDelegate {
         return (System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME)!=null);
     }
 
-    /**
-     * Listen for ServiceElement changes
-     */
-    class ServiceElementChangeManager implements ServiceElementChangeListener {
-
-        /* (non-Javadoc)
-         * @see org.rioproject.core.jsb.ServiceElementChangeListener#changed
-         */
-        public void changed(ServiceElement preElem, ServiceElement postElem) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] ServiceElementChangeManager notified");
-            /* ------------------------------------------*
-             *  SLA Update Processing
-             * ------------------------------------------*/
-
-            /* Get the new SLAs */
-            ServiceLevelAgreements slas = postElem.getServiceLevelAgreements();
-            /* Modify service SLAs */
-            serviceBeanSLAManager.updateSLAs(slas.getServiceSLAs());
-
-            /* --- End SLA Update Processing ---*/
-
-            /* --- Update Logging --- */
-            if(ServiceElementUtil.hasDifferentLoggerConfig(preElem, postElem)) {
-                Map map = postElem.getServiceBeanConfig().getConfigurationParameters();
-                LoggerConfig[] newLoggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
-                map = preElem.getServiceBeanConfig().getConfigurationParameters();
-                LoggerConfig[] currentLoggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
-                for (LoggerConfig newLoggerConfig : newLoggerConfigs) {
-                    if (LoggerConfig.isNewLogger(newLoggerConfig, currentLoggerConfigs)) {
-                        newLoggerConfig.getLogger();
-                    } else if (LoggerConfig.levelChanged(newLoggerConfig, currentLoggerConfigs)) {
-                        Logger.getLogger(newLoggerConfig.getLoggerName()).setLevel(newLoggerConfig.getLoggerLevel());
-                    }
-                }
-            }
-            /* --- End Update Logging --- */
-
-            /* --- Update Discovery --- */
-
-            /* If the groups or LookupLocators have changed, update the
-             * attributes using JoinAdmin capabilities */
-            if(ServiceElementUtil.hasDifferentGroups(preElem, postElem) ||
-               ServiceElementUtil.hasDifferentLocators(preElem, postElem)) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("["+context.getServiceElement().getName()+"] Discovery has changed");
-                if(serviceProxy instanceof Administrable) {
-                    try {
-                        Administrable admin = (Administrable)serviceProxy;
-                        Object adminObject;
-                        adminObject = admin.getAdmin();
-                        if(adminObject instanceof JoinAdmin) {
-                            JoinAdmin joinAdmin = (JoinAdmin)adminObject;
-                            /* Update groups if they have changed */
-                            if(ServiceElementUtil.hasDifferentGroups(preElem, postElem)) {
-                                joinAdmin.setLookupGroups(postElem.getServiceBeanConfig().getGroups());
-                            }
-                            /* Update locators if they have changed */
-                            if(ServiceElementUtil.hasDifferentLocators(preElem, postElem))
-                                joinAdmin.setLookupLocators(postElem.getServiceBeanConfig().getLocators());
-                        } else {
-                            if(logger.isLoggable(Level.FINE))
-                                logger.fine("No JoinAdmin capabilities for "+ context.getServiceElement().getName());
-                        }
-                    } catch(RemoteException e) {
-                        logger.log(Level.SEVERE, "Modifying Discovery attributes", e);
-                    }
-                } else {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("No Administrable capabilities for "+serviceProxy.getClass().getName());
-                }
-                /* --- End Update Discovery --- */
-            }
-        }
-    }
 
     /**
      * The JSBDiscardManager provides a mechanism to manage the discarding of a 
