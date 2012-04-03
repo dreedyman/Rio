@@ -31,12 +31,12 @@ import java.util.logging.Logger;
  */
 public class DeployedServiceContext {
     private ProvisionMonitor monitor;
-    private final static Map<ServiceElement, OperationalStringManager> deployed =
-        new HashMap<ServiceElement, OperationalStringManager>();
+    private final static Map<ServiceElement, OperationalStringManager> deployed = new HashMap<ServiceElement, OperationalStringManager>();
     private static final Logger logger = Logger.getLogger(DeployedServiceContext.class.getName());
 
-    void addDeployedService(ServiceElement serviceElement,
-                            OperationalStringManager opMgr) {
+    void addDeployedService(ServiceElement serviceElement, OperationalStringManager opMgr) {
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Adding deployed service "+getNameForLogging(serviceElement));
         deployed.put(serviceElement, opMgr);
     }
 
@@ -45,15 +45,13 @@ public class DeployedServiceContext {
     }
 
     public Map<ServiceElement, OperationalStringManager> getDeployedServiceMap() {
-        Map<ServiceElement, OperationalStringManager> map =
-            new HashMap<ServiceElement, OperationalStringManager>();
+        Map<ServiceElement, OperationalStringManager> map = new HashMap<ServiceElement, OperationalStringManager>();
         map.putAll(deployed);
         return map;
     }
 
     public void increment(String serviceName, String opstring) {
-        Map.Entry<ServiceElement, OperationalStringManager> entry =
-            getMapEntry(serviceName, opstring);
+        Map.Entry<ServiceElement, OperationalStringManager> entry = getMapEntry(serviceName, opstring);
         if(entry==null) {
             entry = doLookupServiceEntry(serviceName, opstring);
             if(entry==null) {
@@ -66,10 +64,12 @@ public class DeployedServiceContext {
         }
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Increment service "+getNameForLogging(serviceElement));
         try {
             opMgr.increment(serviceElement, true, null);
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING, "While trying to increment [" + serviceName + "] services", t);
         }
     }
 
@@ -81,10 +81,12 @@ public class DeployedServiceContext {
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
         int count = 0;
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Increment service "+getNameForLogging(serviceElement));
         try {
             count = opMgr.getServiceBeanInstances(serviceElement).length;
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING, "While trying to get the service count for " + serviceName, t);
         }
         return count;
     }
@@ -97,6 +99,8 @@ public class DeployedServiceContext {
             return;
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Decrement service "+getNameForLogging(serviceElement));
         try {
             ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(serviceElement);
             if(instances.length>0) {
@@ -104,7 +108,7 @@ public class DeployedServiceContext {
                 opMgr.decrement(instance, true, true);
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING, "While trying to get the decrement " + serviceName, t);
         }
     }
 
@@ -153,8 +157,7 @@ public class DeployedServiceContext {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T doGetService(Map.Entry<ServiceElement, OperationalStringManager> entry,
-                               Class<T> type) {
+    private <T> T doGetService(Map.Entry<ServiceElement, OperationalStringManager> entry, Class<T> type) {
         T service = null;
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
@@ -163,7 +166,9 @@ public class DeployedServiceContext {
             if(instances.length>0)
                 service = (T)instances[0].getService();
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING, 
+                       "While trying to get ["+serviceElement.getName()+"] services from the OperationalStringManager", 
+                       t);
         }
         return service;
     }
@@ -188,7 +193,8 @@ public class DeployedServiceContext {
                     service = (T)instances[0].getService();
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING,
+                       "While trying to lookup [" + serviceName + "] services", t);
         }
         return service;
     }
@@ -291,5 +297,11 @@ public class DeployedServiceContext {
             }
         }
         return entry;
+    }
+    
+    private static String getNameForLogging(ServiceElement element) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(element.getOperationalStringName()).append("/").append(element.getName());
+        return builder.toString();
     }
 }
