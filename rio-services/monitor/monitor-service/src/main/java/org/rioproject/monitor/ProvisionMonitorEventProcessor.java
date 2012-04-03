@@ -1,6 +1,20 @@
+/*
+ * Copyright to the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.rioproject.monitor;
 
-import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import org.rioproject.event.DispatchEventHandler;
 import org.rioproject.event.EventHandler;
@@ -8,41 +22,21 @@ import org.rioproject.monitor.tasks.ProvisionMonitorEventTask;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Sends {@link ProvisionMonitorEvent}s
+ * Sends {@link ProvisionMonitorEvent}s.
+ *
+ * @author Dennis Reedy
  */
 public class ProvisionMonitorEventProcessor {
     /**
      * ThreadPool for sending ProvisionMonitorEvent notifications
      */
     private Executor monitorEventPool;
-    /** Component name we use to find items in the configuration */
-    static final String CONFIG_COMPONENT = "org.rioproject.monitor";
-    static Logger logger = Logger.getLogger(ProvisionMonitorEventProcessor.class.getName());
     private EventHandler monitorEventHandler;
 
     public ProvisionMonitorEventProcessor(Configuration config) throws Exception {
-        /*
-         * Set up the pool for ProvisionMonitorEvent notifications
-         */
-        int provisionMonitorEventTaskPoolMaximum = 10;
-        try {
-            provisionMonitorEventTaskPoolMaximum =
-                Config.getIntEntry(config,
-                                   CONFIG_COMPONENT,
-                                   "provisionMonitorEventTaskPoolMaximum",
-                                   provisionMonitorEventTaskPoolMaximum,
-                                   1,
-                                   100);
-        } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       "Exception getting provisionMonitorEventTaskPoolMaximum, use default of 10",
-                       t);
-        }
-        monitorEventPool = Executors.newFixedThreadPool(provisionMonitorEventTaskPoolMaximum);
+        monitorEventPool = Executors.newCachedThreadPool();
         monitorEventHandler = new DispatchEventHandler(ProvisionMonitorEvent.getEventDescriptor(), config);
     }
 
