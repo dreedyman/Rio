@@ -19,14 +19,14 @@ package org.rioproject.watch;
  * Used to replicate {@link org.rioproject.watch.Calculable} entries
  * added to a ${@link org.rioproject.watch.WatchDataSource}.
  */
-public interface WatchDataReplicator {
+public interface WatchDataReplicator <T extends Calculable> {
 
     /**
      * Replicate a Calculable record
      *
      * @param calculable The Calculable record
      */
-    void addCalculable(Calculable calculable);
+    void addCalculable(T calculable);
 
     /**
      * Closes the WatchDataReplicator
