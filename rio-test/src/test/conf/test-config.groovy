@@ -92,10 +92,6 @@ ScalingServiceTest {
     groups = "ScalingServiceTest"
 }
 
-ReportIntervalTest {
-
-}
-
 ServiceEventLogTest {
     groups = "ServiceEventLogTest"
     numCybernodes = 1
