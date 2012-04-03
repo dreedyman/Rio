@@ -21,11 +21,10 @@ class ComputeResourceConfig {
         return InetAddress.getByName(host)
     }
 
-    /* Report every 60 seconds. This is how often the compute resource
-     * informs registered Observers of a state change. A state change is
-     * determined if any of the MeasurableCapability components contained within
-     * this ComputeResource provide an update in the interval specified by the
-     * reportInterval property */
+    /* The reportInterval property controls how often the compute resource
+     * will inform registered ResourceCapabilityChangeListeners with an update to
+     * the @link ResourceCapability.
+     * */
     long getReportInterval() {
         return 60000
     }
