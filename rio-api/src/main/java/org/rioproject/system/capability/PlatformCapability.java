@@ -99,9 +99,7 @@ import java.util.regex.Pattern;
 
  * @author Dennis Reedy
  */
-public class PlatformCapability implements PlatformCapabilityMBean,
-                                           ResourceCostProducer,
-                                           Serializable {
+public class PlatformCapability implements PlatformCapabilityMBean, ResourceCostProducer, Serializable {
     static final long serialVersionUID = 1L;
     /** Manufacturer information for the capability */
     public final static String MANUFACTURER = "Manufacturer";
@@ -130,8 +128,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
      * Defaults to STATIC */
     private int type = STATIC;
     /** Map of platform capability key and values */
-    protected final Hashtable<String, Object> capabilities =
-        new Hashtable<String, Object>();
+    protected final Hashtable<String, Object> capabilities = new Hashtable<String, Object>();
     /** A description of the PlatformCapability */
     protected String description;
     /** StagedSoftware defining where the software for this
@@ -215,16 +212,12 @@ public class PlatformCapability implements PlatformCapabilityMBean,
         while(sTok.hasMoreTokens()) {
             String libName = sTok.nextToken();
             if(logger.isLoggable(Level.FINE))
-                logger.fine("Loading ["+libName+"] for "+
-                            getClass().getName());
-            System.out.println("Loading ["+libName+"] for "+
-                               getClass().getName());
+                logger.fine("Loading ["+libName+"] for "+getClass().getName());
+            System.out.println("Loading ["+libName+"] for "+getClass().getName());
             System.loadLibrary(libName);
             if(logger.isLoggable(Level.FINE))
-                logger.fine("Loaded ["+libName+"] for "+
-                            getClass().getName());
-            System.out.println("Loaded ["+libName+"] for "+
-                               getClass().getName());
+                logger.fine("Loaded ["+libName+"] for "+getClass().getName());
+            System.out.println("Loaded ["+libName+"] for "+getClass().getName());
         }
     }
     
@@ -302,8 +295,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
      * @deprecated
      */
     public boolean supports(PlatformCapability requirement) {
-        boolean supports = 
-            getClass().getName().equals(requirement.getClass().getName());
+        boolean supports = getClass().getName().equals(requirement.getClass().getName());
         if(supports) {
             String[] keys = requirement.getPlatformKeys();
             for (String key : keys) {
@@ -340,8 +332,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
      * @return True if supported, false otherwise
      */
     public boolean supports(SystemComponent requirement) {
-        boolean supports = hasBasicSupport(requirement.getName(),
-                                           requirement.getClassName());                
+        boolean supports = hasBasicSupport(requirement.getName(), requirement.getClassName());
         if(supports) {
             Map<String, Object> attributes = requirement.getAttributes();
             for (Map.Entry<String, Object> entry : attributes.entrySet()) {
@@ -352,14 +343,12 @@ public class PlatformCapability implements PlatformCapabilityMBean,
                     if (myMapping instanceof String &&
                         theirMapping instanceof String) {
                         if (key.equals(VERSION)) {
-                            if (!(versionSupported((String) theirMapping,
-                                                   (String) myMapping))) {
+                            if (!(versionSupported((String) theirMapping, (String) myMapping))) {
                                 supports = false;
                                 break;
                             }
                         } else {
-                            if (!(matches((String) theirMapping,
-                                          (String) myMapping))) {
+                            if (!(matches((String) theirMapping, (String) myMapping))) {
                                 supports = false;
                                 break;
                             }
@@ -392,8 +381,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
      */
    protected boolean hasBasicSupport(String name, String className) {
        if(name==null && className==null)
-           throw new IllegalArgumentException("className and name cannot " +
-                                              "both be null");
+           throw new IllegalArgumentException("className and name cannot both be null");
        boolean supports = false;
        String myClassName = getClass().getName();
        if(name!=null) {
@@ -422,7 +410,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
     protected boolean matches(String input, String value) {
         boolean useFind = false;
         for (String meta_char : META_CHARS) {
-            if (input.indexOf(meta_char) != -1) {
+            if (input.contains(meta_char)) {
                 useFind = true;
                 break;
             }
@@ -446,8 +434,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
      * @return <code>true</code> if, and only if, the request version can be
      * supported
      */
-    protected boolean versionSupported(String requiredVersion,
-                                       String configuredVersion) {
+    protected boolean versionSupported(String requiredVersion, String configuredVersion) {
         if(requiredVersion == null)
             throw new IllegalArgumentException("requiredVersion is null");
         if(configuredVersion == null)
@@ -456,8 +443,7 @@ public class PlatformCapability implements PlatformCapabilityMBean,
 
         if(requiredVersion.endsWith("*") || requiredVersion.endsWith("+")) {
             boolean minorVersionSupport = requiredVersion.endsWith("*");
-            requiredVersion =
-                requiredVersion.substring(0, requiredVersion.length()-1);
+            requiredVersion = requiredVersion.substring(0, requiredVersion.length()-1);
             int[] required;
             int[] configured;
             try {
@@ -704,13 +690,11 @@ public class PlatformCapability implements PlatformCapabilityMBean,
         synchronized(usageMap) {
             AtomicInteger count = usageMap.get(hashCode());
             if(count==null) {
-                logger.info("PlatformCapability ["+getName()+"], unknown count, " +
-                            "returning");
+                logger.info("PlatformCapability ["+getName()+"], unknown count, returning");
                 return;
             }
             if(count.intValue()==0) {
-                logger.info("PlatformCapability ["+getName()+"], count already at 0, " +
-                            "returning");
+                logger.info("PlatformCapability ["+getName()+"], count already at 0, returning");
                 return;
             }
             int val = count.decrementAndGet();
