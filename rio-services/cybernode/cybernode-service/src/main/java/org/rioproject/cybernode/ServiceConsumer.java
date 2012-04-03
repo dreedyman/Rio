@@ -37,6 +37,7 @@ import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.system.MeasuredResource;
+import org.rioproject.system.ResourceCapabilityChangeListener;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ResourceCapability;
@@ -177,7 +178,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      */
     void destroy() {
         try {
-            adapter.getComputeResource().deleteObserver(computeResourceObserver);
+            adapter.getComputeResource().removeListener(computeResourceObserver);
             if(lCache!=null)
                 lCache.removeListener(this);
             cancelRegistrations();
@@ -611,12 +612,12 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * The ComputeResourceObserver class listens for changes to the ComputeResource
      * component and updates known Provisioners of the change in state
      */
-    class ComputeResourceObserver implements Observer {
+    class ComputeResourceObserver implements ResourceCapabilityChangeListener {
         ComputeResource computeResource;
 
         ComputeResourceObserver(ComputeResource computeResource) {
             this.computeResource = computeResource;
-            computeResource.addObserver(this);
+            computeResource.addListener(this);
         }
 
         /**
@@ -624,14 +625,9 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
          * ResourceCapability object. Get the updated ResourceCapability and notify
          * all provisioners
          */
-        public void update(Observable o, Object arg) {            
-            if(!(o instanceof ComputeResource)) {
-                logger.log(Level.WARNING, "Observable update is not a ComputeResource, detach");
-                computeResource.deleteObserver(this);
-                return;
-            }
+        public void update(ResourceCapability resourceCapability) {
             if(!destroyed) {
-                updateMonitors((ResourceCapability)arg, getServiceDeployments());
+                updateMonitors(resourceCapability, getServiceDeployments());
             } else {
                 logger.warning("Destroyed, but still getting updates from ComputeResource");
             }
