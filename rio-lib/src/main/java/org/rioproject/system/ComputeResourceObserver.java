@@ -26,7 +26,6 @@ import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.ServiceLevelAgreements;
 
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class ComputeResourceObserver implements Observer {
+public class ComputeResourceObserver implements ResourceCapabilityChangeListener {
     /**
      * The ComputeResource the ComputeResourceObserver is observing
      */
@@ -115,7 +114,7 @@ public class ComputeResourceObserver implements Observer {
             }            
         }
         utilizationSLA = new SLA("ComputeResource", 0.0, utilizationLimit);
-        computeResource.addObserver(this);
+        computeResource.addListener(this);
     }    
 
     /**
@@ -123,7 +122,7 @@ public class ComputeResourceObserver implements Observer {
      * in updates
      */
     public void disconnect() {
-        computeResource.deleteObserver(this);
+        computeResource.removeListener(this);
     }
 
     /**
@@ -143,27 +142,14 @@ public class ComputeResourceObserver implements Observer {
      */
     public void setIgnore(boolean ignore) {
         this.ignore = ignore;
-    }    
+    }
 
-    /**
-     * The ComputeResource has changed
-     * 
-     * @param o The Observable object
-     * @param arg The argument
-     */
-    public void update(Observable o, Object arg) {
+    @Override
+    public void update(ResourceCapability resourceCapability) {
         if(ignore)
             return;
-        /* ComputeResource object has changed */
-        if(!(o instanceof ComputeResource)) {
-            logger.warning("ComputeResourceObserver: Observable update is not a ComputeResource, detach");
-            disconnect();
-            return;
-        }
         try {
-            ResourceCapability resourceCapability = (ResourceCapability)arg;
             double currentUtilization = resourceCapability.getUtilization();
-
             /*
              Description for this utility
             */
@@ -214,8 +200,6 @@ public class ComputeResourceObserver implements Observer {
                                                                     SLAThresholdEvent.CLEARED);
                     new Thread(new SLAThresholdEventTask(event)).start();
                 } catch(Throwable t) {
-                    //if(t.getCause()!=null)
-                    //    t = t.getCause();
                     logger.log(Level.WARNING,
                                "["+context.getServiceElement().getName()+"] " +
                                "Creating SLAThresholdEvent.CLEARED. " +
@@ -232,8 +216,7 @@ public class ComputeResourceObserver implements Observer {
     }
 
     /**
-     * This class is used as by a PoolableThread to notify registered
-     * event consumers of a SLAThresholdEvent
+     * This class is used to notify registered event consumers of a SLAThresholdEvent
      */
     class SLAThresholdEventTask implements Runnable {
         SLAThresholdEvent event;

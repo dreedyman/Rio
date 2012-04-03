@@ -15,6 +15,9 @@
  */
 package org.rioproject.system.capability.platform;
 
+import org.rioproject.system.measurable.memory.CalculableMemory;
+import org.rioproject.watch.WatchDataReplicator;
+
 import java.lang.reflect.Method;
 import java.util.Observable;
 import java.util.Observer;
@@ -25,7 +28,7 @@ import java.util.Observer;
  *
  * @author Dennis Reedy
  */
-public class Memory extends ByteOrientedDevice implements Observer {
+public class Memory extends ByteOrientedDevice implements WatchDataReplicator<CalculableMemory> {
     static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "Memory";
 
@@ -46,29 +49,17 @@ public class Memory extends ByteOrientedDevice implements Observer {
         define(NAME, "Memory");
     }
 
-    /**
-     * Notification from the DiskSpace MeasurableCapability
-     *
-     * @param o The Observable object
-     * @param arg The argument, a
-     * {@link org.rioproject.system.measurable.memory.ProcessMemoryUtilization}
-     * instance
-     */
-    public void update(Observable o, Object arg) {
-        try {
-            Method getFreeMemory = arg.getClass().getMethod("getFreeMemory",
-                                                            (Class[])null);
-            Double dFree = (Double)getFreeMemory.invoke(arg, (Object[])null);
-            Method getTotalMemory = arg.getClass().getMethod("getTotalMemory",
-                                                             (Class[])null);
-            Double dTotal = (Double)getTotalMemory.invoke(arg, (Object[])null);
-            /* The values will come to us in MB, need to convert to bytes */
-            dTotal = dTotal*MB;
-            dFree = dFree*MB;
-            capabilities.put(CAPACITY, dTotal);
-            capabilities.put(AVAILABLE, dFree);
-        } catch(Throwable t) {
-            t.printStackTrace();
-        }
+    public void addCalculable(CalculableMemory calculable) {
+        Double dFree = calculable.getFreeMemory();
+        Double dTotal = calculable.getTotalMemory();
+
+        /* The values will come to us in MB, need to convert to bytes */
+        dTotal = dTotal*MB;
+        dFree = dFree*MB;
+        capabilities.put(CAPACITY, dTotal);
+        capabilities.put(AVAILABLE, dFree);
+    }
+
+    public void close() {
     }
 }

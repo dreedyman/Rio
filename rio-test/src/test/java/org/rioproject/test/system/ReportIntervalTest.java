@@ -15,106 +15,86 @@
  */
 package org.rioproject.test.system;
 
+import net.jini.config.ConfigurationException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rioproject.system.ComputeResource;
+import org.rioproject.system.ResourceCapability;
+import org.rioproject.system.ResourceCapabilityChangeListener;
 import org.rioproject.system.measurable.MeasurableCapability;
-import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.Utils;
 
-import java.util.Observable;
-import java.util.Observer;
+import java.net.UnknownHostException;
 
 /**
  * Test report interval notification
  */
-@RunWith(RioTestRunner.class)
+//@RunWith(RioTestRunner.class)
 public class ReportIntervalTest {
+    private ComputeResource computeResource;
+
+    @Before
+    public void create() throws UnknownHostException, ConfigurationException {
+        computeResource = new ComputeResource();
+    }
+
+    @After
+    public void shutdown() {
+        computeResource.shutdown();
+    }
 
     @Test
     public void atOneSecondIntervals() {
         CRO cro = new CRO();
-        Throwable thrown = null;
-        try {
-            ComputeResource cr = new ComputeResource();
-            cr.setReportInterval(1000);
-            cr.boot();
-            cr.addObserver(cro);
-            Assert.assertEquals("Report interval should be 1000 millis",
-                                1000, cr.getReportInterval());
-            for(MeasurableCapability mCap : cr.getMeasurableCapabilities()) {
-                mCap.setPeriod(1000);
-            }
-            Utils.sleep(5000);
-            Assert.assertEquals("Should have been notified 5 times", 5, cro.count);
-        } catch (Exception e) {
-            thrown = e;
+        computeResource.setReportInterval(1000);
+        computeResource.boot();
+        computeResource.addListener(cro);
+        Assert.assertEquals("Report interval should be 1000 millis",
+                            1000, computeResource.getReportInterval());
+        for(MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
+            mCap.setPeriod(1000);
         }
-        Assert.assertNull("Should not have thrown an exception creating " +
-                          "a ComputeResource", thrown);
+        Utils.sleep(5000);
+        Assert.assertEquals("Should have been notified 5 times", 5, cro.count);
     }
 
     @Test
-    public void justFirstUpdate() {
+    public void justOneUpdate() {
         CRO cro = new CRO();
-        Throwable thrown = null;
-        try {
-            ComputeResource cr = new ComputeResource();
-            cr.boot();
-            cr.addObserver(cro);
-            cr.setReportInterval(1000);
-            Assert.assertEquals("Report interval should be 1000 millis",
-                                1000, cr.getReportInterval());
-            for(MeasurableCapability mCap : cr.getMeasurableCapabilities()) {
-                mCap.setPeriod(10000);
-            }
-            Utils.sleep(5000);
-            Assert.assertEquals("Should have been notified just 1 time", 1, cro.count);
-        } catch (Exception e) {
-            thrown = e;
+        computeResource.boot();
+        computeResource.addListener(cro);
+        computeResource.setReportInterval(5000);
+        Assert.assertEquals("Report interval should be 5000 millis",
+                            5000, computeResource.getReportInterval());
+        for (MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
+            mCap.setPeriod(5000);
         }
-        Assert.assertNull("Should not have thrown an exception creating " +
-                          "a ComputeResource", thrown);
+        Utils.sleep(5000);
+        Assert.assertEquals("Should have been notified once", 1, cro.count);
     }
 
     @Test
     public void checkMeasurableCapabilityReportRate() {
-        Throwable thrown = null;
-        try {
-            ComputeResource cr = new ComputeResource();
-            cr.boot();
-            for(MeasurableCapability mCap : cr.getMeasurableCapabilities()) {
-                mCap.setSampleSize(1);
-                mCap.setPeriod(1000);                
-            }
-
-            for(MeasurableCapability mCap : cr.getMeasurableCapabilities()) {
-                Assert.assertEquals("MeasurableCapability ["+mCap.getId()+"] " +
-                                    "period should be 1000",
-                                    1000, mCap.getPeriod());
-            }
-            
-        } catch (Exception e) {
-            thrown = e;
+        computeResource.boot();
+        for(MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
+            mCap.setSampleSize(1);
+            mCap.setPeriod(1000);
         }
-        Assert.assertNull("Should not have thrown an exception creating " +
-                          "a ComputeResource", thrown);
+
+        for(MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
+            Assert.assertEquals("MeasurableCapability ["+mCap.getId()+"] " +
+                                "period should be 1000",
+                                1000, mCap.getPeriod());
+        }
     }
 
-    class CRO implements Observer {
+    class CRO implements ResourceCapabilityChangeListener {
         int count;
-        public void update(Observable o, Object arg) {
+
+        public void update(ResourceCapability updatedCapability) {
             count++;
-            /*
-            ResourceCapability rCap = (ResourceCapability) arg;
-            for (MeasuredResource mRes : rCap.getMeasuredResources()) {
-                if(mRes.getIdentifier().equalsIgnoreCase("memory")) {
-                    System.out.println(mRes);
-                    System.out.println("===> value="+mRes.getValue());
-                }
-            }
-            */
         }
     }
 

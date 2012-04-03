@@ -15,9 +15,8 @@
  */
 package org.rioproject.system.capability.platform;
 
-import java.lang.reflect.Method;
-import java.util.Observable;
-import java.util.Observer;
+import org.rioproject.system.measurable.disk.CalculableDiskSpace;
+import org.rioproject.watch.WatchDataReplicator;
 
 /**
  * The <code>StorageCapability</code> object provides a definition of storage
@@ -25,14 +24,14 @@ import java.util.Observer;
  *
  * @author Dennis Reedy
  */
-public class StorageCapability extends ByteOrientedDevice implements Observer {
+public class StorageCapability extends ByteOrientedDevice implements WatchDataReplicator<CalculableDiskSpace> {
     static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "Storage Capability";
     /** Storage media type */
     public final static String TYPE = "StorageType";
 
-    /** 
-     * Create a StorageCapability 
+    /**
+     * Create a StorageCapability
      */
     public StorageCapability() {
         this(DEFAULT_DESCRIPTION);
@@ -49,28 +48,6 @@ public class StorageCapability extends ByteOrientedDevice implements Observer {
     }
 
     /**
-     * Notification from the DiskSpace MeasurableCapability
-     * 
-     * @param o The Observable object
-     * @param arg The argument, a
-     * {@link org.rioproject.system.measurable.disk.CalculableDiskSpace} instance
-     */
-    public void update(Observable o, Object arg) {
-        try {
-            Method getAvailable = arg.getClass().getMethod("getAvailable",
-                                                           (Class[])null);
-            Double dAvail = (Double)getAvailable.invoke(arg, (Object[])null);
-            Method getCapacity = arg.getClass().getMethod("getCapacity",
-                                                          (Class[])null);
-            Double dCap = (Double)getCapacity.invoke(arg, (Object[])null);
-            capabilities.put(CAPACITY, dCap);
-            capabilities.put(AVAILABLE, dAvail);
-        } catch(Throwable t) {
-            t.printStackTrace();
-        }
-    }
-
-    /**
      * Determine if the requested available diskspace can be met by the
      * StorageCapability
      * 
@@ -84,5 +61,16 @@ public class StorageCapability extends ByteOrientedDevice implements Observer {
         if(dAvail!=null)
             available = dAvail;
         return(requestedSize<available);
+    }
+
+    public void addCalculable(CalculableDiskSpace calculable) {
+        Double dAvail = calculable.getAvailable();
+        Double dCap = calculable.getCapacity();
+        capabilities.put(CAPACITY, dCap);
+        capabilities.put(AVAILABLE, dAvail);
+    }
+
+    public void close() {
+
     }
 }

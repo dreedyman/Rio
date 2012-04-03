@@ -33,7 +33,7 @@ class MeasurablesTest extends GroovyTestCase {
 
         org.rioproject.system.capability.platform.Memory memCapability =
             new org.rioproject.system.capability.platform.Memory()
-        memMeasurable.observable.addObserver(memCapability)
+        memMeasurable.addWatchDataReplicator(memCapability)
         memMeasurable.start()
         
         def req = [(memCapability.CAPACITY) : '250k']
@@ -43,6 +43,8 @@ class MeasurablesTest extends GroovyTestCase {
 
         req.put(memCapability.CAPACITY, '1m')
         sysComp = new SystemComponent(memCapability.name, req)
+        assertEquals 'Should have 3 capabilities, only have '+memCapability.getCapabilities().size(),
+                     3, memCapability.capabilities.size()
         assertTrue 'JVM should have the capacity of 1m but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.MB+'m',
                    memCapability.supports(sysComp)

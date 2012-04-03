@@ -27,29 +27,33 @@ import org.rioproject.resources.util.FileUtils;
 import org.rioproject.resources.util.StringUtil;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityWriter;
+import org.rioproject.system.capability.platform.StorageCapability;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.disk.DiskSpace;
 import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.system.measurable.memory.SystemMemory;
+import org.rioproject.util.TimeUtil;
+import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * The <code>ComputeResource</code> represents an abstract notion of a compute 
- * resource that offers computational resources which can be measured using Quality 
- * of Service mechanisms which correlate to qualitative and quantitative capabilities 
- * such as CPU, Memory, and others
+ * resource that offers computational resources. These computational resources correlate 
+ * to qualitative and quantitative capabilities such as CPU, Memory, and others.
  *
  * @author Dennis Reedy
  */
-public class ComputeResource extends Observable {
+public class ComputeResource /*extends Observable*/ {
     /** Name to use when getting Configuration values and to get the Logger */
     static final String COMPONENT = "org.rioproject.system";
     static Logger logger = Logger.getLogger(COMPONENT);
@@ -81,13 +85,6 @@ public class ComputeResource extends Observable {
      */
     private final List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
     /**
-     * The CapabilityChannel is an inner class which becomes an Observer to 
-     * MeasurableCapability components and ends up notifying the ComputeResource to 
-     * update registered Observer instances if any MeasurableCapability components 
-     * have changed their state within the interval prescribed for the broadcaster
-     */
-    private CapabilityChannel capabilityChannel = new CapabilityChannel();    
-    /**
      * Flag determines whether persistent provisioning is supported
      */
     private boolean persistentProvisioning=true;
@@ -110,6 +107,12 @@ public class ComputeResource extends Observable {
     private final Map<String, String> platformCapabilityNameTable = new HashMap<String, String>();
     private final List<PlatformCapability> removals = new ArrayList<PlatformCapability>();
     private SystemCapabilitiesLoader systemCapabilitiesLoader;
+
+    public static final long DEFAULT_REPORT_INTERVAL=1000*60;
+    private long reportInterval;
+    private final List<ResourceCapabilityChangeListener> listeners = new ArrayList<ResourceCapabilityChangeListener>();
+    private final ScheduledExecutorService resourceCapabilityChangeService = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture resourceCapabilityChangeNotifierFuture;
 
     /**
      * Create a ComputeResource with a default (empty) configuration
@@ -146,27 +149,37 @@ public class ComputeResource extends Observable {
                                                InetAddress.getLocalHost());
         String defaultDescription = address.getHostName()+" "+system;
         description = (String)config.getEntry(COMPONENT, "description", String.class, defaultDescription);
-        long reportInterval = Config.getLongEntry(config,
-                                                  COMPONENT,
-                                                  "reportInterval",
-                                                  CapabilityChannel.DEFAULT_REPORT_INTERVAL,
-                                                  1000,
-                                                  Long.MAX_VALUE);
-        capabilityChannel.setReportInterval(reportInterval);
+        reportInterval = (Long)config.getEntry(COMPONENT, "reportInterval", Long.class, DEFAULT_REPORT_INTERVAL);
+        if(reportInterval<1000)
+            throw new ConfigurationException("The reportInterval must not be less then 1000 milliseconds.");
+        scheduleResourceCapabilityReporting();
     }
     
     /**
-     * Set the reportInterval property which controls how often the ComputeResource 
-     * will inform registered Observers of a state change. A state change is 
-     * determined if any of the MeasurableCapability components contained within 
-     * this ComputeResource provide an update in the interval specified by the 
-     * reportIntervalProperty
+     * Set the reportInterval property which controls how often the {@code ComputeResource} 
+     * will inform registered {@link ResourceCapabilityChangeListener}s with an update to
+     * the {@link ResourceCapability}.
      *
      * @param reportInterval The interval controlling when the ComputeResource 
      * reports change of state to registered Observers
      */
     public void setReportInterval(long reportInterval) {
-        capabilityChannel.setReportInterval(reportInterval);
+        if(this.reportInterval!=reportInterval) {
+            this.reportInterval = reportInterval;
+            if(!resourceCapabilityChangeNotifierFuture.isDone())
+                resourceCapabilityChangeNotifierFuture.cancel(true);
+            if(logger.isLoggable(Level.CONFIG))
+                logger.config("Set ResourceCapability reportInterval to "+ TimeUtil.format(reportInterval));
+            scheduleResourceCapabilityReporting();
+        }
+    }
+
+    private void scheduleResourceCapabilityReporting() {
+        resourceCapabilityChangeNotifierFuture =
+            resourceCapabilityChangeService.scheduleAtFixedRate(new ResourceCapabilityChangeNotifier(),
+                                                                reportInterval,
+                                                                reportInterval,
+                                                                TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -180,7 +193,7 @@ public class ComputeResource extends Observable {
      * of state to registered Observers
      */
     public long getReportInterval() {
-        return(capabilityChannel.getReportInterval());
+        return reportInterval;
     }
 
     /**
@@ -219,9 +232,7 @@ public class ComputeResource extends Observable {
     public void addPlatformCapability(PlatformCapability pCap) {
         if(!hasPlatformCapability(pCap)) {
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Have PlatformCapability : "+
-                              pCap.getClass().getName()+" "+
-                              "load any system resources");
+                logger.finest("Have PlatformCapability : "+pCap.getClass().getName()+" load any system resources");
             pCap.loadResources();
 
             boolean stateChange;
@@ -255,8 +266,7 @@ public class ComputeResource extends Observable {
      * represent any software downloaded to add the PlatformCapability. If no 
      * software was downloaded to add the PlatformCapability, return an empty array
      */
-    public DownloadRecord[] provision(PlatformCapability pCap,
-                                      StagedSoftware stagedSoftware) {
+    public DownloadRecord[] provision(PlatformCapability pCap, StagedSoftware stagedSoftware) {
         boolean pendingInstallation;
         synchronized(platformCapabilityPending) {
             pendingInstallation = platformCapabilityPending.contains(pCap);
@@ -288,14 +298,11 @@ public class ComputeResource extends Observable {
 
         try {
             if(stagedSoftware !=null) {
-                DownloadManager slm = new DownloadManager(provisionRoot,
-                                                          stagedSoftware);
+                DownloadManager slm = new DownloadManager(provisionRoot, stagedSoftware);
                 DownloadRecord record = null;
                 try {
                     if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Provisioning StagedSoftware for "+
-                                      "PlatformCapability : "+
-                                      pCap.getClass().getName());
+                        logger.finest("Provisioning StagedSoftware for PlatformCapability : "+pCap.getClass().getName());
                     record = slm.download();
                     if(logger.isLoggable(Level.FINEST))
                         logger.finest(record.toString());
@@ -351,9 +358,7 @@ public class ComputeResource extends Observable {
                     if(record!=null)
                         slm.remove();
                     logger.log(Level.WARNING,
-                               "Provisioning StagedSoftware for "+
-                               "PlatformCapability : "+
-                               pCap.getClass().getName(),
+                               "Provisioning StagedSoftware for PlatformCapability : "+pCap.getClass().getName(),
                                e);
                 }
             }
@@ -378,30 +383,6 @@ public class ComputeResource extends Observable {
             contains = platformCapabilities.contains(capability);
         }
         return(contains);
-    }
-
-    /**
-     * Update a <code>PlatformCapability</code> object. Updating a
-     * <code>PlatformCapability</code> component has the following semantic:
-     *
-     * <p>If the <code>PlatformCapability</code> object <code>Class</code> exists
-     * in the collection of <code>PlatformCapability</code> components, the
-     * existing <code>PlatformCapability</code> will be updated with the new
-     * <code>PlatformCapability</code> mappings. If the
-     * <code>PlatformCapability</code> object <code>Class</code> cannot be found,
-     * it will be added to the collection.
-     *
-     * <p>Updating a <code>PlatformCapability</code> component causes the state of
-     * this object to change, triggering the notification of all registered
-     * <code>Observer</code> instances
-     *
-     * @param capability The PlatformCapability to add
-     *
-     * @throws Exception If there are errors updating the PlatformCapability
-     */
-    public void updatePlatformCapability(PlatformCapability capability) throws Exception {
-        removePlatformCapability(capability, false);
-        addPlatformCapability(capability);
     }
 
     /**
@@ -501,63 +482,28 @@ public class ComputeResource extends Observable {
             return(false);
         if(measurables.add(capability)) {
             added = true;
-            capabilityChannel.subscribe(capability);
+            //capabilityChannel.subscribe(capability);
             stateChange();
         }
         return(added);
     }
-
-    /**
-     * Determine if the MeasurableCapability exists in this ComputeResource
-     *
-     * @param capability The MeasurableCapability to check
-     *
-     * @return True if the MeasurableCapability exists, false otherwise
-     */
-    public boolean hasMeasurableCapability(MeasurableCapability capability) {
-        return(measurables.contains(capability));
+    
+    public void addListener(ResourceCapabilityChangeListener listener) {
+        if(listener==null)
+            return;
+        synchronized (listeners) {
+            if(!listeners.contains(listener)) {
+                listeners.add(listener);
+            }
+        }
     }
 
-    /**
-     * Update a <code>MeasurableCapability</code> object. Updating a 
-     * <code>MeasurableCapability</code> component causes the state of this object 
-     * to change, triggering the notification of all registered 
-     * <code>Observer</code> instances. 
-     *
-     * <p>If there is a <code>MeasurableCapability</code> object that is equal to 
-     * the provided <code>MeasurableCapability</code> (according to the 
-     * <code>MeasurableCapability.equals()</code> contract), the existing 
-     * <code>MeasurableCapability</code> object will be replaced by the
-     * provided <code>MeasurableCapability</code> object
-     *
-     * @param capability The MeasurableCapability to update
-     */
-    public void updateMeasurableCapability(MeasurableCapability capability) {
-        if(measurables.contains(capability)) {
-            measurables.remove(capability);
-            capabilityChannel.unsubscribe(capability);
+    public void removeListener(ResourceCapabilityChangeListener listener) {
+        if(listener==null)
+            return;
+        synchronized (listeners) {           
+            listeners.remove(listener);
         }
-        addMeasurableCapability(capability);
-    }
-
-    /**
-     * Remove a <code>MeasurableCapability</code> object. The removal of a 
-     * <code>MeasurableCapability</code> component causes the state of this object 
-     * to change, triggering the notification of all registered 
-     * <code>Observer</code> instances
-     *
-     * @param capability The MeasurableCapability to remove
-     *
-     * @return True if removed, false otherwise
-     */
-    public boolean removeMeasurableCapability(MeasurableCapability capability) {
-        boolean removed = false;
-        if(measurables.remove(capability)) {
-            removed = true;
-            capabilityChannel.unsubscribe(capability);
-            stateChange();
-        }
-        return(removed);
     }
 
     /**
@@ -569,8 +515,18 @@ public class ComputeResource extends Observable {
     public void stateChange() {
         if(initializing)
             return;
-        setChanged();
-        notifyObservers(getResourceCapability());
+        notifyResourceCapabilityChangeListeners();
+    }
+
+    private void notifyResourceCapabilityChangeListeners() {
+        ResourceCapabilityChangeListener[] changeListeners;
+        synchronized (listeners) {
+            changeListeners = listeners.toArray(new ResourceCapabilityChangeListener[listeners.size()]);
+        }
+        ResourceCapability resourceCapability = getResourceCapability();
+        for(ResourceCapabilityChangeListener l : changeListeners) {
+            l.update(resourceCapability);
+        }
     }
 
     /**
@@ -589,20 +545,6 @@ public class ComputeResource extends Observable {
     }
 
     /**
-     * A helper method which will remove a <code>ThresholdListener</code> from all 
-     * contained <code>MeasurableCapability</code> components. An alternate mechanism 
-     * is to obtain all <code>MeasurableCapability</code> components contained by 
-     * the <code>ComputeResource</code> and remove the listener from each component
-     *
-     * @param listener The ThresholdListener
-     */
-    public void removeThresholdListener(ThresholdListener listener) {
-        MeasurableCapability[] mCaps = getMeasurableCapabilities();
-        for (MeasurableCapability mCap : mCaps)
-            mCap.removeThresholdListener(listener);
-    }
-
-    /**
      * Return an array of <code>PlatformCapability</code> objects. This method will 
      * create a new array of <code>PlatformCapability</code> objects each time it 
      * is invoked. If there are no <code>PlatformCapability</code> objects contained 
@@ -615,7 +557,7 @@ public class ComputeResource extends Observable {
         PlatformCapability[] pCaps;
         synchronized(platformCapabilities) {
             pCaps = platformCapabilities.toArray(
-                new PlatformCapability[platformCapabilities.size()]);
+                                                    new PlatformCapability[platformCapabilities.size()]);
         }
         return pCaps;
     }
@@ -819,36 +761,33 @@ public class ComputeResource extends Observable {
                                                           SystemCapabilitiesLoader.class, 
                                                           new SystemCapabilities());
             /* Get the PlatformCapability instances */
-            PlatformCapability[] pCaps =
-                systemCapabilitiesLoader.getPlatformCapabilities(config);
-            PlatformCapability storage = null;
-            PlatformCapability memory = null;
+            PlatformCapability[] pCaps = systemCapabilitiesLoader.getPlatformCapabilities(config);
+            StorageCapability storage = null;
+            org.rioproject.system.capability.platform.Memory memory = null;
             for (PlatformCapability pCap : pCaps) {
-                if (pCap.getClass().getName().equals(
-                    SystemCapabilities.STORAGE))
-                    storage = pCap;
-                if (pCap.getClass().getName().equals(
-                    SystemCapabilities.MEMORY))
-                    memory = pCap;
+                if (pCap instanceof StorageCapability) {
+                    storage = (StorageCapability) pCap;
+                }
+                if (pCap instanceof org.rioproject.system.capability.platform.Memory) {
+                    memory = (org.rioproject.system.capability.platform.Memory) pCap;
+                }
                 addPlatformCapability(pCap);
             }
 
             platformCapabilityNameTable.putAll(systemCapabilitiesLoader.getPlatformCapabilityNameTable());
-            
-            /* Initialize the CapabilityChannel */
-            capabilityChannel.init();
-            
+
             /* Get the MeasurableCapability instances */
-            MeasurableCapability[] mCaps = 
-                systemCapabilitiesLoader.getMeasurableCapabilities(config);
+            MeasurableCapability[] mCaps = systemCapabilitiesLoader.getMeasurableCapabilities(config);
             for (MeasurableCapability mCap : mCaps) {
                 if (mCap instanceof DiskSpace) {
-                    if (storage != null)
-                        mCap.getObservable().addObserver((Observer) storage);
+                    if (storage != null) {
+                        mCap.addWatchDataReplicator(storage);
+                    }
                 }
                 if (mCap instanceof Memory && !(mCap instanceof SystemMemory)) {
-                    if (memory != null)
-                        mCap.getObservable().addObserver((Observer) memory);
+                    if (memory != null) {
+                        mCap.addWatchDataReplicator(memory);
+                    }
                 }
                 addMeasurableCapability(mCap);
                 mCap.start();
@@ -867,145 +806,12 @@ public class ComputeResource extends Observable {
         for (MeasurableCapability measurable : measurables) {
             measurable.stop();
         }
-        capabilityChannel.terminate();
-    }    
+        resourceCapabilityChangeService.shutdown();
+    }
 
-    /**
-     * The CapabilityChannel is an inner class that becomes an Observer to
-     * MeasurableCapability components and ends up notifying the ComputeResource 
-     * to update registered Observer instances if any MeasurableCapability 
-     * components have changed their state within the interval prescribed for the 
-     * broadcaster
-     */
-    public class CapabilityChannel implements Observer, Runnable {
-        public static final long DEFAULT_REPORT_INTERVAL=1000*60;
-        long reportInterval;
-        boolean hasChanged;
-        Thread channelThread;
-        boolean run=true;
-        long resetTime = 0;
-
-        public CapabilityChannel() {
-            reportInterval = DEFAULT_REPORT_INTERVAL;            
-        }
-        
-        void init() {
-            if(channelThread==null) {
-                channelThread = new Thread(this, "CapabilityChannel");
-                channelThread.setDaemon(true);
-                channelThread.start();
-            } else {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("CapabilityChannel already initialized");
-            }
-        }
-
-        /**
-         * Stop the CapabilityChannel channelThread
-         */
-        public void terminate() {
-            run = false;
-            if(channelThread!=null)
-                channelThread.interrupt();
-        }
-
-        /**
-         * Set the update interval for channelThread notification
-         *
-         * @param reportInterval The update interval for channelThread notification
-         */
-        public void setReportInterval(long reportInterval) {
-            if(this.reportInterval!=reportInterval) {
-                if(channelThread!=null) {
-                    channelThread.interrupt();
-                    channelThread = null;
-                    resetTime = System.currentTimeMillis()+reportInterval;
-                }
-                this.reportInterval = reportInterval;
-                init();
-            }
-        }
-
-        /**
-         * Get the update interval for channelThread notification
-         *
-         * @return The update interval for channelThread notification
-         */
-        public long getReportInterval() {
-            return(reportInterval);
-        }
-
-        /**
-         * Subscribe to a MeasurableCapability 
-         *
-         * @param capability A MeasurableCapability 
-         */
-        public void subscribe(MeasurableCapability capability) {
-            capability.getObservable().addObserver(this);
-        }
-
-        /**
-         * Unsubscribe from a MeasurableCapability 
-         *
-         * @param capability A MeasurableCapability 
-         */
-        public void unsubscribe(MeasurableCapability capability) {
-            capability.getObservable().deleteObserver(this);
-        }
-
-        /**
-         * Notification that concrete implementation(s) of the 
-         * <code>MeasurableCapability<code> have changed their state. As these 
-         * notifications arise they will cause a chained reaction to occur, that is 
-         * all  listeners (Observers) of the <code>ComputeResource</code> object 
-         * will be notified as well
-         */
-        public void update(Observable o, Object arg) {
-            setHasChanged(true);
-        }
-
-        /**
-         * Thread that will update the ComputeResource to notify Observer instances
-         * if any MeasurableCapability have updated their state in the interval 
-         * provided. If a change has been made, inform the ComputeResource and reset 
-         * the hasChanged attribute
-         */
+    class ResourceCapabilityChangeNotifier implements Runnable {
         public void run() {
-            while(run) {
-                try {
-                    /* resetTime will be set if the channel's report interval
-                     * has been reset. This will avoid an unnecessary update */
-                    if(resetTime<=System.currentTimeMillis()) {
-                        if(getHasChanged()) {
-                            stateChange();
-                            setHasChanged(false);
-                        }
-                    }
-                    Thread.sleep(reportInterval);                    
-                } catch(InterruptedException ignore) {
-                    if(!run)
-                        break;
-                }
-            }
-        }
-
-        /**
-         * Set whether a change has occured from a MeasurableCapability
-         *
-         * @param hasChanged True if a change has occured, false otherwise. False 
-         * indicates a clear, that is a reset
-         */
-        private synchronized void setHasChanged(boolean hasChanged) {
-            this.hasChanged = hasChanged;
-        }
-
-        /**
-         * Get whether a change has occured from a MeasurableCapability
-         *
-         * @return True if a change has occured, false otherwise
-         */
-        private synchronized boolean getHasChanged() {
-            return(hasChanged);
+            notifyResourceCapabilityChangeListeners();
         }
     }
 }

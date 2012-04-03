@@ -24,12 +24,11 @@ import org.rioproject.costmodel.ResourceCostProducer;
 import org.rioproject.costmodel.ZeroCostModel;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.MeasuredResource;
-import org.rioproject.watch.Calculable;
-import org.rioproject.watch.PeriodicWatch;
-import org.rioproject.watch.ThresholdManager;
-import org.rioproject.watch.WatchDataSource;
+import org.rioproject.watch.*;
 
+import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
@@ -38,13 +37,8 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
-public abstract class MeasurableCapability
-    extends PeriodicWatch implements ResourceCostProducer,
-                                     MeasurableCapabilityMBean {
-    /**
-     * Observable object for reporting state change
-     */
-    private Observatory observatory;
+public abstract class MeasurableCapability extends PeriodicWatch implements ResourceCostProducer,
+                                                                            MeasurableCapabilityMBean {
     /**
      * Collection of secondary ThresholdManager instances
      */
@@ -67,47 +61,51 @@ public abstract class MeasurableCapability
     /** Configuration object */
     private Configuration config;
     /** Whether or not this measurable capability is enabled */
-    private boolean isEnabled = true;
+    private AtomicBoolean isEnabled = new AtomicBoolean(true);
     /** The {@link MeasurableMonitor} to use */
     protected MeasurableMonitor monitor;
     protected MeasuredResource lastMeasured;
 
-    protected MeasurableCapability(String id,
-                                   String componentName,
-                                   Configuration config) {
+    protected MeasurableCapability(String id, String componentName, Configuration config) {
         super(id, config);
         this.config = config;
         try {
-            isEnabled = (Boolean) config.getEntry(componentName,
-                                                  "enabled",
-                                                  boolean.class,
-                                                  Boolean.TRUE);
-
+            isEnabled.set((Boolean) config.getEntry(componentName, "enabled", boolean.class, Boolean.TRUE));
         } catch (ConfigurationException e) {
             logger.log(Level.SEVERE, "Getting WatchDataSource Size", e);
         }
-        if(!isEnabled)
+        if(!isEnabled())
             return;
 
         try {
-            WatchDataSource wds =
-                   (WatchDataSource)config.getEntry(componentName,
-                                                    "watchDataSource",
-                                                    WatchDataSource.class,
-                                                    null);
+            WatchDataSource wds = (WatchDataSource)config.getEntry(componentName,
+                                                                   "watchDataSource",
+                                                                   WatchDataSource.class,
+                                                                   null);
             if(wds!=null) {
                 setWatchDataSource(wds);
             }
         } catch (ConfigurationException e) {
             logger.log(Level.SEVERE, "Getting WatchDataSource Size", e); 
         }
-        observatory = new Observatory();
         if(localRef!=null) 
             localRef.setMaxSize(100);
     }
 
+    public void addWatchDataReplicator(WatchDataReplicator replicator) {
+        if(localRef!=null) {
+            localRef.addWatchDataReplicator(replicator);
+        } else {
+            try {
+                watchDataSource.addWatchDataReplicator(replicator);
+            } catch (RemoteException e) {
+                logger.log(Level.WARNING, "Could not add WatchDataReplicator", e);
+            }
+        }
+    }
+
     protected void setEnabled(boolean enabled) {
-        this.isEnabled = enabled;
+        this.isEnabled.set(enabled);
     }
 
     /**
@@ -117,7 +115,12 @@ public abstract class MeasurableCapability
      * false. If the measurable capability is not enabled, it will not be added
      */
     public boolean isEnabled() {
-        return isEnabled;
+        return isEnabled.get();
+    }
+
+    private void checkEnabled() {
+        if(!isEnabled.get())
+            throw new IllegalStateException("The MeasurableCapability ["+getId()+"] is not enabled");
     }
 
     /**
@@ -134,11 +137,9 @@ public abstract class MeasurableCapability
      */
     @Override
     public void setWatchDataSource(WatchDataSource watchDataSource) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         super.setWatchDataSource(watchDataSource);
-        if(watchDataSource!=null) {            
+        if(watchDataSource!=null) {
             try {
                 watchDataSource.setMaxSize(100);
             } catch(Exception e) {
@@ -153,9 +154,7 @@ public abstract class MeasurableCapability
      * @param sla The SLA for this MeasurableCapability
      */
     public void setSLA(SLA sla) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         if(sla == null)
             throw new IllegalArgumentException("sla is null");
         this.sla = sla;
@@ -175,9 +174,7 @@ public abstract class MeasurableCapability
      * @see org.rioproject.system.measurable.MeasurableCapabilityMBean#setSampleSize
      */
     public void setSampleSize(int sampleSize) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         this.sampleSize = sampleSize;             
     }
 
@@ -197,9 +194,7 @@ public abstract class MeasurableCapability
      * @param thresholdManager The ThresholdManager
      */
     public void addSecondaryThresholdManager(ThresholdManager thresholdManager) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         if(thresholdManager==null)
             throw new IllegalArgumentException("thresholdManager is null");
         thresholdManagers.add(thresholdManager);
@@ -222,9 +217,7 @@ public abstract class MeasurableCapability
      * using this MeasurableCapability
      */
     public void setResourceCostModel(ResourceCostModel costModel) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         if(costModel==null)
             throw new IllegalArgumentException("costModel is null");
         this.costModel = costModel;
@@ -234,9 +227,7 @@ public abstract class MeasurableCapability
      * @see org.rioproject.costmodel.ResourceCostProducer#calculateResourceCost
      */
     public ResourceCost calculateResourceCost(double units, long duration) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         if(costModel==null)
             costModel = new ZeroCostModel();
         double cost = costModel.getCostPerUnit(duration)*units;
@@ -254,9 +245,7 @@ public abstract class MeasurableCapability
      * @return This object's measured capability
      */
     public MeasuredResource getMeasuredResource() {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         if(lastMeasured==null)
             checkValue();
 
@@ -284,11 +273,8 @@ public abstract class MeasurableCapability
      * @param record A Calculable record
      */
     public void addWatchRecord(Calculable record) {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
+        checkEnabled();
         super.addWatchRecord(record);
-        observatory.stateChange(record);
         for (ThresholdManager tManager : getThresholdManagers())
             tManager.checkThreshold(record);
     }
@@ -306,35 +292,4 @@ public abstract class MeasurableCapability
         return tMgrs;
     }
 
-    /**
-     * Get the Observable instance
-     * 
-     * @return The object to subscribe for changes in MeasurableCapability 
-     * state
-     */
-    public Observable getObservable() {
-        if(!isEnabled)
-            throw new IllegalStateException("The MeasurableCapability " +
-                                            "["+getId()+"] is not enabled");
-        return(observatory);
-    }
-
-    /**
-     * Internal class for managing state change
-     */
-    static class Observatory extends Observable {
-        Observatory() {
-            super();
-        }
-
-        /**
-         * Indicates that Observers need to be notified of the state change
-         *
-         * @param record The Calculable record representing the change
-         */
-        void stateChange(Calculable record) {
-            setChanged();
-            notifyObservers(record);
-        }
-    }
 }
