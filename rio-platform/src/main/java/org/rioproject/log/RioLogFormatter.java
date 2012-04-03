@@ -131,6 +131,7 @@ public class RioLogFormatter extends Formatter {
                 pw.close();
                 sb.append(sw.toString());
             } catch (Exception ex) {
+                /* */
             }
         }
         String formattedRecord;
