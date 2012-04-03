@@ -145,7 +145,8 @@ public class MaxPerMachineTest  {
                    "**** Services found before deploying the OpString: {0}",
                    Arrays.asList(ArrayUtils.asObjects(prevCounts)));
 
-        logger.log(Level.INFO, "Service details: ["+service+"]");
+        if(logger.isLoggable(Level.FINE))
+            logger.log(Level.INFO, "Service details: ["+service.getProvisionType()+"]");
         if (maxPerMachine == -1) {
             maxPerMachine = Integer.MAX_VALUE;
         }
@@ -414,7 +415,10 @@ public class MaxPerMachineTest  {
     }
 
     private void logBanner(String message) {
-        logger.info("\n************************\n"+message+"\n************************");
+        logger.info("\n" +
+                    "------------------------------------------------\n"+
+                    message+
+                    "\n------------------------------------------------");
     }
 
     public static void main(String... args) {
