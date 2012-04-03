@@ -27,7 +27,7 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 /**
- * Formats log entries
+ * Formats log entries, optionally using ANSI coloring.
  *
  * @author Dennis Reedy
  */
