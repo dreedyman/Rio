@@ -396,14 +396,14 @@ public class InstantiatorResource {
         int numInstances = 0;
         synchronized(serviceElementMap) {
             if(serviceElementMap.containsKey(sElem)) {
-                List list = serviceElementMap.get(sElem);
+                List<DeployedService> list = serviceElementMap.get(sElem);
                 numInstances = list.size();
             }
-            if(logger.isLoggable(Level.FINEST))
+            if(logger.isLoggable(Level.FINEST)) {
                 logger.finest("Get service element count for " +
                               "["+LoggingUtil.getLoggingName(sElem)+"], " +
-                              getName()+" at ["+getHostAddress()+"], "+
-                              "ServiceElementMap: "+serviceElementMap);
+                              getName()+" at ["+getHostAddress()+"], has "+numInstances+" instances");
+            }
         }
         return (numInstances);
     }

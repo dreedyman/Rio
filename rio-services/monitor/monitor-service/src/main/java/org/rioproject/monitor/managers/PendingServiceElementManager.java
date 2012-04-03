@@ -42,11 +42,11 @@ import java.util.logging.Logger;
  */
 public abstract class PendingServiceElementManager {
     /** Sorted collection of pending provision requests */
-    final TreeMap<Key, ProvisionRequest> collection;
+    protected final TreeMap<Key, ProvisionRequest> collection;
     /** Index into the collection to insert elements */
-    long collectionIndex = 1;
+    private long collectionIndex = 1;
     /** A descriptive String type */
-    String type;
+    private String type;
     /** A Logger */
     private final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
 
@@ -77,15 +77,13 @@ public abstract class PendingServiceElementManager {
             int comparison;
             long now = System.currentTimeMillis();
             /* The priority is the high order bit, if not set then check if
-             * the ServiceElement objcts are equal, if they are, make sure 
+             * the ServiceElement objects are equal, if they are, make sure
              * instanceIDs are sorted. If the ServiceElement instances dont match,
              * compare on the timestamp, then the index */
             if(this.priority==0 && that.priority==0) {
                 if(this.sElem.equals(that.sElem)) {
-                    Long thisInstanceID = 
-                        this.sElem.getServiceBeanConfig().getInstanceID();
-                    Long thatInstanceID = 
-                        that.sElem.getServiceBeanConfig().getInstanceID();
+                    Long thisInstanceID = this.sElem.getServiceBeanConfig().getInstanceID();
+                    Long thatInstanceID = that.sElem.getServiceBeanConfig().getInstanceID();
                     comparison = thisInstanceID.compareTo(thatInstanceID);
                 } else {
                     /* Dont have different timestamps, use index */
@@ -93,9 +91,7 @@ public abstract class PendingServiceElementManager {
                         comparison = (this.index>that.index ? 1 : -1);
                     } else {
                         /* age before beauty :) */
-                        comparison = (
-                            ((now-this.timestamp) > (now-that.timestamp)) ?
-                                -1 : 1);
+                        comparison = (( (now-this.timestamp) > (now-that.timestamp)) ?-1 : 1);
                     }
                 }
             } else {
@@ -114,8 +110,7 @@ public abstract class PendingServiceElementManager {
      */
 
     PendingServiceElementManager(String type) {
-        collection = new TreeMap<Key, ProvisionRequest>(
-            new Comparator<Key>() {
+        collection = new TreeMap<Key, ProvisionRequest>(new Comparator<Key>() {
                 public int compare(Key key1, Key key2) {
                     return (key1).compareTo(key2);
                 }
@@ -142,9 +137,7 @@ public abstract class PendingServiceElementManager {
         long ndx;
         synchronized(collection) {                        
             Long keyIndex = (index == 0 ? collectionIndex++ : index);
-            Key key = new Key(request.getServiceElement(),
-                              keyIndex,
-                              request.getTimestamp());
+            Key key = new Key(request.getServiceElement(), keyIndex, request.getTimestamp());
             collection.put(key, request);
             ndx = keyIndex;
         }
@@ -179,8 +172,9 @@ public abstract class PendingServiceElementManager {
             if(c != null) {
                 for (Object aC : c) {
                     ProvisionRequest pr = (ProvisionRequest) aC;
-                    if (pr.getServiceElement().equals(sElem))
+                    if (pr.getServiceElement().equals(sElem)) {
                         count++;
+                    }
                 }
             }
         }
@@ -213,9 +207,9 @@ public abstract class PendingServiceElementManager {
                 removals = removals.subList((removals.size()-numToRemove), 
                                             removals.size());                                
             }
-            if(logger.isLoggable(Level.FINER))
-                logger.finer(type+ ": removing ["+removals.size()+"] "+
-                            "["+sElem.getName()+"] instances");
+            if(logger.isLoggable(Level.FINER)) {
+                logger.finer(type+ ": removing ["+removals.size()+"] ["+sElem.getName()+"] instances");
+            }
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
@@ -247,9 +241,9 @@ public abstract class PendingServiceElementManager {
             }
         }
         if(removals.size() > 0) {
-            if(logger.isLoggable(Level.FINER))
-                logger.finer(type+ ": removing ["+removals.size()+"] "+
-                             "["+sElem.getName()+"] instances");
+            if(logger.isLoggable(Level.FINER)) {
+                logger.finer(type+ ": removing ["+removals.size()+"] ["+sElem.getName()+"] instances");
+            }
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
@@ -301,12 +295,11 @@ public abstract class PendingServiceElementManager {
                     Long id = pr.getServiceElement().getServiceBeanConfig().getInstanceID();
                     ServiceElement newElem = sElem;
                     if (id != null)
-                        newElem =
-                            ServiceElementUtil.prepareInstanceID(sElem,
-                                                                 id.intValue());
+                        newElem = ServiceElementUtil.prepareInstanceID(sElem, id.intValue());
                     pr.setServiceElement(newElem);
-                    if(listener!=null)
+                    if(listener!=null) {
                         pr.setServiceProvisionListener(listener);
+                    }
                 }
             }
         }
@@ -320,7 +313,7 @@ public abstract class PendingServiceElementManager {
      * there are no available resources it will be put back into the collection
      * in order
      */
-    abstract void process();
+    public abstract void process();
 
     /**
      * Get all ProvisionRequest instances
@@ -332,7 +325,7 @@ public abstract class PendingServiceElementManager {
     ProvisionRequest[] getProvisionRequests(ServiceElement sElem) {
         ProvisionRequest[] prs;        
         synchronized(collection) {            
-            /* Get all ProvsionRequest instances */
+            /* Get all ProvisionRequest instances */
             if(sElem==null) {
                 Collection<ProvisionRequest> c = collection.values();
                 prs = c.toArray(new ProvisionRequest[c.size()]);

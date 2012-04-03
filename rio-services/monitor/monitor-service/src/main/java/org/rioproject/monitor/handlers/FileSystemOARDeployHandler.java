@@ -65,14 +65,22 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
         this.installDirectory = installDirectory;
         if(!dropDirectory.exists()) {
             if(dropDirectory.mkdirs()) {
-                logger.config("Created dropDeployDir " +
-                              FileUtils.getFilePath(dropDirectory));
+                if(logger.isLoggable(Level.FINE)) {
+                    logger.fine("Created dropDeployDir " +FileUtils.getFilePath(dropDirectory));
+                }
+            }
+        }                
+        if(!installDirectory.exists()) {
+            if(installDirectory.mkdirs()) {
+                if(logger.isLoggable(Level.FINE)) {
+                logger.fine("Created installDir " +FileUtils.getFilePath(installDirectory));
+                }
             }
         }
-        if(!installDirectory.exists()) {
-            if(installDirectory.mkdirs())
-                logger.config("Created installDir " +
-                              FileUtils.getFilePath(installDirectory));
+        
+        if(logger.isLoggable(Level.CONFIG)) {
+            logger.config("OARs will be scanned for in this directory: "+FileUtils.getFilePath(dropDirectory));
+            logger.config("OARs will be installed into this directory: "+FileUtils.getFilePath(installDirectory));
         }
     }
 

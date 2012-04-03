@@ -56,6 +56,7 @@ import org.rioproject.system.ResourceCapability;
 import org.rioproject.util.BannerProvider;
 import org.rioproject.util.BannerProviderImpl;
 import org.rioproject.util.RioManifest;
+import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.GaugeWatch;
 import org.rioproject.watch.PeriodicWatch;
 import org.rioproject.watch.ThreadDeadlockMonitor;
@@ -596,7 +597,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         boolean undeployed = false;
         OpStringManager opMgr = opStringMangerController.getOpStringManager(name);
         if(logger.isLoggable(Level.FINEST)) {
-            logger.finest("OpStringManager: "+opMgr);
+            logger.finest("OpStringManager: " + opMgr);
         }
         if(opMgr == null || (!opMgr.isActive())) {
             try {
@@ -619,7 +620,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             opMgr.setDeploymentStatus(OperationalString.UNDEPLOYED);
             OperationalString opString = opMgr.doGetOperationalString();
             if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("Terminating Operational String ["+opString.getName()+"]");
+                logger.finest("Terminating Operational String [" + opString.getName() + "]");
             }
             OperationalString[] terminated = opMgr.terminate(terminate);
             logger.info("Undeployed Operational String ["+opString.getName()+"]");
@@ -909,7 +910,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                            t);
             }
             if(logger.isLoggable(Level.CONFIG))
-                logger.config("deployMonitorPeriod="+deployMonitorPeriod);
+                logger.config("Configured to scan for OAR deployments every "+ TimeUtil.format(deployMonitorPeriod));
 
             if(deployMonitorPeriod>0) {
                 String rioHome = System.getProperty("RIO_HOME");
@@ -917,11 +918,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                     rioHome = rioHome+"/";
                 File deployDir = new File(rioHome+"deploy");
                 DeployHandler fsDH = new FileSystemOARDeployHandler(deployDir);
-                DeployHandler[] deployHandlers =
-                    (DeployHandler[]) config.getEntry(CONFIG_COMPONENT,
-                                                      "deployHandlers",
-                                                      DeployHandler[].class,
-                                                      new DeployHandler[]{fsDH});
+                DeployHandler[] deployHandlers = (DeployHandler[]) config.getEntry(CONFIG_COMPONENT,
+                                                                                   "deployHandlers",
+                                                                                   DeployHandler[].class,
+                                                                                   new DeployHandler[]{fsDH});
                 deployMonitor = new DeployHandlerMonitor(deployHandlers,
                                                          deployMonitorPeriod,
                                                          opStringMangerController,

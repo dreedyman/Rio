@@ -37,27 +37,29 @@ import java.util.logging.Logger;
 public class FixedServiceManager extends PendingServiceElementManager {
     private final List<ServiceResource> inProcessResource = Collections.synchronizedList(new ArrayList<ServiceResource>());
     private final ServiceProvisionContext context;
-    private final PendingManager pendingManager;
     private final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
 
     /**
      * Create a FixedServiceManager
      *
      * @param context The ServiceProvisionContext
-     * @param pendingManager The manager for pending service provisioning requests
      */
-    public FixedServiceManager(ServiceProvisionContext context, PendingManager pendingManager) {
+    public FixedServiceManager(ServiceProvisionContext context) {
         super("Fixed-Service TestManager");
         this.context = context;
-        this.pendingManager = pendingManager;
-    }
+    }        
 
     /**
      * Process the entire Fixed collection over all known ServiceResource
      * instances
      */
-    void process() {
+    public void process() {
         ServiceResource[] resources = context.getSelector().getServiceResources();
+        if(logger.isLoggable(Level.FINE)) {
+            logger.fine("\n================\n"
+                        +getType()+" processing "+resources.length+" resources" +
+                        "\n================");
+        }
         for (ServiceResource resource : resources)
             process(resource);
     }
@@ -73,6 +75,11 @@ public class FixedServiceManager extends PendingServiceElementManager {
             if (logger.isLoggable(Level.FINER))
                 logger.log(Level.FINER,  "Deploy [" + LoggingUtil.getLoggingName(request) + "]");
             ServiceResource[] resources = context.getSelector().getServiceResources(request.getServiceElement());
+            if(logger.isLoggable(Level.FINE)) {
+                logger.info("\n================\n"
+                            +getType()+" processing "+resources.length+" resources" +
+                            "\n================");
+            }
             /* Filter out isolated associations and max per machine levels
              * set at the physical level */
             resources = context.getSelector().filterMachineBoundaries(request.getServiceElement(), resources);
@@ -87,12 +94,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
                     } finally {
                         inProcessResource.remove(resource);
                     }
-                }
-                while (context.getProvisioningPool().getActiveCount() > 0) {
-                    Thread.sleep(100);
-                }
-                //if(list.size()>0)
-                //    taskJoiner(list);
+                }                
             }
         } catch (Throwable t) {
             logger.log(Level.WARNING, "FixedServiceManager deployNew", t);
@@ -110,9 +112,9 @@ public class FixedServiceManager extends PendingServiceElementManager {
         inProcessResource.add(resource);
         InstantiatorResource ir = (InstantiatorResource) resource.getResource();
         try {
-            if (getSize() == 0)
+            if(getSize() == 0)
                 return;
-            if (logger.isLoggable(Level.FINEST)) {
+            if(logger.isLoggable(Level.FINEST)) {
                 dumpCollection();
             }
             /* Now traverse the collection for everything else, skipping
@@ -128,17 +130,10 @@ public class FixedServiceManager extends PendingServiceElementManager {
                     } catch (ProvisionException e) {
                         request.setType(ProvisionRequest.Type.UNINSTANTIABLE);
                         if (logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE,
-                                                "Service [" + LoggingUtil.getLoggingName(request) + "] " +
-                                                "is un-instantiable, " +
-                                                "do not resubmit");
+                            logger.fine("Service [" + LoggingUtil.getLoggingName(request) + "] " +
+                                        "is un-instantiable, do not resubmit");
                     }
                 }
-                while (context.getProvisioningPool().getActiveCount() > 0) {
-                    Thread.sleep(100);
-                }
-                //if(list.size()>0)
-                //    taskJoiner(list);
             }
 
         } catch (Throwable t) {
@@ -175,7 +170,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
         if (numAllowed > 0) {
             long currentID = req.getServiceElement().getServiceBeanConfig().getInstanceID();
             StringBuilder b = new StringBuilder();
-            b.append("doDeploy ").append(numAllowed).append(" " + "[")
+            b.append("doDeploy ").append(numAllowed).append(" [")
                 .append(LoggingUtil.getLoggingName(req)).append("] instances");
 
             for (int i = 0; i < numAllowed; i++) {
@@ -187,28 +182,17 @@ public class FixedServiceManager extends PendingServiceElementManager {
                                                                                true,
                                                                                nextID));
 
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "[" + LoggingUtil.getLoggingName(request) + "] " +
-                                             "instanceID : " +
-                                             request.getServiceElement().getServiceBeanConfig().getInstanceID());
-
-                /*b.append("instanceID=").
-                append(request.getServiceElement().getServiceBeanConfig().getInstanceID()).
-                append(", " + "changeInstanceID=").
-                append(changeInstanceID).
-                append("\n");*/
-
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("[" + LoggingUtil.getLoggingName(request) + "] instanceID : " +
+                                  request.getServiceElement().getServiceBeanConfig().getInstanceID());
+                }
                 context.getInProcess().add(request.getServiceElement());
                 context.setProvisionRequest(request);
                 context.setServiceResource(resource);
-                context.getProvisioningPool().execute(new ProvisionTask(context, pendingManager));
+                context.getProvisioningPool().execute(new ProvisionTask(context, null));
             }
             if (logger.isLoggable(Level.FINER))
                 logger.finer(b.toString());
-            //if(!changeInstanceID) {
-            //    Throwable t = new Throwable();
-            //    t.printStackTrace();
-            //}
         }
         return (numAllowed);
     }
@@ -220,8 +204,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
     int getNumAllowed(ServiceResource resource, ProvisionRequest request) {
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
-        InstantiatorResource ir =
-            (InstantiatorResource) resource.getResource();
+        InstantiatorResource ir = (InstantiatorResource) resource.getResource();
         if (!clearedMaxPerMachineAndIsolated(request, ir.getHostAddress()))
             return 0;
 
@@ -231,6 +214,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
         if (request.getServiceElement().getMaxPerMachine() != -1 &&
             request.getServiceElement().getMaxPerMachine() < numAllowed)
             numAllowed = request.getServiceElement().getMaxPerMachine();
+        if(logger.isLoggable(Level.FINER))
+            logger.finer("Cybernode at "+ir.getHostAddress()+" has "+actual+", can accommodate "+numAllowed);
         return (numAllowed);
     }
 
@@ -250,26 +235,4 @@ public class FixedServiceManager extends PendingServiceElementManager {
         return sr.length != 0;
     }
 
-    /*
-     * Wait until all ProvisionTask threads are complete
-     *
-    void taskJoiner(ArrayList list) {
-        if(logger.isLoggable(Level.INFO))
-            logger.log(Level.INFO,
-                                "Wait until all ProvisionTask threads " +
-                                "are complete ...");
-        for (Object aList : list) {
-            try {
-                ((PoolableThread) aList).joinResource();
-            } catch (Throwable e) {
-                logger.log(Level.WARNING,
-                                    "PoolableThread join interruption",
-                                    e);
-            }
-        }
-        if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                                "ProvisionTask threads join complete");
-    }
-    */
-} // End FixedServiceManager
+}

@@ -52,6 +52,7 @@ public class DeployHandlerMonitor {
         processDeployHandlers(null);
         lastRecordedTime = System.currentTimeMillis();
         deployExecutor = Executors.newSingleThreadScheduledExecutor();
+
         deployExecutor.scheduleAtFixedRate(
                                               new Runnable() {
                                                   public void run() {

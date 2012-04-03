@@ -48,7 +48,7 @@ public class RoundRobinSelector extends ServiceResourceSelector {
      */
     public void serviceResourceSelected(ServiceResource svcResource) {
         LinkedList<LeasedResource> list = (LinkedList<LeasedResource>)collection;
-        synchronized(list) {
+        synchronized(collectionLock) {
             list.remove(svcResource);
             list.addLast(svcResource);
         }
