@@ -65,13 +65,13 @@ public class ResourceCapability implements Comparable, Serializable {
                               PlatformCapability[] platformCapabilities,
                               ComputeResourceUtilization resourceUtilization) {
         if(address == null)
-            throw new NullPointerException("address is null");
+            throw new IllegalArgumentException("address is null");
         if(hostName == null)
-            throw new NullPointerException("hostName is null");
+            throw new IllegalArgumentException("hostName is null");
         if(platformCapabilities == null)
-            throw new NullPointerException("platformCapabilities is null");
+            throw new IllegalArgumentException("platformCapabilities is null");
         if(resourceUtilization == null)
-            throw new NullPointerException("resourceUtilization is null");
+            throw new IllegalArgumentException("resourceUtilization is null");
         this.address = address;
         this.hostName = hostName;
         this.persistentProvisioning = persistentProvisioning;
@@ -124,13 +124,8 @@ public class ResourceCapability implements Comparable, Serializable {
     public PlatformCapability[] getPlatformCapabilities() {
         if(platformCapabilities == null)
             return (new PlatformCapability[0]);
-        PlatformCapability[] pCaps = 
-            new PlatformCapability[platformCapabilities.length];
-        System.arraycopy(platformCapabilities,
-                         0,
-                         pCaps,
-                         0,
-                         platformCapabilities.length);
+        PlatformCapability[] pCaps =  new PlatformCapability[platformCapabilities.length];
+        System.arraycopy(platformCapabilities, 0, pCaps, 0, platformCapabilities.length);
         return (pCaps);
     }   
 
