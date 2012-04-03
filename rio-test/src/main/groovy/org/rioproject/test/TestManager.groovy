@@ -142,10 +142,10 @@ class TestManager {
 
         if(createShutdownHook) {
             Runtime rt = Runtime.getRuntime();
-            logger.info ":: Adding shutdown hook"
+            logger.info "Adding shutdown hook"
 
             Closure cl = {
-                logger.info ":: Running shutdown hook, stop Rio services..."
+                logger.info "Running shutdown hook, stop Rio services..."
                 shutdown()
             }
             Thread shutdownHook = new Thread(cl, "RunPostShutdownHook")
