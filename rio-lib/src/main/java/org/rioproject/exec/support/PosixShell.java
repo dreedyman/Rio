@@ -64,12 +64,10 @@ public class PosixShell implements Shell {
             commandLine = commandLine+" "+execDescriptor.getInputArgs();
         }
         if (execDescriptor.getStdOutFileName() != null) {
-            commandLine = commandLine + " > " +
-                            (new File(execDescriptor.getStdOutFileName())).getPath();
+            commandLine = commandLine + " > "+(new File(execDescriptor.getStdOutFileName())).getPath();
         }
         if (execDescriptor.getStdErrFileName() != null) {
-            commandLine = commandLine + " 2> " +
-                            (new File(execDescriptor.getStdErrFileName())).getPath();
+            commandLine = commandLine + " 2> "+(new File(execDescriptor.getStdErrFileName())).getPath();
         }
 
         File pidFile = File.createTempFile("exec-", ".pid");
@@ -79,7 +77,7 @@ public class PosixShell implements Shell {
         generatedShellScript.deleteOnExit();
 
         URL url = Util.getResource(template);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         BufferedReader in =
             new BufferedReader(new InputStreamReader(url.openStream()));
         String str;
