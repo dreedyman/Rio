@@ -41,13 +41,11 @@ public class MeasuredResource implements Serializable {
      * @param value The measured value
      * @param tVals ThresholdValues for the MeasurableResource
      */
-    public MeasuredResource(String identifier, 
-                            double value, 
-                            ThresholdValues tVals) {
+    public MeasuredResource(String identifier, double value, ThresholdValues tVals) {
         if(identifier==null)
-            throw new NullPointerException("identifier is null");
+            throw new IllegalArgumentException("identifier is null");
         if(tVals==null)
-            throw new NullPointerException("tVals is null");
+            throw new IllegalArgumentException("tVals is null");
         this.identifier = identifier;
         this.value = value;
         tValues = tVals;
@@ -90,8 +88,7 @@ public class MeasuredResource implements Serializable {
      * range values
      */
     public boolean thresholdCrossed() {
-        return value < tValues.getLowThreshold() ||
-                  value > tValues.getHighThreshold();
+        return value < tValues.getLowThreshold() || value > tValues.getHighThreshold();
     }
 
     /**
@@ -124,8 +121,7 @@ public class MeasuredResource implements Serializable {
                     || ((MeasuredResource)obj).getIdentifier() == null)
                 return (false);
             else
-                return (getIdentifier().equals(
-                                         ((MeasuredResource)obj).getIdentifier()));
+                return (getIdentifier().equals(((MeasuredResource)obj).getIdentifier()));
         }
         return (false);
     }
@@ -145,10 +141,10 @@ public class MeasuredResource implements Serializable {
 
     @Override
     public String toString() {
-        return "MeasuredResource{" +
-               "identifier='" + identifier + '\'' +
-               ", value=" + value +
-               ", tValues=" + tValues +
-               '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("identifier=").append(identifier);
+        builder.append(", value=").append(value);
+        builder.append(", tValues=").append(tValues);
+        return builder.toString();
     }
 }
