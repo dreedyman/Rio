@@ -171,7 +171,7 @@ public class DroolsFactory {
                 }
             }
         }*/
-        logger.info("\n========\n ADDING: "+getToAddNames(toAdd)+"\n========");
+        logger.info("ADDING: "+getToAddNames(toAdd));
         if(toAdd.size()>0)
             kBase.addKnowledgePackages(toAdd);
         return kBase.newStatefulKnowledgeSession();
