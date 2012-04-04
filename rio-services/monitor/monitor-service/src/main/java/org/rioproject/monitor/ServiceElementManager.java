@@ -194,13 +194,13 @@ public class ServiceElementManager implements InstanceIDManager {
                           boolean active,
                           Configuration config)  throws Exception {
         if(sElem==null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         if(opStringMgr==null)
-            throw new NullPointerException("opStringMgr is null");
+            throw new IllegalArgumentException("opStringMgr is null");
         if(provisioner==null)
-            throw new NullPointerException("provisioner is null");
+            throw new IllegalArgumentException("provisioner is null");
         if(uuid==null)
-            throw new NullPointerException("uuid is null");
+            throw new IllegalArgumentException("uuid is null");
         this.opStringMgr = opStringMgr;
         this.provisioner = provisioner;
         this.myUuid = uuid;
@@ -219,7 +219,7 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     void setServiceElement(ServiceElement newElem) throws Exception {
         if(newElem==null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         boolean update = (this.svcElement != null);
         ServiceElement preElem = svcElement;
         this.svcElement = newElem;
