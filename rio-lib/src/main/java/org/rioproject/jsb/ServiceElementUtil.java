@@ -23,6 +23,7 @@ import net.jini.core.entry.Entry;
 import net.jini.discovery.DiscoveryGroupManagement;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
+import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
@@ -51,6 +52,17 @@ import java.util.logging.Logger;
  */
 public class ServiceElementUtil {
     private static Logger logger = Logger.getLogger("org.rioproject.jsb.ServiceElementUtil");
+
+    public static String getLoggingName(ServiceBeanContext context) {
+        return getLoggingName(context.getServiceElement());
+    }
+
+    public static String getLoggingName(ServiceElement element) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(element.getOperationalStringName()).append("/").append(element.getName());
+        sb.append(":").append(element.getServiceBeanConfig().getInstanceID());
+        return sb.toString();
+    }
 
     /**
      * Check to see if the ThreadDeadlockMonitor has been declared as an SLA.
@@ -272,10 +284,13 @@ public class ServiceElementUtil {
                         break;
                     }
                 }
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("[" + sElem1.getName() + "] " +
-                                  "groups1 [" + aGroups1 + "] matched in " +
-                                  "groups2 : " + matched);
+                if (logger.isLoggable(Level.FINEST)) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("[");
+                    builder.append(sElem1.getName()).append(":").append(sElem1.getServiceBeanConfig().getInstanceID());
+                    builder.append("] groups [").append(aGroups1).append("] matched in groups2 ?").append(matched);
+                    logger.finest(builder.toString());
+                }
                 if (!matched) {
                     different = true;
                     break;
