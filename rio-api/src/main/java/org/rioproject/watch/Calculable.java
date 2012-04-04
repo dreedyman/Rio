@@ -16,6 +16,8 @@
 package org.rioproject.watch;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -178,6 +180,11 @@ public class Calculable implements Serializable {
      * @return String representation of the object.
      */
     public String toString() {
-        return (id + " @" + when + " = " + getValue());
+        String format = "yyyy.MM.dd HH:mm:ss,SSS";
+        DateFormat formatter = new SimpleDateFormat(format);
+        Date date = new Date(when);
+        StringBuilder builder = new StringBuilder();
+        builder.append(id).append(" = ").append(getValue()).append(", ").append(formatter.format(date));
+        return builder.toString();
     }
 }
