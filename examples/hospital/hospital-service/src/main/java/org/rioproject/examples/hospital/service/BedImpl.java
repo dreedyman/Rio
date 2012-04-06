@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -40,13 +41,17 @@ public class BedImpl implements Bed {
     private static final Logger logger = Logger.getLogger(BedImpl.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) {
+        if(logger.isLoggable(Level.FINE)) {
+            logger.config(String.format("Creating Bed:%d...", context.getServiceBeanConfig().getInstanceID()));
+        }
+
         int numRooms = 40;
         String sNumRooms = (String)context.getInitParameter("numRooms");
         if(sNumRooms!=null) {
             try {
                 numRooms = Integer.parseInt(sNumRooms);
             } catch(NumberFormatException e) {
-                logger.warning("Bad roomNumber ["+sNumRooms+"], default to 40 rooms");
+                logger.warning(String.format("Bad roomNumber [%s], default to 40 rooms", sNumRooms));
             }
         }
         Random random = new Random();
@@ -55,6 +60,10 @@ public class BedImpl implements Bed {
         temperature = new GaugeWatch("temperature");
         pulse = new GaugeWatch("pulse");
         context.getWatchRegistry().register(temperature, pulse);
+        if(logger.isLoggable(Level.CONFIG)) {
+            logger.config(String.format("Created Bed:%d in room #%s",
+                                        context.getServiceBeanConfig().getInstanceID(),roomNumber));
+        }
     }
 
     public String getRoomNumber() throws IOException {

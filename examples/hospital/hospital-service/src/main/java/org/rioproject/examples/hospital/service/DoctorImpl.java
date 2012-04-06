@@ -24,6 +24,8 @@ import org.rioproject.watch.GaugeWatch;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of a {@link Doctor}
@@ -35,6 +37,7 @@ public class DoctorImpl implements Doctor {
     private final List<Patient> patients = new ArrayList<Patient>();
     private static final String COMPONENT = DoctorImpl.class.getName();
     private GaugeWatch numPatients;
+    private static Logger logger = Logger.getLogger(DoctorImpl.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) throws
                                                                   ConfigurationException {
@@ -49,6 +52,9 @@ public class DoctorImpl implements Doctor {
                                                                      String.class,
                                                                      null,
                                                                      name);
+        if(logger.isLoggable(Level.CONFIG)) {
+            logger.log(Level.CONFIG, "Status for {0} is {1}", new Object[]{name, sStatus});
+        }
         this.status = Status.valueOf(sStatus);
         numPatients = new GaugeWatch("numPatients");
         context.getWatchRegistry().register(numPatients);
@@ -64,14 +70,21 @@ public class DoctorImpl implements Doctor {
 
     public void onCall() {
         status = Status.ON_CALL;
+        logStatusChange();
     }
 
     public void onDuty() {
         status = Status.ON_DUTY;
+        logStatusChange();
     }
 
     public void offDuty() {
         status = Status.OFF_DUTY;
+        logStatusChange();
+    }
+
+    private void logStatusChange() {
+        logger.log(Level.INFO, "Set {0} to {1}", new Object[]{name, status.name()});
     }
 
     public String getName() {
@@ -80,15 +93,19 @@ public class DoctorImpl implements Doctor {
 
     public void assignPatient(Patient p) {
         synchronized(patients) {
-            if(patients.add(p))
+            if(patients.add(p)) {
                 numPatients.addValue(patients.size());
+                logger.log(Level.INFO, "{0}, total patients: {1}, added {2} ",
+                           new Object[]{name, patients.size(), p.getPatientInfo().getName()});
+            }
         }        
     }
 
     public void removePatient(Patient p) {
         synchronized(patients) {
-            if(patients.remove(p))
+            if(patients.remove(p)) {
                 numPatients.addValue(patients.size());
+            }
         }
     }
 

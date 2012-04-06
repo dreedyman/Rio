@@ -25,10 +25,8 @@ import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Testing the hospital example using the Rio test framework
@@ -37,8 +35,9 @@ import java.util.List;
 public class ITHospitalDeployTest {
     @SetTestManager
     static TestManager testManager;
-    Hospital hospital;
-    List<Doctor> docs;
+    private Hospital hospital;
+    private List<Doctor> docs;
+    private static final Logger logger = Logger.getLogger(ITHospitalDeployTest.class.getName());
 
     @Before
     public void setup() throws Exception {
@@ -80,17 +79,27 @@ public class ITHospitalDeployTest {
         try {
             for(Patient p : first8Presidents()) {
                 hospital.admit(p);
+                /* Give the admitting room a chance to dole out assignments */
+                Thread.sleep(100);
             }
-            Thread.sleep(2000);
-            int numAssigned = getAssignedDocs();
-            Assert.assertTrue("Should have 2 Doctors assigned, have "+numAssigned, numAssigned==2);
+            int numAssigned = waitForDocs(2);
+            Assert.assertTrue("Should have at least 2 Doctors with assigned patients, have "+numAssigned+". " +
+                              "Check that the DoctorRule fired", numAssigned>=2);
+            getAssignedDocs();
 
             List<Patient> patients = next8Presidents();
+
             int onDuty = getNumDoctorsForStatus(docs, Doctor.Status.ON_DUTY);
-            Assert.assertTrue("3 Doctors should be ON_DUTY, have "+onDuty, onDuty==3);
+            if(onDuty<3) {
+                Thread.sleep(500);
+                onDuty = getNumDoctorsForStatus(docs, Doctor.Status.ON_DUTY);
+            }
+            Assert.assertTrue("3 Doctors should be ON_DUTY, have " + onDuty, onDuty == 3);
 
             try {
                 hospital.admit(patients.remove(0));
+                /* Give the admitting room a chance to dole out assignments */
+                Thread.sleep(100);
             } catch(Exception e) {
                 System.out.println(e.getClass().getName()+": "+e.getLocalizedMessage());
             }
@@ -104,17 +113,13 @@ public class ITHospitalDeployTest {
             hospital.admit(patients.remove(0));
             found = waitForBeds(12);
             Assert.assertTrue("Should have at least 12 Beds, have "+found, 12<=found);
-            int waitingRoomSize=0;
             for(Patient p : patients) {
                 try {
                     hospital.admit(p);
                 } catch(AdmissionException e) {
-                    int wSize = hospital.getWaitingRoom().size();
-                    System.out.println("AdmissionException: "+e.getLocalizedMessage()+" for "+p.getPatientInfo().getName()+", waiting room size="+wSize);
-                    waitingRoomSize++;
-                    Assert.assertTrue("Should have "+waitingRoomSize+" Patients in Waiting Room, " +
-                                      "instead we have "+wSize,
-                                      waitingRoomSize==wSize);
+                    List<Patient> patientsInWaitingRoom = hospital.getWaitingRoom();
+                    int wSize = patientsInWaitingRoom.size();
+                    logger.info("AdmissionException: "+e.getLocalizedMessage()+", waiting room size="+wSize);
                 }
             }
             found = waitForBeds(16);
@@ -143,7 +148,7 @@ public class ITHospitalDeployTest {
     private int getAssignedDocs() throws IOException {
         int numAssigned = 0;
         for(Doctor d : hospital.getDoctors()) {
-            System.out.println("===> "+d.getName()+", "+d.getStatus()+", num patients: "+d.getPatients().size());
+            logger.info(d.getName()+", "+d.getStatus()+", num patients: "+d.getPatients().size());
             if(d.getPatients().size()>0) {
                 numAssigned++;
             }
@@ -151,9 +156,33 @@ public class ITHospitalDeployTest {
         return numAssigned;
     }
 
+    private int waitForDocs(int num) throws Exception {
+        int found = 0;
+        int iterations = 120;
+        long t0 = System.currentTimeMillis();
+
+        for(int i=0; i<iterations; i++) {
+            for(Doctor d :  hospital.getDoctors()) {
+                logger.info(d.getName()+" has "+d.getPatients().size()+" patients");
+                if(d.getPatients().size()>0) {
+                    found++;
+                }
+            }
+            if(found<num) {
+                Thread.sleep(500);
+                found = 0;
+            } else {
+                break;
+            }
+        }
+        long t1 = System.currentTimeMillis();
+        logger.info("Waited ("+(double)(t1-t0)+") millis for "+num+" Doctors with assigned patients, found "+found);
+        return found;
+    }
+
     private int waitForBeds(int num) throws Exception {
         int found = 0;
-        int iterations = 20;
+        int iterations = 120;
         long t0 = System.currentTimeMillis();
         for(int i=0; i<iterations; i++) {
             List <Bed> beds = hospital.getBeds();
@@ -165,7 +194,7 @@ public class ITHospitalDeployTest {
             }
         }
         long t1 = System.currentTimeMillis();
-        System.out.println("Waited ("+(double)(t1-t0)+") millis for "+num+" Beds, found "+found);
+        logger.info("Waited ("+(double)(t1-t0)+") millis for "+num+" Beds, found "+found);
         return found;
     }
 
@@ -176,6 +205,8 @@ public class ITHospitalDeployTest {
                 count++;
             }
         }
+        String dr = count==1?"Doctor":"Doctors";
+        logger.info("Found "+count+" "+dr+" "+status.name());
         return count;
     }
 

@@ -11,7 +11,7 @@ end
 
 rule "Available Bed Rule"
 when
-    $beds : Calculable(id == "availableBeds", value == 0) from entry-point "calculables-stream"
+    $beds : Calculable(id == "availableBeds", value <= 0) from entry-point "calculables-stream"
 then
     context.increment("Beds", "Hospital");
 end

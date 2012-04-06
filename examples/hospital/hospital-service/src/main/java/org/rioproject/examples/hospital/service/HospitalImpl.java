@@ -63,9 +63,13 @@ public class HospitalImpl implements Hospital {
                         try {
                             doAdmitWithBed(p, b);
                             waitingRoom.remove(p);
+                            if(logger.isLoggable(Level.INFO)) {
+                                logger.info(String.format("Removed %s from the waiting room, waiting room size is now: %d",
+                                                          p.getPatientInfo().getName(), waitingRoom.size()));
+                            }
                         } catch (AdmissionException e) {
                             if(logger.isLoggable(Level.FINE)) {
-                                logger.fine("Unable to assign patient "+p.getPatientInfo().getName());
+                                logger.fine(String.format("Unable to assign patient %s", p.getPatientInfo().getName()));
                             }
                         }
                     }
@@ -93,7 +97,8 @@ public class HospitalImpl implements Hospital {
                 released = p;
             }
         } catch (IOException e) {
-            throw new AdmissionException("Patient "+p.getPatientInfo().getName()+" could not be released", e);
+            throw new AdmissionException(String.format("Patient %s could not be released", p.getPatientInfo().getName()),
+                                         e);
         }
         return released;
     }
@@ -101,28 +106,26 @@ public class HospitalImpl implements Hospital {
     private Patient doAdmitWithBed(Patient p, Bed bed) throws AdmissionException {
         if(bed==null) {
             addToWaitingRoom(p);
-            throw new AdmissionException("No available beds");
+            throw new AdmissionException(String.format("No available beds for %s", p.getPatientInfo().getName()));
         }
         Doctor d = getAvailableDoctor();
         if(d==null) {
             addToWaitingRoom(p);
-            throw new AdmissionException("No available Doctor");
+            throw new AdmissionException(String.format("No available Doctor for %s", p.getPatientInfo().getName()));
         }
         p.setDoctor(d);
         try {
             d.assignPatient(p);
         } catch(IOException e) {
             p.setDoctor(null);
-            throw new AdmissionException("Could not get the patient a doctor",
-                                         e);
+            throw new AdmissionException("Could not get the patient a doctor", e);
         }
         try {
             p.setBed(bed);
             bed.setPatient(p);
         } catch(IOException e) {
             p.setDoctor(null);
-            throw new AdmissionException("Could not get the patient into a bed",
-                                         e);
+            throw new AdmissionException("Could not get the patient into a bed", e);
         }
         availableBeds.decrement();
         return p;
@@ -188,7 +191,13 @@ public class HospitalImpl implements Hospital {
 
     private void addToWaitingRoom(Patient p) {
         synchronized(waitingRoom) {
-            waitingRoom.add(p);
+            if(waitingRoom.add(p)) {
+                logger.info(String.format("Added %s to the waiting room, waiting room size is now: %d",
+                                          p.getPatientInfo().getName(), waitingRoom.size()));
+            } else {
+                logger.info(String.format("Did not add %s to the waiting room, must already be waiting",
+                                          p.getPatientInfo().getName()));
+            }
         }
     }
 
@@ -248,6 +257,8 @@ public class HospitalImpl implements Hospital {
                 List<Patient> l = d.getPatients();
                 count = l.size();
             } catch (IOException e) {
+                logger.log(Level.WARNING, "Getting patient count from a Doctor", e);
+                /* */
             }
             return count;
         }
