@@ -32,6 +32,7 @@ import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
@@ -133,10 +134,11 @@ public class DroolsFactory {
             builder.add(resource, resourceType);
 
             if (builder.hasErrors()) {
-                logger.severe("Could not create the KnowledgeBuilder using "+resource+" properly");
+                logger.severe(String.format("Could not create the KnowledgeBuilder using %s properly", resource));
                 for (KnowledgeBuilderError error : builder.getErrors()) {
-                    logger.log(Level.SEVERE, "At lines {0}, got error {1}",
-                               new Object[]{error.getErrorLines(), error.getMessage()});
+                    logger.severe(String.format("At lines %s, got error %s",
+                                                Arrays.toString(error.getErrorLines()),
+                                                error.getMessage()));
                 }
                 return null;
             }
@@ -171,7 +173,7 @@ public class DroolsFactory {
                 }
             }
         }*/
-        logger.info("ADDING: "+getToAddNames(toAdd));
+        logger.info(String.format("ADDING: %s", getToAddNames(toAdd)));
         if(toAdd.size()>0)
             kBase.addKnowledgePackages(toAdd);
         return kBase.newStatefulKnowledgeSession();
@@ -190,12 +192,12 @@ public class DroolsFactory {
     }
 
     private static String getToAddNames(Collection<KnowledgePackage> toAdd) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(KnowledgePackage k : toAdd) {
             if(sb.length()>0)
                 sb.append("\n");
             sb.append(k.getName()).append(", Rules: ");
-            StringBuffer sbr = new StringBuffer();
+            StringBuilder sbr = new StringBuilder();
             for(Rule rule : k.getRules()) {
                 if(sbr.length()>0)
                     sbr.append(", ");

@@ -39,20 +39,18 @@ class CEPEventConsumer implements RemoteServiceEventListener {
         this.session = session;
         this.provisionEventsStream = session.getWorkingMemoryEntryPoint(Constants.PROVISION_EVENTS_STREAM);
         if(provisionEventsStream==null)
-            throw new IllegalStateException("The ["+Constants.PROVISION_EVENTS_STREAM+"], " +
-                                            "could not be created. The Drools setup must be invalid");
+            throw new IllegalStateException(String.format("The [%s], could not be created. The Drools setup must be invalid",
+                                                          Constants.PROVISION_EVENTS_STREAM));
     }
 
     public void notify(RemoteServiceEvent event) {
         if (!(event instanceof ProvisionMonitorEvent || event instanceof ProvisionFailureEvent)) {
-            logger.warning("Unrecognized event type "+event.getClass().getName());
+            logger.warning(String.format("Unrecognized event type %s", event.getClass().getName()));
             return;
         }
         
         provisionEventsStream.insert(event);
-        logger.log(Level.INFO,
-                   "Inserted into CEP engine event {0}",
-                   new Object[]{event});
+        logger.info(String.format("Inserted into CEP engine event %s", event));
         session.fireAllRules();     // TODO: make sure this makes sense to fire each time we insert!!
     }
 }

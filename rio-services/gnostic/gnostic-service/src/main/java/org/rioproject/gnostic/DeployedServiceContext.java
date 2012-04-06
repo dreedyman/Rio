@@ -36,7 +36,7 @@ public class DeployedServiceContext {
 
     void addDeployedService(ServiceElement serviceElement, OperationalStringManager opMgr) {
         if(logger.isLoggable(Level.FINE))
-            logger.fine("Adding deployed service "+getNameForLogging(serviceElement));
+            logger.fine(String.format("Adding deployed service %s", getNameForLoggingWithInstanceID(serviceElement)));
         deployed.put(serviceElement, opMgr);
     }
 
@@ -55,8 +55,8 @@ public class DeployedServiceContext {
         if(entry==null) {
             entry = doLookupServiceEntry(serviceName, opstring);
             if(entry==null) {
-                logger.warning("Unable to obtain ServiceElement for " +
-                               "service name: "+serviceName+", opstring: "+opstring+". "+deployed);
+                logger.warning(String.format("Unable to obtain ServiceElement for service name: %s, opstring: %s. %s",
+                                             serviceName, opstring, deployed));
                 return;
             } else {
                 deployed.put(entry.getKey(), entry.getValue());
@@ -69,7 +69,7 @@ public class DeployedServiceContext {
         try {
             opMgr.increment(serviceElement, true, null);
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "While trying to increment [" + serviceName + "] services", t);
+            logger.log(Level.WARNING, String.format("While trying to increment [%s] services", serviceName), t);
         }
     }
 
@@ -82,11 +82,11 @@ public class DeployedServiceContext {
         OperationalStringManager opMgr = entry.getValue();
         int count = 0;
         if(logger.isLoggable(Level.FINE))
-            logger.fine("Increment service "+getNameForLogging(serviceElement));
+            logger.fine(String.format("Increment service %s", getNameForLogging(serviceElement)));
         try {
             count = opMgr.getServiceBeanInstances(serviceElement).length;
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "While trying to get the service count for " + serviceName, t);
+            logger.log(Level.WARNING, String.format("While trying to get the service count for %s", serviceName), t);
         }
         return count;
     }
@@ -100,7 +100,7 @@ public class DeployedServiceContext {
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
         if(logger.isLoggable(Level.FINE))
-            logger.fine("Decrement service "+getNameForLogging(serviceElement));
+            logger.fine(String.format("Decrement service %s", getNameForLogging(serviceElement)));
         try {
             ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(serviceElement);
             if(instances.length>0) {
@@ -108,7 +108,7 @@ public class DeployedServiceContext {
                 opMgr.decrement(instance, true, true);
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "While trying to get the decrement " + serviceName, t);
+            logger.log(Level.WARNING, String.format("While trying to get the decrement %s", serviceName), t);
         }
     }
 
@@ -122,8 +122,7 @@ public class DeployedServiceContext {
 
     public <T> T getService(String serviceName, String opstring, Class<T> type) {
         T service;
-        Map.Entry<ServiceElement, OperationalStringManager> entry =
-            getMapEntry(serviceName, opstring);
+        Map.Entry<ServiceElement, OperationalStringManager> entry = getMapEntry(serviceName, opstring);
         if(entry!=null) {
             service = doGetService(entry, type);
         } else {
@@ -134,8 +133,7 @@ public class DeployedServiceContext {
 
     public <T> List<T> getServices(String serviceName, Class<T> type) {
         List<T> services;
-        Map.Entry<ServiceElement, OperationalStringManager> entry =
-            getMapEntry(serviceName);
+        Map.Entry<ServiceElement, OperationalStringManager> entry = getMapEntry(serviceName);
         if(entry!=null) {
             services = doGetServices(entry, type);
         } else {
@@ -166,8 +164,9 @@ public class DeployedServiceContext {
             if(instances.length>0)
                 service = (T)instances[0].getService();
         } catch (Throwable t) {
-            logger.log(Level.WARNING, 
-                       "While trying to get ["+serviceElement.getName()+"] services from the OperationalStringManager", 
+            logger.log(Level.WARNING,
+                       String.format("While trying to get [%s] services from the OperationalStringManager",
+                                     serviceElement.getName()),
                        t);
         }
         return service;
@@ -194,14 +193,13 @@ public class DeployedServiceContext {
             }
         } catch (Throwable t) {
             logger.log(Level.WARNING,
-                       "While trying to lookup [" + serviceName + "] services", t);
+                       String.format("While trying to lookup [%s] services", serviceName), t);
         }
         return service;
     }
 
     @SuppressWarnings("unchecked")
-    private <T> List<T> doGetServices(Map.Entry<ServiceElement, OperationalStringManager> entry,
-                                      Class<T> type) {
+    private <T> List<T> doGetServices(Map.Entry<ServiceElement, OperationalStringManager> entry, Class<T> type) {
         List<T> services = new ArrayList<T>();
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
@@ -209,10 +207,13 @@ public class DeployedServiceContext {
             ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(serviceElement);
             StringBuilder sb = new StringBuilder();
             for(ServiceBeanInstance instance : instances) {
+                if(sb.length()>0) {
+                    sb.append("\n");
+                }
                 if(type.isAssignableFrom(instance.getService().getClass())) {
-                    sb.append("\n===> ").append(type.getName()).append(" IS assignable from ").append(instance.getService().getClass().getName());
+                    sb.append(type.getName()).append(" IS assignable from ").append(instance.getService().getClass().getName());
                 } else {
-                    sb.append("\n===> ").append(type).append(" instance [").append(instance.getServiceBeanConfig().getInstanceID()).append("]");
+                    sb.append(type).append(" instance [").append(instance.getServiceBeanConfig().getInstanceID()).append("]");
                     sb.append(" NOT assignable from ").append(instance.getService().getClass().getName()).append("\n");
                     for(Class c : instance.getService().getClass().getInterfaces()) {
                         sb.append("\t").append(c.getName()).append("\n");
@@ -223,7 +224,7 @@ public class DeployedServiceContext {
                 services.add((T)instance.getService());
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "Getting service instances of type " + type.getName(), t);
+            logger.log(Level.WARNING, String.format("Getting service instances of type %s", type.getName()), t);
         }
         return services;
     }
@@ -249,7 +250,7 @@ public class DeployedServiceContext {
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING, String.format("Looking up services of type %s", type.getName()), t);
         }
         return services;
     }
@@ -272,7 +273,9 @@ public class DeployedServiceContext {
                 entry = new AbstractMap.SimpleEntry(serviceElement, opMgr);
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            logger.log(Level.WARNING,
+                       String.format("Looking up services entry for service: %s, opstring: %s", serviceName, opstringName),
+                       t);
         }
         return entry;
     }
@@ -302,6 +305,13 @@ public class DeployedServiceContext {
     private static String getNameForLogging(ServiceElement element) {
         StringBuilder builder = new StringBuilder();
         builder.append(element.getOperationalStringName()).append("/").append(element.getName());
+        return builder.toString();
+    }
+
+    private static String getNameForLoggingWithInstanceID(ServiceElement element) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(element.getOperationalStringName()).append("/").append(element.getName());
+        builder.append(":").append(element.getServiceBeanConfig().getInstanceID());
         return builder.toString();
     }
 }

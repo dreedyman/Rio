@@ -126,10 +126,10 @@ public class RuleMapAssociationController {
         association.registerAssociationServiceListener(aListener);
         aListeners.add(aListener);
         if(logger.isLoggable(Level.FINE))
-            logger.fine("Set association for service: "+association.getName()+", received "+associations.size()+
-                        " of "+ruleMap.getServiceDefinitions().size());
+            logger.fine(String.format("Set association for service: %s, received %d of %d",
+                                      association.getName(), associations.size(), ruleMap.getServiceDefinitions().size()));
         if (associations.size() == ruleMap.getServiceDefinitions().size()) {
-            logger.info("Have all services, starting replicator for ["+getRuleMap()+"]");
+            logger.info(String.format("Have all services, starting replicator for [%s]", getRuleMap()));
             boolean notInitialized = initializeEngine();
             if(listener!=null) {
                 if(notInitialized) {
@@ -162,9 +162,10 @@ public class RuleMapAssociationController {
                 shutdownReplicator = true;
             } else {
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("Added WatchDataReplicators for ["+ruleMap.toString()+"], creating KnowledgeSession...");
+                    logger.fine(String.format("Added WatchDataReplicators for [%s], creating KnowledgeSession...",
+                                              ruleMap.toString()));
                 cepSession.initialize(serviceHandles, ruleMap, ruleLoader);
-                logger.info("Created StatefulKnowledgeSession for "+ruleMap);
+                logger.info(String.format("Created StatefulKnowledgeSession for %s", ruleMap));
                 /* Add the watches */
                 for(ServiceHandle sh : serviceHandles) {
                     wdr.registerWatches(sh);
@@ -177,14 +178,12 @@ public class RuleMapAssociationController {
         } catch (ExportException e) {
             shutdownReplicator = true;
             logger.log(Level.WARNING,
-                       "Could not create AssociationsWatchDataReplicator for " +
-                       "["+ruleMap.toString()+"]",
+                       String.format("Could not create AssociationsWatchDataReplicator for [%s]" , ruleMap.toString()),
                        e);
         } catch (IOException e) {
             shutdownReplicator = true;
             logger.log(Level.WARNING,
-                       "Could not initialize DroolsCEPManager for " +
-                       "["+ruleMap.toString()+"]",
+                       String.format("Could not initialize DroolsCEPManager for [%s]", ruleMap.toString()),
                        e);
         } finally {
             if(shutdownReplicator) {
@@ -203,7 +202,7 @@ public class RuleMapAssociationController {
         }
 
         public void serviceAdded(Object o) {
-            logger.fine("Added "+association.getName()+" instance");
+            logger.fine(String.format("Added %s instance ", association.getName()));
             if(wdr!=null)
                 wdr.addService(o, association, ruleMap);
         }

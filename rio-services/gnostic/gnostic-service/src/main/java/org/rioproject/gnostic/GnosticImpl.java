@@ -92,7 +92,7 @@ public class GnosticImpl implements Gnostic {
         try {
             execService = Executors.newSingleThreadExecutor();
             execService.submit(new RuleMapWorker());
-            int scannerInterval = 30;
+            int scannerInterval = 60;
             try {
                 scannerInterval =(Integer) context.getConfiguration().getEntry("org.rioproject.gnostic",
                                                                                "scannerInterval",
@@ -100,8 +100,7 @@ public class GnosticImpl implements Gnostic {
                                                                                scannerInterval);
             } catch (ConfigurationException e) {
                 logger.log(Level.WARNING,
-                           "Non-fatal error, unable to obtain scannerInterval " +
-                           "from configuration, defaulting to 30 seconds",
+                           "Non-fatal error, unable to obtain scannerInterval from configuration, defaulting to 30 seconds",
                            e);
             }
             kAgent = DroolsFactory.createKnowledgeAgent(scannerInterval);
@@ -119,8 +118,7 @@ public class GnosticImpl implements Gnostic {
                                                            null);
         } catch(ConfigurationException e) {
             logger.log(Level.WARNING,
-                       "Non-fatal error, unable to obtain ruleMappings " +
-                       "from configuration",
+                       "Non-fatal error, unable to obtain ruleMappings from configuration",
                        e);
         }
         if(otherMappings!=null)
@@ -136,11 +134,11 @@ public class GnosticImpl implements Gnostic {
     private void checkDroolsHasInitialized() {
         long t0 = System.currentTimeMillis();
         while(!droolsInitialized.get()) {
-            System.err.println("Waiting for Drools to initialize ... "+(System.currentTimeMillis()-t0));
+            logger.info(String.format("Waiting for Drools to initialize ... %d", (System.currentTimeMillis()-t0)));
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Interrupted while waiting for Drools to initialize", e);
             }
         }
     }
@@ -169,7 +167,7 @@ public class GnosticImpl implements Gnostic {
                 return false;
             ruleMapsInProcess.add(ruleMap);
         }
-        logger.info("Adding "+ruleMap);
+        logger.info(String.format("Adding %s", ruleMap));
         addRuleMapQ.add(ruleMap);
         return true;
     }
@@ -179,8 +177,7 @@ public class GnosticImpl implements Gnostic {
         synchronized(managedRuleMaps) {
             if(!managedRuleMaps.contains(ruleMap)) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("RuleMap not found in " +
-                                "collection of managed RuleMaps. "+ruleMap);
+                    logger.fine(String.format("RuleMap not found in collection of managed RuleMaps. %s", ruleMap));
                 return false;
             }
         }        
@@ -202,10 +199,10 @@ public class GnosticImpl implements Gnostic {
             synchronized(managedRuleMaps) {
                 managedRuleMaps.remove(ruleMap);
             }
-            logger.info("Removed "+ruleMap);
+            logger.info(String.format("Removed %s", ruleMap));
         } else {
             if(logger.isLoggable(Level.FINE))
-                logger.fine("RuleMap not managed by any controllers. "+ruleMap);
+                logger.fine(String.format("RuleMap not managed by any controllers. %s", ruleMap));
         }
         return removed;
     }
@@ -306,17 +303,20 @@ public class GnosticImpl implements Gnostic {
                         controllers.add(controller);
                         controller.process();
                     } catch (ResolverException e) {
-                        logger.log(Level.WARNING, "Unable to provision artifact " +
-                                                  "["+ruleMap.getRuleDefinition().getRuleClassPath()+"] " +
-                                                  "for RuleMap "+ruleMap, e);
+                        logger.log(Level.WARNING,
+                                   String.format("Unable to provision artifact [%s] for RuleMap %s",
+                                                 ruleMap.getRuleDefinition().getRuleClassPath(), ruleMap),
+                                   e);
                     } catch (MalformedURLException e) {
-                        logger.log(Level.WARNING,  "Unable to create URL from rule classpath " +
-                                                   "["+ruleMap.getRuleDefinition().getRuleClassPath()+"], " +
-                                                   "cannot set classpath for rule classpath jars", e);
+                        logger.log(Level.WARNING,
+                                   String.format("Unable to create URL from rule classpath [%s], cannot set classpath for rule classpath jars",
+                                                 ruleMap.getRuleDefinition().getRuleClassPath()),
+                                   e);
                     } catch (URISyntaxException e) {
-                        logger.log(Level.WARNING, "Unable to create URI from rule classpath " +
-                                                  "["+ruleMap.getRuleDefinition().getRuleClassPath()+"], " +
-                                                  "cannot set classpath for rule classpath jars", e);
+                        logger.log(Level.WARNING,
+                                   String.format("Unable to create URI from rule classpath [%s], cannot set classpath for rule classpath jars",
+                                                 ruleMap.getRuleDefinition().getRuleClassPath()),
+                                   e);
                     } catch (IllegalArgumentException e) {
                         logger.log(Level.WARNING, "Unable to create RuleMapAssociationController", e);
                     } finally {

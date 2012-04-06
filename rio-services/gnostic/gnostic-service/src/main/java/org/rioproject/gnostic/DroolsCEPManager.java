@@ -17,6 +17,7 @@ package org.rioproject.gnostic;
 
 import org.drools.agent.KnowledgeAgent;
 import org.drools.builder.ResourceType;
+import org.drools.event.rule.DebugWorkingMemoryEventListener;
 import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.drools.logger.KnowledgeRuntimeLoggerFactory;
@@ -45,8 +46,7 @@ public class DroolsCEPManager implements CEPSession {
     private final DeployedServiceContext context;
     private Logger logger =
         Logger.getLogger(DroolsCEPManager.class.getName());
-    private Logger droolsLogger =
-        Logger.getLogger("org.rioproject.gnostic.drools");
+    private Logger droolsLogger = Logger.getLogger("org.rioproject.gnostic.drools");
     private boolean initialized = false;
 
     public DroolsCEPManager(DeployedServiceContext context, KnowledgeAgent kAgent) {
@@ -70,10 +70,9 @@ public class DroolsCEPManager implements CEPSession {
             List<String> rules = new ArrayList<String>();
             boolean classPathResource = false;
             for (String rule : StringUtil.toArray(ruleDef.getResource(), " ,")) {
-                logger.info("PROCESSING: " + rule);
+                logger.info(String.format("PROCESSING: %s", rule));
                 if (rule.startsWith("http")) {
-                    resources.put(ResourceFactory.newUrlResource(rule),
-                                  ResourceType.DRL);
+                    resources.put(ResourceFactory.newUrlResource(rule), ResourceType.DRL);
                 } else if (rule.startsWith("file:")) {
                     rule = rule.substring(5, rule.length());
                     if (!rule.endsWith(".drl"))
@@ -83,8 +82,7 @@ public class DroolsCEPManager implements CEPSession {
                         for (Resource r : generateRule(rule, true, serviceHandles))
                             resources.put(r, ResourceType.DRL);
                     } else {
-                        resources.put(ResourceFactory.newFileResource(rule),
-                                      ResourceType.DRL);
+                        resources.put(ResourceFactory.newFileResource(rule), ResourceType.DRL);
                     }
                 } else {
                     if (!rule.endsWith(".drl"))
@@ -95,8 +93,7 @@ public class DroolsCEPManager implements CEPSession {
                     } else {
                         classPathResource = true;
                         rules.add(rule);
-                        resources.put(ResourceFactory.newClassPathResource(rule),
-                                      ResourceType.DRL);
+                        resources.put(ResourceFactory.newClassPathResource(rule), ResourceType.DRL);
                     }
                 }
             }
@@ -111,7 +108,9 @@ public class DroolsCEPManager implements CEPSession {
                             sb.append(", ");
                         sb.append(rule);
                     }
-                    logger.log(Level.WARNING, "Unable to provide change-set support for the rules "+sb.toString(), e);
+                    logger.log(Level.WARNING,
+                               String.format("Unable to provide change-set support for the rules %s", sb.toString()),
+                               e);
                 }
             }
 
@@ -123,19 +122,21 @@ public class DroolsCEPManager implements CEPSession {
                                                               loader);
             } catch (Throwable t) {
                 logger.log(Level.WARNING,
-                           "While creating StatefulKnowledgeSession for "+ruleMap,
+                           String.format("While creating StatefulKnowledgeSession for %s", ruleMap),
                            t);
             }
             if (session == null) {
                 throw new IllegalStateException(
-                        "Could not create StatefulKnowledgeSession for "+ruleMap);
+                        String.format("Could not create StatefulKnowledgeSession for %s", ruleMap));
             }
             if(session.getGlobal("context")==null)
                 session.setGlobal("context", context);
 
             // log all Drools activity
-            if(droolsLogger.isLoggable(Level.FINEST))
+            if(droolsLogger.isLoggable(Level.FINEST)) {
                 KnowledgeRuntimeLoggerFactory.newConsoleLogger(session);
+                session.addEventListener(new DebugWorkingMemoryEventListener());
+            }
 
             stream = session.getWorkingMemoryEntryPoint(Constants.CALCULABLES_STREAM);
         } finally {
@@ -152,7 +153,7 @@ public class DroolsCEPManager implements CEPSession {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     logger.log(Level.WARNING,
-                               "Waiting for "+getClass().getName()+" initialization interrupted",
+                               String.format("Waiting for %s initialization interrupted", getClass().getName()),
                                e);
                 }
             }
@@ -161,8 +162,7 @@ public class DroolsCEPManager implements CEPSession {
             throw new IllegalStateException("Could not insert calculable into CEP engine, " +
                                             "the working memory entryPoint (stream) is null");
         if(logger.isLoggable(Level.FINER))
-            logger.log(Level.FINER,
-                       "Inserting ["+calculable.getClass().getName()+"], ["+calculable+"] into CEP engine");
+            logger.finer(String.format("Inserting [%s] into CEP engine", calculable));
         try {
             stream.insert(calculable);
         } catch(Exception e) {
@@ -199,13 +199,13 @@ public class DroolsCEPManager implements CEPSession {
             output.write(sb.toString());
             close(output);
             URL url = changeSetFile.toURI().toURL();
-            logger.info("===> kAgent: "+kAgent+" url: "+url);
+            logger.info(String.format("kAgent: %s url: %s", kAgent, url));
             kAgent.applyChangeSet(ResourceFactory.newUrlResource(url));
         } finally {
             if(changeSetFile.delete()) {
                 if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Removed temporary change set file "+
-                                  changeSetFile.getPath());
+                    logger.finest(String.format("Removed temporary change set file %s",
+                                                changeSetFile.getPath()));
             }
         }
     }
@@ -241,10 +241,10 @@ public class DroolsCEPManager implements CEPSession {
                                                                     watchID,
                                                                     sh.elem)));
                     else
-                        logger.warning("Unable to load template "+rule);
+                        logger.warning(String.format("Unable to load template %s", rule));
                 } catch (FileNotFoundException e) {
                     logger.log(Level.WARNING,
-                               "While expanding template " + rule,
+                               String.format("While expanding template %s", rule),
                                e);
                 } finally {
                     close(is);
@@ -260,7 +260,7 @@ public class DroolsCEPManager implements CEPSession {
         parameters.add(ruleParameters);
         String drl = converter.compile(parameters, is);
         if(logger.isLoggable(Level.FINER))
-            logger.finer("\n------------\n" + drl + "\n------------");
+            logger.finer(String.format("\n------------\n%s\n------------", drl));
         Reader rdr = new StringReader(drl);
         return ResourceFactory.newReaderResource(rdr);
     }

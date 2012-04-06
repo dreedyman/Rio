@@ -91,11 +91,12 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
         execService.submit(new CEPWorker());
 
         createWatchDataReplicator();
-        logger.info("Created WatchDataReplicator proxy for "+ruleMap);
+        logger.info(String.format("Created WatchDataReplicator proxy for %s", ruleMap));
 
         /* Get ServiceHandles */
         for (Association<Object> association : associations) {
-            logger.info("Number of ["+association.getName()+"] instances: "+ association.getServiceCount());
+            logger.info(String.format("Number of [%s] instances: %d",
+                                      association.getName(), association.getServiceCount()));
             for (Object o : association) {
                 ServiceHandle sHandle = getServiceHandle(o,
                                                          getWatches(association, ruleMap),
@@ -122,8 +123,8 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 wds.addWatchDataReplicator(wdr);
                 watchDataSources.put(wds, handle.getElem());
                 if(logger.isLoggable(Level.FINER))
-                    logger.log(Level.FINER, "Subscribed to Watch [{0}], service [{1}]",
-                               new Object[] { entry.getKey(), handle.getElem().getName()});
+                    logger.finer(String.format("Subscribed to Watch [%s], service [%s]",
+                                               entry.getKey(), handle.getElem().getName()));
             }
             context.addDeployedService(handle.getElem(), handle.getOpMgr());
         } catch (RemoteException e) {
@@ -148,7 +149,8 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
             }
         }
         if(logger.isLoggable(Level.FINER))
-            logger.finer("Associated service ["+association.getName()+"] has the following watches "+watches);
+            logger.finer(String.format("Associated service [%s] has the following watches %s",
+                                       association.getName(), watches));
         return watches;
     }
     
@@ -173,8 +175,9 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 for(String watch : watches) {
                     try {
                         WatchDataSource wds = s.fetch(watch);
-                        if(logger.isLoggable(Level.FINER))
-                            logger.finer("WatchDataSource for watch ["+watch+"]: "+wds);
+                        if(logger.isLoggable(Level.FINER)) {
+                            logger.finer(String.format("WatchDataSource for watch [%s]: %s", watch, wds));
+                        }
                         if(wds==null)
                             continue;
                         handle.addToWatchMap(watch, wds);
@@ -189,15 +192,13 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 }
             } catch (RemoteException e) {
                 handle = null;
-                logger.log(Level.WARNING,
-                           "Could not get ServiceElement or OperationalStringManager.",
-                           e);
+                logger.log(Level.WARNING, "Could not get ServiceElement or OperationalStringManager.", e);
 
             } catch (OperationalStringException e) {
                 handle = null;
                 logger.log(Level.SEVERE,
-                           "Could not get OperationalStringManager, " +
-                           "unable to create AssociationsWatchDataReplicator.", e);
+                           "Could not get OperationalStringManager, unable to create AssociationsWatchDataReplicator.",
+                           e);
             }
         } else {
             String opStringName = null;
@@ -207,14 +208,14 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                     break;
                 }
             }
-            logger.info("OperationalString for service: ["+opStringName+"]");
+            logger.info(String.format("OperationalString for service: [%s]", opStringName));
             if(opStringName!=null) {
                 try {
                     OperationalStringManager opMgr = ((DeployAdmin)monitor.getAdmin()).getOperationalStringManager(opStringName);
                     ServiceElement elem = opMgr.getServiceElement(o);
                     if(elem==null) {
-                        logger.warning("Unable to obtain ServiceElement for service ["+o+"], " +
-                                       "cannot create AssociationsWatchDataReplicator.");
+                        logger.warning(String.format("Unable to obtain ServiceElement for service [%s], cannot create AssociationsWatchDataReplicator.",
+                                                     o));
                         return null;
                     }
                     handle.setElem(elem);
@@ -238,8 +239,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                         if(elem.forkService()) {
                             int registryPort = ((CybernodeAdmin)c.getAdmin()).getRegistryPort();
                             String address = c.getInetAddress().getHostAddress();
-                            Registry registry = LocateRegistry.getRegistry(address,
-                                                                           registryPort);
+                            Registry registry = LocateRegistry.getRegistry(address, registryPort);
                             Remote r = null;
                             NotBoundException notBound = null;
                             //for(int i=0; i<3; i++) {
@@ -256,17 +256,17 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                             //}
                             if(r==null) {
                                 logger.log(Level.SEVERE,
-                                           "Could not get ServiceBeanExecutor, " +
-                                           "unable to create AssociationsWatchDataReplicator.", notBound);
+                                           "Could not get ServiceBeanExecutor, unable to create AssociationsWatchDataReplicator.",
+                                           notBound);
                                 return null;
                             }
                             if(r instanceof Watchable) {
                                 w = (Watchable)r;
                             } else {
-                                logger.warning("Could not get Watchable from Registry at " +
-                                               "["+address+":"+registryPort+"], " +
-                                               "unable to create AssociationsWatchDataReplicator " +
-                                               "for service ["+elem.getName()+"]");
+                                logger.warning(String.format("Could not get Watchable from Registry at " +
+                                                             "[%s:%d], unable to create AssociationsWatchDataReplicator " +
+                                                             "for service [%s]",
+                                                             address, registryPort, elem.getName()));
                                 return null;
                             }
                         } else {
@@ -277,7 +277,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                             try {
                                 WatchDataSource wds = w.fetch(watch);
                                 if(logger.isLoggable(Level.FINER))
-                                    logger.finer("WatchDataSource for watch ["+watch+"]: "+wds);
+                                    logger.finer(String.format("WatchDataSource for watch [%s]: %s", watch, wds));
                                 if(wds==null)
                                     continue;
                                 handle.addToWatchMap(watch, wds);
@@ -292,28 +292,26 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                         }
 
                     } else {
-                        logger.warning("Unable to obtain Cybernode for service ["+elem.getName()+"]");
+                        logger.warning(String.format("Unable to obtain Cybernode for service [%s]", elem.getName()));
                     }
                 } catch (RemoteException e) {
                     handle = null;
-                    logger.log(Level.WARNING,
-                               "Could not get ServiceElement or OperationalStringManager.",
-                               e);
+                    logger.log(Level.WARNING, "Could not get ServiceElement or OperationalStringManager.", e);
                 } catch (OperationalStringException e) {
                     handle = null;
                     logger.log(Level.SEVERE,
-                               "Could not get OperationalStringManager, " +
-                               "unable to create AssociationsWatchDataReplicator.", e);
+                               "Could not get OperationalStringManager, unable to create AssociationsWatchDataReplicator.",
+                               e);
                 } catch (ClassNotFoundException e) {
                     handle = null;
                     logger.log(Level.SEVERE,
-                               "Could not get service proxy from monitor, " +
-                               "unable to create AssociationsWatchDataReplicator.", e);
+                               "Could not get service proxy from monitor, unable to create AssociationsWatchDataReplicator.",
+                               e);
                 } catch (IOException e) {
                     handle = null;
                     logger.log(Level.SEVERE,
-                               "Could not get service proxy from monitor, " +
-                               "unable to create AssociationsWatchDataReplicator.", e);
+                               "Could not get service proxy from monitor, unable to create AssociationsWatchDataReplicator.",
+                               e);
                 }
             }
         }
@@ -330,13 +328,12 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                     ServiceElement elem = entry.getValue();
                     try {
                         wds.removeWatchDataReplicator(wdr);
-                        logger.info("Unregistered from Watch [" + wds.getID() + "], service [" + elem.getName() + "]");
+                        logger.info(String.format("Unregistered from Watch [%s], service [%s]", wds.getID(), elem.getName()));
                     } catch (RemoteException e) {
                         if(logger.isLoggable(Level.FINER))
-                            logger.finer("Non-fatal problem unregistering from " +
-                                         "remote WatchDataSource, most likely " +
-                                         "the service is no longer present. " +
-                                         e.getClass().getName() + ": " + e.getMessage());
+                            logger.finer(String.format("Non-fatal problem unregistering from remote WatchDataSource, most likely " +
+                                                       "the service is no longer present. %s:%s",
+                                                       e.getClass().getName(), e.getMessage()));
                     }
                 }
             }
@@ -349,6 +346,9 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
     }
 
     public void replicate(Calculable calculable) {
+        if(logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Inserted into CEP engine event [{0}]", new Object[]{calculable});
+        }
         calculablesQ.add(calculable);
     }
 
