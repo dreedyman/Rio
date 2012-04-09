@@ -53,49 +53,49 @@ public class WrappedLogger {
 
     public void severe(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.SEVERE)) {
-            logger.severe(String.format(formatString, objects));
+            logger.severe(format(formatString, objects));
         }
     }
 
     public void warning(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.WARNING)) {
-            logger.warning(String.format(formatString, objects));
+            logger.warning(format(formatString, objects));
         }
     }
 
     public void config(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.CONFIG)) {
-            logger.config(String.format(formatString, objects));
+            logger.config(format(formatString, objects));
         }
     }
 
     public void info(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.INFO)) {
-            logger.info(String.format(formatString, objects));
+            logger.info(format(formatString, objects));
         }
     }
 
     public void fine(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.FINE)) {
-            logger.fine(String.format(formatString, objects));
+            logger.fine(format(formatString, objects));
         }
     }
 
     public void finer(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.FINER)) {
-            logger.finer(String.format(formatString, objects));
+            logger.finer(format(formatString, objects));
         }
     }
 
     public void finest(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.FINEST)) {
-            logger.config(String.format(formatString, objects));
+            logger.config(format(formatString, objects));
         }
     }
 
     public void log(final Level level, final Throwable t, final String formatString, final Object... objects) {
         if(logger.isLoggable(level)) {
-            logger.log(level, String.format(formatString, objects), t);
+            logger.log(level, format(formatString, objects), t);
         }
     }
 
@@ -113,5 +113,11 @@ public class WrappedLogger {
         return logger;
     }
 
+    private String format(final String formatString, final Object... objects) {
+        if(objects.length>0)
+            return String.format(formatString, objects);
+        else
+            return formatString;
+    }
 }
 
