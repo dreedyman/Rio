@@ -30,6 +30,7 @@ import java.rmi.server.ExportException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -114,7 +115,7 @@ public class ServiceProvisionEventHandler implements ServiceProvisionListener,
 
     public void failed(ServiceElement sElem, boolean resubmitted) {
         provisionFailures.incrementAndGet();
-        logger.warning(sElem.getName() + " failed to be instantiated.");
+        logger.log(Level.WARNING, "{0} failed to be instantiated.", sElem.getName());
         receivedNotify();
     }
 
