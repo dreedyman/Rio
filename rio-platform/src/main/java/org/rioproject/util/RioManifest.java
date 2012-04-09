@@ -34,8 +34,7 @@ import java.net.*;
  * @author Dennis Reedy
  */
 public class RioManifest {
-    public static final Attributes.Name RIO_BUILD =
-        new Attributes.Name("Rio-Build");
+    public static final Attributes.Name RIO_BUILD = new Attributes.Name("Rio-Build");
     private JarInputStream jarIn = null;
     /** Holds value of property manifest. */
     private Manifest manifest;
@@ -46,15 +45,6 @@ public class RioManifest {
         }
         JarURLConnection uc = (JarURLConnection) url.openConnection();
         setManifest(uc.getManifest());
-    }
-    
-    public RioManifest(InputStream in) throws IOException {
-        jarIn = new JarInputStream(in);
-        setManifest(jarIn.getManifest());
-    }
-
-    public RioManifest(Manifest manifest) {
-        setManifest(manifest);
     }
     
     public void close() throws IOException {
@@ -69,16 +59,6 @@ public class RioManifest {
      */
     public String getRioBuild() throws IOException {
         return getMainAttribute(RIO_BUILD);
-    }
-    
-    /**
-     * Get an Attribute from a Jar file
-     *
-     * @param name the name of the main attribute entry
-     * @return the value of the main attribute from a Jar file, or null if not defined.
-     */
-    public String getMainAttribute(String name) throws IOException {
-        return getMainAttribute(new Attributes.Name(name));
     }
     
     /**
@@ -108,24 +88,9 @@ public class RioManifest {
         return manifest.getAttributes(name);
     }
 
-    public Attributes getMainAttributes() throws IOException {
-        if(manifest==null)
-            throw new NullPointerException("there is no manifest");
-        return(manifest.getMainAttributes());
-    }    
-
-    /** 
-     * Getter for property manifest.
-     * 
-     * @return Value of property manifest.
-     */
-    public Manifest getManifest() {
-        return manifest;
-    }
-    
-    /** 
+    /**
      * Setter for property manifest.
-     * 
+     *
      * @param manifest New value of property manifest.
      */
     public void setManifest(Manifest manifest) {
