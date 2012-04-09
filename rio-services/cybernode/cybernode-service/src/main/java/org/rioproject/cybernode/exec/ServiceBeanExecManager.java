@@ -37,9 +37,9 @@ import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
 import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.resources.util.FileUtils;
-import org.rioproject.util.PropertyHelper;
 import org.rioproject.resources.util.RMIServiceNameHelper;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.util.PropertyHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -134,8 +134,7 @@ public class ServiceBeanExecManager {
         String sPort = System.getProperty(Constants.REGISTRY_PORT);
         int regPort = Integer.parseInt(sPort);
 
-        String logDir = getLogDirectory(container.getSharedConfiguration(),
-                                        sElem.getOperationalStringName());
+        String logDir = getLogDirectory(container.getSharedConfiguration(), sElem.getOperationalStringName());
         if(!logDir.endsWith("/"))
             logDir = logDir+"/";
 
@@ -145,9 +144,9 @@ public class ServiceBeanExecManager {
         /* Create input args */
         StringBuilder inputArgsBuilder = new StringBuilder();
         inputArgsBuilder.append(getClassPath());
-        String jvmOptions = (sElem.getExecDescriptor()==null? null:
-                             sElem.getExecDescriptor().getInputArgs());
+        String jvmOptions = (sElem.getExecDescriptor()==null? null: sElem.getExecDescriptor().getInputArgs());
         inputArgsBuilder.append(getInputArgs(sElem.getName(),
+                                             normalizedServiceName,
                                              serviceBindName,
                                              sPort,
                                              jvmOptions,
@@ -163,22 +162,19 @@ public class ServiceBeanExecManager {
         if(sElem.getExecDescriptor()!=null) {
             Map<String, String> env = sElem.getExecDescriptor().getEnvironment();
             for(Map.Entry<String, String> entry : env.entrySet()) {
-                env.put(entry.getKey(),
-                        PropertyHelper.expandProperties(entry.getValue()));
+                env.put(entry.getKey(), PropertyHelper.expandProperties(entry.getValue()));
             }
             exDesc.setEnvironment(env);
         } 
 
         String serviceLog = logDir+normalizedServiceName+".log";
-        exDesc.setStdErrFileName(serviceLog);
-        exDesc.setStdOutFileName(serviceLog);
+        /*exDesc.setStdErrFileName(serviceLog);
+        exDesc.setStdOutFileName(serviceLog);*/
 
         try {
             Registry registry = LocateRegistry.getRegistry(regPort);
-            forkedServiceListener =
-                new ForkedServiceBeanListener(discardManager);
-            ServiceBeanExecListener listener =
-                forkedServiceListener.getServiceBeanExecListener();
+            forkedServiceListener = new ForkedServiceBeanListener(discardManager);
+            ServiceBeanExecListener listener = forkedServiceListener.getServiceBeanExecListener();
             long start = System.currentTimeMillis();
 
             PosixShell shell = new PosixShell();
@@ -202,8 +198,7 @@ public class ServiceBeanExecManager {
             long wait = 0;
             do {
                 try {
-                    execHandler =
-                        (ServiceBeanExecutor)registry.lookup(serviceBindName);
+                    execHandler = (ServiceBeanExecutor)registry.lookup(serviceBindName);
                     int execRegPort = execHandler.getRegistryPort();
                     forkedServiceListener.createFDH(execRegPort);
                     execHandler.setUuid(container.getUuid());
@@ -270,11 +265,7 @@ public class ServiceBeanExecManager {
 
     private String getOption(String option, String value) {
         StringBuilder optionBuilder = new StringBuilder();
-        optionBuilder
-            .append("-D")
-            .append(option)
-            .append("=")
-            .append(value);
+        optionBuilder.append("-D").append(option).append("=").append(value);
         return optionBuilder.toString();
     }
 
@@ -289,6 +280,7 @@ public class ServiceBeanExecManager {
     }
 
     private String getInputArgs(String serviceName,
+                                String normalizedServiceName,
                                 String serviceBindName,
                                 String sRegPort,
                                 String declaredJVMOptions,
@@ -298,6 +290,8 @@ public class ServiceBeanExecManager {
             extendedJVMOptions.append(declaredJVMOptions);
         extendedJVMOptions.append(" ");
         extendedJVMOptions.append(getOption("RIO_LOG_DIR", logDir));
+        extendedJVMOptions.append(" ");
+        extendedJVMOptions.append(getOption("org.rioproject.service", normalizedServiceName));
         extendedJVMOptions.append(" ");
         extendedJVMOptions.append("-XX:HeapDumpPath=").append(logDir);
         StringBuilder argsBuilder = new StringBuilder();
@@ -311,11 +305,11 @@ public class ServiceBeanExecManager {
         /*argsBuilder.append("-verbose");
         argsBuilder.append(" ");*/
         argsBuilder.append(getOption(Constants.REGISTRY_PORT, sRegPort));
-        if(System.getProperty(Constants.CODESERVER)!=null) {
+        /*if(System.getProperty(Constants.CODESERVER)!=null) {
             argsBuilder.append(" ");
             argsBuilder.append(getOption(Constants.CODESERVER,
                                          System.getProperty(Constants.CODESERVER)));
-        }
+        }*/
         argsBuilder.append(" ");
         argsBuilder.append(getOption(Constants.SERVICE_BEAN_EXEC_NAME,
                                      serviceBindName));

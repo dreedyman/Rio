@@ -18,6 +18,7 @@ package org.rioproject.cybernode;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.deploy.ServiceStatementManager;
+import org.rioproject.logging.WrappedLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The Environment class provides methods to query and setup the operational
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class Environment {
     /** Logger */
-    static Logger logger = Logger.getLogger(CybernodeImpl.getConfigComponent());
+    static WrappedLogger logger = WrappedLogger.getLogger(CybernodeImpl.getConfigComponent());
 
     /*
      * Setup the default environment
@@ -68,7 +68,7 @@ public class Environment {
         }
 
         if(logger.isLoggable(Level.FINE))
-            logger.config("Using ServiceStatementManager : " + serviceStatementManager.getClass().getName());
+            logger.config("Using ServiceStatementManager : %s", serviceStatementManager.getClass().getName());
         return(serviceStatementManager);
     }
 
@@ -188,7 +188,7 @@ public class Environment {
         if(!rioPath.exists()) {
             if(rioPath.mkdir()) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("Created home directory ["+rioHome+"]");
+                    logger.fine("Created home directory [%s]", rioHome);
             }
         }
         if(!rioHome.endsWith(File.separator))
@@ -219,7 +219,7 @@ public class Environment {
         if(!directory.exists()) {
             if(directory.mkdirs()) {
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine("Created directory ["+directory.getCanonicalPath()+"]");
+                    logger.fine("Created directory [%s]", directory.getCanonicalPath());
             } else {
                 throw new IOException("Could not create directory " +
                                       "["+directory.getCanonicalPath()+"], " +

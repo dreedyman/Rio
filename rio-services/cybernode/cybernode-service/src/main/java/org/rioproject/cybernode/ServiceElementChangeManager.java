@@ -22,6 +22,7 @@ import org.rioproject.core.jsb.ServiceElementChangeListener;
 import org.rioproject.jsb.ServiceBeanSLAManager;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.log.LoggerConfig;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.ServiceLevelAgreements;
@@ -41,7 +42,7 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
     /* Manage declared SLAs */
     private final ServiceBeanSLAManager serviceBeanSLAManager;
     private final Object serviceProxy;
-    private static final Logger logger = Logger.getLogger(ServiceElementChangeManager.class.getName());
+    private static final WrappedLogger logger = WrappedLogger.getLogger(ServiceElementChangeManager.class.getName());
 
     public ServiceElementChangeManager(ServiceBeanContext context,
                                        ServiceBeanSLAManager serviceBeanSLAManager,
@@ -55,8 +56,8 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
     * @see org.rioproject.core.jsb.ServiceElementChangeListener#changed
     */
     public void changed(ServiceElement preElem, ServiceElement postElem) {
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+context.getServiceElement().getName()+"] ServiceElementChangeManager notified");
+        if (logger.isLoggable(Level.FINEST))
+            logger.fine("[%s] ServiceElementChangeManager notified", context.getServiceElement().getName());
         /* ------------------------------------------*
        *  SLA Update Processing
        * ------------------------------------------*/
@@ -69,11 +70,11 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
         /* --- End SLA Update Processing ---*/
 
         /* --- Update Logging --- */
-        if(ServiceElementUtil.hasDifferentLoggerConfig(preElem, postElem)) {
+        if (ServiceElementUtil.hasDifferentLoggerConfig(preElem, postElem)) {
             Map map = postElem.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] newLoggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+            LoggerConfig[] newLoggerConfigs = (LoggerConfig[]) map.get(ServiceBeanConfig.LOGGER);
             map = preElem.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] currentLoggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+            LoggerConfig[] currentLoggerConfigs = (LoggerConfig[]) map.get(ServiceBeanConfig.LOGGER);
             for (LoggerConfig newLoggerConfig : newLoggerConfigs) {
                 if (LoggerConfig.isNewLogger(newLoggerConfig, currentLoggerConfigs)) {
                     newLoggerConfig.getLogger();
@@ -87,35 +88,34 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
         /* --- Update Discovery --- */
 
         /* If the groups or LookupLocators have changed, update the
-   * attributes using JoinAdmin capabilities */
-        if(ServiceElementUtil.hasDifferentGroups(preElem, postElem) ||
-           ServiceElementUtil.hasDifferentLocators(preElem, postElem)) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Discovery has changed");
-            if(serviceProxy instanceof Administrable) {
+         * attributes using JoinAdmin capabilities */
+
+        boolean hasDifferentGroups = ServiceElementUtil.hasDifferentGroups(preElem, postElem);
+        boolean hasDifferentLocators = ServiceElementUtil.hasDifferentLocators(preElem, postElem);
+        if (hasDifferentGroups || hasDifferentLocators) {
+            logger.finest("[%s] Discovery has changed", context.getServiceElement().getName());
+            if (serviceProxy instanceof Administrable) {
                 try {
-                    Administrable admin = (Administrable)serviceProxy;
+                    Administrable admin = (Administrable) serviceProxy;
                     Object adminObject;
                     adminObject = admin.getAdmin();
-                    if(adminObject instanceof JoinAdmin) {
-                        JoinAdmin joinAdmin = (JoinAdmin)adminObject;
+                    if (adminObject instanceof JoinAdmin) {
+                        JoinAdmin joinAdmin = (JoinAdmin) adminObject;
                         /* Update groups if they have changed */
-                        if(ServiceElementUtil.hasDifferentGroups(preElem, postElem)) {
+                        if (hasDifferentGroups) {
                             joinAdmin.setLookupGroups(postElem.getServiceBeanConfig().getGroups());
                         }
                         /* Update locators if they have changed */
-                        if(ServiceElementUtil.hasDifferentLocators(preElem, postElem))
+                        if (hasDifferentLocators)
                             joinAdmin.setLookupLocators(postElem.getServiceBeanConfig().getLocators());
                     } else {
-                        if(logger.isLoggable(Level.FINE))
-                            logger.fine("No JoinAdmin capabilities for "+ context.getServiceElement().getName());
+                        logger.fine("No JoinAdmin capabilities for %s", context.getServiceElement().getName());
                     }
-                } catch(RemoteException e) {
+                } catch (RemoteException e) {
                     logger.log(Level.SEVERE, "Modifying Discovery attributes", e);
                 }
             } else {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("No Administrable capabilities for "+serviceProxy.getClass().getName());
+                logger.fine("No Administrable capabilities for %s", serviceProxy.getClass().getName());
             }
             /* --- End Update Discovery --- */
         }

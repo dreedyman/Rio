@@ -32,7 +32,6 @@ import org.rioproject.system.measurable.MeasurableCapability;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.logging.Logger;
 
 /**
  * The CybernodeAdminImpl class implements the ServiceAdmin interface providing
@@ -42,8 +41,6 @@ import java.util.logging.Logger;
  */
 public class CybernodeAdminImpl extends ServiceAdminImpl
     implements CybernodeAdmin, ServerProxyTrust {
-    /** A Logger */
-    static Logger logger = Logger.getLogger("org.rioproject.cybernode");
     /** Reference to the backend */
     CybernodeImpl backend;
     CybernodeAdmin remoteRef;

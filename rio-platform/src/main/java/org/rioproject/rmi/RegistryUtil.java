@@ -18,6 +18,7 @@ package org.rioproject.rmi;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
+import org.rioproject.logging.WrappedLogger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -25,7 +26,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utility for getting/creating the RMI Registry.
@@ -117,7 +117,7 @@ public class RegistryUtil {
     public static final int DEFAULT_PORT = 1099;
     public static final int DEFAULT_RETRY_COUNT = 50;
     static final String COMPONENT = "org.rioproject.rmi";
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
 
     /**
      * Check if RMI Registry has been started for the VM, if not start it.
@@ -221,9 +221,7 @@ public class RegistryUtil {
                                                      int.class,
                                                      DEFAULT_PORT);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Reading "+COMPONENT+".registryPort",
-                       e);
+            logger.log(Level.WARNING, e, "Reading %s .registryPort", COMPONENT);
         }
         return(registryPort);
     }
@@ -245,9 +243,7 @@ public class RegistryUtil {
                 portRange[1] = Integer.valueOf(range[1]);
             } catch (Exception e) {
                 portRange = null;
-                logger.log(Level.WARNING,
-                           "Illegal range value specified, continue using default registryPort settings.",
-                           e);
+                logger.log(Level.WARNING, e, "Illegal range value specified, continue using default registryPort settings.");
             }
         }
         return(portRange);
@@ -272,9 +268,7 @@ public class RegistryUtil {
                                           Integer.class,
                                           DEFAULT_RETRY_COUNT);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Reading "+COMPONENT+".registryRetries",
-                       e);
+            logger.log(Level.WARNING, e, "Reading %s.registryRetries", COMPONENT);
         }
 
         return(retryCount);

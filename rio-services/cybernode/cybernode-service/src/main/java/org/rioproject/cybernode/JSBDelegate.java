@@ -42,6 +42,7 @@ import org.rioproject.exec.ServiceExecutor;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
 import org.rioproject.jsb.*;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
@@ -56,7 +57,6 @@ import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The JSBDelegate provides loading and management services for a service
@@ -111,7 +111,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         new ArrayList<PlatformCapability>();
     private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
-    private static Logger logger = Logger.getLogger(CONFIG_COMPONENT);
+    private static WrappedLogger logger = WrappedLogger.getLogger(CONFIG_COMPONENT);
     /** Result from loading the service */
     protected ServiceBeanLoader.Result loadResult;
 
@@ -173,7 +173,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     }
                     lastServiceRecordUpdate = now;
                 } catch (Throwable t) {
-                    logger.log(Level.WARNING, "Calculating resource costs for ["+sElem.getName()+"]", t);
+                    logger.log(Level.WARNING, t, "Calculating resource costs for [%s]", sElem.getName());
                 }
             }
         }
@@ -222,18 +222,16 @@ public class JSBDelegate implements ServiceBeanDelegate {
             return(false);
         synchronized(this) {
             if(serviceProxy==null) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Cannot update ["+sElem.getName()+"], Proxy is null");
+                logger.finest("Cannot update [%s], Proxy is null", sElem.getName());
                 return(false);
             }
             /* Preserve instanceID */
             Long instanceID = sElem.getServiceBeanConfig().getInstanceID();
             if(instanceID!=null) {
-                sElem =
-                    ServiceElementUtil.prepareInstanceID(newElem, true, instanceID);
+                sElem = ServiceElementUtil.prepareInstanceID(newElem, true, instanceID);
             } else {
                 sElem = ServiceElementUtil.copyServiceElement(newElem);
-                logger.warning("No instanceID for ["+sElem.getName()+"] to update");
+                logger.warning("No instanceID for [%s] to update", sElem.getName());
             }
 
             if(context instanceof JSBContext) {
@@ -244,7 +242,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 return(false);
             }
 
-            if(context!=null && context.getServiceBeanManager() instanceof JSBManager) {
+            if(context.getServiceBeanManager() instanceof JSBManager) {
                 JSBManager jsbMgr = (JSBManager)context.getServiceBeanManager();
                 OperationalStringManager mgr = jsbMgr.getOperationalStringManager();
                 if(mgr!=null &&
@@ -252,8 +250,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     jsbMgr.setOperationalStringManager(opMgr);
                 }                
             } else {
-                logger.warning("Cannot update ["+sElem.getName()+"], Unknown ServiceBeanManager type "+
-                               "["+context.getServiceBeanManager().getClass().getName()+"]");
+                logger.warning("Cannot update [%s], Unknown ServiceBeanManager type [%s]",
+                               sElem.getName(), context.getServiceBeanManager().getClass().getName());
                 return(false);
             }
         }
@@ -303,9 +301,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
          * advertisement is managed by AssociationManagement */
         for (Association assoc : context.getAssociationManagement().getAssociations()) {
             if (assoc.getAssociationType()== AssociationType.REQUIRES) {
-                if (logger.isLoggable(Level.FINE))
-                    logger.fine(sElem.getName() + " has at least one requires Association, advertisement managed by " +
-                                "AssociationManagement");
+                logger.fine("%s has at least one requires Association, advertisement managed by AssociationManagement",
+                            sElem.getName());
                 return;
             }
         }
@@ -314,8 +311,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             if(logger.isLoggable(Level.FINE))
                 logger.fine(sElem.getName()+": advertised");
         } catch(ServiceBeanControlException e) {
-            logger.log(Level.WARNING,
-                       "Could not advertise "+sElem.getName()+", continue on");
+            logger.warning("Could not advertise %s, continue on", sElem.getName());
             throw e;
         }
     }
@@ -327,10 +323,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 cru  = execManager.getServiceBeanExecutor().getComputeResourceUtilization();
             } catch (RemoteException e) {
                 logger.warning("Getting compute resource utilization failed for " +
-                               "service ["+sElem.getName()+"], the service may be " +
+                               "service [%s], the service may be " +
                                "in the process of failing or may have already " +
-                               "failed. "+
-                               e.getClass().getName()+": "+e.getMessage());
+                               "failed. %s:%s",
+                               sElem.getName(), e.getClass().getName(), e.getMessage());
             }
         } else if(loadResult.getImpl() instanceof ServiceExecutor) {
             cru = ((ServiceExecutor)loadResult.getImpl()).getComputeResourceUtilization();
@@ -380,12 +376,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
                                 //container.discarded(identifier);
                                 terminated = true;
                             } else {
-                                if(logger.isLoggable(Level.FINE))
-                                    logger.fine("No DestroyAdmin capabilities for "+serviceProxy.getClass().getName());
+                                logger.fine("No DestroyAdmin capabilities for %s", serviceProxy.getClass().getName());
                             }
                         } else {
-                            if(logger.isLoggable(Level.FINE))
-                                logger.fine("No Administrable capabilities for "+serviceProxy.getClass().getName());
+                            logger.fine("No Administrable capabilities for %s", serviceProxy.getClass().getName());
                         }
                     } catch(Throwable t) {
                         logger.log(Level.SEVERE, "Terminating ServiceBean", t);
@@ -517,9 +511,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
                             Method setBackend = associationManagement.getClass().getMethod("setBackend", Object.class);
                             setBackend.invoke(associationManagement, loadResult.getImpl());
                         } catch(Exception e) {
-                            logger.log(Level.WARNING,
-                                       "Failed to get setBackend method from ServiceBean ["+sElem.getName()+"] impl",
-                                       e);
+                            logger.log(Level.WARNING, e,
+                                       "Failed to get setBackend method from ServiceBean [%s] impl", sElem.getName());
                         }
                         associationManagement.setServiceBeanContainer(container);
                         associationManagement.setServiceBeanContext(context);
@@ -528,9 +521,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
                             EventHandler eH = ((JSBContext)context).getEventTable().get(SLAThresholdEvent.ID);
                             if(eH!=null) {
                                 slaEventHandler = eH;
-                                if(logger.isLoggable(Level.FINE))
-                                    logger.fine("Set EventHandler ["+slaEventHandler.getClass().getName()+"] for " +
-                                                "SLAManagement for service "+sElem.getName());
+                                logger.fine("Set EventHandler [%s] for SLAManagement for service %s",
+                                            slaEventHandler.getClass().getName(), sElem.getName());
                             }
                         }
 
@@ -593,9 +585,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         MissingMethodException e = (MissingMethodException)t;
                          System.out.println("===> "+sElem.getName()+", MISSING:"+e.getMethod());
                     }
-                    logger.log(Level.SEVERE,
-                               "Failed to load the ServiceBean ["+sElem.getName()+"] "+label+" ["+buff.toString()+"]",
-                               abortThrowable);
+                    logger.log(Level.SEVERE, abortThrowable,
+                               "Failed to load the ServiceBean [%s] %s [%s]", sElem.getName(), label, buff.toString());
                     container.remove(identifier);
                 }
             }
@@ -603,10 +594,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
         jsbThread.start();
         try {
             jsbThread.join();
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("ServiceBean ["+sElem.getName()+"] start thread completed");
+                logger.finest("ServiceBean [%s] start thread completed", sElem.getName());
         } catch(InterruptedException e) {
-            logger.log(Level.WARNING, "ServiceBean ["+sElem.getName()+"] start Thread interrupted", e);
+            logger.log(Level.WARNING, e, "ServiceBean [%s] start Thread interrupted", sElem.getName());
         } finally {
             starting = false;
         }
@@ -689,10 +679,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 Throwable cause = e;
                 if (e.getCause() != null)
                     cause = e.getCause();
-                logger.log(Level.WARNING,
-                           "Registering PlatformCapability " +
-                           "[" + pCap.getName() + "] to JMX",
-                           cause);
+                logger.log(Level.WARNING, cause,
+                           "Registering PlatformCapability [%s] to JMX", pCap.getName());
             }
         }
     }
@@ -707,7 +695,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             ObjectName objectName = JMXUtil.getObjectName(context, "", "PlatformCapability", pCap.getName());
             MBeanServerFactory.getMBeanServer().unregisterMBean(objectName);
         } catch(Exception e) {
-            logger.log(Level.WARNING, "Unregistering PlatformCapability ["+pCap.getName()+"]:"+e.toString(), e);
+            logger.log(Level.WARNING, e, "Unregistering PlatformCapability [%s]:%s", pCap.getName(), e.toString());
         }
     }
 
@@ -729,7 +717,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             }
         }
         if(serviceRecord==null) {
-            logger.warning("Discarding ["+sElem.getName()+"] service, has no ServiceRecord");
+            logger.warning("Discarding [%s] service, has no ServiceRecord", sElem.getName());
             return;
         }
         synchronized(serviceRecordLock) {

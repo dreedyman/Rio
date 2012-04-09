@@ -50,6 +50,7 @@ import org.rioproject.jsb.JSBManager;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanActivation.LifeCycleManager;
 import org.rioproject.jsb.ServiceBeanAdapter;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.net.HostUtil;
 import org.rioproject.opstring.*;
 import org.rioproject.resources.client.DiscoveryManagementPool;
@@ -67,10 +68,12 @@ import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.util.BannerProvider;
 import org.rioproject.util.BannerProviderImpl;
 import org.rioproject.util.RioManifest;
+import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.*;
 
 import javax.management.*;
 import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -83,8 +86,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of a Cybernode
@@ -99,62 +102,51 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                  ServerProxyTrust {
     
     /** Component name we use to find items in the Configuration */
-    static final String RIO_CONFIG_COMPONENT = "org.rioproject";
+    private static final String RIO_CONFIG_COMPONENT = "org.rioproject";
     /** Component name we use to find items in the Configuration */
-    static final String CONFIG_COMPONENT = RIO_CONFIG_COMPONENT+".cybernode";
+    private static final String CONFIG_COMPONENT = RIO_CONFIG_COMPONENT+".cybernode";
     /** Default Exporter attribute */
-    static final String DEFAULT_EXPORTER = "defaultExporter";
+    private static final String DEFAULT_EXPORTER = "defaultExporter";
     /** Logger name */
-    static final String LOGGER = "org.rioproject.cybernode";
+    private static final String LOGGER = "org.rioproject.cybernode";
     /** Cybernode logger. */
-    static final Logger logger = Logger.getLogger(LOGGER);
+    private static final WrappedLogger logger = WrappedLogger.getLogger(LOGGER);
     /** Cybernode logger. */
-    static final Logger loaderLogger = Logger.getLogger(LOGGER+".loader");
-    /**The componant name for accessing the service's configuration */
-    static String configComponent = CONFIG_COMPONENT;
+    private static final WrappedLogger loaderLogger = WrappedLogger.getLogger(LOGGER+".loader");
+    /**The component name for accessing the service's configuration */
+    private static String configComponent = CONFIG_COMPONENT;
     /** Instance of a ServiceBeanContainer */
-    ServiceBeanContainer container;
+    private ServiceBeanContainer container;
     /** If the Cybernode has been configured an an instantiation resource, and
      * the Cybernode removes itself as an asset, this property determines whether
      * instantiated services should be terminated upon unregistration */
-    boolean serviceTerminationOnUnregister=true;
+    private boolean serviceTerminationOnUnregister=true;
     /** default maximum service limit */
-    int serviceLimit=500;
-    /** service consumer responsible for Provision Monitor discovery and
-     * registration */
-    ServiceConsumer svcConsumer=null;
-    /** flag indicating the Cybernode is in shutdown sequence */
-    boolean shutdownSequence=false;
-    /** Collection of JSBs that are in the process of instantiation */
-    final List<ServiceProvisionEvent> inProcess =
-        Collections.synchronizedList(new ArrayList<ServiceProvisionEvent>());
+    private int serviceLimit=500;
+    /** Service consumer responsible for Provision Monitor discovery and registration */
+    private ServiceConsumer svcConsumer=null;
+    /** Flag indicating the Cybernode is in shutdown sequence */
+    private final AtomicBoolean shutdownSequence= new AtomicBoolean(false);
+    /** Collection of services that are in the process of instantiation */
+    private final List<ServiceProvisionEvent> inProcess = new ArrayList<ServiceProvisionEvent>();
     /** Log format version */
-    static final int LOG_VERSION = 1;
+    private static final int LOG_VERSION = 1;
     /** PersistentStore to save state */
     //PersistentStore store;
-    /** LogHandler required when dealing with the ReliableLog */
-    CybernodeLogHandler logHandler;
     /** ThreadPool for SLAThresholdEvent processing */
-    Executor thresholdTaskPool;
+    private Executor thresholdTaskPool;
     /** This flag indicates whether the Cybernode has been configured to install
      * external software  defined by ServiceBean instances */
-    boolean provisionEnabled=true;
-    /**
-     * The directory to provision external software to. This is the root
-     * directory where software may be installed by ServiceBean instances which
-     * require external software to be resident on compute resource the
-     * Cybernode represents
-     */
-    String provisionRoot;
+    private boolean provisionEnabled=true;
     /** The ServiceStatementManager defines the semantics of reading/writing
      * ServiceStatement instances */
-    ServiceStatementManager serviceStatementManager;
+    private ServiceStatementManager serviceStatementManager;
     /** The Timer to use for scheduling a ServiceRecord update task */
     private Timer taskTimer;
     /** The Configuration for the Service */
     private Configuration config;
     /** ProxyPreparer for the OperationalStringMonitor */
-    ProxyPreparer operationalStringManagerPreparer;
+    private ProxyPreparer operationalStringManagerPreparer;
     private LifeCycle lifeCycle;
     /** Flag to indicate if the Cybernode is enlisted */
     private boolean enlisted=false;
@@ -207,12 +199,12 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * Override destroy to ensure that any JSBs are shutdown as well
      */
     public void destroy(boolean force) {
-        if(shutdownSequence)
+        if(shutdownSequence.get())
             return;
         synchronized(CybernodeImpl.class) {
             if(serviceRecordUpdateTask!=null)
                 serviceRecordUpdateTask.cancel();
-            shutdownSequence=true;
+            shutdownSequence.set(true);
             /* Shutdown the ComputeResource */
             if(computeResource!=null)
                 computeResource.shutdown();
@@ -235,9 +227,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 logger.log(Level.SEVERE, "While destroying persistent store", e);
             }
         }
-        logger.log(Level.INFO,
-                   context.getServiceElement().getName()+
-                   ": destroy() notification");
+        logger.info("%s: destroy() notification", context.getServiceElement().getName());
         /* Stop the timer */
         if(taskTimer!=null)
             taskTimer.cancel();
@@ -259,20 +249,18 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     MBeanServerFactory.getMBeanServer().unregisterMBean(objectName);
                 } catch (Exception e) {
                     Throwable cause = ThrowableUtil.getRootCause(e);
-                    logger.warning("Unregistering PlatformCapability " +
-                                   "[" + pCap.getName() + "], Exception: " +
-                                   cause.getClass().getName());
+                    logger.warning("Unregistering PlatformCapability [%s], Exception: %s",
+                                   pCap.getName(), cause.getClass().getName());
                 }
             }
         }
         /* Terminate the DiscoveryManagementPool */
-        DiscoveryManagementPool discoPool =
-            DiscoveryManagementPool.getInstance();
+        DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
         if(discoPool!=null)
             discoPool.terminate();
 
         /* Tell the utility that started the Cybernode we are going away */
-        ServiceBeanManager serviceBeanManager  = context.getServiceBeanManager();
+        ServiceBeanManager serviceBeanManager = context.getServiceBeanManager();
         if(serviceBeanManager!=null) {
             DiscardManager discardMgr = serviceBeanManager.getDiscardManager();
             if(discardMgr!=null) {
@@ -295,7 +283,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     public TrustVerifier getProxyVerifier() {
         if (logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");
+            logger.getLogger().entering(this.getClass().getName(), "getProxyVerifier");
         return (new CybernodeProxy.Verifier(getExportedProxy()));
     }
 
@@ -313,8 +301,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         List<ServiceRecord> list = new ArrayList<ServiceRecord>();
         ServiceStatement[] statements = serviceStatementManager.get();
         for (ServiceStatement statement : statements) {
-            ServiceRecord[] records = statement.getServiceRecords(getUuid(),
-                                                                  filter);
+            ServiceRecord[] records = statement.getServiceRecords(getUuid(), filter);
             list.addAll(Arrays.asList(records));
         }
         return(list.toArray(new ServiceRecord[list.size()]));
@@ -335,22 +322,17 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     public ServiceBeanInstance[] getServiceBeanInstances(ServiceElement element) {
         ServiceBeanInstance[] sbi = container.getServiceBeanInstances(element);
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("ServiceBeanInstance count for "+"["+
-                          element.getName()+"] = "+sbi.length);
+            logger.finest("ServiceBeanInstance count for "+"["+element.getName()+"] = "+sbi.length);
         return (sbi);
     }
 
     /**
      * @see org.rioproject.deploy.ServiceBeanInstantiator#update
      */
-    public void update(ServiceElement[] sElements,
-                       OperationalStringManager opStringMgr) throws RemoteException {
-        opStringMgr = (OperationalStringManager)
-                         operationalStringManagerPreparer.prepareProxy(opStringMgr);
+    public void update(ServiceElement[] sElements, OperationalStringManager opStringMgr) throws RemoteException {
+        opStringMgr = (OperationalStringManager)operationalStringManagerPreparer.prepareProxy(opStringMgr);
         if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                       "Prepared OperationalStringManager proxy: {0}",
-                       opStringMgr);
+            logger.finest("Prepared OperationalStringManager proxy: %s", opStringMgr);
         container.update(sElements, opStringMgr);
     }
 
@@ -382,8 +364,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @param serviceRecord The ServiceRecord
      */
     public void serviceInstantiated(ServiceRecord serviceRecord) {
-        ServiceStatement statement =
-            serviceStatementManager.get(serviceRecord.getServiceElement());
+        ServiceStatement statement = serviceStatementManager.get(serviceRecord.getServiceElement());
         if(statement==null) {
             /* ServiceStatement not found, create one */
             statement = new ServiceStatement(serviceRecord.getServiceElement());
@@ -391,12 +372,10 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         statement.putServiceRecord(getUuid(), serviceRecord);
         serviceStatementManager.record(statement);
         //setChanged(StatusType.NORMAL);
-        if(loaderLogger.isLoggable(Level.FINE)) {
+        if(loaderLogger.isLoggable(Level.INFO)) {
             int instantiatedServiceCount = getInstantiatedServiceCount();
-            logger.fine("Instantiated " +
-                        "["+serviceRecord.getServiceElement().getName()+"], " +
-                        "instance: "+serviceRecord.getServiceElement().getServiceBeanConfig().getInstanceID()+", " +
-                        "numActive: "+instantiatedServiceCount);
+            logger.info("Instantiated %s, total services active: %d",
+                        CybernodeLogUtil.logName(serviceRecord.getServiceElement()), instantiatedServiceCount);
         }
     }
 
@@ -407,25 +386,21 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     public void serviceDiscarded(ServiceRecord serviceRecord) {
         if(serviceRecord==null)
-            logger.log(Level.WARNING,
-                       "ServiceRecord is null when discarding ServiceBean");
+            logger.warning("ServiceRecord is null when discarding ServiceBean");
 
         else {
-            ServiceStatement statement =
-                serviceStatementManager.get(serviceRecord.getServiceElement());
+            ServiceStatement statement = serviceStatementManager.get(serviceRecord.getServiceElement());
             if(statement!=null) {
                 statement.putServiceRecord(getUuid(), serviceRecord);
                 serviceStatementManager.record(statement);
-                int instantiatedServiceCount = getInstantiatedServiceCount();
-                if(loaderLogger.isLoggable(Level.FINE))
-                    loaderLogger.fine("Discarded " +
-                                      "["+serviceRecord.getServiceElement().getName()+"], " +
-                                      "instance: "+serviceRecord.getServiceElement().getServiceBeanConfig().getInstanceID()+", " +
-                                      "numActive: "+instantiatedServiceCount);
+                if(loaderLogger.isLoggable(Level.INFO)) {
+                    int instantiatedServiceCount = getInstantiatedServiceCount();
+                    loaderLogger.info("Discarded %s, total services active: %d",
+                                      CybernodeLogUtil.logName(serviceRecord.getServiceElement()), instantiatedServiceCount);
+                }
             } else {
-                loaderLogger.log(Level.WARNING,
-                                 "ServiceStatement is null when discarding ServiceBean"+
-                                 "["+serviceRecord.getServiceElement().getName()+"]");
+                loaderLogger.warning("ServiceStatement is null when discarding ServiceBean %s",
+                                     CybernodeLogUtil.logName(serviceRecord.getServiceElement()));
             }
             //setChanged(StatusType.NORMAL);
         }
@@ -445,44 +420,19 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * Get the ServiceBeanContext and bootstrap the Cybernode
      */
     protected void bootstrap(String[] configArgs) throws Exception {
-        try {
-            context =
-                ServiceBeanActivation.getServiceBeanContext(
-                                                  getConfigComponent(),
-                                                  "Cybernode",
-                                                  configArgs,
-                                                  getClass().getClassLoader());
-        } catch(Exception e) {
-            logger.log(Level.SEVERE, "Getting ServiceElement", e);
-            throw e;
-        }
-
-        BannerProvider bannerProvider =
-            (BannerProvider)context.getConfiguration().getEntry(getConfigComponent(),
-                                                                "bannerProvider",
-                                                                BannerProvider.class,
-                                                                new BannerProviderImpl());
+        context = ServiceBeanActivation.getServiceBeanContext(getConfigComponent(),
+                                                              "Cybernode",
+                                                              configArgs,
+                                                              getClass().getClassLoader());
+        BannerProvider bannerProvider = (BannerProvider)context.getConfiguration().getEntry(getConfigComponent(),
+                                                                                            "bannerProvider",
+                                                                                            BannerProvider.class,
+                                                                                            new BannerProviderImpl());
         logger.info(bannerProvider.getBanner(context.getServiceElement().getName()));
         try {
-            try {
-                start(context);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-            LifeCycleManager lMgr =
-                (LifeCycleManager)context.
-                    getServiceBeanManager().getDiscardManager();
-            if(lMgr!=null) {
-                Object proxy = getServiceProxy();
-                if(proxy!=null) {
-                    lMgr.register(proxy, context);
-                } else {
-                    logger.severe("Cybernode proxy is null, unable to " +
-                                  "register to LifeCycleManager");
-                }
-            } else {
-                logger.warning("LifeCycleManager is null, unable to register");
-            }
+            start(context);
+            LifeCycleManager lMgr = (LifeCycleManager)context. getServiceBeanManager().getDiscardManager();
+            lMgr.register(getServiceProxy(), context);
         } catch(Exception e) {
             logger.log(Level.SEVERE, "Register to LifeCycleManager", e);
             throw e;
@@ -531,30 +481,23 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         if(registryPort!=0) {
             try {
                 String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-                Registry registry = LocateRegistry.getRegistry(address,
-                                                               registryPort);
+                Registry registry = LocateRegistry.getRegistry(address, registryPort);
                 try {
                     registry.bind(name, (Remote)proxy);
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer("Bound to RMI Registry on port="+
-                                     registryPort);
+                    logger.finer("Bound to RMI Registry on port=%d", registryPort);
                 } catch(AlreadyBoundException e) {
                     /*ignore */
                 }
             } catch(AccessException e) {
-                logger.log(Level.WARNING,
-                           "Binding "+name+" to RMI Registry", e);
+                logger.log(Level.WARNING, "Binding "+name+" to RMI Registry", e);
             } catch(RemoteException e) {
-                logger.log(Level.WARNING,
-                           "Binding "+name+" to RMI Registry", e);
+                logger.log(Level.WARNING, "Binding "+name+" to RMI Registry", e);
             } catch (java.net.UnknownHostException e) {
-                logger.log(Level.WARNING,
-                           "Unknown host address locating RMI Registry", e);
+                logger.log(Level.WARNING, "Unknown host address locating RMI Registry", e);
             }
         } else {
             if(logger.isLoggable(Level.FINER))
-                logger.finer("RMI Registry property not set, " +
-                             "unable to bind "+name);
+                logger.finer("RMI Registry property not set, unable to bind %s", name);
         }
         /*
          * Set the MarshalledInstance into the ServiceBeanManager
@@ -564,8 +507,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(mi);
         } catch (IOException e) {
             logger.log(Level.WARNING,
-                       "Unable to create MarshalledInstance for Cybernode " +
-                       "proxy, non-fatal error, continuing ...",
+                       "Unable to create MarshalledInstance for Cybernode proxy, non-fatal error, continuing ...",
                        e);
         }        
         return(proxy);
@@ -582,11 +524,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             if(admin == null) {
                 Exporter adminExporter = getAdminExporter();
                 if (contextMgr != null)
-                    admin =
-                        new CybernodeAdminImpl(this,
-                                               adminExporter,
-                                               contextMgr.
-                                                  getContextAttributeLogHandler());
+                    admin = new CybernodeAdminImpl(this, adminExporter, contextMgr.getContextAttributeLogHandler());
                 else
                     admin = new CybernodeAdminImpl(this, adminExporter);
             }
@@ -607,18 +545,14 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
          * Determine if a log directory has been provided. If so, create a
          * PersistentStore
          */
-        String logDirName =
-            (String)context.getConfiguration().getEntry(CONFIG_COMPONENT,
-                                                        "logDirectory",
-                                                        String.class,
-                                                        null);
+        String logDirName = 
+            (String)context.getConfiguration().getEntry(CONFIG_COMPONENT, "logDirectory", String.class, null);
         if(logDirName!=null) {
-            logHandler = new CybernodeLogHandler();
+            /* LogHandler required when dealing with the ReliableLog */
+            CybernodeLogHandler logHandler = new CybernodeLogHandler();
             store = new PersistentStore(logDirName, logHandler, logHandler);
             if(logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE,
-                           "Cybernode: using absolute logdir path "+
-                           "["+store.getStoreLocation()+"]");
+                logger.fine("Cybernode: using absolute logdir path [%s]", store.getStoreLocation());
             store.snapshot();
             super.initialize(context, store);
         } else {
@@ -628,68 +562,51 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Get the Configuration */
         config = context.getConfiguration();
         try {
-            Exporter defaultExporter =
-                (Exporter)config.getEntry(RIO_CONFIG_COMPONENT,
-                                          DEFAULT_EXPORTER,
-                                          Exporter.class);
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "{0} has been set as the defaultExporter",
-                           new Object[] {defaultExporter});
+            Exporter defaultExporter = (Exporter)config.getEntry(RIO_CONFIG_COMPONENT, DEFAULT_EXPORTER, Exporter.class);
+            logger.finest("%s has been set as the defaultExporter", defaultExporter);
         } catch(Exception e) {
-            logger.log(Level.SEVERE,
-                       "The "+RIO_CONFIG_COMPONENT+"."+DEFAULT_EXPORTER+" "+
-                       "attribute must be set");
+            logger.severe("The %s.%s attribute must be set", RIO_CONFIG_COMPONENT, DEFAULT_EXPORTER);
             throw e;
         }
 
         /* Set up thread deadlock detection. This seems a little clumsy to use
-         * the WatchInjector and could probaby be improved. This does make the
+         * the WatchInjector and could probably be improved. This does make the
          * most use of the wiring for forked service monitoring. */
         long threadDeadlockCheck = (Long)config.getEntry(CONFIG_COMPONENT,
                                                          "threadDeadlockCheck",
-                                                         long.class,
-                                                         (long)5000);
+                                                         long.class, (long)5000);
         if(threadDeadlockCheck>=1000) {
-            WatchDescriptor threadDeadlockDescriptor =
-                ThreadDeadlockMonitor.getWatchDescriptor();
+
+            WatchDescriptor threadDeadlockDescriptor = ThreadDeadlockMonitor.getWatchDescriptor();
             threadDeadlockDescriptor.setPeriod(threadDeadlockCheck);
-            Method getThreadDeadlockCalculable =
-                ThreadDeadlockMonitor.class.getMethod("getThreadDeadlockCalculable");
+            Method getThreadDeadlockCalculable = ThreadDeadlockMonitor.class.getMethod("getThreadDeadlockCalculable");
             ThreadDeadlockMonitor threadDeadlockMonitor = new ThreadDeadlockMonitor();
+            threadDeadlockMonitor.setThreadMXBean(ManagementFactory.getThreadMXBean());
+
             WatchInjector watchInjector = new WatchInjector(this, context);
-            ThresholdWatch watch =
-                (ThresholdWatch)watchInjector.inject(threadDeadlockDescriptor,
-                                                     threadDeadlockMonitor,
-                                                     getThreadDeadlockCalculable);
+            ThresholdWatch watch = (ThresholdWatch)watchInjector.inject(threadDeadlockDescriptor,
+                                                                        threadDeadlockMonitor,
+                                                                        getThreadDeadlockCalculable);
             watch.setThresholdValues(new ThresholdValues(0, 1));
             watch.addThresholdListener(new DeadlockedThreadPolicyHandler());
         } else {
             logger.info("Thread deadlock monitoring has been disabled. The " +
                         "configured thread deadlock check time was " +
-                        "["+threadDeadlockCheck+"]. To enable " +
-                        "thread deadlock monitoring, the thread deadlock check " +
-                        "time must be >= 1000 milliseconds.");
+                        "[%d]. To enable thread deadlock monitoring, the thread deadlock check " +
+                        "time must be >= 1000 milliseconds.", threadDeadlockCheck);
         }
         try {
-            serviceLimit = Config.getIntEntry(config,
-                                              getConfigComponent(),
-                                              "serviceLimit",
-                                              500,
-                                              0,
-                                              Integer.MAX_VALUE);
+            serviceLimit = Config.getIntEntry(config, getConfigComponent(), "serviceLimit", 500, 0, Integer.MAX_VALUE);
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Exception getting serviceLimit, default to 500");
+            logger.warning("Exception getting serviceLimit, default to 500");
         }
 
         /* Get the ProxyPreparer for passed in OperationalStringManager
          * instances */
-        operationalStringManagerPreparer =
-            (ProxyPreparer)config.getEntry(getConfigComponent(),
-                                           "operationalStringManagerPreparer",
-                                           ProxyPreparer.class,
-                                           new BasicProxyPreparer());
+        operationalStringManagerPreparer = (ProxyPreparer)config.getEntry(getConfigComponent(),
+                                                                          "operationalStringManagerPreparer",
+                                                                          ProxyPreparer.class,
+                                                                          new BasicProxyPreparer());
         /* Check for JMXConnection */
         addAttributes(JMXUtil.getJMXConnectionEntries(config));
 
@@ -697,42 +614,38 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         addAttributes(getServiceUIs());
 
         /* Get the security policy to apply to loading services */
-        String serviceSecurityPolicy =
-            (String)config.getEntry(getConfigComponent(),
-                                    "serviceSecurityPolicy",
-                                    String.class,
-                                    null);
+        String serviceSecurityPolicy = (String)config.getEntry(getConfigComponent(),
+                                                               "serviceSecurityPolicy",
+                                                               String.class,
+                                                               null);
         if(serviceSecurityPolicy!=null)
-            System.setProperty("rio.service.security.policy",
-                               serviceSecurityPolicy);
+            System.setProperty("rio.service.security.policy", serviceSecurityPolicy);
 
         /* Establish default operating environment */
         Environment.setupDefaultEnvironment();
 
         /* Setup persistent provisioning attributes */
-        provisionEnabled =
-            (Boolean) config.getEntry(getConfigComponent(),
-                                      "provisionEnabled",
-                                      Boolean.class,
-                                      true);
-        provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
+        provisionEnabled = (Boolean) config.getEntry(getConfigComponent(), "provisionEnabled", Boolean.class, true);
+        /*
+         * The directory to provision external software to. This is the root
+         * directory where software may be installed by ServiceBean instances which
+         * require external software to be resident on compute resource the
+         * Cybernode represents
+         */
+        String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
         if(provisionEnabled) {
-            if(logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE,
-                           "Software provisioning has been enabled, "+
-                           "default provision root location is ["+provisionRoot+"]");
+            logger.fine("Software provisioning has been enabled, default provision root location is [%s]",
+                        provisionRoot);
         }
         computeResource.setPersistentProvisioningRoot(provisionRoot);
 
         /* Setup the native library directory */
-        String nativeLibDirectories =
-            Environment.setupNativeLibraryDirectories(config);
+        String nativeLibDirectories = Environment.setupNativeLibraryDirectories(config);
 
         /* Ensure org.rioproject.system.native property is set. This will be used
          * by the org.rioproject.system.SystemCapabilities class */
         if(nativeLibDirectories!=null)
-            System.setProperty(SystemCapabilities.NATIVE_LIBS,
-                               nativeLibDirectories);
+            System.setProperty(SystemCapabilities.NATIVE_LIBS, nativeLibDirectories);
 
         /* Initialize the ComputeResource */
         initializeComputeResource(computeResource);
@@ -741,34 +654,21 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             StringBuilder sb = new StringBuilder();
             sb.append("Service Limit : ").append(serviceLimit).append("\n");
             sb.append("System Capabilities\n");
-            MeasurableCapability[] mCaps =
-                computeResource.getMeasurableCapabilities();
+            MeasurableCapability[] mCaps = computeResource.getMeasurableCapabilities();
             sb.append("MeasurableCapabilities : (").
                append(mCaps.length).
                append(")\n");
             for (MeasurableCapability mCap : mCaps) {
-                sb.append("\t")
-                    .append(mCap.getId())
-                    //append(mCap.getClass().getName()).
-                    .append("\n");
+                sb.append("\t").append(mCap.getId()).append("\n");
                 ThresholdValues tValues = mCap.getThresholdValues();
-                sb.append("\t\tlow threshold  : ")
-                    .append(tValues.getLowThreshold())
-                    .append("\n");
-                sb.append("\t\thigh threshold : ")
-                    .append(tValues.getHighThreshold())
-                    .append("\n");
-                sb.append("\t\treport rate    : ")
-                    .append(mCap.getPeriod())
-                    .append("\n");
-                sb.append("\t\tsample size    : ")
-                    .append(mCap.getSampleSize())
-                    .append("\n");
+                sb.append("\t\tlow threshold  : ").append(tValues.getLowThreshold()).append("\n");
+                sb.append("\t\thigh threshold : ").append(tValues.getHighThreshold()).append("\n");
+                sb.append("\t\treport rate    : ").append(mCap.getPeriod()).append("\n");
+                sb.append("\t\tsample size    : ");
+                sb.append(mCap.getSampleSize()).append("\n");
             }
             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
-            sb.append("PlatformCapabilities : (")
-               .append(pCaps.length)
-               .append(")\n");
+            sb.append("PlatformCapabilities : (").append(pCaps.length).append(")\n");
 
             double KB = 1024;
             double MB = Math.pow(KB, 2);
@@ -782,9 +682,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                    pCap.getClass().getName().contains("Memory")) {
                     convert = true;
                 }
-                sb.append("\t")
-                    .append(stripPackageName(pCap.getClass().getName()))
-                    .append("\n");
+                sb.append("\t").append(stripPackageName(pCap.getClass().getName())).append("\n");
                 String[] keys = pCap.getPlatformKeys();
                 for (String key : keys) {
                     Object value = pCap.getValue(key);
@@ -797,16 +695,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                             value = nf.format(d)+" MB";
                         }
                     }
-                    sb.append("\t\t")
-                        .append(key)
-                        .append(" : ")
-                        .append(value)
-                        .append("\n");
+                    sb.append("\t\t").append(key).append(" : ").append(value).append("\n");
                 }
                 String path = pCap.getPath();
                 if (path != null)
-                    sb.append("\t\tPath : ")
-                        .append(path).append("\n");
+                    sb.append("\t\tPath : ").append(path).append("\n");
             }
             logger.finer(sb.toString());
         }
@@ -817,23 +710,20 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Start the timerTask for updating ServiceRecords */
         long serviceRecordUpdateTaskTimer = 60;
         try {
-            serviceRecordUpdateTaskTimer =
-                Config.getLongEntry(config, getConfigComponent(),
-                                    "serviceRecordUpdateTaskTimer",
-                                    serviceRecordUpdateTaskTimer,
-                                    1,
-                                    Long.MAX_VALUE);
+            serviceRecordUpdateTaskTimer = Config.getLongEntry(config,
+                                                               getConfigComponent(),
+                                                               "serviceRecordUpdateTaskTimer",
+                                                               serviceRecordUpdateTaskTimer,
+                                                               1,
+                                                               Long.MAX_VALUE);
         } catch(Throwable t) {
-            logger.log(Level.WARNING,
-                       "Exception getting slaThresholdTaskPoolMinimum",
-                       t);
+            logger.log(Level.WARNING, "Exception getting slaThresholdTaskPoolMinimum", t);
         }
         taskTimer = new Timer(true);
         long period = 1000*serviceRecordUpdateTaskTimer;
         long now = System.currentTimeMillis();
         serviceRecordUpdateTask = new ServiceRecordUpdateTask();
-        taskTimer.scheduleAtFixedRate(serviceRecordUpdateTask,
-                                      new Date(now+period), period);
+        taskTimer.scheduleAtFixedRate(serviceRecordUpdateTask, new Date(now+period), period);
         /*
          * Create a thread pool for processing SLAThresholdEvent
          */
@@ -854,9 +744,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Create the consumer which will discover, register and maintain
          * connection(s) to ProvisionMonitor instances */
         svcConsumer =
-            new ServiceConsumer(new CybernodeAdapter((ServiceBeanInstantiator)getServiceProxy(),
-                                                     this,
-                                                     computeResource),
+            new ServiceConsumer(new CybernodeAdapter((ServiceBeanInstantiator)getServiceProxy(),this, computeResource),
                                 serviceLimit,
                                 config);
 
@@ -866,8 +754,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                    "serviceTerminationOnUnregister",
                                                                    Boolean.class,
                                                                    Boolean.TRUE);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("serviceTerminationOnUnregister="+serviceTerminationOnUnregister);
+        logger.fine("serviceTerminationOnUnregister=%b", serviceTerminationOnUnregister);
 
         /* Get whether the Cybernode will make itself available as an asset */
         boolean doEnlist = (Boolean)config.getEntry(getConfigComponent(), "enlist", Boolean.class, true);
@@ -880,8 +767,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
         /* Ensure we have a serviceID */
         if(serviceID==null) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Creating new ServiceID from UUID="+ getUuid().toString());
+            logger.fine("Creating new ServiceID from UUID=%s", getUuid().toString());
             serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
         }
 
@@ -921,24 +807,18 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                     0,
                                     Long.MAX_VALUE);
         } catch(Throwable t) {
-            logger.log(Level.WARNING,
-                       "Exception getting initialServiceLoadDelay",
-                       t);
+            logger.log(Level.WARNING, "Exception getting initialServiceLoadDelay", t);
         }
-        if(logger.isLoggable(Level.CONFIG))
-            logger.config("initialServiceLoadDelay="+initialServiceLoadDelay);
+        logger.config("initialServiceLoadDelay=%d", initialServiceLoadDelay);
 
         /*
         * Schedule the task to Load any configured services
         */
         if(initialServiceLoadDelay>0) {
             long now = System.currentTimeMillis();
-            getTaskTimer().schedule(
-                                    new InitialServicesLoadTask(config),
-                                    new Date(now+initialServiceLoadDelay));
+            getTaskTimer().schedule(new InitialServicesLoadTask(config), new Date(now+initialServiceLoadDelay));
         } else {
-            InitialServicesLoadTask serviceLoader =
-                new InitialServicesLoadTask(config);
+            InitialServicesLoadTask serviceLoader = new InitialServicesLoadTask(config);
             serviceLoader.loadInitialServices();
         }
     }
@@ -990,7 +870,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                         deploymentURL = new File(initialService).toURI().toURL();
                     load(deploymentURL);
                 } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "Loading initial services : " + initialService, t);
+                    logger.log(Level.SEVERE, t, "Loading initial services : %s", initialService);
                 }
             }
         }
@@ -1007,8 +887,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 OperationalString[] opStrings = opStringLoader.parseOperationalString(deploymentURL);
                 if(opStrings != null) {
                     for (OperationalString opString : opStrings) {
-                        if (logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE, "Activating Deployment " +"[" + opString.getName() + "]");
+                        logger.fine("Activating Deployment [%s]", opString.getName());
                         ServiceElement[] services = opString.getServices();
                         for (ServiceElement service : services) {
                             activate(service);
@@ -1029,7 +908,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         try {
             instantiate(spe);
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "Activating service ["+sElem.getName()+"]", t);
+            logger.log(Level.WARNING, t, "Activating service [%s]", sElem.getName());
         }
     }
 
@@ -1089,8 +968,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     @Override
     protected ServiceInfo getServiceInfo() {
-        URL implUrl =
-            getClass().getProtectionDomain().getCodeSource().getLocation();
+        URL implUrl = getClass().getProtectionDomain().getCodeSource().getLocation();
         RioManifest rioManifest;
         String build = null;
         try {
@@ -1156,21 +1034,20 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     public DeployedService instantiate(ServiceProvisionEvent event)
         throws ServiceBeanInstantiationException, UnknownEventException {
 
-        loaderLogger.log(Level.INFO,
-                         "Instantiating "+
-                         event.getServiceElement().getOperationalStringName()+"/"+
-                         event.getServiceElement().getName());
         DeployedService deployedService;
         try {
-            if(shutdownSequence) {
-                throw new ServiceBeanInstantiationException("["+
-                    context.getServiceElement().getName()+"] shutting down," +
-                    "unavailable for service instantiation");
+            if(shutdownSequence.get()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(CybernodeLogUtil.logName(event)).append(" shutting down, unavailable for service instantiation");
+                logger.warning(builder.toString());
+                throw new ServiceBeanInstantiationException(builder.toString());
             }
+            loaderLogger.info("Instantiating %s", CybernodeLogUtil.logName(event));
 
-            if(event.getID()!=ServiceProvisionEvent.ID)
-                throw new UnknownEventException("Unknown event type "+
-                                                "["+event.getID()+"]");
+            if(event.getID()!=ServiceProvisionEvent.ID) {
+                logger.warning("Unknown event type [%s], ID=%d", event.getClass().getName(), event.getID());
+                throw new UnknownEventException("Unknown event type ["+event.getID()+"]");
+            }
 
             /* Verify that the Cybernode does not instantiate a service past
              * it's specified max per machine or planned value
@@ -1201,31 +1078,25 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                  * count and active instances */
                 int activeServiceCounter = inProcessServiceCount+instantiatedServiceCount;
                 if(loaderLogger.isLoggable(Level.FINEST))
-                    loaderLogger.finest("["+event.getServiceElement().getName()+"] "+
-                                        "activeServiceCounter=["+activeServiceCounter+"], "+
-                                        "inProcessServiceCount=["+inProcessServiceCount+"], " +
-                                        "instantiatedServiceCount=["+instantiatedServiceCount+"]");
+                    loaderLogger.finest("%s activeServiceCounter=[%d], inProcessServiceCount=[%d], instantiatedServiceCount=[%d]",
+                                        CybernodeLogUtil.logName(event), activeServiceCounter, inProcessServiceCount, instantiatedServiceCount);
                 /* First check max per machine */
                 int maxPerMachine = event.getServiceElement().getMaxPerMachine();
                 if(maxPerMachine!=-1 && activeServiceCounter >= maxPerMachine) {
                     if(loaderLogger.isLoggable(Level.FINEST))
-                        loaderLogger.finest("Abort allocation of ["+
-                                            event.getServiceElement().getName()+"] "+
-                                            "activeServiceCounter=["+activeServiceCounter+"] "+
-                                            "inProcessServiceCount=["+inProcessServiceCount+"] "+
-                                            "maxPerMachine=["+maxPerMachine+"]");
-                    throw new ServiceBeanInstantiationException("MaxPerMachine "+
-                                                        "["+maxPerMachine+"] " +
-                                                        "has been "+
-                                                        "reached");
+                        loaderLogger.finest("Abort allocation of %s "+
+                                            "activeServiceCounter=[%d] "+
+                                            "inProcessServiceCount=[%d] "+
+                                            "maxPerMachine=[%d]",
+                                            CybernodeLogUtil.logName(event), activeServiceCounter, inProcessServiceCount, maxPerMachine);
+                    throw new ServiceBeanInstantiationException("MaxPerMachine "+"["+maxPerMachine+"] has been reached");
                 }
 
                 /* The check planned service count */
                 int numPlannedServices = event.getServiceElement().getPlanned();
                 if(activeServiceCounter >= numPlannedServices) {
                     if(loaderLogger.isLoggable(Level.FINEST))
-                        loaderLogger.finest("Cancel allocation of ["+
-                                            event.getServiceElement().getName()+"] "+
+                        loaderLogger.finest("Cancel allocation of "+ CybernodeLogUtil.logName(event)+" "+
                                             "activeServiceCounter=["+activeServiceCounter+"] "+
                                             "numPlannedServices=["+numPlannedServices+"]");
                     return(null);
@@ -1236,51 +1107,47 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
             int inProcessCount;
             synchronized(inProcess) {
-                inProcessCount = inProcess.size() -
-                                 container.getActivationInProcessCount();
+                inProcessCount = inProcess.size() - container.getActivationInProcessCount();
             }
             int containerServiceCount = container.getServiceCounter();
             if((inProcessCount+containerServiceCount) <= serviceLimit) {
-                OperationalStringManager
-                    opMgr = event.getOperationalStringManager();
+                OperationalStringManager opMgr = event.getOperationalStringManager();
                 if(!event.getServiceElement().forkService()) {
+                    if(loaderLogger.isLoggable(Level.FINEST))
+                        loaderLogger.finest("Get OpStringManagerProxy for %s", CybernodeLogUtil.logName(event));
                     try {
                         opMgr = OpStringManagerProxy.getProxy(
                             event.getServiceElement().getOperationalStringName(),
                             event.getOperationalStringManager(),
                             context.getDiscoveryManagement());
-                        
+                        if(loaderLogger.isLoggable(Level.FINEST))
+                            loaderLogger.finest("Got OpStringManagerProxy for %s", CybernodeLogUtil.logName(event));
                     } catch (Exception e) {
                         loaderLogger.log(Level.WARNING,
                                          "Unable to create proxy for " +
-                                         "OperationalStringManager, " +
-                                         "using provided OperationalStringManager",
+                                         "OperationalStringManager, using provided OperationalStringManager",
                                          ThrowableUtil.getRootCause(e));
                         opMgr = event.getOperationalStringManager();
                     }
                 }
                 try {
-                    ServiceBeanInstance
-                        jsbInstance = container.activate(event.getServiceElement(),
-                                                     opMgr,
-                                                     getSLAEventHandler());
-                    ServiceBeanDelegate delegate =
-                        container.getServiceBeanDelegate(jsbInstance.getServiceBeanID());
+                    loaderLogger.finest("Activating %s", CybernodeLogUtil.logName(event));
+                    ServiceBeanInstance jsbInstance = container.activate(event.getServiceElement(),
+                                                                         opMgr,
+                                                                         getSLAEventHandler());
+                    loaderLogger.finest("Activated %s", CybernodeLogUtil.logName(event));
+                    ServiceBeanDelegate delegate = container.getServiceBeanDelegate(jsbInstance.getServiceBeanID());
                     ComputeResourceUtilization cru = delegate.getComputeResourceUtilization();
-                    deployedService = new DeployedService(event.getServiceElement(),
-                                                          jsbInstance,
-                                                          cru);
+                    deployedService = new DeployedService(event.getServiceElement(), jsbInstance, cru);
+                    loaderLogger.finest("Created DeployedService for %s", CybernodeLogUtil.logName(event));
                 } catch(ServiceBeanInstantiationException e) {
                     if(opMgr instanceof OpStringManagerProxy.OpStringManager)
                         ((OpStringManagerProxy.OpStringManager)opMgr).terminate();
                     throw e;
                 }
-
                 return(deployedService);
             } else {
-                throw new ServiceBeanInstantiationException("Service Limit of "+
-                                                    "["+serviceLimit+"] has been "+
-                                                    "reached");
+                throw new ServiceBeanInstantiationException("Service Limit of ["+serviceLimit+"] has been reached");
             }
 
         } finally {
@@ -1289,7 +1156,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             }
         }
     }
-
+    
     /**
      * Create the container the Cybernode will use
      *
@@ -1350,8 +1217,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         for (MeasurableCapability mCap : mCaps) {
             getWatchRegistry().register(mCap);
         }
-        PlatformCapability[] pCaps =
-            computeResource.getPlatformCapabilities();
+        PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
         MBeanServer mbeanServer = MBeanServerFactory.getMBeanServer();
         for (PlatformCapability pCap : pCaps) {
             try {
@@ -1359,31 +1225,18 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 if (objectName != null)
                     mbeanServer.registerMBean(pCap, objectName);
             } catch (MalformedObjectNameException e) {
-                logger.log(Level.WARNING,
-                           "PlatformCapability " +
-                           "[" + pCap.getClass().getName() + "." +
-                           pCap.getName() + "]:" + e.toString(),
-                           e);
+                logger.log(Level.WARNING, e, "PlatformCapability [%s.%s]", pCap.getClass().getName(), pCap.getName());
             } catch (NotCompliantMBeanException e) {
-                logger.log(Level.WARNING,
-                           "PlatformCapability " +
-                           "[" + pCap.getClass().getName() + "." +
-                           pCap.getName() + "]:" + e.toString(),
-                           e);
+                logger.log(Level.WARNING, e, "PlatformCapability [%s.%s]", pCap.getClass().getName(), pCap.getName());
             } catch (MBeanRegistrationException e) {
-                logger.log(Level.WARNING,
-                           "PlatformCapability " +
-                           "[" + pCap.getClass().getName() + "." +
-                           pCap.getName() + "]:" + e.toString(),
-                           e);
+                logger.log(Level.WARNING, e, "PlatformCapability [%s.%s]", pCap.getClass().getName(), pCap.getName());
             } catch (InstanceAlreadyExistsException e) {
-                logger.log(Level.WARNING,
-                           "PlatformCapability " +
-                           "[" + pCap.getClass().getName() + "." +
-                           pCap.getName() + "]:" + e.toString(),
-                           e);
+                logger.log(Level.WARNING, e, "PlatformCapability [%s.%s]", pCap.getClass().getName(), pCap.getName());
             }
         }
+        if(logger.isLoggable(Level.CONFIG))
+            logger.config("Will update discovered Provision Monitors with resource utilization details at " +
+                          "intervals of %s", TimeUtil.format(computeResource.getReportInterval()));
     }
 
     /*
@@ -1391,10 +1244,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     private ObjectName getObjectName(PlatformCapability pCap)
         throws MalformedObjectNameException {
-        return(JMXUtil.getObjectName(context,
-                                     "org.rioproject.cybernode",
-                                     "PlatformCapability",
-                                     pCap.getName()));
+        return(JMXUtil.getObjectName(context, "org.rioproject.cybernode", "PlatformCapability", pCap.getName()));
     }
 
     /*
@@ -1403,8 +1253,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     private ServiceBeanInstance makeServiceBeanInstance() throws IOException {
         return new ServiceBeanInstance(getUuid(),
                                        new MarshalledInstance(getServiceProxy()),
-                                       context.getServiceElement().
-                                           getServiceBeanConfig(),
+                                       context.getServiceElement().getServiceBeanConfig(),
                                        computeResource.getAddress().getHostAddress(),
                                        getUuid());
     }
@@ -1464,11 +1313,10 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                 type);
                 thresholdTaskPool.execute(new SLAThresholdEventTask(event, getSLAEventHandler()));
             } catch(Exception e) {
-                logger.log(Level.WARNING,
+                logger.log(Level.WARNING, e,
                            "Could not send a SLA Threshold Notification as a " +
                            "result of compute resource threshold " +
-                           "["+calculable.getId()+"] being crossed",
-                           e);
+                           "[%s] being crossed", calculable.getId());
             }
         }
     }
@@ -1482,9 +1330,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         ComputeResource computeResource;
         EventHandler thresholdEventHandler;
 
-        ComputeResourcePolicyHandler(ComputeResource computeResource,
-                                     EventHandler thresholdEventHandler) {
-
+        ComputeResourcePolicyHandler(ComputeResource computeResource, EventHandler thresholdEventHandler) {
             this.computeResource = computeResource;
             this.thresholdEventHandler = thresholdEventHandler;
             computeResource.addThresholdListener(this);
@@ -1504,22 +1350,17 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             // implemented for interface compatibility
         }
 
-        public void notify(Calculable calculable,
-                           ThresholdValues thresholdValues,
-                           int type) {
-            if(shutdownSequence)
+        public void notify(Calculable calculable, ThresholdValues thresholdValues, int type) {
+            if(shutdownSequence.get())
                 return;
-            String status =
-                (type == ThresholdEvent.BREACHED?"breached":"cleared");
+            String status = (type == ThresholdEvent.BREACHED?"breached":"cleared");
             if(logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE,
-                           "Threshold={0}, Status={1}, Value={2}, " +
-                           "Low={3}, High={4}",
-                           new Object[]{calculable.getId(),
-                                        status,
-                                        calculable.getValue(),
-                                        thresholdValues.getLowThreshold(),
-                                        thresholdValues.getHighThreshold()});
+                logger.fine("Threshold=%s, Status=%s, Value=%d, Low=%d, High=%d",
+                            calculable.getId(),
+                            status,
+                            calculable.getValue(),
+                            thresholdValues.getLowThreshold(),
+                            thresholdValues.getHighThreshold());
 
             switch(type) {
                 case ThresholdEvent.BREACHED:
@@ -1527,16 +1368,13 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     if(tValue>thresholdValues.getCurrentHighThreshold()) {
                         svcConsumer.updateMonitors();
                         if(calculable.getId().equals("Memory")) {
-                            logger.info("Memory utilization is "+calculable.getValue()+", " +
-                                        "threshold set at "+
-                                        thresholdValues.getCurrentHighThreshold()+", " +
-                                        "request immediate garbage " +
-                                        "collection");
+                            logger.info("Memory utilization is %d, threshold set at %d, request immediate garbage collection",
+                                        calculable.getValue(), thresholdValues.getCurrentHighThreshold());
                             System.gc();
                         }
                         if(calculable.getId().contains("Perm Gen")) {
-                            logger.info("Perm Gen has breached with utilization > "+
-                                            thresholdValues.getCurrentHighThreshold());
+                            logger.info("Perm Gen has breached with utilization > %d",
+                                        thresholdValues.getCurrentHighThreshold());
                             //if(isEnlisted())
                             //release(false);
                             //svcConsumer.cancelRegistrations();
@@ -1559,24 +1397,21 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
                 SLA sla = new SLA(calculable.getId(), range);
                 ServiceBeanInstance instance = makeServiceBeanInstance();
-                SLAThresholdEvent event =
-                         new SLAThresholdEvent(proxy,
-                                               context.getServiceElement(),
-                                               instance,
-                                               calculable,
-                                               sla,
-                                               "Cybernode Resource " +
-                                               "Policy Handler",
-                                               instance.getHostAddress(),
-                                               type);
-                thresholdTaskPool.execute(
-                    new SLAThresholdEventTask(event, thresholdEventHandler));
+                SLAThresholdEvent event = new SLAThresholdEvent(proxy,
+                                                                context.getServiceElement(),
+                                                                instance,
+                                                                calculable,
+                                                                sla,
+                                                                "Cybernode Resource " +
+                                                                "Policy Handler",
+                                                                instance.getHostAddress(),
+                                                                type);
+                thresholdTaskPool.execute(new SLAThresholdEventTask(event, thresholdEventHandler));
             } catch(Exception e) {
-                logger.log(Level.WARNING,
+                logger.log(Level.WARNING, e,
                            "Could not send a SLA Threshold Notification as a " +
                            "result of compute resource threshold " +
-                           "["+calculable.getId()+"] being crossed",
-                           e);
+                           "[%s] being crossed", calculable.getId());
             }
         }
     }
@@ -1589,8 +1424,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         SLAThresholdEvent event;
         EventHandler thresholdEventHandler;
 
-        SLAThresholdEventTask(SLAThresholdEvent event,
-                              EventHandler thresholdEventHandler) {
+        SLAThresholdEventTask(SLAThresholdEvent event, EventHandler thresholdEventHandler) {
             this.event = event;
             this.thresholdEventHandler = thresholdEventHandler;
         }
@@ -1718,8 +1552,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     /*
      * @see org.rioproject.cybernode.CybernodeAdmin#setPersistentProvisioning
      */
-    public void setPersistentProvisioning(boolean provisionEnabled)
-    throws IOException {
+    public void setPersistentProvisioning(boolean provisionEnabled) throws IOException {
         if(this.provisionEnabled==provisionEnabled)
             return;
         this.provisionEnabled = provisionEnabled;

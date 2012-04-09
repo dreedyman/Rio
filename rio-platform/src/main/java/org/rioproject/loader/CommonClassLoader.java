@@ -15,12 +15,13 @@
  */
 package org.rioproject.loader;
 
+import org.rioproject.logging.WrappedLogger;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The CommonClassLoader is created by the <code>RioServiceDescriptor</code> when starting a Rio
@@ -76,7 +77,7 @@ Codebase: "serviceX-dl.jar rio-api.jar jsk-lib-dl.jar"<br>
  */
 public class CommonClassLoader extends URLClassLoader {
     private static final String COMPONENT = "org.rioproject.loader";
-    private static Logger logger = Logger.getLogger(COMPONENT);
+    private static WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
     private static final Map<String, URL[]> components = new HashMap<String, URL[]>();
     private static CommonClassLoader instance;
 
@@ -117,11 +118,7 @@ public class CommonClassLoader extends URLClassLoader {
                     buffer.append(", ");
                 buffer.append(urls[i].toExternalForm());
             }
-            logger.log(Level.FINEST,
-                       "Context ClassLoader={0} URLs={1}",
-                       new Object[] {cl.toString(),
-                                     buffer.toString()
-            });
+            logger.finest("Context ClassLoader=%s URLs=%s", cl.toString(), buffer.toString());
         } 
         return(urls);
     }
@@ -169,10 +166,9 @@ public class CommonClassLoader extends URLClassLoader {
 			try {
 				loadClass(name);
 				exists = true;
-			} catch(Throwable t) {
-				if(logger.isLoggable(Level.FINEST))
-					logger.finest("Failed to find class "+name);
-			}
+            } catch(Throwable t) {
+                logger.finest("Failed to find class %s", name);
+            }
 		}        
 		return(exists);
 	}
@@ -228,7 +224,7 @@ public class CommonClassLoader extends URLClassLoader {
                 added = true;
                 if(logger.isLoggable(Level.FINEST)) {
                     String action = (toAdd?"Adding":"Replacing");
-                    logger.finest(action+" Component "+name);
+                    logger.finest(action+" %s Component %s ", action, name);
                 }
                 components.put(name, urls);
             } else {
@@ -240,10 +236,8 @@ public class CommonClassLoader extends URLClassLoader {
                             buffer.append(":");
                         buffer.append(codebase[i].toExternalForm());
                     }
-                    logger.log(Level.FINEST,
-                               "Component "+name+" has "+
-                               "already been registered with a "+
-                               "codebase of "+buffer.toString());
+                    logger.finest("Component %s has already been registered with a codebase of %s",
+                                  name, buffer.toString());
                 }
             }
 		}

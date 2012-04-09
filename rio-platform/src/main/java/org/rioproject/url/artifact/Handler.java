@@ -15,6 +15,7 @@
  */
 package org.rioproject.url.artifact;
 
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resolver.*;
 
 import java.io.IOException;
@@ -23,7 +24,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>A stream handler for URLs with the <code>artifact</code> protocol. The <code>artifact</code> URL
@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  */
 
 public class Handler extends URLStreamHandler {
-    private static final Logger logger = Logger.getLogger(Handler.class.getName());
+    private static final WrappedLogger logger = WrappedLogger.getLogger(Handler.class.getName());
 
     protected URLConnection openConnection(URL url) throws IOException {
         if(url==null)
@@ -72,7 +72,7 @@ public class Handler extends URLStreamHandler {
         try {
             resolver = ResolverHelper.getResolver();
         } catch (ResolverException e) {
-            logger.log(Level.WARNING, "Could not get a ResolverInstance", e);
+            logger.log(Level.WARNING, e, "Could not get a ResolverInstance");
             throw new IOException(e.getLocalizedMessage());
         }
         URL u;
@@ -80,7 +80,7 @@ public class Handler extends URLStreamHandler {
             //resolver.getClassPathFor(artifact, repositories.toArray(new RemoteRepository[repositories.size()]));
             u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
         } catch (ResolverException e) {
-            logger.log(Level.WARNING, "Could not resolve "+a, e);
+            logger.log(Level.WARNING, e, "Could not resolve %s", a);
             throw new IOException(e.getLocalizedMessage());
         }
 

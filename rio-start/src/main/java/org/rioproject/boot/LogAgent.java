@@ -15,6 +15,9 @@
  */
 package org.rioproject.boot;
 
+import org.rioproject.logging.FileHandler;
+import org.rioproject.logging.WrappedLogger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,7 +28,7 @@ import java.util.logging.*;
 /**
  * Check that the Java logging configuration has a console available. If a console is not available, remove
  * any {@link java.util.logging.ConsoleHandler}s, and set the system out and system error to the name
- * of the service being started as determined by the {@code org.rioproject.service} system property.
+ * of the service log file.
  * <p/>
  * <p>The resulting {@code service}.out and {@code service}.err wil be stored in the location declared by the
  * {@code RIO_LOG_DIR} system property.
@@ -34,11 +37,12 @@ import java.util.logging.*;
  * @author Dennis Reedy
  */
 public class LogAgent {
-    private static final Logger logger = Logger.getLogger(AgentHook.class.getName());
+    private static final WrappedLogger logger = WrappedLogger.getLogger(AgentHook.class.getName());
     private LogAgent() {
     }
 
     public static void redirectIfNecessary() {
+        String lockFileName = null;
         if (System.console() == null) {
             for (Enumeration<String> e = LogManager.getLogManager().getLoggerNames(); e.hasMoreElements(); ) {
                 Logger l = Logger.getLogger(e.nextElement());
@@ -47,51 +51,41 @@ public class LogAgent {
                         h.close();
                         l.removeHandler(h);
                     }
+                    if(h instanceof org.rioproject.logging.FileHandler) {
+                        lockFileName = ((FileHandler)h).getLockFileName();
+                    }
                 }
             }
             StringBuilder builder = new StringBuilder();
-            builder.append("\n================================\n");
-            builder.append("There is no console support, removed ConsoleHandler\n");
+            builder.append("\nThere is no console support, removed ConsoleHandler\n");
 
             String logDir = System.getProperty("RIO_LOG_DIR");
-            if (logDir != null) {
+            if (logDir != null && lockFileName!=null) {
+                File lockFile = new File(lockFileName);
+                int ndx = lockFile.getName().indexOf(".lck");
+                String fileName = lockFile.getName().substring(0, ndx);
                 File rioLogDir = new File(logDir);
-                String service = System.getProperty("org.rioproject.service");
-                File serviceOutput = getOutputFile(service, new File(rioLogDir, service + "-0.out"));
-                File serviceError = getOutputFile(service, new File(rioLogDir, service + "-0.err"));
-                redirect(serviceOutput, "standard output");
-                redirect(serviceError, "standard error");
+                File serviceOutput = new File(rioLogDir, fileName + ".out");
+                File serviceError = new File(rioLogDir, fileName + ".err");
+                redirect(serviceOutput, true);
+                redirect(serviceError, false);
                 builder.append("System out has been redirected to ").append(serviceOutput.getPath()).append("\n");
                 builder.append("System err has been redirected to ").append(serviceError.getPath()).append("\n");
             }
-            builder.append("================================");
             logger.info(builder.toString());
         }
     }
 
-    private static void redirect(final File file, final String type) {
+    private static void redirect(final File file, boolean isOut) {
         try {
-            System.setOut(new PrintStream(new FileOutputStream(file)));
-        } catch (FileNotFoundException e) {
-            logger.log(Level.WARNING, "Redirecting " + type + " to " + file.getPath(), e);
-        }
-    }
-
-    private static File getOutputFile(final String service, File f) {
-        File logFile;
-        if (f.exists()) {
-            int i = 1;
-            /* Get extension */
-            String ext = f.getName();
-            ext = ext.substring(ext.lastIndexOf("."));
-            File dir = f.getParentFile();
-            while (f.exists()) {
-                f = new File(dir, service + "-" + (i++) + ext);
+            if(isOut) {
+                System.setOut(new PrintStream(new FileOutputStream(file)));
+            } else {
+                System.setErr(new PrintStream(new FileOutputStream(file)));
             }
-            logFile = f;
-        } else {
-            logFile = f;
+        } catch (FileNotFoundException e) {
+            String type = isOut?"standard output":"standard error";
+            logger.log(Level.WARNING, e, "Redirecting %s to %s", type, file.getPath());
         }
-        return logFile;
     }
 }

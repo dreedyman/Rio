@@ -19,6 +19,7 @@ import net.jini.config.Configuration;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
 import org.rioproject.deploy.*;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventHandler;
@@ -28,7 +29,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The JSBContainer implements support for a ServiceBeanContainer
@@ -59,7 +59,7 @@ public class JSBContainer implements ServiceBeanContainer {
     /** Configuration files for the shared configuration*/
     private final List<String> configurationFiles = new ArrayList<String>();
     /** Logger */
-    private static final Logger logger = Logger.getLogger("org.rioproject.cybernode");
+    private static final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.cybernode");
 
     /**
      * Create a new ServiceBeanContainer
@@ -215,7 +215,7 @@ public class JSBContainer implements ServiceBeanContainer {
         } catch(Throwable t) {
             if(started)
                 discarded(identifier);
-            logger.log(Level.SEVERE, "Activating service "+ CybernodeLogUtil.logName(sElem), t);
+            logger.log(Level.SEVERE, t, "Activating service %s", CybernodeLogUtil.logName(sElem));
             throw new ServiceBeanInstantiationException("Service "+ CybernodeLogUtil.logName(sElem)+ " load failed", t, true);
         } finally {
             activationInProcessCount.decrementAndGet();
@@ -295,10 +295,8 @@ public class JSBContainer implements ServiceBeanContainer {
         }
         ServiceRecord record = delegate.getServiceRecord();
         if(record==null) {
-            logger.warning("ServiceRecord for " +
-                           "["+delegate.getServiceElement().getName()+"] " +
-                           "is null, no way to notify container of " +
-                           "instantiation");
+            logger.warning("ServiceRecord for [%s] is null, no way to notify container of instantiation",
+                           delegate.getServiceElement().getName());
             return;
         }
         notifyOnInstantiation(delegate.getServiceRecord());
