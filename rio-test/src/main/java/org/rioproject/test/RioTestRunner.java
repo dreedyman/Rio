@@ -25,7 +25,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
-import org.rioproject.log.RioLogFormatter;
+import org.rioproject.logging.RioLogFormatter;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
