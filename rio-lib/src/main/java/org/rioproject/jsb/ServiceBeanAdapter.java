@@ -456,16 +456,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     }
 
     /**
-     * Get the ComputeResourceObserver
-     *
-     * @return ComputeResourceObserver The ComputeResourceObserver for the
-     * service bean 
-     */
-    protected ComputeResourceObserver getComputeResourceObserver() {
-        return(computeResourceObserver);
-    }
-
-    /**
      * Called from initialize() to prepare JMX resources such as registering with
      * MBeanServer
      *
@@ -714,17 +704,16 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#advertise()
      */
     public void advertise() throws IOException {
-        if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("["+context.getServiceElement().getName()+"] ServiceBeanAdapter.advertise()");
-        }
         if (jsbState.getState() == ServiceBeanState.ADVERTISED) {
             if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Already advertised ["+context.getServiceElement().getName()+"]");
+                logger.log(Level.FINEST,
+                           "Already advertised [{0}]", ServiceElementUtil.getLoggingName(context));
             }
             return;
         }
-        if (logger.isLoggable(Level.FINEST))
-            logger.finest("["+context.getServiceElement().getName()+"] verify transition");
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "[{0}] verify transition", ServiceElementUtil.getLoggingName(context));
+        }
         jsbState.verifyTransition(ServiceBeanState.ADVERTISED);
 
         ArrayList<Entry> attrList = new ArrayList<Entry>();
@@ -776,8 +765,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             attrList.addAll(((JSBContext)context).getAttributes());
         }
 
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+context.getServiceElement().getName()+"] do the join");
+        if(logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "[{0}] do the join", ServiceElementUtil.getLoggingName(context));
+        }
         LeaseRenewalManager lrm = null;
         /*
          * The advertise call may be invoked via the MBeanServer. If it is, the
@@ -828,8 +818,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             /* Get the Uuid*/
             getUuid();            
             /* Create the ServiceID */
-            if (logger.isLoggable(Level.FINE))
-                logger.fine("Create ServiceID from UUID " + uuid.toString());
+            if (logger.isLoggable(Level.FINE)){
+                logger.log(Level.FINE, "Create ServiceID from UUID ", uuid.toString());
+            }
             serviceID = new ServiceID(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
 
         }
@@ -838,8 +829,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                          attrList.toArray(new Entry[attrList.size()]),
                          context.getDiscoveryManagement(),
                          lrm);
-        if (logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST, "["+context.getServiceElement().getName()+"] set state to ADVERTISED");
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "[{0}] set state to ADVERTISED", ServiceElementUtil.getLoggingName(context));
+        }
         jsbState.setState(ServiceBeanState.ADVERTISED);
     }
 
@@ -1014,22 +1006,28 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             snapshotter.interrupt();
 
         if (computeResourceObserver != null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Disconnect from ComputeResource");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Disconnect from ComputeResource",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             computeResourceObserver.setIgnore(true);
             computeResourceObserver.disconnect();
         }
         /* Unregister the ServiceElement observer */
         if(sElemChangeMgr!=null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Unregister from ServiceElement observer");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Unregister from ServiceElement observer",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             context.getServiceBeanManager().removeListener(sElemChangeMgr);
             sElemChangeMgr = null;
         }
 
         if (slaEventHandler != null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Terminate the SLAEventHandler");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Terminate the SLAEventHandler",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             slaEventHandler.terminate();
             slaEventHandler = null;
         }
@@ -1042,8 +1040,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* No longer discoverable */
         try {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Unadvertise service");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Unadvertise service",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             unadvertise();
         } catch (IllegalStateException e) {
             logger.log(Level.WARNING, "Unadvertising service", e);
@@ -1051,8 +1051,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* Terminate AssociationManagement */        
         if(context!=null && context.getAssociationManagement()!=null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Terminate AssociationManagement");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Terminate AssociationManagement",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             context.getAssociationManagement().terminate();
         }
 
@@ -1063,16 +1065,20 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* If we're sending heartbeats, stop them */
         if (heartbeatClient != null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Terminating HeartbeatClient");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Terminating HeartbeatClient",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             heartbeatClient.terminate();
         }
 
         /* Terminate DiscoveryManagement */
         try {
             if(context!=null && context.getDiscoveryManagement()!=null) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("["+context.getServiceElement().getName()+"] Terminating DiscoveryManagement");
+                if(logger.isLoggable(Level.FINEST)) {
+                    logger.log(Level.FINEST, "[{0}] Terminating DiscoveryManagement",
+                               ServiceElementUtil.getLoggingName(context));
+                }
                 context.getDiscoveryManagement().terminate();
             }
         } catch (Throwable t) {
@@ -1082,8 +1088,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         /* Unexport the ServiceAdmin */
         if (admin != null) {
             try {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("["+context.getServiceElement().getName()+"] Unexport the ServiceAdmin");
+                if(logger.isLoggable(Level.FINEST)) {
+                    logger.log(Level.FINEST, "[{0}] Unexport the ServiceAdmin",
+                               ServiceElementUtil.getLoggingName(context));
+                }
                 admin.unexport(true);
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Unexporting ServiceAdminImpl", e);
@@ -1093,8 +1101,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         /* Unexport the service */
         try {
             if(System.getProperty("StaticCybernode")==null) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("["+context.getServiceElement().getName()+"] Unexport the service");
+                if(logger.isLoggable(Level.FINEST)) {
+                    logger.log(Level.FINEST, "[{0}] Unexport the service",
+                               ServiceElementUtil.getLoggingName(context));
+                }
                 stop(force);
             }
         } catch (IllegalStateException e) {
@@ -1115,20 +1125,22 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
 
         /* Discard */
         if(context!=null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+context.getServiceElement().getName()+"] Discard the service");
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "[{0}] Discard the service",
+                           ServiceElementUtil.getLoggingName(context));
+            }
             ServiceBeanManager serviceBeanManager = context.getServiceBeanManager();
             if(serviceBeanManager != null) {
                 DiscardManager discardMgr = serviceBeanManager.getDiscardManager();
                 if (discardMgr != null) {
                     discardMgr.discard();
                 } else {
-                    logger.warning("["+context.getServiceElement().getName()+"] " +
-                                   "DiscardManager is null, unable to discard");
+                    logger.log(Level.WARNING, "[{0}] DiscardManager is null, unable to discard",
+                               ServiceElementUtil.getLoggingName(context));
                 }
             } else {
-                logger.warning("["+context.getServiceElement().getName()+"] " +
-                               "ServiceBeanManager is null, unable to discard");
+                logger.log(Level.FINEST, "[{0}] ServiceBeanManager is null, unable to discard",
+                           ServiceElementUtil.getLoggingName(context));
             }
             context = null;
         }
@@ -1317,9 +1329,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                                                             serviceBeanComponent,
                                                             "adminExporter",
                                                             basicExporter);
-        if(logger.isLoggable(Level.FINER))
-            logger.finer("["+context.getServiceElement().getName()+"] using admin exporter: "+
-                         adminExporter.toString());
+        if(logger.isLoggable(Level.FINER)) {
+            logger.log(Level.FINER, "[{0}] using admin exporter: {1}",
+                       new Object[]{ServiceElementUtil.getLoggingName(context), adminExporter.toString()});
+        }
         return(adminExporter);
     }
 
@@ -1379,12 +1392,12 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             boolean unexported = false;
             long start = System.currentTimeMillis();
             if(!force) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Unexporting "+
-                                  context.getServiceElement().getName()+", " +
-                                  "maxUnexportDelay="+
-                                  maxUnexportDelay+", " +
-                                  "unexportRetryDelay="+unexportRetryDelay);
+                if(logger.isLoggable(Level.FINEST)) {
+                    logger.log(Level.FINEST, "Unexporting {0}, maxUnexportDelay={1}, unexportRetryDelay={2}",
+                               new Object[]{ServiceElementUtil.getLoggingName(context),
+                                            maxUnexportDelay,
+                                            unexportRetryDelay});
+                }
                 /*
                 final long end_time = start + maxUnexportDelay;
                 while(!unexported && (System.currentTimeMillis() < end_time)) {
@@ -1438,8 +1451,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
             if(logger.isLoggable(Level.FINEST)) {
                 long end = System.currentTimeMillis();
-                logger.finest("Unexported "+context.getServiceElement().getName()+", " +
-                              "["+unexported+"] time allotted : "+(end-start)+" milliseconds");
+                logger.log(Level.FINEST, "Unexported {0}, [{1}] time allotted {2} milliseconds",
+                           new Object []{ServiceElementUtil.getLoggingName(context), unexported, (end - start)});
             }
         }
 
@@ -1534,9 +1547,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         /**
          * Signal this thread that it should take a snapshot
          */
-        public synchronized void takeSnapshot() {
+        /*public synchronized void takeSnapshot() {
             notifyAll();
-        }
+        }*/
 
         public void run() {
             while (!isInterrupted()) {
