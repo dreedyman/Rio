@@ -306,8 +306,12 @@ public class ClassBundle implements Serializable {
      */
     public int hashCode() {
         int hc = 17;
-        hc = 37*hc+className.hashCode();
-        hc = 37*hc+getJARList().hashCode();
+        hc = 37*hc+(className!=null?className.hashCode():0);
+        if(!getJARList().isEmpty()) {
+            hc = 37*hc+getJARList().hashCode();
+        } else {
+            hc = 37*hc+(artifact!=null?artifact.hashCode():0);
+        }
         return(hc);
     }
 
@@ -320,11 +324,13 @@ public class ClassBundle implements Serializable {
         if(!(obj instanceof ClassBundle))
             return(false);
         ClassBundle that = (ClassBundle)obj;
-        if(this.className.equals(that.className)) {
-            if(this.artifact!=null && that.artifact!=null) {
-                return this.artifact.equals(that.artifact);
-            } else {
-                return this.getJARList().equals(that.getJARList());
+        if(this.className!=null && that.className!=null) {
+            if(this.className.equals(that.className)) {
+                if(this.artifact!=null && that.artifact!=null) {
+                    return this.artifact.equals(that.artifact);
+                } else {
+                    return this.getJARList().equals(that.getJARList());
+                }
             }
         }
         return(false);
