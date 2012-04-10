@@ -16,6 +16,7 @@
 package org.rioproject.gnostic;
 
 import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
@@ -24,7 +25,6 @@ import org.rioproject.monitor.ProvisionMonitor;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Context for operating with deployed services
@@ -32,11 +32,10 @@ import java.util.logging.Logger;
 public class DeployedServiceContext {
     private ProvisionMonitor monitor;
     private final static Map<ServiceElement, OperationalStringManager> deployed = new HashMap<ServiceElement, OperationalStringManager>();
-    private static final Logger logger = Logger.getLogger(DeployedServiceContext.class.getName());
+    private static final WrappedLogger logger = WrappedLogger.getLogger(DeployedServiceContext.class.getName());
 
     void addDeployedService(ServiceElement serviceElement, OperationalStringManager opMgr) {
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Adding deployed service %s", getNameForLoggingWithInstanceID(serviceElement)));
+        logger.fine("Adding deployed service %s", getNameForLoggingWithInstanceID(serviceElement));
         deployed.put(serviceElement, opMgr);
     }
 
@@ -55,8 +54,8 @@ public class DeployedServiceContext {
         if(entry==null) {
             entry = doLookupServiceEntry(serviceName, opstring);
             if(entry==null) {
-                logger.warning(String.format("Unable to obtain ServiceElement for service name: %s, opstring: %s. %s",
-                                             serviceName, opstring, deployed));
+                logger.warning("Unable to obtain ServiceElement for service name: %s, opstring: %s. %s",
+                               serviceName, opstring, deployed);
                 return;
             } else {
                 deployed.put(entry.getKey(), entry.getValue());
@@ -69,7 +68,7 @@ public class DeployedServiceContext {
         try {
             opMgr.increment(serviceElement, true, null);
         } catch (Throwable t) {
-            logger.log(Level.WARNING, String.format("While trying to increment [%s] services", serviceName), t);
+            logger.log(Level.WARNING, t, "While trying to increment [%s] services", serviceName);
         }
     }
 
@@ -81,12 +80,11 @@ public class DeployedServiceContext {
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
         int count = 0;
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Increment service %s", getNameForLogging(serviceElement)));
+        logger.fine("Increment service %s", getNameForLogging(serviceElement));
         try {
             count = opMgr.getServiceBeanInstances(serviceElement).length;
         } catch (Throwable t) {
-            logger.log(Level.WARNING, String.format("While trying to get the service count for %s", serviceName), t);
+            logger.log(Level.WARNING, t, "While trying to get the service count for %s", serviceName);
         }
         return count;
     }
@@ -99,8 +97,7 @@ public class DeployedServiceContext {
             return;
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Decrement service %s", getNameForLogging(serviceElement)));
+        logger.fine("Decrement service %s", getNameForLogging(serviceElement));
         try {
             ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(serviceElement);
             if(instances.length>0) {
@@ -108,7 +105,7 @@ public class DeployedServiceContext {
                 opMgr.decrement(instance, true, true);
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING, String.format("While trying to get the decrement %s", serviceName), t);
+            logger.log(Level.WARNING, t, "While trying to get the decrement %s", serviceName);
         }
     }
 
@@ -164,10 +161,8 @@ public class DeployedServiceContext {
             if(instances.length>0)
                 service = (T)instances[0].getService();
         } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       String.format("While trying to get [%s] services from the OperationalStringManager",
-                                     serviceElement.getName()),
-                       t);
+            logger.log(Level.WARNING, t,
+                       "While trying to get [%s] services from the OperationalStringManager", serviceElement.getName());
         }
         return service;
     }
@@ -192,8 +187,7 @@ public class DeployedServiceContext {
                     service = (T)instances[0].getService();
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       String.format("While trying to lookup [%s] services", serviceName), t);
+            logger.log(Level.WARNING, t, "While trying to lookup [%s] services", serviceName);
         }
         return service;
     }
@@ -219,12 +213,11 @@ public class DeployedServiceContext {
                         sb.append("\t").append(c.getName()).append("\n");
                     }
                 }
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer(sb.toString());
+                logger.finer(sb.toString());
                 services.add((T)instance.getService());
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING, String.format("Getting service instances of type %s", type.getName()), t);
+            logger.log(Level.WARNING, t, "Getting service instances of type %s", type.getName());
         }
         return services;
     }
@@ -250,7 +243,7 @@ public class DeployedServiceContext {
                 }
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING, String.format("Looking up services of type %s", type.getName()), t);
+            logger.log(Level.WARNING, t, "Looking up services of type %s", type.getName());
         }
         return services;
     }
@@ -273,9 +266,8 @@ public class DeployedServiceContext {
                 entry = new AbstractMap.SimpleEntry(serviceElement, opMgr);
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING,
-                       String.format("Looking up services entry for service: %s, opstring: %s", serviceName, opstringName),
-                       t);
+            logger.log(Level.WARNING, t,
+                       "Looking up services entry for service: %s, opstring: %s", serviceName, opstringName);
         }
         return entry;
     }

@@ -28,6 +28,7 @@ import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
@@ -52,7 +53,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Watch data replicator used by Gnostic in order to feed the CEPSession engine
@@ -70,7 +70,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
         new LinkedBlockingQueue<Calculable>();
     private ExecutorService execService;
     private final DeployedServiceContext context;
-    private Logger logger = Logger.getLogger(AssociationsWatchDataReplicator.class.getName());
+    private WrappedLogger logger = WrappedLogger.getLogger(AssociationsWatchDataReplicator.class.getName());
 
     public AssociationsWatchDataReplicator(CEPSession cepSession,
                                            DeployedServiceContext context,
@@ -91,12 +91,11 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
         execService.submit(new CEPWorker());
 
         createWatchDataReplicator();
-        logger.info(String.format("Created WatchDataReplicator proxy for %s", ruleMap));
+        logger.info("Created WatchDataReplicator proxy for %s", ruleMap);
 
         /* Get ServiceHandles */
         for (Association<Object> association : associations) {
-            logger.info(String.format("Number of [%s] instances: %d",
-                                      association.getName(), association.getServiceCount()));
+            logger.info("Number of [%s] instances: %d", association.getName(), association.getServiceCount());
             for (Object o : association) {
                 ServiceHandle sHandle = getServiceHandle(o,
                                                          getWatches(association, ruleMap),
@@ -122,9 +121,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 WatchDataSource wds = entry.getValue();
                 wds.addWatchDataReplicator(wdr);
                 watchDataSources.put(wds, handle.getElem());
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer(String.format("Subscribed to Watch [%s], service [%s]",
-                                               entry.getKey(), handle.getElem().getName()));
+                logger.finer("Subscribed to Watch [%s], service [%s]", entry.getKey(), handle.getElem().getName());
             }
             context.addDeployedService(handle.getElem(), handle.getOpMgr());
         } catch (RemoteException e) {
@@ -148,9 +145,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 }
             }
         }
-        if(logger.isLoggable(Level.FINER))
-            logger.finer(String.format("Associated service [%s] has the following watches %s",
-                                       association.getName(), watches));
+        logger.finer("Associated service [%s] has the following watches %s", association.getName(), watches);
         return watches;
     }
     
@@ -175,9 +170,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 for(String watch : watches) {
                     try {
                         WatchDataSource wds = s.fetch(watch);
-                        if(logger.isLoggable(Level.FINER)) {
-                            logger.finer(String.format("WatchDataSource for watch [%s]: %s", watch, wds));
-                        }
+                        logger.finer("WatchDataSource for watch [%s]: %s", watch, wds);
                         if(wds==null)
                             continue;
                         handle.addToWatchMap(watch, wds);
@@ -208,14 +201,14 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                     break;
                 }
             }
-            logger.info(String.format("OperationalString for service: [%s]", opStringName));
+            logger.info("OperationalString for service: [%s]", opStringName);
             if(opStringName!=null) {
                 try {
                     OperationalStringManager opMgr = ((DeployAdmin)monitor.getAdmin()).getOperationalStringManager(opStringName);
                     ServiceElement elem = opMgr.getServiceElement(o);
                     if(elem==null) {
-                        logger.warning(String.format("Unable to obtain ServiceElement for service [%s], cannot create AssociationsWatchDataReplicator.",
-                                                     o));
+                        logger.warning("Unable to obtain ServiceElement for service [%s], cannot create AssociationsWatchDataReplicator.",
+                                       o);
                         return null;
                     }
                     handle.setElem(elem);
@@ -263,10 +256,9 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                             if(r instanceof Watchable) {
                                 w = (Watchable)r;
                             } else {
-                                logger.warning(String.format("Could not get Watchable from Registry at " +
-                                                             "[%s:%d], unable to create AssociationsWatchDataReplicator " +
-                                                             "for service [%s]",
-                                                             address, registryPort, elem.getName()));
+                                logger.warning("Could not get Watchable from Registry at " +
+                                               "[%s:%d], unable to create AssociationsWatchDataReplicator for service [%s]",
+                                               address, registryPort, elem.getName());
                                 return null;
                             }
                         } else {
@@ -276,8 +268,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                         for(String watch : watches) {
                             try {
                                 WatchDataSource wds = w.fetch(watch);
-                                if(logger.isLoggable(Level.FINER))
-                                    logger.finer(String.format("WatchDataSource for watch [%s]: %s", watch, wds));
+                                logger.finer("WatchDataSource for watch [%s]: %s", watch, wds);
                                 if(wds==null)
                                     continue;
                                 handle.addToWatchMap(watch, wds);
@@ -292,7 +283,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                         }
 
                     } else {
-                        logger.warning(String.format("Unable to obtain Cybernode for service [%s]", elem.getName()));
+                        logger.warning("Unable to obtain Cybernode for service [%s]", elem.getName());
                     }
                 } catch (RemoteException e) {
                     handle = null;
@@ -328,12 +319,11 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                     ServiceElement elem = entry.getValue();
                     try {
                         wds.removeWatchDataReplicator(wdr);
-                        logger.info(String.format("Unregistered from Watch [%s], service [%s]", wds.getID(), elem.getName()));
+                        logger.info("Unregistered from Watch [%s], service [%s]", wds.getID(), elem.getName());
                     } catch (RemoteException e) {
-                        if(logger.isLoggable(Level.FINER))
-                            logger.finer(String.format("Non-fatal problem unregistering from remote WatchDataSource, most likely " +
-                                                       "the service is no longer present. %s:%s",
-                                                       e.getClass().getName(), e.getMessage()));
+                        logger.finer("Non-fatal problem unregistering from remote WatchDataSource, most likely " +
+                                     "the service is no longer present. %s:%s",
+                                     e.getClass().getName(), e.getMessage());
                     }
                 }
             }
@@ -346,9 +336,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
     }
 
     public void replicate(Calculable calculable) {
-        if(logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "Inserted into CEP engine event [{0}]", new Object[]{calculable});
-        }
+        logger.finest("Inserted into CEP engine event [%s]", calculable);
         calculablesQ.add(calculable);
     }
 
@@ -364,8 +352,7 @@ class AssociationsWatchDataReplicator implements RemoteWatchDataReplicator {
                 try {
                     calculable = calculablesQ.take();
                 } catch (InterruptedException e) {
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer("CEPWorker breaking out of main loop: have been Interrupted");
+                    logger.finer("CEPWorker breaking out of main loop: have been Interrupted");
                     break;
                 }
                 if(calculable!=null) {
