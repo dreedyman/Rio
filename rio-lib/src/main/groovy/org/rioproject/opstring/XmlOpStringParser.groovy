@@ -16,7 +16,6 @@
 package org.rioproject.opstring
 
 import java.lang.reflect.Method
-import java.util.logging.Logger
 import org.rioproject.associations.AssociationDescriptor
 
 import org.rioproject.core.provision.SystemRequirements
@@ -31,7 +30,8 @@ import org.rioproject.system.capability.software.SoftwareSupport
 import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 import org.rioproject.opstring.handlers.*
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
+import org.rioproject.core.provision.StagedSoftware
 
 /**
  * Handles the parsing of an XML OperationalString
@@ -231,7 +231,7 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
                     sysComp.classpath = bundle.JARs
             }
             def exec = it.Exec
-            def execDescriptor
+            def execDescriptor = null
             if (exec.size() == 1) {
                 execDescriptor = parseElement(exec[0], global, sDescriptor, opString)
             }
@@ -240,9 +240,9 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
                 parseElement(it, global, sDescriptor, opString)
             }
             if (softwareDownload)
-                sysComp.stagedSoftware = softwareDownload
+                sysComp.stagedSoftware = softwareDownload as StagedSoftware[]
             if (execDescriptor)
-                sysComp.execDescriptor = execDescriptor
+                sysComp.execDescriptor = execDescriptor as ExecDescriptor
             sysRequirements.addSystemComponent(sysComp)
         }
         return sysRequirements
@@ -323,8 +323,8 @@ class XmlOpStringParser extends AbstractOpStringParser implements OpStringParser
      * @return An Map of name value pairs
      */
     def Map<String, String> parseEnvironment(elem) {
-        def map
-        return elem.Property.each {
+        def map = [:]
+        elem.Property.each {
             map[it.Name] = it.Value
         }
         return map

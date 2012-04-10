@@ -17,9 +17,9 @@ package org.rioproject.opstring.handlers
 
 import org.rioproject.opstring.OpString
 import org.rioproject.opstring.OpStringParser
-import java.util.logging.Logger
+
 import java.util.logging.Level
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Handles the parsing for the Include element

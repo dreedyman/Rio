@@ -19,8 +19,8 @@ import org.rioproject.core.provision.StagedData
 import org.rioproject.core.provision.StagedSoftware
 import org.rioproject.core.provision.StagedSoftware.PostInstallAttributes
 import org.rioproject.opstring.OpStringParser
-import java.util.logging.Logger
-import org.rioproject.log.GroovyLogger
+
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Handles the parsing for StagedSoftware elements

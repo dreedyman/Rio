@@ -32,7 +32,7 @@ import net.jini.discovery.DiscoveryManagement
 import java.util.logging.Level
 import org.rioproject.deploy.ProvisionManager
 import org.rioproject.net.HostUtil
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Provides an implementation of  {@link Harvester}

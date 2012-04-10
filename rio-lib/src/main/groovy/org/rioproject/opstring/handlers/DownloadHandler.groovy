@@ -16,8 +16,8 @@
 package org.rioproject.opstring.handlers
 
 import org.rioproject.core.provision.StagedData
-import java.util.logging.Logger
-import org.rioproject.log.GroovyLogger
+
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Handles the parsing for Download elements

@@ -16,11 +16,11 @@
 package org.rioproject.opstring.handlers
 
 import java.util.concurrent.TimeUnit
-import java.util.logging.Logger
+
 import org.rioproject.associations.AssociationDescriptor
 import org.rioproject.associations.AssociationType
 import org.rioproject.opstring.ParsedService
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Handles the parsing for Association elements

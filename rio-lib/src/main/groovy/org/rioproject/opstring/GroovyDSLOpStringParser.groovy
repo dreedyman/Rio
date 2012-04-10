@@ -23,7 +23,7 @@ import java.util.logging.Level
 import org.rioproject.RioVersion
 import org.rioproject.resolver.Resolver
 import org.rioproject.resolver.ResolverHelper
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
 
 /**
  * A parser that handles the Groovy Domain Specific Language support for Rio
