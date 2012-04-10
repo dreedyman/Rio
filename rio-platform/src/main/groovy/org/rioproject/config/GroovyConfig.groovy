@@ -20,10 +20,10 @@ import net.jini.config.ConfigurationException
 import net.jini.config.NoSuchEntryException
 import net.jini.config.ConfigurationNotFoundException
 import net.jini.config.ConfigurationFile
-import java.util.logging.Logger
+
 import java.util.logging.Level
 import java.lang.reflect.Constructor
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Provides support for Groovy based configuration.

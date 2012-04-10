@@ -51,7 +51,7 @@ import org.rioproject.resources.servicecore.ServiceStopHandler
 import org.rioproject.opstring.OAR
 import org.rioproject.resources.util.FileUtils
 import java.util.logging.Level
-import org.rioproject.log.GroovyLogger
+import org.rioproject.logging.GroovyLogger
 
 /**
  * Simplifies the running of core Rio services
@@ -637,7 +637,8 @@ class TestManager {
         logger.info "Logging for $service will be sent to ${logDir}"
         if(logger.isLoggable(Level.INFO)) {
             logger.info "Starting ${service}, using starter config [${starter}]"
-        } else if(logger.isLoggable(Level.FINE)) {
+        }
+        if(logger.isLoggable(Level.FINE)) {
             logger.fine "Exec command line: ${cmdLine}"
         }
         Process process = Runtime.runtime.exec(cmdLine)
