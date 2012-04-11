@@ -16,6 +16,7 @@
 package org.rioproject.logging;
 
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
@@ -30,6 +31,7 @@ import java.util.logging.Logger;
 public class WrappedLogger {
     private final Logger logger;
     private static WrappedLogger instance;
+    private static final String THIS_CLASS_NAME = WrappedLogger.class.getName();
 
     private WrappedLogger(final String name) {
         logger = Logger.getLogger(name);
@@ -53,59 +55,59 @@ public class WrappedLogger {
 
     public void severe(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.SEVERE)) {
-            logger.severe(format(formatString, objects));
+            doLog(createLogRecord(Level.SEVERE, format(formatString, objects)));
         }
     }
 
     public void warning(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.WARNING)) {
-            logger.warning(format(formatString, objects));
+            doLog(createLogRecord(Level.WARNING, format(formatString, objects)));
         }
     }
 
     public void config(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.CONFIG)) {
-            logger.config(format(formatString, objects));
+            doLog(createLogRecord(Level.CONFIG, format(formatString, objects)));
         }
     }
 
     public void info(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.INFO)) {
-            logger.info(format(formatString, objects));
+            doLog(createLogRecord(Level.INFO, format(formatString, objects)));
         }
     }
 
     public void fine(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.FINE)) {
-            logger.fine(format(formatString, objects));
+            doLog(createLogRecord(Level.FINE, format(formatString, objects)));
         }
     }
 
     public void finer(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.FINER)) {
-            logger.finer(format(formatString, objects));
+            doLog(createLogRecord(Level.FINER, format(formatString, objects)));
         }
     }
 
     public void finest(final String formatString, final Object... objects) {
         if(logger.isLoggable(Level.FINEST)) {
-            logger.config(format(formatString, objects));
+            doLog(createLogRecord(Level.FINEST, format(formatString, objects)));
         }
     }
 
     public void log(final Level level, final Throwable t, final String formatString, final Object... objects) {
         if(logger.isLoggable(level)) {
-            logger.log(level, format(formatString, objects), t);
+            doLog(createLogRecord(level, format(formatString, objects), t));
         }
     }
 
     public void log(final Level level, final String message, final Throwable t) {
         if(logger.isLoggable(level)) {
-            logger.log(level, message, t);
+            doLog(createLogRecord(level, message, t));
         }
     }
 
-    public boolean isLoggable(Level level) {
+    public boolean isLoggable(final Level level) {
         return logger.isLoggable(level);
     }
 
@@ -118,6 +120,35 @@ public class WrappedLogger {
             return String.format(formatString, objects);
         else
             return formatString;
+    }
+
+    private LogRecord createLogRecord(final Level l, final String s) {
+        return new LogRecord(l, s);
+    }
+
+    private LogRecord createLogRecord(final Level l, final String s, final Throwable t) {
+        LogRecord lr = new LogRecord(l, s);
+        lr.setThrown(t);
+        return lr;
+    }
+
+    private void doLog(final LogRecord lr) {
+        StackTraceElement element = null;
+        for (StackTraceElement ste : new Throwable().getStackTrace()) {
+            if (!THIS_CLASS_NAME.equals(ste.getClassName())) {
+                element = ste;
+                break;
+            }
+        }
+        if (element != null) {
+            lr.setSourceClassName(element.getClassName());
+            lr.setSourceMethodName(element.getMethodName());
+        }
+        try {
+            logger.log(lr);
+        } catch (Throwable t) {
+            /* should not happen, and if it does just eat it. */
+        }
     }
 }
 
