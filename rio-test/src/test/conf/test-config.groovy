@@ -43,6 +43,10 @@ ForkedServicePreDestroyTest {
     //harvest = true
 }
 
+BackupTest {
+    groups = "BackupTest"
+}
+
 SimpleForkTest {
     groups = "SimpleForkTest"
     numCybernodes = 1
