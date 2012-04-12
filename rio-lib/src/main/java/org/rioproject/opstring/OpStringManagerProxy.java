@@ -23,7 +23,7 @@ import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
-//import net.sf.cglib.proxy.*;
+
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.resources.client.DiscoveryManagementPool;
@@ -40,8 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A generated proxy to assist with the management of
- * {@link OperationalStringManager} instances.
+ * A generated proxy to assist with the management of {@link OperationalStringManager} instances.
  *
  * @author Dennis Reedy
  */
@@ -69,14 +68,6 @@ public class OpStringManagerProxy {
         if(discoMgmt==null) {
             throw new IllegalStateException("DiscoveryManagement has not been set into proxy");
         }
-      /*  Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[]{OpStringManager.class});
-        enhancer.setUseFactory(false);
-        enhancer.setCallback(new OpStringManagerDispatcher(name,
-                                                           manager,
-                                                           discoMgmt));
-        return (OperationalStringManager)enhancer.create();
-    }*/
         return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                                                                  new Class[]{OperationalStringManager.class},
                                                                  new OpStringManagerDispatcher(name, manager, discoMgmt));
@@ -104,14 +95,6 @@ public class OpStringManagerProxy {
         assert dMgr!=null;
         if(discoMgmt==null)
             discoMgmt = dMgr;
-        /*Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[]{OpStringManager.class});
-        enhancer.setUseFactory(false);
-        enhancer.setCallbackFilter(FILTER);
-        enhancer.setCallbacks(new Callback[] {
-            new OpStringManagerDispatcher(name, manager, dMgr),
-            NoOp.INSTANCE});        
-        return (OperationalStringManager)enhancer.create();*/
         return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                                                                  new Class[]{OperationalStringManager.class},
                                                                  new OpStringManagerDispatcher(name, manager, dMgr));
@@ -156,46 +139,6 @@ public class OpStringManagerProxy {
             }
             lCache.addListener(this);
         }
-
- /*       public Object intercept(Object proxy,
-                                Method method,
-                                Object[] args,
-                                MethodProxy methodProxy) throws Throwable {
-            if(terminated) {
-                throw new IllegalStateException("The OpStringManagerDispatcher "+
-                                                "has been terminated, " +
-                                                "invocations through this " +
-                                                "utility are not possible " +
-                                                "in it's current state. " +
-                                                "Make sure all invoking " +
-                                                "threads are terminated to " +
-                                                "resolve this issue");
-            }
-            if(method.getName().equals("terminate")) {
-                lCache.removeListener(this);
-                monitors.clear();
-                terminated = true;
-                return null;
-            }
-            while(!terminated) {
-                try {
-                    if(manager.isManaging())
-                        break;
-                    manager = getManager();
-                } catch (Throwable t) {
-                    if(terminated)
-                        break;
-                    if(!ThrowableUtil.isRetryable(t)) {
-                        manager = getManager();
-                    } else {
-                        throw t;
-                    }
-                }
-            }
-            if(terminated)
-                return null;
-            return method.invoke(manager, args);
-        }*/
 
         public void serviceAdded(ServiceDiscoveryEvent event) {
             ServiceItem item = event.getPostEventServiceItem();
@@ -339,18 +282,5 @@ public class OpStringManagerProxy {
     public static interface OpStringManager extends OperationalStringManager {
         void terminate();
     }
-
-    /*private static final CallbackFilter FILTER = new CallbackFilter() {
-        public int accept(Method method) {
-            if (method.getParameterTypes().length == 0 &&
-                method.getName().equals("finalize") ){
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        }
-    };*/
-
 
 }
