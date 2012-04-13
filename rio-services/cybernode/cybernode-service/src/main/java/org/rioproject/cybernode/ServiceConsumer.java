@@ -357,10 +357,11 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
         for (ProvisionLeaseManager mgr : mgrs) {
             try {
+                logger.info("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: %d",
+                            deployedServices.size());
                 mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Throwable t) {
-                //if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.WARNING, "Updating ProvisionManager", t);
+                logger.log(Level.WARNING, "Updating ProvisionManager", t);
                 boolean connected = false;
 
                 /* Determine if we should even try to reconnect */
