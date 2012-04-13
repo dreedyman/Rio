@@ -16,6 +16,7 @@
 package org.rioproject.deploy;
 
 import net.jini.id.Uuid;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
 
 import java.io.Serializable;
@@ -32,20 +33,22 @@ public class ServiceStatement implements Serializable {
     /**
      * The ServiceElement
      */
-    private ServiceElement sElem;
+    private final ServiceElement sElem;
     /**
      * A Map of ServiceRecord instances
      */
     private final Map<Uuid, List<ServiceRecord>> serviceRecords = new HashMap<Uuid, List<ServiceRecord>>();
+
+    private final static WrappedLogger logger = WrappedLogger.getLogger(ServiceStatement.class.getName());
 
     /**
      * Create a ServiceStatement
      * 
      * @param sElem The sElem for the ServiceBean
      */
-    public ServiceStatement(ServiceElement sElem) {
+    public ServiceStatement(final ServiceElement sElem) {
         if(sElem == null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         this.sElem = sElem;
     }
 
@@ -75,8 +78,7 @@ public class ServiceStatement implements Serializable {
      * ServiceRecord.ACTIVE return true
      */
     public boolean hasActiveServiceRecords() {
-        ServiceRecord[] records = 
-            getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
+        ServiceRecord[] records =  getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
         return records.length != 0;
     }
 
@@ -86,13 +88,13 @@ public class ServiceStatement implements Serializable {
      * @param instantiatorID The ServiceBeanInstantiator id to store the record
      * for
      * @param record The ServiceRecord to add
-     * @throws NullPointerException If either of the parameters are null
+     * @throws IllegalArgumentException If either of the parameters are null
      */
-    public void putServiceRecord(Uuid instantiatorID, ServiceRecord record) {
+    public void putServiceRecord(final Uuid instantiatorID, final ServiceRecord record) {
         if(instantiatorID == null)
-            throw new NullPointerException("instantiatorID is null");
+            throw new IllegalArgumentException("instantiatorID is null");
         if(record == null)
-            throw new NullPointerException("record is null");
+            throw new IllegalArgumentException("record is null");
         synchronized(serviceRecords) {
             List<ServiceRecord> recordList;
             if(!serviceRecords.containsKey(instantiatorID))
@@ -135,7 +137,7 @@ public class ServiceStatement implements Serializable {
      * provided type(s). If there are no records found, a zero length array will
      * be returned
      */
-    public ServiceRecord[] getServiceRecords(int type) {
+    public ServiceRecord[] getServiceRecords(final int type) {
         return (filterServiceRecords(type, getServiceRecords()));
     }
 
@@ -150,9 +152,9 @@ public class ServiceStatement implements Serializable {
      * with the provided key. A new array will be allocated each time. If there
      * are no ServiceRecords found, an empty array will be returned
      */
-    public ServiceRecord[] getServiceRecords(Uuid instantiatorID, int type) {
+    public ServiceRecord[] getServiceRecords(final Uuid instantiatorID, final int type) {
         if(instantiatorID == null)
-            throw new NullPointerException("key is null");
+            throw new IllegalArgumentException("key is null");
         ServiceRecord[] records;
         synchronized(serviceRecords) {
             List<ServiceRecord> recordList;
@@ -173,7 +175,7 @@ public class ServiceStatement implements Serializable {
      * provided identifier. If there are no records found, a zero length array
      * will be returned
      */
-    public ServiceRecord[] getServiceRecords(Uuid sbid) {
+    public ServiceRecord[] getServiceRecords(final Uuid sbid) {
         return (filterServiceRecords(sbid, getServiceRecords()));
     }
 
@@ -187,39 +189,53 @@ public class ServiceStatement implements Serializable {
      * provided identifier. If there are no records found, a zero length array
      * will be returned
      */
-    public ServiceRecord[] getServiceRecords(Uuid sbid, Uuid instantiatorID) {
-        return (filterServiceRecords(sbid,
-                                     getServiceRecords(instantiatorID, ServiceRecord.ACTIVE_SERVICE_RECORD
-                                                                       | ServiceRecord.INACTIVE_SERVICE_RECORD)));
+    public ServiceRecord[] getServiceRecords(final Uuid sbid, final Uuid instantiatorID) {
+        return (filterServiceRecords(sbid, getServiceRecords(instantiatorID,
+                                                             ServiceRecord.ACTIVE_SERVICE_RECORD |
+                                                             ServiceRecord.INACTIVE_SERVICE_RECORD)));
     }
 
     /*
      * Filter ServiceRecord instances based on type
      */
-    private ServiceRecord[] filterServiceRecords(int type, ServiceRecord[] records) {
+    private ServiceRecord[] filterServiceRecords(final int type, final ServiceRecord[] records) {
         if(type == 0 || type != (type & (ServiceRecord.ACTIVE_SERVICE_RECORD | ServiceRecord.INACTIVE_SERVICE_RECORD)))
             throw new IllegalArgumentException("invalid recordType");
         if(((type & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) && ((type & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0)) {
             return (records);
         }
         ArrayList<ServiceRecord> list = new ArrayList<ServiceRecord>();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Filtering ").append(records.length).append(" ServiceRecords");
         for (ServiceRecord record : records) {
+            sb.append("\n");
+            String sType = null;
             if ((type & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) {
-                if ((record.getType() & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0)
+                if ((record.getType() & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) {
                     list.add(record);
+                    sType = "ACTIVE_SERVICE_RECORD";
+                }
             }
             if ((type & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0) {
-                if ((record.getType() & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0)
+                if ((record.getType() & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0) {
                     list.add(record);
+                    sType = sType==null?"INACTIVE_SERVICE_RECORD": sType+" | INACTIVE_SERVICE_RECORD";
+                }
             }
+            sb.append("\tAdding ").append(sType).append(" ServiceRecord for ");
+            sb.append(record.getServiceElement().getOperationalStringName());
+            sb.append("/").append(record.getServiceElement().getName());
+            sb.append(":").append(record.getServiceElement().getServiceBeanConfig().getInstanceID());
+            sb.append(" ").append(record.getServiceID().toString());
         }
+        logger.finer(sb.toString());
         return (list.toArray(new ServiceRecord[list.size()]));
     }
 
     /*
      * Filter ServiceRecord instances based on an identifier
      */
-    private ServiceRecord[] filterServiceRecords(Uuid identifier, ServiceRecord[] records) {
+    private ServiceRecord[] filterServiceRecords(final Uuid identifier, final ServiceRecord[] records) {
         ArrayList<ServiceRecord> list = new ArrayList<ServiceRecord>();
         for (ServiceRecord record : records) {
             if (record.getServiceID().equals(identifier))
