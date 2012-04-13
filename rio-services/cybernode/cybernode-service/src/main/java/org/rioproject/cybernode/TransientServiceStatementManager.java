@@ -23,7 +23,7 @@ import org.rioproject.deploy.ServiceStatementManager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+
 import java.util.logging.Level;
 
 /**
@@ -56,33 +56,43 @@ public class TransientServiceStatementManager implements ServiceStatementManager
     /**
      * @see org.rioproject.deploy.ServiceStatementManager#get
      */
-    public synchronized ServiceStatement[] get() {
-        return(statementMap.values().toArray(new ServiceStatement[statementMap.values().size()]));
+    public ServiceStatement[] get() {
+        ServiceStatement[] statements;
+        synchronized (statementMap) {
+            statements = statementMap.values().toArray(new ServiceStatement[statementMap.values().size()]);
+        }
+        return statements;
     }
 
     /**
      * @see org.rioproject.deploy.ServiceStatementManager#get
      */
-    public synchronized ServiceStatement get(ServiceElement sElem) {
-         return(statementMap.get(sElem));
+    public ServiceStatement get(ServiceElement sElem) {
+        ServiceStatement statement;
+        synchronized (statementMap) {
+            statement = statementMap.get(sElem);
+        }
+         return statement;
     }
 
     /**
      * @see org.rioproject.deploy.ServiceStatementManager#record
      */
-    public synchronized void record(ServiceStatement statement) {
-        ServiceElement key = statement.getServiceElement();
-        boolean active = statement.hasActiveServiceRecords();
-        if (active) {
-            statementMap.put(key, statement);
-        } else {
-            remove(key);
+    public void record(ServiceStatement statement) {
+        synchronized (statementMap) {
+            ServiceElement key = statement.getServiceElement();
+            boolean active = statement.hasActiveServiceRecords();
+            if (active) {
+                statementMap.put(key, statement);
+
+            } else {
+                remove(key);
+            }
         }
     }
 
     private void remove(ServiceElement key) {
         statementMap.remove(key);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("%s is Inactive, Removed Records", key.getName());
+        logger.fine("%s is Inactive, Removed Records", key.getName());
     }
 }
