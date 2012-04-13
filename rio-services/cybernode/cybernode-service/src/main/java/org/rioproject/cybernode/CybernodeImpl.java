@@ -298,13 +298,30 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @see org.rioproject.deploy.ServiceBeanInstantiator#getServiceRecords
      */
     public ServiceRecord[] getServiceRecords(int filter) {
-        List<ServiceRecord> list = new ArrayList<ServiceRecord>();
+        Set<ServiceRecord> recordSet = new HashSet<ServiceRecord>();
         ServiceStatement[] statements = serviceStatementManager.get();
         for (ServiceStatement statement : statements) {
             ServiceRecord[] records = statement.getServiceRecords(getUuid(), filter);
-            list.addAll(Arrays.asList(records));
+            recordSet.addAll(Arrays.asList(records));
         }
-        return(list.toArray(new ServiceRecord[list.size()]));
+        if(logger.isLoggable(Level.FINER)) {
+            StringBuilder sb = new StringBuilder();
+            for(ServiceRecord record : recordSet) {
+                if(sb.length()>0) {
+                    sb.append("\n");
+                }
+                sb.append("\t");
+                sb.append(record.getServiceElement().getOperationalStringName()).append("/");
+                sb.append(record.getServiceElement().getName());
+                sb.append(", instance:").append(record.getServiceElement().getServiceBeanConfig().getInstanceID());
+                sb.append(", ").append(record.getServiceID().toString());
+            }
+            String newLine = recordSet.isEmpty()?"":"\n";
+
+            String type = filter==ServiceRecord.ACTIVE_SERVICE_RECORD?"ACTIVE_SERVICE_RECORD":"INACTIVE_SERVICE_RECORD";
+            logger.finer("Returning (%d) %s ServiceRecords%s%s", recordSet.size(), type, newLine, sb.toString());
+        }
+        return(recordSet.toArray(new ServiceRecord[recordSet.size()]));
     }
 
     /**
@@ -391,6 +408,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         else {
             ServiceStatement statement = serviceStatementManager.get(serviceRecord.getServiceElement());
             if(statement!=null) {
+                if(serviceRecord.getType()!=ServiceRecord.INACTIVE_SERVICE_RECORD) {
+                    serviceRecord.setType(ServiceRecord.INACTIVE_SERVICE_RECORD);
+                    logger.warning("Fixing ServiceRecord for %s, notified as being discarded, but as ServiceRecord.ACTIVE_SERVICE_RECORD",
+                                   CybernodeLogUtil.logName(serviceRecord.getServiceElement()));
+                }
                 statement.putServiceRecord(getUuid(), serviceRecord);
                 serviceStatementManager.record(statement);
                 if(loaderLogger.isLoggable(Level.INFO)) {
@@ -1269,8 +1291,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         public void run() {
             ServiceRecord[] records = container.getServiceRecords();
             for (ServiceRecord record : records) {
-                ServiceStatement statement =
-                    serviceStatementManager.get(record.getServiceElement());
+                ServiceStatement statement = serviceStatementManager.get(record.getServiceElement());
                 if (statement != null) {
                     statement.putServiceRecord(getUuid(), record);
                     serviceStatementManager.record(statement);
