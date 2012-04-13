@@ -215,7 +215,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         synchronized(provisioners) {
             if(provisioners.contains(item.serviceID))
                 return;
-            logger.info("ProvisionManager discovered %s", item.service.toString());
+            logger.fine("ProvisionManager discovered %s", item.service.toString());
             provisioners.add(item.serviceID);
         }
         register(item);
@@ -272,7 +272,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 return;
             }            
             leaseTable.put(item.service, new ProvisionLeaseManager(lease, provisioner, item.serviceID));
-            logger.info("Registered to a ProvisionManager");
+            logger.info("Registered to a ProvisionManager, now connected to [%d] ProvisionMonitor instances",
+                        provisioners.size());
                         
         } catch(Throwable t) {
             provisioners.remove(item.serviceID);
@@ -294,7 +295,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
     /**
      * Cancel the registration to a monitor
      *
-     * @param monitor The monior to cancel
+     * @param monitor The monitor to cancel
      */
 
     void cancelRegistration(Object monitor) {
@@ -357,7 +358,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
         for (ProvisionLeaseManager mgr : mgrs) {
             try {
-                logger.info("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: %d",
+                logger.fine("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: %d",
                             deployedServices.size());
                 mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Throwable t) {
