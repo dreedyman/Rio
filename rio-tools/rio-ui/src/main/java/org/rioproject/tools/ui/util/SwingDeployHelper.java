@@ -106,16 +106,12 @@ public class SwingDeployHelper {
                     dAdmin.deploy(artifact);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    if(e instanceof OperationalStringException) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<html><body>Failure trying to deploy ")
-                        .append(artifact).append("<br><center>")
-                        .append(e.getLocalizedMessage()).append("</center></body></html>");
-
-                        JOptionPane.showMessageDialog(frame,
-                                                      sb.toString(),
-                                                      "Deployment Failure",
-                                                      JOptionPane.ERROR_MESSAGE);
+                    Throwable cause = e.getCause();
+                    if(cause != null) {
+                        Throwable nested = cause.getCause();
+                        Util.showError((nested==null?cause:nested),
+                                       frame,
+                                       "Failure trying to deploy artifact" + artifact);
                     } else {
                         Util.showError(e, frame, "Failure trying to deploy artifact" + artifact);
                     }
