@@ -111,11 +111,11 @@ public class ServiceRecord implements Comparable, Serializable {
                          int type,
                          Date instantiated) {        
         if(uuid == null)
-            throw new NullPointerException("uuid is null");
+            throw new IllegalArgumentException("uuid is null");
         if(sElem == null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         if(hostName == null)
-            throw new NullPointerException("hostName is null");
+            throw new IllegalArgumentException("hostName is null");
         setType(type);
         this.uuid = uuid;
         this.sElem = sElem;
@@ -251,7 +251,7 @@ public class ServiceRecord implements Comparable, Serializable {
      */
     public void addResourceCost(ResourceCost resourceCost) {
         if(resourceCost == null)
-            throw new NullPointerException("resourceCost is null");
+            throw new IllegalArgumentException("resourceCost is null");
         synchronized(resourceCosts) {
             ResourceCost[] rCosts =
                 resourceCosts.toArray(new ResourceCost[resourceCosts.size()]);
