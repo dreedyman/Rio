@@ -21,7 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds the attributes of a URL of type <code>artifact</code>
+ * Holds the attributes of a URL of type <code>artifact</code>.
+ *
+ * <p>The URL scheme that the {@code ArtifactURLConfiguration} decomposes is as follows:<br/>
+ * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;[repositoryId@]repository]</pre></p>
  *
  * @author Dennis Reedy
  */
@@ -32,12 +35,22 @@ public class ArtifactURLConfiguration {
     public ArtifactURLConfiguration(String path) {
         int index = path.indexOf(";");
         if(index!=-1) {
-            String repoString = path.substring(index+1, path.length());
+            String repositoryString = path.substring(index+1, path.length());
             path = path.substring(0, index);
-            String[] parts = repoString.split(";");
+            String[] parts = repositoryString.split(";");
             for(String s : parts) {
+                String url;
+                String id = null;
+                String[] subParts = s.split("@");
+                if(subParts.length>1) {
+                    id = subParts[0];
+                    url = subParts[1];
+                } else {
+                    url = subParts[0];
+                }
                 RemoteRepository r = new RemoteRepository();
-                r.setUrl(s);
+                r.setUrl(url);
+                r.setId(id);
                 repositories.add(r);
             }
         }
