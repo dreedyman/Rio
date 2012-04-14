@@ -30,7 +30,7 @@ import java.util.logging.Level;
  * provides a way to resolve an artifact's dependencies.</p>
  *
  * <p>The URL scheme for this handler is:<br/>
- * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;repository]</pre></p>
+ * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;[repositoryId@]repository]</pre></p>
  *
  * <p>This handler has to be installed before any connection is made by using the following code:
  * <pre>URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());</pre>
