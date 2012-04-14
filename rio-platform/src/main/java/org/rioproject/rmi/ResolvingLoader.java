@@ -15,6 +15,7 @@
  */
 package org.rioproject.rmi;
 
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
@@ -26,6 +27,7 @@ import java.net.*;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.RMIClassLoaderSpi;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * An <code>RMIClassLoader</code> provider that supports the resolving of artifacts based on the
@@ -43,6 +45,7 @@ import java.util.*;
 public class ResolvingLoader extends RMIClassLoaderSpi {
     private final Map<String, String> artifactToCodebase = new HashMap<String, String>();
     private static final Resolver resolver;
+    private static final WrappedLogger logger = WrappedLogger.getLogger(ResolvingLoader.class.getName());
     static {
         try {
             resolver = ResolverHelper.getResolver();
@@ -98,9 +101,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             HashMap loaderTableMap = (HashMap)loaderTable.get(null);
             findAndRemove(serviceLoader, loaderTableMap);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Failure accessing the loaderTable field", e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Failure accessing the loaderTable field", e);
         }
     }
 
@@ -112,6 +115,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             }
             if(adaptedCodebase==null) {
                 try {
+                    logger.fine("Resolve %s ", codebase);
                     StringBuilder builder = new StringBuilder();
                     String[] codebaseParts = codebase.split(" ");
                     for(String codebasePart : codebaseParts) {
@@ -130,9 +134,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                         artifactToCodebase.put(codebase, adaptedCodebase);
                     }
                 } catch (ResolverException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, e, "Unable to resolve %s", codebase);
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, e, "The codebase %s is malformed", codebase);
                 }
             }
         } else {
@@ -156,9 +160,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     //toRemove.put(toCheck, key);
                 }
             } catch (NoSuchFieldException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Failure accessing the parent field", e);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Failure accessing the parent field", e);
             }
         }
 
