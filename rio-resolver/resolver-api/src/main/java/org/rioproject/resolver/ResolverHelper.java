@@ -113,7 +113,7 @@ public class ResolverHelper {
                         if(jarFile.exists()) {
                             s = jarFile.toURI().toString();
                         } else {
-                            logger.warning(jarFile.getPath()+" NOT FOUND");
+                            logger.warning(String.format("%s NOT FOUND", jarFile.getPath()));
                         }
                     }
                     if(s!=null) {
@@ -125,7 +125,7 @@ public class ResolverHelper {
             }
         }
         if(logger.isLoggable(Level.FINE))
-            logger.fine("Artifact: "+artifact+", resolved jars "+jars);
+            logger.fine(String.format("Artifact: %s, resolved jars %s", artifact, jars));
         return jars.toArray(new String[jars.size()]);
     }
 
@@ -149,7 +149,7 @@ public class ResolverHelper {
                 resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
                                                     Thread.currentThread().getContextClassLoader());
             } catch (MalformedURLException e) {
-                throw new ResolverException("Creating ClassLoader to load "+resolverJar.getPath(), e);
+                throw new ResolverException(String.format("Creating ClassLoader to load %s", resolverJar.getPath()), e);
             }
         return getResolver(resolverLoader);
     }
@@ -164,7 +164,7 @@ public class ResolverHelper {
             resolverJarFile = resolverLibDir+File.separator+resolverJarName;
         }
         if(logger.isLoggable(Level.FINE))
-            logger.fine("#######################\n"+resolverJarFile+"\n#######################");
+            logger.fine(String.format("#######################\n%s\n#######################", resolverJarFile));
         return resolverJarFile;
     }
 
@@ -189,7 +189,7 @@ public class ResolverHelper {
         try {
             r = doGetResolver(resourceLoader);
             if(logger.isLoggable(Level.FINE))
-                logger.fine("Selected Resolver: " +(r==null?"No Resolver configuration found":r.getClass().getName()));
+                logger.fine(String.format("Selected Resolver: %s", (r==null?"No Resolver configuration found":r.getClass().getName())));
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
             }
@@ -216,7 +216,7 @@ public class ResolverHelper {
                 sb.append(r.getClass().getName());
                 num++;
             }            
-            logger.fine("Found "+num+" Resolvers: ["+sb.toString()+"]");
+            logger.fine(String.format("Found %s Resolvers: [%s]", num, sb.toString()));
         }
         for(Resolver r : loader) {
             if(r!=null) {
