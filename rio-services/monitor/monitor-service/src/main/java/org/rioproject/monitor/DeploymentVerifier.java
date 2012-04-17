@@ -16,6 +16,7 @@
 package org.rioproject.monitor;
 
 import org.rioproject.config.Constants;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.*;
@@ -29,15 +30,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class is used to verify that either jars declared in an OperationalString can be served, or if the
  * OperationalString is configured to use artifacts, that required artifacts have been resolved
  */
 public class DeploymentVerifier {
-    static Logger logger = Logger.getLogger(DeploymentVerifier.class.getName());
+    static WrappedLogger logger = WrappedLogger.getLogger(DeploymentVerifier.class.getName());
 
     public void verifyDeploymentRequest(DeployRequest request) throws ResolverException, IOException {
         for(OperationalString o : request.getOperationalStrings()) {
@@ -79,24 +78,18 @@ public class DeploymentVerifier {
                 didResolve = true;
             }
             for(String jar : export.getJARNames()) {
-                if(sb1.length()>0)
-                    sb1.append(", ");
-                else
-                    sb1.append("\n");
+                sb1.append("\n");
                 sb1.append(export.getCodebase()).append(jar);
             }
         }
         if(didResolve)
             service.setRemoteRepositories(resolver.getRemoteRepositories());
         sb.append(sb1.toString());
-        if (logger.isLoggable(Level.INFO)) {
-            logger.info(service.getName()+" derived classpath for loading artifact "+sb.toString());
-        }
+        logger.fine("%s derived classpath for loading artifact %s", service.getName(), sb.toString());
     }
 
     void resolve(ClassBundle bundle, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Artifact: "+bundle.getArtifact()+", resolver: "+resolver.getClass().getName());
+        logger.finest("Artifact: %s, resolver: %s", bundle.getArtifact(), resolver.getClass().getName());
         String artifact = bundle.getArtifact();
         if (artifact != null) {
             List<String> jars = new ArrayList<String>();
@@ -109,8 +102,6 @@ public class DeploymentVerifier {
                         jars.add(jar);
                 }
             }
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Artifact: "+bundle.getArtifact()+", resolved jars "+jars);
             bundle.setCodebase("file://");
             bundle.setJARs(jars.toArray(new String[jars.size()]));
         }

@@ -31,6 +31,7 @@ import net.jini.security.ProxyPreparer;
 import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.deploy.ServiceProvisionEvent;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventHandler;
 import org.rioproject.monitor.managers.FixedServiceManager;
@@ -58,7 +59,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ServiceProvisioner is responsible for the managing the leases of
@@ -105,7 +105,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     private ProxyPreparer instantiatorPreparer;
     private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** Logger instance */
-    private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
+    private static final WrappedLogger logger = WrappedLogger.getLogger(CONFIG_COMPONENT);
     private boolean terminating = false;
     private boolean terminated = false;
 
@@ -165,8 +165,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                             ServiceResourceSelector.class,
                                                             new RoundRobinSelector());
         selector.setLandlordLessor(landlord);
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("ServiceResourceSelector : " + selector.getClass().getName());
+        logger.finest("ServiceResourceSelector : %s", selector.getClass().getName());
 
         this.eventSource = eventSource;
         this.watch = watch;
@@ -292,9 +291,8 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
 
         if(logger.isLoggable(Level.FINE)) {
             int instantiatorCount = landlord.total();
-            logger.log(Level.FINE,
-                       "Registered new "+name+" @ {0}, count [{1}]",
-                       new Object[]{resourceCapability.getAddress(), instantiatorCount});
+            logger.fine("Registered new %s, @ %s, count [%d]",
+                        name, resourceCapability.getAddress(), instantiatorCount);
         }
         /* Process all provision types of Fixed first */
         fixedServiceManager.process(serviceResource);
@@ -331,50 +329,38 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         boolean updated = false;
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
-                           "Update from [{0}:{1}], current serviceCount {2}, serviceLimit {3}",
-                           new Object[] {ir.getHostAddress(),
-                                         resource.toString(),
-                                         deployedServices.size(),
-                                         serviceLimit
-                           });
-            }
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Checking for InstantiatorResource match");
+            logger.fine("Update from [%s:%s], current serviceCount %d, serviceLimit %d",
+                        ir.getHostAddress(),
+                        resource.toString(),
+                        deployedServices.size(),
+                        serviceLimit);
+
+            logger.finest("Checking for InstantiatorResource match");
             if(ir.getInstantiator().equals(resource)) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Matched InstantiatorResource");
+                logger.finest("Matched InstantiatorResource");
                 if(!landlord.ensure(svcResource))
                     throw new UnknownLeaseException("No matching Lease found");
                 updated = true;
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Set updated resource capabilities");
+                logger.finest("Set updated resource capabilities");
                 ir.setResourceCapability(updatedCapabilities);
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Set serviceLimit to "+serviceLimit);
+                logger.finest("Set serviceLimit to %d", serviceLimit);
                 ir.setServiceLimit(serviceLimit);
                 try {
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Set deployedServices, was: "+ir.getServiceCount()+", " +
-                                      "updated count is now: "+deployedServices.size());
-                    }
+                    logger.finest("Set deployedServices, was: %d, updated count is now: %d",
+                                  ir.getServiceCount(), deployedServices.size());
                     ir.setDeployedServices(deployedServices);
                 } catch (Throwable t) {
                     logger.log(Level.WARNING, "Getting ServiceRecords", t);
                 }
                 /* Process all provision types of Fixed first */
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Process the "+fixedServiceManager.getType());
+                logger.finest("Process the %s", fixedServiceManager.getType());
                 fixedServiceManager.process(svcResource);
                 /* See if any dynamic provision types are pending */
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Process the "+pendingMgr.getType());
+                logger.finest("Process the %s" ,pendingMgr.getType());
                 pendingMgr.process();
                 break;
             } else {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Did not match InstantiatorResource");
+                logger.finest("Did not match InstantiatorResource");
             }
         }
 
@@ -407,7 +393,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      */
     public void dispatch(ProvisionRequest request, ServiceResource resource, long index) {
         if(terminating || terminated) {
-            logger.info("Request to dispatch "+ LoggingUtil.getLoggingName(request)+" ignored, utility has terminated");
+            logger.info("Request to dispatch %s ignored, utility has terminated", LoggingUtil.getLoggingName(request));
             return;
         }
         try {
@@ -419,22 +405,20 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             } else {
                 int total = selector.getServiceResources().length;
                 String action = (request.type==ProvisionRequest.Type.PROVISION? "provision":"relocate");
-                String failureReason = "A compute resource could not be " +
-                                       "obtained to "+action+" ["+ LoggingUtil.getLoggingName(request)+"], " +
-                                       "total registered="+total;
-                if(logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE,  failureReason);
-                }
+                String failureReason =
+                    String.format("A compute resource could not be obtained to %s [%s], total registered=%d",
+                                  action, LoggingUtil.getLoggingName(request), total);
+                logger.fine(failureReason);
+
                 /* If we have a ServiceProvisionListener, notify the
                  * listener */
                 if(request.svcProvisionListener!=null) {
                     try {
                         request.svcProvisionListener.failed(request.sElem, true);
                     } catch(NoSuchObjectException e) {
-                        logger.log(Level.WARNING,
-                                   "ServiceBeanInstantiatorListener failure notification did not succeed, "+
-                                   "[java.rmi.NoSuchObjectException: "+e.getLocalizedMessage()+"], remove "+
-                                   "ServiceBeanInstantiatorListener ["+request.svcProvisionListener+"]");
+                        logger.warning("ServiceBeanInstantiatorListener failure notification did not succeed, "+
+                                       "[java.rmi.NoSuchObjectException: %s], remove ServiceBeanInstantiatorListener [%s]",
+                                       e.getLocalizedMessage(), request.svcProvisionListener);
                         request.svcProvisionListener = null;
                     } catch(Exception e) {
                         logger.log(Level.WARNING, "ServiceBeanInstantiatorListener notification", e);
@@ -445,7 +429,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                 if(request.type==ProvisionRequest.Type.PROVISION) {
                     pendingMgr.addProvisionRequest(request, index);
                     if(logger.isLoggable(Level.FINE))
-                        logger.fine("Wrote [" + LoggingUtil.getLoggingName(request) + "] to " + pendingMgr.getType());
+                        logger.fine("Wrote [%s] to %s", LoggingUtil.getLoggingName(request), pendingMgr.getType());
                     if(logger.isLoggable(Level.FINEST))
                         pendingMgr.dumpCollection();
                 }
@@ -474,11 +458,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         public void removed(LeasedResource resource) {
             InstantiatorResource ir = (InstantiatorResource)((ServiceResource)resource).getResource();
             int instantiatorCount = landlord.total();
-            if(logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE,
-                           "{0} @ {1} removed, count now [{2}]",
-                           new Object[]{ir.getName(), ir.getResourceCapability().getAddress(), instantiatorCount});
-            }
+            logger.fine("%s @ %s removed, count now [%d]", ir.getResourceCapability().getAddress(), instantiatorCount);
         }
     }
 }
