@@ -92,6 +92,8 @@ public class ResolverHelper {
                                    Resolver resolver,
                                    RemoteRepository[] repositories,
                                    String codebase) throws ResolverException {
+        if(logger.isLoggable(Level.FINE))
+            logger.fine(String.format("Using Resolver %s", resolver.getClass().getName()));
         List<String> jars = new ArrayList<String>();
         if (artifact != null) {
             String[] artifactParts = artifact.split(" ");
@@ -163,8 +165,8 @@ public class ResolverHelper {
             String resolverLibDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator+"resolver";
             resolverJarFile = resolverLibDir+File.separator+resolverJarName;
         }
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("#######################\n%s\n#######################", resolverJarFile));
+        if(logger.isLoggable(Level.CONFIG))
+            logger.config(String.format("Resolver JAR file: %s", resolverJarFile));
         return resolverJarFile;
     }
 
@@ -173,7 +175,7 @@ public class ResolverHelper {
      * configurable provider. The resolver provider can be specified by providing
      * a resource named "META-INF/services/org.rioproject.resolver.Resolver"
      * containing the name of the provider class. If multiple resources with
-     * that name are available, then the one used will be the last one returned
+     * that name are available, then the one used will be the first one returned
      * by ServiceLoader.load.
      *
      * @param cl The class loader to load resources and classes, and to pass when
@@ -221,6 +223,7 @@ public class ResolverHelper {
         for(Resolver r : loader) {
             if(r!=null) {
                 resolver = r;
+                break;
             }
         }
         return resolver;
