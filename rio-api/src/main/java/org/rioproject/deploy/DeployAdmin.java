@@ -15,7 +15,6 @@
  */
 package org.rioproject.deploy;
 
-import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
