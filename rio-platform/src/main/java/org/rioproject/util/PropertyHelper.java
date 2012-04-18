@@ -15,8 +15,10 @@
  */
 package org.rioproject.util;
 
+import java.util.Properties;
+
 /**
- * Property helper
+ * Property helper.
  *
  * @author Dennis Reedy
  */
@@ -24,8 +26,10 @@ public class PropertyHelper {
     public static final String[] PARSETIME = {"${", "}"};
     public static final String[] RUNTIME = {"$[", "]"};
 
+    private PropertyHelper() {}
+
     /**
-     * Expand any properties in the String. Properties are declared with 
+     * Expand any properties in the String. Properties are declared with
      * the pattern of : <code>${property}</code>
      *
      * @param arg The string with properties to expand, must not be null
@@ -38,7 +42,7 @@ public class PropertyHelper {
      * @throws IllegalArgumentException if any of the arguments are
      * <code>null</code>
      */
-    public static String expandProperties(String arg) {
+    public static String expandProperties(final String arg) {
         return expandProperties(arg, PARSETIME);
     }
 
@@ -59,7 +63,7 @@ public class PropertyHelper {
      * <code>null</code> or if the delimeters argument does not
      * contain at least 2 entries, or if a property value cannot be obtained
      */
-    public static String expandProperties(String arg, String[] delimeters) {
+    public static String expandProperties(final String arg, final String[] delimeters) {
         if(arg ==null)
             throw new IllegalArgumentException("arg is null");
         if(delimeters == null)
@@ -83,6 +87,60 @@ public class PropertyHelper {
                     result.append(java.io.File.pathSeparator);
                 } else {
                     String value = System.getProperty(prop);
+                    if(value == null)
+                        throw new IllegalArgumentException("property "+
+                                                           "["+prop+"] "+
+                                                           "not declared");
+                    result.append(value);
+                }
+                s = e+start.length()+prop.length()+end.length();
+            } else {
+                result.append(start);
+                s = e+start.length();
+            }
+        }
+        result.append(arg.substring(s));
+        return (result.toString());
+    }
+
+    /**
+     * Expand any properties in the String. Properties are declared with
+     * the pattern of : <code><start-delim>property<end-delim></code>
+     *
+     * @param arg The string with properties to expand, must not be null
+     * @param properties A {@code Properties} object to use for property replacements, must not be null.
+     *
+     * @return If the string has properties declared (in the form
+     * <start-delim>property<end-delim>), return a formatted string with the
+     * properties expanded. If there are no property elements declared,
+     * return the original string.
+     *
+     * @throws IllegalArgumentException if any of the arguments are
+     * <code>null</code>, or if a property value cannot be obtained
+     */
+    public static String expandProperties(final String arg, final Properties properties) {
+        if(arg ==null)
+            throw new IllegalArgumentException("arg is null");
+        if(properties ==null)
+            throw new IllegalArgumentException("arg is null");
+
+        String start=PARSETIME[0];
+        String end = PARSETIME[1];
+        int s = 0;
+        int e  ;
+        StringBuilder result = new StringBuilder();
+        while((e = arg.indexOf(start, s)) >= 0) {
+            String str = arg.substring(e+start.length());
+            int n = str.indexOf(end);
+            if(n != -1) {
+                result.append(arg.substring(s, e));
+                String prop = str.substring(0, n);
+                if(prop.equals("/")) {
+                    result.append(java.io.File.separator);
+                } else if(prop.equals(":")) {
+                    result.append(java.io.File.pathSeparator);
+                } else {
+                    String value = properties.getProperty(prop);
                     if(value == null)
                         throw new IllegalArgumentException("property "+
                                                            "["+prop+"] "+
