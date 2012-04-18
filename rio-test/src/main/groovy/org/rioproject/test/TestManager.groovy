@@ -216,7 +216,8 @@ class TestManager {
             exec(cybernodeStarter)
             cybernode =  (Cybernode)waitForService(Cybernode.class)
         } else {
-            println "[ERROR]: No cybernodeStarter declared in test-config"
+            logger.warning "A Cybernode has been declared to start in the test configuration "+
+                           "but there is no cybernodeStarter declared in the test-config"
         }
         return cybernode
     }
@@ -236,7 +237,8 @@ class TestManager {
             exec(cybernodeStarter)
             cybernode =  (Cybernode)waitForService(Cybernode.class)
         } else {
-            println "[ERROR]: No cybernodeStarter declared in test-config"
+            logger.warning "A Cybernode has been declared to start in the test configuration "+
+                           "but there is no cybernodeStarter declared in the test-config"
         }
         return cybernode
     }
@@ -254,7 +256,8 @@ class TestManager {
             exec(monitorStarter)
             monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         } else {
-            println "[ERROR]: No monitorStarter declared in test-config"
+            logger.warning "A Monitor has been declared to start in the test configuration "+
+                           "but there is no monitorStarter declared in the test-config"
         }
         return monitor
     }
@@ -274,7 +277,8 @@ class TestManager {
             exec(monitorStarter)
             monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         } else {
-            println "[ERROR]: No monitorStarter declared in test-config"
+            logger.warning "A Monitor has been declared to start in the test configuration "+
+                           "but there is no monitorStarter declared in the test-config"
         }
         return monitor
     }
@@ -306,7 +310,8 @@ class TestManager {
             exec(reggieStarter)
             reggie = (ServiceRegistrar)waitForService(ServiceRegistrar.class)
         } else {
-            println "[ERROR]: No reggieStarter declared in test-config"
+            logger.warning "A Lookup service has been declared to start in the test configuration "+
+                           "but there is no reggieStarter declared in the test-config"
         }
         return reggie
     }
@@ -350,7 +355,7 @@ class TestManager {
             ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
             return deploy(oar.loadOperationalStrings()[0], monitor)
         } else {
-            println "The [${opstring}] is not an artifact"
+            logger.warning "The [${opstring}] is not an artifact"
         }
         return null
     }
@@ -427,7 +432,7 @@ class TestManager {
     boolean undeploy(String name) {
         ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
         if(items.length==0) {
-            println "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
+            logger.warning "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
             return false
         }
         return undeploy(name, (ProvisionMonitor)items[0].service)
@@ -444,7 +449,7 @@ class TestManager {
             DeployAdmin dAdmin = (DeployAdmin)monitor.admin
             return dAdmin.undeploy(name)
         } else {
-            println "Cannot undeploy ${name}, ProvisionMonitor provided is null"
+            logger.warning "Cannot undeploy ${name}, ProvisionMonitor provided is null"
             return false
         }
     }
@@ -550,8 +555,7 @@ class TestManager {
             ProvisionMonitor monitor
             ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
             if(items.length==0) {
-                println "===> No discovered ProvisionMonitor instances, "+
-                        "cannot deploy HarvesterAgents"
+                logger.warning "No discovered ProvisionMonitor instances, cannot deploy HarvesterAgents"
                 return
             }
             monitor = (ProvisionMonitor)items[0].service
@@ -566,8 +570,7 @@ class TestManager {
             } catch (MalformedURLException e) {
                 File opstringFile = new File(opstring)
                 if(!opstringFile.exists())
-                    println "Cannot load [${opstringFile}], "+
-                            "Unable to deploy Harvester support."
+                    logger.warning "Cannot load [${opstringFile}], Unable to deploy Harvester support."
                 opStringUrl = opstringFile.toURI().toURL()
             }
             OpStringLoader loader = new OpStringLoader(getClass().classLoader)
@@ -586,7 +589,7 @@ class TestManager {
             }
             def h = getHarvester(serviceDiscoveryManager.discoveryManager)
             h.harvestDir = "${PropertyHelper.expandProperties(config.manager.harvestDir)}"
-            println "Harvester:: Number of physical machines = ${hosts.size()}"
+            logger.info "Harvester:: Number of physical machines = ${hosts.size()}"
             long timeout = 1000*60
             long duration = 0
             while(h.agentsHandledCount<hosts.size()) {
@@ -595,7 +598,7 @@ class TestManager {
                 if(duration >= timeout)
                     break
             }
-            println "Number of HarvesterAgents handled = ${h.agentsHandledCount}"
+            logger.info "Number of HarvesterAgents handled = ${h.agentsHandledCount}"
             h.unadvertise()
         }
     }

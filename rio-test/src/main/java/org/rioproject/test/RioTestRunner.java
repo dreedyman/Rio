@@ -25,9 +25,9 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
-import org.rioproject.logging.RioLogFormatter;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -35,10 +35,7 @@ import java.lang.reflect.Modifier;
 import java.rmi.RMISecurityManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * RioTestRunner is a custom extension of {@link BlockJUnit4ClassRunner}
@@ -54,11 +51,11 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
             System.setSecurityManager(new RMISecurityManager());
         }
         if(System.getProperty("java.util.logging.config.file")==null) {
-            Logger rootLogger = Logger.getLogger("");
-            for(Handler h : rootLogger.getHandlers()) {
-                if(h instanceof ConsoleHandler) {
-                    h.setFormatter(new RioLogFormatter());
-                }
+            LogManager logManager = LogManager.getLogManager();
+            try {
+                logManager.readConfiguration(Thread.currentThread().getClass().getResourceAsStream("/default-logging.properties"));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
