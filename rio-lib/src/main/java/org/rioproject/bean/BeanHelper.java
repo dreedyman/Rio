@@ -44,6 +44,9 @@ public class BeanHelper {
     public static void invokeLifeCycle(Class<? extends Annotation> annClass,
                                        String methodName,
                                        Object bean) throws Exception {
+        if(bean==null) {
+            return;
+        }
         /* First check if the annotation is declared */
         Method m = getAnnotatedMethod(bean, annClass);
         if (m != null) {
