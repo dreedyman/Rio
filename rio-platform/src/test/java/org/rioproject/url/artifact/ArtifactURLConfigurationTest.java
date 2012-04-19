@@ -40,7 +40,7 @@ public class ArtifactURLConfigurationTest {
 
     @Test
     public void testArtifactConfigurationWithRepositoryId() {
-        ArtifactURLConfiguration config = new ArtifactURLConfiguration("org.foo:bar:1.0;baz@http://blah:8080");
+        ArtifactURLConfiguration config = new ArtifactURLConfiguration("org.foo:bar:1.0;http://blah:8080@baz");
         Assert.assertEquals(1, config.getRepositories().length);
         Assert.assertEquals("baz", config.getRepositories()[0].getId());
     }
