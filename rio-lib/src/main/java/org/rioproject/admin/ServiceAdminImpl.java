@@ -49,15 +49,15 @@ public class ServiceAdminImpl implements ServiceAdmin {
     /** ServiceBeanContext */
     private ServiceBeanContext context;
     /** The Exporter for the ServiceAdmin */
-    protected Exporter exporter;    
+    protected final Exporter exporter;
     /** The ServiceAdminProxy */
     protected ServiceAdminProxy adminProxy;
     /** A snapshot handler */
-    SnapshotHandler snapshotHandler;
+    private SnapshotHandler snapshotHandler;
     /** The time the service was started */
-    long started;
+    private final long started;
     /** A Logger */
-    static Logger logger = Logger.getLogger("org.rioproject.resources.servicecore");
+    private static Logger logger = Logger.getLogger("org.rioproject.admin");
 
     /**
      * Create a ServiceAdmin Impl
@@ -139,8 +139,10 @@ public class ServiceAdminImpl implements ServiceAdmin {
      * This method terminates the service
      */
     public void destroy() {
-        service.destroy();
-        service = null;
+        if(service!=null) {
+            service.destroy();
+            service = null;
+        }
     }
 
     /*-------------------
@@ -189,7 +191,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public Object start() throws ServiceBeanControlException {
         Object proxy;
         try {
-            proxy = service.start(context); 
+            proxy = service.start(context);
         } catch(Throwable t) {
             throw new ServiceBeanControlException("start failed", t);
         }
@@ -263,7 +265,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
     }
 
     public void addLookupAttributes(Entry[] attrs) {
-        //service.addAttributes(attrs);        
+        //service.addAttributes(attrs);
         JoinManager mgr = service.getJoinManager();
         if(mgr!=null) {
             if(attrs != null && attrs.length != 0)
