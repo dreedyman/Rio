@@ -135,3 +135,12 @@ AssociationFutureTest {
     numMonitors = 1
     numLookups = 1
 }
+
+HasExtraAttributesTest {
+    groups = "HasExtraAttributesTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/opstring/space.groovy'
+    autoDeploy = true
+}
