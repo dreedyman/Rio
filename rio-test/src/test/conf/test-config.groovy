@@ -81,6 +81,7 @@ MaxPerMachineTest {
 }
 
 HarvesterTest {
+    groups = "HarvesterTest"
     numLookups = 1
     numMonitors = 1
     numCybernodes = 2
@@ -126,6 +127,7 @@ EnlistReleaseTest {
 }
 
 LoadArtifactAsOpStringTest {
+    groups = "LoadArtifactAsOpStringTest"
     opstring = 'org.rioproject.test:deploy-oar-test:1.0'
 }
 
