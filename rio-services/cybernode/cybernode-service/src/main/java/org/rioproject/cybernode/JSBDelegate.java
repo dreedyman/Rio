@@ -456,7 +456,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
                     /* Check if we are forking a service bean */
                     if(sElem.forkService() && !runningForked()) {
-                        execManager = new ServiceBeanExecManager(identifier, sElem, container);
+                        execManager = new ServiceBeanExecManager(sElem, container);
                         try {
                             /* Get matched PlatformCapability instances to apply */
                             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
