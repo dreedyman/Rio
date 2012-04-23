@@ -24,7 +24,6 @@ import net.jini.discovery.DiscoveryGroupManagement;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.*;
@@ -52,6 +51,8 @@ import java.util.logging.Logger;
  */
 public class ServiceElementUtil {
     private static Logger logger = Logger.getLogger("org.rioproject.jsb.ServiceElementUtil");
+
+    private ServiceElementUtil() {}
 
     public static String getLoggingName(ServiceBeanContext context) {
         return getLoggingName(context.getServiceElement());
@@ -116,55 +117,7 @@ public class ServiceElementUtil {
                 }
             }
         }
-
         return wDesc;
-    }
-
-    /**
-     * Set the codebase for the ServiceElement
-     * @param sElem The ServiceElement
-     * @param codebase The codebase to set
-     *
-     * @throws IllegalArgumentException if either of the parameters are null
-     */
-    public static void setCodebase(ServiceElement sElem, String codebase) {
-        if(sElem == null || codebase == null)
-            throw new IllegalArgumentException("parameters cannot be null");
-        if(sElem.getComponentBundle() != null)
-            sElem.getComponentBundle().setCodebase(codebase);
-        for(int i=0; i<sElem.getExportBundles().length; i++) {
-            sElem.getExportBundles()[i].setCodebase(codebase);
-        }
-        if(sElem.getFaultDetectionHandlerBundle()!=null &&
-            !sElem.getFaultDetectionHandlerBundle().getClassName().startsWith("org.rioproject"))
-            sElem.getFaultDetectionHandlerBundle().setCodebase(codebase);
-    }
-
-    /**
-     * Determine if the ServiceElement has a HTTP based codebase
-     *
-     * @param sElem The ServiceElement
-     *
-     * @return True if the ServiceElement has either a component or
-     * export bundle which has a codebase that is HTTP based
-     *
-     * @throws IllegalArgumentException if either of the parameters are null
-     */
-    public static boolean hasHTTPCodebase(ServiceElement sElem) {
-        if(sElem == null)
-            throw new IllegalArgumentException("parameters cannot be null");
-        boolean httpCodebase = false;
-        if(sElem.getComponentBundle()!=null &&
-           sElem.getComponentBundle().getCodebase()!=null &&
-           sElem.getComponentBundle().getCodebase().startsWith("http")) {
-            httpCodebase = true;
-        } else {
-            if(sElem.getExportBundles().length>0) {
-                if(sElem.getExportBundles()[0].getCodebase()!=null)
-                    httpCodebase = sElem.getExportBundles()[0].getCodebase().startsWith("http");
-            }
-        }
-        return(httpCodebase);
     }
 
     /**
@@ -366,32 +319,6 @@ public class ServiceElementUtil {
         }
         elem.setServiceBeanConfig(sbConfig);        
         return(elem);
-    }
-    
-    /**
-     * Set the instanceID, optionally making a copy of the ServiceElement
-     * 
-     * @param sbi The ServiceBeanInstance to use
-     * @param id The instanceID to assign
-     * 
-     * @return A ServiceBeanInstance with it's instanceID set to the value provided
-     */
-    public static ServiceBeanInstance prepareInstanceID(ServiceBeanInstance sbi, long id) {
-        /* set the instance id */
-        Map<String, Object> parms =
-            sbi.getServiceBeanConfig().getConfigurationParameters();
-        parms.put(ServiceBeanConfig.INSTANCE_ID, id);
-        ServiceBeanConfig sbConfig = 
-            new ServiceBeanConfig(parms,
-                                  sbi.getServiceBeanConfig().getConfigArgs());
-        /* Get the initialization parameters and add them */
-        Map<String, Object> initParms = sbi.getServiceBeanConfig().getInitParameters();
-        for (Map.Entry<String, Object> e : initParms.entrySet()) {
-            sbConfig.addInitParameter(e.getKey(), e.getValue());
-        }
-
-        sbi.setServiceBeanConfig(sbConfig);        
-        return(sbi);
     }
     
     /**
