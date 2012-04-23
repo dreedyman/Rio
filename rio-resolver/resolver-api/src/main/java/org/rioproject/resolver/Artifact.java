@@ -15,12 +15,13 @@
  */
 package org.rioproject.resolver;
 
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * An artifact in the form of: groupId:artifactId[:type[:classifier]]:version
+ * An artifact in the form of: groupId:artifactId[:type[:classifier]]:version.
+ *
+ * @author Dennis Reedy
  */
 public class Artifact {
     private String artifactId;
@@ -28,7 +29,6 @@ public class Artifact {
     private String version;
     private String classifier;
     private String type;
-    private URL pomURL;
 
     public Artifact() {
     }
@@ -37,6 +37,7 @@ public class Artifact {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
+        this.classifier = "";
     }
 
     public Artifact(String groupId, String artifactId, String version, String type, String classifier) {
@@ -44,13 +45,12 @@ public class Artifact {
         this.artifactId = artifactId;
         this.version = version;
         this.type = type;
-        this.classifier = classifier;
+        this.classifier = classifier==null?"":classifier;
     }
 
     public Artifact(String artifact) {
         if(artifact==null)
             throw new IllegalArgumentException("artifact is null");
-        //Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]+))?:([^: /]+)");
         Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]*)(:([^: /]+))?)?:([^: /]+)" );
         Matcher m = p.matcher( artifact );
         if (!m.matches() ) {
@@ -88,36 +88,27 @@ public class Artifact {
         return type;
     }
 
+    public String getFileName() {
+        return getFileName(type);
+    }
+
     public String getFileName(String ext) {
         String name;
-        boolean useClassifier = !(ext.equals("pom") || ext.equals("oar"));
-        boolean loadFromProject = false;
-        if(pomURL==null || loadFromProject) {
-            if(useClassifier && classifier!=null) {
-                name = artifactId+"-"+version+"-"+classifier;
-            } else {
-                name = artifactId+"-"+version;
-            }
+        if(classifier.length()>0) {
+            System.out.println("classifier length: "+classifier.length());
+            name = String.format("%s-%s-%s.%s", artifactId, version, classifier, ext);
         } else {
-            String s = pomURL.toExternalForm();
-            int ndx = s.lastIndexOf("/");
-            s = s.substring(ndx+1);
-            ndx = s.lastIndexOf(".");
-            s = s.substring(0, ndx);
-            if(useClassifier && classifier!=null)
-                name = s+"-"+classifier;
-            else
-                name = s;
+            name = String.format("%s-%s.%s", artifactId, version, ext);
         }
-        return name+"."+ext;
+        return name;
     }
 
     public String getGAV() {
         String gav;
         if(classifier==null || classifier.length()==0) {
-            gav = groupId+":"+artifactId+":"+type+":"+version;
+            gav = String.format("%s:%s:%s:%s", groupId, artifactId, type, version);
         } else {
-            gav = groupId+":"+artifactId+":"+type+":"+classifier+":"+version;
+            gav = String.format("%s:%s:%s:%s:%s", groupId, artifactId, type, classifier, version);
         }
         return gav;
     }
@@ -134,7 +125,7 @@ public class Artifact {
         return sb.toString();
     }
 
-        /**
+    /**
      * Check to see if the provided string represents an Artifact
      *
      * @param s The string to check

@@ -18,18 +18,14 @@ package org.rioproject.resolver.aether;
 import org.apache.maven.repository.internal.*;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
+import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.building.DefaultSettingsBuilder;
-import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuildingException;
-import org.apache.maven.settings.building.SettingsBuildingResult;
-import org.apache.maven.settings.io.DefaultSettingsReader;
-import org.apache.maven.settings.io.DefaultSettingsWriter;
-import org.apache.maven.settings.validation.DefaultSettingsValidator;
 import org.rioproject.resolver.aether.filters.ClassifierFilter;
 import org.rioproject.resolver.aether.filters.ExcludePlatformFilter;
 import org.rioproject.resolver.aether.util.ConsoleRepositoryListener;
 import org.rioproject.resolver.aether.util.ConsoleTransferListener;
+import org.rioproject.resolver.aether.util.SettingsUtil;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
@@ -43,9 +39,7 @@ import org.sonatype.aether.impl.*;
 import org.apache.maven.repository.internal.DefaultServiceLocator;
 import org.sonatype.aether.installation.InstallRequest;
 import org.sonatype.aether.installation.InstallationException;
-import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.repository.RepositoryPolicy;
+import org.sonatype.aether.repository.*;
 import org.sonatype.aether.resolution.*;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
@@ -60,9 +54,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Use Maven 3's Aether API for Maven dependency resolution.
+ *
+ * @author Dennis Reedy
  */
 public class AetherService {
     private final RepositorySystemSession repositorySystemSession;
@@ -71,17 +69,29 @@ public class AetherService {
     private String dependencyFilterScope;
     private final Collection<DependencyFilter> dependencyFilters =
         Collections.synchronizedCollection(new ArrayList<DependencyFilter>());
+    private static final Logger logger = Logger.getLogger(AetherService.class.getName());
 
-    private AetherService(RepositorySystem repositorySystem) throws SettingsBuildingException {
+    private AetherService(RepositorySystem repositorySystem, WorkspaceReader workspaceReader) throws SettingsBuildingException {
         this.repositorySystem = repositorySystem;
-        this.effectiveSettings = getSettings();
-        this.repositorySystemSession = newSession(repositorySystem, getLocalRepositoryLocation());
+        this.effectiveSettings = SettingsUtil.getSettings();
+        this.repositorySystemSession = newSession(repositorySystem,
+                                                  workspaceReader,
+                                                  SettingsUtil.getLocalRepositoryLocation(effectiveSettings));
     }
 
     public static AetherService getDefaultInstance() {
         try {
             RepositorySystem repositorySystem = newRepositorySystem();
-            return new AetherService(repositorySystem);
+            return new AetherService(repositorySystem, null);
+        } catch (SettingsBuildingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static AetherService getInstance(WorkspaceReader workspaceReader) {
+        try {
+            RepositorySystem repositorySystem = newRepositorySystem();
+            return new AetherService(repositorySystem, workspaceReader);
         } catch (SettingsBuildingException e) {
             throw new IllegalStateException(e);
         }
@@ -109,31 +119,18 @@ public class AetherService {
         return locator.getService(RepositorySystem.class);
     }
 
-    private RepositorySystemSession newSession(RepositorySystem system, String repositoryLocation) {
+    private RepositorySystemSession newSession(RepositorySystem system,
+                                               WorkspaceReader workspaceReader,
+                                               String repositoryLocation)
+        throws SettingsBuildingException {
         MavenRepositorySystemSession session = new MavenRepositorySystemSession();
         session.setTransferListener(new ConsoleTransferListener());
         session.setRepositoryListener(new ConsoleRepositoryListener());
+        if(workspaceReader!=null)
+            session.setWorkspaceReader(workspaceReader);
         LocalRepository localRepository = new LocalRepository(repositoryLocation);
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
         return session;
-    }
-
-    /**
-     * Determine the local repository path, honoring any custom setting in the user's maven settings.xml.
-     * Defaults to <code>${user.home}/.m2/repository</code> (which is the maven default).
-     *
-     * @return The location of he local repository
-     */
-    public String getLocalRepositoryLocation() {
-        String localRepositoryLocation = effectiveSettings.getLocalRepository();
-        if (localRepositoryLocation == null) {
-            localRepositoryLocation = System.getProperty("user.home") +
-                                      File.separator +
-                                      ".m2" +
-                                      File.separator +
-                                      "repository";
-        }
-        return localRepositoryLocation;
     }
 
     /**
@@ -275,8 +272,6 @@ public class AetherService {
         repositorySystem.install(repositorySystemSession, installRequest);
     }
 
-
-
     protected DependencyFilter getDependencyFilter(Artifact a) {
         Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();
         if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
@@ -334,19 +329,7 @@ public class AetherService {
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
 
-    private Settings getSettings() throws SettingsBuildingException {
-        DefaultSettingsBuilder defaultSettingsBuilder = new DefaultSettingsBuilder();
-        DefaultSettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
-        File userSettingsFile = new File(System.getProperty("user.home"), ".m2" + File.separator + "settings.xml");
-        request.setUserSettingsFile(userSettingsFile);
-        defaultSettingsBuilder.setSettingsWriter(new DefaultSettingsWriter());
-        defaultSettingsBuilder.setSettingsReader(new DefaultSettingsReader());
-        defaultSettingsBuilder.setSettingsValidator(new DefaultSettingsValidator());
-        SettingsBuildingResult build = defaultSettingsBuilder.build(request);
-        return build.getEffectiveSettings();
-    }
-
-    List<RemoteRepository> getRemoteRepositories(List<RemoteRepository> repositories) {
+    public List<RemoteRepository> getRemoteRepositories(List<RemoteRepository> repositories) {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
         if(repositories==null)
             repositories = new ArrayList<RemoteRepository>();
@@ -372,18 +355,35 @@ public class AetherService {
                 }
             }
         }
+
         if(repositories.size()>0) {
             RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
             List<Mirror> mirrors = effectiveSettings.getMirrors();
             for (Mirror mirror : mirrors) {
                 if (mirror.getMirrorOf().equals("*") || mirror.getMirrorOf().equals("central")) {
-                    System.out.println("[AetherService] Using mirror for central: " + mirror.getUrl());
+                    if(logger.isLoggable(Level.CONFIG))
+                        logger.config(String.format("Using mirror for central: %s", mirror.getUrl()));
                     central = new RemoteRepository("central", "default", mirror.getUrl());
                 }
             }
             if(!repositories.contains(central))
                 repositories.add(central);
         }
+        for(Server server : effectiveSettings.getServers()) {
+            for(RemoteRepository remoteRepository : repositories) {
+                if(server.getId().equals(remoteRepository.getId())) {
+                    if(server.getUsername()!=null) {
+                        Authentication authentication = new Authentication(server.getUsername(),
+                                                                           server.getPassword(),
+                                                                           server.getPrivateKey(),
+                                                                           server.getPassphrase());
+                        remoteRepository.setAuthentication(authentication);
+                    }
+                }
+            }
+        }
+        if(logger.isLoggable(Level.FINE))
+            logger.fine(String.format("Repositories %s", repositories));
         return repositories;
     }
 

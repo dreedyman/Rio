@@ -40,9 +40,13 @@ import java.util.logging.Logger;
  * Uses Maven 3's native dependency resolution interface, Aether.
  */
 public class AetherResolver implements Resolver {
-    private AetherService service = AetherService.getDefaultInstance();
+    protected AetherService service;
     private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
     private static final Logger logger = Logger.getLogger(AetherResolver.class.getName());
+
+    public AetherResolver() {
+        service = AetherService.getDefaultInstance();
+    }
 
     /**
      * {@inheritDoc}

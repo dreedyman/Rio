@@ -13,21 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.resolver.aether;
+package org.rioproject.resolver.aether.util;
 
-import org.junit.Assert;
+import junit.framework.Assert;
+import org.apache.maven.settings.Settings;
 import org.junit.Test;
 
 /**
- * Test the AetherService
+ * Test SettingsUtil
+ *
+ * @author Dennis Reedy
  */
-public class AetherServiceTest {
+public class SettingsUtilTest {
     @Test
-    public void testGetClasspath() throws Exception {
-        ResolutionResult result = AetherService.getDefaultInstance().resolve("org.apache.maven",
-                                                                             "maven-settings-builder",
-                                                                             "3.0.3");
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.getArtifactResults().size()>0);
+    public void testGetSettings() throws Exception {
+        Settings settings = SettingsUtil.getSettings();
+        Assert.assertNotNull(settings);
+    }
+
+    @Test
+    public void testGetLocalRepositoryLocation() throws Exception {
+        Settings settings = SettingsUtil.getSettings();
+        String localRepositoryLocation = SettingsUtil.getLocalRepositoryLocation(settings);
+        Assert.assertNotNull(localRepositoryLocation);
     }
 }
