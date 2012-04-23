@@ -246,22 +246,22 @@ public class AssociationInjector<T> implements AssociationListener<T> {
 
     private Method getInjectionMethod(String propertyName) {
         Method method=null;
-        StringBuffer sb = new StringBuffer();
-        sb.append("\nDeclared property name: ["+propertyName+"]\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nDeclared property name: [").append(propertyName).append("]\n");
         for (Method m : target.getClass().getMethods()) {
             String mName = m.getName();
             if(mName.startsWith("set")) {
                 mName = mName.substring(3);
                 mName = Character.toLowerCase(mName.charAt(0))+mName.substring(1);
                 String mods = Modifier.toString(m.getModifiers());
-                sb.append("\tproperty="+mName+" modifiers: ["+mods+"], "+m+"\n");
+                sb.append("\tproperty=").append(mName).append(" modifiers: [").append(mods).append("], ").append(m).append("\n");
                 if(mName.equals(propertyName) && mods.contains("public")) {
                     method = m;
                     break;
                 }
             }
         }
-        sb.append("Selected method: "+method);
+        sb.append("Selected method: ").append(method);
         if(logger.isLoggable(Level.FINE))
             logger.fine(sb.toString());
         return(method);
