@@ -111,7 +111,7 @@ public class OarMojo extends ClassDepAndJarMojo {
 
                 repository.setReleases(repositoryPolicySupported(o, "getReleases"));
                 repository.setReleaseUpdatePolicy(repositoryPolicyUpdatePolicy(o, false));
-                repository.setReleaseChecksumPolicy(repositoryPolicyChecksumPolicy(o, false));                
+                repository.setReleaseChecksumPolicy(repositoryPolicyChecksumPolicy(o, false));
                 remoteRepositories.add(repository);
             }
         } catch(NoSuchMethodException e) {

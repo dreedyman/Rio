@@ -19,12 +19,12 @@ package org.rioproject.tools.maven
  * Contains information about a repository.
  */
 class Repository {
-     String id
-     String url
-     boolean snapshots
-     boolean releases
-     String releaseChecksumPolicy
-     String snapshotChecksumPolicy
-     String releaseUpdatePolicy
-     String snapshotUpdatePolicy
+    String id
+    String url
+    boolean snapshots
+    boolean releases
+    String releaseChecksumPolicy
+    String snapshotChecksumPolicy
+    String releaseUpdatePolicy
+    String snapshotUpdatePolicy
 }
