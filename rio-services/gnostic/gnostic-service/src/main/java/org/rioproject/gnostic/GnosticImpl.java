@@ -70,6 +70,7 @@ public class GnosticImpl implements Gnostic {
     /*
      * Set the configuration and wire up the Monitor association.
      */
+    @SuppressWarnings("unused")
     public void setServiceBeanContext(ServiceBeanContext context) {
         this.context = context;
         AssociationMgmt associationMgmt =
@@ -87,7 +88,7 @@ public class GnosticImpl implements Gnostic {
     }
 
     @Initialized
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused"})
     public void setupDrools() {
         try {
             execService = Executors.newSingleThreadExecutor();
@@ -227,6 +228,7 @@ public class GnosticImpl implements Gnostic {
     }
 
     @PreDestroy
+    @SuppressWarnings("unused")
     public void cleanup() {
         try {
             context.getAssociationManagement().terminate();
@@ -336,12 +338,12 @@ public class GnosticImpl implements Gnostic {
                                                                 ResolverException,
                                                                 MalformedURLException,
                                                                 URISyntaxException {
-            String ruleClassPath =
-                ruleMap.getRuleDefinition().getRuleClassPath();
+            String ruleClassPath = ruleMap.getRuleDefinition().getRuleClassPath();
             if (ruleClassPath != null) {
                 String[] classPath;
                 if (Artifact.isArtifact(ruleClassPath)) {
-                    String[] cp = ResolverHelper.getResolver().getClassPathFor(ruleClassPath);
+                    String[] cp = ResolverHelper.getResolver().getClassPathFor(ruleClassPath,
+                                                                               context.getServiceElement().getRemoteRepositories());
                     classPath = new String[cp.length];
                     for (int i = 0; i < classPath.length; i++) {
                         String s =
