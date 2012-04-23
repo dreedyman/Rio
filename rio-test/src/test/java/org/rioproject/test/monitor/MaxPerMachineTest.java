@@ -85,15 +85,11 @@ public class MaxPerMachineTest  {
     @Test
     public void scenarioA() throws Exception {
         logBanner("Running Scenario A");
-        final Boolean[] trueFalse = ArrayUtils.asObjects(new boolean[] {
-                false, true});
-        final Integer[] maintainValues = ArrayUtils.asObjects(new int[] {
-                1, 5, 10, 20});
-        final Integer[] maxPerMachineValues = ArrayUtils.asObjects(new int[] {
-            -1, 0, 1, 5, 10});
+        final Boolean[] trueFalse = ArrayUtils.asObjects(new boolean[] {false, true});
+        final Integer[] maintainValues = ArrayUtils.asObjects(new int[] {1, 5, 10, 20});
+        final Integer[] maxPerMachineValues = ArrayUtils.asObjects(new int[] {-1, 0, 1, 5, 10});
 
-        Object[][] combinations = ArrayUtils.combinations(new Object[][] {
-                trueFalse, maintainValues, maxPerMachineValues});
+        Object[][] combinations = ArrayUtils.combinations(new Object[][] {trueFalse, maintainValues, maxPerMachineValues});
         ProvisionMonitor monitor = pmMon.getServices().get(0);
         for (Object[] combination : combinations) {
             boolean fixed = (Boolean) combination[0];
@@ -112,37 +108,26 @@ public class MaxPerMachineTest  {
     /*
      * Tests one combination of Scenario A.
      */
-    private void testCombinationA(boolean fixed,
-                                  int maintain,
-                                  int maxPerMachine,
-                                  ProvisionMonitor monitor)
+    private void testCombinationA(boolean fixed, int maintain, int maxPerMachine, ProvisionMonitor monitor)
         throws Exception {
-        logBanner("Test combination:"
-                  + ", fixed=" + fixed
-                  + ", maintain=" + maintain
-                  + ", maxPerMachine=" + maxPerMachine + "]");
+        logBanner("Test combination:, fixed="+fixed+ ", maintain="+maintain+", maxPerMachine="+maxPerMachine+"]");
 
         testManager.undeployAll(monitor);
 
         // Prepare OpString
         OpStringLoader loader = new OpStringLoader();
         OperationalString[] opstrings =
-            loader.parseOperationalString(
-                new File("src/test/resources/opstring/simple_opstring.groovy"));
+            loader.parseOperationalString(new File("src/test/resources/opstring/simple_opstring.groovy"));
         org.junit.Assert.assertEquals(1, opstrings.length);
         OpString opstring = (OpString)opstrings[0];
         org.junit.Assert.assertEquals(1, opstring.getServices().length);
         ServiceElement service = opstring.getServices()[0];
         service.setPlanned(maintain);
         service.setMaxPerMachine(maxPerMachine);
-        service.setProvisionType(fixed?
-                                 ServiceElement.ProvisionType.FIXED:
-                                 ServiceElement.ProvisionType.DYNAMIC);
+        service.setProvisionType(fixed? ServiceElement.ProvisionType.FIXED: ServiceElement.ProvisionType.DYNAMIC);
 
-        prevCounts = CybernodeUtils.calcServices(cyberMon.getServices(),
-                                                 Simple.class);
-        logger.log(Level.INFO,
-                   "**** Services found before deploying the OpString: {0}",
+        prevCounts = CybernodeUtils.calcServices(cyberMon.getServices(),Simple.class);
+        logger.log(Level.INFO, "**** Services found before deploying the OpString: {0}",
                    Arrays.asList(ArrayUtils.asObjects(prevCounts)));
 
         if(logger.isLoggable(Level.FINE))
@@ -159,17 +144,14 @@ public class MaxPerMachineTest  {
     /*
      * Checks that the current state of the system is as expected.
      */
-    private void checkStateA(final boolean fixed,
-                             final int maintain,
-                             final long maxPerMachine) throws Exception {
+    private void checkStateA(final boolean fixed, final int maintain, final long maxPerMachine) throws Exception {
         // Setup the condition to wait for
         Condition condition = new Condition() {
 
             public boolean test() {
                 int[] counts;
                 try {
-                    counts = CybernodeUtils.calcServices(cyberMon.getServices(),
-                                                         Simple.class);
+                    counts = CybernodeUtils.calcServices(cyberMon.getServices(), Simple.class);
                 } catch (RemoteException e) {
                     logger.log(Level.SEVERE, "Error calculating services", e);
                     return false;
