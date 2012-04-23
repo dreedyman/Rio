@@ -30,7 +30,7 @@ import java.util.logging.Level;
  * provides a way to resolve an artifact's dependencies.</p>
  *
  * <p>The URL scheme for this handler is:<br/>
- * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;[repositoryId@]repository]</pre></p>
+ * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;repository[@repositoryId]]</pre></p>
  *
  * <p>This handler has to be installed before any connection is made by using the following code:
  * <pre>URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());</pre>
@@ -42,8 +42,8 @@ import java.util.logging.Level;
  * <ul>
  *     <li>An artifact URL for groupId, artifactId and version<br/>
  *     <code>artifact:org.rioproject.examples.calculator/calculator-service/2.0.1</code></li>
- *     <li>An artifact URL for groupId, artifactId, version and repository<br/>
- *     <code>artifact:org.rioproject.examples.calculator/calculator-proxy/2.0.1;http://www.rio-project.org</code></li>
+ *     <li>An artifact URL for groupId, artifactId, version and repository with an id<br/>
+ *     <code>artifact:org.rioproject.examples.calculator/calculator-proxy/2.0.1;http://www.rio-project.org@rio</code></li>
  * </ul>
  *
  * @author Dennis Reedy

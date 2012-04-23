@@ -24,7 +24,7 @@ import java.util.List;
  * Holds the attributes of a URL of type <code>artifact</code>.
  *
  * <p>The URL scheme that the {@code ArtifactURLConfiguration} decomposes is as follows:<br/>
- * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;[repositoryId@]repository]</pre></p>
+ * <pre>artifact:groupId/artifactId/version[/type[/classifier]][;[repository[@repositoryId]]</pre></p>
  *
  * @author Dennis Reedy
  */
@@ -43,8 +43,8 @@ public class ArtifactURLConfiguration {
                 String id = null;
                 String[] subParts = s.split("@");
                 if(subParts.length>1) {
-                    id = subParts[0];
-                    url = subParts[1];
+                    url = subParts[0];
+                    id = subParts[1];
                 } else {
                     url = subParts[0];
                 }
