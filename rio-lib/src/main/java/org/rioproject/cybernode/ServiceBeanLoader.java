@@ -34,6 +34,7 @@ import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
@@ -43,6 +44,7 @@ import org.rioproject.core.jsb.ServiceBeanFactory;
 import org.rioproject.core.jsb.ServiceBeanManager;
 import org.rioproject.jsb.*;
 import org.rioproject.log.LoggerConfig;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
@@ -57,9 +59,10 @@ import java.security.AllPermission;
 import java.security.Permission;
 import java.security.Policy;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ServiceBeanLoader will load and create a ServiceBean.
@@ -69,13 +72,21 @@ import java.util.logging.Logger;
 public class ServiceBeanLoader {
     /** Component name for loading configuration artifacts specifically related
      * to service creation */
-    static final String CONFIG_COMPONENT = "service.load";
+    private static final String CONFIG_COMPONENT = "service.load";
     /** A Logger */
-    static Logger logger = Logger.getLogger(ServiceBeanLoader.class.getName());
-    private static AggregatePolicyProvider globalPolicy = null;
-    private static Policy initialGlobalPolicy = null;
-    private static final Map<String, AtomicInteger> counterTable = new HashMap<String, AtomicInteger>();
-    private static final List<ProvisionedResources> provisionedResources = new ArrayList<ProvisionedResources>();
+    private static WrappedLogger logger = WrappedLogger.getLogger(ServiceBeanLoader.class.getName());
+    private final static AggregatePolicyProvider globalPolicy;
+    private final static Policy initialGlobalPolicy;
+    static {
+        initialGlobalPolicy = Policy.getPolicy();
+        globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
+        Policy.setPolicy(globalPolicy);
+    }
+    private static final Map<String, AtomicInteger> counterTable =
+        Collections.synchronizedMap(new HashMap<String, AtomicInteger>());
+    private static final List<ProvisionedResources> provisionedResources =
+        Collections.synchronizedList(new ArrayList<ProvisionedResources>());
+    private final static ExecutorService service = Executors.newCachedThreadPool();
 
     /**
      * Trivial class used as the return value by the 
@@ -102,7 +113,7 @@ public class ServiceBeanLoader {
          * @param m The proxy as a MarshalledInstance
          * @param s The id of the service
          */
-        public Result(ServiceBeanContext c, Object o, MarshalledInstance m, Uuid s) {
+        public Result(final ServiceBeanContext c, final Object o, final MarshalledInstance m, final Uuid s) {
             context = c;
             impl = o;
             mi = m;
@@ -138,7 +149,7 @@ public class ServiceBeanLoader {
      * @param result The Result object to unload
      * @param elem The ServiceElement to use as a reference
      */
-    public static void unload(Result result, ServiceElement elem) {
+    public static void unload(final Result result, final ServiceElement elem) {
         unload(result.impl.getClass().getClassLoader(), elem);
     }
 
@@ -154,23 +165,31 @@ public class ServiceBeanLoader {
      * @param loader The ClassLoader to unload
      * @param elem The ServiceElement to use as a reference
      */
-    public static void unload(ClassLoader loader, ServiceElement elem) {
+    public static void unload(final ClassLoader loader, final ServiceElement elem) {
         if(globalPolicy!=null)
             globalPolicy.setPolicy(loader, null);
         cleanJars(elem);
-        ResolvingLoader.release(loader);
+        service.submit(new Runnable() {
+            @Override
+            public void run() {
+                ResolvingLoader.release(loader);
+            }
+        });
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        service.shutdownNow();
+        super.finalize();
     }
 
     /*
-     * Remove downloaded jars
-     */
-    private static void cleanJars(ServiceElement elem) {
+    * Remove downloaded jars
+    */
+    private static void cleanJars(final ServiceElement elem) {
         List<ProvisionedResources> toRemove = new ArrayList<ProvisionedResources>();
-        ProvisionedResources[] copy;
-        synchronized(provisionedResources) {
-            copy = provisionedResources.toArray(
-                new ProvisionedResources[provisionedResources.size()]);
-        }
+        ProvisionedResources[] copy =
+            provisionedResources.toArray(new ProvisionedResources[provisionedResources.size()]);
         for(ProvisionedResources pr : copy) {
             if(elem.getComponentBundle()!=null &&
                elem.getComponentBundle().getArtifact()!=null)
@@ -180,33 +199,14 @@ public class ServiceBeanLoader {
             }
         }
         for(ProvisionedResources pr : toRemove) {
-            synchronized(counterTable) {
-                AtomicInteger count = counterTable.get(pr.getArtifact());
-                if(count!=null) {
-                    int using = count.decrementAndGet();
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Number of ["+pr.getArtifact()+"] artifacts still active="+using);
-                    if(using==0) {
-                        if(pr.getArtifact().contains("SNAPSHOT")) {
-                            System.out.println("["+elem.getName()+"], artifact="+pr.getArtifact()+", " +
-                                               "has the following jars");
-                            for(URL u : pr.getJars()) {
-                                System.out.println("\t"+u.toExternalForm());
-                            }
-                        }
-
-                        //File parent = dir.getParentFile();
-                        //FileUtils.remove(dir);
-                        //if(parent.exists() && parent.list().length==0)
-                        //    FileUtils.remove(parent);
-                        synchronized(provisionedResources) {
-                            provisionedResources.remove(pr);
-                        }
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Remove cached artifact ["+pr.getArtifact()+"] "+pr);
-                    } else {
-                        counterTable.put(pr.getArtifact(), count);
-                    }
+            AtomicInteger count = counterTable.get(pr.getArtifact());
+            if(count!=null) {
+                int using = count.decrementAndGet();
+                logger.finest("Number of [%s] artifacts still active=%d", pr.getArtifact(), using);
+                if(using==0) {
+                    provisionedResources.remove(pr);
+                } else {
+                    counterTable.put(pr.getArtifact(), count);
                 }
             }
         }
@@ -226,27 +226,16 @@ public class ServiceBeanLoader {
      * @throws org.rioproject.deploy.ServiceBeanInstantiationException If errors occur while creating the
      * service bean
      */
-    public static Result load(ServiceElement sElem,
+    public static Result load(final ServiceElement sElem,
                               Uuid serviceID,
-                              ServiceBeanManager jsbManager,
-                              ServiceBeanContainer container) throws ServiceBeanInstantiationException {
+                              final ServiceBeanManager jsbManager,
+                              final ServiceBeanContainer container) throws ServiceBeanInstantiationException {
         Object proxy;
         MarshalledInstance mi = null;
         Object impl = null;
         ServiceBeanContext context;
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
         ComputeResource computeResource = container.getComputeResource();
-
-        synchronized(ServiceBeanLoader.class) {
-            /* supplant global policy 1st time through */
-            if(globalPolicy == null) {
-                initialGlobalPolicy = Policy.getPolicy();
-                globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
-                Policy.setPolicy(globalPolicy);
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Global policy set: {0}", globalPolicy);
-            }
-        }
 
         /*
          * Provision service jars
@@ -275,7 +264,7 @@ public class ServiceBeanLoader {
                 implJARs = implPR.getJars();
             } catch(Exception e) {
                 throw new ServiceBeanInstantiationException("Unable to provision JARs for " +
-                                                            "service ["+sElem.getName()+"]", e);
+                                                            "service "+ CybernodeLogUtil.logName(sElem), e);
             }
         }
 
@@ -331,10 +320,11 @@ public class ServiceBeanLoader {
                         buffer.append(implJARs[i].toExternalForm());
                     }
                 }
-                String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
-                logger.log(Level.INFO,
-                           "Create ServiceClassLoader for {0}, classpath {1}, codebase {2}",
-                           new Object[] { className, buffer.toString(), jsbCL.getClassAnnotation()});
+                if(logger.isLoggable(Level.FINE)) {
+                    String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
+                    logger.fine("Create ServiceClassLoader for %s, classpath %s, codebase %s",
+                                className, buffer.toString(), jsbCL.getClassAnnotation());
+                }
                 //ClassLoaderUtil.displayClassLoaderTree(jsbCL);
             }
 
@@ -342,7 +332,12 @@ public class ServiceBeanLoader {
              * property has not been set use the policy set for the VM */
             String servicePolicyFile = System.getProperty("rio.service.security.policy",
                                                           System.getProperty("java.security.policy"));
+            logger.finest("%s Service security policy file %s",
+                          CybernodeLogUtil.logName(sElem), servicePolicyFile);
             if(servicePolicyFile!=null) {
+                logger.finest("Set %s service security to LoaderSplitPolicyProvider",
+                              CybernodeLogUtil.logName(sElem));
+
                 DynamicPolicyProvider service_policy =
                     new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
                 LoaderSplitPolicyProvider splitServicePolicy =
@@ -406,12 +401,12 @@ public class ServiceBeanLoader {
                                                            "serviceBeanFactory",
                                                            ServiceBeanFactory.class,
                                                            new JSBLoader());
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, 
-                           "service = {0}, serviceBeanFactory = {1}",
-                           new Object[]{sElem.getName(), serviceBeanFactory});            
+            logger.finest("service = %s, serviceBeanFactory = %s",
+                          CybernodeLogUtil.logName(sElem), serviceBeanFactory);
             ServiceBeanFactory.Created created = serviceBeanFactory.create(context);
+            logger.finest("Created ServiceBeanFactory.Created %s", created);
             impl = created.getImpl();
+            logger.finest("Obtained implementation %s", impl);
             
             if(context.getServiceElement().getComponentBundle()==null) {
                 String compName = impl.getClass().getName();
@@ -423,22 +418,26 @@ public class ServiceBeanLoader {
             }
 
             /* Get the ProxyPreparer */
+            logger.finest("Get the ProxyPreparer for %s", CybernodeLogUtil.logName(sElem));
+            
             ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(context.getConfiguration(),
                                                                                   CONFIG_COMPONENT,
                                                                                   "servicePreparer",
                                                                                   ProxyPreparer.class,
                                                                                   new BasicProxyPreparer());
+            logger.finest("Getting the proxy");
             proxy = created.getProxy();
+            logger.finest("Obtained the proxy %s", proxy);
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            
+            logger.finest("Proxy %s, prepared? %s", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
             /*
              * Set the MarshalledInstance into the ServiceBeanManager
              */
+            logger.finest("Set the MarshalledInstance into the ServiceBeanManager");
             mi = new MarshalledInstance(proxy);
-            ((JSBManager)context.getServiceBeanManager()).
-                setMarshalledInstance(mi);
+            ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(mi);
             /*
              * The service may have created it's own serviceID
              */
@@ -458,17 +457,15 @@ public class ServiceBeanLoader {
                     context.getAssociationManagement().setServiceBeanControl((ServiceBeanControl)adminObject);
                 }                    
             }
-            
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "Proxy =  {0}", proxy);
+
+            logger.finest("Proxy =  %s", proxy);
             //TODO - factor in code integrity for MO
             //proxy = (new MarshalledObject(proxy)).get();
             //currentThread.setContextClassLoader(currentClassLoader);
             
         } catch(Throwable t) {
             ServiceBeanInstantiationException e;
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "Loading ServiceBean", t);
+            logger.log(Level.FINEST, "Loading ServiceBean", t);
             if(t instanceof ServiceBeanInstantiationException)
                 e = (ServiceBeanInstantiationException)t;
             else
@@ -481,9 +478,9 @@ public class ServiceBeanLoader {
         return(new Result(context, impl, mi, serviceID));
     }  
 
-    static synchronized Map<String, ProvisionedResources> provisionService(ServiceElement elem,
-                                                                           Resolver resolver,
-                                                                           boolean supportsInstallation)
+    static synchronized Map<String, ProvisionedResources> provisionService(final ServiceElement elem,
+                                                                           final Resolver resolver,
+                                                                           final boolean supportsInstallation)
         throws MalformedURLException, ServiceBeanInstantiationException {
 
         Map<String, ProvisionedResources> map = new HashMap<String, ProvisionedResources>();
@@ -505,6 +502,15 @@ public class ServiceBeanLoader {
                                                                         "for "+implArtifact);
                         String[] jars;
                         try {
+                            StringBuilder builder = new StringBuilder();
+                            for(RemoteRepository repository: elem.getRemoteRepositories()) {
+                                if(builder.length()>0){
+                                    builder.append(", ");
+                                }
+                                builder.append(repository.getUrl());
+                            }
+                            logger.info("Resolve %s using these repositories [%s]",
+                                        elem.getComponentBundle().getArtifact(), builder.toString());
                             jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
                                                           resolver,
                                                           elem.getRemoteRepositories());
@@ -546,6 +552,15 @@ public class ServiceBeanLoader {
             }
             dlPR = new ProvisionedResources(exportArtifact);
             dlPR.setJars(elem.getExportURLs());
+            for(RemoteRepository repository: elem.getRemoteRepositories()) {
+                StringBuilder repositoryString = new StringBuilder();
+                repositoryString.append(repository.getUrl());
+                if(repository.getId()!=null) {
+                    repositoryString.append("@");
+                    repositoryString.append(repository.getId());
+                }
+                dlPR.addRepositoryUrl(repositoryString.toString());
+            }
         }
 
         /*
@@ -589,7 +604,7 @@ public class ServiceBeanLoader {
 
         if(logger.isLoggable(Level.FINE)) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Service [").append(elem.getName()).append("], ");
+            sb.append("Service ").append(CybernodeLogUtil.logName(elem)).append(" ");
             if(implArtifact!=null)
                 sb.append("impl artifact: [").append(implPR.getArtifact()).append("] ");
             sb.append("impl jars: ");
@@ -609,49 +624,41 @@ public class ServiceBeanLoader {
         return map;
     }
 
-    private static ProvisionedResources getProvisionedResources(String artifact) {
+    private static ProvisionedResources getProvisionedResources(final String artifact) {
         ProvisionedResources pr = null;
         if(artifact!=null && !artifact.contains("SNAPSHOT")) {
-            synchronized(provisionedResources) {
-                for(ProvisionedResources alreadyProvisioned : provisionedResources) {
-                    if(alreadyProvisioned.getArtifact()!=null &&
-                       alreadyProvisioned.getArtifact().equals(artifact)) {
-                        pr = alreadyProvisioned;
-                        break;
-                    }
+            for(ProvisionedResources alreadyProvisioned : provisionedResources) {
+                if(alreadyProvisioned.getArtifact()!=null &&
+                   alreadyProvisioned.getArtifact().equals(artifact)) {
+                    pr = alreadyProvisioned;
+                    break;
                 }
             }
         }
         return pr;
     }
 
-    private static void addProvisionedResources(Map<String, ProvisionedResources> map) {
+    private static void addProvisionedResources(final Map<String, ProvisionedResources> map) {
         for(Map.Entry<String, ProvisionedResources> entry : map.entrySet()) {
             ProvisionedResources pr = entry.getValue();
             if(pr.getArtifact()!=null && !pr.getArtifact().contains("SNAPSHOT")) {
-                synchronized(provisionedResources) {
-                    if(!provisionedResources.contains(pr))
-                        provisionedResources.add(pr);
-                }
+                if(!provisionedResources.contains(pr))
+                    provisionedResources.add(pr);
             }
         }
     }
 
-    private static void registerArtifactCounts(Map<String, ProvisionedResources> map) {
+    private static void registerArtifactCounts(final Map<String, ProvisionedResources> map) {
         for(Map.Entry<String, ProvisionedResources> entry : map.entrySet()) {
             ProvisionedResources pr = entry.getValue();
             if(pr.getArtifact()!=null && !pr.getArtifact().contains("SNAPSHOT")) {
-                synchronized(counterTable) {
-                    AtomicInteger count = counterTable.get(pr.getArtifact());
-                    if(count==null)
-                        count = new AtomicInteger(1);
-                    else
-                        count.incrementAndGet();
-                    counterTable.put(pr.getArtifact(), count);
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Counter for ["+pr.getArtifact()+"] is " +
-                                      "now "+count.get());
-                }
+                AtomicInteger count = counterTable.get(pr.getArtifact());
+                if(count==null)
+                    count = new AtomicInteger(1);
+                else
+                    count.incrementAndGet();
+                counterTable.put(pr.getArtifact(), count);
+                logger.finest("Counter for [%s] is now %d", pr.getArtifact(), count.get());
             }
         }
     }
@@ -661,15 +668,15 @@ public class ServiceBeanLoader {
         String artifact;
         StringBuilder repositories = new StringBuilder();
 
-        private ProvisionedResources(String artifact) {
+        private ProvisionedResources(final String artifact) {
             this.artifact = artifact;
         }
 
-        void setJars(URL[] jars) {
+        void setJars(final URL[] jars) {
             jarList.addAll(Arrays.asList(jars));
         }
 
-        void addJar(URL jar) {
+        void addJar(final URL jar) {
             jarList.add(jar);
         }
 
@@ -701,5 +708,5 @@ public class ServiceBeanLoader {
             sb.append('}');
             return sb.toString();
         }
-    }    
+    }
 }
