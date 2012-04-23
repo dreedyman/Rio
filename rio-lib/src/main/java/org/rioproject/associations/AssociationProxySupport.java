@@ -304,12 +304,12 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
     }
 
     /**
-     * Check if the methods is found in the generated proxy
+     * Check if the method is found in the generated proxy
      *
      * @param method The Method to check
      * @return true if the method is local to the proxy
      */
-    protected boolean isProxyMethod(Method method) {
+    public boolean isProxyMethod(Method method) {
         return proxyMethods.contains(method.toString());
     }
 
