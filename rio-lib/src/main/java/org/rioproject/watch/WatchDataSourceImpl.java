@@ -27,12 +27,12 @@ import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
+import org.rioproject.logging.WrappedLogger;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  The WatchDataSourceImpl provides support for the WatchDataSource
@@ -151,7 +151,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     /** Component for accessing configuration and getting a Logger */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A suitable Logger */
-    protected static Logger logger = Logger.getLogger(COMPONENT);
+    protected static WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
     private final List<WatchDataReplicator> replicators = new ArrayList<WatchDataReplicator>();
 
     /**
@@ -197,13 +197,10 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                                                 MAX_COLLECTION_SIZE);
         } catch(ConfigurationException e) {
             if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "Getting WatchDataSource collection size",
-                           e);
+                logger.log(Level.FINEST, "Getting WatchDataSource collection size", e);
             collectionSize = DEFAULT_COLLECTION_SIZE;
         }
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Watch ["+id+"] history collection size="+collectionSize);
+        logger.finest("Watch [%s] history collection size=%d", id, collectionSize);
         max = collectionSize;
         initialized = true;
     }
@@ -324,9 +321,11 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     private void trimHistory(int range) {
         if(range == 1) {
             history.remove(0);
+            logger.finest("Removed first entry to make room in history");
         } else {
             List subList = history.subList(0, range);
             subList.clear();
+            logger.finest("Removed %d entries to make room in history", range);
         }
     }
 
@@ -351,13 +350,16 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     /**
      * @see org.rioproject.watch.WatchDataSource#addCalculable
      */
+    @SuppressWarnings("unchecked")
     public void addCalculable(Calculable calculable) {
         if(calculable==null)
             throw new IllegalArgumentException("calculable is null");
         if(!closed) {
             addToHistory(calculable);
-            for(WatchDataReplicator replicator : getWatchDataReplicators())
+            for(WatchDataReplicator replicator : getWatchDataReplicators()) {
+                logger.finest("Replicating [%s]", calculable);
                 replicator.addCalculable(calculable);
+            }
         }
     }
 
@@ -367,6 +369,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                 trimHistory(1);
             if(history.size() > max)
                 trimHistory((history.size() - max) - 1);
+            logger.finest("Adding to history [%s]", calculable);
             history.add(calculable);
         }
     }
@@ -488,8 +491,6 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
      * given proxy to this WatchDataSource can be trusted
      */
     public TrustVerifier getProxyVerifier() {
-        if(logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");
         return (new BasicProxyTrustVerifier(proxy));
     }
 
