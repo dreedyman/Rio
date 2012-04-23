@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * DeployAdmin interface defines methods to deploy, undeploy, redeploy, query
- * and optionally remove pending deployment and redeployment requests
+ * and optionally remove pending deployment and redeployment requests.
  *
  * @author Dennis Reedy
  */
