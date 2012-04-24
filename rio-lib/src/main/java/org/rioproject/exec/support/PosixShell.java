@@ -92,7 +92,7 @@ public class PosixShell implements Shell {
         Util.chmodX(generatedShellScript);        
 
         String toExec = FileUtils.getFilePath(generatedShellScript);
-        logger.info("Executing command [%s]", commandLine);
+        logger.fine("Executing command [%s]", commandLine);
         ProcessBuilder pb = new ProcessBuilder(toExec);
 
         Map<String, String> declaredEnv = execDescriptor.getEnvironment();
