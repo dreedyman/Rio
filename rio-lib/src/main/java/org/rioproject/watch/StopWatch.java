@@ -18,13 +18,16 @@ package org.rioproject.watch;
 
 import net.jini.config.Configuration;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * A Watch for capturing elapsed time
  */
 public class StopWatch extends ThresholdWatch implements StopWatchMBean {
     public static final String VIEW = "org.rioproject.watch.ResponseTimeCalculableView";
-    /** Holds value of property startTime. */
-    private long startTime;
+    /** Table of thread ids, and recorded start time.*/
+    private final ConcurrentMap <Long, Long> startTimeTable = new ConcurrentHashMap<Long, Long>();
 
     /**
      * Creates new Stop Watch
@@ -55,6 +58,7 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      * @param watchDataSource the watch data source associated with this watch
      * @param id the identifier for this watch
      */
+    @SuppressWarnings("unused")
     public StopWatch(WatchDataSource watchDataSource, String id) {
         super(watchDataSource, id);
         setView(VIEW);
@@ -64,7 +68,7 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      * @see org.rioproject.watch.StopWatchMBean#startTiming
      */
     public void startTiming() {
-        startTime = System.currentTimeMillis();
+        setStartTime(System.currentTimeMillis());
     }
 
     /**
@@ -72,7 +76,7 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      */
     public void stopTiming() {
         long now = System.currentTimeMillis();
-        setElapsedTime(now - startTime, now);
+        setElapsedTime(now - startTimeTable.get(Thread.currentThread().getId()), now);
     }
 
     /**
@@ -93,13 +97,19 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      * @see org.rioproject.watch.StopWatchMBean#getStartTime
      */
     public long getStartTime() {
-        return (startTime);
+        return startTimeTable.get(Thread.currentThread().getId());
     }
 
     /**
      * @see org.rioproject.watch.StopWatchMBean#setStartTime(long)
      */
     public void setStartTime(long startTime) {
-        this.startTime = startTime;
+        Long key = Thread.currentThread().getId();
+        if(startTimeTable.containsKey(key)) {
+            startTimeTable.replace(key, startTime);
+        } else {
+            startTimeTable.put(key, startTime);
+        }
     }
+
 }
