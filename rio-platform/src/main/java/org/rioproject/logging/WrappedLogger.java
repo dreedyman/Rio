@@ -30,7 +30,6 @@ import java.util.logging.Logger;
  */
 public class WrappedLogger {
     private final Logger logger;
-    private static WrappedLogger instance;
     private static final String THIS_CLASS_NAME = WrappedLogger.class.getName();
 
     private WrappedLogger(final String name) {
@@ -42,15 +41,11 @@ public class WrappedLogger {
     }
 
     public static synchronized WrappedLogger getLogger(final String name) {
-        if(instance==null)
-            instance = new WrappedLogger(name);
-        return instance;
+        return new WrappedLogger(name);
     }
 
     public static synchronized WrappedLogger getLogger(final String name, final String resourceBundleName) {
-        if(instance==null)
-            instance = new WrappedLogger(name, resourceBundleName);
-        return instance;
+        return new WrappedLogger(name, resourceBundleName);
     }
 
     public void severe(final String formatString, final Object... objects) {
