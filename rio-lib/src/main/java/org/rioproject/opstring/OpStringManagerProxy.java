@@ -69,7 +69,7 @@ public class OpStringManagerProxy {
             throw new IllegalStateException("DiscoveryManagement has not been set into proxy");
         }
         return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                                                                 new Class[]{OperationalStringManager.class},
+                                                                 new Class[]{OpStringManager.class},
                                                                  new OpStringManagerDispatcher(name, manager, discoMgmt));
     }
 
@@ -96,7 +96,7 @@ public class OpStringManagerProxy {
         if(discoMgmt==null)
             discoMgmt = dMgr;
         return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                                                                 new Class[]{OperationalStringManager.class},
+                                                                 new Class[]{OpStringManager.class},
                                                                  new OpStringManagerDispatcher(name, manager, dMgr));
     }
 
@@ -104,7 +104,7 @@ public class OpStringManagerProxy {
      * A CGLIB dispatcher for managing the invocation of methods to the
      * primary {@link OperationalStringManager} instance.
      */
-    public static class OpStringManagerDispatcher extends ServiceDiscoveryAdapter implements /*MethodInterceptor*/ InvocationHandler {
+    public static class OpStringManagerDispatcher extends ServiceDiscoveryAdapter implements InvocationHandler {
         String name;
         OperationalStringManager manager;
         DiscoveryManagement dMgr;
@@ -234,14 +234,10 @@ public class OpStringManagerProxy {
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if(terminated) {
-                throw new IllegalStateException("The OpStringManagerDispatcher "+
-                                                "has been terminated, " +
-                                                "invocations through this " +
-                                                "utility are not possible " +
-                                                "in it's current state. " +
-                                                "Make sure all invoking " +
-                                                "threads are terminated to " +
-                                                "resolve this issue");
+                throw new IllegalStateException("The OpStringManagerDispatcher has been terminated, " +
+                                                "invocations through this utility are not possible " +
+                                                "in it's current state. Make sure all invoking " +
+                                                "threads are terminated to resolve this issue");
             }
             if(method.getName().equals("terminate")) {
                 lCache.removeListener(this);
