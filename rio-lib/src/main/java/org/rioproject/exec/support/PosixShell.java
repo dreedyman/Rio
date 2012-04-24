@@ -19,13 +19,12 @@ import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Shell;
 import org.rioproject.exec.Util;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resources.util.FileUtils;
 
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A Shell implementation that forks commands for posix compliant systems
@@ -37,13 +36,13 @@ public class PosixShell implements Shell {
     private static final String EXEC_SCRIPT="exec-template.sh";
     //private static final String EXEC_NOHUP_SCRIPT="exec-nohup-template.sh";
     private String template = EXEC_SCRIPT;
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
 
     public void setShellTemplate(String template) {
         if(template==null)
             throw new IllegalArgumentException("template cannot be null");
         this.template = template;
-        logger.info("Set PosixShell template to: "+template);
+        logger.info("Set PosixShell template to: %s", template);
     }
 
     /**
@@ -93,7 +92,7 @@ public class PosixShell implements Shell {
         Util.chmodX(generatedShellScript);        
 
         String toExec = FileUtils.getFilePath(generatedShellScript);
-        logger.info("Executing command [" + commandLine + "]");
+        logger.info("Executing command [%s]", commandLine);
         ProcessBuilder pb = new ProcessBuilder(toExec);
 
         Map<String, String> declaredEnv = execDescriptor.getEnvironment();
@@ -104,19 +103,15 @@ public class PosixShell implements Shell {
                 String oldValue = entry.getValue();
                 String setValue = oldValue+File.pathSeparator+value;
                 environment.put(entry.getKey(), setValue);
-                logger.info(entry.getKey()+" was ["+oldValue+"], " +
-                            "now ["+environment.get(entry.getKey())+"]");
+                logger.info("%s was [%s], now [%s]", entry.getKey(), oldValue, environment.get(entry.getKey()));
             }
         }
         environment.putAll(execDescriptor.getEnvironment());
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Process Builder's environment="+environment);
+        logger.fine("Process Builder's environment=%s", environment);
 
         if(workingDirectory!=null) {
             pb = pb.directory(new File(workingDirectory));
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Process Builder's working directory set to ["+
-                            pb.directory().getCanonicalFile()+"]");
+            logger.fine("Process Builder's working directory set to [%s]", pb.directory().getCanonicalFile());
 
         }
         pb.redirectErrorStream(true);
@@ -135,16 +130,14 @@ public class PosixShell implements Shell {
         int pid = Integer.parseInt(s);
         in.close();
         if(!pidFile.delete())
-            logger.warning("Non fatal, " +
-                           "could not delete "+FileUtils.getFilePath(pidFile));
+            logger.warning("Non fatal, could not delete %s", FileUtils.getFilePath(pidFile));
 
-        PosixProcessManager procMgr =
-                new PosixProcessManager(process,
-                                        pid,
-                                        execDescriptor.getStdOutFileName(),
-                                        execDescriptor.getStdErrFileName());
-        procMgr.setCommandFile(generatedShellScript);
-        procMgr.setCommandLine(commandLine);
-        return procMgr;
+        PosixProcessManager processManager = new PosixProcessManager(process,
+                                                                     pid,
+                                                                     execDescriptor.getStdOutFileName(),
+                                                                     execDescriptor.getStdErrFileName());
+        processManager.setCommandFile(generatedShellScript);
+        processManager.setCommandLine(commandLine);
+        return processManager;
     }
 }
