@@ -22,6 +22,7 @@ import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
+import org.rioproject.cybernode.CybernodeLogUtil;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
@@ -181,6 +182,7 @@ public class ServiceBeanExecManager {
             } catch (ConfigurationException e) {
                 logger.warning("Cannot get shell template from configuration, continue with default");
             }
+            logger.info("Invoke PosixShell.exec for %s", CybernodeLogUtil.logName(sElem));
             manager = shell.exec(exDesc);
 
             forkedServiceListener.setName(serviceBindName);
@@ -403,8 +405,10 @@ public class ServiceBeanExecManager {
 
         public void serviceInstantiated(ServiceRecord record) {
             serviceRecord = record;
-            if(manager!=null)
+            if(manager!=null) {
                 serviceRecord.setPid(manager.getPid());
+            }
+            logger.fine("Instantiation notification for %s", CybernodeLogUtil.logName(sElem));
         }
 
         public void serviceDiscarded(ServiceRecord record) {
