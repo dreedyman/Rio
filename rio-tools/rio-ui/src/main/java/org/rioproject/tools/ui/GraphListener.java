@@ -313,7 +313,7 @@ public class GraphListener extends ControlAdapter {
                     JMenuItem admin = new JMenuItem("Show Service UI");
                     admin.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
-                            adminManager.doShowAdminUI(node.getServiceItem());
+                            adminManager.doShowAdminUI(node.getServiceItem(), frame);
                         }
                     });
                     popup.add(redeploy);
@@ -346,7 +346,7 @@ public class GraphListener extends ControlAdapter {
                 return;
             GraphNode node = (GraphNode) uo;
             if (node.getServiceItem() != null) {
-                adminManager.doShowAdminUI(node.getServiceItem());
+                adminManager.doShowAdminUI(node.getServiceItem(), frame);
             } //else {
               //  vis.cancel("treeRoot");
               //  doCollapseSupport(node, vis);

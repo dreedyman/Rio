@@ -19,6 +19,8 @@ import net.jini.core.lookup.ServiceItem;
 import net.jini.id.Uuid;
 import org.rioproject.opstring.ServiceElement;
 
+import javax.swing.*;
+
 /**
  * Use as an interchange between the Cybernode tree table and the graph to
  * set service selection
@@ -49,5 +51,9 @@ public class GraphViewAdapter {
 
     public void refreshCybernodeTable() {
         main.refreshCybernodeTable();
+    }
+
+    public JFrame getMain() {
+        return main;
     }
 }

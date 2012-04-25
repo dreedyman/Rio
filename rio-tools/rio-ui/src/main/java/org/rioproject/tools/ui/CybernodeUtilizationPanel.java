@@ -156,7 +156,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                 JMenuItem serviceUI = new JMenuItem("Show "+label+" UI");
                 serviceUI.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ae) {
-                        adminManager.doShowAdminUI(serviceItemAccessor.getServiceItem(), component);
+                        adminManager.doShowAdminUI(serviceItemAccessor.getServiceItem(), graphViewAdapter.getMain());
                     }
                 });
 
@@ -196,7 +196,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                                 ((ServiceNode)node).getServiceElement(),
                                 ((ServiceNode)node).getUuid());
                         if(item!=null)
-                            adminManager.doShowAdminUI(item, component);
+                            adminManager.doShowAdminUI(item, graphViewAdapter.getMain());
                     }                    
                 }
             }
