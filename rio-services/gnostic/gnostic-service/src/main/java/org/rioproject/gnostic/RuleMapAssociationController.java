@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 public class RuleMapAssociationController {
@@ -43,6 +44,7 @@ public class RuleMapAssociationController {
     private final List<AssociatedServiceListener> aListeners = new ArrayList<AssociatedServiceListener>();
     private ClassLoader ruleLoader = null;
     private RuleMapListener listener;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     RuleMapAssociationController(RuleMap ruleMap,
                                  KnowledgeAgent kAgent,
@@ -100,6 +102,7 @@ public class RuleMapAssociationController {
             associationMgmt.terminate();
         if(cepSession !=null)
             cepSession.close();
+        closed.set(true);
         if(wdr!=null) {
             wdr.close();
             wdr = null;
@@ -119,8 +122,13 @@ public class RuleMapAssociationController {
         }
     }
 
-
+    @SuppressWarnings("unused") /* association injection */
     public void setService(Association<Object> association) {
+        if(closed.get()) {
+            logger.warning("The RuleMapAssociationController has been closed, setting the %s/%s service is not allowed",
+                           association.getOperationalStringName(), association.getName());
+            return;
+        }
         associations.add(association);
         AssociatedServiceListener aListener = new AssociatedServiceListener(association);
         association.registerAssociationServiceListener(aListener);
@@ -138,7 +146,6 @@ public class RuleMapAssociationController {
                     listener.added(ruleMap);
                 }
             }
-
         }
     }
 
@@ -166,8 +173,8 @@ public class RuleMapAssociationController {
                 logger.info(String.format("Created StatefulKnowledgeSession for %s", ruleMap));
                 /* Add the watches */
                 for(ServiceHandle sh : serviceHandles) {
-                    wdr.registerWatches(sh);
-
+                    if(wdr!=null)
+                        wdr.registerWatches(sh);
                 }
             }
         } catch(IllegalStateException e) {
@@ -183,7 +190,8 @@ public class RuleMapAssociationController {
                        "Could not initialize DroolsCEPManager for [%s]", ruleMap.toString());
         } finally {
             if(shutdownReplicator) {
-                wdr.close();
+                if(wdr!=null)
+                    wdr.close();
                 cepSession.close();
             }
         }
