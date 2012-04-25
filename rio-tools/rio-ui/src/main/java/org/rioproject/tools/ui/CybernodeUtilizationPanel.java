@@ -151,13 +151,12 @@ public class CybernodeUtilizationPanel extends JPanel {
                 } else {
                     label = "Cybernode Admin";
                 }
-                final ServiceItemAccessor serviceItemAccessor =
-                    new ServiceItemAccessor(cNode==null?sNode:cNode);
+                final ServiceItemAccessor serviceItemAccessor = new ServiceItemAccessor(cNode==null?sNode:cNode);
                 JPopupMenu popup = new JPopupMenu();
                 JMenuItem serviceUI = new JMenuItem("Show "+label+" UI");
                 serviceUI.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent ae) {
-                        adminManager.doShowAdminUI(serviceItemAccessor.getServiceItem());
+                        adminManager.doShowAdminUI(serviceItemAccessor.getServiceItem(), component);
                     }
                 });
 
@@ -197,7 +196,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                                 ((ServiceNode)node).getServiceElement(),
                                 ((ServiceNode)node).getUuid());
                         if(item!=null)
-                            adminManager.doShowAdminUI(item);
+                            adminManager.doShowAdminUI(item, component);
                     }                    
                 }
             }
@@ -491,15 +490,14 @@ public class CybernodeUtilizationPanel extends JPanel {
         int BASE_LINE = 15;
 
         ComputeResourceUtilization[] crus = utilizationModel.getValues();
-        int num = crus.length;
 
         //long uTime = System.currentTimeMillis();
         //long cpuTime = uTime;
 
-        for (int i = 0; i < num; i++) {
-            if (crus[i] == null)
+        for (ComputeResourceUtilization cru : crus) {
+            if (cru == null)
                 continue;
-            double value = crus[i].getUtilization();
+            double value = cru.getUtilization();
             if (value >= uHigh) {
                 uHigh = value;
                 //uHighAt = crus[i].getAddress();
@@ -507,10 +505,10 @@ public class CybernodeUtilizationPanel extends JPanel {
             }
         }
 
-        for (int i = 0; i < num; i++) {
-            if (crus[i] == null)
+        for (ComputeResourceUtilization cru : crus) {
+            if (cru == null)
                 continue;
-            double value = getMeasuredValue("CPU", crus[i]);
+            double value = getMeasuredValue("CPU", cru);
             if (value >= cpuHigh) {
                 cpuHigh = value;
                 //cpuHighAt = crus[i].getAddress();

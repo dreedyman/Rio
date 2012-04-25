@@ -87,8 +87,9 @@ public class ServiceAdminManager {
      * Shows the ServiceUI in a JFrame
      *
      * @param item The ServiceItem for the service
+     * @param component The component to position the admin ui relative to
      */
-    public void doShowAdminUI(final ServiceItem item) {
+    public void doShowAdminUI(final ServiceItem item, final Component component) {
         if(item==null) {
             JOptionPane.showMessageDialog(null,
                                           "There is no ServiceItem for []",
@@ -110,7 +111,7 @@ public class ServiceAdminManager {
         final Runnable createAdminViewer = new Runnable() {
             public void run() {
                 try {
-                    AdminFrame admin = new AdminFrame(item);
+                    AdminFrame admin = new AdminFrame(item, component);
                     admin.addWindowListener(
                         new AdminFrameListener(item.serviceID, admin));
                     adminFrameMap.put(item.serviceID, admin);

@@ -34,11 +34,11 @@ import java.lang.reflect.Method;
 public class AdminFrame extends JFrame {    
     ServiceUIPanel serviceUIPanel;
 
-    public AdminFrame(ServiceItem item) throws Exception {
-        this(item, Constants.DEFAULT_DELAY);
+    public AdminFrame(ServiceItem item, Component component) throws Exception {
+        this(item, Constants.DEFAULT_DELAY, component);
     }
 
-    public AdminFrame(ServiceItem item, long startupDelay) throws Exception {
+    public AdminFrame(ServiceItem item, long startupDelay, Component component) throws Exception {
         super();
         serviceUIPanel = new ServiceUIPanel(item, startupDelay, this);
         ServiceType sType = serviceUIPanel.getServiceType(item.attributeSets);
@@ -47,20 +47,19 @@ public class AdminFrame extends JFrame {
         Container container = getContentPane();
         if(container!=null)
             container.add(serviceUIPanel);
-        display();
+        display(component);
     }
 
-    private void display() {
+    private void display(Component component) {
         WindowListener l = new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 dispose();
             }
         };
         addWindowListener(l);
-
         // Set dimensions and show
         setSize(565, 588);
-        setLocation(50, 100);
+        setLocationRelativeTo(component);
         setVisible(true);
     }
 
@@ -69,10 +68,10 @@ public class AdminFrame extends JFrame {
         //System.out.println(getSize());
         for (Object comp : serviceUIPanel.getUIComponents()) {
             try {
-                Method terminate = comp.getClass().getMethod("terminate",
-                                                              (Class[]) null);
+                Method terminate = comp.getClass().getMethod("terminate", (Class[]) null);
                 terminate.invoke(comp, (Object[]) null);
             } catch (Exception e) {
+                /* ignore */
             }
         }
         super.dispose();
