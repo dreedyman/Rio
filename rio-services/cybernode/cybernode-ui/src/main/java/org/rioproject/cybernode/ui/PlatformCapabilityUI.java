@@ -19,6 +19,7 @@ import net.jini.core.lookup.ServiceItem;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.platform.ByteOrientedDevice;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -34,15 +35,16 @@ import java.util.Vector;
  *
  * @author Dennis Reedy
  */
-public class PlatformCapabilityUI extends JPanel implements Runnable {
+@SuppressWarnings("unused")
+public class PlatformCapabilityUI extends JPanel {
     /** The CybernodeAdmin instance */
     private CybernodeAdmin cybernodeAdmin;
     /** JTable for PlatformCapability display */
-    private JTable capabilityTable;
+    private final JTable capabilityTable;
     /** The model for the table */
-    private PlatformCapabilityModel dataModel;
+    private final PlatformCapabilityModel dataModel;
     /** Checkbox for persistent provisioning support */
-    private JCheckBox supportsProvisioning;
+    private final JCheckBox supportsProvisioning;
 
     public PlatformCapabilityUI(final Object arg) {
         super();
@@ -80,8 +82,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
                 new ActionListener() {
                     public void actionPerformed(ActionEvent ae) {
                         try {
-                            cybernodeAdmin.setPersistentProvisioning(
-                                                 supportsProvisioning.isSelected());
+                            cybernodeAdmin.setPersistentProvisioning(supportsProvisioning.isSelected());
                         } catch(Exception e) {
                             showError(e);
                         }
@@ -99,7 +100,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
                                                 BorderFactory.createEtchedBorder(), 
                                                 "Current Platform Capabilities"),
                                   BorderFactory.createEmptyBorder(8, 8, 8, 8)));        
-        capabilityTable = new JTable();        
+        capabilityTable = new JTable();
         capabilityTable.addMouseListener(new RowListener());
 
         dataModel = new PlatformCapabilityModel();
@@ -117,37 +118,45 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
         JButton details = new JButton("Details");
         details.setToolTipText("Get details on the selected PlatformCapability");
         details.addActionListener(new ActionListener() {
-                                      public void actionPerformed(ActionEvent ae) {
-                                          int row = capabilityTable.getSelectedRow();
-                                          if(row==-1)
-                                              return;
-                                          showDetails(getPlatformCapability(row));
-                                      }
-                                  });
-
-        buttons.add(details);        
+            public void actionPerformed(ActionEvent ae) {
+                int row = capabilityTable.getSelectedRow();
+                if(row==-1)
+                    return;
+                showDetails(getPlatformCapability(row));
+            }
+        });
+        buttons.add(details);
         tablePanel.add(buttons, BorderLayout.SOUTH);
 
         add(tablePanel, BorderLayout.CENTER);
 
-        Thread thread = new Thread(this);
+        Thread thread = new Thread(new PlatformCapabilityInformationFetcher());
         thread.start();
     }
 
-    public void run() {
-        try {
-            supportsProvisioning.setSelected(cybernodeAdmin.getPersistentProvisioning());
-            PlatformCapability[] pCaps = cybernodeAdmin.getPlatformCapabilties();
-            for (PlatformCapability pCap : pCaps) {
-                addPlatformCapability(pCap);
+    private Component getComponent() {
+        return this;
+    }
+
+    class PlatformCapabilityInformationFetcher implements Runnable {
+        public void run() {
+            try {
+                getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                supportsProvisioning.setSelected(cybernodeAdmin.getPersistentProvisioning());
+                PlatformCapability[] pCaps = cybernodeAdmin.getPlatformCapabilties();
+                for (PlatformCapability pCap : pCaps) {
+                    addPlatformCapability(pCap);
+                }
+                getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            } catch(Exception e) {
+                getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                showError(e);
             }
-        } catch(Exception e) {
-            showError(e);
         }
     }
 
     void addPlatformCapability(PlatformCapability pCap) {
-        dataModel.addItem(pCap);
+        dataModel.addOrReplace(pCap);
         dataModel.fireTableDataChanged();
     }
 
@@ -166,9 +175,8 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
     }
 
     class PlatformCapabilityModel extends AbstractTableModel {
-        private Vector tableData = new Vector();
-
-        final String[] columnNames = {"Name", "Description", "Class", "Package"};
+        private final Vector<PlatformCapability> tableData = new Vector<PlatformCapability>();
+        final String[] columnNames = {"Name", "Description"};
 
         public PlatformCapabilityModel() {
             super();
@@ -176,27 +184,13 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
 
         public Object getValueAt(int index, int columnIndex) {
             try {
-                PlatformCapability pCap =
-                    (PlatformCapability)tableData.elementAt(index);
-                switch(columnIndex) {
-                    case 0:
-                        return (pCap.getValue(PlatformCapability.NAME));
-                    case 1:
-                        return(pCap.getDescription());
-                    case 2:
-                        String name = pCap.getClass().getName();
-                        int ndx = name.lastIndexOf(".");
-                        if(ndx!=-1)
-                            name = name.substring(ndx+1, name.length());
-                        return(name);
-                    case 3:
-                        String pkgName = pCap.getClass().getName();
-                        int x = pkgName.lastIndexOf(".");
-                        if(x!=-1)
-                            pkgName = pkgName.substring(0, x);
-                        return(pkgName);
-                    default:
-                        return(null);
+                PlatformCapability pCap = tableData.elementAt(index);
+                if(columnIndex==0) {
+                    return (pCap.getValue(PlatformCapability.NAME));
+                } else if(columnIndex==1) {
+                    return(pCap.getDescription());
+                } else {
+                    return null;
                 }
             } catch(Exception e) {
                 e.printStackTrace();
@@ -209,8 +203,16 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
             fireTableDataChanged();
         }
 
-        @SuppressWarnings("unchecked")
-        public void addItem(Object item) {
+        void addOrReplace(PlatformCapability item) {
+            int ndx = tableData.indexOf(item);
+            if(ndx!=-1) {
+                setValueAt(item, ndx);
+            } else {
+                addItem(item);
+            }
+        }
+
+        public void addItem(PlatformCapability item) {
             int rowNum = tableData.size();
             tableData.insertElementAt(item, rowNum);
             fireTableRowsInserted(rowNum, rowNum);
@@ -237,8 +239,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
             return(columnNames[column]);
         }
 
-        @SuppressWarnings("unchecked")
-        public void setValueAt(Object item, int rowNum) {
+        public void setValueAt(PlatformCapability item, int rowNum) {
             tableData.setElementAt(item, rowNum);
             fireTableRowsUpdated(rowNum, rowNum);
         }
@@ -275,29 +276,18 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
     }
 
     private void showDetails(PlatformCapability pCap) {
-        PlatformCapabilityDetails details = new PlatformCapabilityDetails(pCap);
-        if(details.changed) {
-            Thread thread = new Thread(this);
-            clearPlatformCapabilities();
-            thread.start();            
-        }
+        PlatformCapabilityDetails details = new PlatformCapabilityDetails(pCap, getComponent());
     }
 
     /**
      * Shows the details of a PlatformCapability object
      */
     class PlatformCapabilityDetails extends JDialog {
-        //private final PlatformCapability pCap;
         private JPanel base;
-        //private JDialog instance;
         private PropertiesTable propsTable;
-        private boolean changed=false;
-        private JButton apply;
 
-        PlatformCapabilityDetails(final PlatformCapability pCap) {
+        PlatformCapabilityDetails(final PlatformCapability pCap, Component parent) {
             super((JFrame)null, "Platform PlatformCapabilityConfig Details", true);
-            //this.pCap = pCap;
-            //instance = this;
             base = new JPanel();
             base.setLayout(new BorderLayout(2, 4));
             base.setBorder(BorderFactory.createCompoundBorder(
@@ -313,7 +303,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
             basics.add(new JLabel("Description")); 
             basics.add(createTextField(pCap.getDescription()));
             basics.add(new JLabel("Class"));       
-            basics.add(createTextField(pCap.getClass().getName()));
+            basics.add(createTextField(pCap.getClass().getSimpleName()));
             basics.add(new JLabel("Type"));        
             basics.add(createTextField(pCap.getType()==PlatformCapability.STATIC?
                                                         "STATIC":"PROVISIONABLE"));
@@ -327,9 +317,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
                                                 "PlatformCapabilityConfig Support Mappings"),
                                       BorderFactory.createEmptyBorder(8, 8, 8, 8)));
 
-            //Map capabilityMap = pCap.getMapping();
             Properties props = new Properties();
-            //props.putAll(capabilityMap);
             String[] keys = pCap.getPlatformKeys();
             for (String key : keys) {
                 props.put(key, pCap.getValue(key));
@@ -338,21 +326,9 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
             if(pCap.getPath()!=null) {
                 props.put("Path", pCap.getPath());
             }
-                        
-            /* Check if the PlatformCapability is a 
-             * org.rioproject.system.capability.system.StorageCapability. If it is make 
-             * sure the org.rioproject.system.capability.system.StorageCapability.Available 
-             * and org.rioproject.system.capability.system.StorageCapability.Capacity
-             * are formatted for kbytes display             
-             */
-            String storageClass = "org.rioproject.system.capability.system.StorageCapability";
-            if(pCap.getClass().getName().equals(storageClass)) {
-                Double dVal = (Double)props.get("Available");
-                if(dVal!=null) 
-                    props.put("Available", formatStorageCapabilityValue(dVal));                
-                dVal = (Double)props.get("Capacity");
-                if(dVal!=null)
-                    props.put("Capacity", formatStorageCapabilityValue(dVal));
+
+            if(pCap instanceof ByteOrientedDevice) {
+                formatByteOrientedDevice(pCap, props);
             }
             propsTable = new PropertiesTable(props);
             capabilityPanel.add(propsTable, BorderLayout.CENTER);
@@ -369,14 +345,21 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
                                               dispose();
                                           }
                                       });
-            //buttonPanel.add(Box.createHorizontalGlue());
             buttonPanel.add(dismiss);
             base.add(buttonPanel, BorderLayout.SOUTH);
 
             getContentPane().add(base);
-            //setResizable(false);
             pack();
-            showDialog();
+            showDialog(parent);
+        }
+
+        private void formatByteOrientedDevice(PlatformCapability pCap, Properties props) {
+            Double dVal = (Double)props.get("Available");
+            if(dVal!=null)
+                props.put("Available", formatSizeValue(dVal));
+            dVal = (Double)props.get("Capacity");
+            if(dVal!=null)
+                props.put("Capacity", formatSizeValue(dVal));
         }
 
         /**
@@ -393,18 +376,35 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
         }
 
         /**
-         * Format StorageCapability value
+         * Format a size value
          * 
          * @param dVal The Double value to format
          * 
-         * @return A formatted String value for kbytes
+         * @return A formatted String
          */
-        private String formatStorageCapabilityValue(Double dVal) {
+        private String formatSizeValue(Double dVal) {
             String result = dVal.toString();
             try {
-                double value = dVal /1024;
-                result = new Double(value).intValue()+" kbytes";
-                //result =value+" kbytes";                
+                double value;
+                String size;
+                if(dVal>ByteOrientedDevice.MB) {
+                    if(dVal>ByteOrientedDevice.GB) {
+                        if(dVal>ByteOrientedDevice.TB) {
+                            value = dVal/ByteOrientedDevice.TB;
+                            size = "TB";
+                        } else {
+                            value = dVal/ByteOrientedDevice.GB;
+                            size = "GB";
+                        }
+                    } else {
+                        value = dVal/ByteOrientedDevice.MB;
+                        size = "MB";
+                    }
+                } else {
+                    value = dVal/ByteOrientedDevice.KB;
+                    size = "KB";
+                }
+                result = new Double(value).intValue()+" "+size;
             } catch(Exception e) {
                 System.err.println("Bad StorageCapability value ["+dVal+"]");
             }
@@ -414,11 +414,12 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
         /**
          * Override show to determine size and placement
          */
-        private void showDialog() {
+        private void showDialog(Component component) {
             int width = 400;
             int height = 370;
             pack();
             setSize(width, height);
+            setLocationRelativeTo(component);
             getContentPane().add(base);
             java.awt.event.WindowListener l = new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {
@@ -558,10 +559,7 @@ public class PlatformCapabilityUI extends JPanel implements Runnable {
          * @param text The text to display
          */
         void showError(String text) {
-            JOptionPane.showMessageDialog(this, 
-                                          text, 
-                                          "User Input Error", 
-                                          JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, text, "User Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
