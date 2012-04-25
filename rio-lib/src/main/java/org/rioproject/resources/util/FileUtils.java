@@ -175,4 +175,27 @@ public class FileUtils {
         in.close();
         out.close();
     }
+
+    /**
+     * Determine if the provided {@code File} is a symbolic link.
+     *
+     * @param file The file to test.
+     *
+     * @return If the file is a symbolic link return {@code true}, otherwise return {@code false}.
+     *
+     * @throws IOException If there are problems obtaining the canonical file.
+     * @throws IllegalArgumentException if the {@code file} is {@code null}
+     */
+    public static boolean isSymbolicLink(File file) throws IOException {
+        if (file == null)
+            throw new IllegalArgumentException("File must not be null");
+        File canon;
+        if (file.getParent() == null) {
+            canon = file;
+        } else {
+            File canonDir = file.getParentFile().getCanonicalFile();
+            canon = new File(canonDir, file.getName());
+        }
+        return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
+    }
 }

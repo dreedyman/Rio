@@ -311,7 +311,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             ServiceAdvertiser.advertise(serviceProxy, context);
             logger.fine("%s: advertised", CybernodeLogUtil.logName(sElem));
         } catch(ServiceBeanControlException e) {
-            logger.warning("Could not advertise %s, continue on", sElem.getName());
+            logger.warning("Could not advertise %s", sElem.getName());
             throw e;
         }
     }

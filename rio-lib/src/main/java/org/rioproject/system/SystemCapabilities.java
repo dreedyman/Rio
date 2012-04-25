@@ -20,6 +20,7 @@ import net.jini.config.ConfigurationException;
 import org.rioproject.config.PlatformLoader;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.costmodel.ResourceCostModel;
+import org.rioproject.resources.util.FileUtils;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
 import org.rioproject.system.measurable.MeasurableCapability;
@@ -31,6 +32,7 @@ import org.rioproject.system.measurable.memory.SystemMemory;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -318,6 +320,13 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 for (File dir : dirs) {
                     File[] files = dir.listFiles(new FileFilter() {
                         public boolean accept(File pathName) {
+                            try {
+                                if(FileUtils.isSymbolicLink(pathName)) {
+                                    return false;
+                                }
+                            } catch (IOException e) {
+                                logger.log(Level.WARNING, "Trying to determine whether the file is a symbolic link", e);
+                            }
                             return (pathName.getName().endsWith(libExtension));
                         }
                     });
@@ -330,11 +339,11 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                 logger.config("Create NativeLibrarySupport object for [" + fileName + "]");
                             PlatformCapability nLib = getPlatformCapability(NATIVE_LIB_CLASS);
                             String name;
-                            if (!OperatingSystemType.isWindows()) {
+                            /*if (!OperatingSystemType.isWindows()) {
                                 name = fileName.substring(3, index);
-                            } else {
+                            } else {*/
                                 name = fileName.substring(0, index);
-                            }
+                            //}
                             nLib.define("Name", name);
                             nLib.define("FileName", fileName);
                             nLib.setPath(dir.getCanonicalPath());
@@ -415,16 +424,13 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     private MeasurableCapability getDiskSpace(Configuration config) {
         MeasurableCapability diskSpace = null;
         try {
-            diskSpace =
-                (MeasurableCapability)config.getEntry(COMPONENT,
-                                                      "disk",
-                                                      MeasurableCapability.class,
-                                                      new DiskSpace(config),
-                                                      config);            
+            diskSpace = (MeasurableCapability)config.getEntry(COMPONENT,
+                                                              "disk",
+                                                              MeasurableCapability.class,
+                                                              new DiskSpace(config),
+                                                              config);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Loading DiskSpace MeasurableCapability",
-                       e);
+            logger.log(Level.WARNING, "Loading DiskSpace MeasurableCapability", e);
         }
         return diskSpace;
     }
