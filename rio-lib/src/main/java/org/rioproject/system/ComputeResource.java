@@ -16,7 +16,6 @@
  */
 package org.rioproject.system;
 
-import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
@@ -33,14 +32,12 @@ import org.rioproject.system.measurable.disk.DiskSpace;
 import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.system.measurable.memory.SystemMemory;
 import org.rioproject.util.TimeUtil;
-import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
