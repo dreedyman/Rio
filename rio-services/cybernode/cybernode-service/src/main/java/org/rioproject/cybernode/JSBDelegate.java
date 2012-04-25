@@ -56,6 +56,7 @@ import javax.management.ObjectName;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
@@ -68,13 +69,13 @@ public class JSBDelegate implements ServiceBeanDelegate {
     /** ServiceBeanInstance of a loaded and started ServiceBean */
     private ServiceBeanInstance instance;
     /** Unique identifier for the delegate */
-    private Object identifier;
+    private final Object identifier;
     /** ServiceBean ID */
     private Uuid serviceID;
     /** ServiceBean proxy */
     private Object serviceProxy;
     /** Reference to the ServiceBeanContainer */
-    private ServiceBeanContainer container;
+    private final ServiceBeanContainer container;
     /** The ServiceElement */
     private ServiceElement sElem;
     /** The OperationalStringManager for the JSB */
@@ -88,13 +89,13 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private final Object serviceRecordLock = new Object();
     private long lastServiceRecordUpdate;
     /** Flag to indicate the service is in the process of starting */
-    private boolean starting = false;
+    private final AtomicBoolean starting = new AtomicBoolean(false);
     /** Flag to indicate the service is in the process of terminating */
-    private boolean terminating=false;
+    private final AtomicBoolean terminating =new AtomicBoolean(false);
     /** Flag to indicate the service is terminated */
-    private boolean terminated=false;
+    private final AtomicBoolean terminated = new AtomicBoolean(false);
     /** A utility used to install staged data */
-    private StagedDataManager stagedDataManager;
+    private final StagedDataManager stagedDataManager;
     /** The ServiceBeanContext */
     private ServiceBeanContext context;
     /** EventHandler for SLAThresholdEvent processing */
@@ -111,7 +112,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         new ArrayList<PlatformCapability>();
     private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
-    private static WrappedLogger logger = WrappedLogger.getLogger(CONFIG_COMPONENT);
+    private final static WrappedLogger logger = WrappedLogger.getLogger(JSBDelegate.class.getName());
     /** Result from loading the service */
     protected ServiceBeanLoader.Result loadResult;
 
@@ -212,13 +213,13 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 execManager.getServiceBeanExecutor().update(newElem, opMgr);
                 return true;
             } catch (RemoteException e) {
-                logger.log(Level.WARNING, "Updating forked service ["+sElem.getName()+"]", e);
+                logger.log(Level.WARNING, e, "Updating forked service [%s]", CybernodeLogUtil.logName(sElem));
                 return false;
             }
         }
         if(!this.sElem.equals(newElem))
             return(false);
-        if(terminated || terminating)
+        if(terminated.get() || terminating.get())
             return(false);
         synchronized(this) {
             if(serviceProxy==null) {
@@ -237,8 +238,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
             if(context instanceof JSBContext) {
                 ((JSBContext)context).setServiceElement(sElem);
             } else {
-                logger.warning("Cannot update ["+sElem.getName()+"], Unknown ServiceBeanContext type "+
-                               "["+context.getClass().getName()+"]");
+                logger.warning("Cannot update [%s], Unknown ServiceBeanContext type [%s]",
+                               CybernodeLogUtil.logName(sElem), context.getClass().getName());
                 return(false);
             }
 
@@ -295,7 +296,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         if(serviceProxy==null) {
             throw new ServiceBeanControlException("Cannot advertise ["+sElem.getName()+"], Proxy is null");
         }
-        if(terminated || terminating)
+        if(terminated.get() || terminating.get())
             throw new ServiceBeanControlException("advertising service while in the process of terminating");
         /* If any of the associations are of type requires, service
          * advertisement is managed by AssociationManagement */
@@ -308,8 +309,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         }
         try {
             ServiceAdvertiser.advertise(serviceProxy, context);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine(sElem.getName()+": advertised");
+            logger.fine("%s: advertised", CybernodeLogUtil.logName(sElem));
         } catch(ServiceBeanControlException e) {
             logger.warning("Could not advertise %s, continue on", sElem.getName());
             throw e;
@@ -341,10 +341,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * ServiceBean
      */
     public void terminate() {
-        if(terminated || terminating)
+        if(terminated.get() || terminating.get())
             return;
         try {
-            terminating = true;
+            terminating.set(true);
             if(serviceBeanSLAManager != null) {
                 serviceBeanSLAManager.terminate();
                 serviceBeanSLAManager = null;
@@ -374,7 +374,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                                 destroyAdmin.destroy();
                                 setDiscarded();
                                 //container.discarded(identifier);
-                                terminated = true;
+                                terminated.set(true);
                             } else {
                                 logger.fine("No DestroyAdmin capabilities for %s", serviceProxy.getClass().getName());
                             }
@@ -383,7 +383,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         }
                     } catch(Throwable t) {
                         logger.log(Level.SEVERE, "Terminating ServiceBean", t);
-                        terminating = false;
+                        terminating.set(false);
                     } finally {
                         serviceProxy = null;
                     }
@@ -439,7 +439,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         */
         Thread jsbThread = new Thread("JSBDelegate") {
             public void run() {
-                starting = true;
+                starting.set(true);
                 ComputeResource computeResource = container.getComputeResource();
                 try {
 
@@ -456,18 +456,24 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
                     /* Check if we are forking a service bean */
                     if(sElem.forkService() && !runningForked()) {
+                        logger.fine("Fork required for %s", CybernodeLogUtil.logName(sElem));
+                        logger.finest("Created a ServiceBeanExecManager for %s", CybernodeLogUtil.logName(sElem));
                         execManager = new ServiceBeanExecManager(sElem, container);
                         try {
                             /* Get matched PlatformCapability instances to apply */
                             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
                             PlatformCapability[] matched = ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
+                            logger.finest("Invoke ServiceBeanExecManager.exec for %s", CybernodeLogUtil.logName(sElem));
                             instance = execManager.exec(sElem, opStringMgr, new JSBDiscardManager(), matched);
+                            logger.finest("ServiceBeanInstance obtained from ServiceBeanExecManager for %s", CybernodeLogUtil.logName(sElem));
                             serviceRecord = execManager.getServiceRecord();
+                            logger.finest("ServiceRecord obtained from ServiceBeanExecManager for %s", CybernodeLogUtil.logName(sElem));
                         } catch (Exception e) {
                             abortThrowable = e;
                         }
 
                     } else {
+                        logger.fine("Create %s within Cybernode's JVM ", CybernodeLogUtil.logName(sElem));
                         /* Create the DiscardManager */
                         JSBDiscardManager discardManager = new JSBDiscardManager();
 
@@ -598,7 +604,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         } catch(InterruptedException e) {
             logger.log(Level.WARNING, e, "ServiceBean [%s] start Thread interrupted", sElem.getName());
         } finally {
-            starting = false;
+            starting.set(false);
         }
 
         try {
@@ -705,7 +711,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private void setDiscarded() {
         /* check if the service is "starting" this may happen if service
          * creation is aborted before the start thread completes */
-        if(starting) {
+        if(starting.get()) {
             int iterations = 0;
             while(serviceRecord==null && iterations<4) {
                 try {
@@ -741,7 +747,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
          * @see org.rioproject.core.jsb.DiscardManager#discard
          */
         public void discard() {
-            if(terminated)
+            if(terminated.get())
                 return;
             setDiscarded();
             container.discarded(identifier);
