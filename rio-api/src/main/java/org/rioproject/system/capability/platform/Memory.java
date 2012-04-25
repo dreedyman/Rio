@@ -18,10 +18,6 @@ package org.rioproject.system.capability.platform;
 import org.rioproject.system.measurable.memory.CalculableMemory;
 import org.rioproject.watch.WatchDataReplicator;
 
-import java.lang.reflect.Method;
-import java.util.Observable;
-import java.util.Observer;
-
 /**
  * Describes the amount of memory available for the Java Virtual Machine as
  * a qualitative resource.
@@ -58,6 +54,24 @@ public class Memory extends ByteOrientedDevice implements WatchDataReplicator<Ca
         dFree = dFree*MB;
         capabilities.put(CAPACITY, dTotal);
         capabilities.put(AVAILABLE, dFree);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Memory memory = (Memory) o;
+        return description.equals(memory.description);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + description.hashCode();
+        return result;
     }
 
     public void close() {

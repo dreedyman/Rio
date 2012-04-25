@@ -70,7 +70,24 @@ public class StorageCapability extends ByteOrientedDevice implements WatchDataRe
         capabilities.put(AVAILABLE, dAvail);
     }
 
-    public void close() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        StorageCapability storageCapability = (StorageCapability) o;
+        return description.equals(storageCapability.description);
 
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + description.hashCode();
+        return result;
+    }
+
+    public void close() {
     }
 }
