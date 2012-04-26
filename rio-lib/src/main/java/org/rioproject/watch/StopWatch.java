@@ -76,7 +76,7 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      */
     public void stopTiming() {
         long now = System.currentTimeMillis();
-        setElapsedTime(now - startTimeTable.get(Thread.currentThread().getId()), now);
+        setElapsedTime(now - getStartTime(), now);
     }
 
     /**
@@ -97,7 +97,8 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      * @see org.rioproject.watch.StopWatchMBean#getStartTime
      */
     public long getStartTime() {
-        return startTimeTable.get(Thread.currentThread().getId());
+        Long startTime = startTimeTable.get(Thread.currentThread().getId());
+        return startTime==null?0:startTime;
     }
 
     /**
