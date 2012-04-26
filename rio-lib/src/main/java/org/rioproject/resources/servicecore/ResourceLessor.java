@@ -33,16 +33,15 @@ import java.util.logging.Logger;
  */
 public abstract class ResourceLessor {
     /** A hash of resources to cookies */
-    private final Map<Uuid, LeasedResource> resources =
-        new ConcurrentHashMap<Uuid, LeasedResource>();
+    private final Map<Uuid, LeasedResource> resources = new ConcurrentHashMap<Uuid, LeasedResource>();
     /** A Thread which will clean up stale leases */
     private Thread reaper = null;
     /** A LinkedList of LeaseListener objects */
-    private List<LeaseListener> listeners = new LinkedList<LeaseListener>();
+    private final List<LeaseListener> listeners = new LinkedList<LeaseListener>();
     /** Component for getting the Logger */
-    static final String COMPONENT_NAME = "org.rioproject.resources.servicecore";
+    private static final String COMPONENT_NAME = "org.rioproject.resources.servicecore";
     /** The Logger */
-    Logger logger = Logger.getLogger(COMPONENT_NAME);
+    private static final Logger logger = Logger.getLogger(COMPONENT_NAME);
 
     /**
      * Check to make sure that the LeasedResource lease has not expired yet <br>
