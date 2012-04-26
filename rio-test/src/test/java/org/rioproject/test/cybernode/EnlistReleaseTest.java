@@ -108,4 +108,53 @@ public class EnlistReleaseTest {
         Assert.assertNotNull(sbis);
         Assert.assertTrue(sbis.length==0);
     }
+
+    @Test
+    public void testReleaseEnlist() {
+        ServiceBeanInstantiator[] sbis = null;
+        Throwable thrown = null;
+        try {
+            cybernode.release(true);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            thrown = e;
+        }
+        Assert.assertNull(thrown);
+        try {
+            Assert.assertFalse(cybernode.isEnlisted());
+        } catch (Exception e) {
+            e.printStackTrace();
+            thrown = e;
+        }
+        Assert.assertNull(thrown);
+        thrown = null;
+        try {
+            sbis = monitor.getServiceBeanInstantiators();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            thrown = e;
+        }
+        Assert.assertNull(thrown);
+        Assert.assertNotNull(sbis);
+        Assert.assertTrue(sbis.length==0);
+
+        thrown = null;
+        try {
+            cybernode.enlist();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            thrown = e;
+        }
+        Assert.assertNull(thrown);
+        thrown = null;
+        try {
+            sbis = monitor.getServiceBeanInstantiators();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            thrown = e;
+        }
+        Assert.assertNull(thrown);
+        Assert.assertNotNull(sbis);
+        Assert.assertTrue(sbis.length==1);
+    }
 }
