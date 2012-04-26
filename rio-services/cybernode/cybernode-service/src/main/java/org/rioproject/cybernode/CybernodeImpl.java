@@ -959,12 +959,10 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     protected void doEnlist() {
         if(isEnlisted()) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Already enlisted");
+            logger.fine("Already enlisted");
             return;
         }
-        if(logger.isLoggable(Level.INFO))
-            logger.info("Configured as an instantiation resource");
+        logger.info("Enlist with ProvisionManagers as an instantiation resource");
         try {
             svcConsumer.initializeProvisionDiscovery(context.getDiscoveryManagement());
         } catch(Exception e) {
@@ -1530,9 +1528,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     }
 
     private void doRelease() {
-        if(logger.isLoggable(Level.INFO))
-            logger.info("Unregister from ProvisionMonitor instances ");
-        svcConsumer.destroy();
+        logger.finer("Unregister from ProvisionMonitor instances ");
+        svcConsumer.cancelRegistrations();
         if(serviceTerminationOnUnregister)
             container.terminateServices();
     }

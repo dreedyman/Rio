@@ -48,6 +48,8 @@ import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.security.AccessControlException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 /**
@@ -58,36 +60,36 @@ import java.util.logging.Level;
  * @author Dennis Reedy
  */
 public class ServiceConsumer extends ServiceDiscoveryAdapter {
-    /** The maximum number of services the Cybernode has been configured to 
-     * instantiate */
+    /** The maximum number of services the Cybernode has been configured to instantiate */
     private int serviceLimit;
     private final CybernodeAdapter adapter;
     /** Table of Lease instances to manage */
-    private final Hashtable<Object, ProvisionLeaseManager> leaseTable;
+    private final ConcurrentMap<ProvisionManager, ProvisionLeaseManager> leaseTable =
+        new ConcurrentHashMap<ProvisionManager, ProvisionLeaseManager>();
     /** Collection of ProvisionMonitor instances */
-    private final List<ServiceID> provisioners = Collections.synchronizedList(new ArrayList<ServiceID>());
+    private final ConcurrentMap<ServiceID, ProvisionManager> provisionerMap = new ConcurrentHashMap<ServiceID, ProvisionManager>();
     /** LookupCache for ProvisionMonitor instances */
     private LookupCache lCache;
     /**
      * The duration of the Lease requested by the ServiceInstantiator to
      * ProvisionManager instances
      */
-    private long provisionerLeaseDuration;
+    private final long provisionerLeaseDuration;
     /**
      * The number of times to attempt to reconnect to a ProvisionManager
      * instance if that instance could not be reached for Lease renewal.
      */
-    private int provisionerRetryCount;
+    private final int provisionerRetryCount;
     /**
      * The length of time (in milliseconds) to wait before attempting to
      * reconnect to a ProvisionManager instance if that instance could not be
      * reached for LeaseRenewal
      */
-    private long provisionerRetryDelay;
+    private final long provisionerRetryDelay;
     /** ProxyPreparer for ProvisionManager proxies */
-    private ProxyPreparer provisionerPreparer;
+    private final ProxyPreparer provisionerPreparer;
     /** Observer for ComputeResource changes */
-    private ComputeResourceObserver computeResourceObserver;
+    private final ComputeResourceObserver computeResourceObserver;
     /* Flag to indicate we are destroyed */
     private boolean destroyed = false;
     private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
@@ -105,7 +107,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      *
      * @throws ConfigurationException if errors occur accessing the configuration
      */
-    ServiceConsumer(CybernodeAdapter adapter, int serviceLimit, Configuration config) throws ConfigurationException {
+    ServiceConsumer(final CybernodeAdapter adapter, final int serviceLimit, final Configuration config) throws ConfigurationException {
         if(adapter == null)
             throw new IllegalArgumentException("CybernodeAdapter is null");
         if(config == null)
@@ -148,7 +150,6 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                                                              ProxyPreparer.class,
                                                              new BasicProxyPreparer());
         logger.finest("ProxyPreparer=%s", provisionerPreparer);
-        leaseTable = new Hashtable<Object, ProvisionLeaseManager>();
         this.serviceLimit = serviceLimit;
         computeResourceObserver = new ComputeResourceObserver(adapter.getComputeResource());
     }
@@ -161,11 +162,17 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @throws IOException if discovery cannot be initialized
      * @throws ConfigurationException if the configuration cannot be used
      */
-    void initializeProvisionDiscovery(DiscoveryManagement dm) throws IOException, ConfigurationException {
-        ServiceTemplate template = new ServiceTemplate(null, new Class[] {ProvisionManager.class}, null);
-        LookupCachePool lcPool = LookupCachePool.getInstance();
-        lCache = lcPool.getLookupCache(dm, template);
-        lCache.addListener(this);
+    void initializeProvisionDiscovery(final DiscoveryManagement dm) throws IOException, ConfigurationException {
+        if(lCache==null) {
+            ServiceTemplate template = new ServiceTemplate(null, new Class[] {ProvisionManager.class}, null);
+            LookupCachePool lcPool = LookupCachePool.getInstance();
+            lCache = lcPool.getLookupCache(dm, template);
+            lCache.addListener(this);
+        } else {
+            for(Map.Entry<ServiceID, ProvisionManager> entry : provisionerMap.entrySet()) {
+                register(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     /**
@@ -177,8 +184,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             if(lCache!=null)
                 lCache.removeListener(this);
             cancelRegistrations();
-            synchronized(provisioners) {
-                provisioners.clear();
+            synchronized(provisionerMap) {
+                provisionerMap.clear();
             }
         } finally {
             destroyed = true;
@@ -191,7 +198,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @param serviceLimit The maximum number of services the Cybernode has been 
      * configured to instantiate 
      */
-    void setServiceLimit(int serviceLimit) {
+    private void setServiceLimit(final int serviceLimit) {
         this.serviceLimit = serviceLimit;
     }
 
@@ -200,7 +207,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * 
      * @param sdEvent The ServiceDiscoveryEvent
      */
-    public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
+    public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
         // sdEvent.getPreEventServiceItem() == null                
         ServiceItem item = sdEvent.getPostEventServiceItem();
             if(item==null) {
@@ -212,13 +219,13 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
         if(item == null || item.service == null)
             return;
-        synchronized(provisioners) {
-            if(provisioners.contains(item.serviceID))
+        synchronized(provisionerMap) {
+            if(provisionerMap.get(item.serviceID)!=null)
                 return;
             logger.fine("ProvisionManager discovered %s", item.service.toString());
-            provisioners.add(item.serviceID);
+            provisionerMap.put(item.serviceID, (ProvisionManager) item.service);
         }
-        register(item);
+        register(item.serviceID, (ProvisionManager)item.service);
     }
 
     /**
@@ -226,7 +233,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * 
      * @param sdEvent The ServiceDiscoveryEvent
      */
-    public void serviceRemoved(ServiceDiscoveryEvent sdEvent) {
+    public void serviceRemoved(final ServiceDiscoveryEvent sdEvent) {
         ServiceItem item = sdEvent.getPreEventServiceItem();
         /* Check if provisioner is actually no longer available */
         try {
@@ -239,29 +246,31 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
     /*
      * Remove a ProvisionManager from the collection
      */
-    void removeProvisionManager(ProvisionManager pm, ServiceID sid) {
-        lCache.discard(pm);
-        synchronized(provisioners) {
-            if(provisioners.remove(sid)) {
-                logger.info("Dropping ProvisionManager, now connected to [%d] ProvisionMonitor instances",
-                            provisioners.size());
-            }
-        }
+    private void removeProvisionManager(final ProvisionManager pm, final ServiceID sid) {
+        provisionerMap.remove(sid);
         cancelRegistration(pm);
+        try {
+            lCache.discard(pm);
+        } catch(IllegalStateException e) {
+            logger.log(Level.WARNING,
+                       "For some reason LookupDiscovery has been terminated, non-fatal, must be shutting down",
+                       e);
+        }
     }
 
     /**
      * Register to a Provisioner
      * 
-     * @param item The ServiceItem of a discovered Provisioner
+     * @param serviceID The ServiceID of a discovered Provisioner
+     * @param provisionManager The ProvisionManager to register
      */
-    void register(ServiceItem item) {
+    private void register(final ServiceID serviceID, ProvisionManager provisionManager) {
         try {
-            if(haveRegistration(item)) {
-                logger.finest("Already registered to %s", item.service);
+            if(haveRegistration(provisionManager)) {
+                logger.finest("Already registered to %s", provisionManager);
                 return;                
             }
-            ProvisionManager provisioner = (ProvisionManager)provisionerPreparer.prepareProxy(item.service);
+            ProvisionManager provisioner = (ProvisionManager)provisionerPreparer.prepareProxy(provisionManager);
             logger.finest("ServiceConsumer - prepared ProvisionManager proxy: %s", provisioner.toString());
             ResourceCapability rCap = adapter.getResourceCapability();
             logger.finest("ResourceCapability %s", rCap);
@@ -271,12 +280,12 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 logger.warning("Unable to register to ProvisionManager %s", provisioner.toString());
                 return;
             }            
-            leaseTable.put(item.service, new ProvisionLeaseManager(lease, provisioner, item.serviceID));
+            leaseTable.put(provisioner, new ProvisionLeaseManager(lease, provisioner, serviceID));
             logger.info("Registered to a ProvisionManager, now connected to [%d] ProvisionMonitor instances",
-                        provisioners.size());
+                        provisionerMap.size());
                         
         } catch(Throwable t) {
-            provisioners.remove(item.serviceID);
+            provisionerMap.remove(serviceID);
             logger.log(Level.SEVERE, "Registering ProvisionManager", t);
         }
     }
@@ -285,10 +294,11 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * Cancel all event registrations to Provisioner instances
      */
     void cancelRegistrations() {
-        for(Enumeration e = leaseTable.keys();
-            e.hasMoreElements();) {
-            Object service = e.nextElement();
-            cancelRegistration(service);
+        logger.fine("Canceling all event registrations to Provisioner instances");
+        Map<ProvisionManager, ProvisionLeaseManager> map = new HashMap<ProvisionManager, ProvisionLeaseManager>();
+        map.putAll(leaseTable);
+        for(Map.Entry<ProvisionManager, ProvisionLeaseManager> entry : map.entrySet()) {
+            cancelRegistration(entry.getKey());
         }
     }
 
@@ -298,12 +308,13 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @param monitor The monitor to cancel
      */
 
-    void cancelRegistration(Object monitor) {
-        synchronized(leaseTable) {
-            ProvisionLeaseManager leaseManager = leaseTable.remove(monitor);
-            if(leaseManager != null) {
-                leaseManager.drop(false);
-            }
+    private void cancelRegistration(final ProvisionManager monitor) {
+        ProvisionLeaseManager leaseManager = leaseTable.get(monitor);
+        if(leaseManager != null) {
+            leaseManager.drop(false);
+            leaseTable.remove(monitor);
+            logger.info("Dropping ProvisionManager, now connected to [%d] ProvisionMonitor instances",
+                        leaseTable.size());
         }
     }
 
@@ -320,7 +331,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @param serviceLimit The maximum number of services the Cybernode has been 
      * configured to instantiate 
      */
-    void updateMonitors(int serviceLimit) {
+    void updateMonitors(final int serviceLimit) {
         setServiceLimit(serviceLimit);
         updateMonitors(adapter.getResourceCapability(), adapter.getDeployedServices());
     }
@@ -331,7 +342,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @param resourceCapability The ResourceCapability object
      * @param deployedServices List of deployed services
      */
-    void updateMonitors(ResourceCapability resourceCapability, List<DeployedService> deployedServices) {
+    private void updateMonitors(final ResourceCapability resourceCapability, final List<DeployedService> deployedServices) {
         ProvisionLeaseManager[] mgrs;
         synchronized(leaseTable) {
             Collection<ProvisionLeaseManager> c = leaseTable.values();
@@ -387,7 +398,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @return The Lease the ProvisionMonitor has returned, or null if a valid 
      * Lease could not be obtained
      */
-    synchronized Lease connect(ProvisionManager provisioner) {
+    private synchronized Lease connect(final ProvisionManager provisioner) {
         boolean connected = false;
         Lease lease = null;
         for(int i = 1; i <= provisionerRetryCount; i++) {
@@ -450,14 +461,14 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
     /**
      * Verify we arent already registered to a Provisioner
      *
-     * @param item The ServiceItem for the provisioner
+     * @param provisionManager The ProvisionManager to check
      *  
      * @return true if we already have a registration
      */
-    boolean haveRegistration(ServiceItem item) {
-        for(Enumeration e = leaseTable.keys(); e.hasMoreElements();) {
-            Object service = e.nextElement();
-            if(service.equals(item.service))
+    private boolean haveRegistration(final ProvisionManager provisionManager) {
+        for(Map.Entry<ProvisionManager, ProvisionLeaseManager> entry : leaseTable.entrySet()) {
+            ProvisionManager service = entry.getKey();
+            if(service.equals(provisionManager))
                 return(true);
         }
         return(false);
@@ -466,7 +477,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
     /*
      * Get the DeployedService instances
      */
-    List<DeployedService> getServiceDeployments() {
+    private List<DeployedService> getServiceDeployments() {
         return adapter.getDeployedServices();
     }
 
@@ -481,10 +492,10 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         long leaseTime;
         boolean keepAlive = true;
         Lease lease;
-        ProvisionManager provisioner;
-        ServiceID serviceID;
+        final ProvisionManager provisioner;
+        final ServiceID serviceID;
 
-        ProvisionLeaseManager(Lease lease, ProvisionManager provisioner, ServiceID serviceID) {
+        ProvisionLeaseManager(final Lease lease, final ProvisionManager provisioner, final ServiceID serviceID) {
             super("ProvisionLeaseManager");
             this.lease = lease; 
             leaseTime = lease.getExpiration() - System.currentTimeMillis();
@@ -499,10 +510,11 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             if(!removed) {
                 try {
                     lease.cancel();
+                    logger.finest("Canceled Lease to ProvisionManager");
                 } catch(AccessControlException e) {
                     logger.log(Level.WARNING, "Permissions problem dropping lease", ThrowableUtil.getRootCause(e));
                 } catch(Exception e) {
-                    logger.finer("ProvisionLeaseManager: could not drop lease, already cancelled");
+                    logger.log(Level.WARNING, "ProvisionLeaseManager: could not drop lease", e);
                 }
             }
             lease = null;
@@ -515,6 +527,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                        
             while(!interrupted()) {
                 if(!keepAlive) {
+                    logger.finest("Breaking out of Lease renewal thread");
                     return;
                 }                
                 try {
@@ -522,8 +535,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 } catch(InterruptedException ie) {
                     /* should not happen */
                 } catch(IllegalArgumentException iae) {
-                    logger.warning("Lease renewal time incorrect : "+
-                                   leaseRenewalTime);
+                    logger.warning("Lease renewal time incorrect : %d", leaseRenewalTime);
                 }
                 if(lease != null) {
                     try {
