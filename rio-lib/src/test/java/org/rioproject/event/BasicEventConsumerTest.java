@@ -94,7 +94,8 @@ public class BasicEventConsumerTest {
         EventRegistration eventRegistration = consumer.register(serviceItem);
         Assert.assertNotNull(eventRegistration);
         p.fire();
-        Assert.assertTrue(listener.counter.get()>0);
+        Assert.assertTrue("Expected listener count to be > 0, found: "+listener.counter.get(),
+                          listener.counter.get()>0);
     }
 
     @Test
