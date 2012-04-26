@@ -63,7 +63,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     protected Collection<LeasedResource> collection;
     /* Semaphore for access to modifying the collection */
     protected final Object collectionLock = new Object();
-    static Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
+    static final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
     /**
      * The LandlordLessor which will be registered to, and will provide Lease
      * notification events
@@ -111,14 +111,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return If a <code>ServiceResource</code> object can
      * be identified, otherwise return <code>null</code>
      *
-     * @throws Exception if any errors occur selecting a resource
+     * @throws ProvisionException if any errors occur selecting a resource
      */
     public ServiceResource getServiceResource(ServiceElement sElem,
                                               Uuid uuid,
-                                              boolean inclusive)
-    throws Exception {
-        return (selectServiceResource(sElem,
-                                      getServiceResources(uuid, inclusive)));
+                                              boolean inclusive) throws ProvisionException {
+        return (selectServiceResource(sElem, getServiceResources(uuid, inclusive)));
     }
 
     /**
