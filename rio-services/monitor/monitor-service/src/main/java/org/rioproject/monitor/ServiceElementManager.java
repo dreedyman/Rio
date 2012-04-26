@@ -1963,7 +1963,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     int pending = provisioner.getPendingManager().getCount(svcElement);
                     //int actual = getActual()+pending;
                     /* Dont count pending */
-                    int actual = getActual();
+                    int actual = getActual()+pending;
                     mgrLogger.fine("[%s] Removed: actual [%d], pending [%d], maintain [%d]",
                                    LoggingUtil.getLoggingName(svcElement), actual, pending, maintain);
 
