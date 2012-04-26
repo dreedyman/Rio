@@ -119,10 +119,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @throws Exception if errors are encountered using the Configuration
      * object or creating LandlordLessor
      */
-    ServiceProvisioner(Configuration config,
-                       Object eventSource,
-                       EventHandler failureHandler,
-                       GaugeWatch watch) throws Exception {
+    ServiceProvisioner(final Configuration config,
+                       final Object eventSource,
+                       final EventHandler failureHandler,
+                       final GaugeWatch watch) throws Exception {
         if(config==null)
             throw new IllegalArgumentException("config is null");
         if(failureHandler==null)
@@ -240,12 +240,12 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @throws LeaseDeniedException If the Lease is denied for any reason
      * @throws RemoteException for comm errors
      */
-    EventRegistration register(MarshalledObject<ServiceBeanInstantiator> sbi,
-                               MarshalledObject handback,
-                               ResourceCapability resourceCapability,
-                               List<DeployedService> deployedServices,
-                               int serviceLimit,
-                               long duration) throws LeaseDeniedException, RemoteException {
+    EventRegistration register(final MarshalledObject<ServiceBeanInstantiator> sbi,
+                               final MarshalledObject handback,
+                               final ResourceCapability resourceCapability,
+                               final List<DeployedService> deployedServices,
+                               final int serviceLimit,
+                               final long duration) throws LeaseDeniedException, RemoteException {
         ServiceBeanInstantiator instantiator;
 
         try {
@@ -318,9 +318,9 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * preparation
      */
     void handleFeedback(ServiceBeanInstantiator resource,
-                        ResourceCapability updatedCapabilities,
-                        List<DeployedService> deployedServices,
-                        int serviceLimit) throws UnknownLeaseException, RemoteException {
+                        final ResourceCapability updatedCapabilities,
+                        final List<DeployedService> deployedServices,
+                        final int serviceLimit) throws UnknownLeaseException, RemoteException {
         if(resource instanceof RemoteMethodControl)
             resource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
         ServiceResource[] svcResources = selector.getServiceResources();
@@ -375,7 +375,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * 
      * @param request The ProvisionRequest
      */
-    public void dispatch(ProvisionRequest request) {
+    public void dispatch(final ProvisionRequest request) {
         ServiceResource resource = Selector.acquireServiceResource(request, selector);
         dispatch(request, resource, 0);
     }
@@ -391,7 +391,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * which meets the operational requirements of the ServiceElement
      * @param index Index of the ServiceElement in the pending collection
      */
-    public void dispatch(ProvisionRequest request, ServiceResource resource, long index) {
+    public void dispatch(final ProvisionRequest request, final ServiceResource resource, final long index) {
         if(terminating || terminated) {
             logger.info("Request to dispatch %s ignored, utility has terminated", LoggingUtil.getLoggingName(request));
             return;
@@ -447,7 +447,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     /*
      * Helper method to dispatch a ProvisionFailureEventTask to send a ProvisionFailureEvent
      */
-    private void processProvisionFailure(ProvisionFailureEvent event) {
+    private void processProvisionFailure(final ProvisionFailureEvent event) {
         provisionFailurePool.execute(new ProvisionFailureEventTask(event, failureHandler));
     }
 
@@ -455,10 +455,21 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * Monitors ServiceBeanInstantiator leases being removed. 
      */
     class LeaseMonitor extends LeaseListenerAdapter {
-        public void removed(LeasedResource resource) {
+        @Override
+        public void expired(final LeasedResource resource) {
+            remove(resource);
+        }
+
+        @Override
+        public void removed(final LeasedResource resource) {
+            remove(resource);
+        }
+
+        private void remove(final LeasedResource resource) {
             InstantiatorResource ir = (InstantiatorResource)((ServiceResource)resource).getResource();
             int instantiatorCount = landlord.total();
-            logger.fine("%s @ %s removed, count now [%d]", ir.getResourceCapability().getAddress(), instantiatorCount);
+            logger.info("%s @ %s removed, count now [%d]",
+                        ir.getName(), ir.getResourceCapability().getAddress(), instantiatorCount);
         }
     }
 }
