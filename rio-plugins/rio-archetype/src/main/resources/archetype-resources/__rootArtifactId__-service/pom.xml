@@ -58,7 +58,6 @@
                 <version>2.8</version>
                 <configuration>
                     <forkMode>always</forkMode>
-                    <argLine>-DRIO_TEST_ATTACH</argLine>
                     <systemProperties>
                         <property>
                             <name>opstring</name>

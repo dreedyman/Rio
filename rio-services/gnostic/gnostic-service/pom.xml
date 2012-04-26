@@ -110,7 +110,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <forkMode>always</forkMode>
-                            <argLine>-DRIO_TEST_ATTACH</argLine>
                             <systemProperties>
                                 <property>
                                     <name>RIO_HOME</name>

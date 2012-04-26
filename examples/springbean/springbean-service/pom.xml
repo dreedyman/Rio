@@ -74,7 +74,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <forkMode>once</forkMode>
-                            <argLine>-DRIO_TEST_ATTACH</argLine>
                             <systemProperties>
                                 <property>
                                     <name>opstring</name>
