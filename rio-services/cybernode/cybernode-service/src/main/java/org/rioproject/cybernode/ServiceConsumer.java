@@ -507,14 +507,15 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         }
 
         void drop(boolean removed) {
-            if(!removed) {
+            if(!removed && lease!=null) {
                 try {
                     lease.cancel();
                     logger.finest("Canceled Lease to ProvisionManager");
                 } catch(AccessControlException e) {
                     logger.log(Level.WARNING, "Permissions problem dropping lease", ThrowableUtil.getRootCause(e));
                 } catch(Exception e) {
-                    logger.log(Level.WARNING, "ProvisionLeaseManager: could not drop lease", e);
+                    logger.warning("ProvisionLeaseManager: could not drop lease %s: %s",
+                                   e.getClass().getName(), e.getMessage());
                 }
             }
             lease = null;
