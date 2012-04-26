@@ -37,6 +37,7 @@ import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.ServiceBeanContainer;
 import org.rioproject.cybernode.ServiceBeanContainerListener;
 import org.rioproject.cybernode.ServiceBeanDelegate;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.OpStringFilter;
 
 import java.io.IOException;
@@ -44,7 +45,6 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The LookupCachePool class provides the support to get an existing 
@@ -57,7 +57,7 @@ public class LookupCachePool {
     private final List<SDMWrapper> pool = new ArrayList<SDMWrapper>();
     private ServiceBeanContainerListener containerListener;
     private static final String COMPONENT = LookupCachePool.class.getName();
-    private static final Logger logger = Logger.getLogger(COMPONENT);
+    private static final WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
     private static Configuration config;
     private static LookupCachePool singleton = new LookupCachePool();
 
@@ -99,7 +99,7 @@ public class LookupCachePool {
             if(config==null)
                 logger.fine("Set null configuration for LookupCachePool");
             else
-                logger.log(Level.FINE, "Set configuration for LookupCachePool "+config);
+                logger.fine("Set configuration for LookupCachePool %s", config);
         }
     }
     
@@ -128,10 +128,8 @@ public class LookupCachePool {
      */
     public LookupCache getLookupCache(DiscoveryManagement dMgr, ServiceTemplate template) throws IOException {
         if(!(dMgr instanceof DiscoveryManagementPool.SharedDiscoveryManager)) {
-            logger.warning("The DiscoveryManagement instance pass was not " +
-                           "created by the "+
-                           DiscoveryManagementPool.class.getName()+", " +
-                           "returning null");
+            logger.warning("The DiscoveryManagement instance pass was not created by the %s, returning null",
+                           DiscoveryManagementPool.class.getName());
             return(null);
         }
         DiscoveryManagementPool.SharedDiscoveryManager sharedDM = (DiscoveryManagementPool.SharedDiscoveryManager)dMgr;
@@ -270,17 +268,13 @@ public class LookupCachePool {
                     break;
                 }
             }
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("removeCache(), "+
-                              "cacheTable.size()=="+cacheTable.size());
+            logger.finest("removeCache(), cacheTable.size()==%d",cacheTable.size());
             if(cacheTable.size()==0) {
                 try {
                     sdm.terminate();
                 } catch (IllegalStateException e) {
                     if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, 
-                                   "Terminating SDM", 
-                                   e);
+                        logger.log(Level.FINEST, "Terminating SDM", e);
                 }
                 synchronized(pool) {
                     pool.remove(this);
@@ -555,8 +549,8 @@ public class LookupCachePool {
                     sb.append("Removed LookupCache Listener for template [")
                         .append(getServiceTemplateAsString())
                         .append("], refCounter: ").append(refCounter.get());
-                    logger.log(Level.FINEST, sb.toString());
-                logger.log(Level.FINEST, "lCache="+lCache.toString()+" refCounter="+refCounter.get());
+                    logger.finest(sb.toString());
+                logger.finest("lCache=%s refCounter=%d", lCache.toString(), refCounter.get());
             }
             if(refCounter.get()==0) {
                 terminate();
@@ -567,9 +561,12 @@ public class LookupCachePool {
          * @see LookupCache#discard(Object)
          */
         public void discard(Object o) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "Discard "+o.getClass().getName()+" from LookupCache");
-            lCache.discard(o);
+            logger.finest("Discard %s from LookupCache", o.getClass().getName());
+            try {
+                lCache.discard(o);
+            } catch(IllegalStateException e) {
+                logger.warning("Could not discard %s, %s", o.getClass().getName(), e.getMessage());
+            }
 
         }
 
@@ -583,7 +580,7 @@ public class LookupCachePool {
                     sb.append("Terminating LookupCache for template [")
                         .append(getServiceTemplateAsString())
                         .append("], refCounter: ").append(refCounter.get());
-                    logger.log(Level.FINEST, sb.toString());
+                    logger.finest(sb.toString());
                 }
                 terminated = true;
                 lCache.terminate();
@@ -694,10 +691,8 @@ public class LookupCachePool {
                         attrs = ((JoinAdmin)admin).getLookupAttributes();
                     }
                 } catch(RemoteException e) {
-                    logger.log(Level.WARNING,
-                               "Getting attributes from " +
-                               "["+instance.getServiceBeanConfig().getName()+"]",
-                               e);
+                    logger.log(Level.WARNING, e, "Getting attributes from [%s]",
+                               instance.getServiceBeanConfig().getName());
                 }
             }
             return(new ServiceItem(serviceID, service, attrs));
