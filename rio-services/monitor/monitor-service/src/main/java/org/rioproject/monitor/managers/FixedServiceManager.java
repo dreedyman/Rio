@@ -56,9 +56,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
     public void process() {
         ServiceResource[] resources = context.getSelector().getServiceResources();
         if(logger.isLoggable(Level.FINE)) {
-            logger.fine("\n================\n"
-                        +getType()+" processing "+resources.length+" resources" +
-                        "\n================");
+            logger.fine(String.format("%s processing %d resources", getType(), resources.length));
         }
         for (ServiceResource resource : resources)
             process(resource);
@@ -76,9 +74,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 logger.log(Level.FINER,  "Deploy [" + LoggingUtil.getLoggingName(request) + "]");
             ServiceResource[] resources = context.getSelector().getServiceResources(request.getServiceElement());
             if(logger.isLoggable(Level.FINE)) {
-                logger.info("\n================\n"
-                            +getType()+" processing "+resources.length+" resources" +
-                            "\n================");
+                logger.fine(String.format("%s processing %d resources", getType(), resources.length));
             }
             /* Filter out isolated associations and max per machine levels
              * set at the physical level */
@@ -130,8 +126,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
                     } catch (ProvisionException e) {
                         request.setType(ProvisionRequest.Type.UNINSTANTIABLE);
                         if (logger.isLoggable(Level.FINE))
-                            logger.fine("Service [" + LoggingUtil.getLoggingName(request) + "] " +
-                                        "is un-instantiable, do not resubmit");
+                            logger.fine(String.format("Service [%s] is un-instantiable, do not resubmit",
+                                                      LoggingUtil.getLoggingName(request)));
                     }
                 }
             }
@@ -183,8 +179,9 @@ public class FixedServiceManager extends PendingServiceElementManager {
                                                                                nextID));
 
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("[" + LoggingUtil.getLoggingName(request) + "] instanceID : " +
-                                  request.getServiceElement().getServiceBeanConfig().getInstanceID());
+                    logger.finest(String.format("[%s] instanceID : %d",
+                                                LoggingUtil.getLoggingName(request),
+                                                request.getServiceElement().getServiceBeanConfig().getInstanceID()));
                 }
                 context.getInProcess().add(request.getServiceElement());
                 context.setProvisionRequest(request);
@@ -215,7 +212,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
             request.getServiceElement().getMaxPerMachine() < numAllowed)
             numAllowed = request.getServiceElement().getMaxPerMachine();
         if(logger.isLoggable(Level.FINER))
-            logger.finer("Cybernode at "+ir.getHostAddress()+" has "+actual+", can accommodate "+numAllowed);
+            logger.finer(String.format("Cybernode at %s has %d, can accommodate %d",
+                                       ir.getHostAddress(), actual, numAllowed));
         return (numAllowed);
     }
 
