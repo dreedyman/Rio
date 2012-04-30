@@ -28,6 +28,7 @@ public class ServiceBeanInstantiationException extends Exception {
     /**
      * serialVersionUID
      */
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * This field indicates that the raised exception is in reference to a
@@ -35,10 +36,6 @@ public class ServiceBeanInstantiationException extends Exception {
      * classes or resources
      */
     private boolean unInstantiable = false;
-    /**
-     * An embedded formatted cause stackTrace
-     */
-    private String causeStackTrace;
 
     private ExceptionDescriptor exDesc;
 
@@ -60,15 +57,6 @@ public class ServiceBeanInstantiationException extends Exception {
         super(s);
     }
 
-    @Deprecated
-    public ServiceBeanInstantiationException(String s,
-                                             String causeStackTrace,
-                                             boolean unInstantiable) {
-        super(s);
-        this.causeStackTrace = causeStackTrace;
-        this.unInstantiable = unInstantiable;
-    }
-
     public ServiceBeanInstantiationException(String s,
                                              ExceptionDescriptor exDesc,
                                              boolean unInstantiable) {
@@ -86,7 +74,10 @@ public class ServiceBeanInstantiationException extends Exception {
      * @param cause the exception that was raised while instantiating the JSB
      */
     public ServiceBeanInstantiationException(String s, Throwable cause) {
-        super(s, cause);
+        super(s);
+        this.exDesc = new ExceptionDescriptor(cause.getClass().getName(),
+                                              cause.getLocalizedMessage(),
+                                              cause.getStackTrace());
     }
 
     /**
@@ -103,7 +94,10 @@ public class ServiceBeanInstantiationException extends Exception {
     public ServiceBeanInstantiationException(String s,
                                              Throwable cause,
                                              boolean unInstantiable) {
-        super(s, cause);
+        super(s);
+        this.exDesc = new ExceptionDescriptor(cause.getClass().getName(),
+                                              cause.getLocalizedMessage(),
+                                              cause.getStackTrace());
         this.unInstantiable = unInstantiable;
     }    
 
