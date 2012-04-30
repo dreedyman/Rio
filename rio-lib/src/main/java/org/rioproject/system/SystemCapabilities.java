@@ -53,6 +53,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     public static final String TCPIP = CAPABILITY+".connectivity.TCPConnectivity";
     public static final String J2SE = CAPABILITY+".software.J2SESupport";
     public static final String MEMORY = CAPABILITY+".platform.Memory";
+    public static final String SYSTEM_MEMORY = CAPABILITY+".platform.SystemMemory";
     public static final String STORAGE = CAPABILITY+".platform.StorageCapability";
     public static final String NATIVE_LIB_CLASS = CAPABILITY+".software.NativeLibrarySupport";
     public static final String RIO = CAPABILITY+".software.RioSupport";
@@ -296,6 +297,13 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             if(memory == null) {
                 memory = getPlatformCapability(MEMORY);
                 platforms.add(memory);
+            }
+
+            /* Find out if we have loaded a SystemMemory class */
+            PlatformCapability systemMemory = findCapability(platforms, SYSTEM_MEMORY);
+            if(systemMemory == null) {
+                systemMemory = getPlatformCapability(SYSTEM_MEMORY);
+                platforms.add(systemMemory);
             }
 
             /* Create NativeLibrarySupport objects */ 

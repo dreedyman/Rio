@@ -761,12 +761,16 @@ public class ComputeResource /*extends Observable*/ {
             PlatformCapability[] pCaps = systemCapabilitiesLoader.getPlatformCapabilities(config);
             StorageCapability storage = null;
             org.rioproject.system.capability.platform.Memory memory = null;
+            org.rioproject.system.capability.platform.SystemMemory systemMemory = null;
             for (PlatformCapability pCap : pCaps) {
                 if (pCap instanceof StorageCapability) {
                     storage = (StorageCapability) pCap;
                 }
                 if (pCap instanceof org.rioproject.system.capability.platform.Memory) {
                     memory = (org.rioproject.system.capability.platform.Memory) pCap;
+                }
+                if (pCap instanceof org.rioproject.system.capability.platform.SystemMemory) {
+                    systemMemory = (org.rioproject.system.capability.platform.SystemMemory) pCap;
                 }
                 addPlatformCapability(pCap);
             }
@@ -781,10 +785,17 @@ public class ComputeResource /*extends Observable*/ {
                         mCap.addWatchDataReplicator(storage);
                     }
                 }
-                if (mCap instanceof Memory && !(mCap instanceof SystemMemory)) {
-                    if (memory != null) {
-                        mCap.addWatchDataReplicator(memory);
+                if (mCap instanceof Memory) {
+                    if(mCap instanceof SystemMemory) {
+                        if(systemMemory!=null) {
+                            mCap.addWatchDataReplicator(systemMemory);
+                        }
+                    } else {
+                        if (memory != null) {
+                            mCap.addWatchDataReplicator(memory);
+                        }
                     }
+
                 }
                 addMeasurableCapability(mCap);
                 mCap.start();
