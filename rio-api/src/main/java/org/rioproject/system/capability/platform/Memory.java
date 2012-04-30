@@ -24,9 +24,10 @@ import org.rioproject.watch.WatchDataReplicator;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class Memory extends ByteOrientedDevice implements WatchDataReplicator<CalculableMemory> {
     static final long serialVersionUID = 1L;
-    static final String DEFAULT_DESCRIPTION = "Memory";
+    static final String DEFAULT_DESCRIPTION = "Process Memory";
 
     /**
      * Create a Memory capability
@@ -42,7 +43,7 @@ public class Memory extends ByteOrientedDevice implements WatchDataReplicator<Ca
      */
     public Memory(String description) {
         this.description = description;
-        define(NAME, "Memory");
+        define(NAME, "Process Memory");
     }
 
     public void addCalculable(CalculableMemory calculable) {
