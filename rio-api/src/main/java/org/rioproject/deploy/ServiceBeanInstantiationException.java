@@ -36,7 +36,6 @@ public class ServiceBeanInstantiationException extends Exception {
      * classes or resources
      */
     private boolean unInstantiable = false;
-
     private ExceptionDescriptor exDesc;
 
     /**
@@ -55,14 +54,6 @@ public class ServiceBeanInstantiationException extends Exception {
      */
     public ServiceBeanInstantiationException(String s) {
         super(s);
-    }
-
-    public ServiceBeanInstantiationException(String s,
-                                             ExceptionDescriptor exDesc,
-                                             boolean unInstantiable) {
-        super(s);
-        this.exDesc = exDesc;
-        this.unInstantiable = unInstantiable;
     }
 
     /**
