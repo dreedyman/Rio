@@ -50,9 +50,11 @@ public interface ServiceBeanAdapterMBean {
      * advertisements (registrations, etc...) it has made on the network. The
      * ServiceBean must still be available to accept incoming communications
      *
+     * @throws IOException If errors occur accessing underlying communication
+     * mechanisms
      * @throws IllegalStateException If the state transition is illegal
      */
-    void unadvertise();
+    void unadvertise() throws IOException;
 
     /**
      * The destroy method will destroy the ServiceBean forceably

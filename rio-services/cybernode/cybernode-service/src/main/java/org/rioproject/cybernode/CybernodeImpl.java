@@ -231,7 +231,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Stop the timer */
         if(taskTimer!=null)
             taskTimer.cancel();
-        unadvertise();
+        try {
+            unadvertise();
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "While unadvertising", e);
+        }
         stop(force);
         /* Terminate the ServiceStatementManager */
         if(serviceStatementManager!=null)

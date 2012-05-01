@@ -47,6 +47,8 @@ import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
+import org.rioproject.cybernode.CybernodeLogUtil;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
@@ -243,9 +245,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * @param context The ServiceBeanContext containing ServiceBean
      * initialization attributes
      * @return An Object that can be used to communicate to the ServiceBean
-     * @throws Exception If any errors or unexpected conditions occur
+     * @throws ServiceBeanInstantiationException If any errors or unexpected conditions occur
      */
-    public Object start(final ServiceBeanContext context) throws Exception {
+    public Object start(final ServiceBeanContext context) throws ServiceBeanInstantiationException {
         if (context == null)
             throw new IllegalArgumentException("ServiceBeanContext is null");
         try {
@@ -279,13 +281,17 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
 
         } catch(Throwable t) {
+            if(t instanceof ServiceBeanInstantiationException)
+                throw (ServiceBeanInstantiationException)t;
             Throwable cause = getRootCause(t);
             jsbState.setState(ServiceBeanState.ABORTED);
             destroy(true);
-            if(cause instanceof Exception) {
-                throw (Exception)cause;
+            if(cause instanceof ServiceBeanInstantiationException) {
+                throw (ServiceBeanInstantiationException)cause;
             } else {
-                throw new Exception(cause);
+                String message = String.format("ServiceBean [%s] instantiation failed",
+                                               CybernodeLogUtil.logName(context.getServiceElement()));
+                throw new ServiceBeanInstantiationException(message, cause, true);
             }
         }
         return (proxy);
@@ -875,7 +881,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     /**
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#unadvertise
      */
-    public void unadvertise() {
+    public void unadvertise() throws  IOException {
         if (jsbState.getState() != ServiceBeanState.ADVERTISED
             || jsbState.getState() == ServiceBeanState.UNADVERTISED
             || jsbState.isAborted())
@@ -1046,6 +1052,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
             unadvertise();
         } catch (IllegalStateException e) {
+            logger.log(Level.WARNING, "Unadvertising service", e);
+        } catch (IOException e) {
             logger.log(Level.WARNING, "Unadvertising service", e);
         }
 
