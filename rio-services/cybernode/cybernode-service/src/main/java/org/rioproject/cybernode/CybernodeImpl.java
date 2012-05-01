@@ -410,7 +410,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             if(statement!=null) {
                 if(serviceRecord.getType()!=ServiceRecord.INACTIVE_SERVICE_RECORD) {
                     serviceRecord.setType(ServiceRecord.INACTIVE_SERVICE_RECORD);
-                    logger.warning("Fixing ServiceRecord for %s, notified as being discarded, but as ServiceRecord.ACTIVE_SERVICE_RECORD",
+                    logger.warning("Fixing ServiceRecord for %s, notified as being discarded, but has ServiceRecord.ACTIVE_SERVICE_RECORD",
                                    CybernodeLogUtil.logName(serviceRecord.getServiceElement()));
                 }
                 statement.putServiceRecord(getUuid(), serviceRecord);
