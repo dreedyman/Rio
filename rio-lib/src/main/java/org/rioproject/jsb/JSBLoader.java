@@ -102,7 +102,7 @@ public class JSBLoader implements ServiceBeanFactory {
             ServiceBeanLoader.unload(jsbCL, context.getServiceElement());
             if(t instanceof ServiceBeanInstantiationException)
                 throw (ServiceBeanInstantiationException)t;
-            throw new ServiceBeanInstantiationException("Service Instantiation Exception", t);
+            throw new ServiceBeanInstantiationException("Service Instantiation Exception", t, true);
         }
         return (new Created(impl, proxy));
     }
