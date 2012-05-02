@@ -410,8 +410,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      */
     void createServiceElementManager(ServiceElement sElem,
                                      boolean start,
-                                     ServiceProvisionListener listener)
-        throws Exception {
+                                     ServiceProvisionListener listener) throws Exception {
         ServiceElementManager svcElemMgr =
             new ServiceElementManager(sElem, proxy, provisioner, uuid, isActive(), config);
         /* Set event attributes */
@@ -493,7 +492,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         /*
         * Process nested Operational Strings. If a nested
         * OperationalString does not exist it will be created.
-        * If it does exist check the number of parents, if its only refernced 
+        * If it does exist check the number of parents, if its only referenced
         * by this testManager update it
         */
         OperationalString[] nested = newOpString.getNestedOperationalStrings();
@@ -687,14 +686,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#addServiceElement
     */
-    public void addServiceElement(ServiceElement sElem)
-        throws OperationalStringException {
-        addServiceElement(sElem, null);
-    }
-
-    /*
-    * @see org.rioproject.opstring.OperationalStringManager#addServiceElement
-    */
     public void addServiceElement(ServiceElement sElem,
                                   ServiceProvisionListener listener)
         throws OperationalStringException {
@@ -785,6 +776,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             logger.warning("UNABLE to remove ServiceElementManager for " +
                            "[" + sElem.getOperationalStringName() +
                            "/" + sElem.getName() + "]");
+        else
+            logger.info(String.format("Removed ServiceElementManager for [%s/%s]",
+                                      sElem.getOperationalStringName(), sElem.getName()));
         stateChanged(false);
     }
 
