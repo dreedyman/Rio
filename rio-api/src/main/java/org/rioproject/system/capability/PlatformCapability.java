@@ -372,10 +372,9 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     /**
      * Determine basic supportability
      * 
-     * @param name The name of the class, sans the package name. If this
-     * parameter is not null, this will be checked
-     * @param className The fully qualified className to match if the name
-     * is null
+     * @param name The name of the {@code PlatformCapability}. If this
+     * parameter is not {@code null}, this will be checked
+     * @param className The fully qualified className to match if the name is {@code null}
      *
      * @return true if basic support is provided
      */
@@ -383,16 +382,12 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
        if(name==null && className==null)
            throw new IllegalArgumentException("className and name cannot both be null");
        boolean supports = false;
-       String myClassName = getClass().getName();
        if(name!=null) {
-           String myName = myClassName;
-           int ndx = myClassName.lastIndexOf(".");
-           if(ndx>0)
-               myName = myClassName.substring(ndx+1);
-           supports = myName.equals(name);
+           supports = getName().equals(name);
        }
-       if(!supports && className!=null)                     
-           supports = myClassName.equals(className);
+       if(!supports && className!=null) {
+           supports = getClass().getName().equals(className);
+       }
        return(supports);
     }
 

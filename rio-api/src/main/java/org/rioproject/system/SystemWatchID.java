@@ -23,7 +23,7 @@ public interface SystemWatchID {
     static final String PROC_CPU = "CPU (Proc)";
     static final String DISK_SPACE = "DiskSpace";
     static final String SYSTEM_MEMORY = "System Memory";
-    static final String JVM_MEMORY = "Memory";
+    static final String JVM_MEMORY = "Process Memory";
     static final String JVM_PERM_GEN = "Perm Gen";
     static final String[] IDs = new String[]{SYSTEM_CPU,
                                              PROC_CPU,
