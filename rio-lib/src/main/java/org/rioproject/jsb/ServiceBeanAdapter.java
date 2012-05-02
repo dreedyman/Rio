@@ -1052,9 +1052,11 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
             unadvertise();
         } catch (IllegalStateException e) {
-            logger.log(Level.WARNING, "Unadvertising service", e);
+            logger.warning(String.format("Unadvertising service error, continue on with destroy. %s: %s",
+                                         e.getClass().getName(), e.getLocalizedMessage()));
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Unadvertising service", e);
+            logger.warning(String.format("Unadvertising service error, continue on with destroy. %s: %s",
+                                         e.getClass().getName(), e.getLocalizedMessage()));
         }
 
         /* Terminate AssociationManagement */        
