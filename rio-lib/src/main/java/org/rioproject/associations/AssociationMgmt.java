@@ -39,6 +39,7 @@ import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.ServiceBeanContainer;
 import org.rioproject.cybernode.ServiceBeanContainerListener;
+import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resources.client.*;
 import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.fdh.FaultDetectionHandlerFactory;
@@ -57,7 +58,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The AssociationMgmt class implements the AssociationManagement interface.
@@ -68,13 +68,11 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * Registered AssociationListener instances.
      */
-    private final ArrayList<AssociationListener> listeners =
-        new ArrayList<AssociationListener>();
+    private final List<AssociationListener> listeners = new ArrayList<AssociationListener>();
     /**
      * Collection of AssociationDescriptor.
      */
-    private final ArrayList<AssociationHandler> associationHandlers =
-        new ArrayList<AssociationHandler>();
+    private final List<AssociationHandler> associationHandlers = new ArrayList<AssociationHandler>();
     /**
      * The ServiceBeanControl object for the ServiceBean.
      */
@@ -86,21 +84,21 @@ public class AssociationMgmt implements AssociationManagement {
      * ServiceBean instance's ServiceBeanControl object. If false, the
      * AssociationMgmt object will not unadvertise the ServiceBean.
      */
-    private AtomicBoolean unadvertiseOnBroken = new AtomicBoolean(true);
+    private final AtomicBoolean unadvertiseOnBroken = new AtomicBoolean(true);
     /**
      * Counter to indicate that we have at least one Association that is
      * AssociationType.REQUIRES.
      */
-    private AtomicInteger numRequires = new AtomicInteger(0);
+    private final AtomicInteger numRequires = new AtomicInteger(0);
     /**
      * Indicates whether the JSB is advertised or not.
      */
-    private AtomicBoolean advertised = new AtomicBoolean(false);
+    private final AtomicBoolean advertised = new AtomicBoolean(false);
     /**
      * Indicates that all required associations have been met, and for some
      * reason the ServiceBeanControl object has not been set.
      */
-    private AtomicBoolean advertisePending = new AtomicBoolean(false);
+    private final AtomicBoolean advertisePending = new AtomicBoolean(false);
     /**
      * The ServiceBeanContext.
      */
@@ -129,8 +127,7 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * The Logger.
      */
-    private static final Logger logger =
-        Logger.getLogger("org.rioproject.associations");
+    private static final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.associations");
     /**
      * Configuration component attribute
      */
@@ -154,7 +151,7 @@ public class AssociationMgmt implements AssociationManagement {
      *
      * @param cl  The class loader to provide the caller/client with properly
      */
-    public AssociationMgmt(ClassLoader cl) {
+    public AssociationMgmt(final ClassLoader cl) {
         if(cl==null) {
             final Thread currentThread = Thread.currentThread();
             callerCL = AccessController.doPrivileged(
@@ -172,16 +169,16 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * {@inheritDoc}
      */
-    public void setUnadvertiseOnBroken(boolean unadvertiseOnBroken) {
+    public void setUnadvertiseOnBroken(final boolean unadvertiseOnBroken) {
         this.unadvertiseOnBroken.set(unadvertiseOnBroken);
     }
 
     /**
      * @see AssociationManagement#setServiceBeanControl
      */
-    public void setServiceBeanControl(ServiceBeanControl control) {
+    public void setServiceBeanControl(final ServiceBeanControl control) {
         if(control == null)
-            throw new NullPointerException("control is null");
+            throw new IllegalArgumentException("control is null");
         this.control = control;
         if(advertisePending.get())
             advertise();
@@ -190,9 +187,9 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * {@inheritDoc}
      */
-    public void setServiceBeanContainer(ServiceBeanContainer container) {
+    public void setServiceBeanContainer(final ServiceBeanContainer container) {
         if(container == null)
-            throw new NullPointerException("control is null");
+            throw new IllegalArgumentException("control is null");
         this.container = container;
     }
 
@@ -200,9 +197,9 @@ public class AssociationMgmt implements AssociationManagement {
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
-    public void register(AssociationListener... listeners) {
+    public void register(final AssociationListener... listeners) {
         if (listeners == null)
-            throw new NullPointerException("listeners are null");
+            throw new IllegalArgumentException("listeners are null");
         synchronized (this.listeners) {
             this.listeners.addAll(Arrays.asList(listeners));
         }
@@ -212,8 +209,7 @@ public class AssociationMgmt implements AssociationManagement {
                 continue;
             for (AssociationListener listener : listeners) {
                 if (checkAssociationListener(listener, association)) {
-                    listener.discovered(association,
-                                        association.getService());
+                    listener.discovered(association, association.getService());
                 }
             }
         }
@@ -222,9 +218,9 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * {@inheritDoc}
      */
-    public void remove(AssociationListener... listeners) {
+    public void remove(final AssociationListener... listeners) {
         if (listeners == null)
-            throw new NullPointerException("listeners is null");
+            throw new IllegalArgumentException("listeners is null");
         synchronized (this.listeners) {
             this.listeners.removeAll(Arrays.asList(listeners));
         }
@@ -251,9 +247,9 @@ public class AssociationMgmt implements AssociationManagement {
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
-    public <T> Association<T> getAssociation(Class<T> serviceType,
-                                             String serviceName,
-                                             String opStringName) {
+    public <T> Association<T> getAssociation(final Class<T> serviceType,
+                                             final String serviceName,
+                                             final String opStringName) {
         if(serviceType == null)
             throw new IllegalArgumentException("A serviceType must be provided");
 
@@ -319,7 +315,7 @@ public class AssociationMgmt implements AssociationManagement {
      *
      * @param backend The backend (implementation) to use for property injection
      */
-    public void setBackend(Object backend) {
+    public void setBackend(final Object backend) {
         try {
             listener.createAssociationInjector(backend);
         } catch(IntrospectionException e) {
@@ -333,16 +329,16 @@ public class AssociationMgmt implements AssociationManagement {
      * @param clientName The name of the client that has the associations.
      * This is used for logging and diagnostics
      */
-    public void setClientName(String clientName) {
+    public void setClientName(final String clientName) {
         this.clientName = clientName;
     }
 
     /**
      * @see AssociationManagement#setServiceBeanContext
      */
-    public void setServiceBeanContext(ServiceBeanContext context) {
+    public void setServiceBeanContext(final ServiceBeanContext context) {
         if(context==null)
-            throw new NullPointerException("context is null");
+            throw new IllegalArgumentException("context is null");
         boolean update = false;
         if(this.context!=null)
             update = true;
@@ -354,14 +350,12 @@ public class AssociationMgmt implements AssociationManagement {
             setConfiguration(context.getConfiguration());
         } catch (ConfigurationException e) {
             logger.log(Level.WARNING,
-                       "Unable to get Configuration from ServiceBeanContext. " +
-                       "Will proceed without configuration",
+                       "Unable to get Configuration from ServiceBeanContext. Will proceed without configuration",
                        ThrowableUtil.getRootCause(e));
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
-        AssociationDescriptor[] newDesc =
-            context.getServiceElement().getAssociationDescriptors();
+        AssociationDescriptor[] newDesc = context.getServiceElement().getAssociationDescriptors();
         if(newDesc != null) {
             if(!update) {
                 if(logger.isLoggable(Level.FINEST)) {
@@ -394,9 +388,8 @@ public class AssociationMgmt implements AssociationManagement {
                 for (AssociationDescriptor aRemDesc : remDesc) {
                     for (AssociationHandler handler : handlers) {
                         if (handler.aDesc.equals(aRemDesc)) {
-                            if (logger.isLoggable(Level.FINEST))
-                                logger.finest("[" + clientName + "] During " +
-                                              "update: terminate AssociationHandler for " +handler.aDesc.toString());
+                            logger.finest("[%s] During update: terminate AssociationHandler for %s",
+                                          clientName, handler.aDesc.toString());
                             handler.terminate();
                             if (handler.aDesc.getAssociationType()==AssociationType.REQUIRES) {
                                 numRequires.decrementAndGet();
@@ -418,23 +411,21 @@ public class AssociationMgmt implements AssociationManagement {
         return (config==null? EmptyConfiguration.INSTANCE:config);
     }
 
-    public void setConfiguration(Configuration config) {
+    public void setConfiguration(final Configuration config) {
         this.config = config;
     }
 
     /*
      * Check if the AssociationListener method has a type that is assignable
      */
-    private boolean checkAssociationListener(AssociationListener<?> al,
-                                             Association a) {
+    private boolean checkAssociationListener(final AssociationListener<?> al, final Association a) {
         return checkAssociationListener(al, a.getService());
     }
 
     /*
      * Check if the AssociationListener method has a type that is assignable
      */
-    private boolean checkAssociationListener(AssociationListener<?> al,
-                                             Object service) {
+    private boolean checkAssociationListener(final AssociationListener<?> al, final Object service) {
         if(service==null)
             return false;
         boolean ok = true;
@@ -454,12 +445,11 @@ public class AssociationMgmt implements AssociationManagement {
 
     /*
      * Return an array of AssociationDescriptor instances which are
-     * in the desc1 array but not in the desc2 array of AssociationDescriptor 
+     * in the desc1 array but not in the desc2 array of AssociationDescriptor
      * instances
      */
-    private AssociationDescriptor[]
-        getDifference(AssociationDescriptor[] desc1,
-                      AssociationDescriptor[] desc2) {
+    private AssociationDescriptor[] getDifference(final AssociationDescriptor[] desc1,
+                                                  final AssociationDescriptor[] desc2) {
         ArrayList<AssociationDescriptor> diffList =
             new ArrayList<AssociationDescriptor>();
         for (AssociationDescriptor aDesc1 : desc1) {
@@ -480,10 +470,10 @@ public class AssociationMgmt implements AssociationManagement {
 
     /*
      * Get an AssociationHandler for an Association
-     * 
+     *
      * @return Array of AssociationHandler instances
      */
-    public AssociationHandler getAssociationHandler(Association association) {
+    public AssociationHandler getAssociationHandler(final Association association) {
         AssociationHandler handler = null;
         AssociationHandler[] handlers = getAssociationHandlers();
         for (AssociationHandler handler1 : handlers) {
@@ -512,7 +502,7 @@ public class AssociationMgmt implements AssociationManagement {
 
     /**
      * Get all AssociationDescriptor instances
-     * 
+     *
      * @return Array of AssociationDescriptor instances
      */
     private AssociationDescriptor[] getAssociationDescriptors() {
@@ -535,8 +525,7 @@ public class AssociationMgmt implements AssociationManagement {
     protected AssociationListener<?>[] getAssociationListeners() {
         AssociationListener[] aListeners;
         synchronized(listeners) {
-            aListeners = listeners.toArray(
-                    new AssociationListener[listeners.size()]);
+            aListeners = listeners.toArray(new AssociationListener[listeners.size()]);
         }
         return (aListeners);
     }
@@ -550,12 +539,11 @@ public class AssociationMgmt implements AssociationManagement {
      * @return An AssociationHandler for the AssociationDescriptor. A new
      * AssociationHandler is created each time this method is called
      *
-     * @throws NullPointerException if the AssociationDescriptor is null
+     * @throws IllegalArgumentException if the AssociationDescriptor is null
      */
-    protected AssociationHandler
-        createAssociationHandler(AssociationDescriptor aDesc) {
+    protected AssociationHandler createAssociationHandler(final AssociationDescriptor aDesc) {
         if(aDesc == null)
-            throw new NullPointerException("aDesc is null");
+            throw new IllegalArgumentException("aDesc is null");
         return(new AssociationHandler(aDesc));
     }
 
@@ -563,16 +551,13 @@ public class AssociationMgmt implements AssociationManagement {
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
-    public <T> Association<T> addAssociationDescriptor(AssociationDescriptor aDesc) {
+    public <T> Association<T> addAssociationDescriptor(final AssociationDescriptor aDesc) {
         if(aDesc == null)
-            throw new IllegalArgumentException("The AssociationDescriptor " +
-                                               "cannot be null");
+            throw new IllegalArgumentException("The AssociationDescriptor cannot be null");
         Association<T> association;
         AssociationHandler handler = getAssociationHandler(aDesc);
         if (handler!=null) {
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("Already managing ["+aDesc.toString()+"] for ["+clientName+"]");
-            }
+            logger.finest("Already managing [%s] for [%s]", aDesc.toString(), clientName);
             association = handler.getAssociation();
         } else {
             if (aDesc.getAssociationType()==AssociationType.REQUIRES)
@@ -590,7 +575,7 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * {@inheritDoc}
      */
-    public List<Association<?>> addAssociationDescriptors(AssociationDescriptor... aDescs) {
+    public List<Association<?>> addAssociationDescriptors(final AssociationDescriptor... aDescs) {
         if(aDescs == null)
             throw new IllegalArgumentException("The AssociationDescriptor cannot be null");
         List<AssociationHandler> newHandlers = new ArrayList<AssociationHandler>();
@@ -598,9 +583,7 @@ public class AssociationMgmt implements AssociationManagement {
         for (AssociationDescriptor aDesc : aDescs) {
             AssociationHandler handler = getAssociationHandler(aDesc);
             if (handler!=null) {
-                if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Already managing ["+aDesc.toString()+"] for ["+clientName+"]");
-                }
+                logger.finest("Already managing [%s] for [%s]", aDesc.toString(), clientName);
                 associations.add(handler.getAssociation());
                 continue;
             }
@@ -623,7 +606,7 @@ public class AssociationMgmt implements AssociationManagement {
     /*
      * Determine if we already have an association
      */
-    private AssociationHandler getAssociationHandler(AssociationDescriptor aDesc) {
+    private AssociationHandler getAssociationHandler(final AssociationDescriptor aDesc) {
         AssociationHandler aHandler = null;
         synchronized(associationHandlers) {
             for (AssociationHandler ah : associationHandlers) {
@@ -648,7 +631,7 @@ public class AssociationMgmt implements AssociationManagement {
         /*
          * Create injector
          */
-        private void createAssociationInjector(Object backend)
+        private void createAssociationInjector(final Object backend)
             throws IntrospectionException {
             if(associationInjector==null)
                 associationInjector = new AssociationInjector(backend);
@@ -660,7 +643,7 @@ public class AssociationMgmt implements AssociationManagement {
         /*
          * @see org.rioproject.associations.AssociationListener#discovered
          */
-        public void discovered(Association assoc, Object service) {
+        public void discovered(final Association assoc, final Object service) {
             if(numRequires.get() > 0) {
                 AssociationType aType = assoc.getAssociationType();
 
@@ -683,12 +666,8 @@ public class AssociationMgmt implements AssociationManagement {
          * advertise the service
          */
         void checkAdvertise() {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Check advertise for ["+clientName+"] "+
-                              "advertised="+advertised+", "+
-                              "numRequires="+numRequires+", "+
-                              "requiredAssociations.size()="+
-                              requiredAssociations.size());
+            logger.finest("Check advertise for [%s] advertised=%b, numRequires=%d, requiredAssociations.size()=%d",
+                          clientName, advertised.get(), numRequires, requiredAssociations.size());
             if((requiredAssociations.size() >= numRequires.get()) && !advertised.get()) {
                 advertise();
             } else if((requiredAssociations.size() < numRequires.get()) && advertised.get())
@@ -702,15 +681,15 @@ public class AssociationMgmt implements AssociationManagement {
          * required associations are satisfied. If they are not, unadvertise,
          * otherwise check to make sure the proper state is set
          */
-        void checkUnadvertise() {
+        /*void checkUnadvertise() {
             if((requiredAssociations.size() < numRequires.get()) && advertised.get())
                 unadvertise();
-        }
+        }*/
 
         /*
          * @see org.rioproject.associations.AssociationListener#changed
          */
-        public void changed(Association association, Object service) {
+        public void changed(final Association association, final Object service) {
             if(associationInjector!=null)
                 associationInjector.changed(association, service);
         }
@@ -718,7 +697,7 @@ public class AssociationMgmt implements AssociationManagement {
         /*
          * @see org.rioproject.associations.AssociationListener#broken
          */
-        public void broken(Association association, Object service) {
+        public void broken(final Association association, final Object service) {
             if(associationInjector!=null)
                 associationInjector.broken(association, service);
             if(association.getAssociationType()==AssociationType.REQUIRES) {
@@ -737,16 +716,14 @@ public class AssociationMgmt implements AssociationManagement {
                 control.advertise();
                 advertised.set(true);
                 advertisePending.set(false);
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("AssociationMgmt: Advertise ServiceBean : "+ clientName);
+                logger.fine("Advertise ServiceBean: %s", clientName);
             } else {
                 advertisePending.set(true);
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("AssociationMgmt: ServiceBean ["+clientName+"] "
-                                + "advertisement pending, ServiceBeanControl is null");
+                logger.fine("ServiceBean [%s] advertisement pending, ServiceBeanControl is null",
+                            clientName);
             }
         } catch(Exception e) {
-            logger.log(Level.WARNING, "Advertising ServiceBean", e);
+            logger.log(Level.WARNING, e, "Advertising ServiceBean: %s", clientName);
         }
     }
 
@@ -754,26 +731,22 @@ public class AssociationMgmt implements AssociationManagement {
      * Unadvertise the ServiceBean
      */
     private void unadvertise() {
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+clientName+"] "+
-                          "unadvertiseOnBroken : "+unadvertiseOnBroken);
+        logger.info("[%s] unadvertiseOnBroken : %b", clientName, unadvertiseOnBroken.get());
         if(unadvertiseOnBroken.get()) {
             try {
                 if(control != null) {
                     control.unadvertise();
                     advertised.set(false);
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("AssociationMgmt: Unadvertise ServiceBean : "+ clientName);
+                    logger.fine("Unadvertise ServiceBean : %s", clientName);
                 } else {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("AssociationMgmt: Cannot unadvertise ServiceBean ["+clientName+"]," +
-                                    " ServiceBeanControl is null");
+                    logger.fine("Cannot unadvertise ServiceBean [%s], ServiceBeanControl is null", clientName);
                 }
             } catch(Exception e) {
                 if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Unadvertising ServiceBean", e);
-                logger.warning("Exception ["+ e.getLocalizedMessage()+ "] unadvertising ServiceBean while "+
-                               "processing Broken Association");
+                    logger.log(Level.FINEST, "Unadvertising ServiceBean while processing Broken Association", e);
+                else
+                    logger.warning("Exception [%s] unadvertising ServiceBean while processing Broken Association",
+                                   e.getLocalizedMessage());
             }
         }
     }
@@ -785,12 +758,10 @@ public class AssociationMgmt implements AssociationManagement {
      * @param service The discovered service
      */
     @SuppressWarnings("unchecked")
-    protected void notifyOnDiscovery(Association association, Object service) {
+    protected void notifyOnDiscovery(final Association association, final Object service) {
         AssociationListener[] listeners = getAssociationListeners();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+clientName+"] DISCOVERED "+
-                          "["+association.getName()+"], "+
-                          "Notify ["+(listeners.length+1)+"] listeners");
+        logger.finest("[%s] DISCOVERED [%s], Notify [%d] listeners",
+                      clientName, association.getName(), listeners.length+1);
         try {
             for (AssociationListener al : listeners) {
                 if(checkAssociationListener(al, association)) {
@@ -809,12 +780,10 @@ public class AssociationMgmt implements AssociationManagement {
      * @param service The discovered service
      */
     @SuppressWarnings("unchecked")
-    protected void notifyOnChange(Association association, Object service) {
+    protected void notifyOnChange(final Association association, final Object service) {
         AssociationListener[] listeners = getAssociationListeners();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+clientName+"] CHANGED "+
-                          "["+association.getName()+"], "+
-                          "Notify ["+listeners.length+"] listeners");
+        logger.finest("[%s] CHANGED [%s], Notify [%d] listeners",
+                      clientName, association.getName(), listeners.length);
         try {
             for (AssociationListener al : listeners) {
                 if(checkAssociationListener(al, association))
@@ -832,12 +801,10 @@ public class AssociationMgmt implements AssociationManagement {
      * @param service The discovered service
      */
     @SuppressWarnings("unchecked")
-    protected void notifyOnBroken(Association association, Object service) {
+    protected void notifyOnBroken(final Association association, final Object service) {
         AssociationListener[] listeners = getAssociationListeners();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+clientName+"] BROKEN ["+association.getName()+"], "+
-                          "Type="+association.getAssociationType().toString()+", " +
-                          "Notify ["+listeners.length+"] listeners");
+        logger.finest("[%s] BROKEN [%s], Type=%s, Notify [%d] listeners",
+                      clientName, association.getName(), association.getAssociationType().toString(), listeners.length);
         try {
             for (AssociationListener al : listeners) {
                 if(checkAssociationListener(al, service))
@@ -858,20 +825,18 @@ public class AssociationMgmt implements AssociationManagement {
                                                                          boolean.class,
                                                                          true);
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Getting "+CONFIG_COMPONENT+".colocatedDestroy property from association configuration",
-                           e);
+                logger.log(Level.WARNING, e,
+                           "Getting %s.colocatedDestroy property from association configuration",
+                           CONFIG_COMPONENT);
             }
         }
         if(association.getAssociationType()==AssociationType.COLOCATED &&
            colocatedDestroy) {
             try {
-                 if(logger.isLoggable(Level.FINEST))
-                     logger.finest("["+clientName+"] Colocated Association to"+
-                                   "["+association.getName()+"] BROKEN, terminate service");
+                logger.finest("[%s] Colocated Association to [%s] BROKEN, terminate service",
+                              clientName, association.getName());
                 if(context==null) {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("ServiceBeanContext is null, unable to destroy "+clientName);
+                    logger.fine("ServiceBeanContext is null, unable to destroy %s", clientName);
                     return;
                 }
                 Object proxy = context.getServiceBeanManager().getServiceBeanInstance().getService();
@@ -880,14 +845,12 @@ public class AssociationMgmt implements AssociationManagement {
                     if(admin instanceof DestroyAdmin) {
                         ((DestroyAdmin)admin).destroy();
                     } else {
-                        if(logger.isLoggable(Level.FINE))
-                            logger.fine(clientName+" admin object does not implement "+
-                                        DestroyAdmin.class.getName()+" access, unable to terminate");
+                        logger.warning("%s admin object does not implement %s access, unable to terminate",
+                                       clientName, DestroyAdmin.class.getName());
                     }
                 } else {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine(clientName+" does not provide an "+
-                                    Administrable.class.getName()+" access, unable to terminate");
+                    logger.warning("%s does not provide an %s access, unable to terminate",
+                                   clientName, Administrable.class.getName());
                 }
             } catch(Exception e) {
                 logger.log(Level.WARNING, clientName+" Destroying from broken colocated asssociation",e);
@@ -900,7 +863,7 @@ public class AssociationMgmt implements AssociationManagement {
      * <code>c2</code>, using the class equivalence semantics of the lookup
      * service: same name.
      */
-    private boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
+    private boolean isAssignableFrom(final Class<?> c1, final Class<?> c2) {
         if(c1.isAssignableFrom(c2))
             return true;
         String n1 = c1.getName();
@@ -917,23 +880,23 @@ public class AssociationMgmt implements AssociationManagement {
      */
     public class AssociationHandler extends ServiceDiscoveryAdapter implements FaultDetectionListener <ServiceID> {
         /** The AssociationDescriptor */
-        AssociationDescriptor aDesc;
+        private final AssociationDescriptor aDesc;
         /** Number of instances of the associated service */
-        int instances;
+        private int instances;
         /**
          * Table of service IDs to FaultDetectionHandler instances, one for
          * each service
          */
-        Map<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
+        private final Map<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
         /** The Association for the AssociationHandler */
-        Association association;
+        private final Association association;
         /** The LookupCache for the ServiceDiscoveryManager */
-        LookupCache lCache;
+        private LookupCache lCache;
         /** The LookupServiceHandler */
-        LookupServiceHandler lookupServiceHandler;
+        private LookupServiceHandler lookupServiceHandler;
         /** A ProxyPreparer for discovered services */
-        ProxyPreparer proxyPreparer;
-        ServiceTemplate template;
+        private ProxyPreparer proxyPreparer;
+        private ServiceTemplate template;
 
         /**
          * Create an AssociationHandler
@@ -941,12 +904,10 @@ public class AssociationMgmt implements AssociationManagement {
          * @param assocDesc The AssociationDescriptor describing the
          * attributes of the Association
          */
-        public AssociationHandler(AssociationDescriptor assocDesc) {
+        public AssociationHandler(final AssociationDescriptor assocDesc) {
             aDesc = assocDesc;
             association = new Association(aDesc);
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("AssociationManagement created for " +
-                              "["+clientName+"], ["+assocDesc+"]");
+            logger.finest("AssociationManagement created for [%s], [%s]", clientName, assocDesc);
         }
 
         AssociationDescriptor getAssociationDescriptor() {
@@ -990,24 +951,21 @@ public class AssociationMgmt implements AssociationManagement {
                         logger.log(Level.WARNING, "Could not create ProxyPreparer from configuration, using default", e);
                         proxyPreparer = new BasicProxyPreparer();
                     }
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Association ["+aDesc.getName()+"] "+
-                                      "ProxyPreparer : "+proxyPreparer.getClass().getName());
-                    }
+                    logger.finest("Association [%s]  ProxyPreparer : %s",
+                                  aDesc.getName(), proxyPreparer.getClass().getName());
                     template = JiniClient.getServiceTemplate(aDesc, callerCL);
                     LookupCachePool lcPool = LookupCachePool.getInstance();
                     String sharedName = aDesc.getOperationalStringName();
 
                     lCache = lcPool.getLookupCache(sharedName, aDesc.getGroups(), aDesc.getLocators(), template);
                     lCache.addListener(this);
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer("AssociationManagement for ["+clientName+"], "+
-                                     "obtained LookupCache for ["+aDesc.getName()+"]");
+                    logger.finer("AssociationManagement for [%s], obtained LookupCache for [%s]",
+                                 clientName, aDesc.getName());
                 } else {
                     lookupServiceHandler = new LookupServiceHandler(aDesc, this, getConfiguration());
                 }
             } catch(IllegalStateException e) {
-                logger.warning("Creating an AssociationHandler, "+e.getMessage());
+                logger.warning("Creating an AssociationHandler, %s", e.getMessage());
             } catch(IOException e) {
                 logger.log(Level.WARNING, "Creating an AssociationHandler", e);
             } catch (ClassNotFoundException e) {
@@ -1029,10 +987,7 @@ public class AssociationMgmt implements AssociationManagement {
                 try {
                     lCache.removeListener(this);
                 } catch (Throwable t) {
-                    logger.log(Level.WARNING,
-                               "Exception {0} removing Listener " +
-                               "from LookupCache",
-                               new Object[] {t.getClass().getName()});
+                    logger.warning("Exception %s removing Listener from LookupCache", t.getClass().getName());
                 }
             }
             Set<ServiceID> keySet = fdhTable.keySet();
@@ -1049,7 +1004,7 @@ public class AssociationMgmt implements AssociationManagement {
         /*
          * Create a ServiceItem from a ServiceBeanInstance
          */
-        private ServiceItem makeServiceItem(ServiceBeanInstance instance)
+        private ServiceItem makeServiceItem(final ServiceBeanInstance instance)
             throws IOException, ClassNotFoundException {
             Uuid uuid = instance.getServiceBeanID();
             ServiceID serviceID = new ServiceID(uuid.getMostSignificantBits(),
@@ -1063,10 +1018,7 @@ public class AssociationMgmt implements AssociationManagement {
                         attrs = ((JoinAdmin)admin).getLookupAttributes();
                     }
                 } catch(RemoteException e) {
-                    logger.log(Level.WARNING,
-                               "Getting attributes from " +
-                               "["+getAssociation().getName()+"]",
-                               e);
+                    logger.log(Level.WARNING, e, "Getting attributes from [%s]", getAssociation().getName());
                 }
             }
             return(new ServiceItem(serviceID, service, attrs));
@@ -1088,7 +1040,7 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @param sdEvent The ServiceDiscoveryEvent
          */
-        public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
+        public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
             ServiceItem item = sdEvent.getPostEventServiceItem();
             final Thread currentThread = Thread.currentThread();
             final ClassLoader cCL = AccessController.doPrivileged(
@@ -1098,10 +1050,8 @@ public class AssociationMgmt implements AssociationManagement {
                         }
                     });
             if(item.service==null) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("["+clientName+"] serviceAdded "+
-                                "["+association.getName()+"], "+
-                                "service is null, abort notification");
+                logger.fine("[%s] serviceAdded [%s], service is null, abort notification",
+                            clientName, association.getName());
                 return;
             }
             try {
@@ -1121,15 +1071,10 @@ public class AssociationMgmt implements AssociationManagement {
                         lCache.discard(item.service);
                     }
                     if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Handling service discovery, " +
-                                   "unable to attach FDH",
-                                   e);
+                        logger.log(Level.FINEST, "Handling service discovery, unable to attach FDH", e);
                 }
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "(Un)Marshalling ServiceItem",
-                           e);
+                logger.log(Level.WARNING, "(Un)Marshalling ServiceItem", e);
             } finally {
                 AccessController.doPrivileged(new PrivilegedAction<Void>() {
                     public Void run() {
@@ -1147,14 +1092,10 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @throws Exception if the fault detection handler cannot be attached
          */
-        protected void serviceDiscovered(ServiceItem item) throws Exception {
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "["+clientName+"] "+
-                           "Service Discovered " +
-                           "["+item.service.getClass().getName()+"] " +
-                           "CL=["+item.service.getClass().getClassLoader().
-                                   toString());
+        protected void serviceDiscovered(final ServiceItem item) throws Exception {
+            logger.finest("[%s] Service Discovered [%s] CL=[%s]",
+                          clientName, item.service.getClass().getName(),
+                          item.service.getClass().getClassLoader().toString());
             if(association.addServiceItem(item)) {
                 Association.State state = association.getState();
                 if(state == Association.State.PENDING || Association.State.BROKEN == state)
@@ -1169,16 +1110,11 @@ public class AssociationMgmt implements AssociationManagement {
          * @see org.rioproject.fdh.FaultDetectionListener#serviceFailure
          */
         @SuppressWarnings("unchecked")
-        public void serviceFailure(Object proxy, ServiceID sid) {
+        public void serviceFailure(final Object proxy, final ServiceID sid) {
             decrement();
             lCache.discard(proxy);
             ServiceItem item = association.removeService(proxy);
-            if(logger.isLoggable(Level.FINER))
-                logger.finer("["+clientName+"] "
-                             + "Service FAILURE : "
-                             + item.service.getClass().getName());
-            if(item == null)
-                return;
+            logger.finer("[%s] Service FAILURE : %s", clientName, item.service.getClass().getName());
             notifyOnFailure(item);
             fdhTable.remove(sid);
         }
@@ -1188,7 +1124,7 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @param item The service that has failed
          */
-        protected void notifyOnFailure(ServiceItem item) {
+        protected void notifyOnFailure(final ServiceItem item) {
             if(instances >0) {
                 association.setState(Association.State.CHANGED);
                 notifyOnChange(association, item.service);
@@ -1238,7 +1174,7 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @throws Exception if the fault detection handler cannot be attached
          */
-        protected void setFaultDetectionHandler(Object service, ServiceID serviceID) throws Exception {
+        protected void setFaultDetectionHandler(final Object service, final ServiceID serviceID) throws Exception {
             FaultDetectionHandler<ServiceID> fdh;
             if(getAssociation().getAssociationType()==AssociationType.COLOCATED) {
                 fdh = new ColocatedListener();
@@ -1258,9 +1194,9 @@ public class AssociationMgmt implements AssociationManagement {
          *
          * @throws Exception If error(s) occur
          */
-        protected void registerFaultDetectionHandler(Object service,
-                                                     ServiceID serviceID,
-                                                     FaultDetectionHandler<ServiceID> fdh)
+        protected void registerFaultDetectionHandler(final Object service,
+                                                     final ServiceID serviceID,
+                                                     final FaultDetectionHandler<ServiceID> fdh)
             throws Exception {
             fdh.register(this);
             fdh.monitor(service, serviceID, lCache);
@@ -1271,8 +1207,7 @@ public class AssociationMgmt implements AssociationManagement {
     /*
      * Load interfaces from an AssociationDescriptor
      */
-    private Class[] loadAssociatedInterfaces(AssociationDescriptor a,
-                                             ClassLoader cl)
+    private Class[] loadAssociatedInterfaces(final AssociationDescriptor a, final ClassLoader cl)
         throws ClassNotFoundException {
         String[] iNames = a.getInterfaceNames();
         Class[] interfaces = new Class[iNames.length];
@@ -1285,7 +1220,7 @@ public class AssociationMgmt implements AssociationManagement {
     /*
      * Handle colocated service injection
      */
-    private void handleColocatedServiceInjection(AssociationHandler aHandler) throws Exception {
+    private void handleColocatedServiceInjection(final AssociationHandler aHandler) throws Exception {
         AssociationDescriptor aDesc = aHandler.getAssociationDescriptor();
         ServiceBeanInstance[] instances = container.getServiceBeanInstances(null);
 
@@ -1331,23 +1266,15 @@ public class AssociationMgmt implements AssociationManagement {
                             }
                         } else {
                             hailMaryCheck = true;
-                            if (logger.isLoggable(Level.FINE)) {
-                                logger.fine("AssociationManagement for " +
-                                    "["+clientName+"], associated service proxy " +
-                                    "for colocated service does not implement " +
-                                    JoinAdmin.class.getName() +
-                                    ", using declared service name");
-                            }
+                            logger.fine("AssociationManagement for [%s], associated service proxy " +
+                                        "for colocated service does not implement %s, using declared service name",
+                                        clientName, JoinAdmin.class.getName());
                         }
                     } else {
                         hailMaryCheck = true;
-                        if (logger.isLoggable(Level.FINE)) {
-                            logger.fine("AssociationManagement for " +
-                                "["+clientName+"], associated service proxy for" +
-                                "colocated service does not implement " +
-                                Administrable.class.getName() +", " +
-                                "using declared service name");
-                        }
+                        logger.fine("AssociationManagement for [%s], associated service proxy for" +
+                                    "colocated service does not implement %s, using declared service name",
+                                    clientName, Administrable.class.getName());
                     }
 
                     if (hailMaryCheck) {
@@ -1385,12 +1312,9 @@ public class AssociationMgmt implements AssociationManagement {
          * An instance of the AssociationHandler to delegate association
          * actions to
          */
-        AssociationHandler handler;
+        private final AssociationHandler handler;
         /** Table of ServiceRegistrar instances to ServiceIDs */
-        Map<ServiceRegistrar, ServiceID> registrarTable =
-            new Hashtable<ServiceRegistrar, ServiceID>();
-        /** Configuration to use when discovering lookup services */
-        Configuration config;
+        private final Map<ServiceRegistrar, ServiceID> registrarTable = new Hashtable<ServiceRegistrar, ServiceID>();
         /** A ProxyPreparer for discovered services */
         ProxyPreparer proxyPreparer;
 
@@ -1402,33 +1326,24 @@ public class AssociationMgmt implements AssociationManagement {
          * actions to
          * @param config Configuration to use when discovering lookup services
          */
-        LookupServiceHandler(AssociationDescriptor aDesc,
-                             AssociationHandler handler,
-                             Configuration config) {
+        LookupServiceHandler(final AssociationDescriptor aDesc,
+                             final AssociationHandler handler,
+                             final Configuration config) {
             this.handler = handler;
             try {
-                DiscoveryManagementPool discoPool =
-                    DiscoveryManagementPool.getInstance();
-                dm = discoPool.getDiscoveryManager(
-                               aDesc.getOperationalStringName(),
-                               aDesc.getGroups(),
-                               aDesc.getLocators());
+                DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
+                dm = discoPool.getDiscoveryManager(aDesc.getOperationalStringName(),
+                                                   aDesc.getGroups(),
+                                                   aDesc.getLocators());
                 dm.addDiscoveryListener(this);
-                this.config = config;
-                proxyPreparer =
-                    (ProxyPreparer)config.getEntry(CONFIG_COMPONENT,
-                                                   "proxyPreparer",
-                                                   ProxyPreparer.class,
-                                                   new BasicProxyPreparer());
-                if(logger.isLoggable(Level.FINER)) {
-                    logger.finer("Association ["+aDesc.getName()+"] "+
-                                 "ProxyPreparer : "+
-                                 proxyPreparer.getClass().getName());
-                }
+                proxyPreparer = (ProxyPreparer)config.getEntry(CONFIG_COMPONENT,
+                                                               "proxyPreparer",
+                                                               ProxyPreparer.class,
+                                                               new BasicProxyPreparer());
+                logger.finer("Association [%s] ProxyPreparer : %s",
+                             aDesc.getName(), proxyPreparer.getClass().getName());
             } catch(Exception e) {
-                logger.log(Level.SEVERE,
-                           "Creating LookupServiceHandler",
-                           e);
+                logger.log(Level.SEVERE, "Creating LookupServiceHandler", e);
             }
         }
 
@@ -1452,14 +1367,10 @@ public class AssociationMgmt implements AssociationManagement {
             ServiceRegistrar[] registrars = dEvent.getRegistrars();
             for (ServiceRegistrar registrar : registrars) {
                 try {
-                    ServiceRegistrar sr =
-                        (ServiceRegistrar) proxyPreparer.prepareProxy(
-                            registrar);
+                    ServiceRegistrar sr = (ServiceRegistrar) proxyPreparer.prepareProxy(registrar);
                     registrarDiscovered(sr);
                 } catch (RemoteException e) {
-                    logger.log(Level.SEVERE,
-                               "Preparing ServiceRegistrar Proxy",
-                               e);
+                    logger.log(Level.SEVERE, "Preparing ServiceRegistrar Proxy", e);
                 }
             }
         }
@@ -1472,9 +1383,7 @@ public class AssociationMgmt implements AssociationManagement {
         private void registrarDiscovered(ServiceRegistrar registrar) {
             try {
                 ServiceID serviceID = registrar.getServiceID();
-                ServiceTemplate template = new ServiceTemplate(serviceID,
-                                                               null,
-                                                               null);
+                ServiceTemplate template = new ServiceTemplate(serviceID, null, null);
                 ServiceMatches matches = registrar.lookup(template, 1);
                 if(matches.items.length > 0) {
                     registrarTable.put(registrar, serviceID);
@@ -1500,12 +1409,11 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * Listen for colocated service removals
      */
-    class ColocatedListener implements FaultDetectionHandler <ServiceID>,
-                                       ServiceBeanContainerListener {
-        Uuid uuid;
-        ServiceID serviceID;
-        Object service;
-        FaultDetectionListener<ServiceID> listener;
+    class ColocatedListener implements FaultDetectionHandler <ServiceID>, ServiceBeanContainerListener {
+        private Uuid uuid;
+        private ServiceID serviceID;
+        private Object service;
+        private FaultDetectionListener<ServiceID> listener;
 
         ColocatedListener() {
             container.addListener(this);
@@ -1529,11 +1437,9 @@ public class AssociationMgmt implements AssociationManagement {
         public void unregister(FaultDetectionListener listener) {
         }
 
-        public void monitor(Object service, ServiceID id, LookupCache lCache)
-            throws Exception {
+        public void monitor(Object service, ServiceID id, LookupCache lCache) throws Exception {
             serviceID = id;
-            uuid = UuidFactory.create(serviceID.getMostSignificantBits(),
-                                      serviceID.getLeastSignificantBits());
+            uuid = UuidFactory.create(serviceID.getMostSignificantBits(), serviceID.getLeastSignificantBits());
             this.service = service;
         }
 
