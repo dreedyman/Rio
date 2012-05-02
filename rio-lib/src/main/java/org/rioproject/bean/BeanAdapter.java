@@ -16,6 +16,7 @@
 package org.rioproject.bean;
 
 import net.jini.config.Configuration;
+import net.jini.config.ConfigurationException;
 import net.jini.export.Exporter;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
@@ -23,6 +24,7 @@ import org.rioproject.bean.proxy.BeanDelegator;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBean;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.jsb.ServiceBeanAdapter;
 import org.rioproject.net.HostUtil;
 import org.rioproject.resources.servicecore.Service;
@@ -47,16 +49,13 @@ import java.util.logging.Logger;
  *
  * <pre>
  * public void preAdvertise();
- * public void postAdvertise();
- * public void preUnAdvertise();
  * public void postUnAdvertise();
  * public void preDestroy();
  * </pre>
  *
  * <p>Alternatively, the bean can use the {@link Initialized}, {@link Started},
- * {@link PreAdvertise}, {@link PostAdvertise}, {@link PreUnAdvertise},
- * {@link PostUnAdvertise}, and {@link PreDestroy} annotations to be notified of
- * each respective lifecycle event.
+ * {@link PreAdvertise}, {@link PostUnAdvertise}, and {@link PreDestroy}
+ * annotations to be notified of each respective lifecycle event.
  *
  * <p>Note: ServiceBean initialization is invoked by the start method to
  * initialize the ServiceBean. This method is called only once during the
@@ -127,11 +126,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
     }
    
     @Override
-    protected void registerMBean(ObjectName oName,
-                                 MBeanServer mbeanServer)
-    throws NotCompliantMBeanException,
-           MBeanRegistrationException,
-           InstanceAlreadyExistsException {
+    protected void registerMBean(ObjectName oName, MBeanServer mbeanServer)
+    throws NotCompliantMBeanException, MBeanRegistrationException, InstanceAlreadyExistsException {
         String implClass = bean.getClass().getName();
         Class[] ifaces = bean.getClass().getInterfaces();
         Class mbean = null;
@@ -143,11 +139,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
         }
         if(mbean!=null) {
             String comment = context.getServiceBeanConfig().getComment();
-            mbeanServer.registerMBean(new AggregatingMBean(this,
-                                                           bean,
-                                                           mbean,
-                                                           comment),
-                                      oName);
+            mbeanServer.registerMBean(new AggregatingMBean(this, bean, mbean, comment), oName);
         } else {
             mbeanServer.registerMBean(this, oName);
         }
@@ -169,10 +161,10 @@ public class BeanAdapter extends ServiceBeanAdapter {
      *
      * @param context The ServiceBeanContext
      * @return A remoted proxy used to communicate to the bean
-     * @throws Exception if starting the bean fails
+     * @throws ServiceBeanInstantiationException if starting the bean fails
      */
     @Override
-    public Object start(final ServiceBeanContext context) throws Exception {
+    public Object start(final ServiceBeanContext context) throws ServiceBeanInstantiationException {
         delegatingProxy = createDelegatingProxy();
         /* If defined, invoke preStart lifecycle method */
         BeanHelper.invokeLifeCycle(null, "preStart", bean);
@@ -222,47 +214,37 @@ public class BeanAdapter extends ServiceBeanAdapter {
      * @throws IllegalArgumentException if either of the parameters are null
      */
     public static void invokeLifecycleInjectors(Object bean,
-                                                ServiceBeanContext context) {
+                                                ServiceBeanContext context) throws ServiceBeanInstantiationException {
         if(bean==null)
             throw new IllegalArgumentException("bean cannot be null");
         if(context==null)
             throw new IllegalArgumentException("ServiceBeanContext cannot be null");
-        /* Invoke the method with @SetParameters annotation or the
-         * setParameters method */
+        /* Invoke the method with @SetParameters annotation or the setParameters method */
+        Map<String, ?> parameters = context.getServiceBeanConfig().getInitParameters();
+        BeanHelper.invokeBeanMethod(bean,
+                                    SetParameters.class,
+                                    "setParameters",
+                                    new Class[]{Map.class},
+                                    new Object[]{parameters});
+        /* Invoke the method with @SetConfiguration annotation or the setConfiguration method */
+        Configuration config ;
         try {
-            Map<String, ?> parameters =
-                context.getServiceBeanConfig().getInitParameters();
-            BeanHelper.invokeBeanMethod(bean,
-                                        SetParameters.class,
-                                        "setParameters",
-                                        new Class[]{Map.class},
-                                        new Object[]{parameters});
-        } catch(Exception e) {
-            logger.log(Level.WARNING, "Setting parameters", e);
+            config = context.getConfiguration();
+        } catch (ConfigurationException e) {
+            throw new ServiceBeanInstantiationException(e.getLocalizedMessage());
         }
-        /* Invoke the method with @SetConfiguration annotation or the
-         * setConfiguration method */
-        try {
-            Configuration config = context.getConfiguration();
-            BeanHelper.invokeBeanMethod(bean,
-                                        SetConfiguration.class,
-                                        "setConfiguration",
-                                        new Class[]{Configuration.class},
-                                        new Object[]{config});
-        } catch(Exception e) {
-            logger.log(Level.WARNING, "Setting configuration", e);
-        }
-        /* Invoke the method with @SetServiceBeanContext annotation or the
-         * setServiceBeanContext method */
-        try {
-            BeanHelper.invokeBeanMethod(bean,
-                                        SetServiceBeanContext.class,
-                                        "setServiceBeanContext",
-                                        new Class[]{ServiceBeanContext.class},
-                                        new Object[]{context});
-        } catch(Exception e) {
-            logger.log(Level.WARNING, "Setting ServiceBeanContext", e);
-        }
+        BeanHelper.invokeBeanMethod(bean,
+                                    SetConfiguration.class,
+                                    "setConfiguration",
+                                    new Class[]{Configuration.class},
+                                    new Object[]{config});
+
+        /* Invoke the method with @SetServiceBeanContext annotation or the setServiceBeanContext method */
+        BeanHelper.invokeBeanMethod(bean,
+                                    SetServiceBeanContext.class,
+                                    "setServiceBeanContext",
+                                    new Class[]{ServiceBeanContext.class},
+                                    new Object[]{context});
     }
 
     /**
@@ -305,77 +287,40 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                     "setServiceBean",
                                     new Class[]{ServiceBean.class},
                                     new Object[]{this});
-        /* If defined, invoke postInitialize lifecycle method */
-        //BeanHelper.invokeLifeCycle(null, "postInitialize", bean);
     }
 
     /**
      * Override the advertise method to check if the wrapped bean has a
-     * <code>preAdvertise()</code> or a <code>postAdvertise()</code> method
-     * declared. If the wrapped bean does have an accessible
+     * {@code preAdvertise()} method declared. If the wrapped bean does have an accessible
      * <code>preAdvertise()</code> declared, it will be called prior to
      * advertising the bean.
-     *
-     * <p>Once bean advertisement has been processed,
-     * the wrapped bean will be checked for <code>postAdvertise()</code>
-     * method declaration. If the wrapped bean does have an accessible
-     * <code>postAdvertise()</code> declared, it will be called following
-     * the parent's advertise method.
      */
     @Override
     public void advertise() throws IOException {
         try {
             BeanHelper.invokeLifeCycle(PreAdvertise.class, "preAdvertise", bean);
-        } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Invoking Bean ["+bean.getClass().getName()+"] "+
-                       "preAdvertise() ",
-                       e);
+        } catch(Throwable t) {
+            String message = String.format("Invoking Bean [%s] preAdvertise lifecycle", bean.getClass().getName());
+            throw new IOException(message, t);
         }
         super.advertise();
-        /* If defined, invoke postAdvertise lifecycle method */
-        try {
-            BeanHelper.invokeLifeCycle(PostAdvertise.class, "postAdvertise", bean);
-        } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Invoking Bean ["+bean.getClass().getName()+"] "+
-                       "postAdvertise() ",
-                       e);
-        }
     }
 
     /** 
      * Override the unadvertise method to check if the wrapped bean has a
-     * <code>preUnAdvertise()</code> or a <code>postUnAdvertise()</code> method
-     * declared. If the wrapped bean does have an accessible
-     * <code>preUnadvertise()</code> declared, it will be called prior to
-     * unadvertising the bean.
-     *
-     * <p>Once bean unadvertisement has been processed,
-     * the wrapped bean will be checked for <code>postUnAdvertise()</code>
-     * method declaration. If the wrapped bean does have an accessible
-     * <code>postUnAdvertise()</code> declared, it will be called following
+     * {@code postUnAdvertise()} method declared. If the wrapped bean does have an accessible
+     * {@code postUnAdvertise()} declared, it will be called following
      * the parent's unadvertise method.
      */
     @Override
-    public void unadvertise() {
-        try {
-            BeanHelper.invokeLifeCycle(PreUnAdvertise.class, "preUnAdvertise", bean);
-        } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Invoking Bean ["+bean.getClass().getName()+"] "+
-                       "preUnAdvertise() ",
-                       e);
-        }
+    public void unadvertise() throws IOException {
         super.unadvertise();
         /* If defined, invoke unadvertised lifecycle method */
         try {
             BeanHelper.invokeLifeCycle(PostUnAdvertise.class, "postUnAdvertise", bean);
-        } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Invoking Bean ["+bean.getClass().getName()+"] "+
-                       "postUnAdvertise() ",
-                       e);
+        } catch(Throwable t) {
+            String message = String.format("Invoking Bean [%s] postUnAdvertise lifecycle", bean.getClass().getName());
+            throw new IOException(message, t);
         }
     }
 
@@ -509,8 +454,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                             new Object[]{proxy});
             }
         } catch (Exception e) {
-            logger.info("setting bean proxy");
-            throw new RuntimeException("could not set bean proxy", e);
+            logger.warning("Count not set bean proxy");
+            throw new RuntimeException("Could not set bean proxy", e);
         }
         return (proxy);
     }
@@ -554,7 +499,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                 proxy = super.createProxy();
             }*/
         } catch (Exception e) {
-            logger.info("creating bean proxy");
+            logger.warning("Could not create bean proxy");
             throw new RuntimeException("could not create bean proxy", e);
         }
         return proxy;

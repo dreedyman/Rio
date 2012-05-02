@@ -15,6 +15,7 @@
  */
 package org.rioproject.bean;
 
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.resources.util.ThrowableUtil;
 
 import java.lang.annotation.Annotation;
@@ -39,11 +40,11 @@ public class BeanHelper {
      * @param methodName The lifecycle method name to invoke if the annotation
      * is not found
      * @param bean The bean to invoke methods on
-     * @throws Exception of errors occur
+     * @throws ServiceBeanInstantiationException of errors occur
      */
     public static void invokeLifeCycle(Class<? extends Annotation> annClass,
                                        String methodName,
-                                       Object bean) throws Exception {
+                                       Object bean) throws ServiceBeanInstantiationException {
         if(bean==null) {
             return;
         }
@@ -55,35 +56,38 @@ public class BeanHelper {
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         ClassLoader beanCL = bean.getClass().getClassLoader();
         Thread.currentThread().setContextClassLoader(beanCL);
+        Throwable abort = null;
         try {
-            Method method = bean.getClass().getMethod(methodName,
-                                                      (Class[]) null);
+            Method method = bean.getClass().getMethod(methodName, (Class[]) null);
             if (logger.isLoggable(Level.FINEST))
-                logger.finest("Invoking method ["+methodName+"] " +
-                              "on ["+bean.getClass().getName()+"]");
+                logger.finest("Invoking method ["+methodName+"] on ["+bean.getClass().getName()+"]");
             method.invoke(bean, (Object[]) null);
         } catch (NoSuchMethodException e) {
             if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Bean [" + bean.getClass().getName() + "] " +
-                              "does not have lifecycle method "
-                              + methodName + "() " +
-                              "defined");
+                logger.finest("Bean [" + bean.getClass().getName() + "] does not have lifecycle method "
+                              + methodName + "() defined");
             }
         } catch (IllegalAccessException e) {
             if (logger.isLoggable(Level.FINEST)) {
                 logger.log(Level.FINEST,
-                           "Bean [" + bean.getClass().getName() + "] " +
-                           methodName + "() " +
-                           "method security access",
+                           "Bean ["+bean.getClass().getName()+"] "+methodName+"() method security access",
                            e);
             }
+            abort = e;
         } catch (InvocationTargetException e) {
-            throw new Exception(
-                "Invoking Bean [" + bean.getClass().getName() + "] " +
-                methodName + "() method",
-                ThrowableUtil.getRootCause(e));
+            abort = ThrowableUtil.getRootCause(e);
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST,
+                           "Bean ["+bean.getClass().getName()+"] "+methodName+"() method invocation",
+                           abort);
+            }
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
+        }
+        if(abort!=null) {
+            throw new ServiceBeanInstantiationException("Invoking Bean ["+bean.getClass().getName()+"] "+methodName+"() method",
+                                                        abort,
+                                                        true);
         }
     }
 
@@ -96,14 +100,13 @@ public class BeanHelper {
      * @param classArgs Class arguments
      * @param objectArgs Object argument
      * @return The result of dispatching the method
-     * @throws Exception If errors occur
+     * @throws ServiceBeanInstantiationException If errors occur
      */
     public static Object invokeBeanMethod(Object bean,
                                           Class<? extends Annotation> annClass,
                                           String methodName,
                                           Class[] classArgs,
-                                          Object[] objectArgs) throws
-                                                               Exception {
+                                          Object[] objectArgs) throws ServiceBeanInstantiationException {
          /* First check if the annotation is declared */
         Method m = getAnnotatedMethod(bean, annClass);
         if (m != null) {            
@@ -112,6 +115,7 @@ public class BeanHelper {
         Object result = null;
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         ClassLoader beanCL = bean.getClass().getClassLoader();
+        Throwable abort = null;
         Thread.currentThread().setContextClassLoader(beanCL);
         try {
             Method method = bean.getClass().getMethod(methodName,
@@ -119,25 +123,30 @@ public class BeanHelper {
             result = method.invoke(bean, objectArgs);
         } catch (NoSuchMethodException e) {
             if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Bean [" + bean.getClass().getName() + "] " +
-                              "does not have a " + methodName + "() " +
-                              "method defined");
+                logger.finest("Bean ["+bean.getClass().getName()+"] does not have a "+methodName+"() method defined");
             }
         } catch (IllegalAccessException e) {
             if (logger.isLoggable(Level.FINEST)) {
                 logger.log(Level.FINEST,
-                           "Bean [" + bean.getClass().getName() + "] " +
-                           methodName + "() " +
-                           "method security access",
+                           "Bean ["+bean.getClass().getName()+"] "+methodName+"() method security access",
                            e);
             }
+            abort = e;
         } catch (InvocationTargetException e) {
-            throw new Exception(
-                "Invoking Bean [" + bean.getClass().getName() + "] " +
-                methodName + "() method",
-                ThrowableUtil.getRootCause(e));
+            abort = ThrowableUtil.getRootCause(e);
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST,
+                           "Bean ["+bean.getClass().getName()+"] "+methodName+"() method invocation",
+                           abort);
+            }
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
+        }
+        if(abort!=null) {
+            throw new ServiceBeanInstantiationException("Invoking Bean [" + bean.getClass().getName() + "] " +
+                                                        methodName + "() method",
+                                                        ThrowableUtil.getRootCause(abort),
+                                                        true);
         }
         return (result);
     }
