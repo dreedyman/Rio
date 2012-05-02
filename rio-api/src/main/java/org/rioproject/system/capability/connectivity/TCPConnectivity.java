@@ -51,8 +51,8 @@ public class TCPConnectivity extends ConnectivityCapability {
         super(description);
         int ipv4Nics = 0;
         int ipv6Nics = 0;
-        StringBuffer ipv4buff = new StringBuffer();
-        StringBuffer ipv6buff = new StringBuffer();
+        StringBuilder ipv4buff = new StringBuilder();
+        StringBuilder ipv6buff = new StringBuilder();
         try {
             for(Enumeration en = NetworkInterface.getNetworkInterfaces();
                 en.hasMoreElements();) {
