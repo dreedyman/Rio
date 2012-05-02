@@ -8,8 +8,6 @@ import org.rioproject.bean.SetConfiguration
 import org.rioproject.bean.SetServiceBeanContext
 import org.rioproject.core.jsb.ServiceBeanContext
 import org.rioproject.bean.PreAdvertise
-import org.rioproject.bean.PostAdvertise
-import org.rioproject.bean.PreUnAdvertise
 import org.rioproject.bean.PostUnAdvertise
 import org.rioproject.bean.SetParameters
 import org.rioproject.bean.SetServiceBean
@@ -25,8 +23,6 @@ public class AnnotatedService {
     boolean configInvoked = false
     boolean contextInvoked = false
     boolean preAdvertisedInvoked = false
-    boolean postAdvertisedInvoked = false
-    boolean preUnAdvertisedInvoked = false
     boolean postUnAdvertisedInvoked = false
     boolean parametersInvoked = false
     boolean serviceBeanInvoked = false
@@ -69,16 +65,6 @@ public class AnnotatedService {
     @PreAdvertise
     public void preAdvertise() {
         preAdvertisedInvoked = true
-    }
-
-    @PostAdvertise
-    public void postAdvertise() {
-        postAdvertisedInvoked = true
-    }
-
-    @PreUnAdvertise
-    public void preUnAdvertise() {
-        preUnAdvertisedInvoked = true
     }
 
     @PostUnAdvertise

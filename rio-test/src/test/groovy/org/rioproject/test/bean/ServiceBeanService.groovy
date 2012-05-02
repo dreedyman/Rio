@@ -26,9 +26,13 @@ import org.rioproject.bean.CreateProxy
 import net.jini.id.UuidFactory
 import net.jini.id.Uuid
 import org.rioproject.resources.servicecore.AbstractProxy
+import java.util.concurrent.atomic.AtomicInteger
+import org.rioproject.bean.SetServiceBeanContext
+import org.rioproject.core.jsb.ServiceBeanContext
 
 
 class ServiceBeanService extends ServiceBeanAdapter implements ServiceBeanServiceInterface {
+    AtomicInteger count = new AtomicInteger(0)
     boolean initializedInvoked = false
     boolean startedInvoked = false
     boolean destroyedInvoked = false
@@ -39,6 +43,9 @@ class ServiceBeanService extends ServiceBeanAdapter implements ServiceBeanServic
 
     @Initialized
     public void initialized() {
+        int c = count.getAndIncrement()
+        if(c!=3)
+            throw new IllegalStateException("@Initialized should be called fourth")
         initializedInvoked = true
     }
 
@@ -54,6 +61,9 @@ class ServiceBeanService extends ServiceBeanAdapter implements ServiceBeanServic
 
     @SetConfiguration
     public void setDaConfiguration(Configuration config) {
+        int c = count.getAndIncrement()
+        if(c!=1)
+            throw new IllegalStateException("@SetParameters should be called second")
         if(bogusProxy!=null)
             throw new IllegalStateException("configuration set after createProxy")
         something = config.getEntry('simple', 'something', String.class, "1")
@@ -64,8 +74,18 @@ class ServiceBeanService extends ServiceBeanAdapter implements ServiceBeanServic
         return something
     }
 
+    @SetServiceBeanContext
+    public void setsbc(ServiceBeanContext sbc) {
+        int c = count.getAndIncrement()
+        if(c!=2)
+            throw new IllegalStateException("@SetServiceBeanContext should be called third")
+    }
+
     @SetParameters
     public void parms(Map<String, ?> p) {
+        int c = count.getAndIncrement()
+        if(c!=0)
+            throw new IllegalStateException("@SetParameters should be called first")
         parms = p
     }
 
