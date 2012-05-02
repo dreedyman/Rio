@@ -823,7 +823,8 @@ class TestManager {
         long t0 = System.currentTimeMillis()
         ServiceItem serviceItem = serviceDiscoveryManager.lookup(template, null, 60000)
         if (serviceItem == null) {
-            throw new TimeoutException("Unable to discover service ${type.name}")
+            String info = type==null?(name==null?"<all services>":name):type.name
+            throw new TimeoutException("Unable to discover service $info")
         }
         service = serviceItem.service
         logger.info "${sb.toString()} has been discovered, elapsed time: "+
