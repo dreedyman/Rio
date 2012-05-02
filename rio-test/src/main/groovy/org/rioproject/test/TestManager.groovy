@@ -674,13 +674,13 @@ class TestManager {
                 int numDeployed = entry.value
                 ServiceElement elem = entry.key
                 if (numDeployed < elem.planned) {
-                    logger.info "Waiting for service ${elem.name} to be deployed. " +
+                    logger.info "Waiting for service ${elem.operationalStringName}/${elem.name} to be deployed. " +
                                 "Planned [${elem.planned}], deployed [${numDeployed}]"
                     numDeployed = mgr.getServiceBeanInstances(elem).length
                     deploy.put(elem, numDeployed)
                 } else {
                     deployed += elem.planned
-                    logger.info "Service ${elem.name} is deployed. " +
+                    logger.info "Service ${elem.operationalStringName}/${elem.name} is deployed. " +
                                 "Planned [${elem.planned}], deployed [${numDeployed}]"
                 }
             }
