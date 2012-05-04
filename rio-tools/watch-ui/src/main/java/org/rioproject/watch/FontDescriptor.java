@@ -20,13 +20,14 @@ package org.rioproject.watch;
  * Contains information about a Font used by the AccumulatorViewer
  */
 public class FontDescriptor implements java.io.Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Holds value of property style. */
-    private int style;
+    private final int style;
     /** Holds value of property size. */
-    private int size;
+    private final int size;
     /** Holds value of property name. */
-    private String name;
+    private final String name;
 
     /**
      * Creates new FontDescriptor
@@ -35,10 +36,10 @@ public class FontDescriptor implements java.io.Serializable {
      * @param style The font style
      * @param size The font size
      */
-    public FontDescriptor(String name, int style, int size) {
-        setName(name);
-        setStyle(style);
-        setSize(size);
+    public FontDescriptor(final String name, final int style, final int size) {
+        this.name =name;
+        this.style = style;
+        this.size = size;
     }
 
     /** 
@@ -50,16 +51,7 @@ public class FontDescriptor implements java.io.Serializable {
         return(style);
     }
 
-    /** 
-     * Setter for property style.
-     *
-     * @param style New value of property style.
-     */
-    public void setStyle(int style) {
-        this.style = style;
-    }
-
-    /** 
+    /**
      * Getter for property size.
      *
      * @return Value of property size.
@@ -68,31 +60,13 @@ public class FontDescriptor implements java.io.Serializable {
         return(size);
     }
 
-    /** 
-     * Setter for property size.
-     *
-     * @param size New value of property size.
-     */
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    /** 
+    /**
      * Getter for property name.
      *
      * @return Value of property name.
      */
     public String getName() {
         return(name);
-    }
-
-    /** 
-     * Setter for property name.
-     *
-     * @param name New value of property name.
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String toString() {

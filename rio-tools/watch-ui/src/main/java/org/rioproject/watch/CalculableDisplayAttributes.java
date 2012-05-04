@@ -24,38 +24,32 @@ import java.beans.*;
  * Default attributes to display when providing rendering support for a Calculable
  */
 public class CalculableDisplayAttributes implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
-
     /** Holds value of property yLegend. */
-    private String yLegend;
+    private final String yLegend;
     /** Holds value of property yLegendFont. */
-    private FontDescriptor yLegendFont;
+    private final FontDescriptor yLegendFont;
     /** Holds value of property yScale. */
-    private int yScale;
+    private final int yScale;
     /** Holds value of property yFormat. */
-    private NumberFormat yFormat;
+    private final NumberFormat yFormat;
     /** Holds value of property xLegend. */
-    private String xLegend;
+    private final String xLegend;
     /** Holds value of property xLegendFont. */
-    private FontDescriptor xLegendFont;
+    private final FontDescriptor xLegendFont;
     /** Holds value of property xScale. */
-    private int xScale;
+    private final int xScale;
     /** Holds value of property xFormat. */
-    private NumberFormat xFormat;
+    private final NumberFormat xFormat;
     /** Holds value of property title. */
-    private String title;
+    private final String title;
     /** Holds value of property titleFont. */
-    private FontDescriptor titleFont;
+    private final FontDescriptor titleFont;
     /** Holds value of property calculableClass. */
-    private Class calculableClass;
+    private final Class calculableClass;
 
-    /** 
-     * Creates new CalculableDisplay 
-     */
-    public CalculableDisplayAttributes() {
-    }
-
-    /** 
+    /**
      * Creates new CalculableDisplay with provided inputs:
      *
      * @param yLegend String name of the Y Axis
@@ -70,28 +64,28 @@ public class CalculableDisplayAttributes implements Serializable {
      * @param titleFont Font to use for the title
      * @param calculableClass Class Calculable class object for this display
      */
-    public CalculableDisplayAttributes(String yLegend, 
-                                       FontDescriptor yLegendFont, 
-                                       int yScale,
-                                       NumberFormat yFormat, 
-                                       String xLegend, 
-                                       FontDescriptor xLegendFont, 
-                                       int xScale,
-                                       NumberFormat xFormat, 
-                                       String title, 
-                                       FontDescriptor titleFont, 
-                                       Class calculableClass) {
-        setYLegend(yLegend);
-        setYLegendFont(yLegendFont);
-        setYScale(yScale);
-        setYFormat(yFormat);
-        setXLegend(xLegend);
-        setXLegendFont(xLegendFont);
-        setXScale(xScale);
-        setXFormat(xFormat);
-        setTitle(title);
-        setTitleFont(titleFont);
-        setCalculableClass(calculableClass);
+    public CalculableDisplayAttributes(final String yLegend,
+                                       final FontDescriptor yLegendFont,
+                                       final int yScale,
+                                       final NumberFormat yFormat,
+                                       final String xLegend,
+                                       final FontDescriptor xLegendFont,
+                                       final int xScale,
+                                       final NumberFormat xFormat,
+                                       final String title,
+                                       final FontDescriptor titleFont,
+                                       final Class calculableClass) {
+        this.yLegend = yLegend;
+        this.yLegendFont = yLegendFont;
+        this.yScale = yScale;
+        this.yFormat = yFormat;
+        this.xLegend = xLegend;
+        this.xLegendFont = xLegendFont;
+        this.xScale = xScale;
+        this.xFormat = xFormat;
+        this.title = title;
+        this.titleFont = titleFont;
+        this.calculableClass = calculableClass;
 
     }
 
@@ -104,27 +98,11 @@ public class CalculableDisplayAttributes implements Serializable {
     }
 
     /** 
-     * Setter for property yLegend.
-     * @param yLegend New value of property yLegend.
-     */
-    public void setYLegend(String yLegend) {
-        this.yLegend = yLegend;
-    }
-
-    /** 
      * Getter for property yLegendFont.
      * @return Value of property yLegendFont.
      */
     public FontDescriptor getYLegendFont() {
         return(yLegendFont);
-    }
-
-    /** 
-     * Setter for property yLegendFont.
-     * @param yLegendFont New value of property yLegendFont.
-     */
-    public void setYLegendFont(FontDescriptor yLegendFont) {
-        this.yLegendFont = yLegendFont;
     }
 
     /** 
@@ -136,14 +114,6 @@ public class CalculableDisplayAttributes implements Serializable {
     }
 
     /** 
-     * Setter for property yScale.
-     * @param yScale New value of property yScale.
-     */
-    public void setYScale(int yScale) {
-        this.yScale = yScale;
-    }
-
-    /** 
      * Getter for property yFormat.
      * @return Value of property yFormat.
      */
@@ -151,15 +121,7 @@ public class CalculableDisplayAttributes implements Serializable {
         return(yFormat);
     }
 
-    /** 
-     * Setter for property yFormat.
-     * @param yFormat New value of property yFormat.
-     */
-    public void setYFormat(NumberFormat yFormat) {
-        this.yFormat = yFormat;
-    }
-
-    /** 
+    /**
      * Getter for property xLegend.
      * @return Value of property xLegend.
      */
@@ -167,28 +129,12 @@ public class CalculableDisplayAttributes implements Serializable {
         return(xLegend);
     }
 
-    /** 
-     * Setter for property xLegend.
-     * @param xLegend New value of property xLegend.
-     */
-    public void setXLegend(String xLegend) {
-        this.xLegend = xLegend;
-    }
-
-    /** 
+    /**
      * Getter for property xLegendFont.
      * @return Value of property xLegendFont.
      */
     public FontDescriptor getXLegendFont() {
         return(xLegendFont);
-    }
-
-    /** 
-     * Setter for property xLegendFont.
-     * @param xLegendFont New value of property xLegendFont.
-     */
-    public void setXLegendFont(FontDescriptor xLegendFont) {
-        this.xLegendFont = xLegendFont;
     }
 
     /** 
@@ -199,15 +145,7 @@ public class CalculableDisplayAttributes implements Serializable {
         return(xScale);
     }
 
-    /** 
-     * Setter for property xScale.
-     * @param xScale New value of property xScale.
-     */
-    public void setXScale(int xScale) {
-        this.xScale = xScale;
-    }
-
-    /** 
+    /**
      * Getter for property xFormat.
      * @return Value of property xFormat.
      */
@@ -215,15 +153,7 @@ public class CalculableDisplayAttributes implements Serializable {
         return(xFormat);
     }
 
-    /** 
-     * Setter for property xFormat.
-     * @param xFormat New value of property xFormat.
-     */
-    public void setXFormat(NumberFormat xFormat) {
-        this.xFormat = xFormat;
-    }
-
-    /** 
+    /**
      * Getter for property title.
      * @return Value of property title.
      */
@@ -231,15 +161,7 @@ public class CalculableDisplayAttributes implements Serializable {
         return(title);
     }
 
-    /** 
-     * Setter for property title.
-     * @param title New value of property title.
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    /** 
+    /**
      * Getter for property titleFont.
      * @return Value of property titleFont.
      */
@@ -247,47 +169,33 @@ public class CalculableDisplayAttributes implements Serializable {
         return(titleFont);
     }
 
-    /** 
-     * Setter for property titleFont.
-     * @param titleFont New value of property titleFont.
-     */
-    public void setTitleFont(FontDescriptor titleFont) {
-        this.titleFont = titleFont;
-    }
-
     public String toString() {
-        return("Title = " + title + "\n" +
-              "Title Font = " + titleFont + "\n" +
-              "Y Legend = " + yLegend + "\n" +
-              "Y Legend Font = " + yLegendFont + "\n" +
-              "Y Scale = " + yScale + "\n" +
-              "Y Format = " + yFormat + "\n" +
-              "X Legend = " + xLegend + "\n" +
-              "X Legend Font = " + xLegendFont + "\n" +
-              "X Scale = " + xScale + "\n" +
-              "X Format = " + xFormat + "\n" +
-              "CalculableClass = " + calculableClass.getName() + "\n");
+        StringBuilder builder = new StringBuilder();
+        builder.append("Title = ").append(title).append("\n");
+        builder.append("Title Font = ").append(titleFont).append("\n");
+        builder.append("Y Legend = ").append(yLegend).append("\n");
+        builder.append("Y Legend Font = ").append(yLegendFont).append("\n");
+        builder.append("Y Scale = ").append(yScale).append("\n");
+        builder.append("Y Format = ").append(yFormat).append("\n");
+        builder.append("X Legend = ").append(xLegend).append("\n");
+        builder.append("X Legend Font = ").append(xLegendFont).append("\n");
+        builder.append("X Scale = ").append(xScale).append("\n");
+        builder.append("X Format = ").append(xFormat).append("\n");
+        builder.append("CalculableClass = ").append(calculableClass.getName());
+        return builder.toString();
     }
 
     /** 
      * Getter for property calculableClass.
      * @return Value of property calculableClass.
      */
+    @SuppressWarnings("unused")
     public Class getCalculableClass() {
         return(calculableClass);
     }
 
-    /** 
-     * Setter for property calculableClass.
-     * @param calculableClass New value of property calculableClass.
-     */
-    public void setCalculableClass(Class calculableClass) {
-        this.calculableClass = calculableClass;
-    }
-
+    @SuppressWarnings("unused")
     public BeanInfo getCalculableBeanInfo() throws IntrospectionException {
-        return(calculableClass!=null?
-              Introspector.getBeanInfo(calculableClass):
-              null);
+        return(calculableClass!=null? Introspector.getBeanInfo(calculableClass): null);
     }
 }

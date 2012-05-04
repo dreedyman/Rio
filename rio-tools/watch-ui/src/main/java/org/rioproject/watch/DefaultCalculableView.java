@@ -110,7 +110,7 @@ public class DefaultCalculableView implements CalculableViewable {
      * format the graph
      */
     public DefaultCalculableView(CalculableDisplayAttributes calcDisplayAttrs) {
-        setCalculableDisplayAttributes(calcDisplayAttrs);
+        this.calcDisplayAttrs = calcDisplayAttrs;
     }
 
     /**
@@ -119,8 +119,7 @@ public class DefaultCalculableView implements CalculableViewable {
      * @param calcDisplayAttrs The Calculable Display Attributes used to
      * format the graph
      */
-    public void setCalculableDisplayAttributes(
-                                   CalculableDisplayAttributes calcDisplayAttrs) {
+    public void setCalculableDisplayAttributes(CalculableDisplayAttributes calcDisplayAttrs) {
         this.calcDisplayAttrs = calcDisplayAttrs;
     }
 
