@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Reedy
  */
 public class AssociationDescriptor implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * If an AssociationDescriptor is created with a null for the name
@@ -149,7 +150,7 @@ public class AssociationDescriptor implements Serializable {
                                  String opStringName,
                                  String propertyName) {
         if(type==null)
-            throw new NullPointerException("type is null");
+            throw new IllegalArgumentException("type is null");
         this.type = type;
         this.name = name;
         this.opStringName = opStringName;
