@@ -39,9 +39,10 @@ public class ConstrainableServiceAdminProxy extends ServiceAdminProxy
     private final MethodConstraints constraints;
     
     /* Creates an instance of this class. */
-    ConstrainableServiceAdminProxy(ServiceAdmin serviceAdmin, 
-                                   Uuid id,
-                                   MethodConstraints constraints) {
+    @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod"})
+    ConstrainableServiceAdminProxy(final ServiceAdmin serviceAdmin,
+                                   final Uuid id,
+                                   final MethodConstraints constraints) {
         super(constrainServer(serviceAdmin, constraints), id);
         this.constraints = constraints;
     }
@@ -50,25 +51,20 @@ public class ConstrainableServiceAdminProxy extends ServiceAdminProxy
      * Returns a copy of the server proxy with the specified client
      * constraints and methods mapping.
      */
-    private static ServiceAdmin constrainServer(ServiceAdmin serviceAdmin,
-                                                MethodConstraints constraints) {
+    private static ServiceAdmin constrainServer(final ServiceAdmin serviceAdmin,
+                                                final MethodConstraints constraints) {
                    
-       java.lang.reflect.Method[] methods = ServiceAdmin.class.getMethods();                        
-       java.lang.reflect.Method[] methodMapping = 
-           new java.lang.reflect.Method[methods.length*2];            
-       for(int i=0; i<methodMapping.length; i++)
-           methodMapping[i] = methods[i/2];            
-       return((ServiceAdmin)((RemoteMethodControl)serviceAdmin).setConstraints(
-                           ConstrainableProxyUtil.translateConstraints(
-                                         constraints, 
-                                         methodMapping)));
-   }
-        
+        java.lang.reflect.Method[] methods = ServiceAdmin.class.getMethods();
+        java.lang.reflect.Method[] methodMapping = new java.lang.reflect.Method[methods.length*2];
+        for(int i=0; i<methodMapping.length; i++)
+            methodMapping[i] = methods[i/2];
+        return((ServiceAdmin)((RemoteMethodControl)serviceAdmin).setConstraints(ConstrainableProxyUtil.translateConstraints(
+                                                                                                                                  constraints,
+                                                                                                                                  methodMapping)));
+    }
 
-    public RemoteMethodControl setConstraints(MethodConstraints constraints) {
-        return(new ConstrainableServiceAdminProxy(serviceAdmin, 
-                                                  uuid, 
-                                                  constraints));
+    public RemoteMethodControl setConstraints(final MethodConstraints constraints) {
+        return(new ConstrainableServiceAdminProxy(serviceAdmin, uuid, constraints));
     }
 
     public MethodConstraints getConstraints() {
@@ -82,6 +78,7 @@ public class ConstrainableServiceAdminProxy extends ServiceAdminProxy
      * <code>ProxyTrustVerifier</code> to retrieve this object's
      * trust verifier.
      */
+    @SuppressWarnings("unused")
     private ProxyTrustIterator getProxyTrustIterator() {
         return(new SingletonProxyTrustIterator(serviceAdmin));
     }
@@ -95,8 +92,7 @@ public class ConstrainableServiceAdminProxy extends ServiceAdminProxy
      *         requirements for trust verification (as detailed in the
      *         class description) are not satisfied.
      */
-    private void readObject(ObjectInputStream s)
-    throws IOException, ClassNotFoundException {
+    private void readObject(final ObjectInputStream s) throws IOException, ClassNotFoundException {
         /* Note that basic validation of the fields of this class was
          * already performed in the readObject() method of this class'
          * super class.
@@ -104,11 +100,8 @@ public class ConstrainableServiceAdminProxy extends ServiceAdminProxy
         s.defaultReadObject();
         // Verify that the server implements RemoteMethodControl
         if(!(serviceAdmin instanceof RemoteMethodControl)) {
-            throw new InvalidObjectException(
-                                       "ConstrainableServiceAdminProxy.readObject "+
-                                       "failure - server " +
-                                       "does not implement constrainable "+
-                                       "functionality ");
+            throw new InvalidObjectException("ConstrainableServiceAdminProxy.readObject "+
+                                             "failure - server does not implement constrainable functionality ");
         }
     }    
 }
