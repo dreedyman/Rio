@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class ServiceElementUtil {
+public final class ServiceElementUtil {
     private static Logger logger = Logger.getLogger("org.rioproject.jsb.ServiceElementUtil");
 
     private ServiceElementUtil() {}
