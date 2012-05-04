@@ -31,23 +31,24 @@ public class ListHandler implements OptionHandler {
     static final String CYBERNODE = "cybernode";
     static final String MONITOR = "monitor";
 
-    public String process(String input, BufferedReader br, PrintStream out) {
+    public String process(final String input, final BufferedReader br, final PrintStream out) {
         if(out==null)
-            throw new NullPointerException("Must have an output PrintStream");
-        StringTokenizer tok = new StringTokenizer(input);
+            throw new IllegalArgumentException("Must have an output PrintStream");
+        String modifiableInput = input;
+        StringTokenizer tok = new StringTokenizer(modifiableInput);
         /* first token is "list" */
         String cmd = tok.nextToken();
         int options = 0;
-        input = input.substring((input.length()==cmd.length()?
+        modifiableInput = modifiableInput.substring((modifiableInput.length()==cmd.length()?
                                  cmd.length():cmd.length()+1));
-        String lookfor = getWhatToLookFor(input);
+        String lookfor = getWhatToLookFor(modifiableInput);
         if(lookfor==null)
             return(getUsage());
         if(!lookfor.equals("all")) {
-            input = input.substring((input.length()==lookfor.length()?
+            modifiableInput = modifiableInput.substring((modifiableInput.length()==lookfor.length()?
                                      lookfor.length():lookfor.length()+1));
         }
-        tok = new StringTokenizer(input);
+        tok = new StringTokenizer(modifiableInput);
         while(tok.hasMoreTokens()) {
             String option = tok.nextToken();
             if(option.equals("codeserver"))
@@ -75,8 +76,7 @@ public class ListHandler implements OptionHandler {
         /* Setup entry filters */        
         Entry[] attrs = new Entry[0];
 
-        Integer listLength =
-            (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
+        Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
         ServiceItem[] items = null;
         boolean genericLister = true;
         if("all".equals(lookfor)) {

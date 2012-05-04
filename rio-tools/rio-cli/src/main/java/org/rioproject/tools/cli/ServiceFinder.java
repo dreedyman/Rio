@@ -80,8 +80,8 @@ public class ServiceFinder {
      * @throws ConfigurationException If problems are encountered accessing
      * the configuration
      */
-    public ServiceFinder(String[] groups, LookupLocator[] locators, Configuration config) throws IOException,
-                                                                                                 ConfigurationException {
+    public ServiceFinder(final String[] groups, final LookupLocator[] locators, final Configuration config)
+        throws IOException, ConfigurationException {
 
         proxyPreparer = (ProxyPreparer)config.getEntry(CLI.CONFIG_COMPONENT,
                                                        "proxyPreparer",
@@ -112,7 +112,7 @@ public class ServiceFinder {
         }
     }
 
-    ReggieStat[] getReggieStats(int type) {
+    ReggieStat[] getReggieStats(final int type) {
         return(recordingDiscoveryListener.getReggieStats(type));
     }
 
@@ -133,7 +133,7 @@ public class ServiceFinder {
      * discovered service instances. If no services have been discovered, a 
      * zero-lengh array is returned
      */
-    public ServiceItem[] find(String[] machines, Entry[] attrs) {
+    public ServiceItem[] find(final String[] machines, final Entry[] attrs) {
         ServiceItem[] results = new ServiceItem[0];
         try {
             ServiceItemFilter filter = null;
@@ -172,7 +172,7 @@ public class ServiceFinder {
      * discovered Cybernode service instances. If no Cybernode services have
      * been discovered, a zero-lengh array is returned
      */
-    public ServiceItem[] findCybernodes(String[] machines, Entry[] attrs) {
+    public ServiceItem[] findCybernodes(final String[] machines, final Entry[] attrs) {
         ServiceItem[] results = new ServiceItem[0];
         try {
             ServiceItemFilter filter = null;
@@ -209,7 +209,7 @@ public class ServiceFinder {
      * discovered Monitor service instances. If no Monitor services have been
      * discovered, a zero-lengh array is returned
      */
-    public ServiceItem[] findMonitors(String[] machines, Entry[] attrs) {
+    public ServiceItem[] findMonitors(final String[] machines, final Entry[] attrs) {
         return(findMonitors(machines, attrs, true));
     }
 
@@ -224,9 +224,9 @@ public class ServiceFinder {
      * discovered Monitor service instances. If no Monitor services have been
      * discovered, a zero-lengh array is returned
      */
-    public ServiceItem[] findMonitors(String[] machines,
-                                      Entry[] attrs,
-                                      boolean verbose) {
+    public ServiceItem[] findMonitors(final String[] machines,
+                                      final Entry[] attrs,
+                                      final boolean verbose) {
         ServiceItem[] results = new ServiceItem[0];
         try {
             ServiceItemFilter filter = null;
@@ -270,7 +270,7 @@ public class ServiceFinder {
      *
      * @return a Future
      */
-    Future<ServiceInfo> resolveServiceInfo(ServiceInfo sInfo) {
+    Future<ServiceInfo> resolveServiceInfo(final ServiceInfo sInfo) {
         InfoFetchStat i = new InfoFetchStat(sInfo.getServiceName());
         i.starTime = System.currentTimeMillis();
         synchronized(serviceInfoFetchMap) {
@@ -309,7 +309,7 @@ public class ServiceFinder {
          * @param hostNames The names of hosts to match
          * @param attrs Additional attributes to filter
          */
-        public ServiceFilter(String[] hostNames, Entry[] attrs) {
+        public ServiceFilter(final String[] hostNames, final Entry[] attrs) {
             if(hostNames==null)
                 this.hostNames = new String[0];
             else
@@ -330,7 +330,7 @@ public class ServiceFinder {
          * 
          * @see net.jini.lookup.ServiceItemFilter#check
          */
-        public boolean check(ServiceItem item) {
+        public boolean check(final ServiceItem item) {
             boolean matched = false;
             if(hostNames.length==0) {
                 matched = true;
@@ -367,7 +367,7 @@ public class ServiceFinder {
          * <code>hostNames</code> array, return <code>true</code>, otherwise,
          * return <code>false</code>
          */
-        public boolean hostNameMatches(Entry[] attrs) {
+        public boolean hostNameMatches(final Entry[] attrs) {
             Host host = getHost(attrs);
             if(host!=null)
                 return(checkHosts(host));
@@ -385,7 +385,7 @@ public class ServiceFinder {
          * @return If the hostname in the ComputeResourceInfo is in the known
          * hostnames, return true
          */
-        boolean checkHosts(ComputeResourceInfo aInfo) {
+        boolean checkHosts(final ComputeResourceInfo aInfo) {
             boolean found = false;
             for (String hostName : hostNames) {
                 if (hostName.equalsIgnoreCase(aInfo.hostAddress) || hostName.equalsIgnoreCase(aInfo.hostName)) {
@@ -402,7 +402,7 @@ public class ServiceFinder {
          *
          * @return If found return true
          */
-        boolean checkHosts(Host host) {
+        boolean checkHosts(final Host host) {
             boolean found = false;
             for (String hostName : hostNames) {
                 if (hostName.equalsIgnoreCase(host.hostName)) {
@@ -420,7 +420,7 @@ public class ServiceFinder {
          *
          * @return True if the attributes match
          */
-        boolean checkAttributes(Entry[] attributes) {
+        boolean checkAttributes(final Entry[] attributes) {
             if(attrs.length==0)
                 return(true);
             boolean matched = false;
@@ -445,7 +445,7 @@ public class ServiceFinder {
      */
     public class ServiceListener implements ServiceDiscoveryListener {
 
-        public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
+        public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
             ServiceItem item = sdEvent.getPostEventServiceItem();
             try {
                 if(item.service instanceof ProvisionMonitor)
@@ -474,7 +474,7 @@ public class ServiceFinder {
             }
         }
 
-        public void serviceRemoved(ServiceDiscoveryEvent sdEvent) {
+        public void serviceRemoved(final ServiceDiscoveryEvent sdEvent) {
             ServiceItem item = sdEvent.getPreEventServiceItem();
             ServiceInfo[] info = getServiceInfo();
             for (ServiceInfo anInfo : info) {
@@ -487,7 +487,7 @@ public class ServiceFinder {
             }
         }
 
-        public void serviceChanged(ServiceDiscoveryEvent sdEvent) {
+        public void serviceChanged(final ServiceDiscoveryEvent sdEvent) {
             ServiceItem item = sdEvent.getPostEventServiceItem();
             ServiceInfo[] info = getServiceInfo();
             for (ServiceInfo anInfo : info) {
@@ -525,11 +525,11 @@ public class ServiceFinder {
         private ServiceItem item;
         private String host = UNKNOWN;
 
-        ServiceInfo(ServiceItem item) {
+        ServiceInfo(final ServiceItem item) {
             setServiceItem(item);
         }
 
-        void setServiceItem(ServiceItem item) {
+        private void setServiceItem(final ServiceItem item) {
             this.item = item;
             name = getName(item.attributeSets);
             if(name == null)
@@ -560,7 +560,7 @@ public class ServiceFinder {
         /*
          * Set the groups
          */
-        void setGroups(String[] g) {
+        void setGroups(final String[] g) {
             groups = new String[g.length];
             System.arraycopy(g, 0, groups, 0, g.length);
         }
@@ -587,7 +587,7 @@ public class ServiceFinder {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if(this == obj)
                 return(true);
             if(!(obj instanceof ServiceInfo))
@@ -603,7 +603,7 @@ public class ServiceFinder {
     public class InfoFetcher implements Callable<ServiceInfo> {
         ServiceInfo sInfo;
 
-        InfoFetcher(ServiceInfo sInfo) {
+        InfoFetcher(final ServiceInfo sInfo) {
             this.sInfo = sInfo;
         }
 
@@ -698,7 +698,7 @@ public class ServiceFinder {
         long starTime;
         long stopTime;
 
-        InfoFetchStat(String name) {
+        InfoFetchStat(final String name) {
             this.name = name;
         }
     }
@@ -707,12 +707,12 @@ public class ServiceFinder {
      * Get the name of the service from either the Name attribute or the ServiceInfo
      * attribute
      *
-     * @param attrs Array of Entry attrbutes
+     * @param attrs Array of Entry attributes
      *
      * @return The name of the service from either the Name attribute or the
      * ServiceInfo attribute
      */
-    public static String getName(Entry[] attrs) {
+    public static String getName(final Entry[] attrs) {
         String name = null;
         for (Entry attr : attrs) {
             if (attr instanceof Name) {
@@ -738,7 +738,7 @@ public class ServiceFinder {
      *
      * @return A Host object
      */
-    public static Host getHost(Entry[] attrs) {
+    public static Host getHost(final Entry[] attrs) {
         Host host = null;
         for (Entry attr : attrs) {
             if (attr.getClass().getName().equals(
@@ -774,7 +774,7 @@ public class ServiceFinder {
      *
      * @return If found, the ComputeResourceInfo entry
      */
-    public static ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
+    public static ComputeResourceInfo getComputeResourceInfo(final Entry[] attrs) {
         ComputeResourceInfo computeResourceInfo = null;
         for (Entry attr : attrs) {
             if (attr.getClass().getName().equals(ComputeResourceInfo.class.getName())) {
@@ -813,7 +813,7 @@ public class ServiceFinder {
      *
      * @throws RemoteException If errors occur
      */
-    public Object getPreparedAdmin(Object proxy) throws RemoteException {
+    public Object getPreparedAdmin(final Object proxy) throws RemoteException {
         Object admin = ((Administrable)proxy).getAdmin();
         return(adminProxyPreparer.prepareProxy(admin));
         /*

@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import java.util.StringTokenizer;
  * @author Dennis Reedy
  */
 public class DirHandler implements OptionHandler {
-    public String process(String input, BufferedReader br, PrintStream out) {
+    public String process(final String input, final BufferedReader br, final PrintStream out) {
         if(out==null)
-                throw new NullPointerException("Must have an output PrintStream");
+            throw new IllegalArgumentException("Must have an output PrintStream");
+        BufferedReader reader = br;
         if(input.startsWith("ls") || input.startsWith("dir")) {
             File d = CLI.getInstance().currentDir;
             boolean details = false;
@@ -105,11 +106,11 @@ public class DirHandler implements OptionHandler {
                 if(!value.endsWith("*"))
                     changeDir(value, out);
             } else {
-                if(br==null)
-                    br = new BufferedReader(new InputStreamReader(System.in));
+                if(reader==null)
+                    reader = new BufferedReader(new InputStreamReader(System.in));
                 out.print("(enter a directory to change to) ");
                 try {
-                    String response = br.readLine();
+                    String response = reader.readLine();
                     if(response.length()==0) {
                         out.println("usage: cd directory");
                     } else {

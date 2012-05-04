@@ -41,13 +41,14 @@ public class MonitorControl {
      * Manages deployments
      */
     public static class DeployHandler implements OptionHandler {
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             if (out == null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             StringTokenizer tok = new StringTokenizer(input);
             String deployment = null;
             DeployOptions deployOptions = new DeployOptions();
             deployOptions.deployTimeout = (Long) CLI.getInstance().settings.get(CLI.DEPLOY_WAIT);
+            BufferedReader reader = br;
             boolean oarDeployment = false;
 
             if (tok.countTokens() > 1) {
@@ -144,16 +145,16 @@ public class MonitorControl {
                 if (oarDeployment) {
                     return (deploy(items[0], deployment, deployOptions, out));
                 } else {
-                    return (deploy(items[0], deploy, deployOptions, br, out));
+                    return (deploy(items[0], deploy, deployOptions, reader, out));
                 }
             }
-            if (br == null)
-                br = new BufferedReader(new InputStreamReader(System.in));
+            if (reader == null)
+                reader = new BufferedReader(new InputStreamReader(System.in));
             out.println(Formatter.asList(items) + "\n");
             printRequest(out);
             while (true) {
                 try {
-                    String response = br.readLine();
+                    String response = reader.readLine();
                     if (response == null) {
                         break;
                     }
@@ -167,7 +168,7 @@ public class MonitorControl {
                             if (oarDeployment) {
                                 deploy(items[0], deployment, deployOptions, out);
                             } else {
-                                deploy(items[num - 1], deploy, deployOptions, br, out);
+                                deploy(items[num - 1], deploy, deployOptions, reader, out);
                             }
                             break;
                         }
@@ -193,7 +194,11 @@ public class MonitorControl {
          *
          * @return A String for the completed command
          */
-        String deploy(ServiceItem item, OperationalString deploy, DeployOptions deployOptions, BufferedReader br, PrintStream out) {
+        String deploy(final ServiceItem item,
+                      final OperationalString deploy,
+                      final DeployOptions deployOptions,
+                      final BufferedReader br,
+                      final PrintStream out) {
             try {
                 DeployAdmin deployAdmin = (DeployAdmin)CLI.getInstance().getServiceFinder().getPreparedAdmin(item.service);
                 Boolean wait = (Boolean) CLI.getInstance().settings.get(CLI.DEPLOY_BLOCK);
@@ -213,10 +218,11 @@ public class MonitorControl {
                                     "returning");
                         }
                         out.print("The ["+deploy.getName()+"] is currently deployed, update the deployment? [y/n] ");
+                        BufferedReader reader = br;
                         try {
-                            if (br == null)
-                                br = new BufferedReader(new InputStreamReader(System.in));
-                            String response = br.readLine();
+                            if (reader == null)
+                                reader = new BufferedReader(new InputStreamReader(System.in));
+                            String response = reader.readLine();
                             if (response == null) {
                                 return ("");
                             }
@@ -268,7 +274,7 @@ public class MonitorControl {
          * @param out A printStream for output
          * @return A String for the completed command
          */
-        String deploy(ServiceItem item, String deployName, DeployOptions deployOptions, PrintStream out) {
+        String deploy(final ServiceItem item, final String deployName, final DeployOptions deployOptions, final PrintStream out) {
             boolean isArtifact = false;
             try {
                 new Artifact(deployName);
@@ -342,7 +348,7 @@ public class MonitorControl {
         /*
          * Print the request to the operator
          */
-        void printRequest(PrintStream out) {
+        void printRequest(final PrintStream out) {
             out.print("Choose a Provision Monitor for " +
                       "deployment or \"c\" to cancel : ");
         }
@@ -399,11 +405,11 @@ public class MonitorControl {
      */
     public static class UndeployHandler implements OptionHandler {
         @SuppressWarnings ("unchecked")
-        public String process(String input,
-                              BufferedReader br,
-                              PrintStream out) {
+        public String process(final String input,
+                              final BufferedReader br,
+                              final PrintStream out) {
             if (out == null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             StringTokenizer tok = new StringTokenizer(input);
             String deployment = null;
             boolean verbose = false;
@@ -418,9 +424,10 @@ public class MonitorControl {
             if (items.length == 0)
                 return ("No Provision Monitor instances discovered\n");
 
+            BufferedReader reader = br;
             if (deployment == null) {
-                if (br == null)
-                    br = new BufferedReader(new InputStreamReader(System.in));
+                if (reader == null)
+                    reader = new BufferedReader(new InputStreamReader(System.in));
                 Map<String, DeployAdmin> map = getDeployedOpStrings(items);
                 if (map.size() == 0) {
                     return "Nothing is currently deployed\n";
@@ -435,7 +442,7 @@ public class MonitorControl {
                 printRequest(out);
                 while (true) {
                     try {
-                        String response = br.readLine();
+                        String response = reader.readLine();
                         if (response == null) {
                             break;
                         }
@@ -536,7 +543,7 @@ public class MonitorControl {
         /*
          * Print the request to the operator
          */
-        void printRequest(PrintStream out) {
+        void printRequest(final PrintStream out) {
             out.print("Enter the OperationalString to undeploy " +
                       "or \"c\" to cancel : ");
         }
@@ -546,15 +553,13 @@ public class MonitorControl {
         }
     }
 
-    static Map<String, DeployAdmin> getDeployedOpStrings(ServiceItem[] items) {
+    static Map<String, DeployAdmin> getDeployedOpStrings(final ServiceItem[] items) {
         Map<String, DeployAdmin> map = new HashMap<String, DeployAdmin>();
         for (ServiceItem item : items) {
             try {
-                DeployAdmin deployAdmin =
-                    (DeployAdmin) CLI.getInstance().getServiceFinder().
+                DeployAdmin deployAdmin = (DeployAdmin) CLI.getInstance().getServiceFinder().
                         getPreparedAdmin(item.service);
-                OperationalStringManager[] opMgrs =
-                    deployAdmin.getOperationalStringManagers();
+                OperationalStringManager[] opMgrs = deployAdmin.getOperationalStringManagers();
                 for (OperationalStringManager opMgr : opMgrs) {
                     OperationalString opString = opMgr.getOperationalString();
                     if (opMgr.isManaging()) {
@@ -572,11 +577,11 @@ public class MonitorControl {
      * Manages redeployments
      */
     public static class RedeployHandler implements OptionHandler {
-        public String process(String input,
-                              BufferedReader br,
-                              PrintStream out) {
+        public String process(final String input,
+                              final BufferedReader br,
+                              final PrintStream out) {
             if (out == null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             StringTokenizer tok = new StringTokenizer(input);
             String deployment;
             boolean clean = false;
@@ -622,21 +627,14 @@ public class MonitorControl {
                         "Exception : " + e.getLocalizedMessage() + "\n");
             }
 
-            ServiceItem[] items = CLI.getInstance().finder.findMonitors(null,
-                                                                        null);
+            ServiceItem[] items = CLI.getInstance().finder.findMonitors(null, null);
             if (items.length == 0)
                 return ("No Provision Monitor instances discovered\n");
-            OperationalStringManager primary =
-                findOperationalStringManager(items, deploy);
+            OperationalStringManager primary = findOperationalStringManager(items, deploy);
             if (primary != null) {
                 try {
-                    ServiceProvisionNotification spn =
-                        CLI.getInstance().provisionNotifier;
-                    primary.redeploy(null,
-                                     null,
-                                     clean,
-                                     delay,
-                                     spn.getServiceProvisionListener());
+                    ServiceProvisionNotification spn = CLI.getInstance().provisionNotifier;
+                    primary.redeploy(null, null, clean, delay, spn.getServiceProvisionListener());
                     out.println("Command completed");
                 } catch (Exception e) {
                     return ("Problem redeploying " + deployment + ", " +
@@ -644,15 +642,13 @@ public class MonitorControl {
                             e.getLocalizedMessage());
                 }
             } else {
-                return ("Command failed, no active deployment for " +
-                        deployment);
+                return ("Command failed, no active deployment for " +deployment);
             }
             return ("");
         }
 
         public String getUsage() {
-            return ("usage: redeploy opstring " +
-                    "[clean] [delay=millis-to-delay]\n");
+            return ("usage: redeploy opstring [clean] [delay=millis-to-delay]\n");
         }
     }
 
@@ -664,7 +660,7 @@ public class MonitorControl {
      *
      * @throws Exception If there are any errors
      */
-    static OperationalString loadDeployment(String deployment) throws Exception {
+    static OperationalString loadDeployment(final String deployment) throws Exception {
         OperationalString deploy = null;
         File deployFile = getDeploymentFile(deployment);
         if (deployFile.exists()) {
@@ -683,15 +679,15 @@ public class MonitorControl {
      *
      * @throws Exception If there are any errors
      */
-    static File getDeploymentFile(String deployment) throws Exception {
+    static File getDeploymentFile(final String deployment) throws Exception {
         File deployFile;
         if (deployment.startsWith(File.separator)) {
             deployFile = new File(deployment);
         } else if (deployment.contains(":")) {
             deployFile = new File(deployment);
         } else if (deployment.startsWith("~/")) {
-            deployment = deployment.substring(2);
-            deployFile = new File(System.getProperty("user.home")+File.separator + deployment);
+            String toDeploy = deployment.substring(2);
+            deployFile = new File(System.getProperty("user.home")+File.separator + toDeploy);
         } else {
             deployFile = new File(CLI.getInstance().currentDir.getCanonicalPath()+File.separator+deployment);
         }
@@ -705,7 +701,8 @@ public class MonitorControl {
      * @param deploy The OperationalString
      * @return The primary OperationalStringManager
      */
-    static OperationalStringManager findOperationalStringManager(ServiceItem[] items, OperationalString deploy) {
+    static OperationalStringManager findOperationalStringManager(final ServiceItem[] items,
+                                                                 final OperationalString deploy) {
         OperationalStringManager primary = null;
         for (ServiceItem item : items) {
             try {

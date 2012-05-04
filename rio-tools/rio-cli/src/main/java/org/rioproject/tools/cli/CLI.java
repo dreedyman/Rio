@@ -63,7 +63,6 @@ public class CLI {
     final static String GROUPS="groups";
     final static String LOCATORS="locators";
     final static String SYS_PROPS="system-props";
-    final static String LIST="list-props";
     final static String DEPLOY_BLOCK="wait-on-deploy";
     final static String DEPLOY_WAIT="deploy-timeout";
     final static String LIST_LENGTH="list-length";
@@ -303,11 +302,11 @@ public class CLI {
      * @return If the command is valid, return true, otherwise return false for
      * an invalid command
      *
-     * @throws NullPointerException if the command parameter is null
+     * @throws IllegalArgumentException if the command parameter is null
      */
     public boolean validCommand(String command) {
         if(command == null)
-            throw new NullPointerException("command is null");
+            throw new IllegalArgumentException("command is null");
         boolean valid;
         /* Silly little easter eggs */
         valid = command.equalsIgnoreCase("ian") ||
@@ -332,11 +331,11 @@ public class CLI {
      * A new OptionHandler is created each time. If an OptionHandler cannot
      * be found for the provided option name, return null
      *
-     * @throws NullPointerException if the option parameter is null
+     * @throws IllegalArgumentException if the option parameter is null
      */
     public OptionHandler getOptionHandler(String option) {
         if(option == null)
-            throw new NullPointerException("option is null");
+            throw new IllegalArgumentException("option is null");
         OptionHandler handler = null;
         /* Silly little easter eggs */
         if(option.equalsIgnoreCase("ian")) {
@@ -486,9 +485,9 @@ public class CLI {
          */
         public OptionHandlerDesc(String name, String optionHandlerClass) {
             if(name==null)
-                throw new NullPointerException("name is null");
+                throw new IllegalArgumentException("name is null");
             if(optionHandlerClass ==null)
-                throw new NullPointerException("optionHandlerClass is null");
+                throw new IllegalArgumentException("optionHandlerClass is null");
             this.name = name;
             this.optionHandlerClass = optionHandlerClass;
         }
@@ -533,11 +532,12 @@ public class CLI {
      */
     public static class StopHandler implements OptionHandler {
 
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
+            BufferedReader reader = br;
             if(out==null)
-                throw new NullPointerException("Must have an output PrintStream");
-            if(br==null)
-                br = new BufferedReader(new InputStreamReader(System.in));
+                throw new IllegalArgumentException("Must have an output PrintStream");
+            if(reader==null)
+                reader = new BufferedReader(new InputStreamReader(System.in));
             StringTokenizer tok = new StringTokenizer(input);
             /* first token is "destroy" */
             tok.nextToken();
@@ -554,7 +554,7 @@ public class CLI {
             printRequest(out);
             while(true) {
                 try {
-                    String response = br.readLine();
+                    String response = reader.readLine();
                     if(response!=null) {
                         if(response.equals("c"))
                             break;
@@ -681,7 +681,7 @@ public class CLI {
     protected static class SettingsHandler implements OptionHandler {
         public String process(String input, BufferedReader br, PrintStream out) {
             if(out==null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             StringBuilder buffer = new StringBuilder();
             StringTokenizer tok = new StringTokenizer(input);
             if(tok.countTokens()>1) {
@@ -853,9 +853,10 @@ public class CLI {
      */
     public static class HttpHandler implements OptionHandler {
 
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
+            BufferedReader reader = br;
             if(out==null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             StringTokenizer tok = new StringTokenizer(input);
             if(tok.countTokens()<1)
                 return(getUsage());
@@ -896,10 +897,10 @@ public class CLI {
                           "["+instance.webster.getPort()+"], "+
                           "serving ["+instance.webster.getRoots()+"], stop this "+
                           "and continue [y/n] ? ");
-                if(br==null)
-                    br = new BufferedReader(new InputStreamReader(System.in));
+                if(reader==null)
+                    reader = new BufferedReader(new InputStreamReader(System.in));
                 try {
-                    String response = br.readLine();
+                    String response = reader.readLine();
                     if(response!=null) {
                         if(response.startsWith("y") ||
                            response.startsWith("Y")) {
@@ -971,7 +972,7 @@ public class CLI {
                                             boolean quiet,
                                             PrintStream out) {
             if(out==null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             try {
                 String deployDir = System.getProperty("RIO_HOME")+
                                    File.separator+
@@ -1020,7 +1021,7 @@ public class CLI {
     public static class StatsHandler implements OptionHandler {
         public String process(String input, BufferedReader br, PrintStream out) {
             if(out==null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
             long currentTime = System.currentTimeMillis();
             out.println();
             out.println("Rio version: "+instance.getOfficialVersion()+", " +
@@ -1119,7 +1120,7 @@ public class CLI {
      * Empty impl
      */
     protected static class EmptyHandler implements OptionHandler {
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             return input+" not implemented yet";
         }
         public String getUsage() {
@@ -1131,9 +1132,10 @@ public class CLI {
      * Handle jconsole command
      */
     protected static class JConsoleHandler implements OptionHandler {
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             if (out == null)
-                throw new NullPointerException("Must have an output PrintStream");
+                throw new IllegalArgumentException("Must have an output PrintStream");
+            BufferedReader reader = br;
             try {
                 StringTokenizer tok = new StringTokenizer(input);
                 String jmxServiceURL = null;
@@ -1151,14 +1153,13 @@ public class CLI {
                         jmxServiceURL =
                             JMXUtil.getJMXConnection(items[0].attributeSets);
                     } else {
-                        if (br==null)
-                            br = new BufferedReader(
-                                new InputStreamReader(System.in));
+                        if (reader==null)
+                            reader = new BufferedReader(new InputStreamReader(System.in));
                         out.println(Formatter.asList(items)+"\n");
                         printRequest(out);
                         while(true) {
                             try {
-                                String response = br.readLine();
+                                String response = reader.readLine();
                                 if(response!=null) {
                                     if(response.equals("c")) {
                                         canceled = true;
@@ -1388,7 +1389,7 @@ public class CLI {
      */
     public static String[] initCLI(final String[] args) throws Throwable {
         if(args==null)
-            throw new NullPointerException("args is null");
+            throw new IllegalArgumentException("args is null");
         final LinkedList<String> commandArgs = new LinkedList<String>();
         commandArgs.addAll(Arrays.asList(args));
         if(args.length>=1) {

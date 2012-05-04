@@ -51,7 +51,7 @@ public class Formatter {
 
     public static String asList(ServiceItem[] items, int options) {
         String[] array = formattedArray(items, options);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i=0; i<array.length; i++) {
             if(i>0)
                 buffer.append("\n");
@@ -65,7 +65,7 @@ public class Formatter {
     }
 
     public static String asChoices(ServiceItem[] items, int options) {
-        StringBuffer buffer = new StringBuffer(asList(items, options));
+        StringBuilder buffer = new StringBuilder(asList(items, options));
         buffer.append(String.format("%n%-5s all",
                                     (Object[])
                                     new String[] {"["+(items.length+1)+"]"}));
@@ -101,13 +101,11 @@ public class Formatter {
                 groups = new String[]{"<?>"};
 
             String[] optionValues= new String[] {"", "", ""};
-            String[] optionFormats = new String[] {"%s", "%s", "%s"};            
             if((options & EXPORT_CODEBASE) != 0) {
                 String exportCodebase = getExportCodebase(items[i].service);
                 /* The leading spaces are for 1.4 formatting, they'll be 
                  * stripped if we use the 1.5 format capabilities */
                 optionValues[1] = "   "+exportCodebase;
-                optionFormats[1] = "%-32s";
             }
 
             OutputInfo oi = new OutputInfo();
@@ -170,11 +168,12 @@ public class Formatter {
         String option2;
     }
 
-    private static String truncate(String s) {
+    private static String truncate(final String s) {
+        String toTruncate = s;
         if(s.length()> MAX_ITEM_LENGTH) {
-            s = s.substring(0, (MAX_ITEM_LENGTH-3))+"...";
+            toTruncate = s.substring(0, (MAX_ITEM_LENGTH-3))+"...";
         }
-        return(s);
+        return toTruncate;
     }
 
     /*
@@ -233,16 +232,13 @@ public class Formatter {
      * @param out The output PrintStream
      * @param lineCounter the current line counter
      */
-    private static void listCybernode(Cybernode cybernode,
-                                      BufferedReader br,
-                                      PrintStream out,
-                                      int lineCounter) {
-        Integer listLength =
-            (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
+    private static void listCybernode(final Cybernode cybernode,
+                                      final BufferedReader br,
+                                      final PrintStream out,
+                                      final int lineCounter) {
+        Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
         try {
-            ServiceRecord[] records =
-                cybernode.getServiceRecords(
-                    ServiceRecord.ACTIVE_SERVICE_RECORD);
+            ServiceRecord[] records = cybernode.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
             String status;
             try {
                 status = cybernode.isEnlisted()?"enlisted":"released";
@@ -254,12 +250,10 @@ public class Formatter {
                 out.println("\tNo contained services");
             } else {
                 /* Sort by opstring */
-                Map<String, List<ServiceRecord>> map =
-                    new HashMap<String, List<ServiceRecord>>();
+                Map<String, List<ServiceRecord>> map = new HashMap<String, List<ServiceRecord>>();
 
                 for (ServiceRecord record : records) {
-                    String opstring =
-                        record.getServiceElement().getOperationalStringName();
+                    String opstring = record.getServiceElement().getOperationalStringName();
                     List<ServiceRecord> services;
                     if(map.containsKey(opstring)) {
                         services = map.get(opstring);
@@ -269,25 +263,20 @@ public class Formatter {
                     services.add(record);
                     map.put(opstring, services);
                 }
-
+                int counter = lineCounter;
                 for(Map.Entry<String, List<ServiceRecord>> entry : map.entrySet()) {
                     String opstring = entry.getKey();
                     out.println(opstring);
-                    lineCounter++;
+                    counter++;
                     List<ServiceRecord> recordList = entry.getValue();
                     for (ServiceRecord record : recordList) {
-                        String groups = fromArray(record.getServiceElement().
-                            getServiceBeanConfig().
-                            getGroups());
-                        String elapsed =
-                            TimeUtil.format(record.computeElapsedTime());
-                        if(lineCounter % listLength==0)
+                        String groups = fromArray(record.getServiceElement().getServiceBeanConfig().getGroups());
+                        String elapsed =TimeUtil.format(record.computeElapsedTime());
+                        if(counter % listLength==0)
                             promptMore(br, out);
                         System.out.format("\t%-18.18s %-18.18s %20s%n",
-                                          record.getName(),
-                                          groups,
-                                          elapsed);
-                        lineCounter++;
+                                          record.getName(), groups, elapsed);
+                        counter++;
                     }
                 }
             }
@@ -304,12 +293,11 @@ public class Formatter {
      * @param br A BufferredReader, allows for the user to press enter for more
      * @param out The output PrintStream
      */
-    public static void provisionManagerLister(ServiceItem[] items,
-                                              int options,
-                                              BufferedReader br,
-                                              PrintStream out) {
-        Integer listLength =
-            (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
+    public static void provisionManagerLister(final ServiceItem[] items,
+                                              final int options,
+                                              final BufferedReader br,
+                                              final PrintStream out) {
+        Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
         String[] provisioners = Formatter.formattedArray(items, options);
         for(int i=0, lineCounter=1; i<provisioners.length; i++,lineCounter++) {
             if(lineCounter % listLength==0)
@@ -344,26 +332,23 @@ public class Formatter {
      * @param out The output PrintStream
      * @param lineCounter the current line counter
      */
-    private static void listMgr(OperationalStringManager opMgr,
-                                BufferedReader br,
-                                PrintStream out,
-                                int lineCounter) {
-        Integer listLength =
-            (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
+    private static void listMgr(final OperationalStringManager opMgr,
+                                final BufferedReader br,
+                                final PrintStream out,
+                                final int lineCounter) {
+        Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
         String pad = "    ";
         String role = "primary";
+        int counter = lineCounter;
         try {
             if(!opMgr.isManaging())
                 role = "backup";
-            out.println("\t"+
-                        opMgr.getOperationalString().getName()+
-                        "\trole="+role);
-            lineCounter++;
-            if(lineCounter % listLength==0)
+            out.println("\t"+opMgr.getOperationalString().getName()+"\trole="+role);
+            counter++;
+            if(counter % listLength==0)
                 promptMore(br, out);
 
-            ServiceElement[] sElems =
-                opMgr.getOperationalString().getServices();
+            ServiceElement[] sElems = opMgr.getOperationalString().getServices();
 
             for (ServiceElement sElem : sElems) {
                 String tabs = "\t";
@@ -375,7 +360,7 @@ public class Formatter {
                 } else {
                     pending = pending + opMgr.getPendingCount(sElem);
                 }
-                if(lineCounter % listLength==0)
+                if(counter % listLength==0)
                     promptMore(br, out);
 
                 out.println("\t" + pad +
@@ -383,19 +368,17 @@ public class Formatter {
                             "planned=" + sElem.getPlanned() + "\t" +
                             "actual=" + sElem.getActual() + "\t" +
                             pending);
-                lineCounter++;
+                counter++;
                 ServiceBeanInstance[] instances =
                     opMgr.getServiceBeanInstances(sElem);
                 for (ServiceBeanInstance instance : instances) {
-                    Long id =
-                        instance.getServiceBeanConfig().
-                            getInstanceID();
-                    if(lineCounter % listLength==0)
+                    Long id = instance.getServiceBeanConfig().getInstanceID();
+                    if(counter % listLength==0)
                         promptMore(br, out);
                     out.println("\t" + pad + pad +
                                 "id=" + id + "\t\t" +
                                 instance.getHostAddress());
-                    lineCounter++;
+                    counter++;
                 }
             }
         } catch(Exception e) {
@@ -411,11 +394,11 @@ public class Formatter {
      * 
      * @return A String codebase
      */
-    public static String getExportCodebase(Object service) {
+    public static String getExportCodebase(final Object service) {
         URLClassLoader cl = (URLClassLoader)service.getClass().getClassLoader();
         URL[] urls = cl.getURLs();
         String exportCodebase = urls[0].toExternalForm();
-        if(exportCodebase.indexOf(".jar") != -1) {
+        if(exportCodebase.contains(".jar")) {
             int index = exportCodebase.lastIndexOf('/');
             if(index != -1)
                 exportCodebase = exportCodebase.substring(0, index + 1);
@@ -440,7 +423,7 @@ public class Formatter {
      * @return A comma delimited String. If the array is empty, return a String 
      * with zero-length
      */
-    public static String fromArray(String[] array) {
+    public static String fromArray(final String[] array) {
         return(fromArray(array, ", "));
     }
 
@@ -453,12 +436,12 @@ public class Formatter {
      * @return A comma delimited String. If the array is empty, return a String 
      * with zero-length
      */
-    public static String fromArray(String[] array, String delim) {
+    public static String fromArray(final String[] array, final String delim) {
         if(array==null)
-            throw new NullPointerException("array is null");
+            throw new IllegalArgumentException("array is null");
         if(delim==null)
-            throw new NullPointerException("delim is null");
-        StringBuffer buffer = new StringBuffer();
+            throw new IllegalArgumentException("delim is null");
+        StringBuilder buffer = new StringBuilder();
         for(int i=0; i<array.length; i++) {
             if(i>0)
                 buffer.append(delim);
@@ -474,7 +457,7 @@ public class Formatter {
      *
      * @return A converted array of strings
      */
-    public static String[] toArray(String arg) {
+    public static String[] toArray(final String arg) {
         StringTokenizer tok = new StringTokenizer(arg, " ,");
         String[] array = new String[tok.countTokens()];
         int i=0;
@@ -485,7 +468,7 @@ public class Formatter {
         return(array);
     }
 
-    public static void promptMore(BufferedReader br, PrintStream out) {
+    public static void promptMore(final BufferedReader br, final PrintStream out) {
         out.print("-- more --");
         try {
             br.readLine();

@@ -37,7 +37,7 @@ public class EnlistmentHandler  {
     public static class EnlistHandler implements OptionHandler {
 
         @Override
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             return handleRequest(input, br, out);
         }
 
@@ -49,7 +49,7 @@ public class EnlistmentHandler  {
     public static class ReleaseHandler implements OptionHandler {
 
         @Override
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             return handleRequest(input, br, out);
         }
 
@@ -58,7 +58,7 @@ public class EnlistmentHandler  {
         }
     }
 
-    private static ServiceItem[] getCybernodes(String action) throws RemoteException {
+    private static ServiceItem[] getCybernodes(final String action) throws RemoteException {
         List<ServiceItem> list = new ArrayList<ServiceItem>();
         ServiceItem[] items = CLI.getInstance().getServiceFinder().findCybernodes(null, null);
         for(ServiceItem item : items) {
@@ -76,15 +76,16 @@ public class EnlistmentHandler  {
         return list.toArray(new ServiceItem[list.size()]);
     }
 
-    private static void printRequest(PrintStream out, String action) {
+    private static void printRequest(final PrintStream out, final String action) {
         out.print("Enter cybernode to " + action + " or \"c\" to cancel : ");
     }
 
-    private static String handleRequest(String input, BufferedReader br, PrintStream out) {
+    private static String handleRequest(final String input, final BufferedReader br, final PrintStream out) {
         if (out == null)
-            throw new NullPointerException("Must have an output PrintStream");
-        if (br == null)
-            br = new BufferedReader(new InputStreamReader(System.in));
+            throw new IllegalArgumentException("Must have an output PrintStream");
+        BufferedReader reader = br;
+        if (reader == null)
+            reader = new BufferedReader(new InputStreamReader(System.in));
 
         StringTokenizer tok = new StringTokenizer(input);
         /* first token is "enlist" or "release" */
@@ -107,7 +108,7 @@ public class EnlistmentHandler  {
         printRequest(out, action);
         while (true) {
             try {
-                String response = br.readLine();
+                String response = reader.readLine();
                 if (response != null) {
                     if (response.equals("c"))
                         break;
@@ -139,7 +140,7 @@ public class EnlistmentHandler  {
         return ("");
     }
 
-    private static void handleAction(Cybernode cybernode, String action) throws RemoteException {
+    private static void handleAction(final Cybernode cybernode, final String action) throws RemoteException {
         if(action.equals(ENLIST))
             cybernode.enlist();
         else
