@@ -49,7 +49,7 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
      *
      * @return An instance of the ServiceAdminProxy
      */
-    static ServiceAdminProxy getInstance(ServiceAdmin serviceAdmin, Uuid id) {
+    static ServiceAdminProxy getInstance(final ServiceAdmin serviceAdmin, final Uuid id) {
         if(serviceAdmin instanceof RemoteMethodControl) {
             return new ConstrainableServiceAdminProxy(serviceAdmin, id, null);
         } else {
@@ -60,11 +60,11 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
     /*
      * Private constructor
      */
-    protected ServiceAdminProxy(ServiceAdmin serviceAdmin, Uuid uuid) {
+    protected ServiceAdminProxy(final ServiceAdmin serviceAdmin, final Uuid uuid) {
         if(serviceAdmin == null) {
-            throw new NullPointerException("serviceAdmin cannot be null");
+            throw new IllegalArgumentException("serviceAdmin cannot be null");
         } else if(uuid == null) {
-            throw new NullPointerException("uuid cannot be null");
+            throw new IllegalArgumentException("uuid cannot be null");
         }
         this.serviceAdmin = serviceAdmin;
         this.uuid = uuid;
@@ -85,7 +85,7 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
     }
     
     /** @see org.rioproject.admin.ServiceBeanAdmin#setServiceElement */
-    public void setServiceElement(ServiceElement sElem) throws RemoteException {
+    public void setServiceElement(final ServiceElement sElem) throws RemoteException {
         serviceAdmin.setServiceElement(sElem);
     }
         
@@ -106,7 +106,7 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
     }
 
     /** @see org.rioproject.admin.ServiceBeanControl#stop */
-    public void stop(boolean force) throws ServiceBeanControlException, RemoteException {
+    public void stop(final boolean force) throws ServiceBeanControlException, RemoteException {
         serviceAdmin.stop(force);
     }
 
@@ -128,12 +128,12 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
     }
     
     /** @see net.jini.admin.JoinAdmin#addLookupAttributes */
-    public void addLookupAttributes(Entry[] attrSets) throws RemoteException {
+    public void addLookupAttributes(final Entry[] attrSets) throws RemoteException {
         serviceAdmin.addLookupAttributes(attrSets);
     }
     
     /** @see net.jini.admin.JoinAdmin#modifyLookupAttributes */
-    public void modifyLookupAttributes(Entry[] attrSetTemplates, 
+    public void modifyLookupAttributes(final Entry[] attrSetTemplates,
             Entry[] attrSets) throws RemoteException {
         serviceAdmin.modifyLookupAttributes(attrSetTemplates, attrSets);
     }
@@ -144,17 +144,17 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
     }
     
     /** @see net.jini.admin.JoinAdmin#addLookupGroups */
-    public void addLookupGroups(String[] groups) throws RemoteException {
+    public void addLookupGroups(final String[] groups) throws RemoteException {
         serviceAdmin.addLookupGroups(groups);
     }
     
     /** @see net.jini.admin.JoinAdmin#removeLookupGroups */
-    public void removeLookupGroups(String[] groups) throws RemoteException {
+    public void removeLookupGroups(final String[] groups) throws RemoteException {
         serviceAdmin.removeLookupGroups(groups);
     }
     
     /** @see net.jini.admin.JoinAdmin#setLookupGroups */
-    public void setLookupGroups(String[] groups) throws RemoteException {
+    public void setLookupGroups(final String[] groups) throws RemoteException {
         serviceAdmin.setLookupGroups(groups);
     }
     
@@ -164,17 +164,17 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
     }
     
     /** @see net.jini.admin.JoinAdmin#addLookupLocators */
-    public void addLookupLocators(LookupLocator[] locators)throws RemoteException {
+    public void addLookupLocators(final LookupLocator[] locators)throws RemoteException {
         serviceAdmin.addLookupLocators(locators);
     }
     
     /** @see net.jini.admin.JoinAdmin#removeLookupLocators */
-    public void removeLookupLocators(LookupLocator[] locators) throws RemoteException {
+    public void removeLookupLocators(final LookupLocator[] locators) throws RemoteException {
         serviceAdmin.removeLookupLocators(locators);
     }
     
     /** @see net.jini.admin.JoinAdmin#setLookupLocators */
-    public void setLookupLocators(LookupLocator[] locators) throws RemoteException {
+    public void setLookupLocators(final LookupLocator[] locators) throws RemoteException {
         serviceAdmin.setLookupLocators(locators);
     }
     
@@ -196,7 +196,7 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
      * Proxies for servers with the same <code>uuid</code> are considered
      * equal.
      */
-    public boolean equals(Object o) {        
+    public boolean equals(final Object o) {
         return (ReferentUuids.compare(this, o));
     }        
     
@@ -217,19 +217,15 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
      * @throws ClassNotFoundException if a class is not found during
      * deserialization
      */
-    private void readObject(ObjectInputStream s) throws IOException,
-            ClassNotFoundException {
+    private void readObject(final ObjectInputStream s) throws IOException, ClassNotFoundException {
         s.defaultReadObject();
         /* Verify server */
         if(serviceAdmin == null) {
-            throw new InvalidObjectException(
-                    "ServiceAdminProxy.readObject failure - "
-                            + "serviceAdmin field is null");
+            throw new InvalidObjectException("ServiceAdminProxy.readObject failure - serviceAdmin field is null");
         }
         /* Verify uuid */
         if(uuid == null) {
-            throw new InvalidObjectException("ServiceAdminProxy.uuid failure - "
-                    + "uuid field is null");
+            throw new InvalidObjectException("ServiceAdminProxy.uuid failure - uuid field is null");
         }
     }
 
@@ -245,7 +241,6 @@ public class ServiceAdminProxy implements ServiceAdmin, ReferentUuid, Serializab
      * class; declaring that something is wrong.
      */
     private void readObjectNoData() throws ObjectStreamException {
-        throw new InvalidObjectException("No data found when attempting to "
-                + "deserialize ServiceAdminProxy instance");
+        throw new InvalidObjectException("No data found when attempting to deserialize ServiceAdminProxy instance");
     }
 }
