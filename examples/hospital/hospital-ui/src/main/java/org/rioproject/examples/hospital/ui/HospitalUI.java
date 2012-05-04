@@ -54,7 +54,7 @@ public class HospitalUI extends JFrame {
     JLabel patientCount;
     ExecutorService bedAssignmentCheckingPool = Executors.newCachedThreadPool();
 
-    public HospitalUI(Object obj) {
+    public HospitalUI(final Object obj) {
         super("Hospital Client");
         getAccessibleContext().setAccessibleName("Hospital Client");
         try {
@@ -65,7 +65,7 @@ public class HospitalUI extends JFrame {
         }
     }
 
-    private void init(Hospital h) throws IOException {
+    private void init(final Hospital h) throws IOException {
         this.hospital = h;
         List<Bed> beds = hospital.getBeds();
         bedPanel = new BedPanel(beds);
@@ -167,7 +167,7 @@ public class HospitalUI extends JFrame {
     }
 
     @Override
-    public void setVisible(boolean show) {
+    public void setVisible(final boolean show) {
         if(show) {
             int width = 1120;
             int height = 710;
@@ -176,16 +176,16 @@ public class HospitalUI extends JFrame {
         super.setVisible(show);
     }
 
-    private void doAddPatient(Patient p) {
+    private void doAddPatient(final Patient p) {
         try {
-            p = hospital.admit(p);
-            if(!bedPanel.occupyBed(p)) {
+            Patient admittedPatient = hospital.admit(p);
+            if(!bedPanel.occupyBed(admittedPatient)) {
                 JOptionPane.showMessageDialog(this,
                                               "Could not get associated Bed",
                                               "Patient Assignment Error",
                                               JOptionPane.WARNING_MESSAGE);
             } else {
-                updateStatusText(p);
+                updateStatusText(admittedPatient);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -202,7 +202,7 @@ public class HospitalUI extends JFrame {
         }
     }
 
-    private void updateStatusText(Patient p) {
+    private void updateStatusText(final Patient p) {
         doctorTable.tableDataUpdated();
         patientTable.addPatient(p);
         bedCount.setText(getBedCountLabelText());
@@ -214,7 +214,7 @@ public class HospitalUI extends JFrame {
         patientStats.shutdown();
     }
 
-    private void wireUpProvisionMonitorEventListener(Object o) throws Exception {
+    private void wireUpProvisionMonitorEventListener(final Object o) throws Exception {
         Service s = (Service)o;
         ServiceAdmin sAdmin = (ServiceAdmin) s.getAdmin();
         ServiceItem items[] = null;
@@ -255,9 +255,9 @@ public class HospitalUI extends JFrame {
     }
 
     private class BedPendingAssignment implements Runnable {
-        Bed bed;
+        final Bed bed;
 
-        BedPendingAssignment(Bed bed) {
+        BedPendingAssignment(final Bed bed) {
             this.bed = bed;
         }
 
@@ -277,15 +277,15 @@ public class HospitalUI extends JFrame {
     }
 
     private class Listener implements PatientListener {
-        public void patientCreated(Patient p) {
+        public void patientCreated(final Patient p) {
             patientStats.setPatient(p);
             bedCount.setText(getBedCountLabelText());
             patientCount.setText(getPatientCountLabelText());
         }
-        public void patientSelected(Patient p) {
+        public void patientSelected(final Patient p) {
             patientStats.setPatient(p);
         }
-        public void patientRemoved(Patient p) {
+        public void patientRemoved(final Patient p) {
             bedPanel.emptyBed(p);
             patientStats.setPatient(null);
             doctorTable.updateDoctors();

@@ -42,13 +42,15 @@ public class HospitalImpl implements Hospital {
     private final List<Patient> waitingRoom = new ArrayList<Patient>();
     private final static Logger logger = Logger.getLogger(HospitalImpl.class.getName());
 
-    public void setServiceBeanContext(ServiceBeanContext context) {
+    @SuppressWarnings("unused") /* Injection point for Rio */
+    public void setServiceBeanContext(final ServiceBeanContext context) {
         this.context = context;
         availableBeds = new CounterWatch("availableBeds");
         context.getWatchRegistry().register(availableBeds);
     }
 
     @Started
+    @SuppressWarnings("unused") /* Injection point for Rio */
     public void started() {
         Association<Bed> association = context.getAssociationManagement().getAssociation(Bed.class,
                                                                                          "Beds",
@@ -82,19 +84,19 @@ public class HospitalImpl implements Hospital {
         });
     }
 
-    public Patient admit(Patient p) throws AdmissionException {
+    public Patient admit(final Patient p) throws AdmissionException {
         Bed bed = getEmptyBed();
         return doAdmitWithBed(p, bed);
     }
 
-    public Patient release(Patient p) throws AdmissionException {
+    public Patient release(final Patient p) throws AdmissionException {
         Patient released = null;
         try {
-            p = p.getBed().removePatient();
-            if(p!=null) {
+            Patient removedPatient = p.getBed().removePatient();
+            if(removedPatient!=null) {
                 availableBeds.increment();
-                p.getDoctor().removePatient(p);
-                released = p;
+                removedPatient.getDoctor().removePatient(removedPatient);
+                released = removedPatient;
             }
         } catch (IOException e) {
             throw new AdmissionException(String.format("Patient %s could not be released", p.getPatientInfo().getName()),
@@ -103,7 +105,7 @@ public class HospitalImpl implements Hospital {
         return released;
     }
 
-    private Patient doAdmitWithBed(Patient p, Bed bed) throws AdmissionException {
+    private Patient doAdmitWithBed(final Patient p, final Bed bed) throws AdmissionException {
         if(bed==null) {
             addToWaitingRoom(p);
             throw new AdmissionException(String.format("No available beds for %s", p.getPatientInfo().getName()));
@@ -165,11 +167,13 @@ public class HospitalImpl implements Hospital {
         return Collections.unmodifiableList(bs);
     }
 
-    public void setDoctors(Iterable<Doctor> drs) {
+    @SuppressWarnings("unused") /* Injection point for Rio */
+    public void setDoctors(final Iterable<Doctor> drs) {
         doctors = drs;
     }
 
-    public void setBeds(Iterable<Bed> bs) {
+    @SuppressWarnings("unused") /* Injection point for Rio */
+    public void setBeds(final Iterable<Bed> bs) {
         beds = bs;
     }
 
@@ -189,7 +193,7 @@ public class HospitalImpl implements Hospital {
         return getWaitingRoomList();
     }
 
-    private void addToWaitingRoom(Patient p) {
+    private void addToWaitingRoom(final Patient p) {
         synchronized(waitingRoom) {
             if(waitingRoom.add(p)) {
                 logger.info(String.format("Added %s to the waiting room, waiting room size is now: %d",
@@ -223,7 +227,7 @@ public class HospitalImpl implements Hospital {
         return Collections.unmodifiableList(l);
     }
 
-    private List<Doctor> get(Status status, boolean immutable) {
+    private List<Doctor> get(final Status status, final boolean immutable) {
         List<Doctor> list = new ArrayList<Doctor>();
         for(Doctor d : doctors) {
             if(status==null) {
@@ -243,7 +247,7 @@ public class HospitalImpl implements Hospital {
 
     class DoctorComparator implements Comparator<Doctor> {
 
-        public int compare(Doctor dr1, Doctor dr2) {
+        public int compare(final Doctor dr1, final Doctor dr2) {
             int dr1Patients = getPatientCount(dr1);
             int dr2Patients = getPatientCount(dr2);
             if(dr1Patients==dr2Patients)
@@ -251,7 +255,7 @@ public class HospitalImpl implements Hospital {
             return dr1Patients<dr2Patients?-1:1;
         }
         
-        int getPatientCount(Doctor d) {
+        int getPatientCount(final Doctor d) {
             int count = 0;
             try {
                 List<Patient> l = d.getPatients();
