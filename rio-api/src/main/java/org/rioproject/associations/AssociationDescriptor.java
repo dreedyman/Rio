@@ -120,7 +120,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @param type The AssociationType
      */
-    public AssociationDescriptor(AssociationType type) {
+    public AssociationDescriptor(final AssociationType type) {
         this(type, null, null, null);
     }
 
@@ -130,8 +130,7 @@ public class AssociationDescriptor implements Serializable {
      * @param type The AssociationType
      * @param name The name of the associated service, may be <code>null</code>
      */
-    public AssociationDescriptor(AssociationType type,
-                                 String name) {
+    public AssociationDescriptor(final AssociationType type, final String name) {
         this(type, name, null, null);
     }
 
@@ -145,10 +144,10 @@ public class AssociationDescriptor implements Serializable {
      * @param propertyName The property to set when the associated service is
      * discovered, changed or broken. May be <code>null</code>
     */
-    public AssociationDescriptor(AssociationType type,
-                                 String name,
-                                 String opStringName,
-                                 String propertyName) {
+    public AssociationDescriptor(final AssociationType type,
+                                 final String name,
+                                 final String opStringName,
+                                 final String propertyName) {
         if(type==null)
             throw new IllegalArgumentException("type is null");
         this.type = type;
@@ -171,7 +170,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @param propertyName The propertyName to use to inject the Association
      */
-    public void setPropertyName(String propertyName) {
+    public void setPropertyName(final String propertyName) {
         this.propertyName = propertyName;
     }
 
@@ -215,7 +214,7 @@ public class AssociationDescriptor implements Serializable {
      * @throws IllegalArgumentException If the AssociationDescriptor has it's
      * name property set to null and the matchOnName value is true
      */
-    public void setMatchOnName(boolean matchOnName) {
+    public void setMatchOnName(final boolean matchOnName) {
         if(matchOnName && name==null)
             throw new IllegalArgumentException("cannot match on a null name");
         this.matchOnName = matchOnName;
@@ -241,12 +240,11 @@ public class AssociationDescriptor implements Serializable {
      * @param interfaces Array of public interface names the associated
      * service implements
      */
-    public void setInterfaceNames(String... interfaces) {
+    public void setInterfaceNames(final String... interfaces) {
         if(interfaces == null)
             return;
         this.interfaceNames = new String[interfaces.length];
-        System.arraycopy(interfaces, 0, interfaceNames, 0,
-                         interfaceNames.length);
+        System.arraycopy(interfaces, 0, interfaceNames, 0, interfaceNames.length);
     }
 
     /**
@@ -279,7 +277,7 @@ public class AssociationDescriptor implements Serializable {
      * @param opStringName The associated service's
      * OperationalString name
      */
-    public void setOperationalStringName(String opStringName) {
+    public void setOperationalStringName(final String opStringName) {
         this.opStringName = opStringName;
     }
 
@@ -289,7 +287,7 @@ public class AssociationDescriptor implements Serializable {
      * @param fdhBundle The {@link org.rioproject.opstring.ClassBundle} used to
      * create the fault detection handler
      */
-    public void setFaultDetectionHandlerBundle(ClassBundle fdhBundle) {
+    public void setFaultDetectionHandlerBundle(final ClassBundle fdhBundle) {
         this.fdhBundle = fdhBundle;
     }
 
@@ -320,16 +318,17 @@ public class AssociationDescriptor implements Serializable {
      * value will be transformed to "public"
      * </ul>
      */
-    public void setGroups(String... groups) {
+    public void setGroups(final String... groups) {
         if(groups == ServiceBeanConfig.ALL_GROUPS)
-            groups = new String[]{"all"};
+            this.groups = new String[]{"all"};
         else {
-            for(int i=0; i<groups.length; i++) {
-                if(groups[i].equals(""))
-                    groups[i] = "public";
+            this.groups = new String[groups.length];
+            System.arraycopy(groups, 0, this.groups, 0, groups.length);
+            for(int i=0; i<this.groups.length; i++) {
+                if(this.groups[i].equals(""))
+                    this.groups[i] = "public";
             }
         }
-        this.groups = groups;
     }
 
     /**
@@ -339,7 +338,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @param lookupLocators Array of LookupLocator instances
      */
-    public void setLocators(LookupLocator... lookupLocators) {
+    public void setLocators(final LookupLocator... lookupLocators) {
         this.lookupLocators = lookupLocators;
    }
 
@@ -395,7 +394,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @param proxyClass The class name of the <code>AssociationProxy</code> to use
      */
-    public void setProxyClass(String proxyClass) {
+    public void setProxyClass(final String proxyClass) {
         this.proxyClass = proxyClass;
     }
 
@@ -416,7 +415,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @throws IllegalArgumentException if the proxyType is not {@link AssociationDescriptor#JDK_PROXY}
      */
-    public void setProxyType(String proxyType) {
+    public void setProxyType(final String proxyType) {
         if(proxyType==null) {
             this.proxyType = null;
         } else {
@@ -442,7 +441,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @param associationMatchFilter The classname of the <code>AssociationMatchFilter</code>
      */
-    public void setAssociationMatchFilter(String associationMatchFilter) {
+    public void setAssociationMatchFilter(final String associationMatchFilter) {
         this.associationMatchFilter = associationMatchFilter;
     }
 
@@ -462,7 +461,7 @@ public class AssociationDescriptor implements Serializable {
      * The ServiceSelectionStrategy must have a zero-arg constructor and
      * implement <code>ServiceSelectionStrategy</code>
      */
-    public void setServiceSelectionStrategy(String serviceStrategyClass) {
+    public void setServiceSelectionStrategy(final String serviceStrategyClass) {
         this.serviceStrategyClass = serviceStrategyClass;
     }
 
@@ -496,7 +495,7 @@ public class AssociationDescriptor implements Serializable {
      * service is discovered. If false the association will be injected
      * immediately.
      */
-    public void setLazyInject(boolean lazyInject) {
+    public void setLazyInject(final boolean lazyInject) {
         this.lazyInject = lazyInject;
     }
 
@@ -505,7 +504,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @param serviceDiscoveryTimeout The service discovery timeout.
      */
-    public void setServiceDiscoveryTimeout(long serviceDiscoveryTimeout) {
+    public void setServiceDiscoveryTimeout(final long serviceDiscoveryTimeout) {
         this.serviceDiscoveryTimeout = serviceDiscoveryTimeout;
     }
 
@@ -524,7 +523,7 @@ public class AssociationDescriptor implements Serializable {
      * @param serviceDiscoveryTimeUnits The unit of time for the service
      * discovery timeout
      */
-    public void setServiceDiscoveryTimeUnits(TimeUnit serviceDiscoveryTimeUnits) {
+    public void setServiceDiscoveryTimeUnits(final TimeUnit serviceDiscoveryTimeUnits) {
         if(serviceDiscoveryTimeUnits==null)
             throw new IllegalArgumentException("serviceDiscoveryTimeUnits is null");
         if(serviceDiscoveryTimeUnits.ordinal()<TimeUnit.MILLISECONDS.ordinal())
@@ -551,7 +550,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @return An AssociationDescriptor
      */
-    public static AssociationDescriptor create(String name, Class serviceClass, String... groups) {
+    public static AssociationDescriptor create(final String name, final Class serviceClass, final String... groups) {
         return create(name, null, serviceClass, AssociationType.USES, groups);
     }
 
@@ -566,7 +565,7 @@ public class AssociationDescriptor implements Serializable {
      *
      * @return An AssociationDescriptor
      */
-    public static AssociationDescriptor create(String name, String setter, Class serviceClass, String... groups) {
+    public static AssociationDescriptor create(final String name, final String setter, final Class serviceClass, final String... groups) {
         return create(name, setter, serviceClass, AssociationType.USES, groups);
     }
 
@@ -581,11 +580,11 @@ public class AssociationDescriptor implements Serializable {
      *
      * @return An AssociationDescriptor
      */
-    public static AssociationDescriptor create(String name,
-                                               String setter,
-                                               Class serviceClass,
-                                               AssociationType type,
-                                               String... groups) {
+    public static AssociationDescriptor create(final String name,
+                                               final String setter,
+                                               final Class serviceClass,
+                                               final AssociationType type,
+                                               final String... groups) {
         AssociationDescriptor ad = new AssociationDescriptor(type, name);
         ad.setInterfaceNames(serviceClass.getName());
         if(setter!=null)
@@ -617,7 +616,7 @@ public class AssociationDescriptor implements Serializable {
      * their name, opStringName and
      * {@link AssociationType} attributes are equal
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if(this == obj)
             return (true);
         if(!(obj instanceof AssociationDescriptor))
