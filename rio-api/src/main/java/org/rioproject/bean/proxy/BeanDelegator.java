@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class BeanDelegator implements InvocationHandler, Serializable {
+public final class BeanDelegator implements InvocationHandler, Serializable {
     private static final long serialVersionUID = 1L;
     private Set<PackagedMethod> methodSet = new HashSet<PackagedMethod>();
     private Object service;
@@ -62,7 +62,7 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      * @return An object suitable for use as a proxy. A new
      * proxy will be created each time
      *
-     * @throws NullPointerException if any of the parameters is <code>null</code>
+     * @throws IllegalArgumentException if any of the parameters is <code>null</code>
      * @throws IllegalArgumentException If the interfaces parameter has a
      * zero length
      * @throws ClassNotFoundException If the class cannot be loaded
@@ -81,18 +81,18 @@ public class BeanDelegator implements InvocationHandler, Serializable {
      *
      * @return An object suitable for use as a proxy. A new proxy will be created each time
      *
-     * @throws NullPointerException if any of the parameters is <code>null</code>
+     * @throws IllegalArgumentException if any of the parameters is <code>null</code>
      * @throws IllegalArgumentException If the interfaces parameter has a zero
      * length
      * @throws ClassNotFoundException If the class cannot be loaded
      */
     public static Object getInstance(Object service, Object bean, Class[] interfaces, ClassLoader loader) throws ClassNotFoundException {
         if(service == null)
-            throw new NullPointerException("service is null");
+            throw new IllegalArgumentException("service is null");
         if(bean == null)
-            throw new NullPointerException("bean is null");
+            throw new IllegalArgumentException("bean is null");
         if(interfaces == null)
-            throw new NullPointerException("interfaces is null");
+            throw new IllegalArgumentException("interfaces is null");
         if(interfaces.length == 0)
             throw new IllegalArgumentException("interfaces must contain values");
         return (Proxy.newProxyInstance(loader, interfaces, new BeanDelegator(service, bean, loader)));
