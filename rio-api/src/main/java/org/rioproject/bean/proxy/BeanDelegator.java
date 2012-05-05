@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 /**
  * An {@link java.lang.reflect.InvocationHandler} that delegates method
- * calls between the <code>BeanAdapter</code> and the bean
+ * calls between the {@code BeanAdapter} and the bean
  *
  * @author Dennis Reedy
  */
@@ -55,15 +55,14 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
      * Get an instance of the BeanDelegator using the ClassLoader of the
      * <tt>bean</tt> parameter to define the proxy class
      *
-     * @param service The service, must not be <code>null</code>
-     * @param bean The bean, must not be <code>null</code>
-     * @param interfaces The interfaces to expose, must not be <code>null</code>
+     * @param service The service, must not be {@code null}
+     * @param bean The bean, must not be {@code null}
+     * @param interfaces The interfaces to expose, must not be {@code null}
      *
      * @return An object suitable for use as a proxy. A new
      * proxy will be created each time
      *
-     * @throws IllegalArgumentException if any of the parameters is <code>null</code>
-     * @throws IllegalArgumentException If the interfaces parameter has a
+     * @throws IllegalArgumentException if any of the parameters is {@code null}
      * zero length
      * @throws ClassNotFoundException If the class cannot be loaded
      */
@@ -74,19 +73,19 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
     /**
      * Get an instance of the BeanDelegator
      *
-     * @param service The service, must not be <code>null</code>
-     * @param bean The bean, must not be <code>null</code>
-     * @param interfaces The interfaces to expose, must not be <code>null</code>
+     * @param service The service, must not be {@code null}
+     * @param bean The bean, must not be {@code null}
+     * @param interfaces The interfaces to expose, must not be {@code null}
      * @param loader The class loader to define the proxy class
      *
      * @return An object suitable for use as a proxy. A new proxy will be created each time
      *
-     * @throws IllegalArgumentException if any of the parameters is <code>null</code>
-     * @throws IllegalArgumentException If the interfaces parameter has a zero
+     * @throws IllegalArgumentException if any of the parameters is {@code null}
      * length
      * @throws ClassNotFoundException If the class cannot be loaded
      */
-    public static Object getInstance(Object service, Object bean, Class[] interfaces, ClassLoader loader) throws ClassNotFoundException {
+    public static Object getInstance(Object service, Object bean, Class[] interfaces, ClassLoader loader) 
+        throws ClassNotFoundException {
         if(service == null)
             throw new IllegalArgumentException("service is null");
         if(bean == null)
