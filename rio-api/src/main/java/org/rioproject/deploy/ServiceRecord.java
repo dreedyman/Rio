@@ -31,6 +31,7 @@ import java.util.*;
  * @author Dennis Reedy
  */
 public class ServiceRecord implements Comparable, Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * Indicates a service which is currently active,
@@ -116,7 +117,7 @@ public class ServiceRecord implements Comparable, Serializable {
             throw new IllegalArgumentException("sElem is null");
         if(hostName == null)
             throw new IllegalArgumentException("hostName is null");
-        setType(type);
+        doSetType(type);
         this.uuid = uuid;
         this.sElem = sElem;
         this.hostName = hostName;
@@ -157,8 +158,11 @@ public class ServiceRecord implements Comparable, Serializable {
      * <code>INACTIVE_SERVICE_RECORD</code>
      */
     public void setType(int type) {
-        if(type == 0
-           || type != (type & (ACTIVE_SERVICE_RECORD | INACTIVE_SERVICE_RECORD)))
+        doSetType(type);
+    }
+
+    private void doSetType(int type) {
+        if(type == 0 || type != (type & (ACTIVE_SERVICE_RECORD | INACTIVE_SERVICE_RECORD)))
             throw new IllegalArgumentException("bad type");
         this.type = type;
     }
