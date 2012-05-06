@@ -57,6 +57,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
 public class CLI {
     final static long startTime = System.currentTimeMillis();
     final static String DISCOVERY_TIMEOUT="disco-timeout";
@@ -235,7 +236,7 @@ public class CLI {
         return buffer.toString();
     }
 
-    private String getOutput(String s, Map<Integer, Integer> columnLengths) {
+    private String getOutput(final String s, final Map<Integer, Integer> columnLengths) {
         String output;
         StringBuilder buffer = new StringBuilder();
         Object[] array = toArray(s);
@@ -253,7 +254,7 @@ public class CLI {
         return toArray(s, null);
     }
 
-    private static String[] toArray(String s, String delim) {
+    private static String[] toArray(final String s, final String delim) {
         StringTokenizer tok;
         if(delim==null)
             tok = new StringTokenizer(s);
@@ -283,7 +284,7 @@ public class CLI {
      *
      * @param print If true say thank you
      */
-    void onExit(boolean print) {
+    void onExit(final boolean print) {
         finder.terminate();
         HttpHandler.stopWebster();
         if(print)
@@ -304,7 +305,7 @@ public class CLI {
      *
      * @throws IllegalArgumentException if the command parameter is null
      */
-    public boolean validCommand(String command) {
+    public boolean validCommand(final String command) {
         if(command == null)
             throw new IllegalArgumentException("command is null");
         boolean valid;
@@ -318,7 +319,7 @@ public class CLI {
         return cliOutput;
     }
 
-    private void setOutput(PrintStream cliOutput) {
+    private void setOutput(final PrintStream cliOutput) {
         this.cliOutput = cliOutput;
     }
 
@@ -333,7 +334,7 @@ public class CLI {
      *
      * @throws IllegalArgumentException if the option parameter is null
      */
-    public OptionHandler getOptionHandler(String option) {
+    public OptionHandler getOptionHandler(final String option) {
         if(option == null)
             throw new IllegalArgumentException("option is null");
         OptionHandler handler = null;
@@ -352,7 +353,7 @@ public class CLI {
         return handler;
     }
 
-    protected void loadOptionHandlers(Configuration config) throws ConfigurationException {
+    protected void loadOptionHandlers(final Configuration config) throws ConfigurationException {
         OptionHandlerDesc[] defaultHandlers =
             new OptionHandlerDesc[] {
                 new OptionHandlerDesc("list", ListHandler.class.getName()),
@@ -483,7 +484,7 @@ public class CLI {
          * will be instantiated using a zero-arg constructor. This parameter
          * must not be null
          */
-        public OptionHandlerDesc(String name, String optionHandlerClass) {
+        public OptionHandlerDesc(final String name, final String optionHandlerClass) {
             if(name==null)
                 throw new IllegalArgumentException("name is null");
             if(optionHandlerClass ==null)
@@ -582,11 +583,11 @@ public class CLI {
             return("");
         }
 
-        void printRequest(PrintStream out) {
+        void printRequest(final PrintStream out) {
             out.print("Enter service to destroy or \"c\" to cancel : ");
         }
 
-        public void destroyAll(ServiceItem[] items, PrintStream out) {
+        public void destroyAll(final ServiceItem[] items, final PrintStream out) {
             for (ServiceItem item : items)
                     destroyService(item, out);
             System.out.println("Checking registry ...");
@@ -598,13 +599,13 @@ public class CLI {
             destroyFromRegistry(out);
         }
 
-        public void destroyService(ServiceItem item, PrintStream out) {
+        public void destroyService(final ServiceItem item, final PrintStream out) {
             ServiceStopHandler.destroyService(item.service,
                                               ServiceFinder.getName(item.attributeSets),
                                               out);
         }
 
-        void destroyFromRegistry(PrintStream out) {
+        void destroyFromRegistry(final PrintStream out) {
             List<Registry> rmiRegistries = new ArrayList<Registry>();
             int port = RegistryUtil.DEFAULT_PORT;
             for(int i=0; i< RegistryUtil.getRegistryRetries(sysConfig); i++) {
@@ -648,7 +649,7 @@ public class CLI {
      * Handle the help command
      */
     protected static class HelpHandler implements OptionHandler {
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             StringTokenizer tok = new StringTokenizer(input);
             if(tok.countTokens()>1) {
                 tok.nextToken();
@@ -679,7 +680,7 @@ public class CLI {
      * Handle the Set command
      */
     protected static class SettingsHandler implements OptionHandler {
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             if(out==null)
                 throw new IllegalArgumentException("Must have an output PrintStream");
             StringBuilder buffer = new StringBuilder();
@@ -940,7 +941,7 @@ public class CLI {
          */        
         public boolean createWebster(final int port,
                                      final String roots,
-                                     PrintStream out) {
+                                     final PrintStream out) {
             return(createWebster(port, roots, false, out));
         }
 
@@ -970,7 +971,7 @@ public class CLI {
         public static boolean createWebster(final int port,
                                             final String roots,
                                             boolean quiet,
-                                            PrintStream out) {
+                                            final PrintStream out) {
             if(out==null)
                 throw new IllegalArgumentException("Must have an output PrintStream");
             try {
@@ -1019,7 +1020,7 @@ public class CLI {
      * Handle stats command
      */
     public static class StatsHandler implements OptionHandler {
-        public String process(String input, BufferedReader br, PrintStream out) {
+        public String process(final String input, final BufferedReader br, final PrintStream out) {
             if(out==null)
                 throw new IllegalArgumentException("Must have an output PrintStream");
             long currentTime = System.currentTimeMillis();
@@ -1219,14 +1220,14 @@ public class CLI {
             return "Launching jconsole, command successful\n";
         }
 
-        void execJConsole(String jmxServiceURL) throws IOException {
+        void execJConsole(final String jmxServiceURL) throws IOException {
             Runtime.getRuntime().exec("jconsole "+jmxServiceURL);
         }
 
         /*
          * Print the request to the operator
          */
-        void printRequest(PrintStream out) {
+        void printRequest(final PrintStream out) {
             out.print("Choose a service for jconsole support or \"c\" to cancel : ");
         }
 
@@ -1239,7 +1240,7 @@ public class CLI {
      * Handle easter eggs command
      */
     protected static class EasterEggHandler implements OptionHandler {
-       public String process(String input, BufferedReader br, PrintStream out) {
+       public String process(final String input, final BufferedReader br, final PrintStream out) {
            if(input.equalsIgnoreCase("ian"))
                return("World's best son!");
            if(input.equalsIgnoreCase("sara"))
@@ -1252,12 +1253,12 @@ public class CLI {
            return("Dennis Reedy");
        }
 
-       boolean exists(String fName) {
+       boolean exists(final String fName) {
            File file = new File(fName);
            return(file.exists());
        }
 
-       String locateFailed(String name) {
+       String locateFailed(final String name) {
            return("Cannot locate "+name+", command failed\n");
        }
    }
@@ -1265,8 +1266,7 @@ public class CLI {
     /*
      * Set system properties from configuration
      */
-    private Properties getConfiguredSystemProperties()
-        throws ConfigurationException {
+    private Properties getConfiguredSystemProperties() throws ConfigurationException {
         Configuration config = getConfiguration();
         Properties sysProps = new Properties();
         String[] systemProperties =
@@ -1288,9 +1288,7 @@ public class CLI {
     /*
      * Initialize runtime settings
      */
-    private void initSettings(String[] groups,
-                              LookupLocator[] locators,
-                              long discoTimeout)
+    private void initSettings(final String[] groups, final LookupLocator[] locators, final long discoTimeout)
         throws ConfigurationException {
         settings.put(GROUPS, groups);
         settings.put(LOCATORS, locators);
@@ -1437,9 +1435,8 @@ public class CLI {
         return result;
     }
 
-    static String[] doInit(String[] args, LinkedList<String> commandArgs)
-    throws Exception {
-        getInstance();        
+    static String[] doInit(final String[] arguments, final LinkedList<String> commandArgs) throws Exception {
+        getInstance();
         instance.setOutput((PrintStream)sysConfig.getEntry(CONFIG_COMPONENT, "output", PrintStream.class, System.out));
 
         String[] groups =
@@ -1458,6 +1455,8 @@ public class CLI {
          * groups, locators, discovery timeout, httpPort or ignore http */
         String homeDir = null;
 
+        String args[] = new String[arguments.length];
+        System.arraycopy(arguments, 0, args, 0, args.length);
         for (String arg : args) {
             if (arg.startsWith("homeDir")) {
                 String[] values = arg.split("=");
@@ -1545,7 +1544,7 @@ public class CLI {
 
     public static class LoginCallbackHandler implements CallbackHandler {
 
-        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+        public void handle(final Callback[] callbacks) throws IOException, UnsupportedCallbackException {
             for (Callback callback : callbacks) {
                 if (callback instanceof NameCallback) {
                     NameCallback nc = (NameCallback) callback;
@@ -1577,7 +1576,7 @@ public class CLI {
         }
     }
        
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         ensureSecurityManager();
         try {
             initCLI(args);
