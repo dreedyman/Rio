@@ -66,7 +66,7 @@ public class ClassBundle implements Serializable {
      *
      * @param className The className
      */
-    public ClassBundle(String className) {
+    public ClassBundle(final String className) {
         if(className == null)
             throw new IllegalArgumentException("className is null");
         this.className = className;
@@ -82,12 +82,12 @@ public class ClassBundle implements Serializable {
      * @param codebase The URL path used to load the class. The path will be
      * applied to all JARs in this ClassBundle
      */
-    public ClassBundle(String className, String[] jarNames, String codebase) {
+    public ClassBundle(final String className, final String[] jarNames, final String codebase) {
         if(className == null)
             throw new IllegalArgumentException("className cannot be null");
         this.className = className;
         if(jarNames!=null)
-            doAddJARs(jarNames);
+            addJARs(jarNames);
         this.codebase = codebase;
     }
 
@@ -97,7 +97,7 @@ public class ClassBundle implements Serializable {
      *
      * @param codebase The codebase to set
      */
-    public void setCodebase(String codebase) {
+    public void setCodebase(final String codebase) {
         this.codebase = codebase;
         if(this.codebase!=null) {
             if(!this.codebase.endsWith("/"))
@@ -131,7 +131,7 @@ public class ClassBundle implements Serializable {
      * 
      * @param className The className, suitable for use with Class.forName()
      */
-    public void setClassName(String className) {
+    public void setClassName(final String className) {
         this.className = className;
     }
 
@@ -158,7 +158,7 @@ public class ClassBundle implements Serializable {
      *
      * @param artifact The artifact associated with the className
      */
-    public void setArtifact(String artifact) {
+    public void setArtifact(final String artifact) {
         this.artifact = artifact;
     }
 
@@ -167,7 +167,7 @@ public class ClassBundle implements Serializable {
      * 
      * @param jars Jar names to set
      */
-    public void setJARs(String... jars) {
+    public void setJARs(final String... jars) {
         jarNames.clear();
         addJARs(jars);
     }
@@ -177,11 +177,7 @@ public class ClassBundle implements Serializable {
      *
      * @param jars Jar names to add. 
      */
-    public void addJARs(String... jars) {
-        doAddJARs(jars);
-    }
-
-    private void doAddJARs(String... jars) {
+    public void addJARs(final String... jars) {
         if(jars == null)
             throw new IllegalArgumentException("jars cannot be null");
         for(String jar : jars)
@@ -193,7 +189,7 @@ public class ClassBundle implements Serializable {
      * 
      * @param jar Name of the JAR to add
      */
-    public void addJAR(String jar) {
+    public void addJAR(final String jar) {
         if(jar == null)
             throw new IllegalArgumentException("jar cannot be null");
         if(!jarNames.contains(jar))
@@ -236,7 +232,7 @@ public class ClassBundle implements Serializable {
      * @param parameters Array of Object parameters for use when reflecting on
      * the method
      */
-    public void addMethod(String methodName, Object[] parameters) {
+    public void addMethod(final String methodName, final Object[] parameters) {
         if(methodName == null)
             throw new IllegalArgumentException("methodName is null");
         if(parameters == null) {
@@ -265,7 +261,7 @@ public class ClassBundle implements Serializable {
      * @return Array of Class objects to use when reflecting on the
      * public method
      */
-    public Class[] getMethodClasses(String methodName) {
+    public Class[] getMethodClasses(final String methodName) {
         Object[] args = getMethodObjects(methodName);
         Class[] classes = new Class[args.length];
         for(int i = 0; i < classes.length; i++) {
@@ -282,7 +278,7 @@ public class ClassBundle implements Serializable {
      * @return Array of Object objects to use when reflecting on the
      * public method
      */
-    public Object[] getMethodObjects(String methodName) {
+    public Object[] getMethodObjects(final String methodName) {
         if(methodName == null)
             throw new IllegalArgumentException("methodName is null");
         return (methodObjectTable.get(methodName));
@@ -297,7 +293,7 @@ public class ClassBundle implements Serializable {
      *
      * @throws Exception If there are errors running the known methods
      */
-    public void runKnownMethods(Object object) throws Exception {
+    public void runKnownMethods(final Object object) throws Exception {
         String[] methods = getMethodNames();
         for (String method : methods) {
             Method m = object.getClass()
@@ -323,7 +319,7 @@ public class ClassBundle implements Serializable {
     /**
      * Override equals
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if(this == obj)
             return(true);
         if(!(obj instanceof ClassBundle))
@@ -344,7 +340,7 @@ public class ClassBundle implements Serializable {
     /*
      * Get URLs for jarNames based on the codebase
      */
-    private URL[] urlsFromJARs(String[] jarNames) throws MalformedURLException {
+    private URL[] urlsFromJARs(final String[] jarNames) throws MalformedURLException {
         URL[] urls = new URL[jarNames.length];
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < urls.length; i++) {
@@ -420,7 +416,7 @@ public class ClassBundle implements Serializable {
      * non-null classname, that classname must be equal. If this is not the
      * case then an IllegalArgumentException is thrown.
      */
-    public static ClassBundle merge(ClassBundle... bundles) {
+    public static ClassBundle merge(final ClassBundle... bundles) {
         String className = null;
         for(ClassBundle bundle : bundles) {
             if(bundle.getClassName()!=null) {
