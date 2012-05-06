@@ -30,6 +30,7 @@ import java.util.Map;
  * @author Dennis Reedy
  */
 public class ServiceBeanConfig implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Initialization Properties for the ServiceBean */
     private final Map<String, Object> initParameters = new HashMap<String, Object>();
@@ -71,8 +72,6 @@ public class ServiceBeanConfig implements Serializable {
      * This property is stored as an configuration parameter. The value for
      * this property is an Integer */
     public static final String INITIAL_PLANNED_SERVICES = "initial.planned";
-    /** Key for accessing WatchDescriptors */
-    public static final String WATCHES = "watches";
     /** Token that will be replaced by the instanceID when either a parameter or
      * configuration element is retrieved */
     public static final String INSTANCE_ID_TOKEN="$"+INSTANCE_ID;
@@ -105,8 +104,7 @@ public class ServiceBeanConfig implements Serializable {
      * @throws IllegalArgumentException if the configMap or configArgs parameters
      * are null
      */
-    public ServiceBeanConfig(Map<String, Object> configMap,
-                             String[] configArgs) {
+    public ServiceBeanConfig(final Map<String, Object> configMap, final String[] configArgs) {
         if(configMap == null)
             throw new IllegalArgumentException("configMap is null");
         if(configArgs == null)
@@ -117,11 +115,7 @@ public class ServiceBeanConfig implements Serializable {
         if(configParms.get(INSTANCE_ID)==null)
             configParms.put(INSTANCE_ID, (long) 0);
         this.configArgs = new String[configArgs.length];
-        System.arraycopy(configArgs,
-                         0,
-                         this.configArgs,
-                         0,
-                         this.configArgs.length);
+        System.arraycopy(configArgs, 0, this.configArgs, 0, this.configArgs.length);
     }
 
     /**
@@ -129,7 +123,7 @@ public class ServiceBeanConfig implements Serializable {
      * 
      * @param name for the ServiceBean
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         if(name!=null)
             configParms.put(NAME, name);
     }
@@ -160,7 +154,7 @@ public class ServiceBeanConfig implements Serializable {
      * 
      * @param name of the OperationalString. 
      */
-    public void setOperationalStringName(String name) {
+    public void setOperationalStringName(final String name) {
         if(name!=null)
             configParms.put(OPSTRING, name);
     }
@@ -201,16 +195,19 @@ public class ServiceBeanConfig implements Serializable {
      * value will be transformed to "public"
      * </ul>
      */
-    public void setGroups(String[] groups) {
+    public void setGroups(final String... groups) {
+        String[] g;
         if(groups == ALL_GROUPS)
-            groups = new String[]{"all"};
+            g = new String[]{"all"};
         else {
-            for(int i=0; i<groups.length; i++) {
-                if(groups[i].equals(""))
-                    groups[i] = "public";
+            g = new String[groups.length];
+            System.arraycopy(groups, 0, g, 0, groups.length);
+            for(int i=0; i<g.length; i++) {
+                if(g[i].equals(""))
+                    g[i] = "public";
             }
         }
-        configParms.put(GROUPS, groups);
+        configParms.put(GROUPS, g);
     }
 
     /**
@@ -250,7 +247,7 @@ public class ServiceBeanConfig implements Serializable {
      * 
      * @param lookupLocators Array of LookupLocator instances
      */
-    public void setLocators(LookupLocator[] lookupLocators) {
+    public void setLocators(final LookupLocator[] lookupLocators) {
         configParms.put(LOCATORS, lookupLocators);
     }
 
@@ -272,24 +269,10 @@ public class ServiceBeanConfig implements Serializable {
      * 
      * @throws IllegalArgumentException if the name parameter is null
      */
-    public void addInitParameter(String name, Object value) {
+    public void addInitParameter(final String name, final Object value) {
         if(name == null)
             throw new IllegalArgumentException("name is null");
         initParameters.put(name, value);
-    }
-
-    /**
-     * Remove a name/value pair from the Collection of ServiceBean controlled
-     * initialization parameters.
-     * 
-     * @param name String key name
-     * 
-     * @throws IllegalArgumentException if the name parameter is null
-     */
-    public void removeInitParameter(String name) {
-        if(name == null)
-            throw new IllegalArgumentException("name is null");
-        initParameters.remove(name);
     }
     
     /**
@@ -318,7 +301,7 @@ public class ServiceBeanConfig implements Serializable {
      *
      * @param configParms Map of system initialization parameters.
      */
-    public void setConfigurationParameters(Map<String, Object> configParms) {
+    public void setConfigurationParameters(final Map<String, Object> configParms) {
         this.configParms.clear();
         this.configParms.putAll(configParms);
     }
@@ -357,23 +340,10 @@ public class ServiceBeanConfig implements Serializable {
         return (args);
     }
 
-    /**
-     * Set the ServiceBean configuration arguments
-     *
-     * @param args ServiceBean configuration arguments for use as a
-     * {@link net.jini.config.Configuration} object
-     */
-    public void setConfigArgs(String[] args) {
-        if(args != null) {
-            configArgs = new String[args.length];
-            System.arraycopy(args, 0, configArgs, 0, configArgs.length);
-        }
-    }
-
     /*
      * Regular Expression Search and Replace
      */
-    private String replace(String str, String pattern, String replace) {
+    private String replace(final String str, final String pattern, final String replace) {
         int s = 0;
         int e;
         StringBuilder result = new StringBuilder();
