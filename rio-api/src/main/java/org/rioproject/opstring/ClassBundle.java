@@ -30,6 +30,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class ClassBundle implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * The classname
@@ -86,7 +87,7 @@ public class ClassBundle implements Serializable {
             throw new IllegalArgumentException("className cannot be null");
         this.className = className;
         if(jarNames!=null)
-            addJARs(jarNames);
+            doAddJARs(jarNames);
         this.codebase = codebase;
     }
 
@@ -177,6 +178,10 @@ public class ClassBundle implements Serializable {
      * @param jars Jar names to add. 
      */
     public void addJARs(String... jars) {
+        doAddJARs(jars);
+    }
+
+    private void doAddJARs(String... jars) {
         if(jars == null)
             throw new IllegalArgumentException("jars cannot be null");
         for(String jar : jars)
