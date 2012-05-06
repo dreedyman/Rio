@@ -29,6 +29,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
 public class InternalWebster {
     private static Logger logger = Logger.getLogger("org.rioproject.tools.webster");
 
@@ -47,8 +48,7 @@ public class InternalWebster {
      *
      * @throws IOException If there are errors creating Webster
      */
-    public static int startWebster(String exportJar) 
-    throws IOException {
+    public static int startWebster(final String exportJar) throws IOException {
         String parentPath;
         InetAddress ip = InetAddress.getLocalHost();
         String localIPAddress = ip.getHostAddress();
@@ -64,16 +64,12 @@ public class InternalWebster {
             throw new RuntimeException("Cannot determine CodeSource");
         }
 
-        String sPort =
-            System.getProperty("org.rioproject.tools.webster.port", "0");
+        String sPort = System.getProperty("org.rioproject.tools.webster.port", "0");
         int port = 0;
         try {
             port = Integer.parseInt(sPort);
         } catch(NumberFormatException e) {
-            logger.log(Level.WARNING,
-                       "Bad port Number ["+sPort+"], "+
-                       "default to "+port,
-                       e);
+            logger.log(Level.WARNING, "Bad port Number ["+sPort+"], default to "+port, e);
         }
 
         port = new Webster(port, parentPath).getPort();
