@@ -30,6 +30,7 @@ import java.io.Serializable;
  * @author Dennis Reedy
  */
 public class ServiceBeanInstance implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * Unique identifier for the ServiceBean
@@ -78,13 +79,14 @@ public class ServiceBeanInstance implements Serializable {
                                String hostAddress,
                                Uuid instantiatorID) {
         if(identifier==null)
-            throw new NullPointerException("identifier is null");
+            throw new IllegalArgumentException("identifier is null");
         if(mi==null)
-            throw new NullPointerException("mi is null");
-
+            throw new IllegalArgumentException("mi is null");
+        if(sbConfig==null)
+            throw new IllegalArgumentException("sbConfig is null");
         sbID = identifier;
         this.mi = mi;
-        setServiceBeanConfig(sbConfig);
+        this.sbConfig = sbConfig;
         this.hostAddress = hostAddress;
         this.instantiatorID = instantiatorID;
     }
@@ -138,7 +140,7 @@ public class ServiceBeanInstance implements Serializable {
      */
     public void setServiceBeanConfig(ServiceBeanConfig sbConfig) {
         if(sbConfig==null)
-            throw new NullPointerException("sbConfig is null");
+            throw new IllegalArgumentException("sbConfig is null");
         this.sbConfig = sbConfig;
     }
 
