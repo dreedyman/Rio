@@ -27,6 +27,7 @@ import java.io.Serializable;
  * @author Dennis Reedy
  */
 public class SLA extends ThresholdValues implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * SLA identifier
@@ -69,17 +70,8 @@ public class SLA extends ThresholdValues implements Serializable {
      * lower and upper boundaries. There must be two values here, the first
      * the low boundary, the second te high
      */
-    public SLA(String identifier, double... range) {
+    public SLA(final String identifier, final double... range) {
         super(range);
-        setIdentifier(identifier);
-    }
-
-    /**
-     * Set the identifier of the ThresholdWatch this SLA is for
-     * 
-     * @param identifier The identifier of the ThresholdWatch this SLA is for.
-     */
-    public void setIdentifier(String identifier) {
         if(identifier == null)
             throw new IllegalArgumentException("identifier is null");
         this.identifier = identifier;
@@ -116,15 +108,11 @@ public class SLA extends ThresholdValues implements Serializable {
      *
      * @param watchDescs The WatchDescriptor instances to set.
      */
-    public void setWatchDescriptors(WatchDescriptor... watchDescs) {
+    public void setWatchDescriptors(final WatchDescriptor... watchDescs) {
         if(watchDescs==null)
             return;
         watchDescriptors = new WatchDescriptor[watchDescs.length];
-        System.arraycopy(watchDescs,
-                         0,
-                         watchDescriptors,
-                         0,
-                         watchDescs.length);
+        System.arraycopy(watchDescs, 0, watchDescriptors, 0, watchDescs.length);
     }
 
     /**
@@ -144,10 +132,9 @@ public class SLA extends ThresholdValues implements Serializable {
      * @param upperThresholdDampeningTime The dampening value for upper
      * thresholds being crossed
      */
-    public void setUpperThresholdDampeningTime(long upperThresholdDampeningTime) {
+    public void setUpperThresholdDampeningTime(final long upperThresholdDampeningTime) {
         if(upperThresholdDampeningTime<0)
-            throw new IllegalArgumentException("upperThresholdDampeningTime " +
-                                               "must be >= 0");
+            throw new IllegalArgumentException("upperThresholdDampeningTime must be >= 0");
         this.upperThresholdDampeningTime = upperThresholdDampeningTime;
     }
 
@@ -168,10 +155,9 @@ public class SLA extends ThresholdValues implements Serializable {
      * @param lowerThresholdDampeningTime The dampening value for lower
      * thresholds being crossed
      */
-    public void setLowerThresholdDampeningTime(long lowerThresholdDampeningTime) {
+    public void setLowerThresholdDampeningTime(final long lowerThresholdDampeningTime) {
         if(lowerThresholdDampeningTime<0)
-            throw new IllegalArgumentException("lowerThresholdDampeningTime " +
-                                               "must be >= 0");
+            throw new IllegalArgumentException("lowerThresholdDampeningTime must be >= 0");
         this.lowerThresholdDampeningTime = lowerThresholdDampeningTime;
     }
 
@@ -190,10 +176,9 @@ public class SLA extends ThresholdValues implements Serializable {
      *
      * @param maxServices The maximum services
      */
-    public void setMaxServices(int maxServices) {
+    public void setMaxServices(final int maxServices) {
         if(maxServices < UNDEFINED)
-            throw new IllegalArgumentException("maxServices " +
-                                               "must be > "+UNDEFINED);
+            throw new IllegalArgumentException("maxServices must be > "+UNDEFINED);
         this.maxServices = maxServices;
     }
 
@@ -212,7 +197,7 @@ public class SLA extends ThresholdValues implements Serializable {
      * @param slaPolicyHandler The fully qualified class name of the
      * SLAPolicyHandler to create
      */
-    public void setSlaPolicyHandler(String slaPolicyHandler) {
+    public void setSlaPolicyHandler(final String slaPolicyHandler) {
         this.slaPolicyHandler = slaPolicyHandler;
     }    
 
