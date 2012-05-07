@@ -23,31 +23,29 @@ import java.util.UUID;
  * Proxy for a WatchDataReplicator to be used in conjunction with a
  * {@link org.rioproject.watch.RemoteWatchDataReplicator}.
  */
-public class WatchDataReplicatorProxy extends QueuedReplicator {
+public final class WatchDataReplicatorProxy extends QueuedReplicator {
     private final RemoteWatchDataReplicator backend;
     private final UUID uuid;
 
-    public static WatchDataReplicatorProxy getInstance(RemoteWatchDataReplicator backend,
-                                                       UUID uuid) {
+    public static WatchDataReplicatorProxy getInstance(final RemoteWatchDataReplicator backend, final UUID uuid) {
         return new WatchDataReplicatorProxy(backend, uuid);
     }
 
-    private WatchDataReplicatorProxy(RemoteWatchDataReplicator backend,
-                                     UUID uuid) {
+    private WatchDataReplicatorProxy(final RemoteWatchDataReplicator backend, final UUID uuid) {
         this.backend = backend;
         this.uuid = uuid;
     }
 
-    protected void replicate(Calculable calculable) throws IOException {
+    protected void replicate(final Calculable calculable) throws IOException {
         backend.replicate(calculable);
     }
 
-    protected void bulkReplicate(Collection<Calculable> calculables) throws IOException {
+    protected void bulkReplicate(final Collection<Calculable> calculables) throws IOException {
         backend.bulkReplicate(calculables);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
