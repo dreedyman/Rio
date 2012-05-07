@@ -144,7 +144,7 @@ public class OAR implements Serializable {
      * @throws OARException If the manifest cannot be read
      * @throws IllegalArgumentException If the manifest is null
      */
-    void getManifestAttributes(Manifest manifest) throws OARException {
+    private void getManifestAttributes(Manifest manifest) throws OARException {
         if(manifest==null)
             throw new IllegalArgumentException("manifest cannot be null");
         Attributes attrs = manifest.getMainAttributes();
@@ -202,7 +202,7 @@ public class OAR implements Serializable {
         return opStringName;
     }
 
-    public void setRepositories(Collection<RemoteRepository> repositories) {
+    private void setRepositories(Collection<RemoteRepository> repositories) {
         if(repositories==null)
             throw new IllegalArgumentException("repositories must not be null");
         this.repositories.addAll(repositories);
