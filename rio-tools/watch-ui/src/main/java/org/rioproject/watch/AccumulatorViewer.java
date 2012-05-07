@@ -39,6 +39,7 @@ import java.util.Date;
 /**
  * Accumulator Viewer
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class AccumulatorViewer extends JPanel implements TreeSelectionListener {
     static final long serialVersionUID = 1L;
     private Watchable service;
