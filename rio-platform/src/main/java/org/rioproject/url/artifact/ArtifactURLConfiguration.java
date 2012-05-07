@@ -32,11 +32,12 @@ public class ArtifactURLConfiguration {
     private String artifact;
     private final List<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
 
-    public ArtifactURLConfiguration(String path) {
-        int index = path.indexOf(";");
+    public ArtifactURLConfiguration(final String path) {
+        String pathToUse = path;
+        int index = pathToUse.indexOf(";");
         if(index!=-1) {
-            String repositoryString = path.substring(index+1, path.length());
-            path = path.substring(0, index);
+            String repositoryString = pathToUse.substring(index+1, pathToUse.length());
+            pathToUse = pathToUse.substring(0, index);
             String[] parts = repositoryString.split(";");
             for(String s : parts) {
                 String url;
@@ -54,7 +55,7 @@ public class ArtifactURLConfiguration {
                 repositories.add(r);
             }
         }
-        artifact = path.replaceAll("/", ":");
+        artifact = pathToUse.replaceAll("/", ":");
     }
 
     public String getArtifact() {
