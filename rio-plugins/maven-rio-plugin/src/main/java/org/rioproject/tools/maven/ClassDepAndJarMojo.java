@@ -236,7 +236,7 @@ public class ClassDepAndJarMojo extends AbstractMojo {
 
     protected void createJar(CreateJar createJar,
                              Project antProject,
-                             String outputDir,
+                             final String outputDir,
                              File artifactResourcesDir,
                              boolean setMainArtifact) throws  MojoExecutionException {
         
@@ -264,9 +264,12 @@ public class ClassDepAndJarMojo extends AbstractMojo {
             }
         }
 
+        StringBuilder jarNameBuilder = new StringBuilder();
+        jarNameBuilder.append(outputDir);
         if(!outputDir.endsWith(File.separator))
-            outputDir = outputDir+File.separator;
-        String jarFileName =  outputDir+jarname;
+            jarNameBuilder.append(File.separator);
+        jarNameBuilder.append(jarname);
+        String jarFileName =  jarNameBuilder.toString();
 
         // build the compilation classpath as a Ant path
         Path classpath = new Path(new Project());
