@@ -39,7 +39,7 @@ public class Util {
      *
      * @throws IOException If the resource cannot be loaded
      */
-    public static URL getResource(String resource) throws IOException {
+    public static URL getResource(final String resource) throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         URL url = loader.getResource(RESOURCE_ROOT+resource);
         if(url==null)
@@ -56,7 +56,7 @@ public class Util {
      *
      * @throws IOException If the command does not execute
      */
-    public static void chmod(File file, String perms) throws IOException {
+    public static void chmod(final File file, final String perms) throws IOException {
         if(perms==null)
             throw new IllegalArgumentException("cannot apply permissions if " +
                                                "perms is null");
@@ -86,7 +86,7 @@ public class Util {
      *
      * @throws IOException If the command does not execute
      */
-    public static void chmodX(File file) throws IOException {
+    public static void chmodX(final File file) throws IOException {
         boolean execChmod = false;
         try {
             Method setExecutable = File.class.getMethod("setExecutable",
@@ -116,7 +116,7 @@ public class Util {
         }
     }
     
-    public static void close(Closeable c) {
+    public static void close(final Closeable c) {
         if (c != null) {
             try {
                 c.close();
@@ -132,10 +132,9 @@ public class Util {
      * @param contents The contents to write
      * @param file The file to write to
      * 
-     * @throws IOException If the file cannot be wrriten to
+     * @throws IOException If the file cannot be written to
      */
-    public static void writeFile(String contents, File file) throws
-                                                             IOException {
+    public static void writeFile(final String contents, final File file) throws IOException {
         BufferedWriter out = null;
         try {
             out = new BufferedWriter(new FileWriter(file));
@@ -155,7 +154,7 @@ public class Util {
      *
      * @throws IOException If the process cannot be created
      */
-    public static int runShellScript(File shellScript) throws IOException {
+    public static int runShellScript(final File shellScript) throws IOException {
         return runShellScript(shellScript, true);
     }
 
@@ -169,7 +168,7 @@ public class Util {
      *
      * @throws IOException If the process cannot be created
      */
-    public static int runShellScript(File shellScript, boolean sync) throws IOException {
+    public static int runShellScript(final File shellScript, final boolean sync) throws IOException {
         String sh = FileUtils.getFilePath(shellScript);
         ProcessBuilder pb = new ProcessBuilder(sh);
         Process process = pb.start();
@@ -178,6 +177,7 @@ public class Util {
             try {
                 process.waitFor();
             } catch (InterruptedException e) {
+                /* ignore */
             } finally {
                 close(process.getOutputStream());
                 close(process.getInputStream());
@@ -198,8 +198,7 @@ public class Util {
      *
      * @return A modified ExecDescriptor
      */
-    public static ExecDescriptor extendCommandLine(String root,
-                                                   ExecDescriptor exec) {
+    public static ExecDescriptor extendCommandLine(final String root, final ExecDescriptor exec) {
         String cmdLine = exec.getCommandLine();
         String workingDir = exec.getWorkingDirectory();
         if(workingDir!=null) {
@@ -209,10 +208,13 @@ public class Util {
                 cmdLine = workingDir + File.separator + cmdLine;
         }
         if(root!=null) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(root);
             if(!root.endsWith(File.separator))
-                root = root + File.separator;
+                builder.append(File.separator);
+            builder.append(cmdLine);
 
-            exec.setCommandLine(root + cmdLine);
+            exec.setCommandLine(builder.toString());
 
             if(workingDir!=null && !workingDir.startsWith("/")) {
                 exec.setWorkingDirectory(root + workingDir);
@@ -230,10 +232,10 @@ public class Util {
      *
      * @return A string with tokens replaced
      */
-    public static String replace(String str, String pattern, String replace) {
+    public static String replace(final String str, final String pattern, final String replace) {
         int s = 0;
         int e;
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         while((e = str.indexOf(pattern, s)) >= 0) {
             result.append(str.substring(s, e));
