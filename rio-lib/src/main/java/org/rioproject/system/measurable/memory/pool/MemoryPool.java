@@ -33,6 +33,7 @@ import java.util.logging.Logger;
  */
 /* Suppress PMD warnings for the invocation of createMeasurableMonitor() during object
  * construction. This is by design. */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class MemoryPool extends MeasurableCapability {
     /** Iteration value for calculating utilization of sampleSize >1 */
     private int count;
