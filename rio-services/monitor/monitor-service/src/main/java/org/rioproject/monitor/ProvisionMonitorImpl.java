@@ -154,7 +154,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      *
      * @throws Exception If bootstrapping fails
      */
-    protected void bootstrap(String[] configArgs) throws Exception {
+    private void bootstrap(String[] configArgs) throws Exception {
         context = ServiceBeanActivation.getServiceBeanContext(CONFIG_COMPONENT,
                                                               "ProvisionMonitor",
                                                               configArgs,
@@ -488,7 +488,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     /*
      * @see org.rioproject.monitor.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(URL opStringUrl, ServiceProvisionListener listener)
+    public Map<String, Throwable> deploy(final URL opStringUrl, ServiceProvisionListener listener)
     throws OperationalStringException {
         if(opStringUrl == null)
             throw new IllegalArgumentException("OperationalString URL cannot be null");
@@ -496,13 +496,14 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
 
         try {
             OAR oar = null;
+            URL opStringUrlToUse = opStringUrl;
             if(opStringUrl.toExternalForm().endsWith("oar")) {
                 oar = new OAR(opStringUrl);
                 StringBuilder sb = new StringBuilder();
                 sb.append("jar:").append(oar.getURL().toExternalForm()).append("!/").append(oar.getOpStringName());
-                opStringUrl = new URL(sb.toString());
+                opStringUrlToUse = new URL(sb.toString());
             }
-            OperationalString[] opStrings = opStringLoader.parseOperationalString(opStringUrl);
+            OperationalString[] opStrings = opStringLoader.parseOperationalString(opStringUrlToUse);
             if(opStrings != null) {
                 DeployRequest request = new DeployRequest(opStrings, (oar==null?null:oar.getRepositories()));
                 deploymentVerifier.verifyDeploymentRequest(request);
@@ -569,35 +570,37 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     /*
      * @see org.rioproject.monitor.DeployAdmin#undeploy
      */
-    public boolean undeploy(String name, boolean terminate) throws OperationalStringException  {
+    public boolean undeploy(final String name, boolean terminate) throws OperationalStringException  {
         if(name == null)
             throw new IllegalArgumentException("name cannot be null");
-        logger.info("Undeploying %s", name);
+        String opStringName = name;
+        logger.info("Undeploying %s", opStringName);
         URL artifactURL = getArtifactURL(name);
         if(artifactURL!=null) {
             try {
                 OAR oar = new OAR(artifactURL);
                 OperationalString[] opstring = oar.loadOperationalStrings();
-                name = opstring[0].getName();
+                opStringName = opstring[0].getName();
             } catch(Exception e) {
-                throw new OperationalStringException(String.format("Unable to undeploy, cannot parse/load [%s]", name));
+                throw new OperationalStringException(String.format("Unable to undeploy, cannot parse/load [%s]",
+                                                                   opStringName));
             }
         }
         boolean undeployed = false;
-        OpStringManager opMgr = opStringMangerController.getOpStringManager(name);
+        OpStringManager opMgr = opStringMangerController.getOpStringManager(opStringName);
         logger.finest("OpStringManager: %s", opMgr);
         if(opMgr == null || (!opMgr.isActive())) {
             try {
-                DeployAdmin dAdmin = opStringMangerController.getPrimaryDeployAdmin(name);
+                DeployAdmin dAdmin = opStringMangerController.getPrimaryDeployAdmin(opStringName);
                 if(dAdmin!=null) {
-                    OperationalStringManager mgr = dAdmin.getOperationalStringManager(name);
+                    OperationalStringManager mgr = dAdmin.getOperationalStringManager(opStringName);
                     if(mgr.isManaging()) {
                         dAdmin.undeploy(name);
                         undeployed = true;
                     }
                 }
             } catch(RemoteException e) {
-                logger.log(Level.FINE, e, "Communicating to peer during undeployment of [%s]", name);
+                logger.log(Level.FINE, e, "Communicating to peer during undeployment of [%s]", opStringName);
             } catch(OperationalStringException e) {
                 /* ignore */
             }
@@ -619,7 +622,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
 
         }
         if(!undeployed) {
-            throw new OperationalStringException(String.format("No deployment for [%s] found", name));
+            throw new OperationalStringException(String.format("No deployment for [%s] found", opStringName));
         }
 
         return (true);

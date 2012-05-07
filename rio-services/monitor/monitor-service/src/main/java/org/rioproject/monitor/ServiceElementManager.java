@@ -85,6 +85,8 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
+/* PMD will warn that setServiceElement() gets called. Its okay that we call it in the constructor */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class ServiceElementManager implements InstanceIDManager {
     /** The ServiceElement */
     private ServiceElement svcElement;
@@ -766,6 +768,7 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     boolean destroyService(final Object service, final Uuid serviceUuid, boolean clean) {
         boolean terminated = false;
+        boolean forceClean = false;
         try {
             logger.finest("Obtaining DestroyAdmin for [%s]", LoggingUtil.getLoggingName(svcElement));
             Administrable admin = (Administrable)service;
@@ -783,11 +786,11 @@ public class ServiceElementManager implements InstanceIDManager {
             if(!ThrowableUtil.isRetryable(e)) {
                 mgrLogger.fine("Force clean for [%s] ServiceBeanInstance [%s]",
                                LoggingUtil.getLoggingName(svcElement), serviceUuid.toString());
-                clean = true;
+                forceClean = true;
             }
         }
         ServiceBeanInstance instance;
-        if(clean) {
+        if(clean || forceClean) {
             instance = cleanService(service, serviceUuid, true);
         } else {
             instance = getServiceBeanInstance(serviceUuid);
@@ -1714,7 +1717,7 @@ public class ServiceElementManager implements InstanceIDManager {
         /**
          * @see org.rioproject.monitor.ProvisionListener#serviceProvisioned(ServiceBeanInstance, InstantiatorResource)
          */
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "PMD.AvoidReassigningParameters"})
         public void serviceProvisioned(ServiceBeanInstance instance, final InstantiatorResource resource) {
             try {
                 Object proxy = instance.getService();

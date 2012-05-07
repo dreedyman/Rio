@@ -175,7 +175,8 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         fixedServiceManager = new FixedServiceManager(getServiceProvisionContext(null, null));
     }
 
-    ServiceProvisionContext getServiceProvisionContext(ProvisionRequest request, ServiceResource serviceResource) {
+    private ServiceProvisionContext getServiceProvisionContext(final ProvisionRequest request,
+                                                               final ServiceResource serviceResource) {
         ServiceProvisionContext context = new ServiceProvisionContext(selector,
                                                                       provisioningPool,
                                                                       inProcess,
@@ -317,12 +318,13 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @throws RemoteException if the ServiceBeanInstantiator proxy fails
      * preparation
      */
-    void handleFeedback(ServiceBeanInstantiator resource,
+    void handleFeedback(final ServiceBeanInstantiator resource,
                         final ResourceCapability updatedCapabilities,
                         final List<DeployedService> deployedServices,
                         final int serviceLimit) throws UnknownLeaseException, RemoteException {
+        ServiceBeanInstantiator preparedResource = resource;
         if(resource instanceof RemoteMethodControl)
-            resource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
+            preparedResource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
         ServiceResource[] svcResources = selector.getServiceResources();
         if(svcResources.length == 0)
             throw new UnknownLeaseException("Empty Collection, no leases");
@@ -331,12 +333,12 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             logger.fine("Update from [%s:%s], current serviceCount %d, serviceLimit %d",
                         ir.getHostAddress(),
-                        resource.toString(),
+                        preparedResource.toString(),
                         deployedServices.size(),
                         serviceLimit);
 
             logger.finest("Checking for InstantiatorResource match");
-            if(ir.getInstantiator().equals(resource)) {
+            if(ir.getInstantiator().equals(preparedResource)) {
                 logger.finest("Matched InstantiatorResource");
                 if(!landlord.ensure(svcResource))
                     throw new UnknownLeaseException("No matching Lease found");

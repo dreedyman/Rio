@@ -52,6 +52,7 @@ import java.util.logging.Logger;
  * The DefaultOpStringManager provides the management for an OperationalString that
  * has been deployed to the ProvisionMonitor
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class DefaultOpStringManager implements OperationalStringManager, OpStringManager, ServerProxyTrust {
     /** Component name we use to find items in the configuration */
     static final String CONFIG_COMPONENT = "org.rioproject.monitor";
@@ -130,26 +131,26 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @param opStringMangerController The managing entity for OpStringManagers
      * @throws java.rmi.RemoteException if the DefaultOpStringManager cannot export itself
      */
-    public DefaultOpStringManager(OperationalString opString,
-                                  OpStringManager parent,
-                                  boolean mode,
-                                  Configuration config,
-                                  OpStringMangerController opStringMangerController) throws RemoteException {
+    public DefaultOpStringManager(final OperationalString opString,
+                                  final OpStringManager parent,
+                                  final boolean mode,
+                                  final Configuration config,
+                                  final OpStringMangerController opStringMangerController) throws RemoteException {
 
         this.config = config;
         this.opStringMangerController = opStringMangerController;
         Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory());
-        config = (config == null ? EmptyConfiguration.INSTANCE : config);
+        Configuration myConfig = (config == null ? EmptyConfiguration.INSTANCE : config);
         try {
             exporter = ExporterConfig.getExporter(config, CONFIG_COMPONENT, "opStringManagerExporter", defaultExporter);
             if (logger.isLoggable(Level.FINER))
                 logger.finer("Deployment [" + opString.getName() + "] using exporter " + exporter);
 
             /* Get the ProxyPreparer for ServiceProvisionListener instances */
-            serviceProvisionListenerPreparer = (ProxyPreparer) config.getEntry(CONFIG_COMPONENT,
-                                                                               "serviceProvisionListenerPreparer",
-                                                                               ProxyPreparer.class,
-                                                                               new BasicProxyPreparer());
+            serviceProvisionListenerPreparer = (ProxyPreparer) myConfig.getEntry(CONFIG_COMPONENT,
+                                                                                 "serviceProvisionListenerPreparer",
+                                                                                 ProxyPreparer.class,
+                                                                                 new BasicProxyPreparer());
         } catch (ConfigurationException e) {
             logger.log(Level.WARNING, "Getting opStringManager Exporter", e);
         }
@@ -830,8 +831,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             throw new IllegalArgumentException("instance is null");
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
+        ServiceProvisionListener preparedListener = null;
         if (listener != null)
-            listener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
+            preparedListener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
         try {
             ServiceElementManager svcElemMgr = getServiceElementManager(instance);
             if (svcElemMgr == null)
@@ -840,7 +842,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                      "[" + instance.toString() + "]", false);
             if (svcElemMgr.getServiceElement().getProvisionType() != ServiceElement.ProvisionType.DYNAMIC)
                 throw new OperationalStringException("Service must be dynamic to be relocated");
-            svcElemMgr.relocate(instance, listener, uuid);
+            svcElemMgr.relocate(instance, preparedListener, uuid);
         } catch (Throwable t) {
             logger.warning("Relocating ServiceBeanInstance [" +
                            t.getClass().getName() + ":" + t.getMessage() + "]");
@@ -894,13 +896,14 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             throw new IllegalArgumentException("ServiceElement is null");
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
+        ServiceProvisionListener preparedListener = null;
         if (listener != null)
-            listener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
+            preparedListener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
         try {
             ServiceElementManager svcElemMgr = getServiceElementManager(sElem);
             if (svcElemMgr == null)
                 throw new OperationalStringException("Unmanaged ServiceElement [" + sElem.getName() + "]", false);
-            ServiceElement changed = svcElemMgr.increment(permanent, listener);
+            ServiceElement changed = svcElemMgr.increment(permanent, preparedListener);
             if (changed == null)
                 return;
             stateChanged(false);
@@ -1133,9 +1136,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
 
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
+        ServiceProvisionListener preparedListener = null;
         if (listener != null) {
             try {
-                listener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
+                preparedListener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
             } catch (RemoteException e) {
                 Throwable cause = ThrowableUtil.getRootCause(e);
                 if (logger.isLoggable(Level.FINER))
@@ -1148,12 +1152,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
 
         if (delay > 0) {
-            doScheduleRedeploymentTask(delay, sElem, instance, clean, sticky, listener);
+            doScheduleRedeploymentTask(delay, sElem, instance, clean, sticky, preparedListener);
         } else {
             if (sElem == null && instance == null)
-                doRedeploy(clean, sticky, listener);
+                doRedeploy(clean, sticky, preparedListener);
             else
-                doRedeploy(sElem, instance, clean, sticky, listener);
+                doRedeploy(sElem, instance, clean, sticky, preparedListener);
         }
     }
 

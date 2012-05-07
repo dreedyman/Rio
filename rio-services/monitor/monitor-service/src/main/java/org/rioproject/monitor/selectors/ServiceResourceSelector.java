@@ -131,16 +131,16 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @throws org.rioproject.monitor.ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
-    protected ServiceResource selectServiceResource(ServiceElement sElem,
-                                                    ServiceResource[] svcResources) throws ProvisionException {
+    protected ServiceResource selectServiceResource(final ServiceElement sElem,
+                                                    final ServiceResource[] svcResources) throws ProvisionException {
 
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
-        svcResources = filterMachineBoundaries(sElem, svcResources);
-        if(svcResources.length>0)
-            svcResources = filterIsolated(sElem, svcResources);
+        ServiceResource[] filteredResources = filterMachineBoundaries(sElem, svcResources);
+        if(filteredResources.length>0)
+            filteredResources = filterIsolated(sElem, filteredResources);
 
-        for (ServiceResource svcResource : svcResources) {
+        for (ServiceResource svcResource : filteredResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             /*
              * Make sure the InstantiatorResource has not reached it's
