@@ -16,7 +16,6 @@
 package org.rioproject.monitor.handlers;
 
 import org.rioproject.config.Constants;
-import org.rioproject.opstring.OperationalString;
 import org.rioproject.monitor.DeploymentVerifier;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
