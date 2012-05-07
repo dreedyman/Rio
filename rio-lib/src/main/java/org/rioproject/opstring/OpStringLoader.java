@@ -102,7 +102,7 @@ public class OpStringLoader {
         this.exportJars = ParsedService.DEFAULT_EXPORT_JARS;
         String group = System.getProperty(Constants.GROUPS_PROPERTY_NAME);
         if (group != null)
-            setDefaultGroups(new String[]{group});
+            this.groups = new String[]{group};
     }
 
     /**
