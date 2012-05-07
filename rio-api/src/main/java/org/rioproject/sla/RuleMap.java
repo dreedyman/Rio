@@ -31,7 +31,7 @@ public class RuleMap implements Serializable {
             throw new IllegalArgumentException("rule cannot be null");
         if(services==null)
             throw new IllegalArgumentException("services cannot be null");
-        if(services.size()==0)
+        if(services.isEmpty())
             throw new IllegalArgumentException("services cannot be empty");
         this.ruleDefinition = rule;
         this.services.addAll(services);
