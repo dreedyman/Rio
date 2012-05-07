@@ -23,6 +23,7 @@ import java.io.Serializable;
  * A utility that allows glass pane type effects to be applied to portions of
  * your UI instead of the entire UI
  */
+@SuppressWarnings("PMD")
 public class GlassPaneContainer extends JPanel {
     private JComponent glassPane;
 
