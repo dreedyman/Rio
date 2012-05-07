@@ -53,6 +53,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class Webster implements Runnable {
     static final int DEFAULT_MAX_THREADS = 10;
     private ServerSocket ss;
@@ -247,8 +248,7 @@ public class Webster implements Runnable {
      * @param roots The root(s) to serve code from. This is a semi-colin
      * delimited list of directories
      */
-    private void initialize(String roots, String bindAddress)
-    throws BindException {
+    private void initialize(String roots, String bindAddress) throws BindException {
         String d = System.getProperty("org.rioproject.tools.webster.debug");
         if(d!=null)
             debug = true;
@@ -257,29 +257,23 @@ public class Webster implements Runnable {
             debug = true;
         setupRoots(roots);
         try {
-            if(bindAddress == null)
-                bindAddress = InetAddress.getLocalHost().getHostAddress();
-            try {
-                InetAddress addr = InetAddress.getByName(bindAddress);
-                if(socketFactory==null) {
-                    ss = new ServerSocket(port, 0, addr);
-                } else {
-                    ss = socketFactory.createServerSocket(port, 0, addr);
-                }
-                if(debug)
-                    System.out.println("Webster serving on : "+
-                            ss.getInetAddress().getHostAddress()+":"+port);
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Webster serving on : "+
-                            ss.getInetAddress().getHostAddress()+":"+port);
-            } catch(Exception e) {
-                logger.log(Level.SEVERE, "Bind Address Failure", e);
-                return;
+            InetAddress addr = InetAddress.getByName(bindAddress==null?
+                                                     InetAddress.getLocalHost().getHostAddress():bindAddress);
+            if(socketFactory==null) {
+                ss = new ServerSocket(port, 0, addr);
+            } else {
+                ss = socketFactory.createServerSocket(port, 0, addr);
             }
+            if(debug)
+                System.out.println("Webster serving on : "+
+                                   ss.getInetAddress().getHostAddress()+":"+port);
+            if(logger.isLoggable(Level.FINE))
+                logger.fine("Webster serving on : "+
+                            ss.getInetAddress().getHostAddress()+":"+port);
+
             port = ss.getLocalPort();
         } catch(IOException ioe) {
-            throw new BindException("Could not start listener. " +
-                                    "Port ["+port+"] already taken");
+            throw new BindException("Could not start Webster.");
         }
         if(debug)
             System.out.println("Webster listening on port : " + port);
@@ -305,7 +299,7 @@ public class Webster implements Runnable {
 
         /* Set system property */        
         System.setProperty(Constants.CODESERVER,
-                           "http://"+getAddress()+":"+getPort());
+                           "http://"+ss.getInetAddress().getHostAddress()+":"+port);
 
         Thread runner = new Thread(this, "Webster");
         //runner.setDaemon(true);
@@ -582,9 +576,9 @@ public class Webster implements Runnable {
         }
     } // end of loadMimes
 
-    protected File parseFileName(String filename) {
-        filename = filename.replace("%20", " ");
-        StringBuilder fn = new StringBuilder(filename);
+    protected File parseFileName(final String filename) {
+        String fileNameWithSpacesHandled = filename.replace("%20", " ");
+        StringBuilder fn = new StringBuilder(fileNameWithSpacesHandled);
         for (int i = 0; i < fn.length(); i++) {
             if (fn.charAt(i) == '/')
                 fn.replace(i, i + 1, File.separator);
