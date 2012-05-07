@@ -15,6 +15,7 @@
  */
 package org.rioproject.tools.ui;
 
+import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.entry.ComputeResourceInfo;
@@ -79,8 +80,7 @@ public class GraphListener extends ControlAdapter {
                 buff.append("\n");
             }
             if (node.getServiceItem() != null) {
-                ComputeResourceInfo aInfo =
-                    Util.getComputeResourceInfo(node.getServiceItem().attributeSets);
+                ComputeResourceInfo aInfo = getComputeResourceInfo(node.getServiceItem().attributeSets);
                 if(aInfo!=null) {
                     if (aInfo.osName != null && aInfo.osName.length() > 0) {
                         buff.append("Operating System=");
@@ -120,6 +120,15 @@ public class GraphListener extends ControlAdapter {
             }
         }
         d.setToolTipText(buff.toString());
+    }
+
+    private ComputeResourceInfo getComputeResourceInfo(final Entry[] attrs) {
+        for (Entry attr : attrs) {
+            if (attr instanceof ComputeResourceInfo) {
+                return (ComputeResourceInfo) attr;
+            }
+        }
+        return (null);
     }
 
     public void itemExited(VisualItem item, MouseEvent e) {

@@ -48,8 +48,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public abstract class AbstractFaultDetectionHandler
-    implements FaultDetectionHandler<ServiceID> {
+public abstract class AbstractFaultDetectionHandler implements FaultDetectionHandler<ServiceID> {
     public static final int DEFAULT_RETRY_COUNT = 3;
     public static final long DEFAULT_RETRY_TIMEOUT = 1000;
     public static final String RETRY_COUNT_KEY = "retryCount";
@@ -107,8 +106,7 @@ public abstract class AbstractFaultDetectionHandler
     /**
      * @see FaultDetectionHandler#monitor
      */
-    public void monitor(Object proxy, ServiceID id, LookupCache lCache)
-    throws Exception {
+    public void monitor(Object proxy, ServiceID id, LookupCache lCache) throws Exception {
         if(proxy == null)
             throw new IllegalArgumentException("proxy is null");
         if(id == null)

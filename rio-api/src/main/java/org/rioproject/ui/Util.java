@@ -35,7 +35,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -45,7 +44,8 @@ import java.util.Vector;
  */
 public class Util {
 
-    public static OperationalStringManager getOperationalStringManager(ProvisionManager monitor, String opStringName)
+    public static OperationalStringManager getOperationalStringManager(final ProvisionManager monitor,
+                                                                       final String opStringName)
         throws RemoteException, OperationalStringException {
 		if (monitor == null)
 			return null;
@@ -65,11 +65,11 @@ public class Util {
      *
      * @return The row color
      */
-    public static Color getRowColor(DefaultMutableTreeNode root,
-                                    DefaultMutableTreeNode node,
-                                    JTree tree,
-                                    Color defaultColor,
-                                    Color altRowColor) {
+    public static Color getRowColor(final DefaultMutableTreeNode root,
+                                    final DefaultMutableTreeNode node,
+                                    final JTree tree,
+                                    final Color defaultColor,
+                                    final Color altRowColor) {
         Color color;
         if(node.getAllowsChildren()) {
             int ndx = tree.getModel().getIndexOfChild(root, node);
@@ -83,7 +83,7 @@ public class Util {
         return color;
     }
 
-    private static Color colorForRow(int row, Color defaultColor, Color altRowColor) {
+    private static Color colorForRow(final int row, final Color defaultColor, final Color altRowColor) {
         return (row % 2 == 0) ? altRowColor : defaultColor;
     }
 
@@ -92,7 +92,7 @@ public class Util {
      *
      * @param comp The Container
      */
-    public static void dispose(Container comp) {
+    public static void dispose(final Container comp) {
         try {
             Method dispose = comp.getClass().getMethod("dispose");
             dispose.invoke(comp);
@@ -102,55 +102,13 @@ public class Util {
     }
 
     /**
-     * Save properties to a file stored in ${user.home}/.rio
-     *
-     * @param props The Properties object to save, must not be null
-     * @param filename The file name to save the Proeprties to
-     *
-     * @throws IOException If there are exceptions accessing the file system
-     */
-    public static void saveProperties(Properties props, String filename)
-        throws IOException {
-        if (props == null)
-            throw new IllegalArgumentException("props is null");
-
-        File rioHomeDir = new File(System.getProperty("user.home") +
-                                    File.separator +
-                                    ".rio");
-        if (!rioHomeDir.exists())
-            rioHomeDir.mkdir();
-        File propFile = new File(rioHomeDir, filename);
-        props.store(new FileOutputStream(propFile), null);
-    }
-
-    /**
-     * Load properties from ${user.home}/.rio
-     *
-     * @param filename The name of the properties file to load
-     *
-     * @return A Properties object loaed from the system
-     * @throws IOException If there are exceptions accessing the file system
-     */
-    public static Properties loadProperties(String filename) throws IOException {
-        File rioHomeDir = new File(System.getProperty("user.home") +
-                                    File.separator +
-                                    ".rio");
-        Properties props = new Properties();
-        if (!rioHomeDir.exists())
-            return (props);
-        File propFile = new File(rioHomeDir, filename);
-        props.load(new FileInputStream(propFile));
-        return (props);
-    }
-
-    /**
      * Get an image as a resource and create an ImageIcon
      *
      * @param location The image icon location
      *
      * @return The corresponding ImageIcon loaded from the location
      */
-    public static ImageIcon getImageIcon(String location) {
+    public static ImageIcon getImageIcon(final String location) {
         ImageIcon icon = null;
         URL url = Thread.currentThread().getContextClassLoader().getResource(location);
         if (url != null)
@@ -167,7 +125,7 @@ public class Util {
      *
      * @return The corresponding ImageIcon loaded from the location and scaled
      */
-    public static ImageIcon getScaledImageIcon(String location, int width, int height) {
+    public static ImageIcon getScaledImageIcon(final String location, final int width, final int height) {
         ImageIcon icon = null;
         URL url = Thread.currentThread().getContextClassLoader().getResource(location);
         if (url != null) {
@@ -180,55 +138,41 @@ public class Util {
     }
 
     /**
-     * Helper to get the ComputeResourceInfo Entry
-     *
-     * @param attrs - Array of Entry objects
-     * @return ComputeResourceInfo
-     */
-    public static ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
-        for (Entry attr : attrs) {
-            if (attr instanceof ComputeResourceInfo) {
-                return (ComputeResourceInfo) attr;
-            }
-        }
-        return (null);
-    }
-
-    /**
      * Show an exception in a Dialog
      *
      * @param e The exception
      * @param comp The parent component
      * @param title The title to use
      */
-    public static void showError(Throwable e, Component comp, String title) {
+    public static void showError(final Throwable e, final Component comp, final String title) {
         if (e.getCause() != null &&
             e.getCause() instanceof UnsupportedConstraintException) {
-            e = e.getCause();
+            Throwable cause = e.getCause();
             JOptionPane.showMessageDialog(null,
                                           "<html><font face=monospace><font size=3>" +
                                           "Exception: " +
-                                          e.getClass().getName() +
+                                          cause.getClass().getName() +
                                           "<br><br> " +
                                           "You do not have permission to perform " +
                                           "the action" +
                                           "</font></font></html>",
                                           "Action Denied",
-                                          JOptionPane.OK_OPTION);
+                                          JOptionPane.ERROR_MESSAGE);
             return;
         }
         StringBuilder buffer = new StringBuilder();
+        Throwable thrown = e;
         if (e.getCause() != null)
-            e = e.getCause();
-        StackTraceElement[] trace = e.getStackTrace();
+            thrown = e.getCause();
+        StackTraceElement[] trace = thrown.getStackTrace();
         for (StackTraceElement aTrace : trace)
             buffer.append("&nbsp;&nbsp;&nbsp;&nbsp;at ").append(aTrace).append("<br>");
 
         showError("<html><font face=monospace><font size=3>" +
                   "Exception : " +
-                  e.getClass().getName() +
+                  thrown.getClass().getName() +
                   " : " +
-                  e.getLocalizedMessage() +
+                  thrown.getLocalizedMessage() +
                   "<br>" +
                   buffer.toString() +
                   "</font></font></html>",
@@ -243,7 +187,7 @@ public class Util {
      * @param comp The parent component
      * @param title The title to use
      */
-    public static void showError(String text, Component comp, String title) {
+    public static void showError(final String text, final Component comp, final String title) {
         JDialog dialog;
         if (comp instanceof Dialog)
             dialog = new JDialog((Dialog) comp);
@@ -286,70 +230,12 @@ public class Util {
     public static class DisposeActionListener implements ActionListener {
         JDialog dialog;
 
-        public DisposeActionListener(JDialog dialog) {
+        public DisposeActionListener(final JDialog dialog) {
             this.dialog = dialog;
         }
 
-        public void actionPerformed(ActionEvent ae) {
+        public void actionPerformed(final ActionEvent ae) {
             dialog.dispose();
-        }
-    }
-
-    public static class MultiLineToolTip extends JToolTip {
-        public MultiLineToolTip() {
-            setUI(new MultiLineToolTipUI());
-        }
-    }
-
-    public static class MultiLineToolTipUI extends BasicToolTipUI {
-        private String[] strs;
-
-        public void paint(Graphics g, JComponent c) {
-            FontMetrics metrics = g.getFontMetrics();
-            Dimension size = c.getSize();
-            g.setColor(c.getBackground());
-            g.fillRect(0, 0, size.width, size.height);
-            g.setColor(c.getForeground());
-            if (strs != null) {
-                for (int i = 0; i < strs.length; i++) {
-                    g.drawString(strs[i], 3, (metrics.getHeight()) * (i + 1));
-                }
-            }
-        }
-
-        public Dimension getPreferredSize(JComponent c) {
-            FontMetrics metrics = c.getFontMetrics(c.getFont());
-            String tipText = ((JToolTip) c).getTipText();
-            if (tipText == null) {
-                tipText = "";
-            }
-            BufferedReader br = new BufferedReader(new StringReader(tipText));
-            String line;
-            int maxWidth = 0;
-            Vector<String> v = new Vector<String>();
-            try {
-                while ((line = br.readLine()) != null) {
-                    int width = SwingUtilities.computeStringWidth(metrics,
-                                                                  line);
-                    maxWidth = (maxWidth < width) ? width : maxWidth;
-                    v.addElement(line);
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            int lines = v.size();
-            if (lines < 1) {
-                strs = null;
-                lines = 1;
-            } else {
-                strs = new String[lines];
-                int i = 0;
-                for (Enumeration e = v.elements(); e.hasMoreElements(); i++) {
-                    strs[i] = (String) e.nextElement();
-                }
-            }
-            int height = metrics.getHeight() * lines;
-            return new Dimension(maxWidth + 6, height + 4);
         }
     }
 }

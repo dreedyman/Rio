@@ -732,10 +732,52 @@ public class Main extends JFrame {
         }
 
         try {
-            Util.saveProperties(props, Constants.UI_PROPS);
+            saveProperties(props, Constants.UI_PROPS);
         } catch (IOException e) {
             e.printStackTrace();  
         }
+    }
+
+    /**
+     * Load properties from ${user.home}/.rio
+     *
+     * @param filename The name of the properties file to load
+     *
+     * @return A Properties object loaded from the system
+     * @throws IOException If there are exceptions accessing the file system
+     */
+    private static Properties loadProperties(String filename) throws IOException {
+        File rioHomeDir = new File(System.getProperty("user.home") +
+                                   File.separator +
+                                   ".rio");
+        Properties props = new Properties();
+        if (!rioHomeDir.exists())
+            return (props);
+        File propFile = new File(rioHomeDir, filename);
+        props.load(new FileInputStream(propFile));
+        return (props);
+    }
+
+
+    /**
+     * Save properties to a file stored in ${user.home}/.rio
+     *
+     * @param props The Properties object to save, must not be null
+     * @param filename The file name to save the Properties to
+     *
+     * @throws IOException If there are exceptions accessing the file system
+     */
+    private void saveProperties(final Properties props, final String filename) throws IOException {
+        if (props == null)
+            throw new IllegalArgumentException("props is null");
+
+        File rioHomeDir = new File(System.getProperty("user.home") +
+                                   File.separator +
+                                   ".rio");
+        if (!rioHomeDir.exists())
+            rioHomeDir.mkdir();
+        File propFile = new File(rioHomeDir, filename);
+        props.store(new FileOutputStream(propFile), null);
     }
 
     /**
@@ -1342,7 +1384,7 @@ public class Main extends JFrame {
             final Configuration config = ConfigurationProvider.getInstance(args);
             final Properties props  = new Properties();
             try {
-                props.putAll(Util.loadProperties(Constants.UI_PROPS));
+                props.putAll(loadProperties(Constants.UI_PROPS));
             } catch(IOException e) {
                 //
             }
