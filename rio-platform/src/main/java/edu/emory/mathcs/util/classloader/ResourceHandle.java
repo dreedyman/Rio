@@ -24,6 +24,7 @@ import java.util.jar.*;
  * @author Dawid Kurzyniec
  * @version 1.0
  */
+@SuppressWarnings("PMD")
 public abstract class ResourceHandle {
 
     /**

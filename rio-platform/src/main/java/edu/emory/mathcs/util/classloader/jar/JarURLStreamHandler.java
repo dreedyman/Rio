@@ -26,6 +26,7 @@ import edu.emory.mathcs.util.classloader.*;
  * @author Dawid Kurzyniec
  * @version 1.0
  */
+@SuppressWarnings("PMD")
 public class JarURLStreamHandler extends URLStreamHandler {
 
     // "jar:" + url + "!" + /<path>/ + <file>? + "#"<anchor>?

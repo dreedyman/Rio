@@ -56,7 +56,7 @@ import java.util.jar.Manifest;
  * @author Dawid Kurzyniec
  * @version 1.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "PMD"})
 public class ResourceLoader {
 
     private static final String JAR_INDEX_ENTRY_NAME = "META-INF/INDEX.LIST";
