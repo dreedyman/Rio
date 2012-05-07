@@ -313,6 +313,7 @@ public class DownloadManager {
      *
      * @throws IOException if there are errors extracting the archive
      */
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     public static ExtractResults extract(File directory, File archive) throws IOException {
 
         String extractedToPath = null;
@@ -374,6 +375,7 @@ public class DownloadManager {
         return (new ExtractResults(extractedToPath, extractSize, extractList));
     }
 
+    @SuppressWarnings("PMD.AvoidReassigningParameters")
     private static String getExtractedToPath(File path, File rootDir) {
         File parent;
         do {
