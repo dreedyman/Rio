@@ -17,7 +17,6 @@ package org.rioproject.tools.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import javax.sound.midi.SysexMessage;
 import java.io.File;
 
 /**
