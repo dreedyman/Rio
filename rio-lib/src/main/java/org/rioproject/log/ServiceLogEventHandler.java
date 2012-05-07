@@ -52,6 +52,7 @@ import java.util.logging.Logger;
  * name (as obtained from {@link java.util.logging.LogRecord#getLoggerName()}
  * starts with a configured <i>publishable</i> logger name.  
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceLogEventHandler extends Handler implements ServiceLogEventHandlerMBean {
     private Level publishOnLevel = Level.SEVERE;
     private final Collection<String> publishableLoggers =
