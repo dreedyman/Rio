@@ -78,7 +78,7 @@ public class SLAPolicyHandler implements ThresholdListener {
      * @param sla The SLA for the SLAPolicyHandler
      */
     public SLAPolicyHandler(SLA sla) {
-        setSLA(sla);
+        mySLA = sla;
         try {
             hostAddress = InetAddress.getLocalHost().getHostAddress();
         } catch(UnknownHostException e) {
@@ -189,11 +189,10 @@ public class SLAPolicyHandler implements ThresholdListener {
 
     protected void setName(String name, long iID) {
         if(iID > 0) {
-            name = name+":"+iID;
+            this.name = name+":"+iID;
         } else {
-            name = name+":XX";
+            this.name = name+":XX";
         }
-        this.name = name;
     }
 
     protected String getName() {
