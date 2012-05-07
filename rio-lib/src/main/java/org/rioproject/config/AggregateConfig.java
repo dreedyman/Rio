@@ -30,23 +30,6 @@ import net.jini.config.NoSuchEntryException;
 public class AggregateConfig implements Configuration {
     private Configuration common;
     private Configuration outer;
-
-    /**
-     * Create an AggregateConfig
-     * 
-     * @param commonConfig The "common" Configuration
-     * @param configArgs Configuration arguments for an 'outer' configuration.
-     * This configuration will be looked at first for configuration entries.
-     * If entries are not found, the common configuration is consulted.
-     * 
-     * @throws ConfigurationException If there are errors creating the
-     * Configuration
-     * @throws IllegalArgumentException if the commonConfig parameter is null
-     */
-    public AggregateConfig(Configuration commonConfig, String[] configArgs)
-    throws ConfigurationException {
-        this(commonConfig, configArgs, null);
-    }
     
     /**
      * Create an AggregateConfig
@@ -63,24 +46,13 @@ public class AggregateConfig implements Configuration {
      * Configuration
      * @throws IllegalArgumentException if the config parameter is null
      */
-    public AggregateConfig(Configuration commonConfig,
-                           String[] configArgs, 
-                           ClassLoader loader) throws ConfigurationException {
+    public AggregateConfig(final Configuration commonConfig,
+                           final String[] configArgs,
+                           final ClassLoader loader) throws ConfigurationException {
         if(commonConfig==null)
             throw new IllegalArgumentException("common config cannot be null");
-        if(loader==null)
-            loader = AggregateConfig.class.getClassLoader();
         outer  = ConfigurationProvider.getInstance(configArgs, loader);
         common = commonConfig;
-    }
-
-    /**
-     * Get the common configuration this class was created with
-     *
-     * @return The common {@link net.jini.config.Configuration} object.
-     */
-    public Configuration getCommonConfiguration() {
-        return(common);
     }
 
     /**
