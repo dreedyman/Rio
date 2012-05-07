@@ -24,7 +24,6 @@ import org.rioproject.deploy.ServiceStatementManager;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.util.logging.Level;
 
 /**
  * The {@code TransientServiceStatementManager} provides an implementation of the
