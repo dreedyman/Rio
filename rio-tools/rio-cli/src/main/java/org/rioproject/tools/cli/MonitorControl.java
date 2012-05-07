@@ -16,9 +16,6 @@
 package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringException;
-import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
