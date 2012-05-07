@@ -55,20 +55,19 @@ import java.util.logging.Logger;
  */
 public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     private SLA sla;
-    private final List<ServiceCapability<T>> services =
-        new ArrayList<ServiceCapability<T>>();
+    private final List<ServiceCapability<T>> services = new ArrayList<ServiceCapability<T>>();
     private OperationalStringManager opMgr;
     /** Scheduler for Cybernode utilization gathering */
     private ScheduledExecutorService scheduler;
     private static Logger logger = Logger.getLogger(Utilization.class.getName());
 
     @Override
-    public void setAssociation(Association<T> association) {
+    public void setAssociation(final Association<T> association) {
         this.association = association;
         initialize(association.getOperationalStringName());
     }
 
-    public void setSLA(SLA sla) {
+    public void setSLA(final SLA sla) {
         this.sla = sla;
     }
 
@@ -119,7 +118,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     }
 
     @Override
-    public void serviceAdded(T service) {
+    public void serviceAdded(final T service) {
         ServiceItem item = association.getServiceItem(service);
         if(item!=null) {
             addService(item);
@@ -134,7 +133,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     }
 
     @Override
-    public void serviceRemoved(T service) {
+    public void serviceRemoved(final T service) {
         if(removeService(service)){
             if(logger.isLoggable(Level.FINE))
                 logger.fine("Service removed, " +
@@ -151,35 +150,29 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
             ((OpStringManagerProxy.OpStringManager)opMgr).terminate();
     }
 
-    private void initialize(String opStringName) {
-        if(opStringName==null) {
+    private void initialize(final String opStringName) {
+        String opStringNameToUse = opStringName;
+        if(opStringNameToUse==null) {
             ServiceItem item = association.getServiceItem();
             if(item==null)
                 return;
             for(Entry e : item.attributeSets) {
                 if(e instanceof OperationalStringEntry) {
-                    opStringName = ((OperationalStringEntry)e).name;
+                    opStringNameToUse = ((OperationalStringEntry)e).name;
                     break;
                 }
             }
         }
-        if(opStringName!=null &&
-           opMgr==null &&
-           association.getServiceItem()!=null) {
+        if(opStringNameToUse!=null && opMgr==null && association.getServiceItem()!=null) {
             try {
-                opMgr = OpStringManagerProxy.getProxy(opStringName, null);
-                ComputeResourceUtilizationFetcher
-                    cruf = new ComputeResourceUtilizationFetcher(opMgr,
-                                                                 opStringName);
+                opMgr = OpStringManagerProxy.getProxy(opStringNameToUse, null);
+                ComputeResourceUtilizationFetcher cruf = new ComputeResourceUtilizationFetcher(opMgr,
+                                                                                               opStringNameToUse);
                 setServiceList(association.getServiceItems());
                 long initialDelay = 0;
                 long period = 1000*5;                
-                scheduler =
-                    Executors.newSingleThreadScheduledExecutor();
-                scheduler.scheduleAtFixedRate(cruf,
-                                              initialDelay,
-                                              period,
-                                              TimeUnit.MILLISECONDS);
+                scheduler = Executors.newSingleThreadScheduledExecutor();
+                scheduler.scheduleAtFixedRate(cruf, initialDelay, period, TimeUnit.MILLISECONDS);
             } catch (RemoteException e) {
                 logger.log(Level.WARNING,
                            "Getting ServiceElement for ["+association.getName()+"]",
@@ -193,7 +186,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         }
     }
 
-    private void setServiceList(ServiceItem[] items) {
+    private void setServiceList(final ServiceItem[] items) {
         synchronized(services) {
             services.clear();
             for(ServiceItem item : items) {
@@ -203,7 +196,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private synchronized void addService(ServiceItem item) {
+    private synchronized void addService(final ServiceItem item) {
         if(opMgr==null) {
             String opStringName = null;
             for(Entry e : item.attributeSets) {
@@ -236,7 +229,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         }
     }
 
-    private boolean removeService(T service) {
+    private boolean removeService(final T service) {
         boolean removed = false;
         for(ServiceCapability sc : getServices()) {
             if(sc.getService().equals(service)) {
@@ -258,13 +251,13 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     }
 
     class ComputeResourceUtilizationFetcher implements Runnable {
-        OperationalStringManager opMgr;
-        String opStringName;
+        final OperationalStringManager opMgr;
+        final String opStringName;
         final List<DeployedService> list = new ArrayList<DeployedService>();
         final List<ServiceElement> serviceElements = new ArrayList<ServiceElement>();
 
-        ComputeResourceUtilizationFetcher(OperationalStringManager opMgr,
-                                          String opStringName) {
+        ComputeResourceUtilizationFetcher(final OperationalStringManager opMgr,
+                                          final String opStringName) {
             this.opMgr = opMgr;
             this.opStringName = opStringName;
         }
@@ -312,7 +305,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
             }
         }
 
-        private List<ServiceElement> getMatchingServiceElements(DeploymentMap dMap) {
+        private List<ServiceElement> getMatchingServiceElements(final DeploymentMap dMap) {
             List<ServiceElement> matching = new ArrayList<ServiceElement>();
             AssociationDescriptor ad = association.getAssociationDescriptor();
             String[] adInterfaces = ad.getInterfaceNames();
@@ -338,13 +331,13 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     }
 
     class ServiceCapability<T> {
-        T service;
-        Uuid uuid;
+        final T service;
+        final Uuid uuid;
         ComputeResourceUtilization cru;
         boolean wasBreached = false;
         final Object updateLock = new Object();
 
-        ServiceCapability(T service, Uuid uuid) {
+        ServiceCapability(final T service, final Uuid uuid) {
             this.service = service;
             this.uuid = uuid;
         }
@@ -353,7 +346,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
             return service;
         }
 
-        void setComputeResourceUtilization(ComputeResourceUtilization cru) {
+        void setComputeResourceUtilization(final ComputeResourceUtilization cru) {
             synchronized(updateLock) {
                 this.cru = cru;
             }

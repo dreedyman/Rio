@@ -80,7 +80,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
      * @param target The object that will have dependencies injected
      */
     public AssociationInjector(Object target) {
-        setBackend(target);
+        this.target = target;
     }
 
     /**

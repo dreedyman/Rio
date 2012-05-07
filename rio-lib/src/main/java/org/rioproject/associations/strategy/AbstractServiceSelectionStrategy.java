@@ -24,8 +24,8 @@ import org.rioproject.associations.Association;
  *
  * @author Dennis Reedy
  */
-public abstract class AbstractServiceSelectionStrategy<T> implements
-                                                       ServiceSelectionStrategy<T> {
+@SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
+public abstract class AbstractServiceSelectionStrategy<T> implements ServiceSelectionStrategy<T> {
     protected Association<T> association;
 
     public void setAssociation(Association<T> association) {
