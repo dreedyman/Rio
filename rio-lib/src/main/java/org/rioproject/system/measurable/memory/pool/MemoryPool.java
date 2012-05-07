@@ -31,6 +31,8 @@ import java.util.logging.Logger;
 /**
  * The MemoryPool is used to monitor a JMX memory pool.
  */
+/* Suppress PMD warnings for the invocation of createMeasurableMonitor() during object
+ * construction. This is by design. */
 public class MemoryPool extends MeasurableCapability {
     /** Iteration value for calculating utilization of sampleSize >1 */
     private int count;
