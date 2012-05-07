@@ -23,6 +23,7 @@ import org.rioproject.deploy.ServiceBeanInstantiationException;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ThrowableUtil {
     public static Throwable getRootCause(Throwable e) {
         if(e instanceof ServiceBeanInstantiationException) {
