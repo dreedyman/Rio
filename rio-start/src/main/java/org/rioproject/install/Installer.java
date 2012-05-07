@@ -31,7 +31,8 @@ import java.util.jar.JarFile;
 /**
  * Install Rio jars to local repository
  */
-public class Installer {
+@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
+public final class Installer {
 
     private Installer() {}
 
@@ -129,7 +130,10 @@ public class Installer {
      * @throws IOException If jars cannot be written to the local filesystem
      * @throws IllegalArgumentException If groupId, artifactId, version or artifactFile are <code>null</code>
      */
-    public static void install(Artifact artifact, File pomFile, File artifactFile, Object aetherService) throws IOException {
+    public static void install(final Artifact artifact,
+                               final File pomFile,
+                               final File artifactFile,
+                               final Object aetherService) throws IOException {
         if(artifact==null)
             throw new IllegalArgumentException("artifact must not be null");
         if(artifactFile==null && pomFile==null)
@@ -139,6 +143,7 @@ public class Installer {
         String groupId = artifact.getGroupId();
         String artifactId = artifact.getArtifactId();
         String version = artifact.getVersion();
+        File workingPomFile = pomFile;
         sb.append(groupId.replace(".", File.separator));
         sb.append(File.separator);
         sb.append(artifactId);
@@ -158,7 +163,7 @@ public class Installer {
             /*
              * Look for the pom in the artifact. Once we find it, read it in, then write it out as a temp file
              */
-            if (pomFile == null) {
+            if (workingPomFile == null) {
                 String line;
                 List<String> pomListing = new ArrayList<String>();
                 JarFile jarFile = new JarFile(artifactFile);
@@ -185,7 +190,7 @@ public class Installer {
                     is.close();
                     output.close();
                 }
-                pomFile = tempPom;
+                workingPomFile = tempPom;
             }
         }
 
@@ -203,9 +208,9 @@ public class Installer {
                                                                         String.class,
                                                                         File.class,
                                                                         File.class);
-            install.invoke(aetherService, groupId, artifactId, version, pomFile, artifactFile);
+            install.invoke(aetherService, groupId, artifactId, version, workingPomFile, artifactFile);
         } catch (Exception e) {
-            e.getCause().printStackTrace();
+            e.printStackTrace();
         }
     }
 
