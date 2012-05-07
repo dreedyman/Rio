@@ -36,7 +36,7 @@ import java.util.logging.*;
  *
  * @author Dennis Reedy
  */
-public class LogAgent {
+public final class LogAgent {
     private static final WrappedLogger logger = WrappedLogger.getLogger(AgentHook.class.getName());
     private LogAgent() {
     }
