@@ -153,8 +153,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
                                                 "$", "|", ")", "?", "+"};
     private String configurationFile;
     /** A suitable Logger */
-    protected static final Logger logger =
-        Logger.getLogger("org.rioproject.system.capability");
+    protected static final Logger logger = Logger.getLogger("org.rioproject.system.capability");
 
     /**
      * Set the path of the PlatformCapability
@@ -162,7 +161,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @param path The path on an accessible filesystem where the
      * PlatformCapability is installed
      */
-    public void setPath(String path) {
+    public void setPath(final String path) {
         this.path = path;
     }
 
@@ -182,7 +181,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      *
      * @param classpath The classpath for the PlatformCapability
      */
-    public void setClassPath(String[] classpath) {
+    public void setClassPath(final String[] classpath) {
         this.classpath = classpath;
     }
 
@@ -229,7 +228,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * capability
      * @param value The value associated with the platform capability key
      */
-    public void define(String key, Object value) {
+    public void define(final String key, final Object value) {
         capabilities.put(key, value);
         if(key.equals(DESCRIPTION)) {
             description = value.toString();
@@ -241,7 +240,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      *
      * @param map The Map containing platform capability mappings
      */
-    public void defineAll(Map<String, Object> map) {
+    public void defineAll(final Map<String, Object> map) {
         capabilities.putAll(map);
         for(Enumeration<String> en=capabilities.keys(); en.hasMoreElements();) {
             String key = en.nextElement();
@@ -259,7 +258,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @return The value associated with the key in the platform
      * capability mapping
      */
-    public Object getValue(String key) {
+    public Object getValue(final String key) {
         return(capabilities.get(key));
     }
     
@@ -270,7 +269,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      *
      * @return True if removed, false otherwise
      */
-    public boolean remove(String key) {
+    public boolean remove(final String key) {
         Object o = capabilities.remove(key);
         return o != null;
     }
@@ -294,7 +293,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * 
      * @deprecated
      */
-    public boolean supports(PlatformCapability requirement) {
+    public boolean supports(final PlatformCapability requirement) {
         boolean supports = getClass().getName().equals(requirement.getClass().getName());
         if(supports) {
             String[] keys = requirement.getPlatformKeys();
@@ -331,7 +330,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      *  
      * @return True if supported, false otherwise
      */
-    public boolean supports(SystemComponent requirement) {
+    public boolean supports(final SystemComponent requirement) {
         boolean supports = hasBasicSupport(requirement.getName(), requirement.getClassName());
         if(supports) {
             Map<String, Object> attributes = requirement.getAttributes();
@@ -378,7 +377,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      *
      * @return true if basic support is provided
      */
-   protected boolean hasBasicSupport(String name, String className) {
+   protected boolean hasBasicSupport(final String name, final String className) {
        if(name==null && className==null)
            throw new IllegalArgumentException("className and name cannot both be null");
        boolean supports = false;
@@ -407,7 +406,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @return <code>true</code> if, and only if, a subsequence of the
      * regex matches this matcher's pattern
      */
-    protected boolean matches(String input, String value) {
+    protected boolean matches(final String input, final String value) {
         boolean useFind = false;
         for (String meta_char : META_CHARS) {
             if (input.contains(meta_char)) {
@@ -434,20 +433,21 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @return <code>true</code> if, and only if, the request version can be
      * supported
      */
-    protected boolean versionSupported(String requiredVersion, String configuredVersion) {
+    protected boolean versionSupported(final String requiredVersion, final String configuredVersion) {
         if(requiredVersion == null)
             throw new IllegalArgumentException("requiredVersion is null");
         if(configuredVersion == null)
             throw new IllegalArgumentException("configuredVersion is null");
         boolean supported;
 
-        if(requiredVersion.endsWith("*") || requiredVersion.endsWith("+")) {
-            boolean minorVersionSupport = requiredVersion.endsWith("*");
-            requiredVersion = requiredVersion.substring(0, requiredVersion.length()-1);
+        String versionRequired = requiredVersion;
+        if(versionRequired.endsWith("*") || versionRequired.endsWith("+")) {
+            boolean minorVersionSupport = versionRequired.endsWith("*");
+            versionRequired = versionRequired.substring(0, versionRequired.length()-1);
             int[] required;
             int[] configured;
             try {
-                required = toIntArray(requiredVersion.split("\\D"));
+                required = toIntArray(versionRequired.split("\\D"));
                 configured = toIntArray(configuredVersion.split("\\D"));
             } catch(NumberFormatException e) {
                 return (false);
@@ -485,7 +485,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
                 }
             }
         } else {
-            supported = configuredVersion.equals(requiredVersion);
+            supported = configuredVersion.equals(versionRequired);
         }
         return (supported);
     }
@@ -496,7 +496,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @return An int array
      * @throws NumberFormatException if the value in the array is not a number
      */
-    private int[] toIntArray(String[] a) throws NumberFormatException {
+    private int[] toIntArray(final String[] a) throws NumberFormatException {
         int[] array = new int[a.length];
         for(int i = 0; i < array.length; i++) {
             if(a[i].length() == 0)
@@ -522,7 +522,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      *
      * @param description Description of the PlatformCapability
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         if(description!=null)
             this.description = description;
     }
@@ -562,7 +562,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @param costModel The ResourceCostModel that will determine the cost
      * of using this PlatformCapability
      */
-    public void setResourceCostModel(ResourceCostModel costModel) {
+    public void setResourceCostModel(final ResourceCostModel costModel) {
         if(costModel==null)
             throw new IllegalArgumentException("costModel is null");
         this.costModel = costModel;
@@ -582,7 +582,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     /**
      * @see org.rioproject.costmodel.ResourceCostProducer#calculateResourceCost
      */
-    public ResourceCost calculateResourceCost(double units, long duration) {
+    public ResourceCost calculateResourceCost(final double units, final long duration) {
         if(costModel==null)
             costModel = new ZeroCostModel();
         double cost = costModel.getCostPerUnit(duration)*units;
@@ -601,7 +601,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @param software The StagedSoftware defining where the software for
      * the PlatformCapability can be downloaded from
      */
-    public void addStagedSoftware(StagedSoftware... software) {
+    public void addStagedSoftware(final StagedSoftware... software) {
         if(software ==null)
             throw new IllegalArgumentException("StagedSoftware is null");
         stagedSoftware.addAll(Arrays.asList(software));
@@ -625,7 +625,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @param record A DownloadRecord instance defining where
      * software has been installed
      */
-    public void addDownloadRecord(DownloadRecord record) {
+    public void addDownloadRecord(final DownloadRecord record) {
         if(record==null)
             throw new IllegalArgumentException("record is null");
         synchronized(downloadRecords) {
@@ -668,7 +668,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @throws IllegalArgumentException if the supplied type is neither
      * STATIC or PROVISIONABLE
      */
-    protected void setType(int type) {
+    protected void setType(final int type) {
         if(type != STATIC && type != PROVISIONABLE)
             throw new IllegalArgumentException("bad type : "+type);
         this.type = type;
@@ -720,7 +720,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
         return configurationFile;
     }
 
-    public void setConfigurationFile(String configurationFile) {
+    public void setConfigurationFile(final String configurationFile) {
         this.configurationFile = configurationFile;
     }
 
@@ -738,7 +738,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * A PlatformCapability is equal to another PlatformCapability if they
      * are the same class and their capabilities maps are equal
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
         if(this == obj)
