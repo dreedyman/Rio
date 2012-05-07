@@ -227,6 +227,7 @@ public class AdvertiseLifecycleTest {
         elem.setServiceBeanConfig(sbc);
         elem.setOperationalStringName(opstringName);
         elem.setPlanned(planned);
+        elem.setFaultDetectionHandlerBundle(null);
         return elem;
     }
 
