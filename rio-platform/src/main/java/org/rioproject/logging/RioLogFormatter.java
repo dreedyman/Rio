@@ -31,6 +31,7 @@ import java.util.logging.LogRecord;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class RioLogFormatter extends Formatter {
     Date date = new Date();
     private final static String format = "{0,date,yyyy.MM.dd HH:mm:ss,SSS}";
