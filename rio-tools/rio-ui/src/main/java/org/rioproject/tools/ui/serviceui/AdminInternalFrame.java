@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class AdminInternalFrame extends JInternalFrame {
     ServiceUIPanel serviceUIPanel;
     public static final long DEFAULT_DELAY=1000*30;

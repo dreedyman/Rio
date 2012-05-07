@@ -27,6 +27,7 @@ import javax.swing.*;
  * Note that the API changed slightly in the 3rd version: You must now invoke
  * start() on the SwingWorker after creating it.
  */
+@SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
 public abstract class SwingWorker {
     private Object value;  // see getValue(), setValue()
     //private Thread thread;

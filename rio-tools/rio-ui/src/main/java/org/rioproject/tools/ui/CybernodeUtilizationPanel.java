@@ -55,6 +55,7 @@ import java.util.concurrent.Executors;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class CybernodeUtilizationPanel extends JPanel {
     /**
      * The model for the Cybernode utilization table

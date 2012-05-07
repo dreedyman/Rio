@@ -94,7 +94,7 @@ public class ServiceTypePanel extends JPanel {
         }
     }
 
-    JTextField createAttrTextField() {
+    private JTextField createAttrTextField() {
         JTextField tf = new JTextField();
         tf.setEditable(false);
         return (tf);

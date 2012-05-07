@@ -162,14 +162,14 @@ public class CybernodePanel extends JPanel {
         return select;
     }
 
-    void insertColumn(String headerLabel) {
+    private void insertColumn(String headerLabel) {
         int colIndex = columnChoices.getColumnCount();
         betterAddColumn(columnChoices, headerLabel);
         if(colIndex>0)
             columnChoices.moveColumn(columnChoices.getColumnCount()-1, colIndex);
     }
 
-    void removeColumn(String headerLabel) {
+    private void removeColumn(String headerLabel) {
         java.util.List<TableColumn> currentCols = getTableColumns();
         TableColumn removeColumn = null;
         for(TableColumn col : currentCols) {
@@ -183,7 +183,7 @@ public class CybernodePanel extends JPanel {
             columnChoices.getColumnModel().removeColumn(removeColumn);
     }
 
-    void betterAddColumn(JTable table, String headerLabel) {
+    private void betterAddColumn(JTable table, String headerLabel) {
         DefaultTableModel model = (DefaultTableModel)table.getModel();
         TableColumn col = new TableColumn(model.getColumnCount());
 

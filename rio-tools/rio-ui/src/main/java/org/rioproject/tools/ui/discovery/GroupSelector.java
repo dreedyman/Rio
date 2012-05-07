@@ -117,7 +117,7 @@ public class GroupSelector extends JPanel {
 
     }
 
-    void fillGroups(DiscoveryManagement dMgr, RecordingDiscoveryListener rdl) {
+    private void fillGroups(DiscoveryManagement dMgr, RecordingDiscoveryListener rdl) {
         String[] configured = ((DiscoveryGroupManagement)dMgr).getGroups();
         
         boolean allGroups = false;

@@ -117,7 +117,7 @@ public class JTreeTable extends JTable {
         return editingRow;
     }
 
-    public void setModel(TreeTableModel treeTableModel) {
+    private void setModel(TreeTableModel treeTableModel) {
         if (treeTableModel == null) {
             return;
         }
@@ -535,8 +535,7 @@ public class JTreeTable extends JTable {
 
         public ListToTreeSelectionModelWrapper() {
             super();
-            getListSelectionModel().addListSelectionListener
-                (createListSelectionListener());
+            getListSelectionModel().addListSelectionListener(createListSelectionListener());
         }
 
         /**
@@ -577,7 +576,7 @@ public class JTreeTable extends JTable {
          *
          * @return ListSelectionListener
          */
-        protected ListSelectionListener createListSelectionListener() {
+        private ListSelectionListener createListSelectionListener() {
             return new ListSelectionHandler();
         }
 

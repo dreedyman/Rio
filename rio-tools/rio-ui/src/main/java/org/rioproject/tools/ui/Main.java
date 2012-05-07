@@ -87,6 +87,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class Main extends JFrame {
     private final static long startTime = System.currentTimeMillis();
     private JSplitPane splitPane;
@@ -680,7 +681,8 @@ public class Main extends JFrame {
         Point point = getLocation();
         int divider = splitPane.getDividerLocation();
         Properties props = new Properties();
-        props.putAll(utilities.getOptions());
+        if(utilities !=null)
+            props.putAll(utilities.getOptions());
         
         props.put(Constants.FRAME_DIVIDER, Integer.toString(divider));
         props.put(Constants.FRAME_HEIGHT, Integer.toString(dim.height));
@@ -1327,7 +1329,8 @@ public class Main extends JFrame {
         return lookupComponent+".multicastAnnouncementInterval="+multicastAnnouncementInterval;
     }
 
-    public static void main(String[] args) {
+    @SuppressWarnings("unchecked")
+    public static void main(final String[] args) {
         try {
             Main frame;
             final LinkedList<String> commandArgs = new LinkedList<String>();
@@ -1379,9 +1382,9 @@ public class Main extends JFrame {
                 }
             }
             commandArgs.add(override);
-            args = commandArgs.toArray(new String[commandArgs.size()]);
+            String[] newArgs = commandArgs.toArray(new String[commandArgs.size()]);
                         
-            final Configuration config = ConfigurationProvider.getInstance(args);
+            final Configuration config = ConfigurationProvider.getInstance(newArgs);
             final Properties props  = new Properties();
             try {
                 props.putAll(loadProperties(Constants.UI_PROPS));

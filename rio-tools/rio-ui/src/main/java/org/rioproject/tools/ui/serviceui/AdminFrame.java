@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class AdminFrame extends JFrame {    
     ServiceUIPanel serviceUIPanel;
 

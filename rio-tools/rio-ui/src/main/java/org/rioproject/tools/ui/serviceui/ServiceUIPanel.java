@@ -368,7 +368,7 @@ public class ServiceUIPanel extends JPanel {
         }
     }
 
-    ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
+    private ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ComputeResourceInfo) {
                 return (ComputeResourceInfo) attr;
@@ -377,7 +377,7 @@ public class ServiceUIPanel extends JPanel {
         return(null);
     }
 
-    ServiceInfo getServiceInfo(Entry[] attrs) {
+    private ServiceInfo getServiceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ServiceInfo) {
                 return (ServiceInfo) attr;

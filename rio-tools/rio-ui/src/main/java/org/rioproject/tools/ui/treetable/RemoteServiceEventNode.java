@@ -23,6 +23,7 @@ import java.util.Date;
 /**
  * Container that holds information about a remote event
  */
+@SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
 public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent> extends DefaultMutableTreeNode {
     private T event;
 

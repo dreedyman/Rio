@@ -162,10 +162,10 @@ public class ColorPanel extends JPanel {
         warningColorComp.setBackground(warningColor);
     }
 
-    JComponent makeColorComponent(Color color,
-                                  final String desc,
-                                  String tooltip,
-                                  final Field field) {
+    private JComponent makeColorComponent(Color color,
+                                          final String desc,
+                                          String tooltip,
+                                          final Field field) {
         final JLabel comp = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>");
         comp.setOpaque(true);
         comp.setBackground(color);

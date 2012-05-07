@@ -292,7 +292,7 @@ public class SingleComponentInfiniteProgress extends JComponent
                     makeSnapshot();
                     setOpaque(true);
                 } catch (AWTException e1) {
-                    throw new RuntimeException(e1);
+                    e1.printStackTrace();
                 }
             } else {
                 iterate--;
@@ -454,14 +454,14 @@ public class SingleComponentInfiniteProgress extends JComponent
      * @return the y value that is the y param + the text height.
      */
     public static double drawTextAt(String text, Font font, Graphics2D g2,
-                                    int width, double y, Color foreGround) {
+                                    int width, final double y, Color foreGround) {
         final TextLayout layout = getTextLayout(text, font, g2);
         if (layout != null) {
             Rectangle2D bounds = layout.getBounds();
             g2.setColor(foreGround);
             float textX = (float) (width - bounds.getWidth()) / 2;
-            y = y + layout.getLeading() + 2 * layout.getAscent();
-            layout.draw(g2, textX, (float) y);
+            float horizontal = (float) (y + layout.getLeading() + 2 * layout.getAscent());
+            layout.draw(g2, textX, horizontal);
             return y + bounds.getHeight();
         } else {
             return 0d;

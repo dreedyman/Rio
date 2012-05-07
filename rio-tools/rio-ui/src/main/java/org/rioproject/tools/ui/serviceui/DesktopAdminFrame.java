@@ -37,6 +37,8 @@ import java.util.Map;
  *
  * @author Dennis Reedy
  */
+/* PMD complains that cascade() is called during creation. This is okay */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class DesktopAdminFrame extends JFrame {
     private JDesktopPane desktop;
     private JPanel tray;

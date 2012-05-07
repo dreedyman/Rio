@@ -79,7 +79,7 @@ public class ServiceInfoPanel extends JPanel {
         manufacturer.setCaretPosition(0);
     }
 
-    JTextField  createAttrTextField() {
+    private JTextField createAttrTextField() {
         JTextField tf = new JTextField();
         tf.setEditable(false);
         return(tf);

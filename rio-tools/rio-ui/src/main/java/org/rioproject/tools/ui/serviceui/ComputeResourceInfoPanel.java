@@ -108,7 +108,7 @@ public class ComputeResourceInfoPanel extends JPanel {
         arch.setCaretPosition(0);
     }
 
-    JTextField createAttrTextField() {
+    private JTextField createAttrTextField() {
         JTextField tf = new JTextField();
         tf.setEditable(false);
         return (tf);

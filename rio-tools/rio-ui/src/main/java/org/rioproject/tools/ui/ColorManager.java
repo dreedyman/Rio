@@ -29,6 +29,7 @@ import java.util.Properties;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class ColorManager {
     public static final int BORDER_COLOR_RGB = ColorLib.rgb(255,255,255);
     public static final int HOVER_COLOR_RGB = ColorLib.rgb(102,0,102);
@@ -57,24 +58,16 @@ public class ColorManager {
     public ColorManager(Properties props) {
         if(props==null)
             throw new IllegalArgumentException("properties is null");
-        int rgb = Integer.parseInt(
-            props.getProperty(Constants.ALT_ROW_COLOR,
-                              Integer.toString(ROW_COLOR_5.getRGB())));
+        int rgb = Integer.parseInt(props.getProperty(Constants.ALT_ROW_COLOR, Integer.toString(ROW_COLOR_5.getRGB())));
         setAltRowColor(new Color(rgb));
 
-        rgb = Integer.parseInt(
-            props.getProperty(Constants.FAILURE_COLOR,
-                              Integer.toString(FAILURE_COLOR_RGB)));
+        rgb = Integer.parseInt(props.getProperty(Constants.FAILURE_COLOR, Integer.toString(FAILURE_COLOR_RGB)));
         setFailureColor(new Color(rgb));
 
-        rgb = Integer.parseInt(
-            props.getProperty(Constants.OKAY_COLOR,
-                              Integer.toString(OKAY_COLOR_RGB)));
+        rgb = Integer.parseInt(props.getProperty(Constants.OKAY_COLOR, Integer.toString(OKAY_COLOR_RGB)));
         setOkayColor(new Color(rgb));
 
-        rgb = Integer.parseInt(
-            props.getProperty(Constants.WARNING_COLOR,
-                              Integer.toString(WARNING_COLOR_RGB)));
+        rgb = Integer.parseInt(props.getProperty(Constants.WARNING_COLOR, Integer.toString(WARNING_COLOR_RGB)));
         setWarningColor(new Color(rgb));
     }
     
