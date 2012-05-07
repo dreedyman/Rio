@@ -242,14 +242,15 @@ public class JiniClient {
      * and the configured URLs pointing to the class(es) classpath are invalid.
      * @throws ClassNotFoundException If the interface class(es) cannot be loaded
      */
-    public static ServiceTemplate getServiceTemplate(ServiceElement sElem, ClassLoader cl) throws IOException,
+    public static ServiceTemplate getServiceTemplate(final ServiceElement sElem, final ClassLoader cl) throws IOException,
                                                                                                   ClassNotFoundException {
         if(sElem == null)
             throw new IllegalArgumentException("sElem is null");
         ServiceTemplate template;
-        if(cl==null) {
+        ClassLoader loader = cl;
+        if(loader==null) {
             final Thread currentThread = Thread.currentThread();
-            cl = AccessController.doPrivileged(
+            loader = AccessController.doPrivileged(
                 new PrivilegedAction<ClassLoader>() {
                     public ClassLoader run() {
                         return (currentThread.getContextClassLoader());
@@ -261,7 +262,7 @@ public class JiniClient {
 
         for(int i = 0; i < eBundles.length; i++) {
             try {
-                interfaces[i] = Class.forName(eBundles[i].getClassName(), false, cl);
+                interfaces[i] = Class.forName(eBundles[i].getClassName(), false, loader);
             } catch(ClassNotFoundException e) {
                 /* CNFE means the interface(s) are not in the context ClassLoader.
                  * So load the interface class(es) using the URLs in the
@@ -327,9 +328,10 @@ public class JiniClient {
         ServiceTemplate template  ;
         String[] iNames = aDesc.getInterfaceNames();
         Class[] interfaces = new Class[iNames.length];
-        if(cl==null) {
+        ClassLoader loader = cl;
+        if(loader==null) {
             final Thread currentThread = Thread.currentThread();
-            cl = AccessController.doPrivileged(
+            loader = AccessController.doPrivileged(
                 new PrivilegedAction<ClassLoader>() {
                     public ClassLoader run() {
                         return (currentThread.getContextClassLoader());
@@ -337,7 +339,7 @@ public class JiniClient {
                 });
         }
         for(int i = 0; i < interfaces.length; i++) {
-            interfaces[i] = Class.forName(iNames[i], false, cl);
+            interfaces[i] = Class.forName(iNames[i], false, loader);
         }
 
         if(aDesc.matchOnName())
