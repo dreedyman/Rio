@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class SigarHelper {
+public final class SigarHelper {
     public static final String COMPONENT = SigarHelper.class.getPackage().getName();
     static Logger logger = Logger.getLogger(COMPONENT);
     private static final double NOT_AVAILABLE = -1;
@@ -145,7 +145,7 @@ public class SigarHelper {
      *
      * @return The matching child pid, or -1 if not found.
      */
-    public long matchChild(int ppid, String[] sPids) {
+    public long matchChild(final int ppid, final String[] sPids) {
         long found = -1;
         long[] pids = new long[sPids.length];
         for(int i=0; i<sPids.length; i++)
@@ -163,7 +163,7 @@ public class SigarHelper {
             return found;
 
         Method getProcState = null;
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for(int i=0; i<pids.length; i++) {
             if(i>0)
                 s.append(", ");
@@ -304,7 +304,7 @@ public class SigarHelper {
      * @return The CPU utilization (percentage) for a process, or -1 if not
      * available
      */
-    public double getProcessCpuPercentage(long pid) {
+    public double getProcessCpuPercentage(final long pid) {
         checkProcCPU();
         if(getProcCpuMethod==null) {
             return NOT_AVAILABLE;
@@ -347,7 +347,7 @@ public class SigarHelper {
      *
      * @return The cpu user usage for the process; or -1 if not available.
      */
-    public long getProcessCpuUser(long pid) {
+    public long getProcessCpuUser(final long pid) {
         checkProcCPU();
         if(getProcCpuMethod==null) {
             return (long)NOT_AVAILABLE;
@@ -389,7 +389,7 @@ public class SigarHelper {
      *
      * @return The cpu system (kernel) usage for the process; or -1 if not available.
      */
-    public long getProcessCpuSys(long pid) {
+    public long getProcessCpuSys(final long pid) {
         checkProcCPU();
         if(getProcCpuMethod==null) {
             return (long)NOT_AVAILABLE;
@@ -441,7 +441,7 @@ public class SigarHelper {
      *
      * @return The amount of virtual memory (in bytes) or -1 if not available
      */
-    public long getProcessVirtualMemorySize(long pid) {
+    public long getProcessVirtualMemorySize(final long pid) {
         checkProcMemMethod();
         if(getProcMemMethod==null)
             return (long)NOT_AVAILABLE;
@@ -474,7 +474,7 @@ public class SigarHelper {
      *
      * @return The amount of real memory (in bytes) or -1 if not available
      */
-    public long getProcessResidentMemory(long pid) {
+    public long getProcessResidentMemory(final long pid) {
         checkProcMemMethod();
         if(getProcMemMethod==null)
             return (long)NOT_AVAILABLE;
@@ -506,7 +506,7 @@ public class SigarHelper {
      *
      * @return The amount of shared memory (in bytes) or -1 if not available
      */
-    public long getProcessSharedMemory(long pid) {
+    public long getProcessSharedMemory(final long pid) {
         checkProcMemMethod();
         if(getProcMemMethod==null)
             return (long)NOT_AVAILABLE;        
@@ -540,7 +540,7 @@ public class SigarHelper {
      * @return The amount of available K-bytes for the file system, or -1 if not
      * available
      */
-    public long getFileSystemFree(String fileSystem) {
+    public long getFileSystemFree(final String fileSystem) {
         /*
          FileSystemUsage fUse = sigar.getFileSystemUsage(File.separator);
          double available = fUse.getFree()*1024;
@@ -567,7 +567,7 @@ public class SigarHelper {
      * @return The amount of used K-bytes for the file system, or -1 if not
      * available
      */
-    public long getFileSystemUsed(String fileSystem) {
+    public long getFileSystemUsed(final String fileSystem) {
         checkFileSysemUsageMethods(fileSystem);
         if(fileSystemUsedMethod==null)
             return (long)NOT_AVAILABLE;
@@ -589,7 +589,7 @@ public class SigarHelper {
      * @return The number of K-bytes  for the file system, or -1 if not
      * available
      */
-    public long getFileSystemTotal(String fileSystem) {
+    public long getFileSystemTotal(final String fileSystem) {
         checkFileSysemUsageMethods(fileSystem);
         if(fileSystemTotalMethod==null)
             return (long)NOT_AVAILABLE;
@@ -610,7 +610,7 @@ public class SigarHelper {
      *
      * @return The percentage of disk used, or -1 if not available
      */
-    public double getFileSystemUsedPercent(String fileSystem) {
+    public double getFileSystemUsedPercent(final String fileSystem) {
         checkFileSysemUsageMethods(fileSystem);
         if(fileSystemUsedPercentMethod==null)
             return NOT_AVAILABLE;
@@ -774,7 +774,7 @@ public class SigarHelper {
         return cpuPerc;
     }
 
-    private Object getProcMem(long pid) {
+    private Object getProcMem(final long pid) {
         Object procMem;
         try {
             synchronized(sigarLock) {
@@ -788,7 +788,7 @@ public class SigarHelper {
         return procMem;
     }
 
-    private Object getFileSystemUsage(String fileSystem) {
+    private Object getFileSystemUsage(final String fileSystem) {
         Object fsu;
         try {
             synchronized(sigarLock) {
@@ -803,7 +803,7 @@ public class SigarHelper {
         return fsu;
     }
 
-    private void checkFileSysemUsageMethods(String fileSystem) {
+    private void checkFileSysemUsageMethods(final String fileSystem) {
         checkFileSystemUsageMethod();
         if(getFileSystemUsageMethod==null)
             return;
@@ -971,7 +971,7 @@ public class SigarHelper {
         return have;
     }
 
-    private Method getMethod(String methodName, Class... parameterTypes)
+    private Method getMethod(final String methodName, final Class... parameterTypes)
         throws NoSuchMethodException {
         Method m;
         synchronized(sigarLock) {
@@ -980,7 +980,7 @@ public class SigarHelper {
         return m;
     }
 
-    private void log(String s, Throwable t) {
+    private void log(final String s, final Throwable t) {
         Throwable cause = ThrowableUtil.getRootCause(t);
         if(logger.isLoggable(Level.FINE))
             logger.log(Level.FINE, s, t);
