@@ -20,7 +20,8 @@ import org.rioproject.opstring.ServiceElement;
 /**
  * Create a name suitable as a RMI Registry bind name.
  */
-public class RMIServiceNameHelper {
+public final class RMIServiceNameHelper {
+    private RMIServiceNameHelper() {}
 
     /**
      * Create a normalized service name
@@ -31,7 +32,7 @@ public class RMIServiceNameHelper {
      * appending the instance ID to the name. This will be used for the
      * log name and the registry bind name
      */
-    public static String createNormalizedServiceName(ServiceElement elem) {
+    public static String createNormalizedServiceName(final ServiceElement elem) {
 
         String normalizedServiceName = replaceIllegalChars(elem.getName());
         return normalizedServiceName+"-"+elem.getServiceBeanConfig().getInstanceID();
@@ -47,7 +48,7 @@ public class RMIServiceNameHelper {
      * appending the instance ID to the name. This will be used for the
      * log name and the registry bind name
      */
-    public static String createBindName(ServiceElement elem) {
+    public static String createBindName(final ServiceElement elem) {
         String normalizedServiceName = createNormalizedServiceName(elem);
         /* Build the RMI registry bind name*/
         StringBuilder nameBuilder = new StringBuilder();
@@ -57,13 +58,14 @@ public class RMIServiceNameHelper {
         return nameBuilder.toString();
     }
 
-    private static String replaceIllegalChars(String s) {
+    private static String replaceIllegalChars(final String s) {
         char[] toReplace = new char[]{'/', '!', '#', '$', '&', '*',
                                       '(', ')', '\'', '`', '[', ']',
                                       '{', '}', '|', '~', ' '};
+        String newString = s;
         for(char c : toReplace) {
-            s = s.replace(c, '_');
+            newString = newString.replace(c, '_');
         }
-        return s;
+        return newString;
     }
 }
