@@ -16,26 +16,20 @@
 package org.rioproject.ui;
 
 import net.jini.admin.Administrable;
-import net.jini.core.entry.Entry;
 import net.jini.io.UnsupportedConstraintException;
 import org.rioproject.deploy.ProvisionManager;
-import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.deploy.DeployAdmin;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicToolTipUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * General utilities for use with a UI component in Rio
