@@ -148,8 +148,8 @@ public class Watch implements WatchMBean {
         try {
             if(config!=null)
                 watchDataSource.setConfiguration(config);
-            watchDataSource.setID(getId());
-            watchDataSource.setView(getView());
+            watchDataSource.setID(id);
+            watchDataSource.setView(view);
             if(wds instanceof WatchDataSourceImpl) {
                 localRef = (WatchDataSourceImpl)wds;
             }
