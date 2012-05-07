@@ -17,10 +17,7 @@ package org.rioproject.monitor;
 
 import org.rioproject.config.Constants;
 import org.rioproject.logging.WrappedLogger;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.*;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
