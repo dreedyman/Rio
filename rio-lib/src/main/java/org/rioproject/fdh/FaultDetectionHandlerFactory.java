@@ -29,7 +29,9 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-public class FaultDetectionHandlerFactory {
+public final class FaultDetectionHandlerFactory {
+
+    private FaultDetectionHandlerFactory(){}
     
     /**
      * Get a FaultDetectionHandler from the ServiceElement
