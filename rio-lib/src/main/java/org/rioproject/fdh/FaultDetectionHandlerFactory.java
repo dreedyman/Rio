@@ -45,7 +45,8 @@ public class FaultDetectionHandlerFactory {
      *
      * @throws Exception If there are errors creating the FaultDetectionHandler
      */
-    public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(ServiceElement sElem, ClassLoader cl)
+    public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(final ServiceElement sElem,
+                                                                            final ClassLoader cl)
     throws Exception {
         return (getFaultDetectionHandler(sElem.getFaultDetectionHandlerBundle(), cl));
     }
@@ -65,7 +66,8 @@ public class FaultDetectionHandlerFactory {
      *
      * @throws Exception If there are errors creating the FaultDetectionHandler
      */
-    public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(AssociationDescriptor aDesc, ClassLoader cl)
+    public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(final AssociationDescriptor aDesc,
+                                                                            final ClassLoader cl)
     throws Exception {
         return (getFaultDetectionHandler(aDesc.getFaultDetectionHandlerBundle(), cl));
     }
@@ -87,16 +89,14 @@ public class FaultDetectionHandlerFactory {
      * @throws Exception If there are errors creating the FaultDetectionHandler
      */
     @SuppressWarnings("unchecked")
-    public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(ClassBundle fdhBundle, ClassLoader cl)
+    public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(final ClassBundle fdhBundle,
+                                                                            final ClassLoader cl)
     throws Exception {
         Class fdhClass;
-        if(fdhBundle==null) {
-            fdhBundle = new ClassBundle("org.rioproject.fdh.AdminFaultDetectionHandler");
-        }
         if(cl==null)
-            fdhClass = ClassBundleLoader.loadClass(fdhBundle);
+            fdhClass = ClassBundleLoader.loadClass(getClassBundle(fdhBundle));
         else
-            fdhClass = ClassBundleLoader.loadClass(cl, fdhBundle);
+            fdhClass = ClassBundleLoader.loadClass(cl, getClassBundle(fdhBundle));
         FaultDetectionHandler fdh = (FaultDetectionHandler)fdhClass.newInstance();
         fdhBundle.runKnownMethods(fdh);
         return (fdh);
@@ -109,7 +109,7 @@ public class FaultDetectionHandlerFactory {
      * @param configuration Configuration arguments
      * @return A ClassBundle created based on the input arguments
      */
-    public static ClassBundle getClassBundle(String fdhClassName, String configuration) {
+    public static ClassBundle getClassBundle(final String fdhClassName, final String configuration) {
         ClassBundle bundle = new ClassBundle(fdhClassName);
         bundle.addMethod("setConfiguration",
                          new Object[] {new String[]{configuration}});
@@ -123,8 +123,7 @@ public class FaultDetectionHandlerFactory {
      * @param configArgs Configuration arguments
      * @return A ClassBundle created based on the input arguments
      */
-    public static ClassBundle
-        getClassBundle(String fdhClassName, String[] configArgs) {
+    public static ClassBundle getClassBundle(final String fdhClassName, final String[] configArgs) {
         ClassBundle bundle = new ClassBundle(fdhClassName);
         bundle.addMethod("setConfiguration",
                          new Object[] {configArgs});
@@ -138,12 +137,17 @@ public class FaultDetectionHandlerFactory {
      * @param configArgs List of configuration arguments
      * @return A ClassBundle created based on the input arguments
      */
-    public static ClassBundle
-        getClassBundle(String fdhClassName, List<String> configArgs) {
+    public static ClassBundle getClassBundle(final String fdhClassName, final List<String> configArgs) {
         String[] args = configArgs.toArray(new String[configArgs.size()]);
         ClassBundle bundle = new ClassBundle(fdhClassName);
         bundle.addMethod("setConfiguration", new Object[] {args});
         return(bundle);
+    }
+
+    private static ClassBundle getClassBundle(ClassBundle cb) {
+        if(cb==null)
+            return new ClassBundle("org.rioproject.fdh.AdminFaultDetectionHandler");
+        return cb;
     }
 
 }
