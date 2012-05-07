@@ -264,7 +264,7 @@ public class Association<T> implements Iterable<T> {
     public ServiceItem getServiceItem() {
         ServiceItem item = null;
         synchronized(serviceList) {
-            if(serviceList.isEmpty())
+            if(!serviceList.isEmpty())
                 item = serviceList.get(0);
         }
         return (item);
