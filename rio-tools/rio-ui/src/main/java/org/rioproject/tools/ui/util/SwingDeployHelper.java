@@ -17,7 +17,6 @@ package org.rioproject.tools.ui.util;
 
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.ui.Util;
