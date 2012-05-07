@@ -18,7 +18,6 @@ package org.rioproject.monitor;
 import net.jini.id.Uuid;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
-import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.*;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
