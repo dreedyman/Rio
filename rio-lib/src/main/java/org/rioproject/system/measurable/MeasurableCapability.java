@@ -74,7 +74,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
         } catch (ConfigurationException e) {
             logger.log(Level.SEVERE, "Getting WatchDataSource Size", e);
         }
-        if(!isEnabled())
+        if(!isEnabled.get())
             return;
 
         try {
@@ -83,7 +83,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
                                                                    WatchDataSource.class,
                                                                    null);
             if(wds!=null) {
-                setWatchDataSource(wds);
+                doSetWatchDataSource(wds);
             }
         } catch (ConfigurationException e) {
             logger.log(Level.SEVERE, "Getting WatchDataSource Size", e); 
@@ -137,6 +137,10 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
      */
     @Override
     public void setWatchDataSource(WatchDataSource watchDataSource) {
+        doSetWatchDataSource(watchDataSource);
+    }
+
+    private void doSetWatchDataSource(WatchDataSource watchDataSource) {
         checkEnabled();
         super.setWatchDataSource(watchDataSource);
         if(watchDataSource!=null) {
@@ -146,7 +150,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
                 logger.log(Level.SEVERE, "Setting WatchDataSource Size", e);
             }
         }
-    }     
+    }
 
     /**
      * Set the SLA for ths MeasurableCapability. 
