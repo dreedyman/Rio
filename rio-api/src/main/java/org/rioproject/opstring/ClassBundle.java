@@ -85,9 +85,14 @@ public class ClassBundle implements Serializable {
     public ClassBundle(final String className, final String[] jarNames, final String codebase) {
         if(className == null)
             throw new IllegalArgumentException("className cannot be null");
+        if(jarNames==null)
+            throw new IllegalArgumentException("jarNames cannot be null");
         this.className = className;
-        if(jarNames!=null)
-            addJARs(jarNames);
+        for(String jar : jarNames) {
+            if(jar!=null) {
+                this.jarNames.add(jar);
+            }
+        }
         this.codebase = codebase;
     }
 
