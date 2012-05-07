@@ -66,7 +66,7 @@ public class ClassAnnotator implements ClassAnnotation {
      *
      * @param urls The URLs used for class annotations.
      */
-    public void setAnnotationURLs(URL[] urls) {
+    private void setAnnotationURLs(URL[] urls) {
         this.codebase = urls;
         this.exportAnnotation = urlsToPath(codebase);
     }
