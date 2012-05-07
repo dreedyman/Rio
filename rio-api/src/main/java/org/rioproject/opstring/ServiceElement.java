@@ -38,6 +38,7 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class ServiceElement implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     public enum ProvisionType {
         /**
@@ -182,8 +183,8 @@ public class ServiceElement implements Serializable {
         this.provisionType = provisionType;
         exportBundles = new ClassBundle[exports.length];
         System.arraycopy(exports, 0, exportBundles, 0, exports.length);        
-        this.componentBundle = componentBundle;        
-        setServiceBeanConfig(sbConfig);
+        this.componentBundle = componentBundle;
+        this.sbConfig = sbConfig;
         this.slAgreements = slAgreements;
     }
 
