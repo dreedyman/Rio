@@ -24,8 +24,10 @@ import java.util.logging.Level;
 /**
  * Utilities for working with Files.
  */
-public class FileUtils {
-   private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
+public final class FileUtils {
+    private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
+
+    private FileUtils() {}
 
     /**
      * Get the path from a File object
@@ -35,7 +37,7 @@ public class FileUtils {
      * @return The canonical path. If there is an IOException getting the
      * canonical path, return the absolute path
      */
-    public static String getFilePath(File f) {
+    public static String getFilePath(final File f) {
         String path;
         try {
             path = f.getCanonicalPath();
@@ -54,20 +56,20 @@ public class FileUtils {
      * @param extension The name of the extension
      * @return A directory name
      */
-    public static String makeFileName(String root, String extension) {
+    public static String makeFileName(final String root, final String extension) {
         String name;
         if(extension==null)
             throw new IllegalArgumentException("extension cannot be null");
-        extension = PropertyHelper.expandProperties(extension);
-        if(extension.startsWith("/")) {
-            name = extension;
+        String ext = PropertyHelper.expandProperties(extension);
+        if(ext.startsWith("/")) {
+            name = ext;
         } else if(root!=null) {
             if(root.endsWith(File.separator))
-                name = root + extension;
+                name = root + ext;
             else
-                name = root + File.separator + extension;
+                name = root + File.separator + ext;
         } else {
-            name = extension;
+            name = ext;
         }
         return (name);
     }
@@ -79,7 +81,7 @@ public class FileUtils {
      *
      * @return {@code} true if the file has been removed {@code} false if not.
      */
-    public static boolean remove(File file) {
+    public static boolean remove(final File file) {
         boolean removed;
         if(file.isDirectory()) {
             File[] files = file.listFiles();
@@ -131,25 +133,26 @@ public class FileUtils {
      * directory cannt be written to
      * @throws IllegalArgumentException if the dir parameter is null
      */
-    public static void checkDirectory(File dir, String description) throws IOException {
+    public static void checkDirectory(final File dir, final String description) throws IOException {
         if(dir==null)
             throw new IllegalArgumentException("dir is null");
-        if(description==null)
-            description = dir.getName(); 
+        String descriptionToUse = description;
+        if(descriptionToUse==null)
+            descriptionToUse = dir.getName();
         if(dir.exists()) {
             if(!dir.isDirectory())
-                throw new IOException("The "+description+" "+
+                throw new IOException("The "+descriptionToUse+" "+
                                       "["+dir.getAbsolutePath()+"] exists, "+
                                       "but is not a directory. "+
                                       "Aborting service creation");
         } else {
             if(dir.mkdirs())
-                logger.info("Created "+description+" directory " +
+                logger.info("Created "+descriptionToUse+" directory " +
                             "["+dir.getAbsolutePath()+"]");
         }
         if(!dir.canWrite())
             throw new IOException("We do not have write access to the " +
-                                  description+" directory "+
+                                  descriptionToUse+" directory "+
                                   "["+dir.getAbsolutePath()+"], " +
                                   "therefore a log cannot be created. " +
                                   "Aborting service creation");
@@ -162,7 +165,7 @@ public class FileUtils {
      * @param dst The destination File. If the dst file does not exist, it is created
      * @throws IOException If the copy fails
      */
-    public static void copy(File src, File dst) throws IOException {
+    public static void copy(final File src, final File dst) throws IOException {
         InputStream in = new FileInputStream(src);
         OutputStream out = new FileOutputStream(dst);
 
@@ -186,7 +189,7 @@ public class FileUtils {
      * @throws IOException If there are problems obtaining the canonical file.
      * @throws IllegalArgumentException if the {@code file} is {@code null}
      */
-    public static boolean isSymbolicLink(File file) throws IOException {
+    public static boolean isSymbolicLink(final File file) throws IOException {
         if (file == null)
             throw new IllegalArgumentException("File must not be null");
         File canon;
