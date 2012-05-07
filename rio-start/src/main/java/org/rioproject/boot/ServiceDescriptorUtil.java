@@ -35,7 +35,8 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-public class ServiceDescriptorUtil {
+@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
+public final class ServiceDescriptorUtil {
     /* Port value obtained from invoking the getStartupPort() method */
     private static int port = 0;
 
@@ -70,7 +71,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getWebster(String policy, String[] roots) throws IOException {
+    public static ServiceDescriptor getWebster(final String policy, final String[] roots) throws IOException {
         return(getWebster(policy, "0", roots));        
     }
 
@@ -89,7 +90,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getWebster(String policy, String sPort, String[] roots) throws IOException {
+    public static ServiceDescriptor getWebster(final String policy, final String sPort, final String[] roots) throws IOException {
         return(getWebster(policy, sPort, roots, false));
     }
 
@@ -107,10 +108,10 @@ public class ServiceDescriptorUtil {
      *
      * @throws IOException If there are problems getting the anonymous port
      */
-    public static ServiceDescriptor getWebster(String policy,
-                                               String sPort,
-                                               String[] roots,
-                                               boolean debug) throws IOException {
+    public static ServiceDescriptor getWebster(final String policy,
+                                               final String sPort,
+                                               final String[] roots,
+                                               final boolean debug) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
@@ -135,11 +136,11 @@ public class ServiceDescriptorUtil {
      * @throws IOException If there are problems getting the anonymous port
      * @throws IllegalArgumentException If the <tt>RIO_HOME</tt> system property is not set
      */
-    public static ServiceDescriptor getWebster(String policy,
-                                               String sPort,
-                                               String[] roots,
-                                               boolean debug,
-                                               String webster) throws IOException {
+    public static ServiceDescriptor getWebster(final String policy,
+                                               final String sPort,
+                                               final String[] roots,
+                                               final boolean debug,
+                                               final String webster) throws IOException {
         if(webster==null)
             throw new IllegalArgumentException("webster jar cannot be null");
         String portOptionArg = "-port";
@@ -190,7 +191,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getCybernode(String policy, String... cybernodeConfig) throws IOException {
+    public static ServiceDescriptor getCybernode(final String policy, final String... cybernodeConfig) throws IOException {
         String cybernodeClasspath = getCybernodeClasspath();
         String cybernodeCodebase = "artifact:org.rioproject.cybernode/cybernode-proxy/"+ RioVersion.VERSION;
         String implClass = "org.rioproject.cybernode.CybernodeImpl";
@@ -218,7 +219,7 @@ public class ServiceDescriptorUtil {
         return "artifact:org.rioproject.cybernode/cybernode-proxy/"+ RioVersion.VERSION;
     }
 
-    static String getProjectResolverLocation(String rioHome) {
+    static String getProjectResolverLocation(final String rioHome) {
         StringBuilder sb = new StringBuilder();
         sb.append(rioHome).append(File.separator)
             .append("lib").append(File.separator)
@@ -241,7 +242,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getMonitor(String policy, String... monitorConfig) throws IOException {
+    public static ServiceDescriptor getMonitor(final String policy, final String... monitorConfig) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
@@ -261,7 +262,7 @@ public class ServiceDescriptorUtil {
         return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
     }
 
-    private static String getProxyClassPath(String proxy) throws IOException {
+    private static String getProxyClassPath(final String proxy) throws IOException {
         String[] proxyClassPath;
         try {
             Resolver resolver = ResolverHelper.getResolver();
@@ -286,7 +287,7 @@ public class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getLookup(String policy, String... lookupConfig) throws IOException {
+    public static ServiceDescriptor getLookup(final String policy, final String... lookupConfig) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
@@ -296,7 +297,7 @@ public class ServiceDescriptorUtil {
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }
     
-    protected static String makePath(String dir, String... jars) {
+    protected static String makePath(final String dir, final String... jars) {
         StringBuilder sb = new StringBuilder();
         for(String jar : jars) {
             if(sb.length()>0)
@@ -306,7 +307,7 @@ public class ServiceDescriptorUtil {
         return sb.toString();
     }
 
-    protected static String makePath(String... jars) {
+    protected static String makePath(final String... jars) {
         StringBuilder sb = new StringBuilder();
         for(String jar : jars) {
             if(sb.length()>0)
