@@ -51,7 +51,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     public T getService() {
         T service = null;
         synchronized(serviceList) {
-            if(serviceList.size()>0) {
+            if(!serviceList.isEmpty()) {
                 ServiceItem item = serviceList.get(0);
                 service = (T)item.service;
             }

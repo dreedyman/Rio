@@ -1372,7 +1372,7 @@ public class Main extends JFrame {
 
             /* Add the interval to wait for multicast announcements as
                an override */
-            if(commandArgs.size()==0) {
+            if(commandArgs.isEmpty()) {
                 override = generateGroovyOverride(multicastAnnouncementInterval);
             } else {
                 if(commandArgs.get(0).endsWith(".groovy")) {

@@ -619,7 +619,7 @@ public class Webster implements Runnable {
             }
         }
         String[] roots;
-        if(expandedRoots.size() > 0) {
+        if(!expandedRoots.isEmpty()) {
             roots = expandedRoots.toArray(new String[expandedRoots.size()]);
         } else {
             roots = websterRoot;

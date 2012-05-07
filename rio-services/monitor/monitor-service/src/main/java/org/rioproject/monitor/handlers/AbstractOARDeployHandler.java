@@ -131,7 +131,7 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
                 buffer.append(opstring.getName());
             }
 
-            if(list.size()==0)
+            if(list.isEmpty())
                 logger.finer("Returning ["+list.size()+"] OperationalStrings");
             else
                 logger.finer("Returning ["+list.size()+"], " +

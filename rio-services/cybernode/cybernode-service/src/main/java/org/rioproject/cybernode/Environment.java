@@ -124,7 +124,7 @@ public class Environment {
             logger.log(Level.WARNING, "Exception getting configured nativeLibDirectories", e);
         }
         String nativeLibDirs = null;
-        if(nativeDirs.size()>0) {
+        if(!nativeDirs.isEmpty()) {
             StringBuilder buffer = new StringBuilder();
             String[] dirs = nativeDirs.toArray(new String[nativeDirs.size()]);
             for(int i=0; i<dirs.length; i++) {

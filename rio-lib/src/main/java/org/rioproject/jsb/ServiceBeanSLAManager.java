@@ -56,8 +56,7 @@ public class ServiceBeanSLAManager {
     private WatchInjector watchInjector;
     /** Table of ThresholdManager instances to MeasurableCapability
      * registrations */
-    private Map<ThresholdManager, MeasurableCapability> thresholdManagerReg =
-        new HashMap<ThresholdManager, MeasurableCapability>();
+    private final Map<ThresholdManager, MeasurableCapability> thresholdManagerReg = new HashMap<ThresholdManager, MeasurableCapability>();
     /**
      * Transforms SLAThresholdEvents into JMX Notifications for SLAs that are
      * system related to those the service has declared
@@ -67,11 +66,10 @@ public class ServiceBeanSLAManager {
     static final String COMPONENT = ServiceBeanSLAManager.class.getName();
     static final Logger logger = Logger.getLogger(COMPONENT);
 
-    public ServiceBeanSLAManager(Object impl,
-                                 Object proxy,
-                                 ServiceBeanContext context,
-                                 EventHandler slaEventHandler)
-        throws IntrospectionException {
+    public ServiceBeanSLAManager(final Object impl,
+                                 final Object proxy,
+                                 final ServiceBeanContext context,
+                                 final EventHandler slaEventHandler) throws IntrospectionException {
         if(impl == null)
             throw new IllegalArgumentException("impl is null");
         if(proxy == null)
@@ -113,7 +111,7 @@ public class ServiceBeanSLAManager {
      *
      * @param slas Array of SLA instances to add
      */
-    public void addSLAs(SLA[] slas) {
+    public void addSLAs(final SLA[] slas) {
         for (SLA sla : slas) {
             String identifier = sla.getIdentifier();
             /* Get the WatchDescriptors from the SLA. If there are no
@@ -130,9 +128,7 @@ public class ServiceBeanSLAManager {
             MeasurableCapability mCap = getMeasurableCapability(identifier);
             if (mCap != null) {
                 if (logger.isLoggable(Level.FINEST))
-                    logger.finest("["+elem.getName()+"] " +
-                                  "SLA [" + identifier + "] correlates to a " +
-                                  "MeasurableCapability");
+                    logger.finest("["+elem.getName()+"] SLA [" + identifier + "] correlates to a MeasurableCapability");
                 try {
                     /* Load the SLA PolicyHandler and set attributes */
                     handler = createSLAPolicyHandler(sla, null);
@@ -152,16 +148,13 @@ public class ServiceBeanSLAManager {
                                       handler.getClass().getName());
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
-                               "Creating SLAPolicyHandler for system SLA " +
-                               "[" + sla.getIdentifier() + "]",
+                               "Creating SLAPolicyHandler for system SLA [" + sla.getIdentifier() + "]",
                                e);
                 }
 
             /* Check if the SLA matches the ThreadDeadlockMonitor. */
             } else if(identifier.equals(ThreadDeadlockMonitor.ID)) {
-                WatchDescriptor wDesc =
-                    ServiceElementUtil.getWatchDescriptor(elem,
-                                                          ThreadDeadlockMonitor.ID);
+                WatchDescriptor wDesc = ServiceElementUtil.getWatchDescriptor(elem, ThreadDeadlockMonitor.ID);
                 if(wDesc==null)
                     wDesc = ThreadDeadlockMonitor.getWatchDescriptor();
 
@@ -203,39 +196,29 @@ public class ServiceBeanSLAManager {
                                                            ThreadMXBean.class);
                         threadDeadlockMonitor.setThreadMXBean(threadMXBean);
                     }
-
-                    watchInjector.inject(wDesc,
-                                         threadDeadlockMonitor,
-                                         getThreadDeadlockCalculable);
+                    watchInjector.inject(wDesc, threadDeadlockMonitor, getThreadDeadlockCalculable);
 
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
-                               "Creating SLAPolicyHandler for SLA " +
-                               "[" + sla.getIdentifier() + "]",
+                               "Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]",
                                e);
                 }
             } else {
                 try {
-                    handler =
-                        createSLAPolicyHandler(sla,
-                                               impl.getClass().getClassLoader());
+                    handler = createSLAPolicyHandler(sla, impl.getClass().getClassLoader());
                     /* Inject watch if necessary */
                     for (WatchDescriptor wd : wds) {
                         try {
                             watchInjector.inject(wd);
                         } catch (ConfigurationException e) {
                             logger.log(Level.WARNING,
-                                       "Injecting Watch " +
-                                       "[" + wd.getName() + "] " +
-                                       "for SLA " +
-                                       "[" + sla.getIdentifier() + "]",
+                                       "Injecting Watch [" + wd.getName() + "] for SLA [" + sla.getIdentifier() + "]",
                                        e);
                         }
                     }
                 } catch (Exception e) {
                     logger.log(Level.WARNING,
-                               "Creating SLAPolicyHandler for SLA " +
-                               "[" + sla.getIdentifier() + "]",
+                               "Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]",
                                e);
                 }
             }
@@ -243,12 +226,9 @@ public class ServiceBeanSLAManager {
             if (logger.isLoggable(Level.FINEST))
                 logger.finest(
                     "[" + context.getServiceElement().getName() + "] " +
-                    "Adding SLA [" + identifier + "] to the " +
-                    "Watch Registry " +
-                    "for subsequent association");
+                    "Adding SLA [" + identifier + "] to the Watch Registry for subsequent association");
             if (handler != null) {
-                context.getWatchRegistry().addThresholdListener(identifier,
-                                                                handler);
+                context.getWatchRegistry().addThresholdListener(identifier, handler);
             }
         }
     }
@@ -258,11 +238,10 @@ public class ServiceBeanSLAManager {
      *
      * @param slas Array of SLAs to update
      */
-    public void updateSLAs(SLA[] slas) {
+    public void updateSLAs(final SLA[] slas) {
         /* Create a representation of the current Collection so we
          * can determine if any SLAPolicyHandlers are no longer needed */
-        ArrayList<SLAPolicyHandler> toDiscardList =
-            new ArrayList<SLAPolicyHandler>(slaPolicyHandlers);
+        ArrayList<SLAPolicyHandler> toDiscardList = new ArrayList<SLAPolicyHandler>(slaPolicyHandlers);
 
         /* List for new SLAs, that is SLAs that do not have an ID equal to
          * a current Watch */
@@ -273,8 +252,7 @@ public class ServiceBeanSLAManager {
                 toAddList.add(sla);
             } else {
                 toDiscardList.remove(slap);
-                if (SLAPolicyHandlerFactory.slaPolicyHandlerChanged(sla,
-                                                                    slap)) {
+                if (SLAPolicyHandlerFactory.slaPolicyHandlerChanged(sla, slap)) {
                     if(logger.isLoggable(Level.FINEST)) {
                         StringBuilder b = new StringBuilder();
                         b.append("The SLAPolicyHandler for [");
@@ -304,11 +282,7 @@ public class ServiceBeanSLAManager {
                             watchInjector.modify(wd);
                         } catch (ConfigurationException e) {
                             logger.log(Level.WARNING,
-                                       "Modifying " +
-                                       "WatchDescriptor " +
-                                       "[" + wd.getName() + "] " +
-                                       "for SLA " +
-                                       "[" + sla.getIdentifier() + "]",
+                                       "Modifying WatchDescriptor ["+wd.getName()+"] for SLA ["+sla.getIdentifier()+"]",
                                        e);
                         }
                     }
@@ -337,19 +311,13 @@ public class ServiceBeanSLAManager {
     public void createSLAThresholdEventAdapter() {
         if(slaAdapter != null)
             return;
-        if(slaPolicyHandlers.size() > 0) {
+        if(!slaPolicyHandlers.isEmpty()) {
             try {
-                ObjectName objectName =
-                    JMXUtil.getObjectName(context,
-                                          "",
-                                          context
-                                              .getServiceElement().getName());
+                ObjectName objectName = JMXUtil.getObjectName(context, "", context.getServiceElement().getName());
                 if(MBeanServerFactory.getMBeanServer().isRegistered(objectName)) {
                     slaAdapter =
-                        new SLAThresholdEventAdapter(
-                            objectName,
-                            context.getServiceBeanManager().
-                                    getNotificationBroadcasterSupport());
+                        new SLAThresholdEventAdapter(objectName,
+                                                     context.getServiceBeanManager().getNotificationBroadcasterSupport());
                 }
             } catch(Exception e) {
                 if(logger.isLoggable(Level.FINE))
@@ -370,15 +338,9 @@ public class ServiceBeanSLAManager {
      *
      * @throws Exception if the SLAPolicyHandler cannot be created
      */
-    private SLAPolicyHandler createSLAPolicyHandler(SLA sla,
-                                                    ClassLoader loader)
+    private SLAPolicyHandler createSLAPolicyHandler(final SLA sla, final ClassLoader loader)
         throws Exception {
-        SLAPolicyHandler slappy =
-            SLAPolicyHandlerFactory.create(sla,
-                                           proxy,
-                                           slaEventHandler,
-                                           context,
-                                           loader);
+        SLAPolicyHandler slappy = SLAPolicyHandlerFactory.create(sla, proxy, slaEventHandler, context, loader);
         if(logger.isLoggable(Level.FINEST))
             logger.finest("["+context.getServiceElement().getName()+"] "+
                           "SLA ["+sla.getIdentifier()+"] "+
@@ -396,8 +358,7 @@ public class ServiceBeanSLAManager {
      *         zero-length array is returned
      */
     private SLAPolicyHandler[] getSLAPolicyHandlers() {
-        SLAPolicyHandler[] handlers =
-            slaPolicyHandlers.toArray(new SLAPolicyHandler[slaPolicyHandlers.size()]);
+        SLAPolicyHandler[] handlers = slaPolicyHandlers.toArray(new SLAPolicyHandler[slaPolicyHandlers.size()]);
         return (handlers);
     }
 
@@ -409,7 +370,7 @@ public class ServiceBeanSLAManager {
      * @return The SLAPolicyHandler instance for the provided SLA or null if
      * not found or the sla parameter is <code>null</code>
      */
-    private SLAPolicyHandler getSLAPolicyHandler(SLA sla) {
+    private SLAPolicyHandler getSLAPolicyHandler(final SLA sla) {
         if(sla!=null) {
             SLAPolicyHandler[] slappys = getSLAPolicyHandlers();
             for (SLAPolicyHandler slappy : slappys) {
@@ -423,11 +384,10 @@ public class ServiceBeanSLAManager {
     /*
      * Unregister and remove a SLAPolicyHandler
      */
-    private void removeSLAPolicyHandler(SLAPolicyHandler slaPolicyHandler) {
+    private void removeSLAPolicyHandler(final SLAPolicyHandler slaPolicyHandler) {
         slaPolicyHandlers.remove(slaPolicyHandler);
         slaPolicyHandler.disconnect();
-        context.getWatchRegistry().removeThresholdListener(slaPolicyHandler.getID(),
-                                                           slaPolicyHandler);
+        context.getWatchRegistry().removeThresholdListener(slaPolicyHandler.getID(), slaPolicyHandler);
         ThresholdManager tMgr = slaPolicyHandler.getThresholdManager();
         MeasurableCapability mCap = thresholdManagerReg.remove(tMgr);
         if(mCap != null) {
@@ -441,7 +401,7 @@ public class ServiceBeanSLAManager {
      * instances. Discard Watch instances which do not match to
      * Watch identifiers
      */
-    private void discardWatches(SLA[] serviceSLAs) {
+    private void discardWatches(final SLA[] serviceSLAs) {
         if(watchInjector==null)
             return;
         String[] createdWatches = watchInjector.getWatchNames();
@@ -467,7 +427,7 @@ public class ServiceBeanSLAManager {
     /*
      * Get the WatchDescriptor instances from the SLA configs
      */
-    private WatchDescriptor[] getWatchDescriptors(SLA[] slas) {
+    private WatchDescriptor[] getWatchDescriptors(final SLA[] slas) {
         ArrayList<WatchDescriptor> list = new ArrayList<WatchDescriptor>();
         for (SLA sla : slas) {
             WatchDescriptor[] wDesc = sla.getWatchDescriptors();
@@ -482,7 +442,7 @@ public class ServiceBeanSLAManager {
      * @return The MeasurableCapability for a SLA. If a matching
      *         MeasurableCapability cannot be found return null
      */
-    private MeasurableCapability getMeasurableCapability(String id) {
+    private MeasurableCapability getMeasurableCapability(final String id) {
         MeasurableCapability[] mCaps = context.getComputeResourceManager().
             getMatchedMeasurableCapabilities();
         for (MeasurableCapability mCap : mCaps) {

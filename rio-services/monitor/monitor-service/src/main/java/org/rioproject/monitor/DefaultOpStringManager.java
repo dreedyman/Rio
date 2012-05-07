@@ -276,7 +276,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         opString.setDeployed(status);
         deployStatus = status;
         if (deployStatus == OperationalString.UNDEPLOYED) {
-            if (nestedManagers.size() > 0) {
+            if (!nestedManagers.isEmpty()) {
                 OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[nestedManagers.size()]);
                 for (OpStringManager nestedMgr : nestedMgrs) {
                     if (nestedMgr.getParentCount() == 1)
@@ -649,7 +649,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             mgr.stopManager(killServices);
         }
         /* Adjust parent/nested relationships */
-        if (parents.size() > 0) {
+        if (!parents.isEmpty()) {
             for (OpStringManager parent : parents) {
                 parent.removeNested(this);
             }
@@ -1003,7 +1003,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *         parents)
      */
     public boolean isTopLevel() {
-        return parents.size() == 0;
+        return parents.isEmpty();
     }
 
     /*

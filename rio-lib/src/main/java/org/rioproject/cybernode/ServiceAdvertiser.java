@@ -148,9 +148,8 @@ public class ServiceAdvertiser {
                     addList.addAll(Arrays.asList(configuredAttributes));
 
                     /* If we have Entry objects to add, add them */
-                    if (addList.size() > 0) {
-                        Entry[] adds =
-                            addList.toArray(new Entry[addList.size()]);
+                    if (!addList.isEmpty()) {
+                        Entry[] adds = addList.toArray(new Entry[addList.size()]);
                         addAttributes(adds, joinAdmin);
                     }
                     /* Apply groups to the JoinAdmin */

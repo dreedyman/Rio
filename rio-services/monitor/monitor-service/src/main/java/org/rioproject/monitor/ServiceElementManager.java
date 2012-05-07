@@ -553,7 +553,7 @@ public class ServiceElementManager implements InstanceIDManager {
                  */
 
                 // TODO: IS THIS CODE STILL NEEDED? 
-                if(instanceIDs.size()==0 && instances.length>0) {
+                if(instanceIDs.isEmpty() && instances.length>0) {
                     InstantiatorResource[] resources =
                         provisioner.getServiceResourceSelector().getInstantiatorResources(svcElement);
                     for(InstantiatorResource resource : resources) {
@@ -2009,7 +2009,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     List<String> hosts = new ArrayList<String>();
                     hosts.addAll(seenHosts);
                     boolean addHost = true;
-                    if(hosts.size()>0) {
+                    if(!hosts.isEmpty()) {
                         if(hosts.get(hosts.size()-1).equals(host))
                             addHost = false;
                     }

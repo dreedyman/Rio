@@ -163,7 +163,7 @@ public class RuleMapAssociationController {
         try {
             wdr = new AssociationsWatchDataReplicator(cepSession, context, monitor);
             List<ServiceHandle> serviceHandles = wdr.init(ruleMap, getAssociations());
-            if(serviceHandles.size()==0) {
+            if(serviceHandles.isEmpty()) {
                 logger.warning("No service handles, cannot continue");
                 shutdownReplicator = true;
             } else {

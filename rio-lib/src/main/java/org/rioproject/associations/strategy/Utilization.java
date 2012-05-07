@@ -270,9 +270,9 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                                   "obtaining DeploymentMap for " +
                                   "["+opStringName+"]");
                 DeploymentMap dMap = opMgr.getDeploymentMap();
-                if(serviceElements.size()==0) {
+                if(serviceElements.isEmpty()) {
                     serviceElements.addAll(getMatchingServiceElements(dMap));
-                    if(serviceElements.size()==0)
+                    if(serviceElements.isEmpty())
                         logger.warning("Unable to obtain matching ServiceElement(s)" +
                                        "for associated service ["+association.getName()+"]");
                 }

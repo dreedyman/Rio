@@ -400,7 +400,7 @@ public class StaticCybernode {
             if(option.endsWith(".xml") || option.endsWith(".groovy")) {
                 options.remove(option);
                 String[] beans = null;
-                if(options.size()>0)
+                if(!options.isEmpty())
                     beans = parseBeans(options.get(0));
                 sbc.activate(new File(args[0]), beans);
             }

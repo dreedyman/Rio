@@ -356,7 +356,7 @@ public final class AetherService {
             }
         }
 
-        if(myRepositories.size()>0) {
+        if(!myRepositories.isEmpty()) {
             RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
             List<Mirror> mirrors = effectiveSettings.getMirrors();
             for (Mirror mirror : mirrors) {

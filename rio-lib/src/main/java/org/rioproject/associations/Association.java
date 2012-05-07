@@ -214,7 +214,7 @@ public class Association<T> implements Iterable<T> {
         AssociationInjector<T> ai = new AssociationInjector<T>(task);
         ai.setTargetPropertyName("proxy");
         Collection<T> services = getServices();
-        if(services.size()==0) {
+        if(services.isEmpty()) {
             registerAssociationServiceListener(new AssociationFutureListener<T>(ai,
                                                                                 this));
         } else {
@@ -264,7 +264,7 @@ public class Association<T> implements Iterable<T> {
     public ServiceItem getServiceItem() {
         ServiceItem item = null;
         synchronized(serviceList) {
-            if(serviceList.size()>0)
+            if(serviceList.isEmpty())
                 item = serviceList.get(0);
         }
         return (item);
@@ -319,7 +319,7 @@ public class Association<T> implements Iterable<T> {
     public ServiceItem getNextServiceItem() {
         ServiceItem item;
         synchronized(serviceList) {
-            if(serviceList.size() == 0) {
+            if(serviceList.isEmpty()) {
                 item = null;
             } else {
                 if(index.get()>=serviceList.size()) {
@@ -447,6 +447,7 @@ public class Association<T> implements Iterable<T> {
             ai.discovered(a, service);
         }
 
+        /* Left empty, no-op*/
         public void serviceRemoved(T service) {
         }
     }

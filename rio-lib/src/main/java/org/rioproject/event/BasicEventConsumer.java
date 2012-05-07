@@ -681,7 +681,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     private boolean removeListener(final RemoteServiceEventListener l) {
         boolean removed = eventSubscribers.remove(l);
         if(removed) {
-            if(eventSubscribers.size() == 0) {
+            if(eventSubscribers.isEmpty()) {
                 List<ServiceID> keyList = new ArrayList<ServiceID>();
                 for(Enumeration<ServiceID> e = leaseTable.keys(); e.hasMoreElements();) {
                     keyList.add(e.nextElement());

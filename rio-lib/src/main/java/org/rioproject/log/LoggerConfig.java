@@ -560,7 +560,7 @@ public class LoggerConfig implements Serializable {
                 Class handlerClass = 
                     Thread.currentThread().getContextClassLoader().
                                            loadClass(handlerClassName);
-                if(handlerArgList.size() > 0) {
+                if(!handlerArgList.isEmpty()) {
                     Class[] parameterTypes = getParameterTypes();
                     Object[] initArgs = getInitArgs();
                     java.lang.reflect.Constructor constructor = 

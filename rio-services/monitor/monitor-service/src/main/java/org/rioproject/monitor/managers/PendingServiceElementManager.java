@@ -202,7 +202,7 @@ public abstract class PendingServiceElementManager {
                     removals.add(key);
             }
         }
-        if(removals.size() > 0) {
+        if(!removals.isEmpty()) {
             if(removals.size()>numToRemove) {
                 removals = removals.subList((removals.size()-numToRemove), 
                                             removals.size());                                
@@ -240,7 +240,7 @@ public abstract class PendingServiceElementManager {
                     removals.add(key);
             }
         }
-        if(removals.size() > 0) {
+        if(!removals.isEmpty()) {
             if(logger.isLoggable(Level.FINER)) {
                 logger.finer(type+ ": removing ["+removals.size()+"] ["+sElem.getName()+"] instances");
             }

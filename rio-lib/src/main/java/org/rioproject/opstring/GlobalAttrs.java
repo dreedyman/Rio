@@ -120,7 +120,7 @@ public class GlobalAttrs {
     public void setConfigParameters(String[] parms, boolean append) {
         if(parms==null)
             return;
-        if(!append || configParms.size()==0) {
+        if(!append || configParms.isEmpty()) {
             configParms.clear();
             configParms.addAll(Arrays.asList(parms));
         } else {
@@ -171,7 +171,7 @@ public class GlobalAttrs {
      * @return String array suitable for use for a Configuration
      */
     public String[] getConfigParameters() {
-        if(configParms.size()==0)
+        if(configParms.isEmpty())
             return (new String[]{"-"});
         return(configParms.toArray(new String[configParms.size()]));
     }
@@ -251,7 +251,7 @@ public class GlobalAttrs {
     public void setLogConfigs(LoggerConfig[] configs, boolean append) {
         if(configs==null)
             return;
-        if(!append || logConfigs.size()==0) {
+        if(!append || logConfigs.isEmpty()) {
             logConfigs.clear();
             logConfigs.addAll(Arrays.asList(configs));
         } else {

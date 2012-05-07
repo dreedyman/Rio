@@ -90,13 +90,13 @@ public class CreateJar {
     private String classifier;
 
     public List<String> getIns() {
-        if(ins.size()==0 && in!=null)
+        if(ins.isEmpty() && in!=null)
             ins.add(in);
         return ins;
     }
 
     public List<String> getOuts() {
-        if(outs.size()==0 && out!=null)
+        if(outs.isEmpty() && out!=null)
             outs.add(out);
         return outs;
     }
@@ -106,7 +106,7 @@ public class CreateJar {
     }
 
     public List<String> getTopclasses() {
-        if(topclasses.size()==0 && topclass!=null)
+        if(topclasses.isEmpty() && topclass!=null)
             topclasses.add(topclass);
         return topclasses;
     }

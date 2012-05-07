@@ -688,7 +688,7 @@ public class ServiceBeanLoader {
         }
 
         String getJarsAsString() {
-            return jarList.size() == 0 ? "<>" : jarList.toString();
+            return jarList.isEmpty() ? "<>" : jarList.toString();
         }
 
         void addRepositoryUrl(String u) {
@@ -703,7 +703,7 @@ public class ServiceBeanLoader {
         public String toString() {
             final StringBuilder sb = new StringBuilder();
             sb.append("jars=").append(
-                jarList.size() == 0 ? "<>" : jarList.toString());
+                jarList.isEmpty() ? "<>" : jarList.toString());
             sb.append('}');
             return sb.toString();
         }

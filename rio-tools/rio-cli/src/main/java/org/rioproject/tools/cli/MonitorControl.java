@@ -426,7 +426,7 @@ public class MonitorControl {
                 if (reader == null)
                     reader = new BufferedReader(new InputStreamReader(System.in));
                 Map<String, DeployAdmin> map = getDeployedOpStrings(items);
-                if (map.size() == 0) {
+                if (map.isEmpty()) {
                     return "Nothing is currently deployed\n";
                 }
                 int i = 1;

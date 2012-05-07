@@ -174,7 +174,7 @@ public class DroolsFactory {
             }
         }*/
         logger.info(String.format("ADDING: %s", getToAddNames(toAdd)));
-        if(toAdd.size()>0)
+        if(!toAdd.isEmpty())
             kBase.addKnowledgePackages(toAdd);
         return kBase.newStatefulKnowledgeSession();
     }

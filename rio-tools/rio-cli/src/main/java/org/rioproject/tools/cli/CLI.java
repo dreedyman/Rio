@@ -616,7 +616,7 @@ public class CLI {
                     //;
                 }
             }
-            if(rmiRegistries.size()>0) {
+            if(!rmiRegistries.isEmpty()) {
                 Registry[] registries = rmiRegistries.toArray(
                 new Registry[rmiRegistries.size()]);
                 for (Registry registry : registries) {
@@ -1080,7 +1080,7 @@ public class CLI {
                 out.println("Service Information Statistics");
                 Map<ServiceFinder.ServiceInfo, ServiceFinder.InfoFetchStat> stats =
                     instance.getServiceFinder().getServiceInfoFetchMap();
-                if(stats.size()==0) {
+                if(stats.isEmpty()) {
                     out.println("\tNo pending information requests");
                 } else {
                     out.println("\tNum pending : "+stats.size());

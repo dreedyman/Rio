@@ -44,7 +44,7 @@ public class UtilizationColumnManager {
                                         Constants.UTIL_REAL_MEM_PROC
         };
         checkProperties(props, columns);
-        if(selectedColumns.size()==0) {
+        if(selectedColumns.isEmpty()) {
             selectedColumns.addAll(Arrays.asList(defaultColumns));
         }
 

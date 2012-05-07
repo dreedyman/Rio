@@ -181,7 +181,7 @@ public class StagedDataManager {
 
         /* Verify missing components. If there are any, go get them */
         Collection<SystemRequirements.SystemComponent> missing = verifyPlatformCapabilities();
-        if(missing.size()>0) {
+        if(!missing.isEmpty()) {
             install(missing);
             logger.info("Missing requirements have been provisioned");
         }

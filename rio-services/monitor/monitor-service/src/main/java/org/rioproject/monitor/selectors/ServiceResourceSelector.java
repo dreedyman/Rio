@@ -226,7 +226,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                 candidateList.remove(candidate1);
             }
         }
-        if(logger.isLoggable(Level.FINER) && candidateList.size()==0) {
+        if(logger.isLoggable(Level.FINER) && candidateList.isEmpty()) {
             logger.log(Level.FINER,
                        "Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a virtual machine " +
                        "boundary constraint and an instance of the service has " +
@@ -298,7 +298,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         }
 
         if(logger.isLoggable(Level.FINER) &&
-           candidateList.size()==0 &&
+           candidateList.isEmpty() &&
            elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
             logger.log(Level.FINER,
                        "Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a physical machine " +

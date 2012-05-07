@@ -87,7 +87,7 @@ public class DeployHandlerMonitor {
                         action = "deploy";
                         result = deployAdmin.deploy(opstring, null);
                     }
-                    if (result.size() > 0) {
+                    if (!result.isEmpty()) {
                         for (Map.Entry<String, Throwable> entry : result.entrySet()) {
                             logger.log(Level.WARNING,
                                        "Deploying service " +

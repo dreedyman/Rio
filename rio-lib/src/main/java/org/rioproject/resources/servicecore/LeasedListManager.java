@@ -93,7 +93,7 @@ public class LeasedListManager implements LeaseListener {
      */
     public ServiceResource getNext() throws NoSuchElementException {
         ServiceResource sr;
-        if(list.size() == 0)
+        if(list.isEmpty())
             throw new NoSuchElementException("Empty resource list");
         synchronized(list) {
             sr = list.removeFirst();
@@ -121,7 +121,7 @@ public class LeasedListManager implements LeaseListener {
      */
     public ServiceResource getPrevious() throws NoSuchElementException {
         ServiceResource sr;
-        if(list.size() == 0)
+        if(list.isEmpty())
             throw new NoSuchElementException("Empty resource list");
         synchronized(list) {
             sr = list.removeLast();

@@ -191,7 +191,7 @@ public class OarMojo extends ClassDepAndJarMojo {
                                        getOpStringFile().getName()));
             manifest.addConfiguredAttribute(
                 new Manifest.Attribute("OAR-Activation", activation));
-            if(attached.size()>0) {
+            if(!attached.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for(String s: attached) {
                     if(sb.length()>0)

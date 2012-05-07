@@ -126,7 +126,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             throw new IllegalArgumentException("serviceBeanManager is null");
         if(computeResource == null)
             throw new IllegalArgumentException("computeResource is null");
-        setServiceElement(sElem);
+        this.sElem = sElem;
         this.serviceBeanManager = serviceBeanManager;
         this.computeResource = computeResource;
         this.sharedConfig = sharedConfig;
@@ -333,7 +333,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
 
             if(locatorString!=null) {
                 LookupLocator[] systemLocators = JiniClient.parseLocators(locatorString);
-                if(locators.size()==0) {
+                if(locators.isEmpty()) {
                     locators.addAll(Arrays.asList(systemLocators));
                 } else {
                     List<LookupLocator> toAdd = new ArrayList<LookupLocator>();
@@ -352,7 +352,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                         locators.add(ll);
                 }
             }
-            LookupLocator[] locatorsToUse = locators.size()==0?null:
+            LookupLocator[] locatorsToUse = locators.isEmpty()?null:
                                             locators.toArray(new LookupLocator[locators.size()]);
             if(sElem.getDiscoveryManagementPooling()) { 
                 serviceDiscoMgmt = discoPool.getDiscoveryManager(getOperationalStringName(),

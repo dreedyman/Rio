@@ -350,7 +350,7 @@ public class InstantiatorResource {
                         break;
                     }
                 }
-                if(list.size()>0) {
+                if(!list.isEmpty()) {
                     serviceElementMap.put(sElem, list);
                 } else {
                     serviceElementMap.remove(sElem);
@@ -794,7 +794,7 @@ public class InstantiatorResource {
            meetsQuantitativeRequirements(sElem)) {
             Collection<SystemComponent> unsupportedReqs =
                 meetsQualitativeRequirements(sElem.getServiceLevelAgreements());
-            if(unsupportedReqs.size() == 0) {
+            if(unsupportedReqs.isEmpty()) {
                 if(logger.isLoggable(Level.FINER))
                     logger.finer(getName()+" at ["+getHostAddress()+"] meets "+
                                  "qualitative requirements for "+

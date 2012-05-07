@@ -162,7 +162,7 @@ public class OpStringManagerProxy {
             OperationalStringManager opMgr = null;
             ProvisionManager monitor;
             synchronized(monitors) {
-                if(monitors.size()>0)
+                if(!monitors.isEmpty())
                     monitor = monitors.get(0);
                 else {
                     StringBuilder sb = new StringBuilder();
@@ -219,7 +219,7 @@ public class OpStringManagerProxy {
                     }
                     if(!ThrowableUtil.isRetryable(t)) {
                         synchronized(monitors) {
-                            if(monitors.size()>0)
+                            if(!monitors.isEmpty())
                                 monitors.remove(monitor);
                             else
                                 toThrow = t;
