@@ -115,15 +115,16 @@ public class MacTopOutputParser extends CPUExecHandler {
         }
     }
 
-    double getDouble(String sVal) {
+    double getDouble(final String sVal) {
+        String s  =sVal;
         double dVal = 0.0;
         try {
-            int ndx = sVal.indexOf("%");
+            int ndx = s.indexOf("%");
             if(ndx != -1)
-                sVal = sVal.substring(0, ndx);
-            dVal = Double.parseDouble(sVal) / 100;
+                s = s.substring(0, ndx);
+            dVal = Double.parseDouble(s) / 100;
         } catch(NumberFormatException e) {
-            System.out.println("Bad value [" + sVal + "]");
+            System.out.println("Bad value [" + s + "]");
         }
         return (dVal);
     }
