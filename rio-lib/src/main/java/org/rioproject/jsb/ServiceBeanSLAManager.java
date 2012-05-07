@@ -22,7 +22,6 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventHandler;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
-import org.rioproject.watch.ThreadDeadlockMonitor;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAPolicyHandler;
 import org.rioproject.sla.SLAPolicyHandlerFactory;
@@ -277,7 +276,7 @@ public class ServiceBeanSLAManager {
                 if (SLAPolicyHandlerFactory.slaPolicyHandlerChanged(sla,
                                                                     slap)) {
                     if(logger.isLoggable(Level.FINEST)) {
-                        StringBuffer b = new StringBuffer();
+                        StringBuilder b = new StringBuilder();
                         b.append("The SLAPolicyHandler for [");
                         b.append(sla.getIdentifier());
                         b.append("] has changed. ");
@@ -291,7 +290,7 @@ public class ServiceBeanSLAManager {
                     toAddList.add(sla);
                 } else {
                     if(logger.isLoggable(Level.FINEST)) {
-                        StringBuffer b = new StringBuffer();
+                        StringBuilder b = new StringBuilder();
                         b.append("Updating the SLAPolicyHandler for [");
                         b.append(sla.getIdentifier());
                         b.append("] with new SLA values: ");
