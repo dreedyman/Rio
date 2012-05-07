@@ -55,6 +55,7 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
      * the implementation of this method. If the underlying resource needs to
      * be closed, implementing classes need to override this method.
      */
+    @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
     protected void closeResource() { }
 
 
