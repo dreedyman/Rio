@@ -214,7 +214,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         }
         this.handback = handback;
         if(listener != null)
-            register(listener);
+            eventSubscribers.add(listener);
         service = Executors.newCachedThreadPool();
     }
 
