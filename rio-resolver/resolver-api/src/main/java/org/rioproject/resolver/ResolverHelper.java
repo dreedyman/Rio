@@ -46,6 +46,7 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class ResolverHelper {
     public final static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
     static final String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
