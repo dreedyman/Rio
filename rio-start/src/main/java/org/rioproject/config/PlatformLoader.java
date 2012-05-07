@@ -40,6 +40,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class PlatformLoader {
     static final String COMPONENT = "org.rioproject.boot";
     static final Logger logger = Logger.getLogger(COMPONENT);
