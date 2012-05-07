@@ -74,8 +74,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     @Override
     public ClassLoader getClassLoader(String codebase) throws MalformedURLException {
-        codebase = resolveCodebase(codebase);
-        return loader.getClassLoader(codebase);
+        String resolvedCodebase = resolveCodebase(codebase);
+        return loader.getClassLoader(resolvedCodebase);
     }
 
     @Override
