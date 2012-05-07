@@ -130,7 +130,7 @@ public final class FileUtils {
      * details for IOException that may be thrown
      *
      * @throws IOException If the provided dir is not a directory, or if the
-     * directory cannt be written to
+     * directory cannot be written to
      * @throws IllegalArgumentException if the dir parameter is null
      */
     public static void checkDirectory(final File dir, final String description) throws IOException {
