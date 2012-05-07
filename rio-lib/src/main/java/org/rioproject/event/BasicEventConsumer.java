@@ -104,7 +104,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(EventDescriptor edTemplate) throws Exception {
+    public BasicEventConsumer(final EventDescriptor edTemplate) throws Exception {
         this(edTemplate, null, null, null);
     }
 
@@ -115,7 +115,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(RemoteServiceEventListener listener) throws Exception {
+    public BasicEventConsumer(final RemoteServiceEventListener listener) throws Exception {
         this(null, listener, null, null);
     }
 
@@ -128,7 +128,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(EventDescriptor edTemplate, RemoteServiceEventListener listener) throws Exception {
+    public BasicEventConsumer(final EventDescriptor edTemplate, final RemoteServiceEventListener listener)
+        throws Exception {
         this(edTemplate, listener, null, null);
     }
 
@@ -142,9 +143,9 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(EventDescriptor edTemplate,
-                              RemoteServiceEventListener listener,
-                              Configuration config) throws Exception {
+    public BasicEventConsumer(final EventDescriptor edTemplate,
+                              final RemoteServiceEventListener listener,
+                              final Configuration config) throws Exception {
         this(edTemplate, listener, null, config);
     }
 
@@ -160,45 +161,44 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */                                  
-    public BasicEventConsumer(EventDescriptor edTemplate,
-                              RemoteServiceEventListener listener,
-                              MarshalledObject handback,
-                              Configuration config) throws Exception {
+    public BasicEventConsumer(final EventDescriptor edTemplate,
+                              final RemoteServiceEventListener listener,
+                              final MarshalledObject handback,
+                              final Configuration config) throws Exception {
         Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
                                                          new BasicILFactory(),
                                                          false,
                                                          true);
         ProxyPreparer basicLeasePreparer = new BasicProxyPreparer();
 
-        if(config == null)
-            config = EmptyConfiguration.INSTANCE;
-
         this.config = config;
+        if(this.config == null)
+            this.config = EmptyConfiguration.INSTANCE;
 
-        leaseDuration = Config.getLongEntry(config,
+        leaseDuration = Config.getLongEntry(this.config,
                                             COMPONENT,
                                             "eventLeaseDuration",
                                             DEFAULT_LEASE_DURATION, //default
                                             1000*60,                // min
                                             Long.MAX_VALUE);        // max
 
-        exporter = ExporterConfig.getExporter(config,
+        exporter = ExporterConfig.getExporter(this.config,
                                               COMPONENT,
                                               "eventConsumerExporter",
                                               defaultExporter);
 
-        eventLeasePreparer = (ProxyPreparer)config.getEntry(COMPONENT,
-                                                            "eventLeasePreparer",
-                                                            ProxyPreparer.class,
-                                                            basicLeasePreparer);
-        connectRetries = Config.getIntEntry(config,
+        eventLeasePreparer = (ProxyPreparer)this.config.getEntry(COMPONENT,
+                                                                 "eventLeasePreparer",
+                                                                 ProxyPreparer.class,
+                                                                 basicLeasePreparer);
+        connectRetries = Config.getIntEntry(this.config,
                                             COMPONENT,
                                             "connectRetries",
                                             DEFAULT_CONNECT_RETRY_COUNT, // default
                                             0,                           // min
                                             5);                          // max
 
-        retryWait = Config.getLongEntry(config,
+        retryWait = Config.getLongEntry(this.config,
                                         COMPONENT,
                                         "retryWait",
                                         DEFAULT_RETRY_WAIT,  // default
@@ -259,7 +259,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @param listener The RemoteServiceEventListener
      * @return true if the RemoteServiceEventListener has been added
      */
-    public boolean register(RemoteServiceEventListener listener) {
+    public boolean register(final RemoteServiceEventListener listener) {
         return (register(listener, null));
     }
 
@@ -276,8 +276,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @param handback The MarshalledObject to be used as a handback
      * @return true if the RemoteServiceEventListener has been added
      */
-    public boolean register(RemoteServiceEventListener listener,
-                            MarshalledObject handback) {
+    public boolean register(final RemoteServiceEventListener listener,
+                            final MarshalledObject handback) {
         this.handback = handback;
         boolean added = eventSubscribers.add(listener);
         return (added);
@@ -290,7 +290,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @param listener The RemoteServiceEventListener
      * @return true if the RemoteServiceEventListener was removed
      */
-    public boolean deregister(RemoteServiceEventListener listener) {
+    public boolean deregister(final RemoteServiceEventListener listener) {
         return(removeListener(listener));
     }
 
@@ -303,7 +303,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @return The Watch
      */
-    public Watch createWatch(WatchDataSourceRegistry watchRegistry) {
+    public Watch createWatch(final WatchDataSourceRegistry watchRegistry) {
         if(watchRegistry == null)
             throw new IllegalArgumentException("watchRegistry is null");
         if(responseWatch!=null)
@@ -357,7 +357,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws IllegalArgumentException if the item parameter is null
      */
-    public EventRegistration register(ServiceItem item) {
+    public EventRegistration register(final ServiceItem item) {
         if(item==null)
             throw new IllegalArgumentException("item is null");
 
@@ -409,9 +409,9 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws IllegalArgumentException if any og the parameters are null
      */
-    public EventRegistration register(EventProducer eventProducer,
-                                      EventDescriptor eventDesc,
-                                      ServiceID serviceID) {
+    public EventRegistration register(final EventProducer eventProducer,
+                                      final EventDescriptor eventDesc,
+                                      final ServiceID serviceID) {
         if(eventProducer==null)
             throw new IllegalArgumentException("eventProducer is null");
         if(eventDesc==null)
@@ -444,7 +444,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @return The Lease for the @link net.jini.core.event.EventRegistration}
      */
-    Lease connect(EventProducer producer, EventDescriptor eDesc) {
+    Lease connect(final EventProducer producer, final EventDescriptor eDesc) {
         Lease lease = null;
         for(int i=0; i<connectRetries; i++) {
             try {
@@ -521,7 +521,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @return If found, returns the source object associated with the
      * eventID, otherwise returns null
      */
-    public Object getEventRegistrationSource(long eventID) {
+    public Object getEventRegistrationSource(final long eventID) {
         EventRegistration eReg = eventRegistrationTable.get(
             eventID);
         Object source = null;
@@ -538,7 +538,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws IllegalArgumentException if the serviceID parameter is null
      */
-    public void deregister(ServiceID serviceID) {
+    public void deregister(final ServiceID serviceID) {
         deregister(serviceID, true);
     }
 
@@ -552,7 +552,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws IllegalArgumentException if the serviceID parameter is null
      */
-    public void deregister(ServiceID serviceID, boolean disconnect) {
+    public void deregister(final ServiceID serviceID, final boolean disconnect) {
         if(serviceID==null)
             throw new IllegalArgumentException("serviceID is null");
         EventLeaseManager elm = leaseTable.remove(serviceID);
@@ -572,7 +572,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @throws UnknownEventException If the RemoteEvent cannot be downcast to a
      * RemoteServiceEvent
      */
-    public void notify(RemoteEvent rEvent)throws UnknownEventException {
+    public void notify(final RemoteEvent rEvent)throws UnknownEventException {
         if(!(rEvent instanceof RemoteServiceEvent))
             throw new UnknownEventException("Unsupported event class");
         RemoteServiceEvent rsEvent = (RemoteServiceEvent)rEvent;
@@ -621,8 +621,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @return An EventDescriptor if found or null if no match
      */
-    protected EventDescriptor getDescriptor(Entry[] attrs,
-                                            EventDescriptor template) {
+    protected EventDescriptor getDescriptor(final Entry[] attrs,
+                                            final EventDescriptor template) {
         EventDescriptor matchedDescriptor = null;
         /* Traverse the attribute collection, for each EventDescriptor
          * attribute, first check if the attribute has a "matches" method. If it
@@ -678,7 +678,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         }
     }
 
-    private boolean removeListener(RemoteServiceEventListener l) {
+    private boolean removeListener(final RemoteServiceEventListener l) {
         boolean removed = eventSubscribers.remove(l);
         if(removed) {
             if(eventSubscribers.size() == 0) {
@@ -755,16 +755,16 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * is allowed to expire.
      */
     class EventLeaseManager extends Thread {
-        long leaseTime;
+        final long leaseTime;
         boolean keepAlive = true;
-        EventProducer producer;
+        final EventProducer producer;
         Lease lease;
-        EventDescriptor eDesc;
+        final EventDescriptor eDesc;
         private Integer id;
 
-        EventLeaseManager(EventProducer producer,
-                          Lease lease,
-                          EventDescriptor eDesc) {
+        EventLeaseManager(final EventProducer producer,
+                          final Lease lease,
+                          final EventDescriptor eDesc) {
             super("EventLeaseManager");
             synchronized(EventLeaseManager.class) {
                 id = token++;
