@@ -27,7 +27,6 @@ import org.rioproject.associations.AssociationType;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.opstring.*;
 import org.rioproject.core.provision.SystemRequirements;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.sla.SLA;
