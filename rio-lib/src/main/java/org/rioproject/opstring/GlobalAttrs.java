@@ -33,6 +33,7 @@ import java.util.Properties;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class GlobalAttrs {
     /** List of groups to join */
     protected List<String> groupList = new ArrayList<String>();
@@ -375,12 +376,9 @@ public class GlobalAttrs {
      * by the equals method of an AssociationDescriptor), then an Exception is
      * thrown
      */
-    public void addAssociationDescriptor(AssociationDescriptor a)
-        throws Exception {
+    public void addAssociationDescriptor(AssociationDescriptor a) throws Exception {
         if(associations.contains(a))
-            throw new Exception("Duplicate AssociationDescriptor ["
-                                +a.getName()
-                                +"]");
+            throw new Exception("Duplicate AssociationDescriptor ["+a.getName()+"]");
         associations.add(a);
     }
 
