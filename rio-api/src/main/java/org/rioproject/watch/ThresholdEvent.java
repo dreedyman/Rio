@@ -78,10 +78,10 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
                           int type,
                           String detail) {
         super(source);
-        setCalculable(calculable);
-        setThresholdValues(thresholdValues);
-        setType(type);
-        setDetail(detail);
+        this.calculable = calculable;
+        this.thresholdValues = thresholdValues;
+        this.type = type;
+        this.detail = detail;
     }
 
     /**
