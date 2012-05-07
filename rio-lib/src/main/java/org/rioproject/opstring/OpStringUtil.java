@@ -62,44 +62,35 @@ public class OpStringUtil {
      * @throws java.io.IOException If the jars cannot be served
      */
     public static void checkCodebase(ServiceElement elem, String codebase) throws IOException {
-        if (codebase != null) {
-            if (!codebase.endsWith("/"))
-                codebase = codebase + "/";
+        if (codebase == null) {
+            if (logger.isLoggable(Level.WARNING))
+                logger.warning("Cannot fix null codebase for [" + elem.getName() + "], unknown codebase");
+            return;
         }
+        StringBuilder codebaseBuilder = new StringBuilder();
+        codebaseBuilder.append(codebase);
+        if (!codebase.endsWith("/")) {
+            codebaseBuilder.append("/");
+        }
+        String codebaseToUse = codebaseBuilder.toString();
         ClassBundle bundle = elem.getComponentBundle();
         if (bundle.getCodebase() == null) {
-            if (codebase == null) {
-                if (logger.isLoggable(Level.WARNING))
-                    logger.warning("Cannot fix null codebase for [" + elem.getName() + "], unknown codebase");
-                return;
-            }
             for(String jar : bundle.getJARNames())
-                canServe(jar, codebase);
-            bundle.setCodebase(codebase);
+                canServe(jar, codebaseToUse);
+            bundle.setCodebase(codebaseToUse);
             logger.fine("Fixed ClassBundle "+bundle);
 
-        } else if (bundle.getRawCodebase().startsWith("$[")) {
-            String resolved = PropertyHelper.expandProperties(bundle.getRawCodebase(), PropertyHelper.RUNTIME);
-            if (resolved == null) {
-                if (logger.isLoggable(Level.FINE))
-                    logger.fine("Cannot fix ["+bundle.getRawCodebase()+"] codebase for ["+elem.getName()+"], "+
-                                "unknown property");
-                return;
-            }
-            canServe(bundle.getClassName(), codebase);
-            bundle.setCodebase(codebase);
         }
 
         ClassBundle[] exports = elem.getExportBundles();
         StringBuilder sb = new StringBuilder();
-
         StringBuilder sb1 = new StringBuilder();
         for (ClassBundle export : exports) {
             if (export.getCodebase() == null) {
                 for(String jar : export.getJARNames()) {
-                    canServe(jar, codebase);
+                    canServe(jar, codebaseToUse);
                 }
-                export.setCodebase(codebase);
+                export.setCodebase(codebaseToUse);
                 logger.fine("Fixed export ClassBundle "+export);
             } else if (export.getRawCodebase().startsWith("$[")) {
                 String resolved = PropertyHelper.expandProperties(export.getRawCodebase(), PropertyHelper.RUNTIME);
