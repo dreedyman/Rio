@@ -64,8 +64,8 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      *
      * @throws Exception if the DynamicEventConsumer cannot be created
      */
-    public DynamicEventConsumer(EventDescriptor edTemplate,
-                                DiscoveryManagement dMgr) throws Exception {
+    public DynamicEventConsumer(final EventDescriptor edTemplate,
+                                final DiscoveryManagement dMgr) throws Exception {
         this(edTemplate, null, dMgr);
     }
 
@@ -79,9 +79,9 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      *
      * @throws Exception if the DynamicEventConsumer cannot be created
      */
-    public DynamicEventConsumer(EventDescriptor edTemplate,
-                                RemoteServiceEventListener listener, 
-                                DiscoveryManagement dMgr) throws Exception {
+    public DynamicEventConsumer(final EventDescriptor edTemplate,
+                                final RemoteServiceEventListener listener,
+                                final DiscoveryManagement dMgr) throws Exception {
         this(edTemplate, listener, null, dMgr);
     }
 
@@ -98,10 +98,10 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      *
      * @throws Exception if the DynamicEventConsumer cannot be created
      */
-    public DynamicEventConsumer(EventDescriptor edTemplate,
-                                RemoteServiceEventListener listener, 
-                                MarshalledObject handback,
-                                DiscoveryManagement dMgr) throws Exception {
+    public DynamicEventConsumer(final EventDescriptor edTemplate,
+                                final RemoteServiceEventListener listener,
+                                final MarshalledObject handback,
+                                final DiscoveryManagement dMgr) throws Exception {
         this(edTemplate, listener, handback, dMgr, null);
     }
 
@@ -119,19 +119,16 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      *
      * @throws Exception if the DynamicEventConsumer cannot be created
      */
-    public DynamicEventConsumer(EventDescriptor edTemplate,
-                                RemoteServiceEventListener listener, 
-                                MarshalledObject handback,
-                                DiscoveryManagement dMgr, 
-                                Configuration config) throws Exception {
+    public DynamicEventConsumer(final EventDescriptor edTemplate,
+                                final RemoteServiceEventListener listener,
+                                final MarshalledObject handback,
+                                final DiscoveryManagement dMgr,
+                                final Configuration config) throws Exception {
         super(edTemplate, listener, handback, config);
-        ServiceTemplate template = new ServiceTemplate(null,
-                                                       null,
-                                                       new Entry[]{edTemplate});
-        config = (config==null?EmptyConfiguration.INSTANCE:config);
+        ServiceTemplate template = new ServiceTemplate(null, null, new Entry[]{edTemplate});
         sdm = new ServiceDiscoveryManager(dMgr, 
-                                          new LeaseRenewalManager(config), 
-                                          config);
+                                          new LeaseRenewalManager(config),
+                                          (config==null?EmptyConfiguration.INSTANCE:config));
         lCache = sdm.createLookupCache(template, null,  null);
         
         lCache.addListener(new EventProducerManager());
@@ -163,7 +160,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      * discovered EventProducer instances that match we should register with
      * them
      */
-    public boolean register(RemoteServiceEventListener listener, MarshalledObject handback) {
+    public boolean register(final RemoteServiceEventListener listener, final MarshalledObject handback) {
         this.handback = handback;
         boolean added = super.register(listener, handback);
         try {
@@ -187,7 +184,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
         /**
          * An EventProducer has been added
          */
-        public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
+        public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
             // sdEvent.getPreEventServiceItem() == null
             ServiceItem item = sdEvent.getPostEventServiceItem();
             try {
@@ -265,10 +262,10 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      */
     class ServiceFaultListener extends ServiceDiscoveryAdapter 
     implements FaultDetectionListener<ServiceID> {
-        boolean useLookupCache;
-        ServiceID serviceID;
+        final boolean useLookupCache;
+        final ServiceID serviceID;
         
-        ServiceFaultListener(boolean useLookupCache, ServiceID serviceID) {
+        ServiceFaultListener(final boolean useLookupCache, final ServiceID serviceID) {
             this.useLookupCache = useLookupCache;
             this.serviceID = serviceID;
         }
@@ -276,7 +273,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
         /**
          * @see org.rioproject.fdh.FaultDetectionListener#serviceFailure
          */
-        public synchronized void serviceFailure(Object proxy, ServiceID serviceID) {
+        public synchronized void serviceFailure(final Object proxy, final ServiceID serviceID) {
             if(logger.isLoggable(Level.FINEST)) {
                 String name = proxy.getClass().getName();
                 logger.log(Level.FINEST, 
@@ -289,7 +286,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
         /**
          * An EventProducer has been removed
          */
-        public void serviceRemoved(ServiceDiscoveryEvent sdEvent) {
+        public void serviceRemoved(final ServiceDiscoveryEvent sdEvent) {
             if(!useLookupCache)
                 return;
             ServiceItem item = sdEvent.getPreEventServiceItem();
