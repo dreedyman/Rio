@@ -40,11 +40,12 @@ public class RioManifest {
     private Manifest manifest;
     
     public RioManifest(URL url) throws IOException {
-        if(!url.getProtocol().equals("jar")) {
-            url = new URL("jar:" + url.toExternalForm() + "!/");
+        URL u = url;
+        if(!u.getProtocol().equals("jar")) {
+            u = new URL("jar:" + u.toExternalForm() + "!/");
         }
-        JarURLConnection uc = (JarURLConnection) url.openConnection();
-        setManifest(uc.getManifest());
+        JarURLConnection uc = (JarURLConnection) u.openConnection();
+        this.manifest = uc.getManifest();
     }
     
     public void close() throws IOException {
@@ -87,14 +88,4 @@ public class RioManifest {
             throw new IllegalArgumentException("there is no manifest");
         return manifest.getAttributes(name);
     }
-
-    /**
-     * Setter for property manifest.
-     *
-     * @param manifest New value of property manifest.
-     */
-    public void setManifest(Manifest manifest) {
-        this.manifest = manifest;
-    }
-    
 }
