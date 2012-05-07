@@ -82,12 +82,13 @@ public class ConsoleTransferListener extends AbstractTransferListener {
         }
     }
 
-    private void pad(StringBuilder buffer, int spaces) {
+    private void pad(StringBuilder buffer, final int spaces) {
+        int spaceCountDown = spaces;
         String block = "                                        ";
-        while (spaces > 0) {
+        while (spaceCountDown > 0) {
             int n = Math.min(spaces, block.length());
             buffer.append(block, 0, n);
-            spaces -= n;
+            spaceCountDown -= n;
         }
     }
 
