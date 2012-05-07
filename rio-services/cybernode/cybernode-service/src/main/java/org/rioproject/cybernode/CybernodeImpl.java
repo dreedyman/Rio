@@ -351,10 +351,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @see org.rioproject.deploy.ServiceBeanInstantiator#update
      */
     public void update(ServiceElement[] sElements, OperationalStringManager opStringMgr) throws RemoteException {
-        opStringMgr = (OperationalStringManager)operationalStringManagerPreparer.prepareProxy(opStringMgr);
+        OperationalStringManager preparedOpStringMgr =
+            (OperationalStringManager)operationalStringManagerPreparer.prepareProxy(opStringMgr);
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("Prepared OperationalStringManager proxy: %s", opStringMgr);
-        container.update(sElements, opStringMgr);
+            logger.finest("Prepared OperationalStringManager proxy: %s", preparedOpStringMgr);
+        container.update(sElements, preparedOpStringMgr);
     }
 
     /**
@@ -445,7 +446,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     /*
      * Get the ServiceBeanContext and bootstrap the Cybernode
      */
-    protected void bootstrap(String[] configArgs) throws Exception {
+    private void bootstrap(String[] configArgs) throws Exception {
         context = ServiceBeanActivation.getServiceBeanContext(getConfigComponent(),
                                                               "Cybernode",
                                                               configArgs,
@@ -1391,31 +1392,27 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                             thresholdValues.getLowThreshold(),
                             thresholdValues.getHighThreshold());
 
-            switch(type) {
-                case ThresholdEvent.BREACHED:
-                    double tValue = calculable.getValue();
-                    if(tValue>thresholdValues.getCurrentHighThreshold()) {
-                        svcConsumer.updateMonitors();
-                        if(calculable.getId().equals("Memory")) {
-                            logger.info("Memory utilization is %d, threshold set at %d, request immediate garbage collection",
-                                        calculable.getValue(), thresholdValues.getCurrentHighThreshold());
-                            System.gc();
-                        }
-                        if(calculable.getId().contains("Perm Gen")) {
-                            logger.info("Perm Gen has breached with utilization > %d",
-                                        thresholdValues.getCurrentHighThreshold());
-                            //if(isEnlisted())
-                            //release(false);
-                            //svcConsumer.cancelRegistrations();
-                        }
-                        
-                    }
-                    break;
-
-                case ThresholdEvent.CLEARED:
-                    //setChanged(StatusType.WARNING);
+            if(type==ThresholdEvent.BREACHED)  {
+                double tValue = calculable.getValue();
+                if(tValue>thresholdValues.getCurrentHighThreshold()) {
                     svcConsumer.updateMonitors();
-                    break;
+                    if(calculable.getId().equals("Memory")) {
+                        logger.info("Memory utilization is %d, threshold set at %d, request immediate garbage collection",
+                                    calculable.getValue(), thresholdValues.getCurrentHighThreshold());
+                        System.gc();
+                    }
+                    if(calculable.getId().contains("Perm Gen")) {
+                        logger.info("Perm Gen has breached with utilization > %d",
+                                    thresholdValues.getCurrentHighThreshold());
+                        //if(isEnlisted())
+                        //release(false);
+                        //svcConsumer.cancelRegistrations();
+                    }
+
+                }
+            } else if(type== ThresholdEvent.CLEARED) {
+                //setChanged(StatusType.WARNING);
+                svcConsumer.updateMonitors();
             }
 
             try {
