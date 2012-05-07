@@ -128,19 +128,17 @@ public class DirHandler implements OptionHandler {
         return(changeDir(dirName, true, out));
     }
 
-    static boolean changeDir(String dirName,
-                             boolean echoSuccess,
-                             PrintStream out) {
+    static boolean changeDir(String dirName, boolean echoSuccess, PrintStream out) {
+        String dirNameToUse = dirName;
         boolean changed = false;
-        if(dirName.startsWith("..")) {
-            dirName = CLI.getInstance().currentDir.getAbsolutePath()+
-                           File.separator+dirName; 
+        if(dirNameToUse.startsWith("..")) {
+            dirNameToUse = CLI.getInstance().currentDir.getAbsolutePath()+File.separator+dirName;
         }
-        if(dirName.equals("~")) {
-            dirName = CLI.getInstance().homeDir;
+        if(dirNameToUse.equals("~")) {
+            dirNameToUse = CLI.getInstance().homeDir;
         }
         /* See if the passed in property is a complete directory */
-        File dir = new File(dirName);
+        File dir = new File(dirNameToUse);
         /* If its not, it may be a relative path */
         if(!dir.exists()) {
             dir = new File(CLI.getInstance().currentDir.getAbsolutePath()+
