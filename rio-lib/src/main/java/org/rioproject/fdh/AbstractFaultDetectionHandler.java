@@ -48,6 +48,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public abstract class AbstractFaultDetectionHandler implements FaultDetectionHandler<ServiceID> {
     public static final int DEFAULT_RETRY_COUNT = 3;
     public static final long DEFAULT_RETRY_TIMEOUT = 1000;
