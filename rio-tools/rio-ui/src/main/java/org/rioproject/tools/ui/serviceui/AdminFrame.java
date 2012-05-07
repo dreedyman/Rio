@@ -15,6 +15,7 @@
  */
 package org.rioproject.tools.ui.serviceui;
 
+import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.entry.ServiceType;
 import org.rioproject.tools.ui.Constants;
@@ -42,7 +43,7 @@ public class AdminFrame extends JFrame {
     public AdminFrame(ServiceItem item, long startupDelay, Component component) throws Exception {
         super();
         serviceUIPanel = new ServiceUIPanel(item, startupDelay, this);
-        ServiceType sType = serviceUIPanel.getServiceType(item.attributeSets);
+        ServiceType sType = getServiceType(item.attributeSets);
         if(sType!=null && sType.getDisplayName()!=null)
             setTitle("Service UI for "+sType.getDisplayName());
         Container container = getContentPane();
@@ -62,6 +63,15 @@ public class AdminFrame extends JFrame {
         setSize(565, 588);
         setLocationRelativeTo(component);
         setVisible(true);
+    }
+
+    private ServiceType getServiceType(Entry[] attrs) {
+        for (Entry attr : attrs) {
+            if (attr instanceof ServiceType) {
+                return (ServiceType) attr;
+            }
+        }
+        return(null);
     }
 
     @Override

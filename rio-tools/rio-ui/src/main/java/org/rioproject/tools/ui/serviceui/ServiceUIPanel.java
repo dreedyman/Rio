@@ -386,7 +386,7 @@ public class ServiceUIPanel extends JPanel {
         return(null);
     }
 
-    ServiceType getServiceType(Entry[] attrs) {
+    private ServiceType getServiceType(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ServiceType) {
                 return (ServiceType) attr;

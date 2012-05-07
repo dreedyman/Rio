@@ -37,6 +37,8 @@ import java.util.EventObject;
  *
  * @author Sun Microsystems
  */
+/* We call setRowHeight() int e constructor. */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class JTreeTable extends JTable {
     private ColorManager colorManager;
     protected TreeTableCellRenderer tree;
