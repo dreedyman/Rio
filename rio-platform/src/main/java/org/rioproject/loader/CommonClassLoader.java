@@ -75,7 +75,7 @@ Codebase: "serviceX-dl.jar rio-api.jar jsk-lib-dl.jar"<br>
 
  @author Dennis Reedy
  */
-public class CommonClassLoader extends URLClassLoader {
+public final class CommonClassLoader extends URLClassLoader {
     private static final String COMPONENT = "org.rioproject.loader";
     private static WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
     private static final Map<String, URL[]> components = new HashMap<String, URL[]>();
@@ -86,7 +86,7 @@ public class CommonClassLoader extends URLClassLoader {
      *
      * @param parent The parent ClassLoader
 	 */
-    private CommonClassLoader(ClassLoader parent) {
+    private CommonClassLoader(final ClassLoader parent) {
         super(new URL[0], parent);
     }
     
@@ -131,7 +131,7 @@ public class CommonClassLoader extends URLClassLoader {
      *
      * @return Array of URLs
      */
-    private URL[] doGetURLs(ClassLoader cl) {
+    private URL[] doGetURLs(final ClassLoader cl) {
         URL[] urls;
         if(cl.equals(this)) {
             urls = super.getURLs();
@@ -153,7 +153,7 @@ public class CommonClassLoader extends URLClassLoader {
      * @return true If the requested component can be located, false
      * otherwise.
      */
-	public boolean testComponentExistence(String name) {
+	public boolean testComponentExistence(final String name) {
 		boolean exists = false;
 		/* First check if the class is registered in the component Map */
 		synchronized(components) {
@@ -178,7 +178,7 @@ public class CommonClassLoader extends URLClassLoader {
      * 
      * @param jars Array of URLs
      */
-    public void addCommonJARs(URL[] jars) {
+    public void addCommonJARs(final URL[] jars) {
         if(jars==null)
             return;
         for (URL jar : jars) {
@@ -194,7 +194,7 @@ public class CommonClassLoader extends URLClassLoader {
      * @param name The name of the class
      * @param urls Codebase for the class identified by the name parameter
      */
-	public void addComponent(String name, URL[] urls) {
+	public void addComponent(final String name, final URL[] urls) {
 		boolean added = false;
 		boolean toAdd = false;
         boolean toReplace = false;
@@ -253,7 +253,7 @@ public class CommonClassLoader extends URLClassLoader {
     /*
      * Check if the URL already is registered
      */
-    private boolean hasURL(URL url) {
+    private boolean hasURL(final URL url) {
         URL[] urls = getURLs();
         for (URL url1 : urls) {
             if (url1.equals(url))
