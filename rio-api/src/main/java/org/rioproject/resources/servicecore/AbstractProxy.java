@@ -51,9 +51,9 @@ public abstract class AbstractProxy implements ReferentUuid, Service, Serializab
 
     public AbstractProxy(Remote server, Uuid uuid) {
         if(server == null) {
-            throw new NullPointerException("server cannot be null");
+            throw new IllegalArgumentException("server cannot be null");
         } else if(uuid == null) {
-            throw new NullPointerException("uuid cannot be null");
+            throw new IllegalArgumentException("uuid cannot be null");
         }
         this.server = server;
         this.uuid = uuid;

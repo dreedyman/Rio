@@ -24,12 +24,11 @@ import org.rioproject.resolver.RemoteRepository;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
 /**
- * The <tt>OperationalStringManager</tt> defines the semantics for a service that can
+ * The {@code OperationalStringManager} defines the semantics for a service that can
  * manage OperationalString objects
  * 
  * @see OperationalString
@@ -39,7 +38,7 @@ import java.util.Map;
  */
 public interface OperationalStringManager extends Remote {
     /**
-     * Get the OperationalString the <tt>OperationalStringManager</tt> is managing
+     * Get the OperationalString the {@code OperationalStringManager} is managing
      * 
      * @return The OperationalString
      * @throws RemoteException If communication errors occur
@@ -47,12 +46,12 @@ public interface OperationalStringManager extends Remote {
     OperationalString getOperationalString() throws RemoteException;
 
     /**
-     * Whether the <tt>OperationalStringManager</tt> is the active managing
-     * <tt>OperationalStringManager</tt> for the OperationalString. The managing
-     * <tt>OperationalStringManager</tt> will actively respond to scenarios where
+     * Whether the {@code OperationalStringManager} is the active managing
+     * {@code OperationalStringManager} for the OperationalString. The managing
+     * {@code OperationalStringManager} will actively respond to scenarios where
      * service's contained within this OperationalString need to be allocated,
-     * updated, relocated, removed or added. If the <tt>OperationalStringManager</tt> is
-     * not the managing <tt>OperationalStringManager</tt>, it will observe and record
+     * updated, relocated, removed or added. If the {@code OperationalStringManager} is
+     * not the managing {@code OperationalStringManager}, it will observe and record
      * OperationalString transitions but not act on them.
      * 
      * @return True if managing, false otherwise
@@ -62,15 +61,15 @@ public interface OperationalStringManager extends Remote {
     boolean isManaging() throws RemoteException;
 
     /**
-     * Set the <tt>OperationalStringManager</tt> managing status based on the active
+     * Set the {@code OperationalStringManager} managing status based on the active
      * parameter
      * 
-     * @param active If true, the <tt>OperationalStringManager</tt> is the active
-     * managing <tt>OperationalStringManager</tt> for the OperationalString. The managing
-     * <tt>OperationalStringManager</tt> will actively respond to scenarios where
+     * @param active If true, the {@code OperationalStringManager} is the active
+     * managing {@code OperationalStringManager} for the OperationalString. The managing
+     * {@code OperationalStringManager} will actively respond to scenarios where
      * service's contained within this OperationalString need to be allocated,
-     * updated, relocated, removed or added. If the <tt>OperationalStringManager</tt> is
-     * not the managing <tt>OperationalStringManager</tt>, it will observe and record
+     * updated, relocated, removed or added. If the {@code OperationalStringManager} is
+     * not the managing {@code OperationalStringManager}, it will observe and record
      * OperationalString transitions but not act on them.
      *
      * @throws RemoteException If communication errors happen
@@ -81,15 +80,14 @@ public interface OperationalStringManager extends Remote {
      * Get the deployment Date history
      * 
      * @return An array of Date objects documenting the date & time the
-     * OperationalString has been deployed. If has never been deployed (has been
-     * scheduled) then a zero-length array will be returned.
+     * OperationalString has been deployed.
      *
      * @throws RemoteException If communication errors happen
      */
     Date[] getDeploymentDates() throws RemoteException;
 
     /**
-     * Update the OperationalString that the <tt>OperationalStringManager</tt> is managing.
+     * Update the OperationalString that the {@code OperationalStringManager} is managing.
      * This involves updating ServiceElement instances, which may include the addition
      * and or removal of ServiceElements in the OperationalString 
      * 
@@ -110,8 +108,7 @@ public interface OperationalStringManager extends Remote {
      * the OperationalString
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> update(OperationalString opstring)
-        throws OperationalStringException, RemoteException;
+    Map<String, Throwable> update(OperationalString opstring) throws OperationalStringException, RemoteException;
 
     /**
      * This method returns the ServiceElement object for a requested service
@@ -130,7 +127,7 @@ public interface OperationalStringManager extends Remote {
      * This method returns the ServiceElement object for a requested service
      * based on the array of interface (or proxy) classes the service implements
      * as an array of String objects and an optional service name. The
-     * <tt>OperationalStringManager</tt> will locate the ServiceElement by matching the
+     * {@code OperationalStringManager} will locate the ServiceElement by matching the
      * interface (or proxy) names provided and the name (if not null) of the
      * supplied OperationalString.
      * 
@@ -144,21 +141,6 @@ public interface OperationalStringManager extends Remote {
      * @throws RemoteException If communication errors occur
      */
     ServiceElement getServiceElement(String[] interfaces, String name) throws RemoteException;
-
-    /**
-     * This method will add a ServiceElement to an OperationalString. Based on
-     * the attributes of the ServiceElement, ServiceBean instances will be
-     * provisioned to available compute resources based on the capability of the
-     * compute resource to meet the operational criteria criteria of the
-     * ServiceElement
-     * 
-     * @param sElem The ServiceElement to add
-     * @throws OperationalStringException If the service described by the
-     * ServiceElement already exists, or there are problems adding the
-     * ServiceElement
-     * @throws RemoteException If communication errors occur
-     */
-    void addServiceElement(ServiceElement sElem) throws OperationalStringException, RemoteException;
 
     /**
      * This method will add a ServiceElement to an OperationalString. Based on
@@ -182,8 +164,8 @@ public interface OperationalStringManager extends Remote {
 
     /**
      * This method will modify the ServiceElement attributes of a ServiceElement
-     * in the <tt>OperationalStringManager</tt>. The
-     * <tt>OperationalStringManager</tt> will locate deployed ServiceElement
+     * in the {@code OperationalStringManager}. The
+     * {@code OperationalStringManager} will locate deployed ServiceElement
      * instances, and apply the attributes to those running instances.
      * If the ServiceElement is not found it will be added and deployed.
      * 
@@ -203,7 +185,7 @@ public interface OperationalStringManager extends Remote {
      * @param destroy If true, destroy all services upon removal, otherwise
      * just remove
      * @throws OperationalStringException If the ServiceElement is null or not
-     * being managed by the <tt>OperationalStringManager</tt>
+     * being managed by the {@code OperationalStringManager}
      * @throws RemoteException If communication errors occur
      */
     void removeServiceElement(ServiceElement sElem, boolean destroy) throws OperationalStringException, 
@@ -219,7 +201,7 @@ public interface OperationalStringManager extends Remote {
      * array is returned. A new array is allocated each time.
      *
      * @throws OperationalStringException If the ServiceElement is unknown to the
-     * <tt>OperationalStringManager</tt>
+     * {@code OperationalStringManager}
      * @throws RemoteException If communication errors occur
      */
     ServiceBeanInstance[] getServiceBeanInstances(ServiceElement sElem) throws OperationalStringException, 
@@ -237,14 +219,14 @@ public interface OperationalStringManager extends Remote {
      * notified on the result of the attempt to relocate the service instance.
      * @param uuid The Uuid of the
      * {@link org.rioproject.deploy.ServiceBeanInstantiator} (Cybernode)
-     * to relocate to. If this parameter is null, the <tt>OperationalStringManager</tt>
+     * to relocate to. If this parameter is null, the {@code OperationalStringManager}
      * will determine a suitable compute resource
      *
      * @throws OperationalStringException If the ServiceElement is not being
-     * managed by the <tt>OperationalStringManager</tt>, or the service requesting
+     * managed by the {@code OperationalStringManager}, or the service requesting
      * relocation is not a
      * {@link org.rioproject.opstring.ServiceElement.ProvisionType#DYNAMIC} service
-     * @throws NullPointerException if the instance is <code>null</code>
+     * @throws IllegalArgumentException if the instance is <code>null</code>
      * @throws RemoteException If communication errors occur
      */
     void relocate(ServiceBeanInstance instance, ServiceProvisionListener listener, Uuid uuid)
@@ -264,15 +246,15 @@ public interface OperationalStringManager extends Remote {
      * 
      * @param sElem The ServiceElement instance to increment. This parameter
      * is used to match a ServiceElement being managed by the
-     * <tt>OperationalStringManager</tt>
+     * {@code OperationalStringManager}
      * @param permanent If the increment request should be considered permanent. If 
      * set to false, the number of service instances may vary over time
      * @param listener If not null, the ServiceProvisionListener will be
      * notified on the result of the attempt to increment the amount of service
      * instances.
      * @throws OperationalStringException If the ServiceElement is not being
-     * managed by the <tt>OperationalStringManager</tt> (or the <tt>OperationalStringManager</tt>
-     * is not the managing <tt>OperationalStringManager</tt> for the OperationalString)
+     * managed by the {@code OperationalStringManager} (or the {@code OperationalStringManager}
+     * is not the managing {@code OperationalStringManager} for the OperationalString)
      * @throws RemoteException If communication errors occur
      */
     void increment(ServiceElement sElem, boolean permanent, ServiceProvisionListener listener)
@@ -285,19 +267,19 @@ public interface OperationalStringManager extends Remote {
      * @param instance The ServiceBeanInstance
      * @param mandate The mandate parameter is processed as follows:
      * <ul
-     * <li>If set to <tt>true</tt>, and the number of running services
+     * <li>If set to {@code true}, and the number of running services
      * is equal to the number of services to maintain, the number of services to
      * maintain will be decremented by 1.
-     * <li>If set to <tt>false</tt>, and the number of service instances running
+     * <li>If set to {@code false}, and the number of service instances running
      * is greater then the number of services to maintain, the number
      * of services to maintain will be decremented by 1.
-     * <li>If set to <tt>false</tt>, and the number of running service is
+     * <li>If set to {@code false}, and the number of running service is
      * equal to the number of services to maintain, the decrement will not be allowed.
      * </ul>
      * @param destroy If true, destroy the ServiceBean upon decrementing, otherwise
      * just remove the service instance from being a managed service.
      * @throws OperationalStringException If the ServiceElement is not being
-     * managed by the <tt>OperationalStringManager</tt>
+     * managed by the {@code OperationalStringManager}
      * @throws RemoteException If communication errors occur
      */
     void decrement(ServiceBeanInstance instance, boolean mandate, boolean destroy)
@@ -307,19 +289,19 @@ public interface OperationalStringManager extends Remote {
      * Get the number of pending service provision requests. This method will only 
      * take action if the ServiceElement provision type is
      * {@link org.rioproject.opstring.ServiceElement.ProvisionType#DYNAMIC}.
-     * Any other provisiontype will be ignored
+     * Any other {@code ProvisionType} will be ignored
      *  
      * @param sElem The ServiceElement instance to query. This parameter
      * is used to match a ServiceElement being managed by the
-     * <tt>OperationalStringManager</tt>
+     * {@code OperationalStringManager}
      * 
      * @throws RemoteException If communication errors occur
      * 
      * @return The number of pending requests. If the ServiceElement 
      * provision type is not
      * {@link org.rioproject.opstring.ServiceElement.ProvisionType#DYNAMIC}
-     * <tt>OperationalStringManager</tt> is not
-     * the managing <tt>OperationalStringManager</tt>, -1 will be returned
+     * {@code OperationalStringManager} is not
+     * the managing {@code OperationalStringManager}, -1 will be returned
      */
     int getPendingCount(ServiceElement sElem) throws RemoteException;
 
@@ -330,8 +312,8 @@ public interface OperationalStringManager extends Remote {
      * provision type will be ignored
      * 
      * @param sElem The {@link ServiceElement} instance to
-     * trim. This parameter is used to match a <tt>ServiceElement</tt> being
-     * managed by the <tt>OperationalStringManager</tt>
+     * trim. This parameter is used to match a {@code ServiceElement} being
+     * managed by the {@code OperationalStringManager}
      * @param trimUp The number of pending requests to trim. The number of
      * pending requests to trim will be determined as follows :
      * <ul>
@@ -347,7 +329,7 @@ public interface OperationalStringManager extends Remote {
      * </ul> 
      * 
      * @throws OperationalStringException If the ServiceElement is not being
-     * managed by the <tt>OperationalStringManager</tt>
+     * managed by the {@code OperationalStringManager}
      * @throws RemoteException If communication errors occur
      * @return The number of pending requests that were trimmed. The value will be
      * the new managed ServiceElement planned property. If the ServiceElement 
@@ -365,7 +347,7 @@ public interface OperationalStringManager extends Remote {
      * is (re-)allocated or relocated, the settings are applied to the new i
      * nstance.
      * @throws OperationalStringException If the ServiceElement is not being
-     * managed by the <tt>OperationalStringManager</tt>
+     * managed by the {@code OperationalStringManager}
      * @throws RemoteException If communication errors occur
      */
     void update(ServiceBeanInstance instance) throws OperationalStringException, RemoteException;
@@ -452,7 +434,7 @@ public interface OperationalStringManager extends Remote {
      * Get the {@link org.rioproject.deploy.ServiceStatement}s for
      * all {@link ServiceElement}s in the OperationalString
      *
-     * @return An array of <tt>ServiceStatement</tt> instances.
+     * @return An array of {@code ServiceStatement} instances.
      *
      * @throws RemoteException If communication errors occur
      */

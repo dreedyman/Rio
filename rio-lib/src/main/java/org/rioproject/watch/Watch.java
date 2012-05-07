@@ -77,11 +77,10 @@ public class Watch implements WatchMBean {
         this.id = id;
         this.config = config;
         try {
-            WatchDataSource wds =
-                (WatchDataSource) config.getEntry(COMPONENT,
-                                                  "watchDataSource",
-                                                  WatchDataSource.class,
-                                                  null);
+            WatchDataSource wds = (WatchDataSource) config.getEntry(COMPONENT,
+                                                                    "watchDataSource",
+                                                                    WatchDataSource.class,
+                                                                    null);
             if(wds==null)
                 wds = new WatchDataSourceImpl(); 
 

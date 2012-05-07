@@ -68,7 +68,7 @@ public class BeanInvocationLayerFactory extends BasicILFactory {
     @Override
     protected Class[] getRemoteInterfaces(Remote impl) throws ExportException {
         if(impl == null) {
-            throw new NullPointerException("impl is null");
+            throw new IllegalArgumentException("impl is null");
         }
         return(impl.getClass().getInterfaces());
     }

@@ -48,7 +48,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
      */
     public void deregister(Watch... watches) {
         if (watches == null)
-            throw new NullPointerException("Watches cannot be null");
+            throw new IllegalArgumentException("Watches cannot be null");
         watchRegistry.removeAll(Arrays.asList(watches));
         for (Watch watch : watches) {
             try {
@@ -109,7 +109,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
      */
     public void register(Watch... watches) {
         if(watches == null)
-            throw new NullPointerException("Watches cannot be null");
+            throw new IllegalArgumentException("Watches cannot be null");
         watchRegistry.addAll(Arrays.asList(watches));
         for (Watch watch : watches) {
             associateThresholdListener(watch);
@@ -159,9 +159,9 @@ public class WatchDataSourceRegistry implements WatchRegistry {
     public void addThresholdListener(String id,
                                      ThresholdListener thresholdListener) {
         if(id==null)
-            throw new NullPointerException("id is null");
+            throw new IllegalArgumentException("id is null");
         if(thresholdListener==null)
-            throw new NullPointerException("thresholdListener is null");
+            throw new IllegalArgumentException("thresholdListener is null");
         Collection<ThresholdListener> collection;
         if(thresholdListenerTable.containsKey(id)) {
             collection = thresholdListenerTable.get(id);
@@ -226,7 +226,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
      */
     public Watch findWatch(String id) {
         if(id == null)
-            throw new NullPointerException("id is null");
+            throw new IllegalArgumentException("id is null");
 
         Watch watch = null;
         for(Watch w : watchRegistry) {

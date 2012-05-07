@@ -236,7 +236,7 @@ public class ProvisionTask implements Runnable {
         } finally {
             if (thrown != null) {
                 if (!ThrowableUtil.isRetryable(thrown)) {
-                    logger.info("Drop %s %s from collection", ir.getName(), ir.getInstantiator());
+                    logger.info("Drop %s %s from collection, reason: %s", ir.getName(), ir.getInstantiator(), failureReason);
                     context.getSelector().dropServiceResource(serviceResource);
                     result = ServiceProvisioner.PROVISION_FAILURE | ServiceProvisioner.BAD_CYBERNODE;
                 } else {

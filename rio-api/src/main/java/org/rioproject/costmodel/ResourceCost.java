@@ -51,11 +51,11 @@ public class ResourceCost implements Serializable {
                         String costModelDescription, 
                         Date date) {
         if(resourceName == null)
-            throw new NullPointerException("resourceName is null");
+            throw new IllegalArgumentException("resourceName is null");
         if(costModelDescription == null)
-            throw new NullPointerException("costModelDescription is null");
+            throw new IllegalArgumentException("costModelDescription is null");
         if(date == null)
-            throw new NullPointerException("date is null");
+            throw new IllegalArgumentException("date is null");
         this.resourceName = resourceName;
         this.cost = cost;
         this.units = units;

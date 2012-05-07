@@ -89,7 +89,7 @@ public abstract class EventHandler {
     public EventHandler(EventDescriptor descriptor, Configuration config)
         throws Exception {
         if(descriptor == null)
-            throw new NullPointerException("descriptor is null");
+            throw new IllegalArgumentException("descriptor is null");
         this.descriptor = descriptor;
         resourceMgr = new LeasedListManager();
         landlord = new LandlordLessor(config);

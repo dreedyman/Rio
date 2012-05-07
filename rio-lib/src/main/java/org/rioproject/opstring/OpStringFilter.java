@@ -36,7 +36,7 @@ public class OpStringFilter implements ServiceItemFilter {
      */
     public OpStringFilter(String opStringName) {
         if(opStringName==null)
-            throw new NullPointerException("opStringName is null");
+            throw new IllegalArgumentException("opStringName is null");
         this.opStringName = opStringName;
     }
     

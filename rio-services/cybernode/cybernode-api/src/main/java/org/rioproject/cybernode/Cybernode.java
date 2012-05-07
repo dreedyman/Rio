@@ -42,7 +42,7 @@ public interface Cybernode extends ServiceBeanInstantiator, Service {
      * no effect
      *
      *
-     * @throws NullPointerException If the schedule parameter is <code>null</code>
+     * @throws IllegalArgumentException If the schedule parameter is <code>null</code>
      * @throws RemoteException If communication errors occur
      */
     void enlist() throws RemoteException;

@@ -154,14 +154,14 @@ public class JMXUtil {
      * @param defaultType The defaultOpenType to use
      * @return the corresponding OpenType
      *
-     * @throws NullPointerException if the classString argument is null
+     * @throws IllegalArgumentException if the classString argument is null
      * @throws InvalidOpenTypeException if the class described by the
      * classString argument is not a valid open type
      */
     public static OpenType getOpenType(String classString,
                                        final OpenType defaultType) {
         if(classString==null)
-            throw new NullPointerException("classString is null");
+            throw new IllegalArgumentException("classString is null");
         if(classString.equals("void")) {
             return SimpleType.VOID;
         }

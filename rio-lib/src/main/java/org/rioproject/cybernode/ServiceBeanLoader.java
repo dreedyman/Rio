@@ -297,7 +297,6 @@ public class ServiceBeanLoader {
             Properties metaData = new Properties();
             metaData.setProperty("opStringName", sElem.getOperationalStringName());
             metaData.setProperty("serviceName", sElem.getName());
-
             ServiceClassLoader jsbCL = new ServiceClassLoader(ServiceClassLoader.getURIs(classpath),
                                                               new ClassAnnotator(exports),
                                                               commonCL,
@@ -308,7 +307,6 @@ public class ServiceBeanLoader {
                 new ServiceClassLoader(classpath, annotator, commonCL);
                 */
             currentThread.setContextClassLoader(jsbCL);
-            
             if(logger.isLoggable(Level.INFO)) {
                 StringBuilder buffer = new StringBuilder();
                 if(implJARs.length==0) {
@@ -325,7 +323,6 @@ public class ServiceBeanLoader {
                     logger.fine("Create ServiceClassLoader for %s, classpath %s, codebase %s",
                                 className, buffer.toString(), jsbCL.getClassAnnotation());
                 }
-                //ClassLoaderUtil.displayClassLoaderTree(jsbCL);
             }
 
             /* Get the servicePolicyFile from the environment. If the

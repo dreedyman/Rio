@@ -37,7 +37,7 @@ class MeasurablesTest extends GroovyTestCase {
         memMeasurable.start()
         
         def req = [(memCapability.CAPACITY) : '250k']
-        SystemComponent sysComp = new SystemComponent(memCapability.name, req)
+        SystemComponent sysComp = new SystemComponent(memCapability.name, memCapability.class.name, req)
         assertTrue 'JVM should have the capacity of 250k but does not',
                    memCapability.supports(sysComp)
 
@@ -100,5 +100,21 @@ class MeasurablesTest extends GroovyTestCase {
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
         memMeasurable.stop()        
+    }
+
+    void testDiskSpace() {
+        Configuration config = EmptyConfiguration.INSTANCE
+        org.rioproject.system.measurable.disk.DiskSpace diskMeasurable =
+            new org.rioproject.system.measurable.disk.DiskSpace(config)
+
+        org.rioproject.system.capability.platform.StorageCapability storageCapability =
+            new org.rioproject.system.capability.platform.StorageCapability()
+        diskMeasurable.addWatchDataReplicator(storageCapability)
+        diskMeasurable.start()
+
+        def req = [(storageCapability.CAPACITY) : '250k']
+        SystemComponent sysComp = new SystemComponent(storageCapability.name, req)
+        assertTrue 'System should have the disk space capacity of 250k but does not',
+                   storageCapability.supports(sysComp)
     }
 }

@@ -1165,8 +1165,14 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     deployedService = new DeployedService(event.getServiceElement(), jsbInstance, cru);
                     loaderLogger.finest("Created DeployedService for %s", CybernodeLogUtil.logName(event));
                 } catch(ServiceBeanInstantiationException e) {
-                    if(opMgr instanceof OpStringManagerProxy.OpStringManager)
-                        ((OpStringManagerProxy.OpStringManager)opMgr).terminate();
+                    if(opMgr instanceof OpStringManagerProxy.OpStringManager) {
+                        try {
+                            ((OpStringManagerProxy.OpStringManager)opMgr).terminate();
+                        } catch(IllegalStateException ex) {
+                            logger.warning("Shutting down OpStringManagerProxy more then once for service %s",
+                                           CybernodeLogUtil.logName(event));
+                        }
+                    }
                     throw e;
                 }
                 return(deployedService);

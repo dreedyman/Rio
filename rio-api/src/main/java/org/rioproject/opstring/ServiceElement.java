@@ -199,7 +199,7 @@ public class ServiceElement implements Serializable {
     /**
      * Get the provision type set for this service.
      *
-     * @return The provison type
+     * @return The provision type
      */
     public ProvisionType getProvisionType() {
         return (provisionType);

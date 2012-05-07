@@ -23,21 +23,17 @@ import org.junit.runner.RunWith;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.cybernode.Cybernode;
-import org.rioproject.cybernode.StaticCybernode;
 import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.*;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
-
-import java.io.IOException;
-
 
 /**
  * Test pre and post advertisement invocations
@@ -61,68 +57,102 @@ public class AdvertiseLifecycleTest {
     }
 
     @Test
-    public void testThatServiceThatThrowsDuringPreAdvertiseDoesNotGetCreated() {
-        StaticCybernode cybernode = new StaticCybernode();
-        ServiceBeanInstantiationException thrown = null;
-        try {
-            cybernode.activate(ServiceThatThrowsDuringPreAdvertise.class.getName());
-        } catch(ServiceBeanInstantiationException e) {
-            thrown = e;
-        }
-        Assert.assertNotNull("Expected a ServiceBeanInstantiationException got " +
-                             (thrown == null ? "null" : thrown.getClass().getName()),
-                             thrown);
-    }
-
-    @Test
     public void testThatServiceThatThrowsDuringPreAdvertiseDoesNotGetDeployed() throws Exception {
-        ServiceElement element = makeServiceElement(ServiceThatThrowsDuringPreAdvertise.class.getName(),
+        String opStringName = "Foo";
+        ServiceElement element = makeServiceElement(ServiceThatThrowsDuringAdvertiseCallbacks.class.getName(),
                                                     "Test",
-                                                    "Foo",
+                                                    opStringName,
                                                     Boolean.TRUE.toString(),
+                                                    Boolean.FALSE.toString(),
                                                     1);
         PFEListener listener = new PFEListener();
         BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionFailureEvent.getEventDescriptor(), listener);
         eventConsumer.register(monitorItems[0]);
 
-        OpString opString = new OpString("Foo", null);
+        OpString opString = new OpString(opStringName, null);
         opString.addService(element);
         Assert.assertNotNull(monitor);
         testManager.deploy(opString, monitor);
-        try {
-            for(int i=0; i<10; i++) {
-                if(listener.failed!=null) {
-                    break;
-                }
-                Thread.sleep(500);
+        for(int i=0; i<10; i++) {
+            if(listener.failed!=null) {
+                break;
             }
-            Assert.assertNotNull(listener.failed);
-            ServiceBeanInstance[] instances = cybernode.getServiceBeanInstances(element);
-            Assert.assertEquals(0, instances.length);
-        } finally {
-            testManager.undeploy("Foo");
+            Thread.sleep(500);
         }
+        Assert.assertNotNull(listener.failed);
+        ServiceBeanInstance[] instances = cybernode.getServiceBeanInstances(element);
+        Assert.assertEquals(0, instances.length);
+        eventConsumer.terminate();
     }
 
     @Test
-    public void testThatServiceThrowsDuringPreAdvertiseWithRequiresAssociation() throws IOException,
-                                                                                        ClassNotFoundException,
-                                                                                        InterruptedException,
-                                                                                        OperationalStringException {
-        ServiceElement element1 = makeServiceElement(ServiceThatThrowsDuringPreAdvertise.class.getName(),
+    public void testThatServiceThatThrowsDuringPostAdvertiseWithRequiresAssociation() throws Exception {
+        String opStringName = "Bar";
+        ServiceElement element1 = makeServiceElement(ServiceThatThrowsDuringAdvertiseCallbacks.class.getName(),
+                                                    "Test",
+                                                    opStringName,
+                                                    Boolean.FALSE.toString(),
+                                                    Boolean.TRUE.toString(),
+                                                    1);
+        ServiceElement element2 = makeServiceElement(ServiceThatThrowsDuringAdvertiseCallbacks.class.getName(),
+                                                     "DependsOn",
+                                                     opStringName,
+                                                     Boolean.FALSE.toString(),
+                                                     Boolean.FALSE.toString(),
+                                                     1);
+        AssociationDescriptor descriptor = new AssociationDescriptor(AssociationType.REQUIRES, "DependsOn");
+        descriptor.setMatchOnName(true);
+        descriptor.setOperationalStringName(element2.getOperationalStringName());
+        descriptor.setGroups(testManager.getGroups());
+        element1.setAssociationDescriptors(descriptor);
+        OpString opString = new OpString(opStringName, null);
+        opString.addService(element1);
+        opString.addService(element2);
+        OperationalStringManager manager = testManager.deploy(opString, monitor);
+        Assert.assertNotNull(manager);
+        testManager.waitForDeployment(manager);
+
+        PMEListener listener = new PMEListener();
+        BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), listener);
+        eventConsumer.register(monitorItems[0]);
+
+        manager.removeServiceElement(element2, true);
+
+        for(int i=0; i<10; i++) {
+            if(listener.event!=null &&
+               listener.event.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED)) {
+                break;
+            }
+            Thread.sleep(500);
+        }
+        eventConsumer.terminate();
+        Assert.assertNotNull(listener.event);
+        Assert.assertEquals(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED, listener.event.getAction());
+        Assert.assertEquals(element1, listener.event.getServiceElement());
+
+        OperationalString operationalString = manager.getOperationalString();
+        Assert.assertEquals(1, operationalString.getServices().length);
+        Assert.assertEquals("Test", operationalString.getServices()[0].getName());
+        Assert.assertEquals(0, operationalString.getServices()[0].getPlanned());
+    }
+
+    @Test
+    public void testThatServiceThrowsDuringPreAdvertiseWithRequiresAssociation() throws Exception {
+        ServiceElement element1 = makeServiceElement(ServiceThatThrowsDuringAdvertiseCallbacks.class.getName(),
                                                     "Test",
                                                     "FooBar",
                                                     Boolean.TRUE.toString(),
-                                                    1);
-        ServiceElement element2 = makeServiceElement(ServiceThatThrowsDuringPreAdvertise.class.getName(),
-                                                    "DependsOn",
-                                                    "FooBar",
                                                     Boolean.FALSE.toString(),
-                                                    0);
+                                                    1);
+        ServiceElement element2 = makeServiceElement(ServiceThatThrowsDuringAdvertiseCallbacks.class.getName(),
+                                                     "DependsOn",
+                                                     "FooBar",
+                                                     Boolean.FALSE.toString(),
+                                                     Boolean.FALSE.toString(),
+                                                     0);
 
         AssociationDescriptor descriptor = new AssociationDescriptor(AssociationType.REQUIRES, "DependsOn");
         descriptor.setMatchOnName(true);
-        //descriptor.setInterfaceNames(element2.getExportBundles()[0].getClassName());
         descriptor.setOperationalStringName(element2.getOperationalStringName());
         descriptor.setGroups(testManager.getGroups());
         element1.setAssociationDescriptors(descriptor);
@@ -141,27 +171,44 @@ public class AdvertiseLifecycleTest {
         }
         Assert.assertEquals(1, instances.length);
         manager.increment(element2, true, null);
+        PMEListener listener = new PMEListener();
+        BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), listener);
+        eventConsumer.register(monitorItems[0]);
 
         testManager.waitForService("DependsOn");
+        for(int i=0; i<10; i++) {
+            if(listener.event!=null &&
+               listener.event.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED)) {
+                break;
+            }
+            Thread.sleep(500);
+        }
+        eventConsumer.terminate();
+        Assert.assertNotNull(listener.event);
+        Assert.assertEquals(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED, listener.event.getAction());
+        instances = cybernode.getServiceBeanInstances(element1);
+        Assert.assertEquals(0, instances.length);
+        instances = manager.getServiceBeanInstances(element1);
+        Assert.assertEquals(0, instances.length);
+        OperationalString operationalString = manager.getOperationalString();
+        ServiceElement element1AfterDecrement = null;
+        for(ServiceElement service : operationalString.getServices()) {
+            if(service.getName().equals("Test")) {
+                element1AfterDecrement = service;
+                break;
+            }
+        }
 
-       /* org.rioproject.resources.servicecore.Service proxy =
-            (org.rioproject.resources.servicecore.Service)instances[0].getService();
-
-        try {
-            Object admin = proxy.getAdmin();
-            ((ServiceBeanControl)admin).advertise();
-        } catch(ServiceBeanControlException e) {
-            e.printStackTrace();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }*/
+        Assert.assertNotNull(element1AfterDecrement);
+        Assert.assertEquals(0, element1AfterDecrement.getPlanned());
     }
 
-    ServiceElement makeServiceElement(String implClass,
-                                      String name,
-                                      String opstringName,
-                                      String throwOnPreAdvertise,
-                                      int planned)  {
+    private ServiceElement makeServiceElement(String implClass,
+                                              String name,
+                                              String opstringName,
+                                              String throwOnPreAdvertise,
+                                              String throwOnPostUnAdvertise,
+                                              int planned)  {
         ServiceElement elem = new ServiceElement();
         ClassBundle main = new ClassBundle(implClass,
                                            new String[]{System.getProperty("user.dir")+"/target/test-classes/"},
@@ -176,6 +223,7 @@ public class AdvertiseLifecycleTest {
         sbc.setName(name);
         sbc.setGroups(System.getProperty("org.rioproject.groups"));
         sbc.addInitParameter("throwOnPreAdvertise", Boolean.valueOf(throwOnPreAdvertise));
+        sbc.addInitParameter("throwOnPostUnAdvertise", Boolean.valueOf(throwOnPostUnAdvertise));
         elem.setServiceBeanConfig(sbc);
         elem.setOperationalStringName(opstringName);
         elem.setPlanned(planned);
@@ -187,6 +235,14 @@ public class AdvertiseLifecycleTest {
 
         public void notify(RemoteServiceEvent event) {
             failed = (ProvisionFailureEvent)event;
+        }
+    }
+
+    class PMEListener implements RemoteServiceEventListener {
+        ProvisionMonitorEvent event;
+
+        public void notify(RemoteServiceEvent rEvent) {
+            event = (ProvisionMonitorEvent)rEvent;
         }
     }
 }

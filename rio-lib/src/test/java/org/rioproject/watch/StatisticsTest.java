@@ -61,8 +61,8 @@ public class StatisticsTest {
 
         try {
             new Statistics(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -163,8 +163,8 @@ public class StatisticsTest {
 
         try {
             stat.addValue(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -216,8 +216,8 @@ public class StatisticsTest {
 
         try {
             stat.setValues((List<Double>)null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -292,14 +292,14 @@ public class StatisticsTest {
 
         try {
             new Statistics().removeValues(null, false);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
 
         try {
             new Statistics().removeValues(null, true);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -398,20 +398,20 @@ public class StatisticsTest {
 
         try {
             stat.removeValues(null, (double) 0);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
 
         try {
             stat.removeValues((double) 0, null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
 
         try {
             stat.removeValues(null, null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 

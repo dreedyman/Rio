@@ -63,7 +63,7 @@ public class DynamicConfiguration extends AbstractConfiguration {
      */
     public void setEntry(String component, String name, Class type, Object value) {
         if (component == null || name == null || type == null) {
-            throw new NullPointerException(
+            throw new IllegalArgumentException(
                 "Component, name, and type cannot be null");
         }
         Entry entry = new Entry();
@@ -79,7 +79,7 @@ public class DynamicConfiguration extends AbstractConfiguration {
         throws ConfigurationException {
 
         if (component == null || name == null || type == null) {
-            throw new NullPointerException(
+            throw new IllegalArgumentException(
                 "Component, name, and type cannot be null");
         }
         Entry entry = entries.get(component + '.' + name);

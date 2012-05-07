@@ -86,7 +86,7 @@ public abstract class AbstractFaultDetectionHandler
      */
     public void register(FaultDetectionListener<ServiceID> listener) {
         if(listener == null)
-            throw new NullPointerException("listener is null");
+            throw new IllegalArgumentException("listener is null");
         synchronized(listeners) {
             if(!listeners.contains(listener))
                 listeners.add(listener);
@@ -98,7 +98,7 @@ public abstract class AbstractFaultDetectionHandler
      */
     public void unregister(FaultDetectionListener<ServiceID> listener) {
         if(listener == null)
-            throw new NullPointerException("listener is null");
+            throw new IllegalArgumentException("listener is null");
         synchronized(listeners) {
             listeners.remove(listener);
         }
@@ -110,9 +110,9 @@ public abstract class AbstractFaultDetectionHandler
     public void monitor(Object proxy, ServiceID id, LookupCache lCache)
     throws Exception {
         if(proxy == null)
-            throw new NullPointerException("proxy is null");
+            throw new IllegalArgumentException("proxy is null");
         if(id == null)
-            throw new NullPointerException("id is null");
+            throw new IllegalArgumentException("id is null");
         this.proxy = proxy;
         this.serviceID = id;
         if(lCache != null) {

@@ -43,14 +43,14 @@ public class SpringDiscardManager implements DiscardManager {
      * @param discardManager The infrastructure created
      * {@link org.rioproject.core.jsb.DiscardManager}
      *
-     * @throws NullPointerException if either parameter is <code>null</code>
+     * @throws IllegalArgumentException if either parameter is <code>null</code>
      */
     public SpringDiscardManager(Object springContext,
                                 DiscardManager discardManager) {
         if(springContext==null)
-            throw new NullPointerException("springContext is null");
+            throw new IllegalArgumentException("springContext is null");
         if(discardManager==null)
-            throw new NullPointerException("discardManager is null");
+            throw new IllegalArgumentException("discardManager is null");
         this.springContext = springContext;
         this.discardManager = discardManager;
     }

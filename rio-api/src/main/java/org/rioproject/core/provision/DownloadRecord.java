@@ -100,11 +100,11 @@ public class DownloadRecord implements Serializable {
                           long downloadTime,
                           long unarchiveTime) {
         if (location == null)
-            throw new NullPointerException("location is null");
+            throw new IllegalArgumentException("location is null");
         if (path == null)
-            throw new NullPointerException("path is null");
+            throw new IllegalArgumentException("path is null");
         if (name == null)
-            throw new NullPointerException("name is null");
+            throw new IllegalArgumentException("name is null");
         this.location = location;
         this.path = path;
         this.name = name;

@@ -177,7 +177,7 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
     public void setConfiguration(String[] configArgs) {
         if (configArgs == null)
-            throw new NullPointerException("configArgs is null");
+            throw new IllegalArgumentException("configArgs is null");
         try {
             this.configArgs = new String[configArgs.length];
             this.configArgs = new String[configArgs.length];

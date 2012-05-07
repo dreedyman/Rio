@@ -122,21 +122,25 @@ public class LeastActiveSelector extends ServiceResourceSelector {
         ServiceResource[] resources = s.toArray(new ServiceResource[s.size()]);
         if(logger.isLoggable(Level.FINEST)) {
             StringBuilder b = new StringBuilder();
-            int i=0;
-            for(ServiceResource sr : resources) {
-                InstantiatorResource ir = (InstantiatorResource)sr.getResource();
-                if(i>0) {
-                    b.append(", ");
+            if(resources.length>0) {
+                int i=0;
+                for(ServiceResource sr : resources) {
+                    InstantiatorResource ir = (InstantiatorResource)sr.getResource();
+                    if(i>0) {
+                        b.append(", ");
+                    }
+                    int count = ((InstantiatorResource)sr.getResource()).getServiceCount();
+                    b.append("(")
+                        .append(ir.getName())
+                        .append(" at ")
+                        .append(ir.getHostAddress())
+                        .append(", service count:")
+                        .append(count)
+                        .append(")");
+                    i++;
                 }
-                int count = ((InstantiatorResource)sr.getResource()).getServiceCount();
-                b.append("(")
-                    .append(ir.getName())
-                    .append(" at ")
-                    .append(ir.getHostAddress())
-                    .append(", service count:")
-                    .append(count)
-                    .append(")");
-                i++;
+            } else {
+                b.append("[No registered Cybernodes]");
             }
             logger.finest(b.toString());
         }

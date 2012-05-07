@@ -544,6 +544,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * Implemented as part of the contract for a
      * {@link javax.management.MBeanRegistration}, empty implementation
      */
+    @SuppressWarnings("{PMD.EmptyMethodInAbstractClassShouldBeAbstract}")
     public void postRegister(Boolean aBoolean) {
     }
 
@@ -551,6 +552,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * Implemented as part of the contract for a
      * {@link javax.management.MBeanRegistration}, empty implementation
      */
+    @SuppressWarnings("{PMD.EmptyMethodInAbstractClassShouldBeAbstract}")
     public void preDeregister() throws Exception {
     }
 
@@ -559,6 +561,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      *
      * @see javax.management.MBeanRegistration#postDeregister()
      */
+    @SuppressWarnings("{PMD.EmptyMethodInAbstractClassShouldBeAbstract}")
     public void postDeregister() {
         mbeanServer = null;
         objectName = null;
@@ -1052,10 +1055,12 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
             }
             unadvertise();
         } catch (IllegalStateException e) {
-            logger.warning(String.format("Unadvertising service error, continue on with destroy. %s: %s",
+            logger.warning(String.format("Error unadvertising service %s, continue on with destroy. %s: %s",
+                                         ServiceElementUtil.getLoggingName(context),
                                          e.getClass().getName(), e.getLocalizedMessage()));
         } catch (IOException e) {
-            logger.warning(String.format("Unadvertising service error, continue on with destroy. %s: %s",
+            logger.warning(String.format("Error unadvertising service %s, continue on with destroy. %s: %s",
+                                         ServiceElementUtil.getLoggingName(context),
                                          e.getClass().getName(), e.getLocalizedMessage()));
         }
 

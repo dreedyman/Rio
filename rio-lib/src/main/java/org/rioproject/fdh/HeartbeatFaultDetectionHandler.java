@@ -180,7 +180,7 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
      */
     public void setConfiguration(String[] configArgs) {
         if(configArgs == null) {
-            throw new NullPointerException("configArgs is null");
+            throw new IllegalArgumentException("configArgs is null");
         }
         try {
             this.config = ConfigurationProvider.getInstance(configArgs);

@@ -50,9 +50,9 @@ public class ServiceAdvertiser {
      */
     public static void advertise(Object serviceProxy, ServiceBeanContext context) throws ServiceBeanControlException {
         if (serviceProxy == null)
-            throw new NullPointerException("serviceProxy is null");
+            throw new IllegalArgumentException("serviceProxy is null");
         if (context == null)
-            throw new NullPointerException("context is null");
+            throw new IllegalArgumentException("context is null");
 
         String hostAddress = context.getComputeResourceManager().getComputeResource().getAddress().getHostAddress();
         Configuration config;

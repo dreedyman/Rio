@@ -105,7 +105,7 @@ public class ProvisionMonitorEventAdapter extends EventNotificationAdapter {
     public void notify(RemoteEvent theEvent)
         throws UnknownEventException, RemoteException {
         if(theEvent == null)
-            throw new NullPointerException("event is null");
+            throw new IllegalArgumentException("event is null");
         if(!(theEvent instanceof ProvisionMonitorEvent)) {
             throw new UnknownEventException("Not a ProvisionMonitorEvent "+
                                             "["+

@@ -42,16 +42,16 @@ public abstract class EventNotificationAdapter implements RemoteEventListener {
      * {@link javax.management.NotificationBroadcasterSupport} for sending
      * the notification
      *
-     * @throws NullPointerException if any of the constructor arguments are
+     * @throws IllegalArgumentException if any of the constructor arguments are
      * <code>null</code>
      */
     public EventNotificationAdapter(
         ObjectName objectName,
         NotificationBroadcasterSupport notificationBroadcasterSupport) {
         if(objectName==null)
-            throw new NullPointerException("objectName is null");
+            throw new IllegalArgumentException("objectName is null");
         if(notificationBroadcasterSupport == null)
-            throw new NullPointerException("notificationBroadcasterSupport " +
+            throw new IllegalArgumentException("notificationBroadcasterSupport " +
                                            "is null");
         this.objectName = objectName;
         this.notificationBroadcasterSupport = notificationBroadcasterSupport;
@@ -66,7 +66,7 @@ public abstract class EventNotificationAdapter implements RemoteEventListener {
      * @param theEvent The remote evet notification
      * @throws UnknownEventException If theEvent argument is an unknown or
      * unexpected type
-     * @throws NullPointerException If theEvent argument is <code>null</code>
+     * @throws IllegalArgumentException If theEvent argument is <code>null</code>
      * @throws RemoteException
      *
      * @see net.jini.core.event.RemoteEventListener#notify(net.jini.core.event.RemoteEvent)

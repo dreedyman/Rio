@@ -121,7 +121,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
      */
     public BeanAdapter(Object bean) {
         if(bean == null)
-            throw new NullPointerException("bean is null");
+            throw new IllegalArgumentException("bean is null");
         this.bean = bean;
     }
    
@@ -149,14 +149,9 @@ public class BeanAdapter extends ServiceBeanAdapter {
      * Override the start method to create a delegating proxy required
      * to navigate between the ServiceBean and the bean.
      *
-     * <p>This method will also check if the wrapped bean has a
-     * <code>preStart()</code> or a <code>postStart()</code> method declared.
-     * If the wrapped bean does have an accessible <code>preAdvertise()</code>
-     * declared, it will be called prior to starting the bean.
-     *
      * <p>Once the bean has been started, the wrapped bean will be checked
-     * for <code>postStart()</code> method declaration. If the wrapped bean
-     * does have an accessible <code>postStart()</code> declared, it will be
+     * for {@code @Initialized()} or a {@code postStart()} method declaration. If the wrapped bean
+     * does have an accessible {@code @Initialized()} or a {@code postStart()} declared, it will be
      * called following the parent's start method.
      *
      * @param context The ServiceBeanContext
@@ -166,32 +161,18 @@ public class BeanAdapter extends ServiceBeanAdapter {
     @Override
     public Object start(final ServiceBeanContext context) throws ServiceBeanInstantiationException {
         delegatingProxy = createDelegatingProxy();
-        /* If defined, invoke preStart lifecycle method */
-        BeanHelper.invokeLifeCycle(null, "preStart", bean);
         Object o = super.start(context);
         /* If defined, invoke postStart lifecycle method, Check if we are
          * being started up first. If so, then the Cybernode will invoke
          * the lifecycle method (RIO-141) */
         Boolean rioStarting =
-            (Boolean)context.getServiceBeanConfig().getConfigurationParameters()
-                                                   .get(Constants.STARTING);
+            (Boolean)context.getServiceBeanConfig().getConfigurationParameters().get(Constants.STARTING);
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("The bean ["+bean.getClass().getName()+"], " +
-                          "is in the process of being instantiated: "+
-                          (rioStarting==null?"false":rioStarting));
-        if(!(rioStarting!=null && rioStarting))
-            BeanHelper.invokeLifeCycle(null, "postStart", bean);
-        /*
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    BeanHelper.invokeLifeCycle(null, "postStart", bean);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-        */
+            logger.finest(String.format("The bean [%s], is in the process of being instantiated: %s",
+                                        bean.getClass().getName(), (rioStarting==null?"false":rioStarting)));
+        if(!(rioStarting!=null && rioStarting)) {
+            BeanHelper.invokeLifeCycle(Started.class, "postStart", bean);
+        }
         return(o);
     }
 
@@ -249,8 +230,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
 
     /**
      * Override the initialize method to check if the wrapped bean has a
-     * <code>preInitialize()</code> method declared. If the wrapped bean
-     * does have an accessible <code>preInitialize()</code> declared, it
+     * {@code preInitialize()} method declared. If the wrapped bean
+     * does have an accessible {@code preInitialize()} declared, it
      * will be called prior to initializing the bean.
      *
      * <p>Once the parent's initialize method has been invoked, if the wrapped
@@ -265,9 +246,9 @@ public class BeanAdapter extends ServiceBeanAdapter {
      * <br>
      *
      * <p>Once bean initialization has been processed,
-     * the wrapped bean will be checked for <code>postInitialize()</code>
+     * the wrapped bean will be checked for {@code postInitialize()}
      * method declaration. If the wrapped bean does have an accessible
-     * <code>postInitialize()</code> declared, it will be called following
+     * {@code postInitialize()} declared, it will be called following
      * the parent's initialize method.
      *
      * @throws Exception if the initialization process fails
@@ -292,7 +273,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
     /**
      * Override the advertise method to check if the wrapped bean has a
      * {@code preAdvertise()} method declared. If the wrapped bean does have an accessible
-     * <code>preAdvertise()</code> declared, it will be called prior to
+     * {@code preAdvertise()} declared, it will be called prior to
      * advertising the bean.
      */
     @Override
@@ -326,8 +307,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
 
     /**
      * Override the destroy method to check if the wrapped bean has a
-     * <code>preDestroy()</code> method declared. If the wrapped bean does
-     * have an accessible <code>preDestroy()</code> declared, it will be
+     * {@code preDestroy()} method declared. If the wrapped bean does
+     * have an accessible {@code preDestroy()} declared, it will be
      * called prior to destroying the bean.
      */
     @Override
@@ -396,7 +377,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
     @Override
     protected Remote exportDo(Exporter exporter) throws Exception {
         if(exporter == null)
-            throw new NullPointerException("exporter is null");
+            throw new IllegalArgumentException("exporter is null");
         return (exporter.export(delegatingProxy));
     }
 

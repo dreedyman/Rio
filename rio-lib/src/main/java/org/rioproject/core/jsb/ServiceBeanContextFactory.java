@@ -39,7 +39,7 @@ public interface ServiceBeanContextFactory {
      * @return A ServiceBeanContext instance. A new ServiceBeanContext will
      * be returned each time this method is invoked
      *
-     * @throws NullPointerException if the sElem, serviceBeanManager or
+     * @throws IllegalArgumentException if the sElem, serviceBeanManager or
      * computeResource parameters are null
      */
     ServiceBeanContext create(ServiceElement sElem,

@@ -66,7 +66,7 @@ public class SLAThresholdEventAdapter extends EventNotificationAdapter
     public void notify(RemoteEvent theEvent)
         throws UnknownEventException, RemoteException {
         if(theEvent == null)
-            throw new NullPointerException("event is null");
+            throw new IllegalArgumentException("event is null");
         if(!(theEvent instanceof SLAThresholdEvent)) {
             throw new UnknownEventException("Not a SLAThresholdEvent "+
                                             "["+
@@ -83,7 +83,7 @@ public class SLAThresholdEventAdapter extends EventNotificationAdapter
      */
     public void policyAction(SLAPolicyEvent event) {
         if(event == null)
-            throw new NullPointerException("event is null");
+            throw new IllegalArgumentException("event is null");
         SLAThresholdEvent slaThresholdEvent = event.getSLAThresholdEvent();
         if(slaThresholdEvent != null)
             buildAndSend(slaThresholdEvent);

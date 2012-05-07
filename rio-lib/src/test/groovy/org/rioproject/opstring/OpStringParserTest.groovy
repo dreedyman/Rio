@@ -30,6 +30,7 @@ import java.lang.management.ManagementFactory
 
 import org.rioproject.watch.ThresholdValues
 import net.jini.core.discovery.LookupLocator
+import org.rioproject.system.SystemWatchID
 
 /**
  * Test groovy parsing
@@ -155,7 +156,7 @@ class OpStringParserTest extends GroovyTestCase {
             assertNotNull sc.attributes
             if(sc.name.equals("Memory")) {
                 Map attrs = new HashMap()
-                attrs.put("Name", "Memory")
+                attrs.put("Name", SystemWatchID.JVM_MEMORY)
                 attrs.put("Available", "4g")
                 attrs.put("Capacity", "20g")
                 checkSystemComponent sc, attrs
@@ -163,7 +164,7 @@ class OpStringParserTest extends GroovyTestCase {
             }
             if(sc.name.equals("StorageCapability")) {
                 Map attrs = new HashMap()
-                attrs.put("Name", "Disk")
+                attrs.put("Name", SystemWatchID.DISK_SPACE)
                 attrs.put("Available", "100g")
                 attrs.put("Capacity", "20t")
                 checkSystemComponent sc, attrs

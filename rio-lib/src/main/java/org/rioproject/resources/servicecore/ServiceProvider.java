@@ -147,7 +147,7 @@ public abstract class ServiceProvider implements Service {
     throws LeaseDeniedException, UnknownEventException, RemoteException {
 
         if(descriptor == null)
-            throw new NullPointerException("descriptor is null");
+            throw new IllegalArgumentException("descriptor is null");
         if(descriptor.eventID == null)
             throw new UnknownEventException("Event ID is null");
         EventHandler eHandler = eventTable.get(descriptor.eventID);

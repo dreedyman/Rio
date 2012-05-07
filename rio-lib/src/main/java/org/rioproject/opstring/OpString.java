@@ -49,7 +49,7 @@ public class OpString implements OperationalString, Serializable {
      */
     public OpString(String name, URL loadedFrom) {
         if (name == null)
-            throw new NullPointerException("OpString name is null");
+            throw new IllegalArgumentException("OpString name is null");
         this.name = name;
         this.loadedFrom = loadedFrom;
     }    
@@ -110,7 +110,7 @@ public class OpString implements OperationalString, Serializable {
      */
     public void setName(String name) {
         if(name==null)
-            throw new NullPointerException("name is null");
+            throw new IllegalArgumentException("name is null");
         this.name = name;
         ServiceElement[] services = getServices();
         for (ServiceElement service : services)
@@ -143,7 +143,7 @@ public class OpString implements OperationalString, Serializable {
      */
     public void addService(ServiceElement sElem) {
         if(sElem==null)
-            throw new NullPointerException("ServiceElement is null");
+            throw new IllegalArgumentException("ServiceElement is null");
         synchronized(services) {
             if(!services.contains(sElem))
                 services.add(sElem);
@@ -155,7 +155,7 @@ public class OpString implements OperationalString, Serializable {
      */    
     public void removeService(ServiceElement sElem) {
         if(sElem==null)
-            throw new NullPointerException("ServiceElement is null");
+            throw new IllegalArgumentException("ServiceElement is null");
         synchronized(services) {
             services.remove(sElem);
         }
@@ -168,7 +168,7 @@ public class OpString implements OperationalString, Serializable {
      */
     public void addOperationalString(OperationalString[] opStrings) {
         if(opStrings==null)
-            throw new NullPointerException("OperationalString is null");
+            throw new IllegalArgumentException("OperationalString is null");
         for (OperationalString opString : opStrings) {
             addOperationalString(opString);
         }
@@ -181,7 +181,7 @@ public class OpString implements OperationalString, Serializable {
      */
     public void addOperationalString(OperationalString opString) {
         if(opString==null)
-            throw new NullPointerException("OperationalString is null");
+            throw new IllegalArgumentException("OperationalString is null");
         synchronized(nestedOpStrings) {
             nestedOpStrings.add(opString);
         }
@@ -344,7 +344,7 @@ public class OpString implements OperationalString, Serializable {
      */
     /*public void setSchedule(Schedule schedule) {
         if(schedule == null)
-            throw new NullPointerException("schedule is null");
+            throw new IllegalArgumentException("schedule is null");
         this.schedule = schedule;
     }*/
     

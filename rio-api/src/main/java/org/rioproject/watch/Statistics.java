@@ -216,7 +216,7 @@ public class Statistics {
 
     public void addValue(Double double1) {
         if(double1==null)
-            throw new NullPointerException("value is null");
+            throw new IllegalArgumentException("value is null");
         v.addElement(double1);
     }
 
@@ -226,7 +226,7 @@ public class Statistics {
 
     public void setValues(Iterable<Double> vals) {
         if(vals==null)
-            throw new NullPointerException("vector is null");
+            throw new IllegalArgumentException("vector is null");
         v.clear();
         for(Double d : vals)
             v.add(d);
@@ -234,7 +234,7 @@ public class Statistics {
 
     public void setValues(Calculable[] calcs) {
         if(calcs==null)
-            throw new NullPointerException("calcs is null");
+            throw new IllegalArgumentException("calcs is null");
         v.clear();
         for(Calculable calc : calcs)
             v.add(calc.getValue());
@@ -258,7 +258,7 @@ public class Statistics {
      */     
     public void removeValues(Double double1, boolean removeAll) {
         if(double1==null)
-            throw new NullPointerException("value is null");
+            throw new IllegalArgumentException("value is null");
         if(removeAll) {
             Vector<Double> toRemove = new Vector<Double>(1);
             toRemove.add(double1);
@@ -281,9 +281,9 @@ public class Statistics {
      */     
     public void removeValues(Double low, Double high) {
         if(low==null)
-            throw new NullPointerException("low is null");
+            throw new IllegalArgumentException("low is null");
         if(high==null)
-            throw new NullPointerException("high is null");
+            throw new IllegalArgumentException("high is null");
         removeValues(low.doubleValue(), high.doubleValue());
     }
 

@@ -147,7 +147,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                             LifeCycle lifeCycle,
                             String... serverConfigArgs) {
         if(codebase == null || policy == null || classpath == null || implClassName == null)
-            throw new NullPointerException("Codebase, policy, classpath, and implementation cannot be null");
+            throw new IllegalArgumentException("Codebase, policy, classpath, and implementation cannot be null");
         this.codebase = codebase;
         this.policy = policy;
         this.classpath = setClasspath(classpath);

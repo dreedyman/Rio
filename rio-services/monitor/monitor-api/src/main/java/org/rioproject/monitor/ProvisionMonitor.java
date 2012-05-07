@@ -118,9 +118,9 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
          */
         public PeerInfo(ProvisionMonitor service, long id, String address) {
             if(service==null)
-                throw new NullPointerException("service is null");
+                throw new IllegalArgumentException("service is null");
             if(address==null)
-                throw new NullPointerException("address is null");
+                throw new IllegalArgumentException("address is null");
             this.service = service;            
             this.address = address;
             this.id = id;
@@ -149,7 +149,7 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
          */
         public void setBackupCount(int bCount) {
             if(bCount<0)
-                throw new NullPointerException("backupCount must be positive");
+                throw new IllegalArgumentException("backupCount must be positive");
             synchronized(this) {
                 this.backupCount = bCount;
             }

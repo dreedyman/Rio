@@ -208,15 +208,20 @@ public class JSBContainer implements ServiceBeanContainer {
             }
 
         } catch(ServiceBeanInstantiationException e) {
-            if(started)
+            if(started) {
                 discarded(identifier);
+                delegate.terminate();
+            }
             /* rethrow ServiceBeanInstantiationException */
             throw e;
         } catch(Throwable t) {
-            if(started)
+            if(started) {
                 discarded(identifier);
-            logger.log(Level.SEVERE, t, "Activating service %s", CybernodeLogUtil.logName(sElem));
-            throw new ServiceBeanInstantiationException("Service "+ CybernodeLogUtil.logName(sElem)+ " load failed", t, true);
+                delegate.terminate();
+            }
+            logger.log(Level.SEVERE, t, "Could not activate service %s", CybernodeLogUtil.logName(sElem));
+            throw new ServiceBeanInstantiationException(String.format("Service %s load failed", CybernodeLogUtil.logName(sElem)),
+                                                        t, true);
         } finally {
             activationInProcessCount.decrementAndGet();
         }

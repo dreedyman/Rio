@@ -171,7 +171,7 @@ public class Webster implements Runnable {
     public Webster(String[] options, com.sun.jini.start.LifeCycle lifeCycle)
     throws BindException {
         if(options == null)
-            throw new NullPointerException("options are null");
+            throw new IllegalArgumentException("options are null");
         this.lifeCycle = lifeCycle;
         String roots = null;
         String bindAddress = null;
@@ -344,7 +344,7 @@ public class Webster implements Runnable {
      */
     private void setupRoots(String roots) {
         if(roots == null)
-            throw new NullPointerException("roots is null");
+            throw new IllegalArgumentException("roots is null");
         StringTokenizer tok = new StringTokenizer(roots, ";");
         websterRoot = new String[tok.countTokens()];
         if(websterRoot.length > 1) {

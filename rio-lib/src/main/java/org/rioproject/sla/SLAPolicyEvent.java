@@ -47,9 +47,9 @@ public class SLAPolicyEvent extends EventObject {
     public SLAPolicyEvent(Object source, SLA sla, String message) {
         super(source);
         if(sla == null)
-            throw new NullPointerException("sla is null");
+            throw new IllegalArgumentException("sla is null");
         if(message == null)
-            throw new NullPointerException("message is null");
+            throw new IllegalArgumentException("message is null");
         this.sla = sla;
         this.message = message;
         when = System.currentTimeMillis();
@@ -70,7 +70,7 @@ public class SLAPolicyEvent extends EventObject {
                           Object resultant) {
         this(source, sla, message);
         if(resultant==null)
-            throw new NullPointerException("resultant is null");
+            throw new IllegalArgumentException("resultant is null");
         this.resultant = resultant;
     }
 

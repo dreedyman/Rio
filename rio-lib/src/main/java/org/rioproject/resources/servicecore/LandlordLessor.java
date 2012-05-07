@@ -151,7 +151,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
     throws RemoteException {
         super();
         if (config == null)
-            throw new NullPointerException("config is null");
+            throw new IllegalArgumentException("config is null");
            
         /* Get the LeasePeriodPolicy */
         final LeasePeriodPolicy defaultLeasePeriodPolicy =

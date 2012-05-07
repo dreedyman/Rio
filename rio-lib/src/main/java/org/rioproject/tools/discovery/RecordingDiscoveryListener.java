@@ -37,7 +37,7 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
 
     public RecordingDiscoveryListener(DiscoveryManagement disco) {
         if(disco==null)
-            throw new NullPointerException(
+            throw new IllegalArgumentException(
                 "DiscoveryManagement cannot be null");
         this.disco = disco;
     }
@@ -115,7 +115,7 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
      */
     private ReggieStat getReggieStat(ReggieStat reggieStat) {
         if(reggieStat == null)
-            throw new NullPointerException("reggieStat is null");
+            throw new IllegalArgumentException("reggieStat is null");
         ReggieStat rStat = null;
         synchronized(discoveryTimes) {
             for (ReggieStat rt : discoveryTimes) {
@@ -140,7 +140,7 @@ public class RecordingDiscoveryListener implements DiscoveryListener {
      */
     private ReggieStat removeReggieStat(ServiceID id) {
         if(id == null)
-            throw new NullPointerException("id is null");
+            throw new IllegalArgumentException("id is null");
         ReggieStat rStat = null;
         synchronized(discoveryTimes) {
             for (ReggieStat rt : discoveryTimes) {

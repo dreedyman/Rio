@@ -46,7 +46,7 @@ public interface EventProducer extends Remote {
      * 
      * @return An EventRegistration
      * 
-     * @throws NullPointerException if the descriptor parameter is null
+     * @throws IllegalArgumentException if the descriptor parameter is null
      * @throws UnknownEventException if the service does not produce events described
      * by the EventDescriptor
      * @throws LeaseDeniedException if the duration parameter is not accepted

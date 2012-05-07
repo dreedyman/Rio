@@ -69,7 +69,7 @@ public class RioManifest {
      */
     public String getMainAttribute(Attributes.Name name) throws IOException {
         if(manifest==null)
-            throw new NullPointerException("there is no manifest");
+            throw new IllegalArgumentException("there is no manifest");
         Attributes attributes = manifest.getMainAttributes();
         if(attributes == null)
             return null;
@@ -84,7 +84,7 @@ public class RioManifest {
      */
     public Attributes getEntry(String name) throws IOException {
         if(manifest==null)
-            throw new NullPointerException("there is no manifest");
+            throw new IllegalArgumentException("there is no manifest");
         return manifest.getAttributes(name);
     }
 

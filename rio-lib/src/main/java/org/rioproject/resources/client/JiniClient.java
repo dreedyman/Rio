@@ -245,7 +245,7 @@ public class JiniClient {
     public static ServiceTemplate getServiceTemplate(ServiceElement sElem, ClassLoader cl) throws IOException,
                                                                                                   ClassNotFoundException {
         if(sElem == null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         ServiceTemplate template;
         if(cl==null) {
             final Thread currentThread = Thread.currentThread();
@@ -290,7 +290,7 @@ public class JiniClient {
      */
     public static DiscoveryManagement getDiscoveryManagement(ServiceElement sElem) throws IOException {
         if(sElem == null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
         return (discoPool.getDiscoveryManager(sElem.getOperationalStringName(),
                                               sElem.getServiceBeanConfig().getGroups(),
@@ -323,7 +323,7 @@ public class JiniClient {
     public static ServiceTemplate getServiceTemplate(AssociationDescriptor aDesc, ClassLoader cl)
         throws ClassNotFoundException {
         if(aDesc == null)
-            throw new NullPointerException("aDesc is null");
+            throw new IllegalArgumentException("aDesc is null");
         ServiceTemplate template  ;
         String[] iNames = aDesc.getInterfaceNames();
         Class[] interfaces = new Class[iNames.length];
@@ -367,7 +367,7 @@ public class JiniClient {
     public static LookupCache getLookupCache(ServiceBeanContext context, ClassLoader cl) throws IOException,
                                                                                                 ClassNotFoundException {
         if(context == null)
-            throw new NullPointerException("context is null");
+            throw new IllegalArgumentException("context is null");
         LookupCachePool lcPool = LookupCachePool.getInstance();
         return(lcPool.getLookupCache(context.getDiscoveryManagement(),
                                      getServiceTemplate(context.getServiceElement(), cl)));

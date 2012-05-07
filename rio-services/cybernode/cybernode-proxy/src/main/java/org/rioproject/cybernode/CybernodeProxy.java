@@ -272,7 +272,7 @@ class CybernodeProxy extends AbstractProxy implements Cybernode, Serializable {
         public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx)
         throws RemoteException {
             if (obj == null || ctx == null) {
-                throw new NullPointerException();
+                throw new IllegalArgumentException();
             } else if (!(obj instanceof ConstrainableCybernodeProxy)) {
                 return false;
             }

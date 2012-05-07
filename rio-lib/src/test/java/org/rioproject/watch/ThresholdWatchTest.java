@@ -177,15 +177,15 @@ public class ThresholdWatchTest extends WatchTest {
         // Test adding illegal listener
         try {
             watch.addThresholdListener(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
 
         // Test removing illegal listener
         try {
             watch.removeThresholdListener(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
 
         Utils.close(watch.getWatchDataSource());
@@ -245,8 +245,8 @@ public class ThresholdWatchTest extends WatchTest {
         // Setting illegal value
         try {
             watch.setThresholdValues(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
 
         Utils.close(watch.getWatchDataSource());

@@ -24,6 +24,8 @@ import org.rioproject.RioVersion
 import org.rioproject.resolver.Resolver
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.logging.GroovyLogger
+import org.rioproject.system.SystemWatchID
+import org.rioproject.system.capability.software.SoftwareSupport
 
 /**
  * A parser that handles the Groovy Domain Specific Language support for Rio
@@ -368,7 +370,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
 
             emc.memory = { Map attributes ->
                 builder.SystemComponent(Name: "Memory") {
-                    Attribute(Name: 'Name', Value: 'Memory')
+                    Attribute(Name: 'Name', Value: SystemWatchID.JVM_MEMORY)
                     if(attributes.available)
                         Attribute(Name: 'Available', Value: attributes.available)
                     if(attributes.capacity)
@@ -378,7 +380,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
 
             emc.diskspace = { Map attributes ->
                 builder.SystemComponent(Name: "StorageCapability") {
-                    Attribute(Name: 'Name', Value: 'Disk')
+                    Attribute(Name: 'Name', Value: SystemWatchID.DISK_SPACE)
                     if(attributes.available)
                         Attribute(Name: 'Available', Value: attributes.available)
                     if(attributes.capacity)
@@ -401,7 +403,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
             emc.software = { Map attributes, Closure cl ->
                 def componentName = attributes.type == null ? "SoftwareSupport" : attributes.type
                 builder.SystemRequirements {
-                    SystemComponent(Name: componentName) {
+                    SystemComponent(ClassName: componentName) {
                         for(Map.Entry<String, String> entry : attributes.entrySet()) {
                             def skip = ['removeOnDestroy', 'type', 'classpathresource', 'overwrite']
                             if(entry.key in skip) {
@@ -720,26 +722,26 @@ class GroovyDSLOpStringParser implements OpStringParser {
     }
 
     private generateSystemRequirements(MarkupBuilder builder, Map attributes, def parent) {
-        def componentName = attributes.type == null ? "SoftwareSupport" : attributes.type
+        def componentClass = attributes.type == null ? SoftwareSupport.class.simpleName : attributes.type
         if (!parent) {
             builder.SystemRequirements {
-                generateSystemComponent(builder, componentName, attributes)
+                generateSystemComponent(builder, componentClass, attributes)
             }
         } else {
             if(parent.equals("service")) {
                 builder.SystemRequirements {
-                    generateSystemComponent(builder, componentName, attributes)
+                    generateSystemComponent(builder, componentClass, attributes)
                 }
             } else {
-                generateSystemComponent(builder, componentName, attributes)
+                generateSystemComponent(builder, componentClass, attributes)
             }
         }
     }
 
     private generateSystemComponent(MarkupBuilder builder,
-                                    def componentName,
+                                    def componentClass,
                                     Map attributes) {
-        builder.SystemComponent(Name: componentName) {
+        builder.SystemComponent(ClassName: componentClass) {
             for(Map.Entry<String, String> entry : attributes.entrySet()) {
                 def key = entry.key.substring(0,1).toUpperCase() + entry.key.substring(1);
                 def value = entry.value

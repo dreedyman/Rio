@@ -75,12 +75,12 @@ public class EventDescriptor extends AbstractEntry {
      * <code>eventID</code> is equal to the <code>eventID</code> property
      * </ul>
      * 
-     * @throws NullPointerException if the the provided EventDescriptor is 
+     * @throws IllegalArgumentException if the the provided EventDescriptor is 
      * <code>null</code> 
      */
     public boolean matches(EventDescriptor template) {
         if(template==null)
-            throw new NullPointerException("template is null");
+            throw new IllegalArgumentException("template is null");
         
         boolean matches = false;        
         if(template.eventID==null) {            

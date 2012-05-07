@@ -49,7 +49,7 @@ public interface ProvisionMonitorImplMBean extends ServiceBeanAdapterMBean {
      * Map will be returned with name value pairs associating the service and
      * corresponding exceptions
      *
-     * @throws NullPointerException if the opStringUrl is <code>null</code>
+     * @throws IllegalArgumentException if the opStringUrl is <code>null</code>
      * @throws MalformedURLException if the opStringUrl cannot be used to
      * create a <code>java.net.URL</code>
      */
@@ -71,7 +71,7 @@ public interface ProvisionMonitorImplMBean extends ServiceBeanAdapterMBean {
      *
      * @return Returns true if the OperationalString has been undeployed
      *
-     * @throws NullPointerException if the name is <code>null</code>
+     * @throws IllegalArgumentException if the name is <code>null</code>
      */
     boolean undeploy(String name);
 

@@ -35,7 +35,7 @@ public class ProvisionMonitorPermission extends AccessPermission {
      * {@link AccessPermission}for details on the name parameter.
      * 
      * @param name the target name
-     * @throws NullPointerException if the target name is <code>null</code>
+     * @throws IllegalArgumentException if the target name is <code>null</code>
      * @throws IllegalArgumentException if the target name does not match the
      * syntax specified in the comments at the beginning of
      * {@link AccessPermission}.

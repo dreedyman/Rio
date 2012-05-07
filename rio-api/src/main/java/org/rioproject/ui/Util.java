@@ -112,7 +112,7 @@ public class Util {
     public static void saveProperties(Properties props, String filename)
         throws IOException {
         if (props == null)
-            throw new NullPointerException("props is null");
+            throw new IllegalArgumentException("props is null");
 
         File rioHomeDir = new File(System.getProperty("user.home") +
                                     File.separator +

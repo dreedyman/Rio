@@ -54,7 +54,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
         setView(VIEW);
     }    
     
-    /**
+    /**                                                                          `
      * Create a new ThresholdWatch
      * 
      * @param watchDataSource The watch data source associated with this watch
@@ -80,11 +80,11 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     /**
      * Add a ThresholdListener
      * 
-     * @param listener Thre ThresholdListener
+     * @param listener The ThresholdListener
      */
     public void addThresholdListener(ThresholdListener listener) {
         if(listener==null)
-            throw new NullPointerException("listener is null");
+            throw new IllegalArgumentException("listener is null");
         thresholdManager.addThresholdListener(listener);
     }
 
@@ -95,7 +95,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      */
     public void removeThresholdListener(ThresholdListener listener) {
         if(listener==null)
-            throw new NullPointerException("listener is null");
+            throw new IllegalArgumentException("listener is null");
         thresholdManager.removeThresholdListener(listener);
     }
 
@@ -106,7 +106,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      */
     public void setThresholdValues(ThresholdValues tValues) {
         if(tValues == null)
-            throw new NullPointerException("tValues is null");
+            throw new IllegalArgumentException("tValues is null");
         thresholdManager.setThresholdValues(tValues);
         if(localRef!=null)
             localRef.setThresholdValues(getThresholdValues());

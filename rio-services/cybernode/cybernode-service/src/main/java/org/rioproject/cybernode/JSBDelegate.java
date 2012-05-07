@@ -586,14 +586,18 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     } else {
                         buff.append("<unknown>");
                     }
-                    abortThrowable = ThrowableUtil.getRootCause(t);
+                    if(!(t instanceof ServiceBeanInstantiationException))
+                        abortThrowable = ThrowableUtil.getRootCause(t);
+                    else
+                        abortThrowable = t;
                     if(t instanceof MissingMethodException) {
                         MissingMethodException e = (MissingMethodException)t;
                          System.out.println("===> "+sElem.getName()+", MISSING:"+e.getMethod());
                     }
                     logger.log(Level.SEVERE, abortThrowable,
                                "Failed to load the ServiceBean [%s] %s [%s]", sElem.getName(), label, buff.toString());
-                    container.remove(identifier);
+                    container.discarded(identifier);
+                    terminate();
                 }
             }
         };
@@ -638,12 +642,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
             if(abortThrowable instanceof ServiceBeanInstantiationException) {
                 toThrow = (ServiceBeanInstantiationException) abortThrowable;
             } else {
-                ServiceBeanInstantiationException.ExceptionDescriptor exDesc =
-                    new ServiceBeanInstantiationException.ExceptionDescriptor(abortThrowable.getClass().getName(),
-                                                                      abortThrowable.getLocalizedMessage(),
-                                                                      abortThrowable.getStackTrace());
-                toThrow = new ServiceBeanInstantiationException("ServiceBean ["+sElem.getName()+"] instantiation failed",
-                                                                exDesc,
+                toThrow = new ServiceBeanInstantiationException(String.format("ServiceBean [%s] instantiation failed",
+                                                                              CybernodeLogUtil.logName(sElem)),
+                                                                abortThrowable,
                                                                 true);
             }
             stagedDataManager.removeInstalledPlatformCapabilities();

@@ -146,3 +146,10 @@ HasExtraAttributesTest {
     opstring = 'src/test/resources/opstring/space.groovy'
     autoDeploy = true
 }
+
+AdvertiseLifecycleTest {
+    groups = "AdvertiseLifecycleTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+}

@@ -730,10 +730,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                               ResolverHelper.getResolver(),
                                                               getRemoteRepositories());
             createServiceElementManager(sElem, true, listener);
+            opString.addService(sElem);
+            stateChanged(true);
         } else {
             throw new OperationalStringException("Interfaces are null");
         }
-        stateChanged(false);
     }
 
     /*
@@ -776,10 +777,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             logger.warning("UNABLE to remove ServiceElementManager for " +
                            "[" + sElem.getOperationalStringName() +
                            "/" + sElem.getName() + "]");
-        else
+        else {
             logger.info(String.format("Removed ServiceElementManager for [%s/%s]",
                                       sElem.getOperationalStringName(), sElem.getName()));
-        stateChanged(false);
+            opString.removeService(sElem);
+            stateChanged(true);
+        }
     }
 
     /*

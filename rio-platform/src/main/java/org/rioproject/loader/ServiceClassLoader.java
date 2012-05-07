@@ -71,7 +71,7 @@ public class ServiceClassLoader extends URIClassLoader implements ClassAnnotatio
                               Properties metaData) {
         super(searchPath, parent);
         if(annotator==null)
-            throw new NullPointerException("annotator is null");
+            throw new IllegalArgumentException("annotator is null");
         this.annotator = annotator;
         this.searchPath = searchPath;
         if(metaData!=null)

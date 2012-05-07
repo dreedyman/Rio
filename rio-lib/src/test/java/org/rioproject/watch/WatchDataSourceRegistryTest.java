@@ -163,13 +163,13 @@ public class WatchDataSourceRegistryTest {
 
         try {
             registry.register((Watch[])null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
         try {
             registry.deregister((Watch[])null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -282,8 +282,8 @@ public class WatchDataSourceRegistryTest {
 
         try {
             registry.fetch(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -347,8 +347,8 @@ public class WatchDataSourceRegistryTest {
 
         try {
             registry.findWatch(null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 
@@ -394,13 +394,13 @@ public class WatchDataSourceRegistryTest {
 
         try {
             registry.addThresholdListener(null, new LoggingThresholdListener());
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
         try {
             registry.addThresholdListener("aaa", null);
-            Assert.fail("NullPointerException expected but not thrown");
-        } catch (NullPointerException e) {
+            Assert.fail("IllegalArgumentException expected but not thrown");
+        } catch (IllegalArgumentException e) {
         }
     }
 

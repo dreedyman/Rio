@@ -386,7 +386,12 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
            supports = getName().equals(name);
        }
        if(!supports && className!=null) {
-           supports = getClass().getName().equals(className);
+           /* Check if we are equals to the simple name first. If that fails, check equality with filly
+            * qualified classname */
+           supports = getClass().getSimpleName().equals(className);
+           if(!supports) {
+               supports = getClass().getName().equals(className);
+           }
        }
        return(supports);
     }

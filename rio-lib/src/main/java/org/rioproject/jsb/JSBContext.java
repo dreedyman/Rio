@@ -40,6 +40,7 @@ import org.rioproject.resources.client.JiniClient;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.software.SoftwareSupport;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.watch.WatchDataSourceRegistry;
 import org.rioproject.watch.WatchRegistry;
@@ -546,18 +547,23 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
         if(className == null)
             throw new IllegalArgumentException("className is null");        
         PlatformCapability pCap;
-        CommonClassLoader cl = CommonClassLoader.getInstance();
-        if(!cl.testComponentExistence(className)) {
-            if(classPath!=null && classPath.length!=0) {
-                cl.addComponent(className, classPath);
-            } else {
-                throw new IllegalArgumentException("Cannot load PlatformCapability "+
-                                                  "{"+className+"}, unknown "+
-                                                  "location");
-            }                    
-        }        
-        Class clazz = cl.loadClass(className);
-        pCap = (PlatformCapability)clazz.newInstance();
+        if(className.equals(SoftwareSupport.class.getSimpleName())) {
+            pCap = new SoftwareSupport();
+        } else if(className.equals(SoftwareSupport.class.getName())) {
+            pCap = new SoftwareSupport();
+        } else {
+            CommonClassLoader cl = CommonClassLoader.getInstance();
+            if(!cl.testComponentExistence(className)) {
+                if(classPath!=null && classPath.length!=0) {
+                    cl.addComponent(className, classPath);
+                } else {
+                    throw new IllegalArgumentException("Cannot load PlatformCapability "+
+                                                       "{"+className+"}, invalid classPath");
+                }
+            }
+            Class clazz = cl.loadClass(className);
+            pCap = (PlatformCapability)clazz.newInstance();
+        }
         if(mapping!=null)
             pCap.defineAll(mapping);            
         return (pCap);
@@ -571,8 +577,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             throw new IllegalArgumentException("pCap is null");
         boolean removed = false;
         if(platformList.contains(pCap)) {
-            removed =
-                computeResource.removePlatformCapability(pCap, true);
+            removed = computeResource.removePlatformCapability(pCap, true);
             platformList.remove(pCap);
         }
         return (removed);

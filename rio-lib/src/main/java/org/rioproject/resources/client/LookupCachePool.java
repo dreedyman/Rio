@@ -167,7 +167,7 @@ public class LookupCachePool {
     throws IOException {
         
         if(template==null)
-            throw new NullPointerException("template is null");
+            throw new IllegalArgumentException("template is null");
         SDMWrapper sdmWrapper;
         try {
             sdmWrapper = getSDMWrapper(sharedName, groups, locators);

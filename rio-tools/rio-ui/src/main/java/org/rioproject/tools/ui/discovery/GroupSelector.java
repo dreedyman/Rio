@@ -42,7 +42,7 @@ public class GroupSelector extends JPanel {
     public GroupSelector(final DiscoveryManagement dMgr, final RecordingDiscoveryListener rdl, final JDialog dialog) {
         super(new BorderLayout(8, 8));
         if(rdl==null)
-            throw new NullPointerException("rdl is null");
+            throw new IllegalArgumentException("rdl is null");
 
         groupTable = new JTable();
         JButton okay = new JButton();

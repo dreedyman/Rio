@@ -355,11 +355,11 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * service is not an {@link EventProducer} or the {@link EventDescriptor}
      * template the BasicEventConsumer was started with cannot be matched
      *
-     * @throws NullPointerException if the item parameter is null
+     * @throws IllegalArgumentException if the item parameter is null
      */
     public EventRegistration register(ServiceItem item) {
         if(item==null)
-            throw new NullPointerException("item is null");
+            throw new IllegalArgumentException("item is null");
 
         if(edTemplate==null)
             throw new IllegalStateException("An EventDescriptor template has not " +
@@ -407,17 +407,17 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * service is not an {@link EventProducer} or the {@link EventDescriptor}
      * template the BasicEventConsumer was started with cannot be matched
      *
-     * @throws NullPointerException if any og the parameters are null
+     * @throws IllegalArgumentException if any og the parameters are null
      */
     public EventRegistration register(EventProducer eventProducer,
                                       EventDescriptor eventDesc,
                                       ServiceID serviceID) {
         if(eventProducer==null)
-            throw new NullPointerException("eventProducer is null");
+            throw new IllegalArgumentException("eventProducer is null");
         if(eventDesc==null)
-            throw new NullPointerException("eventDesc is null");
+            throw new IllegalArgumentException("eventDesc is null");
         if(serviceID==null)
-            throw new NullPointerException("serviceID is null");
+            throw new IllegalArgumentException("serviceID is null");
 
         if(leaseTable.containsKey(serviceID)) {
             if(logger.isLoggable(Level.FINEST))
@@ -536,7 +536,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @param serviceID The serviceID of the EventProducer to deregister
      *
-     * @throws NullPointerException if the serviceID parameter is null
+     * @throws IllegalArgumentException if the serviceID parameter is null
      */
     public void deregister(ServiceID serviceID) {
         deregister(serviceID, true);
@@ -550,11 +550,11 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @param disconnect Whether to explicitly cancel the lease with the
      * EventProducer, or just let the least time out
      *
-     * @throws NullPointerException if the serviceID parameter is null
+     * @throws IllegalArgumentException if the serviceID parameter is null
      */
     public void deregister(ServiceID serviceID, boolean disconnect) {
         if(serviceID==null)
-            throw new NullPointerException("serviceID is null");
+            throw new IllegalArgumentException("serviceID is null");
         EventLeaseManager elm = leaseTable.remove(serviceID);
         if(elm != null) {
             try {

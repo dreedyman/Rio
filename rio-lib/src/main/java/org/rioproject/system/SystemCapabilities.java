@@ -86,7 +86,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
      */
     public MeasurableCapability[] getMeasurableCapabilities(Configuration config) {
         if(config==null)
-            throw new NullPointerException("config is null");
+            throw new IllegalArgumentException("config is null");
         
         List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
         /* Create the Memory MeasurableCapability. This will measure memory

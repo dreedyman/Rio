@@ -34,7 +34,7 @@ public class MasterImpl implements Master {
     
     public WorkflowEntry process() throws WorkflowException {
         if (space == null)
-            throw new NullPointerException("space is null");
+            throw new IllegalArgumentException("space is null");
 
         /* Submit the new Order */
         WorkflowEntry order = new WorkflowEntry(id, State.NEW);

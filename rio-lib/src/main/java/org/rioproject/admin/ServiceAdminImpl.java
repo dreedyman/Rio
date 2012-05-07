@@ -80,7 +80,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                             Exporter exporter, 
                             SnapshotHandler snapshotHandler)  {
         if(service==null)
-            throw new NullPointerException("service is null");
+            throw new IllegalArgumentException("service is null");
         this.service = service;
         this.exporter = exporter;
         this.snapshotHandler = snapshotHandler;
@@ -246,7 +246,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
      */
     public void setServiceBeanContext(ServiceBeanContext context) {
         if(context==null)
-            throw new NullPointerException("context is null");        
+            throw new IllegalArgumentException("context is null");        
         this.context = context;
     }
 

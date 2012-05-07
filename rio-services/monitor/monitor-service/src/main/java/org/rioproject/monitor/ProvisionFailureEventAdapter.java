@@ -61,7 +61,7 @@ public class ProvisionFailureEventAdapter extends EventNotificationAdapter {
     public void notify(RemoteEvent theEvent)
         throws UnknownEventException, RemoteException {
         if(theEvent==null)
-            throw new NullPointerException("event is null");
+            throw new IllegalArgumentException("event is null");
         if(!(theEvent instanceof ProvisionFailureEvent)) {
             throw new UnknownEventException("Not a ProvisionFailureEvent " +
                                             "["+

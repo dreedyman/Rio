@@ -52,7 +52,7 @@ public class ReggieStat {
         if(type < DISCOVERED || type > DISCARDED)
             throw new IllegalArgumentException("bad type");
         if(reggie == null)
-            throw new NullPointerException("reggie is null");
+            throw new IllegalArgumentException("reggie is null");
         this.type = type;
         eventTime = t;
         groups = reggie.getGroups();

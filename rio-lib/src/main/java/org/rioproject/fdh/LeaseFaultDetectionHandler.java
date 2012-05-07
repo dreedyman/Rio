@@ -197,7 +197,7 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
      */
     public void setConfiguration(String[] configArgs) {
         if(configArgs == null)
-            throw new NullPointerException("configArgs is null");
+            throw new IllegalArgumentException("configArgs is null");
         try {
             this.configArgs = new String[configArgs.length];
             System.arraycopy(configArgs, 0, this.configArgs, 0, configArgs.length);

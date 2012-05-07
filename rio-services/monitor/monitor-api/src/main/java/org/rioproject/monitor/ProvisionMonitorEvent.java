@@ -112,7 +112,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     public ProvisionMonitorEvent(Object source, Action action, ServiceElement sElem) {
         super(source);
         if(sElem==null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         opStringName = sElem.getOperationalStringName();
         this.action = action;
         this.sElem = sElem;
@@ -129,7 +129,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     public ProvisionMonitorEvent(Object source, Action action, OperationalString opString) {
         super(source);
         if(opString==null)
-            throw new NullPointerException("opString is null");
+            throw new IllegalArgumentException("opString is null");
         this.action = action;
         this.opString = opString;
         opStringName = opString.getName();
@@ -146,9 +146,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     public ProvisionMonitorEvent(Object source, String opStringName, ServiceBeanInstance instance) {
         super(source);
         if(opStringName==null)
-            throw new NullPointerException("opStringName cannot be null");
+            throw new IllegalArgumentException("opStringName cannot be null");
         if(instance==null)
-            throw new NullPointerException("instance is null");
+            throw new IllegalArgumentException("instance is null");
         this.action = Action.SERVICE_BEAN_INSTANCE_UPDATED;
         this.instance = instance;
         this.opStringName = opStringName;
@@ -171,9 +171,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
                                  ServiceBeanInstance instance) {
         super(source);
         if(opStringName==null)
-            throw new NullPointerException("opStringName cannot be null");
+            throw new IllegalArgumentException("opStringName cannot be null");
         if(sElem==null)
-            throw new NullPointerException("sElem is null");
+            throw new IllegalArgumentException("sElem is null");
         this.action = action;
         this.sElem = sElem;
         this.instance = instance;
@@ -197,9 +197,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
                                  Object[] args) {
         super(source);        
         if(opStringName==null)
-            throw new NullPointerException("opStringName cannot be null");
+            throw new IllegalArgumentException("opStringName cannot be null");
         if(args==null)
-            throw new NullPointerException("redeployment args cannot be null");
+            throw new IllegalArgumentException("redeployment args cannot be null");
         this.action = Action.REDEPLOY_REQUEST;
         this.opStringName = opStringName;
         this.sElem = sElem;
