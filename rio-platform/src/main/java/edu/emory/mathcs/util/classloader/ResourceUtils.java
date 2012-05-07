@@ -14,7 +14,7 @@ import java.net.*;
  * @author Dawid Kurzyniec
  * @version 1.0
  */
-public class ResourceUtils {
+public final class ResourceUtils {
 
     private static final Pattern dotInMiddlePattern      = Pattern.compile("/\\./");
     private static final Pattern dotAtBegPattern         = Pattern.compile("^\\./");
