@@ -26,6 +26,7 @@ import java.util.Iterator;
 /**
  * The class provides utility methods for Rio tests
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class Utils {
     public static void setEnvironment() {
         if(System.getProperty("JAVA_HOME")==null) {
