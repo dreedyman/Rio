@@ -39,7 +39,7 @@ public class ConstrainableServiceAdminProxy extends ServiceAdminProxy
     private final MethodConstraints constraints;
     
     /* Creates an instance of this class. */
-    @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod"})
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     ConstrainableServiceAdminProxy(final ServiceAdmin serviceAdmin,
                                    final Uuid id,
                                    final MethodConstraints constraints) {

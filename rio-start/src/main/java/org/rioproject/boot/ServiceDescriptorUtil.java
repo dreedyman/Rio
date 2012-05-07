@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class ServiceDescriptorUtil {
     /* Port value obtained from invoking the getStartupPort() method */
     private static int port = 0;

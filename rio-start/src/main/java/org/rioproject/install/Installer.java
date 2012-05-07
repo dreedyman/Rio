@@ -31,7 +31,7 @@ import java.util.jar.JarFile;
 /**
  * Install Rio jars to local repository
  */
-@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class Installer {
 
     private Installer() {}

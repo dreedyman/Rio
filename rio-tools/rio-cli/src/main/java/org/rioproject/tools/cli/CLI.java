@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class CLI {
     final static long startTime = System.currentTimeMillis();
     final static String DISCOVERY_TIMEOUT="disco-timeout";

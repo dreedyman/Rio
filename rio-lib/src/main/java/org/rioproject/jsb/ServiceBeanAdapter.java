@@ -110,6 +110,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
 public abstract class ServiceBeanAdapter extends ServiceProvider
         implements
         ServiceBean,
@@ -544,7 +545,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * Implemented as part of the contract for a
      * {@link javax.management.MBeanRegistration}, empty implementation
      */
-    @SuppressWarnings("{PMD.EmptyMethodInAbstractClassShouldBeAbstract}")
     public void postRegister(Boolean aBoolean) {
     }
 
@@ -552,7 +552,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * Implemented as part of the contract for a
      * {@link javax.management.MBeanRegistration}, empty implementation
      */
-    @SuppressWarnings("{PMD.EmptyMethodInAbstractClassShouldBeAbstract}")
     public void preDeregister() throws Exception {
     }
 
@@ -561,7 +560,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      *
      * @see javax.management.MBeanRegistration#postDeregister()
      */
-    @SuppressWarnings("{PMD.EmptyMethodInAbstractClassShouldBeAbstract}")
     public void postDeregister() {
         mbeanServer = null;
         objectName = null;

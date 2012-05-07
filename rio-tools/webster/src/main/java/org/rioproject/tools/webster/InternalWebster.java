@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-@SuppressWarnings("{PMD.AvoidThrowingRawExceptionTypes}")
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class InternalWebster {
     private static Logger logger = Logger.getLogger("org.rioproject.tools.webster");
 
