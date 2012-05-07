@@ -65,6 +65,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings({"unused", "PMD.AvoidThrowingRawExceptionTypes"})
 public class ServiceBeanExec implements ServiceBeanExecutor,
                                         ServiceBeanContainerListener,
                                         FaultDetectionListener<ServiceID> {
