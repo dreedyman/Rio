@@ -31,7 +31,7 @@ import java.io.File;
  *
  * @author Dennis Reedy
  */
-public class SettingsUtil {
+public final class SettingsUtil {
     private SettingsUtil() {}
 
     /**
