@@ -42,6 +42,7 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ResolvingLoader extends RMIClassLoaderSpi {
     private final Map<String, String> artifactToCodebase = new HashMap<String, String>();
     private static final Resolver resolver;
@@ -56,19 +57,19 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     private static final RMIClassLoaderSpi loader = RMIClassLoader.getDefaultProviderInstance();
 
     @Override
-    public Class<?> loadClass(String codebase,
-                              String name,
-                              ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
-        codebase = resolveCodebase(codebase);
-        return loader.loadClass(codebase, name, defaultLoader);
+    public Class<?> loadClass(final String codebase,
+                              final String name,
+                              final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
+        String resolvedCodebase = resolveCodebase(codebase);
+        return loader.loadClass(resolvedCodebase, name, defaultLoader);
     }
 
     @Override
-    public Class<?> loadProxyClass(String codebase,
-                                   String[] interfaces,
-                                   ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
-        codebase = resolveCodebase(codebase);
-        return loader.loadProxyClass(codebase, interfaces, defaultLoader);
+    public Class<?> loadProxyClass(final String codebase,
+                                   final String[] interfaces,
+                                   final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
+        String resolvedCodebase = resolveCodebase(codebase);
+        return loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     }
 
     @Override
-    public String getClassAnnotation(Class<?> aClass) {
+    public String getClassAnnotation(final Class<?> aClass) {
         if(aClass.getClassLoader() instanceof URLClassLoader) {
             URL[] urls = ((URLClassLoader)aClass.getClassLoader()).getURLs();
             if(urls.length>0 && urls[0].getProtocol().equals("artifact")) {
@@ -94,7 +95,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         return loader.getClassAnnotation(aClass);
     }
 
-    public static void release(ClassLoader serviceLoader) {
+    public static void release(final ClassLoader serviceLoader) {
         try {
             Field loaderTable = sun.rmi.server.LoaderHandler.class.getDeclaredField("loaderTable");
             loaderTable.setAccessible(true);
@@ -107,7 +108,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         }
     }
 
-    private String resolveCodebase(String codebase) {
+    private String resolveCodebase(final String codebase) {
         String adaptedCodebase;
         if(codebase!=null && codebase.startsWith("artifact:")) {
             synchronized (artifactToCodebase) {
