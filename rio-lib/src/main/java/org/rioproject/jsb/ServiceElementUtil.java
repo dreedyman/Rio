@@ -17,6 +17,7 @@ package org.rioproject.jsb;
 
 import com.sun.jini.lookup.entry.LookupAttributes;
 import net.jini.config.Configuration;
+import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
@@ -24,18 +25,16 @@ import net.jini.discovery.DiscoveryGroupManagement;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.*;
 import org.rioproject.core.provision.SystemRequirements;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.watch.ThreadDeadlockMonitor;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAPolicyHandler;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.watch.ThreadDeadlockMonitor;
 import org.rioproject.watch.WatchDescriptor;
 
 import javax.management.MBeanServerConnection;
@@ -195,7 +194,7 @@ public final class ServiceElementUtil {
                                                             new Entry[0],
                                                             codebase);            
             return(!LookupAttributes.equal(serviceUIs, serviceUIs1));
-        } catch (Exception e) {
+        } catch (ConfigurationException e) {
             if(logger.isLoggable(Level.FINEST))
                 logger.log(Level.FINEST, 
                            "Getting ServiceUIs from ServiceElement",
