@@ -46,7 +46,7 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
-public class ResolverHelper {
+public final class ResolverHelper {
     public final static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
     static final String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
     private static URLClassLoader resolverLoader;
@@ -71,7 +71,8 @@ public class ResolverHelper {
      *
      * @throws ResolverException If there are exceptions resolving the artifact
      */
-    public static String[] resolve(String artifact, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
+    public static String[] resolve(final String artifact, final Resolver resolver, final RemoteRepository[] repositories)
+        throws ResolverException {
         return resolve(artifact, resolver, repositories, M2_HOME_URI);
     }
 
@@ -88,10 +89,10 @@ public class ResolverHelper {
      *
      * @throws ResolverException If there are exceptions resolving the artifact
      */
-    public static String[] resolve(String artifact,
-                                   Resolver resolver,
-                                   RemoteRepository[] repositories,
-                                   String codebase) throws ResolverException {
+    public static String[] resolve(final String artifact,
+                                   final Resolver resolver,
+                                   final RemoteRepository[] repositories,
+                                   final String codebase) throws ResolverException {
         if(logger.isLoggable(Level.FINE))
             logger.fine(String.format("Using Resolver %s", resolver.getClass().getName()));
         List<String> jars = new ArrayList<String>();
@@ -185,7 +186,7 @@ public class ResolverHelper {
      *
      * @throws ResolverException if there are problems loading the resource
      */
-    public static Resolver getResolver(ClassLoader cl) throws ResolverException {
+    public static Resolver getResolver(final ClassLoader cl) throws ResolverException {
         Resolver r;
         ClassLoader resourceLoader = (cl != null) ? cl : Thread.currentThread().getContextClassLoader();
         try {
@@ -206,7 +207,7 @@ public class ResolverHelper {
     /*
      * Returns the Resolver using ServiceLoader.load.
      */
-    private static Resolver doGetResolver(ClassLoader cl) throws IOException, ResolverException {
+    private static Resolver doGetResolver(final ClassLoader cl) throws IOException, ResolverException {
         Resolver resolver = null;
         ServiceLoader<Resolver> loader =  ServiceLoader.load(Resolver.class, cl);
         if(logger.isLoggable(Level.FINE)) {
@@ -232,22 +233,24 @@ public class ResolverHelper {
     /*
      * Convert windows path names if needed
      */
-    public static String handleWindows(String s) {
+    public static String handleWindows(final String s) {
+        String newString = s;
         if (System.getProperty("os.name").startsWith("Windows")) {
             if(s.startsWith("/"))
-                s = s.substring(1, s.length());
+                newString = s.substring(1, s.length());
             if(s.startsWith("file:"))
-                s = s.replace('/', '\\');
+                newString = s.replace('/', '\\');
         }
-        return s;
+        return newString;
     }
 
     /*
      * Trim leading '/'
      */
-    private static String handleWindowsHTTP(String s) {
+    private static String handleWindowsHTTP(final String s) {
+        String newString = s;
         if (System.getProperty("os.name").startsWith("Windows"))
-            s = s.replace('\\', '/');
-        return s;
+            newString = s.replace('\\', '/');
+        return newString;
     }
 }
