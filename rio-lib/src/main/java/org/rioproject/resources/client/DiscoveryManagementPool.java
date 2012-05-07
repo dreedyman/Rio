@@ -327,10 +327,10 @@ public class DiscoveryManagementPool {
             }
 
             SharedDiscoveryManager ldm;
-            config = (config==null?EmptyConfiguration.INSTANCE:config);
+            Configuration configToUse = (config==null?EmptyConfiguration.INSTANCE:config);
             String className = SharedDiscoveryManager.class.getName();
             try {
-                className = (String)config.getEntry(COMPONENT,
+                className = (String)configToUse.getEntry(COMPONENT,
                                                     "sharedDiscoveryManager",
                                                     String.class,
                                                     SharedDiscoveryManager.class.getName());
@@ -342,7 +342,7 @@ public class DiscoveryManagementPool {
             }
 
             try {
-                ldm = createSharedDiscoveryManager(className, groups, locators, listener, config);
+                ldm = createSharedDiscoveryManager(className, groups, locators, listener, configToUse);
             } catch (ConfigurationException e) {
                 logger.log(Level.WARNING, "Creating SharedDiscoveryManager with Configuration", e);
                 ldm = createSharedDiscoveryManager(className, groups, locators, listener);
