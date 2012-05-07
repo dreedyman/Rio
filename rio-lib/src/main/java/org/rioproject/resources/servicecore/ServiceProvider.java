@@ -113,17 +113,13 @@ public abstract class ServiceProvider implements Service {
         this.config = config;
         if(config != null) {
             try {
-                listenerPreparer =
-                    (ProxyPreparer)Config.getNonNullEntry(
-                        config,
-                        COMPONENT,
-                        "eventListenerPreparer",
-                        ProxyPreparer.class,
-                        listenerPreparer);
+                listenerPreparer =(ProxyPreparer)Config.getNonNullEntry(config,
+                                                                        COMPONENT,
+                                                                        "eventListenerPreparer",
+                                                                        ProxyPreparer.class,
+                                                                        listenerPreparer);
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Getting eventListenerPreparer",
-                           e);
+                logger.log(Level.WARNING, "Getting eventListenerPreparer", e);
             }
         }
     }
@@ -152,15 +148,14 @@ public abstract class ServiceProvider implements Service {
             throw new UnknownEventException("Event ID is null");
         EventHandler eHandler = eventTable.get(descriptor.eventID);
         if(eHandler == null)
-            throw new UnknownEventException("Unknown event ID "+
-                    descriptor.eventID);
+            throw new UnknownEventException("Unknown event ID "+descriptor.eventID);
 
         /* Prepare the RemoteEventListener */
-        listener = (RemoteEventListener)listenerPreparer.prepareProxy(listener);
+        RemoteEventListener preparedListener = (RemoteEventListener)listenerPreparer.prepareProxy(listener);
         if(logger.isLoggable(Level.FINE))
             logger.log(Level.FINE,
                        "Register listener {0} for Event {1}",
-                       new Object[] {listener, descriptor});
+                       new Object[] {preparedListener, descriptor});
         Object o = getServiceProxy();
         if(!(o instanceof EventProducer)) {
             String reason = "Proxy returned from getServiceProxy() does " +
@@ -169,7 +164,7 @@ public abstract class ServiceProvider implements Service {
             throw new ClassCastException(reason);
         }
         
-        return (eHandler.register(o, listener, handback, duration));
+        return (eHandler.register(o, preparedListener, handback, duration));
     }
 
     /**
