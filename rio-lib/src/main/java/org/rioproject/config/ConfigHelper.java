@@ -74,8 +74,8 @@ public class ConfigHelper {
      * @throws IOException              if there are errors accessing the file
      *                                  system
      */
-    public static String[] getConfigArgs(String... args) throws IOException {
-        return getConfigArgs(args, null);
+    public static String[] getConfigArgs(final String... args) throws IOException {
+        return getConfigArgs(args, Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -85,8 +85,7 @@ public class ConfigHelper {
      * @param args Arguments to be used by a
      * {@link net.jini.config.ConfigurationProvider}
      * to create a {@link net.jini.config.Configuration}
-     * @param cl The ClassLoader to use if resources need to be loaded. If
-     * null, the threads current context classloader is used
+     * @param cl The ClassLoader to use if resources need to be loaded.
      *
      * @return
      * <ul>
@@ -114,25 +113,22 @@ public class ConfigHelper {
      * configuration argument
      * </ul>
      *
-     * @throws IllegalArgumentException if the args parameter is null or of zero
-     *                                  length
-     * @throws IOException              if there are errors accessing the file
-     *                                  system
+     * @throws IllegalArgumentException if the args parameter is null or of zero length, or if the ClassLoader is {@code null}
+     * @throws IOException              if there are errors accessing the file system
      */
-    public static String[] getConfigArgs(String[] args,
-                                         ClassLoader cl) throws IOException {
+    public static String[] getConfigArgs(final String[] args, final ClassLoader cl) throws IOException {
         if (args == null)
             throw new IllegalArgumentException("args cannot be null");
         if (args.length == 0)
             throw new IllegalArgumentException("args cannot be of zero-length");
+        if(cl==null)
+            throw new IllegalArgumentException("You must provide a ClassLoader");
         if (args[0].equals("-"))
             return args;
         if(args[0].startsWith(CLASSPATH_RESOURCE)) {
             String classPathArgs = args[0].substring(CLASSPATH_RESOURCE.length(),
                                                      args[0].length());
 
-            if(cl==null)
-                cl = Thread.currentThread().getContextClassLoader();
             List<String> list = new ArrayList<String>();
             for(String s : classPathArgs.split(",")) {
                 URL url = cl.getResource(s);
@@ -200,7 +196,7 @@ public class ConfigHelper {
         return (new String[]{tmp.getCanonicalPath()});
     }
 
-    private static boolean isGroovy(String... args) {
+    private static boolean isGroovy(final String... args) {
         StringBuilder buff = new StringBuilder();
         for(String s : args)
             buff.append(s);
