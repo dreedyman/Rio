@@ -39,6 +39,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class JSBManager implements ServiceBeanManager {
     private static final String COMPONENT="org.rioproject.jsb";
     private static Logger logger = Logger.getLogger(COMPONENT);
