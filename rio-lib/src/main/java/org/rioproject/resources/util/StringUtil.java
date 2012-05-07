@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
 /**
  * Utility for converting strings to arrays
  */
-public class StringUtil {
+public final class StringUtil {
 
     private StringUtil() {}
 
@@ -33,7 +33,7 @@ public class StringUtil {
      *
      * @return An array of Strings
      */
-    public static String[] toArray(String arg) {
+    public static String[] toArray(final String arg) {
         return toArray(arg, " ,"+ File.pathSeparator);
     }
 
@@ -45,7 +45,7 @@ public class StringUtil {
      *
      * @return An array of Strings
      */
-    public static String[] toArray(String arg, String delim) {
+    public static String[] toArray(final String arg, final String delim) {
         StringTokenizer tok = new StringTokenizer(arg, delim);
         String[] array = new String[tok.countTokens()];
         int i=0;
