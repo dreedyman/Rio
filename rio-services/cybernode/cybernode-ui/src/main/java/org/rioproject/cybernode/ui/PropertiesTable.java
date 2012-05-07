@@ -66,7 +66,7 @@ public class PropertiesTable extends JPanel {
      * 
      * @param props The Properties to display
      */
-    public void setProperties(Properties props) {
+    private void setProperties(Properties props) {
         if(props == null)
             throw new IllegalArgumentException("props is null");
         propertiesTableModel.setData(props);
@@ -214,15 +214,10 @@ public class PropertiesTable extends JPanel {
         }
 
         public Object getValueAt(int row, int column) {
-            try {
-                switch (column) {
-                    case 0 :
-                        return (keys.get(row));
-                    case 1 :
-                        return (values.get(row));
-                }
-            } catch(Exception e) {
-                System.out.println("bad row number : " + row);
+            if(column==0) {
+                return (keys.get(row));
+            } else if(column==1) {
+                return (values.get(row));
             }
             return (null);
         }

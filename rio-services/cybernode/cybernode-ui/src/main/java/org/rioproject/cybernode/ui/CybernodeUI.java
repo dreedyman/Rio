@@ -33,6 +33,7 @@ import java.rmi.RemoteException;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class CybernodeUI extends JPanel implements Runnable {
     private ServiceTable serviceTable;
     private ServiceTable execServiceTable;
@@ -233,7 +234,7 @@ public class CybernodeUI extends JPanel implements Runnable {
         return(svcCount);
     }
 
-    ComputeResourceUtilization getComputeResourceUtilization(CybernodeAdmin cAdmin)
+    private ComputeResourceUtilization getComputeResourceUtilization(CybernodeAdmin cAdmin)
     throws RemoteException {
         return(cAdmin.getComputeResourceUtilization());
     }
@@ -279,30 +280,31 @@ public class CybernodeUI extends JPanel implements Runnable {
     public static void showError(Throwable e, Component comp, String title) {
         if (e.getCause() != null &&
             e.getCause() instanceof UnsupportedConstraintException) {
-            e = e.getCause();
+            Throwable cause = e.getCause();
             JOptionPane.showMessageDialog(null,
                                           "<html>" +
                                           "Exception: <font color=red>" +
-                                          e.getClass().getName() +
+                                          cause.getClass().getName() +
                                           "</font><br><br> " +
                                           "You do not have permission to perform " +
                                           "the action</html>",
                                           "Action Denied",
-                                          JOptionPane.OK_OPTION);
+                                          JOptionPane.ERROR_MESSAGE);
             return;
         }
         StringBuilder buffer = new StringBuilder();
-        if (e.getCause() != null)
-            e = e.getCause();
+        Throwable thrown = e;
+        if (thrown.getCause() != null)
+            thrown = thrown.getCause();
         StackTraceElement[] trace = e.getStackTrace();
         for (StackTraceElement aTrace : trace) {
             buffer.append("at ").append(aTrace).append("<br>");
         }
         showError("<html>Exception : <font color=red>" +
-                  e.getClass().getName() + "</font>" +
+                  thrown.getClass().getName() + "</font>" +
                   " : " +
                   "<font color=blue>" +
-                  e.getLocalizedMessage() + "</font>" +
+                  thrown.getLocalizedMessage() + "</font>" +
                   "<br>" +
                   buffer.toString() +
                   "</html>",
