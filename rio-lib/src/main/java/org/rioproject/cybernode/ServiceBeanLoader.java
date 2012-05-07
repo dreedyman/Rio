@@ -227,7 +227,7 @@ public class ServiceBeanLoader {
      * service bean
      */
     public static Result load(final ServiceElement sElem,
-                              Uuid serviceID,
+                              final Uuid serviceID,
                               final ServiceBeanManager jsbManager,
                               final ServiceBeanContainer container) throws ServiceBeanInstantiationException {
         Object proxy;
@@ -270,6 +270,7 @@ public class ServiceBeanLoader {
 
         final Thread currentThread = Thread.currentThread();
         ClassLoader currentClassLoader = currentThread.getContextClassLoader();
+        Uuid serviceIDToUse = serviceID;
         try {
             ClassBundle jsbBundle = sElem.getComponentBundle();
             List<URL> urlList = new ArrayList<URL>();
@@ -438,9 +439,10 @@ public class ServiceBeanLoader {
             /*
              * The service may have created it's own serviceID
              */
+
             if(proxy instanceof ReferentUuid) {
-                serviceID = ((ReferentUuid)proxy).getReferentUuid();
-                ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceID);
+                serviceIDToUse = ((ReferentUuid)proxy).getReferentUuid();
+                ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
             }
             
             /*
@@ -472,7 +474,7 @@ public class ServiceBeanLoader {
             currentThread.setContextClassLoader(currentClassLoader);
         }
         
-        return(new Result(context, impl, mi, serviceID));
+        return(new Result(context, impl, mi, serviceIDToUse));
     }  
 
     static synchronized Map<String, ProvisionedResources> provisionService(final ServiceElement elem,
