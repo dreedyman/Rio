@@ -15,6 +15,7 @@
  */
 package org.rioproject.costmodel;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,6 +27,7 @@ import java.util.TreeSet;
  * @author Dennis Reedy
  */
 public class GenericCostModel implements ResourceCostModel {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Default description */
     private static final String DEFAULT_DESCRIPTION = "Generic Cost Model";     
@@ -77,8 +79,7 @@ public class GenericCostModel implements ResourceCostModel {
             throw new IllegalArgumentException("value must be non-negative");
         costPerUnit = value;
         if(timeBoundaries!=null) {
-            for (TimeBoundary timeBoundary : timeBoundaries)
-                addTimeBoundary(timeBoundary);
+            Collections.addAll(this.timeBoundaries, timeBoundaries);
         }
         if(description!=null)
             this.description = description;
