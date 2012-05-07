@@ -40,6 +40,10 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+
+/* Suppress PMD warnings for the invocation of getComponentName() and createMeasurableMonitor() during object
+ * construction. This is by design. */
+@SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class Memory extends MeasurableCapability {
     /** Iteration value for calculating utilization of sampleSize >1 */
     private int count;
