@@ -22,7 +22,7 @@ import java.util.Properties;
  *
  * @author Dennis Reedy
  */
-public class PropertyHelper {
+public final class PropertyHelper {
     public static final String[] PARSETIME = {"${", "}"};
     public static final String[] RUNTIME = {"$[", "]"};
 
