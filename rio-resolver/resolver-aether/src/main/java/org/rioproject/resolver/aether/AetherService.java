@@ -36,7 +36,6 @@ import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyFilter;
 import org.sonatype.aether.impl.*;
-import org.apache.maven.repository.internal.DefaultServiceLocator;
 import org.sonatype.aether.installation.InstallRequest;
 import org.sonatype.aether.installation.InstallationException;
 import org.sonatype.aether.repository.*;
