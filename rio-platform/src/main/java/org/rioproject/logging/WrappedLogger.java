@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class WrappedLogger {
+public final class WrappedLogger {
     private final Logger logger;
     private static final String THIS_CLASS_NAME = WrappedLogger.class.getName();
 
