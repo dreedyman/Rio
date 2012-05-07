@@ -65,6 +65,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceBeanActivation {
     /**
      * Default name of the OperationalString name this utility adds for services
@@ -352,9 +353,9 @@ public class ServiceBeanActivation {
                                                                                             "adminProxyPreparer",
                                                                                             BasicProxyPreparer.class,
                                                                                             new BasicProxyPreparer());
-                    sbProxy = prep.prepareProxy(sbProxy);
-                    if(sbProxy instanceof Administrable) {
-                        Administrable admin = (Administrable)sbProxy;
+                    Object preparedPProxy = prep.prepareProxy(sbProxy);
+                    if(preparedPProxy instanceof Administrable) {
+                        Administrable admin = (Administrable)preparedPProxy;
                         Object adminObject = admin.getAdmin();
                         if(adminObject instanceof DestroyAdmin) {
                             Subject subject = null;
