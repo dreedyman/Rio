@@ -138,7 +138,7 @@ public class Watch implements WatchMBean {
     /*
      * Setup WatchDataSource
      */
-    void doSetWatchDataSource(WatchDataSource wds) {
+    private void doSetWatchDataSource(WatchDataSource wds) {
         this.watchDataSource = wds;
         if(localRef!=null) {
             localRef.unexport(true);

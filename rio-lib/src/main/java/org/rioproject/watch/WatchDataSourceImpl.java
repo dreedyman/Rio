@@ -167,10 +167,12 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
      * @param config Configuration object for use
      */
     public WatchDataSourceImpl(String id, Configuration config) {
-        setID(id);
+        if(id==null)
+            throw new IllegalArgumentException("id is null");
         if(config==null)
             throw new IllegalArgumentException("config is null");
-        setConfiguration(config);
+        this.id = id;
+        this.config = config;
         doInit();
     }
 
