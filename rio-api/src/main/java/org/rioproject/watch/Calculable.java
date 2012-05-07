@@ -64,7 +64,7 @@ public class Calculable implements Serializable {
      */
     public Calculable(String id, double value, long when) {
         this(id, value);
-        this.when = System.currentTimeMillis();
+        this.when = when;
     }
 
     /**
