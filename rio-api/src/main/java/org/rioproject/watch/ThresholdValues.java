@@ -22,6 +22,7 @@ import java.io.Serializable;
  * Watch
  */
 public class ThresholdValues implements Serializable, Cloneable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Holds value of property highThreshold. */
     private double highThreshold = Double.NaN;
@@ -54,34 +55,13 @@ public class ThresholdValues implements Serializable, Cloneable {
         if(range[0] >= range[1])
             throw new IllegalArgumentException("range is not valid");
 
-        setLowThreshold(range[0]);
-        setHighThreshold(range[1]);
+        this.lowThreshold = range[0];
+        this.currentLowThreshold = range[0];
 
+        this.highThreshold = range[1];
+        this.currentHighThreshold = range[1];
     }
 
-    /**
-     * Create a new ThresholdValues
-     * 
-     * @param lowThreshold The low threshold
-     * @param highThreshold The high threshold value
-     */
-    public ThresholdValues(double lowThreshold, double highThreshold) {
-        if(lowThreshold >= highThreshold)
-            throw new IllegalArgumentException("range is not valid");
-        setLowThreshold(lowThreshold);
-        setHighThreshold(highThreshold);
-    }        
-
-    /**
-     * Setter for property highThreshold.
-     * 
-     * @param highThreshold Value of property highThreshold. This method will
-     * also set the currentHighThreshold property equal to the highThreshold
-     */
-    public void setHighThreshold(double highThreshold) {
-        this.highThreshold = highThreshold;
-        this.currentHighThreshold = highThreshold;
-    }
 
     /**
      * Getter for property highThreshold.
@@ -90,17 +70,6 @@ public class ThresholdValues implements Serializable, Cloneable {
      */
     public double getHighThreshold() {
         return (highThreshold);
-    }
-
-    /**
-     * Setter for property lowThreshold.
-     *
-     * @param lowThreshold Value of property lowThreshold. This method will
-     * also set the currentLowThreshold property equal to the lowThreshold
-     */
-    public void setLowThreshold(double lowThreshold) {
-        this.lowThreshold = lowThreshold;
-        this.currentLowThreshold = lowThreshold;
     }
 
     /**

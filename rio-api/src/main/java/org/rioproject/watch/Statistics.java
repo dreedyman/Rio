@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class Statistics {
     /** the collection of values */
-    private Vector<Double> v = new Vector<Double>();
+    private final Vector<Double> v = new Vector<Double>();
 
     /** no arg constructor */
     public Statistics() {
@@ -35,7 +35,11 @@ public class Statistics {
      * @param values initial values for new instance
      */
     public Statistics(Iterable<Double> values) {
-        setValues(values);
+        if(values==null)
+            throw new IllegalArgumentException("values is null");
+        for(Double d : values) {
+            v.add(d);
+        }
     }
 
     /**

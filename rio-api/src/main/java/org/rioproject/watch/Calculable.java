@@ -50,9 +50,9 @@ public class Calculable implements Serializable {
      * @param value The value for the Calculable
      */
     public Calculable(String id, double value) {
-        setId(id);
-        setValue(value);
-        setWhen(System.currentTimeMillis());
+        this.id = id;
+        this.value = value;
+        this.when = System.currentTimeMillis();
     }
 
     /**
@@ -64,7 +64,7 @@ public class Calculable implements Serializable {
      */
     public Calculable(String id, double value, long when) {
         this(id, value);
-        setWhen(when);
+        this.when = System.currentTimeMillis();
     }
 
     /**

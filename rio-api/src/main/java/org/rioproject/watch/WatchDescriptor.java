@@ -20,12 +20,13 @@ import java.io.Serializable;
 
 /**
  * The WatchDescriptor defines attributes of a declarable
- * {@link org.rioproject.watch.Watch}, allowing a Watch to be declared as part
+ * {@code Watch}, allowing a Watch to be declared as part
  * of an OperationalString.
  *
  * @author Dennis Reedy
  */
 public class WatchDescriptor implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     public enum Type { GAUGE, COUNTER, PERIODIC, STOP }
     public static final long DEFAULT_PERIOD=10*1000;
@@ -37,11 +38,6 @@ public class WatchDescriptor implements Serializable {
     private long period;
     private transient MBeanServerConnection mbsc;
 
-    /**
-     * Create a WatchDescriptor
-     */
-    public WatchDescriptor() {
-    }
 
     /**
      * Create a WatchDescriptor
@@ -82,7 +78,9 @@ public class WatchDescriptor implements Serializable {
             throw new IllegalArgumentException("name is null");
         if(property == null)
             throw new IllegalArgumentException("property is null");
-        setType(type);
+        if(type == null)
+            throw new IllegalArgumentException("type is null");
+        this.type = type;
         this.name = name;
         this.type = type;
         this.property = property;
