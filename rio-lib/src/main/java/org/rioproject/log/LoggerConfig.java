@@ -33,6 +33,7 @@ import java.util.logging.*;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class LoggerConfig implements Serializable {
     static final long serialVersionUID = 1L;
     /** The Logger name */
@@ -671,16 +672,17 @@ public class LoggerConfig implements Serializable {
 
         /**
          * Transform a String that has control characters into a formatted
-         * String with machine dependant File.separater and System property
+         * String with machine dependant File.separator and System property
          * values set
          *
          * @param input The input string
          *
          * @return A transformed string
          */
-        String transformString(String input) {
+        String transformString(final String input) throws Exception {
             StringBuilder buffer = new StringBuilder();
             int index;
+            String transformed = input;
             while ((index = input.indexOf("${")) != -1) {
                 buffer.append(input.substring(0, index));
                 int end = input.indexOf("}");
@@ -692,15 +694,13 @@ public class LoggerConfig implements Serializable {
                 } else {
                     String property = System.getProperty(value);
                     if(property == null)
-                        throw new RuntimeException("Cannot resolve property ["
-                                                   + value
-                                                   + "]");
+                        throw new Exception("Cannot resolve property ["+value+"]");
                     buffer.append(property);
                 }
-                input = buffer.toString() + input.substring(end + 1);
+                transformed = buffer.toString() + input.substring(end + 1);
                 buffer.delete(0, buffer.length());
             }
-            return (input);
+            return (transformed);
         }
     }
 }
