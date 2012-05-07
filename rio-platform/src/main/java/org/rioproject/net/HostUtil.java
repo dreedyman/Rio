@@ -18,7 +18,7 @@ package org.rioproject.net;
 /**
  * Utility for getting host name and address.
  */
-public class HostUtil {
+public final class HostUtil {
 
     private HostUtil() {
     }
@@ -46,7 +46,7 @@ public class HostUtil {
      * @throws java.net.UnknownHostException if no IP address for the host name
      * could be found.
      */
-    public static String getHostAddress(String name) throws java.net.UnknownHostException {
+    public static String getHostAddress(final String name) throws java.net.UnknownHostException {
         return java.net.InetAddress.getByName(name).getHostAddress();
     }
 
@@ -63,7 +63,7 @@ public class HostUtil {
      * @throws java.net.UnknownHostException if no IP address for the host name
      * could be found.
      */
-    public static String getHostAddressFromProperty(String property) throws java.net.UnknownHostException {
+    public static String getHostAddressFromProperty(final String property) throws java.net.UnknownHostException {
         String host = getHostAddress();
         String value = System.getProperty(property);
         if(value != null) {
