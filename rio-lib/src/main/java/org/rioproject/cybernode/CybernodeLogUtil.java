@@ -21,15 +21,15 @@ import org.rioproject.opstring.ServiceElement;
 /**
  * Provides utilities for dealing with common logging formats for services being instantiated.
  */
-public class CybernodeLogUtil {
+public final class CybernodeLogUtil {
     private CybernodeLogUtil() {
     }
     
-    public static String logName(ServiceProvisionEvent event) {
+    public static String logName(final ServiceProvisionEvent event) {
         return logName(event.getServiceElement());
     }
 
-    public static String logName(ServiceElement element) {
+    public static String logName(final ServiceElement element) {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
         builder.append(element.getOperationalStringName()).append("/");
@@ -39,7 +39,7 @@ public class CybernodeLogUtil {
         return builder.toString();
     }
 
-    public static Long getInstanceID(ServiceElement element) {
+    public static Long getInstanceID(final ServiceElement element) {
         return element.getServiceBeanConfig().getInstanceID();
     }
 
