@@ -134,7 +134,6 @@ public class SamplingWatch extends PeriodicWatch {
                 propertyMatch = true;
                 Method m = pd.getReadMethod();                
                 if (m != null) {
-                    //verifyReturnType(m);
                     accessor = m;
                 } else {
                     logger.warning("SamplingWatch " +
@@ -156,35 +155,5 @@ public class SamplingWatch extends PeriodicWatch {
         }
 
         return accessor;
-    }
-
-    private void verifyReturnType(Method m) {
-        /* Check method return type */
-        Class<?> type = m.getReturnType();
-        if(type.isPrimitive()) {
-            if(!(type == int.class ||
-                 type == long.class ||
-                 type == float.class||
-                 type == double.class)) {
-                throw new Error("Unsupported primitive return " +
-                                "type: "+type+" for declared watch=" +
-                                "["+getId()+"], " +
-                                "property=" +
-                                "["+property+"]. Supported "+
-                                "types are [int, long, float, double]");
-            }
-        } else {
-            if(!(type == Integer.class ||
-                 type == Long.class ||
-                 type == Float.class ||
-                 type == Double.class)) {
-                throw new Error("Unsupported return "+
-                                "type: "+type+" for declared watch="+
-                                "["+getId()+"], "+
-                                "property="+
-                                "["+property+"]. Supported " +
-                                "types are [Integer, Long, Float, Double]");
-            }
-        }
     }
 }
