@@ -25,20 +25,21 @@ import java.io.Serializable;
 
 /**
  * The SLAThresholdEvent extends ThresholdEvent and represents a threshold
- * being crossed for a Service
+ * being crossed for a Service.
  *
  * @author Dennis Reedy
  */
 public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Unique ID */
     public static final long ID = 1000000001;
     /** The ServiceElement for the service */
-    private ServiceElement sElem;
+    private final ServiceElement sElem;
     /** Description of th SLAPolicyHandler */
     private String slaPolicyHandlerDescription;
     /** Holds value of property hostAddress */
-    private String hostAddress;
+    private final String hostAddress;
     /** The ServiceBeanInstance */
     private ServiceBeanInstance instance;
     
@@ -62,9 +63,9 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
                              String hostAddress, 
                              int type) {
         super(source, calculable, sla, type);
-        setServiceElement(sElem);
-        setSLAPolicyHandlerDescription(slaPolicyHandlerDescription);
-        setHostAddress(hostAddress);
+        this.sElem = sElem;
+        this.slaPolicyHandlerDescription = slaPolicyHandlerDescription;
+        this.hostAddress = hostAddress;
     }
     
     /**
@@ -87,13 +88,7 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
                              String slaPolicyHandlerDescription,
                              String hostAddress, 
                              int type) {
-        this(source, 
-             sElem, 
-             calculable, 
-             sla, 
-             slaPolicyHandlerDescription, 
-             hostAddress, 
-             type);
+        this(source, sElem, calculable, sla, slaPolicyHandlerDescription, hostAddress, type);
         this.instance = instance;
     }
 
@@ -104,15 +99,6 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
      */
     public ServiceElement getServiceElement() {
         return(sElem);
-    }
-
-    /** 
-     * Setter for property sElem
-     *
-     * @param sElem New value of property sElem
-     */
-    public void setServiceElement(ServiceElement sElem) {
-        this.sElem = sElem;
     }
 
     /** 
@@ -129,7 +115,7 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
      *
      * @param sla New value of property sla
      */
-    public void setSLA(SLA sla) {
+    public void setSLA(final SLA sla) {
         setThresholdValues(sla);
     }
 
@@ -140,17 +126,6 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
      */
     public String getSLAPolicyHandlerDescription() {
         return(slaPolicyHandlerDescription);
-    }  
-
-    /** 
-     * Setter for property slaPolicyHandlerDescription
-     *
-     * @param slaPolicyHandlerDescription New value of property
-     * slaPolicyHandlerDescription
-     */
-    public void setSLAPolicyHandlerDescription(
-        String slaPolicyHandlerDescription) {
-        this.slaPolicyHandlerDescription = slaPolicyHandlerDescription;
     }
 
     /** 
@@ -160,15 +135,6 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
      */
     public String getHostAddress() {
         return(hostAddress);
-    }
-
-    /** 
-     * Setter for property hostAddress
-     *
-     * @param hostAddress New value of property hostAddress
-     */
-    public void setHostAddress(String hostAddress) {
-        this.hostAddress = hostAddress;
     }
 
     /**
