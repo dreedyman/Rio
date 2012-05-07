@@ -26,7 +26,7 @@ import java.net.ServerSocket;
  *
  * @author Dennis Reedy
  */
-public class BootUtil {
+public final class BootUtil {
     
     /** This class cannot be instantiated. */
     private BootUtil() {
@@ -63,7 +63,7 @@ public class BootUtil {
      * @throws IllegalArgumentException is either bound is not between
      * 0 and 65535, or if <code>end</code> is &lt; than <code>low</code>.
      */
-    public static int getPortFromRange(String portRange) throws IOException {
+    public static int getPortFromRange(final String portRange) throws IOException {
         String[] range = portRange.split("-");
         int start = Integer.parseInt(range[0]);
         int end = Integer.parseInt(range[1]);
@@ -83,7 +83,7 @@ public class BootUtil {
      * @throws IllegalArgumentException is either bound is not between
      * 0 and 65535, or if <code>end</code> is &lt; than <code>low</code>.
      */
-    public static int getPortFromRange(int start, int end) throws IOException {
+    public static int getPortFromRange(final int start, final int end) throws IOException {
         PortRangeServerSocketFactory factory = new PortRangeServerSocketFactory(start, end);
         ServerSocket ss = factory.createServerSocket(0);
         int p = factory.getLastPort();
