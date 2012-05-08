@@ -37,6 +37,7 @@ import javax.management.MBeanServerConnection;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,9 +76,9 @@ public class SimpleForkTest {
             if(jvmVersion.contains("1.5")) {
                 logger.info("The JMX Attach APIs require Java 6 or above. You are running Java "+jvmVersion);
             } else {
-                MBeanServerConnection mbsc = attach();
-                Assert.assertNotNull("Expected a MBeanServerConnection", mbsc);
-                verifyJVMArgs(mbsc, elem.getExecDescriptor());
+                RuntimeMXBean runtime = attach("T62___W_FL___SK_-1");
+                Assert.assertNotNull("Expected a RuntimeMXBean", runtime);
+                verifyJVMArgs(runtime, elem.getExecDescriptor());
             }
             ServiceBeanInstance[] instances = cybernode.getServiceBeanInstances(opstring.getServices()[0]);
             Assert.assertEquals(1, instances.length);
@@ -91,12 +92,7 @@ public class SimpleForkTest {
         Assert.assertNull("Should not have thrown an exception", thrown);
     }
 
-    private void verifyJVMArgs(MBeanServerConnection mbsc,
-                               ExecDescriptor exDesc) {
-        RuntimeMXBean runtime =
-            JMXUtil.getPlatformMXBeanProxy(mbsc,
-                                           ManagementFactory.RUNTIME_MXBEAN_NAME,
-                                           RuntimeMXBean.class);
+    private void verifyJVMArgs(RuntimeMXBean runtime, ExecDescriptor exDesc) {
         String[] declaredArgs = toArray(exDesc.getInputArgs());
         List<String> jvmArgs = runtime.getInputArguments();
         logger.info("Runtime JVM Args ["+flatten(jvmArgs)+"]");
@@ -112,34 +108,37 @@ public class SimpleForkTest {
         }
     }
 
-    private MBeanServerConnection attach() {
-        MBeanServerConnection mbsc = null;
-        long forkedPID = -1;
+    private RuntimeMXBean attach(final String matchName) {
         String[] managedVMs = JMXConnectionUtil.listManagedVMs();
         for(String managedVM : managedVMs) {
             if(managedVM.contains("start-service-bean-exec")) {
                 String pid = managedVM.substring(0, managedVM.indexOf(" "));
-                forkedPID = Long.valueOf(pid);
-                break;
+                long forkedPID = Long.valueOf(pid);
+                if(forkedPID!=-1) {
+                    logger.fine("PID of exec'd process obtained: "+forkedPID);
+                    try {
+                        MBeanServerConnection mbsc = JMXConnectionUtil.attach(Long.toString(forkedPID));
+                        logger.fine("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
+                        RuntimeMXBean runtime = JMXUtil.getPlatformMXBeanProxy(mbsc,
+                                                                               ManagementFactory.RUNTIME_MXBEAN_NAME,
+                                                                               RuntimeMXBean.class);
+                        for(Map.Entry<String,String> entry : runtime.getSystemProperties().entrySet()) {
+                            if(entry.getKey().equals("org.rioproject.service") && entry.getValue().equals(matchName)) {
+                                return runtime;
+                            }
+                        }
+                    } catch(Exception e) {
+                        logger.log(Level.WARNING,
+                                   "Could not attach to the exec'd JVM with pid: "+forkedPID+", continue service execution",
+                                   e);
+                    }
+                }
+            } else {
+                logger.fine("Could not obtain actual pid of exec'd process, " +
+                            "process cpu and java memory utilization are not available");
             }
         }
-
-        if(forkedPID!=-1) {
-            logger.info("PID of exec'd process obtained: "+forkedPID);
-            try {
-                mbsc = JMXConnectionUtil.attach(Long.toString(forkedPID));
-                logger.info("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
-            } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Could not attach to the exec'd JVM with pid: "+forkedPID+", continue service execution",
-                           e);
-            }
-        } else {
-            logger.info("Could not obtain actual pid of exec'd process, " +
-                        "process cpu and java memory utilization are not available");
-        }
-
-        return mbsc;
+        return null;
     }
 
     private String[] toArray(String s) {
