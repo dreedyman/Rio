@@ -126,9 +126,8 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                                 final Configuration config) throws Exception {
         super(edTemplate, listener, handback, config);
         ServiceTemplate template = new ServiceTemplate(null, null, new Entry[]{edTemplate});
-        sdm = new ServiceDiscoveryManager(dMgr, 
-                                          new LeaseRenewalManager(config),
-                                          (config==null?EmptyConfiguration.INSTANCE:config));
+        Configuration configInstance = config==null?EmptyConfiguration.INSTANCE:config;
+        sdm = new ServiceDiscoveryManager(dMgr, new LeaseRenewalManager(configInstance), configInstance);
         lCache = sdm.createLookupCache(template, null,  null);
         
         lCache.addListener(new EventProducerManager());
