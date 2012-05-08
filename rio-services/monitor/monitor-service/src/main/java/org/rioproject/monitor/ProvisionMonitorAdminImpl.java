@@ -42,10 +42,10 @@ import java.util.logging.Logger;
  */
 public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements ProvisionMonitorAdmin, ServerProxyTrust {
     /** A Logger */
-    static Logger logger = Logger.getLogger("org.rioproject.monitor");
+    private final static Logger logger = Logger.getLogger("org.rioproject.monitor");
     /** Reference to the backend */
-    ProvisionMonitorImpl backend;
-    ProvisionMonitorAdmin remoteRef;
+    private final ProvisionMonitorImpl backend;
+    private ProvisionMonitorAdmin remoteRef;
     
     /**
      * Create a ProvisionMonitorAdminImpl
@@ -53,8 +53,7 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
      * @param service Concrete implementation of a ServiceBeanAdapter
      * @param exporter The Exporter to export this object
      */
-    public ProvisionMonitorAdminImpl(ProvisionMonitorImpl service, 
-                                     Exporter exporter) {
+    public ProvisionMonitorAdminImpl(ProvisionMonitorImpl service, Exporter exporter) {
         this(service, exporter, null);
     }
 
@@ -92,9 +91,7 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
     public ServiceAdmin getServiceAdmin() throws RemoteException {
         if(adminProxy==null) {
             remoteRef = (ProvisionMonitorAdmin)exporter.export(this);
-            adminProxy = 
-                ProvisionMonitorAdminProxy.getInstance(remoteRef, 
-                                                       UuidFactory.generate());
+            adminProxy =  ProvisionMonitorAdminProxy.getInstance(remoteRef, UuidFactory.generate());
         }
         return(adminProxy);
     }
@@ -102,51 +99,44 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
     /* (non-Javadoc)
      * @see org.rioproject.monitor.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(URL opStringURL)
-                               throws OperationalStringException {
+    public Map<String, Throwable> deploy(URL opStringURL) throws OperationalStringException {
         return(backend.deploy(opStringURL, null));
     }
     
     /* (non-Javadoc)
      * @see org.rioproject.monitor.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(URL opStringURL,
-                                         ServiceProvisionListener listener)
-                               throws OperationalStringException {
+    public Map<String, Throwable> deploy(URL opStringURL, ServiceProvisionListener listener) throws OperationalStringException {
         return(backend.deploy(opStringURL, listener));
     }
 
      /* (non-Javadoc)
     * @see org.rioproject.monitor.DeployAdmin#deploy
     */
-    public Map<String, Throwable> deploy(String location)
-    throws OperationalStringException {
+    public Map<String, Throwable> deploy(String location) throws OperationalStringException {
         return(backend.deploy(location, null));
     }
 
     /* (non-Javadoc)
     * @see org.rioproject.monitor.DeployAdmin#deploy
     */
-    public Map<String, Throwable> deploy(String location,
-                                         ServiceProvisionListener listener)
-    throws OperationalStringException {
+    public Map<String, Throwable> deploy(String location, ServiceProvisionListener listener)
+        throws OperationalStringException {
         return(backend.deploy(location, listener));
     }
 
     /* (non-Javadoc)
     * @see org.rioproject.monitor.DeployAdmin#deploy
     */
-    public Map<String, Throwable> deploy(OperationalString opString)
-                               throws OperationalStringException {
+    public Map<String, Throwable> deploy(OperationalString opString) throws OperationalStringException {
         return(backend.deploy(opString, null));
     }
     
     /* (non-Javadoc)
      * @see org.rioproject.monitor.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(OperationalString opString,
-                                         ServiceProvisionListener listener)
-                               throws OperationalStringException {
+    public Map<String, Throwable> deploy(OperationalString opString, ServiceProvisionListener listener)
+        throws OperationalStringException {
         return(backend.deploy(opString, listener));
     }
 

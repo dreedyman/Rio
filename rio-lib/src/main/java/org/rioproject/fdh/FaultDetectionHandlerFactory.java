@@ -95,41 +95,14 @@ public final class FaultDetectionHandlerFactory {
                                                                             final ClassLoader cl)
     throws Exception {
         Class fdhClass;
+        ClassBundle theFdhBundle = getClassBundle(fdhBundle);
         if(cl==null)
-            fdhClass = ClassBundleLoader.loadClass(getClassBundle(fdhBundle));
+            fdhClass = ClassBundleLoader.loadClass(theFdhBundle);
         else
-            fdhClass = ClassBundleLoader.loadClass(cl, getClassBundle(fdhBundle));
+            fdhClass = ClassBundleLoader.loadClass(cl, theFdhBundle);
         FaultDetectionHandler fdh = (FaultDetectionHandler)fdhClass.newInstance();
-        fdhBundle.runKnownMethods(fdh);
+        theFdhBundle.runKnownMethods(fdh);
         return (fdh);
-    }
-
-    /**
-     * Get the ClassBundle for a FaultDetectionHandler declaration
-     *
-     * @param fdhClassName The class name of the FaultDetectionHandler
-     * @param configuration Configuration arguments
-     * @return A ClassBundle created based on the input arguments
-     */
-    public static ClassBundle getClassBundle(final String fdhClassName, final String configuration) {
-        ClassBundle bundle = new ClassBundle(fdhClassName);
-        bundle.addMethod("setConfiguration",
-                         new Object[] {new String[]{configuration}});
-        return(bundle);
-    }
-
-    /**
-     * Get the ClassBundle for a FaultDetectionHandler declaration
-     *
-     * @param fdhClassName The class name of the FaultDetectionHandler
-     * @param configArgs Configuration arguments
-     * @return A ClassBundle created based on the input arguments
-     */
-    public static ClassBundle getClassBundle(final String fdhClassName, final String[] configArgs) {
-        ClassBundle bundle = new ClassBundle(fdhClassName);
-        bundle.addMethod("setConfiguration",
-                         new Object[] {configArgs});
-        return(bundle);
     }
 
     /**

@@ -81,7 +81,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
                             SnapshotHandler snapshotHandler)  {
         if(service==null)
             throw new IllegalArgumentException("service is null");
-        if(context==null)
+        if(service.getServiceBeanContext()==null)
             throw new IllegalArgumentException("context is null");
         this.service = service;
         this.exporter = exporter;
