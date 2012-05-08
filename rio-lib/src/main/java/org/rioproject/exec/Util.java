@@ -217,7 +217,12 @@ public class Util {
             exec.setCommandLine(builder.toString());
 
             if(workingDir!=null && !workingDir.startsWith("/")) {
-                exec.setWorkingDirectory(root + workingDir);
+                StringBuilder workingDirectoryBuilder = new StringBuilder();
+                workingDirectoryBuilder.append(root);
+                if(!root.endsWith(File.separator))
+                    workingDirectoryBuilder.append(File.separator);
+                workingDirectoryBuilder.append(workingDir);
+                exec.setWorkingDirectory(workingDirectoryBuilder.toString());
             }                                    
         }
         return (exec);
