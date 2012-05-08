@@ -118,10 +118,7 @@ public class ServiceTable extends JPanel {
 
         public void addItem(ServiceRecord item) {
             int rowNum = tableData.size();
-            if(rowNum==0)
-                tableData.add(item);
-            else
-                tableData.set(rowNum, item);
+            tableData.add(item);
             fireTableRowsInserted(rowNum, rowNum);
         }
 
