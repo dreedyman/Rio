@@ -77,8 +77,7 @@ public class PosixShell implements Shell {
 
         URL url = Util.getResource(template);
         StringBuilder sb = new StringBuilder();
-        BufferedReader in =
-            new BufferedReader(new InputStreamReader(url.openStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str;
         while ((str = in.readLine()) != null) {
             str = Util.replace(str, "${command}", command);
@@ -107,13 +106,13 @@ public class PosixShell implements Shell {
             }
         }
         environment.putAll(execDescriptor.getEnvironment());
-        logger.fine("Process Builder's environment=%s", environment);
+        logger.finest("Process Builder's environment=%s", environment);
 
         if(workingDirectory!=null) {
             pb = pb.directory(new File(workingDirectory));
             logger.fine("Process Builder's working directory set to [%s]", pb.directory().getCanonicalFile());
-
         }
+
         pb.redirectErrorStream(true);
         Process process = pb.start();        
         /* Started process, wait for pid file ... */
