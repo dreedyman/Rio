@@ -96,8 +96,7 @@
         <repository>
             <id>rio</id>
             <name>Rio Repository</name>
-            <!--<url>scp://www.rio-project.org/var/www/maven2</url>-->
-            <url>file:///Users/dreedy/REPO</url>
+            <url>scp://www.rio-project.org/var/www/maven2</url>
         </repository>
     </distributionManagement>
 
