@@ -54,7 +54,7 @@ public class RoundRobinEventHandler extends EventHandler {
      *
      * @throws Exception If a landlord lease manager cannot be created
      */
-    public RoundRobinEventHandler(EventDescriptor descriptor) throws Exception {
+    public RoundRobinEventHandler(final EventDescriptor descriptor) throws Exception {
         super(descriptor);
     }
 
@@ -67,8 +67,7 @@ public class RoundRobinEventHandler extends EventHandler {
      *
      * @throws Exception If a landlord lease manager cannot be created
      */
-    public RoundRobinEventHandler(EventDescriptor descriptor,
-        Configuration config) throws Exception {
+    public RoundRobinEventHandler(final EventDescriptor descriptor, Configuration config) throws Exception {
         super(descriptor, config);
     }
 
@@ -80,9 +79,9 @@ public class RoundRobinEventHandler extends EventHandler {
      * @param event The event to send
      * 
      * @throws NoEventConsumerException is there are no event registrants to
-     * send the event to
+     * send the event to.
      */
-    public void fire(RemoteServiceEvent event) throws NoEventConsumerException {
+    public void fire(final RemoteServiceEvent event) throws NoEventConsumerException {
         event.setEventID(descriptor.eventID);
         event.setSequenceNumber(sequenceNumber);
         while (true) {
@@ -90,8 +89,7 @@ public class RoundRobinEventHandler extends EventHandler {
             if(sr == null)
                 throw new NoEventConsumerException("No event consumers");
             try {
-                EventRegistrationResource er = 
-                    (EventRegistrationResource)sr.getResource();
+                EventRegistrationResource er = (EventRegistrationResource)sr.getResource();
                 RemoteEventListener listener = er.getListener();
                 MarshalledObject handback = er.getHandback();
                 event.setHandback(handback);
@@ -111,10 +109,7 @@ public class RoundRobinEventHandler extends EventHandler {
                     resourceMgr.removeResource(sr);
                     landlord.cancel(sr.getCookie());
                 } catch(Exception ex) {
-                    logger.log(Level.SEVERE,
-                               "Removing/Cancelling an EventConsumer "+
-                               "from UnknownEventException",
-                               ex);
+                    logger.log(Level.WARNING, "Removing/Cancelling an EventConsumer from UnknownEventException", ex);
                 }
             } catch(RemoteException re) {
                 // Not sure if we are allowed to cancel the lease here, but
@@ -126,10 +121,7 @@ public class RoundRobinEventHandler extends EventHandler {
                     resourceMgr.removeResource(sr);
                     landlord.cancel(sr.getCookie());
                 } catch(Exception ex) {
-                    logger.log(Level.SEVERE,
-                               "Removing/Cancelling an EventConsumer from "+
-                               "RemoteException",
-                               ex);
+                    logger.log(Level.WARNING, "Removing/Cancelling an EventConsumer from RemoteException", ex);
                 }
             }
         }
