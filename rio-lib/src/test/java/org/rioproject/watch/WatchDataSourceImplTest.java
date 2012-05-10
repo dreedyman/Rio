@@ -523,7 +523,7 @@ public class WatchDataSourceImplTest {
 
                 long waited = 0;
                 if(wdrClass.equals(RemoteWDR.class.getName())) {
-                    int maxIterations = 5000;
+                    int maxIterations = 10000;
                     int iteration = 0;
                     long current = System.currentTimeMillis();
                     while(expected.size()!=wdr.calculables().size() && iteration<maxIterations) {
