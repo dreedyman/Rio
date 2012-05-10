@@ -41,6 +41,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.rmi.MarshalledObject;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -94,8 +96,9 @@ public class BasicEventConsumerTest {
         EventRegistration eventRegistration = consumer.register(serviceItem);
         Assert.assertNotNull(eventRegistration);
         p.fire();
-        Assert.assertTrue("Expected listener count to be > 0, found: "+listener.counter.get(),
-                          listener.counter.get()>0);
+        listener.countDown.await(5, TimeUnit.SECONDS);
+        Assert.assertTrue("Expected listener count to be > 0, found: " + listener.counter.get(),
+                          listener.counter.get() > 0);
     }
 
     @Test
@@ -149,16 +152,20 @@ public class BasicEventConsumerTest {
         ServiceItem serviceItem = createServiceItem(p);
 
         BasicEventConsumer consumer1 = new BasicEventConsumer(getEventDescriptor());
-        Listener listener1 = new Listener();
+        Listener listener1 = new Listener(2);
         consumer1.register(listener1);
 
         BasicEventConsumer consumer2 = new BasicEventConsumer(getEventDescriptor());
-        Listener listener2 = new Listener();
+        Listener listener2 = new Listener(2);
         consumer2.register(listener2);
 
         BasicEventConsumer consumer3 = new BasicEventConsumer(getEventDescriptor());
-        Listener listener3 = new Listener();
+        Listener listener3 = new Listener(2);
         consumer3.register(listener3);
+
+        listener1.countDown.await(5, TimeUnit.SECONDS);
+        listener2.countDown.await(5, TimeUnit.SECONDS);
+        listener2.countDown.await(5, TimeUnit.SECONDS);
 
         Assert.assertNotNull(consumer1.register(serviceItem));
         Assert.assertNotNull(consumer2.register(serviceItem));
@@ -237,9 +244,19 @@ public class BasicEventConsumerTest {
 
     class Listener implements RemoteServiceEventListener {
         AtomicInteger counter = new AtomicInteger();
+        CountDownLatch countDown;
+
+        Listener() {
+            countDown = new CountDownLatch(1);
+        }
+
+        Listener(int startCountFrom) {
+            countDown = new CountDownLatch(startCountFrom);
+        }
 
         public void notify(RemoteServiceEvent event) {
             counter.incrementAndGet();
+            countDown.countDown();
         }
     }
 }
