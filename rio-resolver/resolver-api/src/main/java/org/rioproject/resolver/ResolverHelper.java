@@ -161,10 +161,12 @@ public final class ResolverHelper {
     private static String getResolverJarFile() {
         String resolverJarFile = System.getProperty(RESOLVER_JAR);
         if(resolverJarFile==null) {
-            if(System.getProperty("RIO_HOME")==null)
+            String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
+            if(rioHome==null) {
                 throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar");
+            }
             String resolverJarName = "resolver-aether.jar";
-            String resolverLibDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator+"resolver";
+            String resolverLibDir = rioHome+File.separator+"lib"+File.separator+"resolver";
             resolverJarFile = resolverLibDir+File.separator+resolverJarName;
         }
         if(logger.isLoggable(Level.CONFIG))
