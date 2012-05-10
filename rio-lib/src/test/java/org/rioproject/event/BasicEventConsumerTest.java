@@ -163,19 +163,16 @@ public class BasicEventConsumerTest {
         Listener listener3 = new Listener(2);
         consumer3.register(listener3);
 
-        listener1.countDown.await(5, TimeUnit.SECONDS);
-        listener2.countDown.await(5, TimeUnit.SECONDS);
-        listener2.countDown.await(5, TimeUnit.SECONDS);
-
         Assert.assertNotNull(consumer1.register(serviceItem));
         Assert.assertNotNull(consumer2.register(serviceItem));
         Assert.assertNotNull(consumer3.register(serviceItem));
 
         for(int i=0; i<6; i++)
             p.fire();
-        Assert.assertTrue("Should have gotten 2, got "+listener1.counter.get(), listener1.counter.get()==2);
-        Assert.assertTrue("Should have gotten 2, got "+listener2.counter.get(), listener2.counter.get()==2);
-        Assert.assertTrue("Should have gotten 2, got "+listener3.counter.get(), listener3.counter.get()==2);
+
+        Assert.assertTrue("Should have gotten 2, got "+listener1.counter.get(), listener1.countDown.await(5, TimeUnit.SECONDS));
+        Assert.assertTrue("Should have gotten 2, got "+listener2.counter.get(), listener2.countDown.await(5, TimeUnit.SECONDS));
+        Assert.assertTrue("Should have gotten 2, got "+listener3.counter.get(), listener3.countDown.await(5, TimeUnit.SECONDS));
     }
 
     private ServiceItem createServiceItem(Producer p) throws Exception {
