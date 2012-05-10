@@ -785,8 +785,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
         /* Get whether the Cybernode will make itself available as an asset */
         boolean doEnlist = (Boolean)config.getEntry(getConfigComponent(), "enlist", Boolean.class, true);
-        if(doEnlist)
+        if(doEnlist) {
             doEnlist();
+        } else {
+            logger.info("Do not enlist with ProvisionManagers as an instantiation resource");
+        }
 
         /* Create a computeResourcePolicyHandler to watch for thresholds
          * being crossed */
