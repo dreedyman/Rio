@@ -237,26 +237,13 @@ public class Watch implements WatchMBean {
     public TabularData getCalculables(){
         try {
             Calculable[] calculables;
-            if(localRef != null)
+            if(localRef != null) {
                 calculables = localRef.getCalculable();
-            else
+            } else {
                 calculables = watchDataSource.getCalculable();
-            if (calculables == null || calculables.length == 0) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("No Calculables Available From Data Source:" +getId());
-                return null;
             }
-            CompositeType type = JMXUtil.createCompositeType(
-                    JMXUtil.toMap(calculables[0]),
-                    "Calculable",
-                    "Calculable"
-            );
-            TabularType tabularType = new TabularType(
-                    "Calculables",
-                    "Calculables",
-                    type,
-                    new String[]{"when"}
-            );
+            CompositeType type = JMXUtil.createCompositeType(JMXUtil.toMap(calculables[0]), "Calculable", "Calculable");
+            TabularType tabularType = new TabularType("Calculables", "Calculables", type, new String[]{"when"});
             TabularDataSupport tabularDataSupport = new TabularDataSupport(tabularType);
             for (Calculable calculable : calculables) {
                 CompositeData compositeData = new CompositeDataSupport(type, JMXUtil.toMap(calculable));
