@@ -28,6 +28,7 @@ import org.rioproject.config.ConfigHelper;
 import org.rioproject.cybernode.ServiceBeanLoader;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -102,6 +103,11 @@ public class JSBLoader implements ServiceBeanFactory {
             ServiceBeanLoader.unload(jsbCL, context.getServiceElement());
             if(t instanceof ServiceBeanInstantiationException)
                 throw (ServiceBeanInstantiationException)t;
+            /* Get the cause if we have an InvocationTargetException, it will allow the thrown exception
+             * to have a more meaningful cause. */
+             if(t instanceof InvocationTargetException) {
+                t = t.getCause();
+            }
             throw new ServiceBeanInstantiationException("Service Instantiation Exception", t, true);
         }
         return (new Created(impl, proxy));
