@@ -341,12 +341,9 @@ public final class AetherService {
                         /*if(r.getId().equals("rio") || r.getUrl().equals("http://www.rio-project.org/maven2/"))
                             haveRio = true;*/
                         RemoteRepository remoteRepository = new RemoteRepository(r.getId(), "default", r.getUrl());
-                        RepositoryPolicy snapShotPolicy = new RepositoryPolicy(r.getSnapshots().isEnabled(),
-                                                                               r.getSnapshots().getUpdatePolicy(),
-                                                                               r.getSnapshots().getChecksumPolicy());
-                        RepositoryPolicy releasesPolicy = new RepositoryPolicy(r.getReleases().isEnabled(),
-                                                                               r.getReleases().getUpdatePolicy(),
-                                                                               r.getReleases().getChecksumPolicy());
+                        RepositoryPolicy snapShotPolicy = createRepositoryPolicy(r.getSnapshots());
+                        RepositoryPolicy releasesPolicy = createRepositoryPolicy(r.getReleases());
+
                         remoteRepository.setPolicy(true, snapShotPolicy);
                         remoteRepository.setPolicy(false, releasesPolicy);
                         myRepositories.add(remoteRepository);
@@ -385,6 +382,18 @@ public final class AetherService {
         if(logger.isLoggable(Level.FINE))
             logger.fine(String.format("Repositories %s", myRepositories));
         return myRepositories;
+    }
+
+    private RepositoryPolicy createRepositoryPolicy(org.apache.maven.settings.RepositoryPolicy r) {
+        boolean enabled = true;
+        String updatePolicy = "";
+        String checksumPolicy = "";
+        if(r!=null) {
+            enabled = r.isEnabled();
+            checksumPolicy = r.getUpdatePolicy();
+            updatePolicy = r.getChecksumPolicy();
+        }
+        return new RepositoryPolicy(enabled, updatePolicy, checksumPolicy);
     }
 
 }
