@@ -49,14 +49,6 @@
                 provides platform specific monitoring of the compute resource
                 attribute being observed.
             </p>
-            <div id="infobox">
-                <img src="images/information.gif"/>
-                Rio uses Hyperic SIGAR to assist with the collection of system monitoring.
-                Hyperic SIGAR is licensed under the GPL with a FLOSS license exception,
-                allowing it to be included with the Rio Apache License v2 distribution.
-                If for some reason the GPL cannot be used with your distribution of Rio,
-                remove the RIO_HOME/lib/hyperic directory.
-            </div>
             <p>
                 If a service has declared SLA requirements that include one of
                 the monitored system resources, the wiring up of the service's

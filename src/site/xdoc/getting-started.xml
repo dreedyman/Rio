@@ -32,13 +32,6 @@
                 Prefuse Visualization Toolkit.
             </p>
 
-            <div id="infobox">
-                <img src="images/information.gif"/>
-                Hyperic SIGAR is licensed under the GPL with a FLOSS license exception,
-                allowing it to be included with the Rio Apache License v2 distribution.
-                If for some reason the GPL cannot be used with your distribution of Rio,
-                remove the <tt>RIO_HOME/lib/hyperic directory</tt>.
-            </div>
 
             <div class="section"><h3>Installing</h3></div>
             <p>
