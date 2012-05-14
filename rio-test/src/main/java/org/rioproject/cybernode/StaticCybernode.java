@@ -128,7 +128,9 @@ public class StaticCybernode {
                                   null); // EventHandler (slas)
         JSBDelegate delegate =
             (JSBDelegate) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
-        return delegate.getImpl();
+        Object impl = delegate.getImpl();
+        serviceSet.add(new ActivatedService(impl, delegate.getProxy(), delegate));
+        return impl;
     }
 
     /**
