@@ -310,7 +310,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             String nativeLibDirs = System.getProperty(NATIVE_LIBS);
             List<File> dirList = new ArrayList<File>();
             if(nativeLibDirs!=null && nativeLibDirs.length()>0) {
-                StringTokenizer st = new StringTokenizer(nativeLibDirs);
+                StringTokenizer st = new StringTokenizer(nativeLibDirs, File.pathSeparator+" ");
                 while(st.hasMoreTokens()) {
                     String dirName = st.nextToken();
                     File dir = new File(dirName);
@@ -323,7 +323,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                        "permissions to check for native libraries ["+dirName+"]. Continuing ...");
                     }                       
                 }
-                final String libExtension = getLibExtension();
+                final String[] libExtensions = getLibExtensions();
                 File[] dirs = dirList.toArray(new File[dirList.size()]);
                 for (File dir : dirs) {
                     File[] files = dir.listFiles(new FileFilter() {
@@ -335,7 +335,14 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                             } catch (IOException e) {
                                 logger.log(Level.WARNING, "Trying to determine whether the file is a symbolic link", e);
                             }
-                            return (pathName.getName().endsWith(libExtension));
+                            boolean matches = false;
+                            for(String libExtension : libExtensions) {
+                                if(pathName.getName().endsWith(libExtension)) {
+                                    matches = true;
+                                    break;
+                                }
+                            }
+                            return matches;
                         }
                     });
 
@@ -461,13 +468,13 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
      * Get the library extension to search for. Determined by the operating 
      * system name
      */
-    private String getLibExtension() {
+    private String[] getLibExtensions() {
         String opSys = System.getProperty("os.name");
         if(opSys.startsWith("Windows"))
-            return("dll");
+            return(new String[]{"dll"});
         if(opSys.startsWith("Mac"))
-            return("jnilib");
-        return("so");
+            return(new String[]{"jnilib", "dylib"});
+        return(new String[]{"so"});
     }
 
     /*
