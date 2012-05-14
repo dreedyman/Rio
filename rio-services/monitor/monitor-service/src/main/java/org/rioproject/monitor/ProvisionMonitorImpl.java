@@ -579,9 +579,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         if(artifactURL!=null) {
             try {
                 OAR oar = new OAR(artifactURL);
-                OperationalString[] opstring = oar.loadOperationalStrings();
+                OperationalString[] opstring = oar.loadOperationalStrings(this.getClass().getClassLoader());
                 opStringName = opstring[0].getName();
             } catch(Exception e) {
+                logger.log(Level.WARNING,
+                           String.format("Unable to load OperationalString during undeploy for %s", name), e);
                 throw new OperationalStringException(String.format("Unable to undeploy, cannot parse/load [%s]",
                                                                    opStringName));
             }

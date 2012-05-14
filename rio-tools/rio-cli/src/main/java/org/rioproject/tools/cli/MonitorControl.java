@@ -416,8 +416,7 @@ public class MonitorControl {
                 /* Next token is the opstring */
                 deployment = tok.nextToken();
             }
-            ServiceItem[] items =
-                CLI.getInstance().finder.findMonitors(null, null, verbose);
+            ServiceItem[] items = CLI.getInstance().finder.findMonitors(null, null, verbose);
             if (items.length == 0)
                 return ("No Provision Monitor instances discovered\n");
 

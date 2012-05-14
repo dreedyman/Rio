@@ -261,6 +261,10 @@ public class OAR implements Serializable {
     }
 
     public OperationalString[] loadOperationalStrings() throws OARException {
+        return loadOperationalStrings(Thread.currentThread().getContextClassLoader());
+    }
+
+    public OperationalString[] loadOperationalStrings(ClassLoader loader) throws OARException {
         if(url==null)
             throw new OARException("Cannot load OperationalString(s), unknown URL in OAR");
         StringBuilder sb = new StringBuilder();
@@ -273,7 +277,7 @@ public class OAR implements Serializable {
         sb.append(getOpStringName());
         try {
             URL opStringURL = new URL(sb.toString());
-            OpStringLoader osl = new OpStringLoader();
+            OpStringLoader osl = new OpStringLoader(loader);
             return osl.parseOperationalString(opStringURL);
         } catch (Exception e) {
             throw new OARException("Unable to load OperationalStrings", e);
