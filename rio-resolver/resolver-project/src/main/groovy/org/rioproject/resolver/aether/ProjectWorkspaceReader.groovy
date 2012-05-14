@@ -66,11 +66,11 @@ public class ProjectWorkspaceReader implements WorkspaceReader {
     public File findArtifact(Artifact artifact) {
         String fileName = String.format("%s-%s.%s", artifact.getArtifactId(), artifact.getVersion(), artifact.getExtension());
         String artifactName = String.format("%s-%s", artifact.getArtifactId(), artifact.getVersion());
-        if(projectArtifactName.equals(artifactName)) {
+        if(projectArtifactName!=null && projectArtifactName.equals(artifactName)) {
             if("pom".equals(artifact.extension) && pomFile!=null) {
                 return pomFile;
             }
-            if(artifactFile.getName().equals(fileName) && artifactFile!=null) {
+            if( artifactFile!=null && artifactFile.getName().equals(fileName)) {
                 return artifactFile;
             }
         }
