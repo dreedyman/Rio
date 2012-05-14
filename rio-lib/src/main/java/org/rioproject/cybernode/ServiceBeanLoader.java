@@ -514,7 +514,10 @@ public class ServiceBeanLoader {
                                                           resolver,
                                                           elem.getRemoteRepositories());
                         } catch (ResolverException e) {
-                            throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", e);
+                            Throwable thrown = e;
+                            if(e.getCause()!=null)
+                                thrown = e.getCause();
+                            throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", thrown);
                         }
                         List<URL> urls = new ArrayList<URL>();
                         for(String jar: jars) {
