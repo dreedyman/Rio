@@ -33,24 +33,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This class manages interactions with {@link OpStringManager} classes
+ * This class manages interactions with {@link OpStringManager} classes.
  */
 public class OpStringMangerController {
     /** Collection for all OperationalString OpStringManager instances */
-    final List<OpStringManager> opStringManagers = new ArrayList<OpStringManager>();
+    private final List<OpStringManager> opStringManagers = new ArrayList<OpStringManager>();
     /** Collection for all pending (in process) OperationalString
      * OpStringManager instances */
-    final List<OpStringManager> pendingManagers = new ArrayList<OpStringManager>();
-    ProvisionMonitorPeer provisionMonitorPeer;
-    Configuration config;
-    ProvisionMonitor serviceProxy;
-    ProvisionMonitorEventProcessor eventProcessor;
-    StateManager stateManager;
-    ServiceProvisioner serviceProvisioner;
-    Uuid uuid;
-    static Logger logger = Logger.getLogger(OpStringMangerController.class.getName());
+    private final List<OpStringManager> pendingManagers = new ArrayList<OpStringManager>();
+    private ProvisionMonitorPeer provisionMonitorPeer;
+    private Configuration config;
+    private ProvisionMonitor serviceProxy;
+    private ProvisionMonitorEventProcessor eventProcessor;
+    private StateManager stateManager;
+    private ServiceProvisioner serviceProvisioner;
+    private Uuid uuid;
+    private static Logger logger = Logger.getLogger(OpStringMangerController.class.getName());
 
-    void setServiceProvisioner(ServiceProvisioner serviceProvisioner) {
+    void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {
         this.serviceProvisioner = serviceProvisioner;
     }
 
@@ -58,23 +58,23 @@ public class OpStringMangerController {
         this.uuid = uuid;
     }
 
-    void setEventProcessor(ProvisionMonitorEventProcessor eventProcessor) {
+    void setEventProcessor(final ProvisionMonitorEventProcessor eventProcessor) {
         this.eventProcessor = eventProcessor;
     }
 
-    void setServiceProxy(ProvisionMonitor serviceProxy) {
+    void setServiceProxy(final ProvisionMonitor serviceProxy) {
         this.serviceProxy = serviceProxy;
     }
 
-    void setProvisionMonitorPeer(ProvisionMonitorPeer provisionMonitorPeer) {
+    void setProvisionMonitorPeer(final ProvisionMonitorPeer provisionMonitorPeer) {
         this.provisionMonitorPeer = provisionMonitorPeer;
     }
 
-    void setConfig(Configuration config) {
+    void setConfig(final Configuration config) {
         this.config = config;
     }
 
-    void setStateManager(StateManager stateManager) {
+    void setStateManager(final StateManager stateManager) {
         this.stateManager = stateManager;
     }
 
@@ -111,7 +111,7 @@ public class OpStringMangerController {
      * @return The corresponding OpStringManager, or null if
      * not found
      */
-    public OpStringManager getOpStringManager(String name) {
+    public OpStringManager getOpStringManager(final String name) {
         if(name == null)
             return (null);
 
@@ -141,7 +141,7 @@ public class OpStringMangerController {
      *
      * @return The primary OperationalStringManager if found, or null if not
      */
-    public OperationalStringManager getPrimary(String name) {
+    public OperationalStringManager getPrimary(final String name) {
         OperationalStringManager mgr = null;
         ProvisionMonitor[] monitors = provisionMonitorPeer.getProvisionMonitorPeers();
         for (ProvisionMonitor monitor : monitors) {
@@ -172,7 +172,7 @@ public class OpStringMangerController {
      * @return The primary DeployAdmin for the opstring, or null
      * if not found
      */
-    public DeployAdmin getPrimaryDeployAdmin(String opStringName) {
+    public DeployAdmin getPrimaryDeployAdmin(final String opStringName) {
         DeployAdmin primary = null;
         ProvisionMonitor.PeerInfo[] peers = provisionMonitorPeer.getBackupInfo();
         for (ProvisionMonitor.PeerInfo peer : peers) {
@@ -230,11 +230,11 @@ public class OpStringMangerController {
      *
      * @throws Exception if an OpStringManger cannot be created
      */
-    public OpStringManager addOperationalString(OperationalString opString,
-                                                Map<String, Throwable> map,
-                                                OpStringManager parent,
-                                                DeployAdmin dAdmin,
-                                                ServiceProvisionListener listener) throws Exception {
+    public OpStringManager addOperationalString(final OperationalString opString,
+                                                final Map<String, Throwable> map,
+                                                final OpStringManager parent,
+                                                final DeployAdmin dAdmin,
+                                                final ServiceProvisionListener listener) throws Exception {
         DefaultOpStringManager opMgr = null;
         boolean active = dAdmin==null;
         try {
@@ -346,7 +346,7 @@ public class OpStringMangerController {
      *
      * @return true if the  OperationalString with the provided name is loaded
      */
-    public boolean opStringExists(String opStringName) {
+    public boolean opStringExists(final String opStringName) {
         boolean exists = false;
         synchronized(pendingManagers) {
             for (OpStringManager mgr : pendingManagers) {
