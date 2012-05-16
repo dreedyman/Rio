@@ -232,9 +232,18 @@ public final class AetherService {
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, getDependencyFilter(artifact));
         dependencyRequest.setCollectRequest(collectRequest);
 
-        List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession,
-                                                                                    dependencyRequest).getArtifactResults();
-        return new ResolutionResult(artifact, artifactResults);
+        try {
+            List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession,
+                                                                                        dependencyRequest).getArtifactResults();
+            return new ResolutionResult(artifact, artifactResults);
+        } catch(NullPointerException e) {
+            /* catch, log and rethrow */
+            logger.log(Level.SEVERE,
+                       String.format("Trying to resolve %s, make sure that all parent poms are resolveable", artifact),
+                       e);
+            throw e;
+        }
+
     }
 
     /**
