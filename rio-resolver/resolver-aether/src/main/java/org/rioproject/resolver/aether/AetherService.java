@@ -338,15 +338,15 @@ public final class AetherService {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
                     for(org.apache.maven.settings.Repository r : profile.getRepositories()) {
-                        /*if(r.getId().equals("rio") || r.getUrl().equals("http://www.rio-project.org/maven2/"))
-                            haveRio = true;*/
-                        RemoteRepository remoteRepository = new RemoteRepository(r.getId(), "default", r.getUrl());
-                        RepositoryPolicy snapShotPolicy = createRepositoryPolicy(r.getSnapshots());
-                        RepositoryPolicy releasesPolicy = createRepositoryPolicy(r.getReleases());
+                        if(!alreadyHaveRepository(myRepositories, r.getId())) {
+                            RemoteRepository remoteRepository = new RemoteRepository(r.getId(), "default", r.getUrl());
+                            RepositoryPolicy snapShotPolicy = createRepositoryPolicy(r.getSnapshots());
+                            RepositoryPolicy releasesPolicy = createRepositoryPolicy(r.getReleases());
 
-                        remoteRepository.setPolicy(true, snapShotPolicy);
-                        remoteRepository.setPolicy(false, releasesPolicy);
-                        myRepositories.add(remoteRepository);
+                            remoteRepository.setPolicy(true, snapShotPolicy);
+                            remoteRepository.setPolicy(false, releasesPolicy);
+                            myRepositories.add(remoteRepository);
+                        }
                     }
                     break;
                 }
@@ -363,7 +363,7 @@ public final class AetherService {
                     central = new RemoteRepository("central", "default", mirror.getUrl());
                 }
             }
-            if(!myRepositories.contains(central))
+            if(!alreadyHaveRepository(myRepositories, "central"))
                 myRepositories.add(central);
         }
         for(Server server : effectiveSettings.getServers()) {
@@ -396,4 +396,14 @@ public final class AetherService {
         return new RepositoryPolicy(enabled, updatePolicy, checksumPolicy);
     }
 
+    private boolean alreadyHaveRepository(List<RemoteRepository> repositories, String id) {
+        boolean hasRepository = false;
+        for(RemoteRepository r : repositories) {
+            if(id.equals(r.getId())) {
+                hasRepository = true;
+                break;
+            }
+        }
+        return hasRepository;
+    }
 }

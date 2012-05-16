@@ -18,6 +18,7 @@ package org.rioproject.resolver.aether;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.http.LightweightHttpWagon;
 import org.apache.maven.wagon.providers.http.LightweightHttpsWagon;
+import  org.apache.maven.wagon.providers.file.FileWagon;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 
 public class ManualWagonProvider implements WagonProvider {
@@ -30,6 +31,8 @@ public class ManualWagonProvider implements WagonProvider {
             wagon = new LightweightHttpWagon();
         } else if("https".equals(roleHint)) {
             wagon = new LightweightHttpsWagon();
+        } else if("file".equals(roleHint)) {
+            wagon = new FileWagon();
         }
         return wagon;
     }
