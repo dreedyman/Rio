@@ -292,7 +292,7 @@ public final class ServiceDescriptorUtil {
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         String reggieClasspath = rioHome+File.separator+"lib"+File.separator+"reggie.jar";
-        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/2.1.1;http://www.rio-project.org/maven2";
+        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/2.1.1";
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }
