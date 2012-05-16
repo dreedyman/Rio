@@ -61,6 +61,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                               final String name,
                               final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
         String resolvedCodebase = resolveCodebase(codebase);
+        if(logger.isLoggable(Level.FINEST))
+            logger.finest("Load class %s using codebase %s, resolved to %s", name, codebase, resolvedCodebase);
         return loader.loadClass(resolvedCodebase, name, defaultLoader);
     }
 
@@ -69,6 +71,16 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                                    final String[] interfaces,
                                    final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
         String resolvedCodebase = resolveCodebase(codebase);
+        if(logger.isLoggable(Level.FINEST)) {
+            StringBuilder builder = new StringBuilder();
+            for(String s : interfaces) {
+                if(builder.length()>0) {
+                    builder.append(" ");
+                }
+                builder.append(s);
+            }
+            logger.finest("Load proxy classes %s using codebase %s, resolved to %s", builder.toString(), codebase, resolvedCodebase);
+        }
         return loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
     }
 
@@ -80,7 +92,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     @Override
     public String getClassAnnotation(final Class<?> aClass) {
-        if(aClass.getClassLoader() instanceof URLClassLoader) {
+        /*if(aClass.getClassLoader() instanceof URLClassLoader) {
             URL[] urls = ((URLClassLoader)aClass.getClassLoader()).getURLs();
             if(urls.length>0 && urls[0].getProtocol().equals("artifact")) {
                 StringBuilder builder = new StringBuilder();
@@ -91,7 +103,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 }
                 return resolveCodebase(builder.toString());
             }
-        }
+        }*/
         return loader.getClassAnnotation(aClass);
     }
 
