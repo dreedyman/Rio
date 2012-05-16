@@ -92,32 +92,16 @@ public class ServiceBeanExecManager {
         return execHandler;
     }
 
-    public ServiceBeanInstance exec(ServiceElement sElem,
-                                    OperationalStringManager opStringMgr,
-                                    DiscardManager discardManager,
-                                    PlatformCapability[] installedpCaps) throws Exception {
+    public ServiceBeanInstance exec(final ServiceElement sElem,
+                                    final OperationalStringManager opStringMgr,
+                                    final DiscardManager discardManager,
+                                    final PlatformCapability[] installedpCaps) throws Exception {
         ExecDescriptor exDesc = new ExecDescriptor();
 
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null)
-            throw new ServiceBeanInstantiationException("Cannot exec service " +
-                                                "["+sElem.getName()+"], " +
-                                                "unknown RIO_HOME system " +
-                                                "property");
-        File rioHomeBin = new File(rioHome+File.separator+"bin");
-        if(!rioHomeBin.exists())
-            throw new ServiceBeanInstantiationException("Cannot exec service " +
-                                                "["+sElem.getName()+"], " +
-                                                "the RIO_HOME/bin directory " +
-                                                "does not exist " +
-                                                "["+rioHome+File.separator+"bin]");
-        if(!rioHomeBin.isDirectory())
-            throw new ServiceBeanInstantiationException("Cannot exec service " +
-                                                "["+sElem.getName()+"], " +
-                                                "RIO_HOME/bin does not point to a " +
-                                                "directory " +
-                                                "["+rioHome+File.separator+"bin]");
-
+            throw new ServiceBeanInstantiationException(String.format("Cannot exec service [%s], unknown RIO_HOME system property",
+                                                                      sElem.getName()));
         /* Create a normalized service name, translating " " to "_" and
          * appending the instance ID to the name. This will be used for the
          * log name and the registry bind name */
@@ -148,7 +132,7 @@ public class ServiceBeanExecManager {
         inputArgsBuilder.append(getStarterConfig(rioHome));
 
         exDesc.setInputArgs(inputArgsBuilder.toString());
-        exDesc.setWorkingDirectory(FileUtils.getFilePath(rioHomeBin));
+        exDesc.setWorkingDirectory(System.getProperty("user.dir"));
 
         /* If we have an exec descriptor, make add any environment settings the
          * service has declared */
@@ -172,17 +156,16 @@ public class ServiceBeanExecManager {
 
             PosixShell shell = new PosixShell();
             try {
-                String shellTemplate =
-                    (String)container.getSharedConfiguration().getEntry(COMPONENT,
-                                                                        "serviceBeanExecShellTemplate",
-                                                                        String.class,
-                                                                        null);
+                String shellTemplate = (String)container.getSharedConfiguration().getEntry(COMPONENT,
+                                                                                           "serviceBeanExecShellTemplate",
+                                                                                           String.class,
+                                                                                           null);
                 if(shellTemplate!=null)
                     shell.setShellTemplate(shellTemplate);
             } catch (ConfigurationException e) {
                 logger.warning("Cannot get shell template from configuration, continue with default");
             }
-            logger.info("Invoke PosixShell.exec for %s", CybernodeLogUtil.logName(sElem));
+            logger.info("Invoke PosixShell.exec for %s, working directory %s", CybernodeLogUtil.logName(sElem), exDesc.getWorkingDirectory());
             manager = shell.exec(exDesc);
 
             forkedServiceListener.setName(serviceBindName);
@@ -248,7 +231,7 @@ public class ServiceBeanExecManager {
         return jvmBuilder.toString();
     }
 
-    private String getOption(String option, String value) {
+    private String getOption(final String option, final String value) {
         StringBuilder optionBuilder = new StringBuilder();
         optionBuilder.append("-D").append(option).append("=").append(value);
         return optionBuilder.toString();
@@ -264,11 +247,11 @@ public class ServiceBeanExecManager {
         return cpBuilder.toString();
     }
 
-    private String getInputArgs(String normalizedServiceName,
-                                String serviceBindName,
-                                String sRegPort,
-                                String declaredJVMOptions,
-                                String logDir) {
+    private String getInputArgs(final String normalizedServiceName,
+                                final String serviceBindName,
+                                final String sRegPort,
+                                final String declaredJVMOptions,
+                                final String logDir) {
         StringBuilder extendedJVMOptions = new StringBuilder();
         if(declaredJVMOptions!=null)
             extendedJVMOptions.append(declaredJVMOptions);
@@ -288,14 +271,8 @@ public class ServiceBeanExecManager {
         /*argsBuilder.append("-verbose");
         argsBuilder.append(" ");*/
         argsBuilder.append(getOption(Constants.REGISTRY_PORT, sRegPort));
-        /*if(System.getProperty(Constants.CODESERVER)!=null) {
-            argsBuilder.append(" ");
-            argsBuilder.append(getOption(Constants.CODESERVER,
-                                         System.getProperty(Constants.CODESERVER)));
-        }*/
         argsBuilder.append(" ");
-        argsBuilder.append(getOption(Constants.SERVICE_BEAN_EXEC_NAME,
-                                     serviceBindName));
+        argsBuilder.append(getOption(Constants.SERVICE_BEAN_EXEC_NAME, serviceBindName));
         /*argsBuilder.append(" ");
         argsBuilder.append(getOption("RIO_LOG_DIR", logDir));*/
         argsBuilder.append(" ");
@@ -303,12 +280,11 @@ public class ServiceBeanExecManager {
     }
 
     private String getMainClass() {
-        String mainClass = System.getProperty("rio.script.mainClass",
-                                              "com.sun.jini.start.ServiceStarter");
+        String mainClass = System.getProperty("rio.script.mainClass", "com.sun.jini.start.ServiceStarter");
         return mainClass+" ";
     }
 
-    private String getStarterConfig(String rioHome) throws IOException {
+    private String getStarterConfig(final String rioHome) throws IOException {
         StringBuilder configBuilder = new StringBuilder();
         configBuilder
             .append(rioHome)
@@ -323,7 +299,7 @@ public class ServiceBeanExecManager {
         return f.getCanonicalPath();
     }
 
-    private void unregister(int regPort, String name) {
+    private void unregister(final int regPort, final String name) {
         try {
             Registry registry = LocateRegistry.getRegistry(regPort);
             registry.unbind(name);
@@ -333,15 +309,12 @@ public class ServiceBeanExecManager {
         }
     }
 
-    private String getLogDirectory(Configuration config,
-                                   String opstringName) throws
-                                                        ConfigurationException,
-                                                        IOException {
+    private String getLogDirectory(final Configuration config,
+                                   final String opstringName) throws ConfigurationException, IOException {
         String serviceLogRootDirectory = (String)config.getEntry(COMPONENT,
-                                                 "serviceLogRootDirectory",
-                                                 String.class,
-                                                 System.getProperty("java.io.tmpdir"));
-
+                                                                 "serviceLogRootDirectory",
+                                                                 String.class,
+                                                                 System.getProperty("java.io.tmpdir"));
         File rootDir = new File(serviceLogRootDirectory);
         FileUtils.checkDirectory(rootDir, "service log root");
         
@@ -354,30 +327,28 @@ public class ServiceBeanExecManager {
         return opstringDir.getAbsolutePath();
     }
 
-    class ForkedServiceBeanListener implements ServiceBeanExecListener,
-                                               FaultDetectionListener<ServiceID> {
-        DiscardManager discardManager;
+    class ForkedServiceBeanListener implements ServiceBeanExecListener, FaultDetectionListener<ServiceID> {
+        final DiscardManager discardManager;
         Exporter exporter;
         ServiceBeanExecListener listener;
         int registryPort;
         int forkedRegistryPort;
         String name;
 
-        ForkedServiceBeanListener(DiscardManager discardManager) {
+        ForkedServiceBeanListener(final DiscardManager discardManager) {
             this.discardManager = discardManager;
         }
 
-        void setRegistryPort(int registryPort) {
+        void setRegistryPort(final int registryPort) {
             this.registryPort = registryPort;
         }
 
-        void createFDH(int forkedRegistryPort) {
+        void createFDH(final int forkedRegistryPort) {
             this.forkedRegistryPort = forkedRegistryPort;
             JMXFaultDetectionHandler fdh = new JMXFaultDetectionHandler();
             fdh.setInvocationDelay(3*1000);
             fdh.setRetryCount(0);
-            fdh.setJMXConnection( JMXConnectionUtil.getJMXServiceURL(forkedRegistryPort,
-                                                                     "localhost"));
+            fdh.setJMXConnection(JMXConnectionUtil.getJMXServiceURL(forkedRegistryPort, "localhost"));
             fdh.register(this);
             try {
                 fdh.monitor();
@@ -390,9 +361,7 @@ public class ServiceBeanExecManager {
             this.name = name;
         }
 
-        ServiceBeanExecListener getServiceBeanExecListener() throws
-                                                             ConfigurationException,
-                                                             ExportException {
+        ServiceBeanExecListener getServiceBeanExecListener() throws ConfigurationException, ExportException {
             if(listener==null) {
                 exporter  = ExporterConfig.getExporter(container.getSharedConfiguration(),
                                                        "org.rioproject.cybernode",
@@ -403,7 +372,7 @@ public class ServiceBeanExecManager {
             return listener;
         }
 
-        public void serviceInstantiated(ServiceRecord record) {
+        public void serviceInstantiated(final ServiceRecord record) {
             serviceRecord = record;
             if(manager!=null) {
                 serviceRecord.setPid(manager.getPid());
@@ -411,12 +380,12 @@ public class ServiceBeanExecManager {
             logger.fine("Instantiation notification for %s", CybernodeLogUtil.logName(sElem));
         }
 
-        public void serviceDiscarded(ServiceRecord record) {
+        public void serviceDiscarded(final ServiceRecord record) {
             logger.info("Discard notification for %s/%s", sElem.getOperationalStringName(), sElem.getName());
             discardManager.discard();
         }
 
-        public void serviceFailure(Object service, ServiceID serviceID) {
+        public void serviceFailure(final Object service, final ServiceID serviceID) {
             try {
                 Registry registry = LocateRegistry.getRegistry(registryPort);
                 registry.unbind(name);
