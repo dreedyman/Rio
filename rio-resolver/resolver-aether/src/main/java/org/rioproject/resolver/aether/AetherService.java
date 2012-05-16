@@ -390,8 +390,8 @@ public final class AetherService {
         String checksumPolicy = "";
         if(r!=null) {
             enabled = r.isEnabled();
-            checksumPolicy = r.getUpdatePolicy();
-            updatePolicy = r.getChecksumPolicy();
+            checksumPolicy = r.getChecksumPolicy();
+            updatePolicy = r.getUpdatePolicy();
         }
         return new RepositoryPolicy(enabled, updatePolicy, checksumPolicy);
     }
