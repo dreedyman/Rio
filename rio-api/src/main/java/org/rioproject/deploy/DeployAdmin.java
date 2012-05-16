@@ -123,7 +123,7 @@ public interface DeployAdmin {
      * OperationalString to deploy
      * @param listener If not null, the ServiceProvisionListener will be
      * notified as each service is deployed
-     * 
+     *
      * @return If there are errors loading part of the OperationalString the
      * Map will be returned with name value pairs associating the service and
      * corresponding exceptions
