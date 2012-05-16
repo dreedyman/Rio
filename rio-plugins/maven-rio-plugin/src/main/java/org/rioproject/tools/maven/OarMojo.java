@@ -76,6 +76,13 @@ public class OarMojo extends ClassDepAndJarMojo {
     private String activation;
 
     /**
+     * Whether to encode repository information into the OAR. Either "true" or "false"
+     *
+     * @parameter expression="true"
+     */
+    private boolean encodeRepositories;
+
+    /**
      * @parameter expression="${project.dependencyArtifacts}"
      */
     private Collection dependencies;
@@ -121,10 +128,6 @@ public class OarMojo extends ClassDepAndJarMojo {
         } catch (IllegalAccessException e) {
             throw new MojoExecutionException("Building Repository list", e);
         }
-        RepositoryEncoder repositoryEncoder = new RepositoryEncoder();
-        File repoConfiguration = new File(System.getProperty("java.io.tmpdir"), "repositories.xml");
-        //repoConfiguration.deleteOnExit();
-        repositoryEncoder.encode(remoteRepositories, repoConfiguration);
 
         doExecute(getMavenProject(), false);                
         getLog().info("Building OAR: "+getOarFileName());
@@ -136,10 +139,16 @@ public class OarMojo extends ClassDepAndJarMojo {
         oar.setDestFile(oarFile);
 
         /* Add repository configuration */
-        ZipFileSet fileSetRepositoryConfig = new ZipFileSet();
-        fileSetRepositoryConfig.setDir(repoConfiguration.getParentFile());
-        fileSetRepositoryConfig.setIncludes(repoConfiguration.getName());
-        oar.addZipfileset(fileSetRepositoryConfig);
+        if(encodeRepositories) {
+            RepositoryEncoder repositoryEncoder = new RepositoryEncoder();
+            File repoConfiguration = new File(System.getProperty("java.io.tmpdir"), "repositories.xml");
+            //repoConfiguration.deleteOnExit();
+            repositoryEncoder.encode(remoteRepositories, repoConfiguration);
+            ZipFileSet fileSetRepositoryConfig = new ZipFileSet();
+            fileSetRepositoryConfig.setDir(repoConfiguration.getParentFile());
+            fileSetRepositoryConfig.setIncludes(repoConfiguration.getName());
+            oar.addZipfileset(fileSetRepositoryConfig);
+        }
 
         /* Add the pom */
         File projectPath = getMavenProject().getBasedir();
@@ -182,15 +191,10 @@ public class OarMojo extends ClassDepAndJarMojo {
         // add the manifest
         Manifest manifest = new Manifest();
         try {
-            manifest.addConfiguredAttribute(
-                new Manifest.Attribute("OAR-Name", oarName));
-            manifest.addConfiguredAttribute(
-                new Manifest.Attribute("OAR-Version", getMavenProject().getVersion()));
-            manifest.addConfiguredAttribute(
-                new Manifest.Attribute("OAR-OperationalString",
-                                       getOpStringFile().getName()));
-            manifest.addConfiguredAttribute(
-                new Manifest.Attribute("OAR-Activation", activation));
+            manifest.addConfiguredAttribute(new Manifest.Attribute("OAR-Name", oarName));
+            manifest.addConfiguredAttribute(new Manifest.Attribute("OAR-Version", getMavenProject().getVersion()));
+            manifest.addConfiguredAttribute(new Manifest.Attribute("OAR-OperationalString", getOpStringFile().getName()));
+            manifest.addConfiguredAttribute(new Manifest.Attribute("OAR-Activation", activation));
             if(!attached.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for(String s: attached) {
@@ -198,8 +202,7 @@ public class OarMojo extends ClassDepAndJarMojo {
                         sb.append(",");
                     sb.append(s);
                 }
-                manifest.addConfiguredAttribute(
-                    new Manifest.Attribute("OAR-Artifacts", sb.toString()));
+                manifest.addConfiguredAttribute(new Manifest.Attribute("OAR-Artifacts", sb.toString()));
             }
         } catch (ManifestException e) {
             getLog().error("Can't generate OAR manifest", e);
@@ -284,6 +287,10 @@ public class OarMojo extends ClassDepAndJarMojo {
 
     protected String getOarFileName() {
         return oarFileName;
+    }
+
+    protected boolean getEncodeRepositories() {
+        return encodeRepositories;
     }
 
     @Override

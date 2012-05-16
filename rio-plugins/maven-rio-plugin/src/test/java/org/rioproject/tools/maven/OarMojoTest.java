@@ -19,7 +19,6 @@ import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
-import org.junit.Test;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -32,15 +31,15 @@ public class OarMojoTest extends AbstractMojoTestCase {
         super.setUp();
     }
 
-    @Test
+    //@Test
     public void testMojoLookup() throws Exception {
-        OarMojo mojo = getOarMojo();
+        OarMojo mojo = getOarMojo("test-project");
         assertNotNull(mojo);
     }
 
-     @Test
+     //@Test
     public void testRepositorySetting() throws Exception {
-        OarMojo mojo = getOarMojo();
+        OarMojo mojo = getOarMojo("test-project");
         assertNotNull(mojo);
         assertNotNull(mojo.getOpstring());
         MavenProject project = (MavenProject)getVariableValueFromObject( mojo, "project" );
@@ -49,9 +48,9 @@ public class OarMojoTest extends AbstractMojoTestCase {
         assertTrue(repositories.size()==4);
     }
 
-    @Test
+    //@Test
     public void testDependencyParsingForIssue302() throws Exception {
-        OarMojo mojo = getOarMojo();
+        OarMojo mojo = getOarMojo("test-project");
         assertNotNull(mojo);
         assertNotNull(mojo.getOpstring());
         MavenProject project = (MavenProject)getVariableValueFromObject( mojo, "project" );
@@ -64,8 +63,15 @@ public class OarMojoTest extends AbstractMojoTestCase {
         assertTrue(classpath.size()==1);
     }
 
-    private OarMojo getOarMojo() throws Exception {
-        File xml = new File(getBasedir(), "src/test/resources/test-project/pom.xml");
+    public void testEncodeRepository() throws Exception {
+        OarMojo mojo = getOarMojo("test-project-1");
+        assertNotNull(mojo);
+        assertFalse(mojo.getEncodeRepositories());
+        mojo.execute();
+    }
+
+    private OarMojo getOarMojo(String project) throws Exception {
+        File xml = new File(getBasedir(), "src/test/resources/"+project+"/pom.xml");
         return (OarMojo) lookupMojo("oar", xml);
     }
 
