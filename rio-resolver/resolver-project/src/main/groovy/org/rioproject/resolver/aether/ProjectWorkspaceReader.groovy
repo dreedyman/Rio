@@ -22,6 +22,8 @@ import org.sonatype.aether.repository.WorkspaceReader
 import org.sonatype.aether.repository.WorkspaceRepository
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.rioproject.logging.GroovyLogger
+import java.util.logging.Level
 
 /**
  * A {@code WorkspaceReader} that reads the current project's pom and artifact.
@@ -34,6 +36,7 @@ public class ProjectWorkspaceReader implements WorkspaceReader {
     private final String projectArtifactName
     private final File pomFile
     private final File artifactFile
+    private def logger = new GroovyLogger(ProjectWorkspaceReader.class.name)
 
     public ProjectWorkspaceReader() throws SettingsBuildingException {
         localRepositoryLocation = SettingsUtil.getLocalRepositoryLocation(SettingsUtil.getSettings())
@@ -47,15 +50,23 @@ public class ProjectWorkspaceReader implements WorkspaceReader {
                 version = model.parent.version
             }
             projectArtifactName = "${model.artifactId}-${version}"
+            if(logger.isLoggable(Level.FINE)) {
+                logger.fine("Project artifact ${projectArtifactName}")
+            }
             pomReader.close()
             File target = new File(System.getProperty("user.dir"), "target")
             if(target.exists()) {
                 File f = new File(target, "${projectArtifactName}.jar")
                 if(f.exists()) {
                     artifactFile = f
+                    if(logger.isLoggable(Level.FINE)) {
+                        logger.fine "Project artifact file ${artifactFile.name}"
+                    }
                 }
             }
             pomReader.close()
+        } else {
+            logger.info("Pom file not found, working in ${System.getProperty("user.dir")}")
         }
     }
 
@@ -66,11 +77,19 @@ public class ProjectWorkspaceReader implements WorkspaceReader {
     public File findArtifact(Artifact artifact) {
         String fileName = String.format("%s-%s.%s", artifact.getArtifactId(), artifact.getVersion(), artifact.getExtension());
         String artifactName = String.format("%s-%s", artifact.getArtifactId(), artifact.getVersion());
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("find artifact ${artifactName}")
         if(projectArtifactName!=null && projectArtifactName.equals(artifactName)) {
             if("pom".equals(artifact.extension) && pomFile!=null) {
+                if(logger.isLoggable(Level.FINE)) {
+                    logger.fine("Return project pom ${pomFile.name}")
+                }
                 return pomFile;
             }
             if( artifactFile!=null && artifactFile.getName().equals(fileName)) {
+                if(logger.isLoggable(Level.FINE)) {
+                    logger.fine("Return project artifact ${artifactFile.name}")
+                }
                 return artifactFile;
             }
         }
