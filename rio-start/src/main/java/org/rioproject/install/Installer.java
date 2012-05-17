@@ -71,7 +71,7 @@ public final class Installer {
 
             /* Install rio-platform */
             Artifact rioPlatform = new Artifact("org.rioproject:rio-platform:" + RioVersion.VERSION);
-            install(rioPlatform, null, new File(libDir, "resolver-api.jar"), aetherServiceInstance);
+            install(rioPlatform, null, new File(libDir, "rio-platform.jar"), aetherServiceInstance);
 
             /* Install Rio Resolver API */
             Artifact resolverAPI = new Artifact("org.rioproject.resolver:resolver-api:" + RioVersion.VERSION);
@@ -114,6 +114,9 @@ public final class Installer {
             install(jskDL, new File(pomDir, "jsk-dl.pom"), new File(libDlDir, "jsk-dl.jar"), aetherServiceInstance);
             install(reggieDL, new File(pomDir, "reggie-dl.pom"), new File(libDlDir, "reggie-dl.jar"), aetherServiceInstance);
             install(serviceUI, new File(pomDir, "serviceui.pom"), new File(libDlDir, "serviceui.jar"), aetherServiceInstance);
+
+            /* Dont forget groovy */
+
 
         } catch (ResolverException e) {
             e.printStackTrace();
