@@ -15,13 +15,40 @@
  */
 package org.rioproject.resolver.aether;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.rioproject.resolver.FileUtils;
+import org.rioproject.resolver.Utils;
+import org.rioproject.resolver.maven2.Repository;
+import org.sonatype.aether.repository.RemoteRepository;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test the AetherService
  */
 public class AetherServiceTest {
+    File saveOriginalSettings;
+
+    @Before
+    public void saveOriginalSettings() throws IOException {
+        saveOriginalSettings = Utils.saveM2Settings();
+    }
+
+    @After
+    public void restoreOriginalSettings() throws IOException {
+        if(saveOriginalSettings!=null) {
+            FileUtils.copy(saveOriginalSettings, Utils.getM2Settings());
+        } else {
+            FileUtils.remove(Utils.getM2Settings());
+        }
+    }
+
     @Test
     public void testGetClasspath() throws Exception {
         ResolutionResult result = AetherService.getDefaultInstance().resolve("org.apache.maven",
@@ -29,5 +56,23 @@ public class AetherServiceTest {
                                                                              "3.0.3");
         Assert.assertNotNull(result);
         Assert.assertTrue(result.getArtifactResults().size()>0);
+    }
+
+    @Test
+    public void testMirrors() {
+        File testRepo;
+        Utils.writeLocalM2RepoSettingsWithMirror();
+        testRepo = Repository.getLocalRepository();
+        if(testRepo.exists())
+            FileUtils.remove(testRepo);
+
+        AetherService aetherService = AetherService.getDefaultInstance();
+        RemoteRepository repository = new RemoteRepository("foo", "default", "http://bogus");
+        List<RemoteRepository> list = new ArrayList<RemoteRepository>();
+        list.add(repository);
+        list = aetherService.getRemoteRepositories(list);
+        for(RemoteRepository r : list) {
+            Assert.assertTrue("Expected "+Utils.getMirroredURL()+" got "+r.getUrl(), r.getUrl().equals(Utils.getMirroredURL()));
+        }
     }
 }

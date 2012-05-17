@@ -73,6 +73,36 @@ public class Utils {
         }
     }
 
+    public static String getMirroredURL() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("file://").append(System.getProperty("user.dir")).append("target");
+        return builder.toString();
+    }
+    public static void writeLocalM2RepoSettingsWithMirror() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\"").append("\n");
+        sb.append("    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"").append("\n");
+        sb.append("    xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">").append("\n");
+        sb.append("    <localRepository>target/test-repo/</localRepository> ").append("\n");
+        sb.append("    <mirrors>").append("\n");
+        sb.append("        <mirror>").append("\n");
+        sb.append("            <id>all</id>").append("\n");
+        sb.append("            <url>").append(getMirroredURL()).append("</url>").append("\n");
+        sb.append("            <mirrorOf>*</mirrorOf>").append("\n");
+        sb.append("        </mirror>").append("\n");
+        sb.append("    </mirrors>").append("\n");
+        sb.append("</settings>").append("\n");
+        File localM2RepoSettingsFile = getM2Settings();
+        Writer output;
+        try {
+            output = new BufferedWriter(new FileWriter(localM2RepoSettingsFile));
+            output.write(sb.toString());
+            close(output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static File getM2Settings() {
         return new File(System.getProperty("user.home"), ".m2/settings.xml");
     }

@@ -33,6 +33,8 @@ import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.DependencyCollectionException;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
+import org.sonatype.aether.deployment.DeployRequest;
+import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyFilter;
 import org.sonatype.aether.impl.*;
@@ -280,6 +282,40 @@ public final class AetherService {
         repositorySystem.install(repositorySystemSession, installRequest);
     }
 
+    @SuppressWarnings("unused")
+    public void deploy(final String groupId,
+                       final String artifactId,
+                       final String version,
+                       final File artifactFile,
+                       final File pomFile,
+                       final String repositoryId,
+                       final String repositoryURL) throws DeploymentException {
+
+        DeployRequest deployRequest = new DeployRequest();
+        if(artifactFile!=null) {
+            String name = artifactFile.getName();
+            String type = name.substring(artifactFile.getName().lastIndexOf(".")+1, name.length());
+            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", type, version);
+            jarArtifact = jarArtifact.setFile(artifactFile);
+            Artifact pomArtifact = new SubArtifact(jarArtifact, "", "pom");
+            pomArtifact = pomArtifact.setFile(pomFile);
+            deployRequest = deployRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
+        } else {
+            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "", "pom", version);
+            pomArtifact = pomArtifact.setFile(pomFile);
+            deployRequest = deployRequest.addArtifact(pomArtifact);
+        }
+
+        RemoteRepository repository = new RemoteRepository(repositoryId, "default", repositoryURL );
+        List<RemoteRepository> repositoryList = new ArrayList<RemoteRepository>();
+        repositoryList.add(repository);
+        repositoryList = getRemoteRepositories(repositoryList);
+
+        deployRequest.setRepository(repositoryList.get(0));
+
+        repositorySystem.deploy(repositorySystemSession, deployRequest );
+    }
+
     protected DependencyFilter getDependencyFilter(final Artifact a) {
         Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();
         if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
@@ -362,19 +398,26 @@ public final class AetherService {
             }
         }
 
-        if(!myRepositories.isEmpty()) {
+        if(!alreadyHaveRepository(myRepositories, "central")) {
             RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
-            List<Mirror> mirrors = effectiveSettings.getMirrors();
-            for (Mirror mirror : mirrors) {
-                if (mirror.getMirrorOf().equals("*") || mirror.getMirrorOf().equals("central")) {
-                    if(logger.isLoggable(Level.CONFIG))
-                        logger.config(String.format("Using mirror for central: %s", mirror.getUrl()));
-                    central = new RemoteRepository("central", "default", mirror.getUrl());
+            myRepositories.add(central);
+        }
+
+        List<Mirror> mirrors = effectiveSettings.getMirrors();
+        for (Mirror mirror : mirrors) {
+            if (mirror.getMirrorOf().equals("*")) {
+                for(RemoteRepository r : myRepositories) {
+                    r.setUrl(mirror.getUrl());
+                }
+            } else {
+                for(RemoteRepository r : myRepositories) {
+                    if(mirror.getMirrorOf().equals(r.getId())) {
+                        r.setUrl(mirror.getUrl());
+                    }
                 }
             }
-            if(!alreadyHaveRepository(myRepositories, "central"))
-                myRepositories.add(central);
         }
+
         for(Server server : effectiveSettings.getServers()) {
             for(RemoteRepository remoteRepository : myRepositories) {
                 if(server.getId().equals(remoteRepository.getId())) {
