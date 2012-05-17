@@ -69,6 +69,10 @@ public final class Installer {
 
             File libDir = new File(rioHome + File.separator + "lib");
 
+            /* Install rio-platform */
+            Artifact rioPlatform = new Artifact("org.rioproject:rio-platform:" + RioVersion.VERSION);
+            install(rioPlatform, null, new File(libDir, "resolver-api.jar"), aetherServiceInstance);
+
             /* Install Rio Resolver API */
             Artifact resolverAPI = new Artifact("org.rioproject.resolver:resolver-api:" + RioVersion.VERSION);
             install(resolverAPI, null, new File(libDir, "resolver-api.jar"), aetherServiceInstance);
