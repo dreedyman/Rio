@@ -164,16 +164,6 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <!-- Get reggie-dl.jar and put into the lib-dl directory -->
-        <!--<dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <includes>
-                <include>com.sun.jini:reggie-dl</include>
-            </includes>
-            <outputDirectory>lib-dl</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}-dl.${artifact.extension}</outputFileNameMapping>
-        </dependencySet>-->
-
         <!-- The rest of the service download (-api, -proxy and -ui) jars go into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -186,7 +176,6 @@
                 <include>org.rioproject.monitor:monitor-proxy:jar</include>
                 <include>org.rioproject:rio-api:jar</include>
                 <include>org.rioproject:watch-ui</include>
-                <!--<include>org.rioproject:gnostic-api:jar</include>-->
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
