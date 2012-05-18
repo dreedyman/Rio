@@ -1681,9 +1681,7 @@ public class ServiceElementManager implements InstanceIDManager {
                         .append("\n");
             }
         }
-
-        if(changed)
-            instanceIDLog(buff);
+        instanceIDLog(buff);
     }
 
     @SuppressWarnings("unchecked")
