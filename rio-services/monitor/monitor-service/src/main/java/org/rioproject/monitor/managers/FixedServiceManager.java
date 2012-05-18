@@ -16,10 +16,7 @@
 package org.rioproject.monitor.managers;
 
 import org.rioproject.jsb.ServiceElementUtil;
-import org.rioproject.monitor.InstantiatorResource;
-import org.rioproject.monitor.ProvisionException;
-import org.rioproject.monitor.ProvisionRequest;
-import org.rioproject.monitor.ServiceProvisionContext;
+import org.rioproject.monitor.*;
 import org.rioproject.monitor.tasks.ProvisionTask;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.resources.servicecore.ServiceResource;
@@ -44,7 +41,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
      *
      * @param context The ServiceProvisionContext
      */
-    public FixedServiceManager(ServiceProvisionContext context) {
+    public FixedServiceManager(final ServiceProvisionContext context) {
         super("Fixed-Service TestManager");
         this.context = context;
     }        
@@ -68,7 +65,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
      *
      * @param request The ProvisionRequest to deploy
      */
-    public void deploy(ProvisionRequest request) {
+    public void deploy(final ProvisionRequest request) {
         try {
             if (logger.isLoggable(Level.FINER))
                 logger.log(Level.FINER,  "Deploy [" + LoggingUtil.getLoggingName(request) + "]");
@@ -100,7 +97,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
     /* Process the fixed services collection with an input
      * ServiceResource 
      */
-    public void process(ServiceResource resource) {
+    public void process(final ServiceResource resource) {
         if (resource == null)
             throw new IllegalArgumentException("ServiceResource is null");
         if (inProcessResource.contains(resource))
@@ -148,7 +145,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
      * @return The number deployed
      * @throws Exception If there are errors
      */
-    int doDeploy(ServiceResource resource, ProvisionRequest request) throws Exception {
+    private int doDeploy(final ServiceResource resource, final ProvisionRequest request) throws Exception {
         return (doDeploy(resource, request, true));
     }
 
@@ -161,7 +158,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
      * @return The number deployed
      * @throws Exception If there are errors
      */
-    int doDeploy(ServiceResource resource, ProvisionRequest req, boolean changeInstanceID) throws Exception {
+    private int doDeploy(final ServiceResource resource, final ProvisionRequest req, final boolean changeInstanceID)
+        throws Exception {
         int numAllowed = getNumAllowed(resource, req);
         if (numAllowed > 0) {
             long currentID = req.getServiceElement().getServiceBeanConfig().getInstanceID();
@@ -171,9 +169,9 @@ public class FixedServiceManager extends PendingServiceElementManager {
 
             for (int i = 0; i < numAllowed; i++) {
                 ProvisionRequest request = ProvisionRequest.copy(req);
+                ServiceProvisionContext spc = getServiceProvisionContext();
                 long nextID = (changeInstanceID ?
-                               request.getInstanceIDMgr().getNextInstanceID() :
-                               currentID);
+                               request.getInstanceIDMgr().getNextInstanceID() : currentID);
                 request.setServiceElement(ServiceElementUtil.prepareInstanceID(request.getServiceElement(),
                                                                                true,
                                                                                nextID));
@@ -183,10 +181,10 @@ public class FixedServiceManager extends PendingServiceElementManager {
                                                 LoggingUtil.getLoggingName(request),
                                                 request.getServiceElement().getServiceBeanConfig().getInstanceID()));
                 }
-                context.getInProcess().add(request.getServiceElement());
-                context.setProvisionRequest(request);
-                context.setServiceResource(resource);
-                context.getProvisioningPool().execute(new ProvisionTask(context, null));
+                spc.getInProcess().add(request.getServiceElement());
+                spc.setProvisionRequest(request);
+                spc.setServiceResource(resource);
+                spc.getProvisioningPool().execute(new ProvisionTask(spc, null));
             }
             if (logger.isLoggable(Level.FINER))
                 logger.finer(b.toString());
@@ -198,7 +196,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
     * Determine how many services can be allocated based on how many
     * are already on the resource minus the number planned
     */
-    int getNumAllowed(ServiceResource resource, ProvisionRequest request) {
+    private int getNumAllowed(final ServiceResource resource, final ProvisionRequest request) {
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
         InstantiatorResource ir = (InstantiatorResource) resource.getResource();
@@ -221,7 +219,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
     * Filter out isolated associations and max per machine levels set
     * at the physical level
     */
-    boolean clearedMaxPerMachineAndIsolated(ProvisionRequest request, String hostAddress) {
+    private boolean clearedMaxPerMachineAndIsolated(final ProvisionRequest request, final String hostAddress) {
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
         ServiceResource[] sr =
@@ -233,4 +231,15 @@ public class FixedServiceManager extends PendingServiceElementManager {
         return sr.length != 0;
     }
 
+    public ServiceProvisionContext getServiceProvisionContext() {
+        return new ServiceProvisionContext(context.getSelector(),
+                                           context.getProvisioningPool(),
+                                           context.getInProcess(),
+                                           context.getEventSource(),
+                                           context.getWatch(),
+                                           context.getDispatcher(),
+                                           context.getProvisionFailurePool(),
+                                           context.getFailureHandler(),
+                                           context.getServiceProvisionEventSequenceNumber());
+    }
 }
