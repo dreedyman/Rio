@@ -16,6 +16,7 @@
 package org.rioproject.resolver.aether.util;
 
 import java.io.PrintStream;
+import java.util.logging.*;
 
 import org.sonatype.aether.AbstractRepositoryListener;
 import org.sonatype.aether.RepositoryEvent;
@@ -25,6 +26,7 @@ import org.sonatype.aether.RepositoryEvent;
  */
 public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     private PrintStream out;
+    private final static Logger logger = Logger.getLogger(ConsoleRepositoryListener.class.getName());
 
     public ConsoleRepositoryListener() {
         this(null);
@@ -60,19 +62,23 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactResolved(RepositoryEvent event) {
-        //out.println("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
+        if(logger.isLoggable(Level.FINEST))
+            out.println("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloading(RepositoryEvent event) {
-        //out.println("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
+        if(logger.isLoggable(Level.FINEST))
+            out.println("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloaded(RepositoryEvent event) {
-        //out.println("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
+        if(logger.isLoggable(Level.FINEST))
+            out.println("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactResolving(RepositoryEvent event) {
-        //out.println("Resolving artifact " + event.getArtifact());
+        if(logger.isLoggable(Level.FINEST))
+            out.println("Resolving artifact " + event.getArtifact());
     }
 
     public void metadataDeployed(RepositoryEvent event) {
@@ -96,11 +102,13 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void metadataResolved(RepositoryEvent event) {
-        //out.println("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
+        if(logger.isLoggable(Level.FINEST))
+            out.println("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 
     public void metadataResolving(RepositoryEvent event) {
-        //out.println("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
+        if(logger.isLoggable(Level.FINEST))
+            out.println("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 
 }
