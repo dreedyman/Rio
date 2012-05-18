@@ -42,11 +42,11 @@ public class ConsoleTransferListener extends AbstractTransferListener {
         this.out = (out != null) ? out : System.out;
     }
 
-    @Override
+    /*@Override
     public void transferInitiated(TransferEvent event) {
         String message = event.getRequestType() == TransferEvent.RequestType.PUT ? "Uploading" : "Downloading";
         out.println(message + ": " + event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
-    }
+    }*/
 
     @Override
     public void transferProgressed(TransferEvent event) {
