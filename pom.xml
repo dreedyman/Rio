@@ -399,7 +399,7 @@
   </modules>
 
     <properties>
-        <groovy.version>1.8.0</groovy.version>
+        <groovy.version>1.7.0</groovy.version>
         <rio.version>5.0-SNAPSHOT</rio.version>
         <rio.plugin.version>5.0-SNAPSHOT</rio.plugin.version>
         <hyperic.version>1.6.3.82</hyperic.version>
