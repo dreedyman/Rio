@@ -39,7 +39,7 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactDeploying(RepositoryEvent event) {
-        out.println("Deploying " + event.getArtifact() + " to " + event.getRepository());
+        //out.println("Deploying " + event.getArtifact() + " to " + event.getRepository());
     }
 
     public void artifactDescriptorInvalid(RepositoryEvent event) {
