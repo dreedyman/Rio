@@ -378,7 +378,6 @@ public final class AetherService {
         List<RemoteRepository> myRepositories = new ArrayList<RemoteRepository>();
         if(repositories!=null)
             myRepositories.addAll(repositories);
-        //boolean haveCentral = false;
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
@@ -431,8 +430,8 @@ public final class AetherService {
                 }
             }
         }
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Repositories %s", myRepositories));
+        if(logger.isLoggable(Level.FINEST))
+            logger.finest(String.format("Repositories %s", myRepositories));
         return myRepositories;
     }
 
