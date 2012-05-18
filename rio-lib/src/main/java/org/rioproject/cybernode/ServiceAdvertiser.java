@@ -22,9 +22,11 @@ import net.jini.config.ConfigurationException;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.discovery.LookupDiscovery;
+import net.jini.lookup.entry.Host;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.admin.ServiceBeanControlException;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.jsb.ServiceBeanActivation;
 
 import java.lang.reflect.Constructor;
@@ -96,16 +98,32 @@ public class ServiceAdvertiser {
                                                                            context.getExportCodebase());
                     JoinAdmin joinAdmin = (JoinAdmin) adminObject;
                     ArrayList<Entry> addList = new ArrayList<Entry>();
+                    if(logger.isLoggable(Level.FINEST)) {
+                        logger.finest("OperationalString "+opStringName);
+                    }
                     /* Try and add an OperationalStringEntry */
                     if (opStringName != null && opStringName.length() > 0) {
-                        Entry opStringEntry =
-                            loadEntry("org.rioproject.entry.OperationalStringEntry", joinAdmin, opStringName, proxyCL);
-                        if (opStringEntry != null)
+                        Entry opStringEntry = loadEntry("org.rioproject.entry.OperationalStringEntry",
+                                                        joinAdmin, opStringName, proxyCL);
+                        if (opStringEntry != null) {
                             addList.add(opStringEntry);
+                            if (logger.isLoggable(Level.FINEST)) {
+                                logger.warning("Added OperationalStringEntry ["+
+                                               ((OperationalStringEntry)opStringEntry).name+"] for "+serviceName);
+                            }
+                        } else {
+                            logger.warning("Unable to obtain the OperationalStringEntry for "+serviceName);
+                        }
 
                         Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, proxyCL);
-                        if (hostEntry != null)
+                        if (hostEntry != null) {
                             addList.add(hostEntry);
+                            if (logger.isLoggable(Level.FINEST)) {
+                                logger.warning("Added Host ["+((Host)hostEntry).hostName+"] for "+serviceName);
+                            }
+                        } else {
+                            logger.warning("Unable to obtain the Host entry for "+serviceName);
+                        }
                     } else {
                         if (logger.isLoggable(Level.FINEST)) {
                             String s = (opStringName == null ? "[null]" : "[empty string]");
