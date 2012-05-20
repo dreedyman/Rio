@@ -73,6 +73,7 @@ import java.rmi.MarshalledObject;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
@@ -117,7 +118,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /** Is informed if a service is detected to have failed */
     private final ServiceFaultListener serviceFaultListener = new ServiceFaultListener();
     /** Table of service IDs to FaultDetectionHandler instances, one for each service */
-    private final Map<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
+    private final Map<ServiceID, FaultDetectionHandler> fdhTable = new ConcurrentHashMap<ServiceID, FaultDetectionHandler>();
     /** A List of ServiceBeanInstances */
     private final List<ServiceBeanInstance> serviceBeanList = new ArrayList<ServiceBeanInstance>();
     /** A List of ServiceBeanInstances which have been decremented and are not
@@ -1223,8 +1224,7 @@ public class ServiceElementManager implements InstanceIDManager {
         }
 
         /* Stop all FaultDetectionHandler instances */
-        for (Map.Entry<ServiceID, FaultDetectionHandler> entry :
-            fdhTable.entrySet()) {
+        for (Map.Entry<ServiceID, FaultDetectionHandler> entry : fdhTable.entrySet()) {
             FaultDetectionHandler fdh = entry.getValue();
             fdh.terminate();
         }
@@ -1638,7 +1638,6 @@ public class ServiceElementManager implements InstanceIDManager {
     void addServiceBeanInstance(final ServiceBeanInstance instance) {
         if(instance==null)
             return;
-        boolean changed = false;
         StringBuffer buff = new StringBuffer();
         buff.append("[").append(svcElement.getName()).append("] ");
         if(!serviceBeanList.contains(instance)) {
@@ -1647,7 +1646,6 @@ public class ServiceElementManager implements InstanceIDManager {
             instance.getServiceBeanConfig().getInstanceID();
             if(!instanceIDs.contains(instanceID))
                 instanceIDs.add(instanceID);
-            changed = true;
             if(sbiLogger.isLoggable(Level.FINE))
                 buff.append("Added SBI = ")
                     .append(instance.getServiceBeanConfig().getInstanceID())
@@ -1661,7 +1659,6 @@ public class ServiceElementManager implements InstanceIDManager {
             if(current.getHostAddress()==null &&
                instance.getHostAddress()!=null) {
                 serviceBeanList.set(ndx, instance);
-                changed = true;
                 if(sbiLogger.isLoggable(Level.FINE))
                     buff.append("Adjusted SBI host address, was [null], now = ")
                         .append(instance.getHostAddress())
@@ -1674,7 +1671,6 @@ public class ServiceElementManager implements InstanceIDManager {
             if((iid==null || (iid ==0)) &&
                instance.getServiceBeanConfig().getInstanceID()!=null) {
                 serviceBeanList.set(ndx, instance);
-                changed = true;
                 if(sbiLogger.isLoggable(Level.FINE))
                     buff.append("Adjusted SBI instanceID, was [null], now = ")
                         .append(instance.getServiceBeanConfig().getInstanceID())
