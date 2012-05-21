@@ -71,8 +71,8 @@ public class AetherServiceTest {
         List<RemoteRepository> list = new ArrayList<RemoteRepository>();
         list.add(repository);
         list = aetherService.getRemoteRepositories(list);
-        for(RemoteRepository r : list) {
-            Assert.assertTrue("Expected "+Utils.getMirroredURL()+" got "+r.getUrl(), r.getUrl().equals(Utils.getMirroredURL()));
-        }
+        Assert.assertTrue(list.size()==1);
+        RemoteRepository r = list.get(0);
+        Assert.assertTrue("Expected "+Utils.getMirroredURL()+" got "+r.getUrl(), r.getUrl().equals(Utils.getMirroredURL()));
     }
 }
