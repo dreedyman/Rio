@@ -83,7 +83,7 @@ public final class AetherService {
     public static AetherService getDefaultInstance() {
         try {
             RepositorySystem repositorySystem = newRepositorySystem();
-            return new AetherService(repositorySystem, null);
+            return new AetherService(repositorySystem, new LocalRepositoryWorkspaceReader());
         } catch (SettingsBuildingException e) {
             throw new IllegalStateException(e);
         }
@@ -402,21 +402,6 @@ public final class AetherService {
             myRepositories.add(central);
         }
 
-        List<Mirror> mirrors = effectiveSettings.getMirrors();
-        for (Mirror mirror : mirrors) {
-            if (mirror.getMirrorOf().equals("*")) {
-                for(RemoteRepository r : myRepositories) {
-                    r.setUrl(mirror.getUrl());
-                }
-            } else {
-                for(RemoteRepository r : myRepositories) {
-                    if(mirror.getMirrorOf().equals(r.getId())) {
-                        r.setUrl(mirror.getUrl());
-                    }
-                }
-            }
-        }
-
         for(Server server : effectiveSettings.getServers()) {
             for(RemoteRepository remoteRepository : myRepositories) {
                 if(server.getId().equals(remoteRepository.getId())) {
@@ -426,6 +411,24 @@ public final class AetherService {
                                                                            server.getPrivateKey(),
                                                                            server.getPassphrase());
                         remoteRepository.setAuthentication(authentication);
+                    }
+                }
+            }
+        }
+
+        List<Mirror> mirrors = effectiveSettings.getMirrors();
+        if(!mirrors.isEmpty()) {
+            for (Mirror mirror : mirrors) {
+                if (mirror.getMirrorOf().equals("*")) {
+                    myRepositories.clear();
+                    RemoteRepository repositoryMirror = new RemoteRepository(mirror.getId(), "default", mirror.getUrl());
+                    myRepositories.add(repositoryMirror);
+                    break;
+                } else {
+                    for(RemoteRepository r : myRepositories) {
+                        if(mirror.getMirrorOf().equals(r.getId())) {
+                            r.setUrl(mirror.getUrl());
+                        }
                     }
                 }
             }
