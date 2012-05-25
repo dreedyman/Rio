@@ -355,10 +355,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                     logger.log(Level.WARNING, "Getting ServiceRecords", t);
                 }
                 /* Process all provision types of Fixed first */
-                logger.finest("Process the %s", fixedServiceManager.getType());
+                logger.finer("Process the %s", fixedServiceManager.getType());
                 fixedServiceManager.process(svcResource);
                 /* See if any dynamic provision types are pending */
-                logger.finest("Process the %s" ,pendingMgr.getType());
+                logger.finer("Process the %s", pendingMgr.getType());
                 pendingMgr.process();
                 break;
             } else {
