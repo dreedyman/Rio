@@ -112,7 +112,7 @@ public class AdvertiseLifecycleTest {
         Assert.assertNotNull(manager);
         testManager.waitForDeployment(manager);
 
-        PMEListener listener = new PMEListener();
+        PMEListener listener = new PMEListener(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED);
         BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), listener);
         eventConsumer.register(monitorItems[0]);
 
@@ -171,7 +171,7 @@ public class AdvertiseLifecycleTest {
         }
         Assert.assertEquals(1, instances.length);
         manager.increment(element2, true, null);
-        PMEListener listener = new PMEListener();
+        PMEListener listener = new PMEListener(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED);
         BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), listener);
         eventConsumer.register(monitorItems[0]);
 
@@ -241,9 +241,15 @@ public class AdvertiseLifecycleTest {
 
     class PMEListener implements RemoteServiceEventListener {
         ProvisionMonitorEvent event;
+        ProvisionMonitorEvent.Action actionToMatch;
+
+        PMEListener(ProvisionMonitorEvent.Action actionToMatch) {
+            this.actionToMatch = actionToMatch;
+        }
 
         public void notify(RemoteServiceEvent rEvent) {
-            event = (ProvisionMonitorEvent)rEvent;
+            if(((ProvisionMonitorEvent)rEvent).getAction().equals(actionToMatch))
+                event = (ProvisionMonitorEvent)rEvent;
         }
     }
 }
