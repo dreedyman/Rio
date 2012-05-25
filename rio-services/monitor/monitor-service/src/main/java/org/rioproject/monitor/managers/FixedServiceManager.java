@@ -94,8 +94,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
         }
     }
 
-    /* Process the fixed services collection with an input
-     * ServiceResource 
+    /* Process the fixed services collection with an input ServiceResource
      */
     public void process(final ServiceResource resource) {
         if (resource == null)
@@ -104,6 +103,9 @@ public class FixedServiceManager extends PendingServiceElementManager {
             return;
         inProcessResource.add(resource);
         InstantiatorResource ir = (InstantiatorResource) resource.getResource();
+        if(logger.isLoggable(Level.FINE)) {
+            logger.fine(String.format("%s processing %s", getType(), ir.getHostAddress()));
+        }
         try {
             if(getSize() == 0)
                 return;
