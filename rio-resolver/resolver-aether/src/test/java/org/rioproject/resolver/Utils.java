@@ -75,7 +75,8 @@ public class Utils {
 
     public static String getMirroredURL() {
         StringBuilder builder = new StringBuilder();
-        builder.append("file://").append(System.getProperty("user.dir")).append("target");
+        //builder.append("file://").append(System.getProperty("user.dir")).append(File.separator).append("target");
+        builder.append("http://repo1.maven.org/maven2");
         return builder.toString();
     }
     public static void writeLocalM2RepoSettingsWithMirror() {
@@ -91,6 +92,39 @@ public class Utils {
         sb.append("            <mirrorOf>*</mirrorOf>").append("\n");
         sb.append("        </mirror>").append("\n");
         sb.append("    </mirrors>").append("\n");
+        sb.append("    <profiles>").append("\n");
+        sb.append("        <profile>").append("\n");
+        sb.append("            <id>p1</id>").append("\n");
+        sb.append("            <activation>").append("\n");
+        sb.append("                <activeByDefault>true</activeByDefault>").append("\n");
+        sb.append("            </activation>").append("\n");
+        sb.append("            <repositories>").append("\n");
+        sb.append("                <repository>").append("\n");
+        sb.append("                    <id>rio</id>").append("\n");
+        sb.append("                    <url>http://www.rio-project.org/maven2</url>").append("\n");
+        sb.append("                    <releases>").append("\n");
+        sb.append("                        <enabled>true</enabled>").append("\n");
+        sb.append("                    </releases>").append("\n");
+        sb.append("                    <snapshots>").append("\n");
+        sb.append("                        <enabled>true</enabled>").append("\n");
+        sb.append("                    </snapshots>").append("\n");
+        sb.append("                </repository>").append("\n");
+        sb.append("                <repository>").append("\n");
+        sb.append("                    <id>jboss</id>").append("\n");
+        sb.append("                    <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>").append("\n");
+        sb.append("                    <releases>").append("\n");
+        sb.append("                        <enabled>true</enabled>").append("\n");
+        sb.append("                    </releases>").append("\n");
+        sb.append("                    <snapshots>").append("\n");
+        sb.append("                        <enabled>true</enabled>").append("\n");
+        sb.append("                    </snapshots>").append("\n");
+        sb.append("                </repository>").append("\n");
+        sb.append("            </repositories>").append("\n");
+        sb.append("        </profile>").append("\n");
+        sb.append("    </profiles>").append("\n");
+        sb.append("    <activeProfiles>").append("\n");
+        sb.append("        <activeProfile>p1</activeProfile>").append("\n");
+        sb.append("    </activeProfiles>").append("\n");
         sb.append("</settings>").append("\n");
         File localM2RepoSettingsFile = getM2Settings();
         Writer output;

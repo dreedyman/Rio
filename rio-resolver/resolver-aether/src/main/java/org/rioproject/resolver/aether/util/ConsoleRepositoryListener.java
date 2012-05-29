@@ -62,7 +62,7 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactResolved(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINEST))
+        if(logger.isLoggable(Level.FINER))
             out.println("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
@@ -98,11 +98,12 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void metadataInvalid(RepositoryEvent event) {
+        if(logger.isLoggable(Level.FINE))
         out.println("Invalid metadata " + event.getMetadata());
     }
 
     public void metadataResolved(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINEST))
+        if(logger.isLoggable(Level.FINER))
             out.println("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 

@@ -26,7 +26,6 @@ import org.sonatype.aether.repository.RemoteRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,12 +66,9 @@ public class AetherServiceTest {
             FileUtils.remove(testRepo);
 
         AetherService aetherService = AetherService.getDefaultInstance();
-        RemoteRepository repository = new RemoteRepository("foo", "default", "http://bogus");
-        List<RemoteRepository> list = new ArrayList<RemoteRepository>();
-        list.add(repository);
-        list = aetherService.getRemoteRepositories(list);
-        Assert.assertTrue(list.size()==1);
-        RemoteRepository r = list.get(0);
+        List<RemoteRepository> list = aetherService.getRemoteRepositories();
+        Assert.assertTrue("Expected at least 1, got "+list.size(), list.size()>0);
+        RemoteRepository r = aetherService.getMirrorSelector(list).getMirror(list.get(0));
         Assert.assertTrue("Expected "+Utils.getMirroredURL()+" got "+r.getUrl(), r.getUrl().equals(Utils.getMirroredURL()));
     }
 }

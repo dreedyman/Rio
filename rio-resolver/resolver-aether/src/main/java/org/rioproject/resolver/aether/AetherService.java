@@ -47,6 +47,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.artifact.JavaScopes;
 import org.sonatype.aether.util.artifact.SubArtifact;
 import org.sonatype.aether.util.filter.DependencyFilterUtils;
+import org.sonatype.aether.util.repository.DefaultMirrorSelector;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -149,27 +150,7 @@ public final class AetherService {
      */
     public ResolutionResult resolve(final String groupId, final String artifactId, final String version)
         throws DependencyCollectionException, DependencyResolutionException, SettingsBuildingException {
-        return resolve(groupId, artifactId, "jar", version);
-    }
-
-    /**
-     * Resolve an artifact with the specified coordinates.
-     *
-     * @param groupId The group identifier of the artifact, may be {@code null}.
-     * @param artifactId The artifact identifier of the artifact, may be {@code null}.
-     * @param extension The file extension of the artifact, may be {@code null}.
-     * @param version The version of the artifact, may be {@code null}.
-     *
-     * @return A <code>ResolutionResult</code> for the artifact with the specified coordinates.
-     *
-     * @throws DependencyCollectionException If errors are encountered creating the collection of dependencies
-     * @throws DependencyResolutionException If errors are encountered resolving dependencies
-     * @throws SettingsBuildingException If errors are encountered handling settings
-     */
-    public ResolutionResult resolve(final String groupId, final String artifactId, final String extension, final String version)
-        throws DependencyCollectionException, DependencyResolutionException, SettingsBuildingException {
-        return resolve(groupId, artifactId, extension, null, version);
-
+        return resolve(groupId, artifactId, "jar", null, version);
     }
 
     /**
@@ -194,7 +175,7 @@ public final class AetherService {
                                     final String version) throws DependencyCollectionException,
                                                                  DependencyResolutionException,
                                                                  SettingsBuildingException {
-        return resolve(groupId, artifactId, extension, classifier, version, getRemoteRepositories(null));
+        return resolve(groupId, artifactId, extension, classifier, version, null);
     }
 
     /**
@@ -225,7 +206,14 @@ public final class AetherService {
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
         Dependency dependency = new Dependency(artifact, JavaScopes.COMPILE);
-        List<RemoteRepository> myRepositories = getRemoteRepositories(repositories);
+        List<RemoteRepository> myRepositories;
+        if(repositories==null || repositories.isEmpty())
+            myRepositories = getRemoteRepositories();
+        else
+            myRepositories = repositories;
+
+        setMirrorSelector(myRepositories);
+        applyAuthentication(myRepositories);
 
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(dependency);
@@ -307,15 +295,20 @@ public final class AetherService {
         }
 
         RemoteRepository repository = new RemoteRepository(repositoryId, "default", repositoryURL );
-        List<RemoteRepository> repositoryList = new ArrayList<RemoteRepository>();
-        repositoryList.add(repository);
-        repositoryList = getRemoteRepositories(repositoryList);
+        setMirrorSelector(asList(repository));
+        applyAuthentication(asList(repository));
+        deployRequest.setRepository(repository);
 
-        deployRequest.setRepository(repositoryList.get(0));
-
-        repositorySystem.deploy(repositorySystemSession, deployRequest );
+        repositorySystem.deploy(repositorySystemSession, deployRequest);
     }
 
+    /**
+     * Get the {@code DependencyFilter} for an artifact
+     *
+     * @param a The artifact
+     *
+     * @return The {@code DependencyFilter} to use
+     */
     protected DependencyFilter getDependencyFilter(final Artifact a) {
         Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();
         if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
@@ -342,7 +335,7 @@ public final class AetherService {
      */
     public URL getLocation(final String artifactCoordinates, final String artifactExt) throws ArtifactResolutionException,
                                                                                               MalformedURLException {
-        return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories(null));
+        return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories());
     }
 
     /**
@@ -362,22 +355,28 @@ public final class AetherService {
                            final String artifactExt,
                            final List<RemoteRepository> repositories) throws ArtifactResolutionException,
                                                                              MalformedURLException {
+
+        setMirrorSelector(repositories);
+        applyAuthentication(repositories);
+
         DefaultArtifact a = new DefaultArtifact(artifactCoordinates);
         String extension = artifactExt==null? "jar":artifactExt;
         ArtifactRequest artifactRequest = new ArtifactRequest();
         DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), extension, a.getVersion());
         artifactRequest.setArtifact(artifact);
-        List<RemoteRepository> myRepositories = getRemoteRepositories(repositories);
-        artifactRequest.setRepositories(myRepositories);
+        artifactRequest.setRepositories(repositories);
         ArtifactResult artifactResult = repositorySystem.resolveArtifact(repositorySystemSession, artifactRequest);
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
 
-    public List<RemoteRepository> getRemoteRepositories(final List<RemoteRepository> repositories) {
+    /**
+     * Get the {@code RemoteRepository} instances that are configured.
+     *
+     * @return An immutable {@code List} of {@code RemoteRepository} instances.
+     */
+    public List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
         List<RemoteRepository> myRepositories = new ArrayList<RemoteRepository>();
-        if(repositories!=null)
-            myRepositories.addAll(repositories);
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
@@ -401,9 +400,17 @@ public final class AetherService {
             RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
             myRepositories.add(central);
         }
+        return Collections.unmodifiableList(myRepositories);
+    }
 
+    /**
+     * Apply and authentication required for the provided repositories
+     *
+     * @param repositories The {@code List} of repositories
+     */
+    private void applyAuthentication(final List<RemoteRepository> repositories) {
         for(Server server : effectiveSettings.getServers()) {
-            for(RemoteRepository remoteRepository : myRepositories) {
+            for(RemoteRepository remoteRepository : repositories) {
                 if(server.getId().equals(remoteRepository.getId())) {
                     if(server.getUsername()!=null) {
                         Authentication authentication = new Authentication(server.getUsername(),
@@ -415,29 +422,64 @@ public final class AetherService {
                 }
             }
         }
-
-        List<Mirror> mirrors = effectiveSettings.getMirrors();
-        if(!mirrors.isEmpty()) {
-            for (Mirror mirror : mirrors) {
-                if (mirror.getMirrorOf().equals("*")) {
-                    myRepositories.clear();
-                    RemoteRepository repositoryMirror = new RemoteRepository(mirror.getId(), "default", mirror.getUrl());
-                    myRepositories.add(repositoryMirror);
-                    break;
-                } else {
-                    for(RemoteRepository r : myRepositories) {
-                        if(mirror.getMirrorOf().equals(r.getId())) {
-                            r.setUrl(mirror.getUrl());
-                        }
-                    }
-                }
-            }
-        }
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest(String.format("Repositories %s", myRepositories));
-        return myRepositories;
     }
 
+    /**
+     * Set the {@code MirrorSelector}  to the session if any mirrors have been declared
+     *
+     * @param repositories The {@code List} of repositories
+     */
+    private void setMirrorSelector(final List<RemoteRepository> repositories) {
+        MirrorSelector mirrorSelector = getMirrorSelector(repositories);
+        ((MavenRepositorySystemSession)repositorySystemSession).setMirrorSelector(mirrorSelector);
+    }
+
+    /**
+     * Get the {@code MirrorSelector} to use.
+     *
+     * NOTE: This method is package-protected for testing purposes.
+     *
+     * @param repositories The {@code List} of repositories
+     *
+     * @return The {@code MirrorSelector} to use.
+     */
+    MirrorSelector getMirrorSelector(final List<RemoteRepository> repositories) {
+        DefaultMirrorSelector mirrorSelector = new DefaultMirrorSelector();
+        List<Mirror> mirrors = effectiveSettings.getMirrors();
+        if(!mirrors.isEmpty()) {
+
+            List<RemoteRepository> repositoryMirrors = new ArrayList<RemoteRepository>();
+            for (Mirror mirror : mirrors) {
+                mirrorSelector.add(mirror.getId(),
+                                   mirror.getUrl(),
+                                   "default",
+                                   false,
+                                   mirror.getMirrorOf(),
+                                   "*");
+                repositoryMirrors.add(new RemoteRepository(mirror.getId(), "default", mirror.getUrl()));
+            }
+
+            for (RemoteRepository mirror : repositoryMirrors) {
+                List<RemoteRepository> mirroredRepositories = new ArrayList<RemoteRepository>();
+                for(RemoteRepository r : repositories) {
+                    if(mirrorSelector.getMirror(r)!=null) {
+                        mirroredRepositories.add(r);
+                        r.setUrl(mirror.getUrl());
+                    }
+                }
+                mirror.setMirroredRepositories(mirroredRepositories);
+            }
+        }
+        return mirrorSelector;
+    }
+
+    /**
+     * Utility to create a {@code RepositoryPolicy} from a {@code org.apache.maven.settings.RepositoryPolicy}
+     *
+     * @param r The org.apache.maven.settings.RepositoryPolicy to transform
+     *
+     * @return A transformed org.apache.maven.settings.RepositoryPolicy
+     */
     private RepositoryPolicy createRepositoryPolicy(org.apache.maven.settings.RepositoryPolicy r) {
         boolean enabled = true;
         String updatePolicy = "";
@@ -450,6 +492,14 @@ public final class AetherService {
         return new RepositoryPolicy(enabled, updatePolicy, checksumPolicy);
     }
 
+    /**
+     * Check if there is already a {@code RemoteRepository} in the {@code List} that has the same {@code id}.
+     *
+     * @param repositories {@code List} of
+     * @param id The id to match
+     *
+     * @return {@code true} if the id is found, {@code false} otherwise.
+     */
     private boolean alreadyHaveRepository(List<RemoteRepository> repositories, String id) {
         boolean hasRepository = false;
         for(RemoteRepository r : repositories) {
@@ -459,5 +509,18 @@ public final class AetherService {
             }
         }
         return hasRepository;
+    }
+
+    /**
+     * Utility to create a {@code List} of {@code RemoteRepository} from a single {@code RemoteRepository}.
+     *
+     * @param r the {@code RemoteRepository} to use
+     *
+     * @return A {@code List} of {@code RemoteRepository}
+     */
+    private List<RemoteRepository> asList(final RemoteRepository r) {
+        List<RemoteRepository> list = new ArrayList<RemoteRepository>();
+        list.add(r);
+        return list;
     }
 }

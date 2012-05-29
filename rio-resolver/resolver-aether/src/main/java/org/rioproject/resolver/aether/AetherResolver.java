@@ -142,7 +142,7 @@ public class AetherResolver implements Resolver {
      */
     @Override
     public Collection<RemoteRepository> getRemoteRepositories() {
-        List<org.sonatype.aether.repository.RemoteRepository> repos = service.getRemoteRepositories(null);
+        List<org.sonatype.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();
         List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
 
         for(org.sonatype.aether.repository.RemoteRepository r : repos)
