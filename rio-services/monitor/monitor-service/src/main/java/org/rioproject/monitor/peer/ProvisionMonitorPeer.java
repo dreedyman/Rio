@@ -172,8 +172,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             fdh.terminate();
         }
         eventConsumer.deregister(this);
-        if(eventConsumer != null)
-            eventConsumer.terminate();
+        eventConsumer.terminate();
         if(sdm != null)
             sdm.terminate();
     }
@@ -887,7 +886,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     ServiceChannel channel = ServiceChannel.getInstance();
                     channel.broadcast(new ServiceChannel.ServiceChannelEvent(this,
                                                                              sElem,
-                                                                             instance,
                                                                              ServiceChannel.ServiceChannelEvent.PROVISIONED));
                     break;
 

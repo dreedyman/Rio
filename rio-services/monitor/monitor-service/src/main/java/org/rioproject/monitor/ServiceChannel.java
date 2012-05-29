@@ -15,13 +15,10 @@
  */
 package org.rioproject.monitor;
 
-import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.jsb.ServiceElementUtil;
 
-import java.util.EventObject;
-import java.util.Vector;import java.util.Arrays;
+import java.util.*;
 
 /**
  * The ServiceChannel provides a local channel for service instances that have
@@ -30,63 +27,23 @@ import java.util.Vector;import java.util.Arrays;
  * @author Dennis Reedy
  */
 public class ServiceChannel {
-    Vector<Registration> registrations;
+    private final List<Registration> registrations = new ArrayList<Registration>();
     private static final ServiceChannel instance = new ServiceChannel();
-
-    private ServiceChannel() {
-        registrations = new Vector<Registration>();
-    }
 
     public static ServiceChannel getInstance() {
         return(instance);
     }
 
-    public void subscribe(ServiceChannelListener listener,
-                          ServiceElement element) {
-        Registration reg = new Registration(listener, element);
+    public void subscribe(ServiceChannelListener listener, String name, String[] interfaces, String opStringName) {
+        Registration reg = new Registration(listener, name, interfaces, opStringName);
         if(!registrations.contains(reg)) {
             registrations.add(reg);
-        }
-    }
-
-    public void subscribe(ServiceChannelListener listener,
-                          String name,
-                          String[] interfaces,
-                          String opStringName) {
-        Registration reg = new Registration(listener,
-                                            name,
-                                            interfaces,
-                                            opStringName);
-        if(!registrations.contains(reg)) {
-            registrations.add(reg);
-        }
-    }
-
-    public void unsubscribe(ServiceChannelListener listener,
-                            String name,
-                            String[] interfaces,
-                            String opStringName) {
-        Registration reg = new Registration(listener,
-                                            name,
-                                            interfaces,
-                                            opStringName);
-        if(registrations.contains(reg)) {
-            registrations.remove(reg);
-        }
-    }
-
-    public void unsubscribe(ServiceChannelListener listener,
-                            ServiceElement element) {
-        Registration reg = new Registration(listener, element);
-        if(registrations.contains(reg)) {
-            registrations.remove(reg);
         }
     }
 
     public void unsubscribe(ServiceChannelListener listener) {
-        Object[] arrLocal = getRegistrations();
-        for (Object anArrLocal : arrLocal) {
-            Registration r = (Registration) anArrLocal;
+        Registration[] regs = getRegistrations();
+        for (Registration r : regs) {
             if (r.getServiceChannelListener().equals(listener)) {
                 registrations.remove(r);
             }
@@ -103,12 +60,12 @@ public class ServiceChannel {
         }
     }
 
-    private Object[] getRegistrations() {
-        Object[] arrLocal;
+    private Registration[] getRegistrations() {
+        Registration[] regs;
         synchronized(this) {
-            arrLocal = registrations.toArray();
+            regs = registrations.toArray(new Registration[registrations.size()]);
         }
-        return(arrLocal);
+        return(regs);
     }
 
     /**
@@ -124,27 +81,17 @@ public class ServiceChannel {
     public static class ServiceChannelEvent extends EventObject {
         public static final int PROVISIONED = 1;
         public static final int FAILED = 2;
-        public static final int TERMINATED = 2;
         private ServiceElement element;
-        private ServiceBeanInstance instance;
         private int type;
 
-        public ServiceChannelEvent(Object source,
-                                   ServiceElement element,
-                                   ServiceBeanInstance instance,
-                                   int type) {
+        public ServiceChannelEvent(Object source, ServiceElement element, int type) {
             super(source);
             this.element = element;
-            this.instance = instance;
             this.type = type;
         }
 
         public ServiceElement getServiceElement() {
             return(element);
-        }
-
-        public ServiceBeanInstance getServiceBeanInstance() {
-            return(instance);
         }
 
         public int getType() {
@@ -153,47 +100,30 @@ public class ServiceChannel {
     }
 
     private class Registration {
-        ServiceElement element;
-        ServiceChannelListener listener;
-        String name;
-        String[] interfaces;
-        String opStringName;
+        final ServiceChannelListener listener;
+        final String name;
+        final String[] interfaces;
+        final String opStringName;
 
-        Registration(ServiceChannelListener listener,
-                     ServiceElement element) {
-            this.element = element;
-            this.listener = listener;
-            name = element.getName();
-            ClassBundle[] exports = element.getExportBundles();
-            interfaces = new String[exports.length];
-            for(int i = 0; i < interfaces.length; i++) {
-                interfaces[i] = exports[i].getClassName();
-            }
-            opStringName = element.getOperationalStringName();
-        }
-
-        Registration(ServiceChannelListener listener,
-                     String name,
-                     String[] interfaces,
-                     String opStringName) {
+        Registration(final ServiceChannelListener listener,
+                     final String name,
+                     final String[] interfaces,
+                     final String opStringName) {
             this.listener = listener;
             this.name = name;
             this.interfaces = interfaces;
             this.opStringName = opStringName;
         }
 
-        boolean matches(ServiceElement element) {
-            return(ServiceElementUtil.matchesServiceElement(element,
-                                                            name,
-                                                            interfaces,
-                                                            opStringName));
+        boolean matches(final ServiceElement element) {
+            return(ServiceElementUtil.matchesServiceElement(element, name, interfaces, opStringName));
         }
 
         ServiceChannelListener getServiceChannelListener() {
             return(listener);
         }
 
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if(this == obj)
                 return (true);
             if(!(obj instanceof Registration)) {
@@ -207,10 +137,7 @@ public class ServiceChannel {
         }
 
         public int hashCode() {
-            return(name.hashCode()+
-                   interfaces.hashCode()+
-                   opStringName.hashCode()+
-                   listener.hashCode());
+            return(name.hashCode()+Arrays.hashCode(interfaces)+opStringName.hashCode()+listener.hashCode());
         }
     }
 }

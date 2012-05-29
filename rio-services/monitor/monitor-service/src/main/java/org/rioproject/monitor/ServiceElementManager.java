@@ -448,7 +448,7 @@ public class ServiceElementManager implements InstanceIDManager {
      *
      * @param provListener the ServiceProvisionListener to notify
      */
-    void notifyPendingManager(final ServiceProvisionListener provListener) {
+    private void notifyPendingManager(final ServiceProvisionListener provListener) {
         if(!active.get()) {
             /* If the ServiceElement is dynamic and it is in the pending queue, 
              * remove ProvisionRequest instances from the PendingManager */
@@ -1208,13 +1208,13 @@ public class ServiceElementManager implements InstanceIDManager {
         shutdown.set(true);
         /* Unsubscribe from the service channel */
         ServiceChannel.getInstance().unsubscribe(serviceChannelClient);
-        /* Remove service from TestManager instances */
-        if(svcElement.getProvisionType()==ProvisionType.DYNAMIC)
+        /* Remove services from manager */
+        if(svcElement.getProvisionType()==ProvisionType.DYNAMIC) {
             provisioner.getPendingManager().removeServiceElement(svcElement);
-        else
+        } else {
             provisioner.getFixedServiceManager().removeServiceElement(svcElement);
-        /* Terminate the LookupCache and ServiceDiscoveryManagement
-         * instances */
+        }
+        /* Remove ourselves as a LookupCache listener */
         if(lCache!=null && sElemListener!=null) {
             try {
                 lCache.removeListener(sElemListener);
@@ -1229,6 +1229,12 @@ public class ServiceElementManager implements InstanceIDManager {
             fdh.terminate();
         }
 
+        /* If requested, destroy service instances */
+        if(destroyServices &&
+           svcElement.getProvisionType()!=ProvisionType.EXTERNAL)
+            destroyServices();
+
+        /* Terminate ServiceDiscoveryManagement instances */
         if(sdm!=null) {
             try {
                 sdm.terminate();
@@ -1237,10 +1243,6 @@ public class ServiceElementManager implements InstanceIDManager {
             }
         }
 
-        /* If requested, destroy service instances */
-        if(destroyServices &&
-           svcElement.getProvisionType()!=ProvisionType.EXTERNAL)
-            destroyServices();
         svcManagerStarted.set(false);
     }
 
@@ -1533,6 +1535,7 @@ public class ServiceElementManager implements InstanceIDManager {
 
         /* Make sure we dont already have a ServiceBeanInstance for the item */
         ServiceBeanInstance[] instances = getServiceBeanInstances();
+
         for (ServiceBeanInstance sbi : instances) {
             if (sbi.getServiceBeanID().equals(uuid)) {
                 instance = sbi;
@@ -1544,17 +1547,11 @@ public class ServiceElementManager implements InstanceIDManager {
             ServiceBeanConfig jsbConfig = null;
             Uuid instantiatorUuid = null;
             if(item.service instanceof Administrable) {
-                try {
-                    Object admin = ((Administrable)item.service).getAdmin();
-                    if(admin instanceof ServiceBeanAdmin) {
-                        ServiceBeanAdmin jsbAdmin = (ServiceBeanAdmin)admin;
-                        jsbConfig = jsbAdmin.getServiceElement().getServiceBeanConfig();
-                        instantiatorUuid = jsbAdmin.getServiceBeanInstantiatorUuid();
-                    }
-                } catch(RemoteException e) {
-                    mgrLogger.log(Level.WARNING, e,
-                                  "Getting ServiceBeanConfig for service [%s]",
-                                  LoggingUtil.getLoggingName(svcElement));
+                Object admin = ((Administrable)item.service).getAdmin();
+                if(admin instanceof ServiceBeanAdmin) {
+                    ServiceBeanAdmin jsbAdmin = (ServiceBeanAdmin)admin;
+                    jsbConfig = jsbAdmin.getServiceElement().getServiceBeanConfig();
+                    instantiatorUuid = jsbAdmin.getServiceBeanInstantiatorUuid();
                 }
             }
 
@@ -1713,6 +1710,17 @@ public class ServiceElementManager implements InstanceIDManager {
             try {
                 Object proxy = instance.getService();
                 String hostAddress = instance.getHostAddress();
+                if(shutdown.get()) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("Service Provision notification for ").append(LoggingUtil.getLoggingName(svcElement));
+                    builder.append(" while shutting down, destroy the service instance\n");
+                    logger.warning(builder.toString());
+                    /* Prepare the proxy */
+                    if(proxy instanceof RemoteMethodControl)
+                        proxy = proxyPreparer.prepareProxy(proxy);
+                    destroyService(proxy, instance.getServiceBeanID(), false);
+                    return;
+                }
                 synchronized(serviceBeanList) {
                     /* Prepare the proxy */
                     if(proxy instanceof RemoteMethodControl)
@@ -1800,7 +1808,7 @@ public class ServiceElementManager implements InstanceIDManager {
                                                                     instance);
             processEvent(event);
             ServiceChannel channel = ServiceChannel.getInstance();
-            channel.broadcast(new ServiceChannelEvent(this, svcElement, instance, ServiceChannelEvent.PROVISIONED));
+            channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.PROVISIONED));
         }
     }
 
@@ -1810,8 +1818,7 @@ public class ServiceElementManager implements InstanceIDManager {
     class ServiceChannelClient implements ServiceChannel.ServiceChannelListener {
 
         public void notify(final ServiceChannelEvent event) {
-            if(getActive() &&
-               event.getType()==ServiceChannelEvent.PROVISIONED) {
+            if(getActive() && event.getType()==ServiceChannelEvent.PROVISIONED) {
                 if(provisioner.getPendingManager().getCount(svcElement)>0) {
                     provisioner.getPendingManager().process();
                 }
@@ -1837,12 +1844,20 @@ public class ServiceElementManager implements InstanceIDManager {
                                       LoggingUtil.getLoggingName(svcElement));
                     return;
                 }
+                if(shutdown.get()) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("\n*************************************************\n");
+                    builder.append("Discovery notification for ").append(LoggingUtil.getLoggingName(svcElement));
+                    builder.append(" while shutting down\n");
+                    builder.append("*************************************************");
+                    logger.warning(builder.toString());
+                    return;
+                }
                 /* Prepare the proxy */
                 if(item.service instanceof RemoteMethodControl)
                     item.service = proxyPreparer.prepareProxy(item.service);
 
-                /* Construct the ServiceBeanInstance and add it to the
-                 * serviceBeanList */
+                /* Construct the ServiceBeanInstance and add it to the serviceBeanList */
                 ServiceBeanInstance sbi = createServiceBeanInstance(item);
                 if(sbi!=null)
                     addServiceBeanInstance(sbi);
@@ -1979,7 +1994,7 @@ public class ServiceElementManager implements InstanceIDManager {
                                                                         instance);
                 processEvent(event);
                 ServiceChannel channel = ServiceChannel.getInstance();
-                channel.broadcast(new ServiceChannelEvent(this, svcElement, instance, ServiceChannelEvent.FAILED));
+                channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.FAILED));
             }
         }
 

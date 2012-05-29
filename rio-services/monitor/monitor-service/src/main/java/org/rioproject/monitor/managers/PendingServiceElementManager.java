@@ -15,6 +15,8 @@
  */
 package org.rioproject.monitor.managers;
 
+import org.rioproject.logging.WrappedLogger;
+import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.jsb.ServiceElementUtil;
@@ -22,7 +24,6 @@ import org.rioproject.monitor.ProvisionRequest;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Abstract class which will manage ProvisionRequest instances that are waiting
@@ -46,9 +47,9 @@ public abstract class PendingServiceElementManager {
     /** Index into the collection to insert elements */
     private long collectionIndex = 1;
     /** A descriptive String type */
-    private String type;
+    private final String type;
     /** A Logger */
-    private final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
+    private final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.monitor.provision");
 
     /**
      * A key for the sortable set
@@ -207,9 +208,7 @@ public abstract class PendingServiceElementManager {
                 removals = removals.subList((removals.size()-numToRemove), 
                                             removals.size());                                
             }
-            if(logger.isLoggable(Level.FINER)) {
-                logger.finer(type+ ": removing ["+removals.size()+"] ["+sElem.getName()+"] instances");
-            }
+            logger.info("%s: removing [%d] [%s] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
@@ -241,15 +240,15 @@ public abstract class PendingServiceElementManager {
             }
         }
         if(!removals.isEmpty()) {
-            if(logger.isLoggable(Level.FINER)) {
-                logger.finer(type+ ": removing ["+removals.size()+"] ["+sElem.getName()+"] instances");
-            }
+            logger.info("%s: removing [%d] [%s] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
                     removed.add(pr);
                 }
             }
+        } else {
+            logger.warning("%s: removing [%d] [%s] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
         }
         return (removed.toArray(new ProvisionRequest[removed.size()]));
     }
