@@ -108,8 +108,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                            "will also terminate. Care should be taken to not " +
                            "use the default RMI Registry port.");
         cybernodeRegistryPort = Integer.parseInt(sPort);
-        execBindName =
-            System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME, "ServiceBeanExec");
+        execBindName = System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME, "ServiceBeanExec");
         bootstrap(configArgs);
         logger.info("Started ServiceBeanExecutor for "+execBindName);
     }
@@ -121,19 +120,16 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         computeResource = new ComputeResource(config);
 
         /* Setup persistent provisioning attributes */
-        boolean provisionEnabled =
-            (Boolean) config.getEntry("org.rioproject.cybernode",
-                                      "provisionEnabled",
-                                      Boolean.class,
-                                      true);
+        boolean provisionEnabled = (Boolean) config.getEntry("org.rioproject.cybernode",
+                                                             "provisionEnabled",
+                                                             Boolean.class,
+                                                             true);
         computeResource.setPersistentProvisioning(provisionEnabled);        
-        String provisionRoot = Environment.setupProvisionRoot(provisionEnabled,
-                                                              config);
+        String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
         if(provisionEnabled) {
             if(logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE,
-                           "Software provisioning has been enabled, "+
-                           "using provision root ["+provisionRoot+"]");
+                logger.fine(String.format("Software provisioning has been enabled, using provision root [%s]",
+                                          provisionRoot));
         }
         computeResource.setPersistentProvisioningRoot(provisionRoot);
 
@@ -146,36 +142,24 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         container.setComputeResource(computeResource);
         container.addListener(this);
 
-        context = ServiceBeanActivation.getServiceBeanContext(
-                                                  CONFIG_COMPONENT,
-                                                  "Cybernode",
-                                                  configArgs,
-                                                  getClass().getClassLoader());
-
+        context = ServiceBeanActivation.getServiceBeanContext(CONFIG_COMPONENT,
+                                                              "Cybernode",
+                                                              configArgs,
+                                                              config,
+                                                              getClass().getClassLoader());
         registry = LocateRegistry.getRegistry(cybernodeRegistryPort);
-        exporter = ExporterConfig.getExporter(config,
-                                              "org.rioproject.cybernode",
-                                              "exporter");
+
+        exporter = ExporterConfig.getExporter(config, "org.rioproject.cybernode", "exporter");
 
         createdRegistryPort = RegistryUtil.getRegistry(config);
         if(createdRegistryPort>0)
-            System.setProperty(Constants.REGISTRY_PORT,
-                               Integer.toString(createdRegistryPort));
+            System.setProperty(Constants.REGISTRY_PORT, Integer.toString(createdRegistryPort));
         else
             throw new RuntimeException("Unable to create RMI Registry");
-        
-        JMXConnectionUtil.createJMXConnection(config);
 
         Remote proxy = exporter.export(this);
         registry.bind(execBindName, proxy);
-
-        /* Setup FDH to make sure Cybernode doesnt orphan us */
-        fdh = new JMXFaultDetectionHandler();
-        fdh.setConfiguration(config);
-        fdh.setJMXConnection(
-            JMXConnectionUtil.getJMXServiceURL(cybernodeRegistryPort, "localhost"));
-        fdh.register(this);
-        fdh.monitor();
+        new Thread(new CreateFDH(config, this)).start();
     }
 
     public int getRegistryPort() {
@@ -336,5 +320,29 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
             logger.warning("JVM CPU monitoring not supported");
         }
         return measurables.toArray(new MeasurableCapability[measurables.size()]);
+    }
+
+    private class CreateFDH implements Runnable {
+        private final Configuration config;
+        private final FaultDetectionListener<ServiceID> faultDetectionListener;
+
+        private CreateFDH(Configuration config, FaultDetectionListener<ServiceID> faultDetectionListener) {
+            this.config = config;
+            this.faultDetectionListener = faultDetectionListener;
+        }
+
+        public void run() {
+            try {
+                JMXConnectionUtil.createJMXConnection(config);
+                /* Setup FDH to make sure Cybernode doesnt orphan us */
+                fdh = new JMXFaultDetectionHandler();
+                fdh.setConfiguration(config);
+                fdh.setJMXConnection(JMXConnectionUtil.getJMXServiceURL(cybernodeRegistryPort, "localhost"));
+                fdh.register(faultDetectionListener);
+                fdh.monitor();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Unable to setup FDH to make sure Cybernode doesnt orphan us ", e);
+            }
+        }
     }
 }
