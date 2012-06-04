@@ -53,12 +53,20 @@ public final class ResolverHelper {
     private static URLClassLoader resolverLoader;
     static final Logger logger = Logger.getLogger(ResolverHelper.class.getName());
     public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
+    static {
+        File resolverJar = new File(getResolverJarFile());
+        try {
+            resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
+                                                Thread.currentThread().getContextClassLoader());
+        } catch (MalformedURLException e) {
+            logger.log(Level.SEVERE, String.format("Creating ClassLoader to load %s", resolverJar.getPath()), e);
+        }
+    }
 
     /*
      * Disallow instantiation
      */
     private ResolverHelper() {
-
     }
 
     /**
@@ -139,23 +147,14 @@ public final class ResolverHelper {
      * a resource named "META-INF/services/org.rioproject.resolver.Resolver"
      * containing the name of the provider class. If multiple resources with
      * that name are available, then the one used will be the first one returned
-     * by ServiceLoader.load. If the resource is not found, the
-     * SimpleResolver class is used.
+     * by ServiceLoader.load.
      *
      * @return An instance of the resolver provider
      *
      * @throws ResolverException if there are problems loading the resource
      */
-    public static synchronized Resolver getResolver() throws ResolverException {
-        File resolverJar = new File(getResolverJarFile());
-        if(resolverLoader==null)
-            try {
-                resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
-                                                    Thread.currentThread().getContextClassLoader());
-            } catch (MalformedURLException e) {
-                throw new ResolverException(String.format("Creating ClassLoader to load %s", resolverJar.getPath()), e);
-            }
-        return getResolver(resolverLoader);
+    public static Resolver getResolver() throws ResolverException {
+       return getResolver(resolverLoader);
     }
 
     private static String getResolverJarFile() {
