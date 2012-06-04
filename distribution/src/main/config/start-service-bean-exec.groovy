@@ -16,9 +16,7 @@ class StartServiceBeanExecConfig {
         String classpath = ServiceDescriptorUtil.getCybernodeClasspath()
         
         String policyFile = rioHome + '/policy/policy.all'
-        def configArgs = [rioHome + '/config/common.groovy',
-                          rioHome + '/config/cybernode.groovy',
-                          rioHome + '/config/compute_resource.groovy']
+        def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/forked_service.groovy']
 
         def serviceDescriptors = [
             new RioServiceDescriptor(codebase,
