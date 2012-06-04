@@ -251,14 +251,10 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         Object proxy = null;
 
         /* Warn user of inaccessible codebase(s) */
-        HTTPDStatus.httpdWarning(getCodebase());
+        if(getCodebase().startsWith("http"))
+            HTTPDStatus.httpdWarning(getCodebase());
 
         /* Set common JARs to the CommonClassLoader */
-
-        //URL[] defaultCommonJARs = null;
-        //String defaultPlatformConfig =
-        //    PlatformLoader.getDefaultPlatformConfiguration();
-
         String defaultDir = null;
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null) {
