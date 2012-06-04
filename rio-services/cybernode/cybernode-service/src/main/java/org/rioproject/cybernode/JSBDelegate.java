@@ -46,7 +46,6 @@ import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
@@ -586,10 +585,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     } else {
                         buff.append("<unknown>");
                     }
-                    if(!(t instanceof ServiceBeanInstantiationException))
-                        abortThrowable = ThrowableUtil.getRootCause(t);
-                    else
-                        abortThrowable = t;
+                    abortThrowable = t;
                     if(t instanceof MissingMethodException) {
                         MissingMethodException e = (MissingMethodException)t;
                          System.out.println("===> "+sElem.getName()+", MISSING:"+e.getMethod());
