@@ -21,6 +21,7 @@ import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
 import org.rioproject.core.provision.DownloadRecord;
 import org.rioproject.core.provision.StagedSoftware;
+import org.rioproject.net.HostUtil;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
 import org.rioproject.resources.util.StringUtil;
@@ -140,10 +141,11 @@ public class ComputeResource /*extends Observable*/ {
                         System.getProperty("os.arch")+", "+
                         System.getProperty("os.version");
         this.config = config;
+        String host = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
         address = (InetAddress)config.getEntry(COMPONENT,
                                                "address",
                                                InetAddress.class,
-                                               InetAddress.getLocalHost());
+                                               InetAddress.getByName(host));
         String defaultDescription = address.getHostName()+" "+system;
         description = (String)config.getEntry(COMPONENT, "description", String.class, defaultDescription);
         reportInterval = (Long)config.getEntry(COMPONENT, "reportInterval", Long.class, DEFAULT_REPORT_INTERVAL);
