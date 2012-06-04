@@ -82,7 +82,8 @@ public class ServiceBeanActivation {
     static final String FDH = "org.rioproject.fdh.AdminFaultDetectionHandler";
 
     /**
-     * Create a ServiceBeanContext from the Configuration element
+     * Create a ServiceBeanContext from the Configuration element.
+     *
      * @param configComponent The configuration component name of the
      * ServiceBean to use when obtaining configuration attributes. Must not be null.
      * @param defaultServiceName The default name of the service. Must not be null.
@@ -91,25 +92,59 @@ public class ServiceBeanActivation {
      *
      * @return A ServiceBeanContext. A new ServiceBeanContext is created each time
      *
-     * @throws Exception If a ServiceBeanContext cannot be created
+     * @throws ConfigurationException If the Configuration cannot be created
+     * @throws IOException If the hostname cannot be accessed
      * @throws IllegalArgumentException If any of the arguments are null.
      */
     public static ServiceBeanContext getServiceBeanContext(String configComponent,
                                                            String defaultServiceName,
                                                            String[] configArgs,
-                                                           ClassLoader loader)
-    throws Exception {
+                                                           ClassLoader loader) throws ConfigurationException, IOException {
+        if(configArgs == null)
+            throw new IllegalArgumentException("configArgs is null");
+        Configuration config = ConfigurationProvider.getInstance(configArgs, loader);
+        return getServiceBeanContext(configComponent, defaultServiceName, configArgs, config, loader);
+
+    }
+
+    /**
+     * Create a ServiceBeanContext from the Configuration element. This method is used if the
+     * {@code Configuration} object has already been created.
+     *
+     * @param configComponent The configuration component name of the
+     * ServiceBean to use when obtaining configuration attributes. Must not be null.
+     * @param defaultServiceName The default name of the service. Must not be null.
+     * @param configArgs Configuration arguments for the ServiceBean. This is used to create a
+     * {@code ServiceBeanConfig} object, and the {@code configArgs} are those used to create the
+     * {@code Configuration} argument following. Must not be null.
+     * @param config Configuration for the ServiceBean. Must not be null.
+     * @param loader The ClassLoader which loaded the ServiceBean. Must not be null.
+     *
+     * @return A ServiceBeanContext. A new ServiceBeanContext is created each time
+     *
+     * @throws ConfigurationException If the Configuration cannot be created
+     * @throws IOException If the hostname cannot be accessed
+     * @throws IllegalArgumentException If any of the arguments are null.
+     */
+    public static ServiceBeanContext getServiceBeanContext(String configComponent,
+                                                           String defaultServiceName,
+                                                           String[] configArgs,
+                                                           Configuration config,
+                                                           ClassLoader loader) throws ConfigurationException,
+                                                                                      IOException {
         if(configComponent == null)
             throw new IllegalArgumentException("configComponent is null");
         if(defaultServiceName == null)
             throw new IllegalArgumentException("defaultServiceName is null");
         if(configArgs == null)
             throw new IllegalArgumentException("configArgs is null");
+        if(config == null)
+            throw new IllegalArgumentException("config is null");
         if(loader == null)
             throw new IllegalArgumentException("loader is null");
 
-        Map<String, Object> configParms = new HashMap<String, Object>();        
-        Configuration config = ConfigurationProvider.getInstance(configArgs, loader);
+        Map<String, Object> configParms = new HashMap<String, Object>();
+
         RegistryUtil.checkRegistry(config);
         
         configParms.putAll(readServiceBeanConfig(configComponent, defaultServiceName, config));
@@ -118,8 +153,7 @@ public class ServiceBeanActivation {
         if(jmxName!=null)
             configParms.put(ServiceBeanConfig.JMX_NAME, jmxName);
 
-        ServiceBeanConfig sbConfig = new ServiceBeanConfig(configParms,
-                                                           configArgs);
+        ServiceBeanConfig sbConfig = new ServiceBeanConfig(configParms, configArgs);
         sbConfig.addInitParameter(BOOT_CONFIG_COMPONENT, configComponent);
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
