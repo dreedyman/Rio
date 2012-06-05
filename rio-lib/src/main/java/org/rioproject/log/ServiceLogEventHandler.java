@@ -55,11 +55,10 @@ import java.util.logging.Logger;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceLogEventHandler extends Handler implements ServiceLogEventHandlerMBean {
     private Level publishOnLevel = Level.SEVERE;
-    private final Collection<String> publishableLoggers =
-        Collections.synchronizedCollection(new ArrayList<String>());
+    private final Collection<String> publishableLoggers = Collections.synchronizedCollection(new ArrayList<String>());
     private EventHandler eventHandler;
     private EventProducer source;
-    private InetAddress address;
+    private final InetAddress address;
     private final Executor eventExecutor = Executors.newSingleThreadExecutor();
     private final static Logger logger = Logger.getLogger(ServiceLogEventHandler.class.getName());
 
@@ -78,10 +77,10 @@ public class ServiceLogEventHandler extends Handler implements ServiceLogEventHa
             ObjectName oName = new ObjectName(ServiceLogEventHandler.class.getName()+":type=ServiceLogEventHandler");
             mbs.registerMBean(this, oName);
         } catch (Exception e) {
-            logger.log(Level.WARNING,
-                       "Trying to create MBean for ServiceLogEventHandler",
-                       e);
+            logger.log(Level.WARNING, "Trying to create MBean for ServiceLogEventHandler", e);
         }
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Created and registered the ServiceLogEventHandler");
     }
 
     public void setEventHandler(EventHandler eventHandler) {
