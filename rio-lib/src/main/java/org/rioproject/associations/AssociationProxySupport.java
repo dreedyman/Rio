@@ -116,7 +116,7 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
     * invocation succeeds, or there are no more services available
     *
     * @param a The Association referencing a collection of associated services
-    * @param method The mthod to invoke
+    * @param method The method to invoke
     * @param args Method arguments
     *
     * @return The result of the method invocation
@@ -124,18 +124,12 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
     * @throws Throwable the exception to throw from the method invocation on
     * the associated service instance.
     */
-    public Object doInvokeService(Association<T> a, Method method, Object[] args)
-        throws Throwable {
-
+    public Object doInvokeService(Association<T> a, Method method, Object[] args) throws Throwable {
         if(terminated)
-            throw new IllegalStateException("The association proxy for " +
-                                            formatAssociationService(a)+" "+
-                                            "has been terminated, invocations " +
-                                            "to the service through this " +
-                                            "generated proxy are not possible " +
-                                            "in it's current state. Make sure " +
-                                            "all invoking threads are " +
-                                            "terminated to resolve this issue");
+            throw new IllegalStateException("The association proxy for "+formatAssociationService(a)+" "+
+                                            "has been terminated, invocations to the service through this " +
+                                            "generated proxy are not possible in it's current state. Make sure " +
+                                            "all invoking threads are terminated to resolve this issue");
         Object result = null;
         long stopTime = 0;
         while (!terminated) {
@@ -149,15 +143,11 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                                     aDesc.getServiceDiscoveryTimeout()): stopTime);
                     if(System.currentTimeMillis()<stopTime) {
                         if(logger.isLoggable(Level.FINEST)) {
-                            logger.finest("The association proxy for " +
-                                          formatAssociationService(a)+" is " +
-                                          "not available. A service discovery " +
-                                          "timeout of " +
+                            logger.finest("The association proxy for "+formatAssociationService(a)+" is " +
+                                          "not available. A service discovery timeout of " +
                                           "["+aDesc.getServiceDiscoveryTimeout()+"], " +
-                                          "has been configured, and the " +
-                                          "computed stop time is: "+
-                                          new Date(stopTime)+", " +
-                                          "sleep for one second and re-evaluate");
+                                          "has been configured, and the computed stop time is: "+
+                                          new Date(stopTime)+", sleep for one second and re-evaluate");
                         }
                         Thread.sleep(1000);
                         continue;
@@ -201,15 +191,16 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
             } catch (Throwable t) {
                 if(!ThrowableUtil.isRetryable(t)) {
                     logger.log(Level.WARNING,
-                               "Interceptor.intercept " +
-                               "method [" + method.getName() + "] " +
-                               "remove service ["+service+"]",
+                               "Failed to invoke method ["+method.getName()+"], remove  service ["+service+"]",
                                t);
                     if (service != null) {
-                        if(a.removeService(service)!=null)
-                            logger.warning("Service ["+service+"] removed");
-                        else
-                            logger.warning("Unable to remove service ["+service+"]");
+                        getServiceSelectionStrategy().serviceRemoved(service);
+                        if(a.removeService(service)!=null) {
+                            logger.warning("Service ["+service+"] removed, have ["+a.getServiceCount()+"] services");
+                        } else {
+                            logger.warning("Unable to remove service ["+service+"], have ["+a.getServiceCount()+"] services");
+                            //terminated = true;
+                        }
                     }
                 } else {
                     throw t;
