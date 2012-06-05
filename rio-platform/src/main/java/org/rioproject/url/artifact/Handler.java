@@ -15,7 +15,6 @@
  */
 package org.rioproject.url.artifact;
 
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resolver.*;
 
 import java.io.IOException;
@@ -23,7 +22,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+import java.util.logging.*;
 
 /**
  * <p>A stream handler for URLs with the <code>artifact</code> protocol. The <code>artifact</code> URL
@@ -48,9 +51,23 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
-
 public class Handler extends URLStreamHandler {
-    private static final WrappedLogger logger = WrappedLogger.getLogger(Handler.class.getName());
+    private static final Logger logger = Logger.getLogger(Handler.class.getName());
+    private static Resolver resolver;
+    static {
+        try {
+            resolver = ResolverHelper.getResolver();
+        } catch (ResolverException e) {
+            logger.log(Level.SEVERE, "Could not get a ResolverInstance", e);
+            throw new RuntimeException(e);
+        }
+    }
+    private final ConcurrentMap<Artifact, URL> cache = new ConcurrentHashMap<Artifact, URL>();
+
+    public Handler() {
+        ScheduledExecutorService snapshotReaper = Executors.newScheduledThreadPool(1);
+        snapshotReaper.scheduleAtFixedRate(new SnapShotReaper(), 3, 3, TimeUnit.HOURS);
+    }
 
     protected URLConnection openConnection(URL url) throws IOException {
         if(url==null)
@@ -68,19 +85,18 @@ public class Handler extends URLStreamHandler {
             throw new MalformedURLException(e.getLocalizedMessage());
         }
 
-        Resolver resolver;
-        try {
-            resolver = ResolverHelper.getResolver();
-        } catch (ResolverException e) {
-            logger.log(Level.WARNING, e, "Could not get a ResolverInstance");
-            throw new IOException(e.getLocalizedMessage());
-        }
         URL u;
         try {
             //resolver.getClassPathFor(artifact, repositories.toArray(new RemoteRepository[repositories.size()]));
-            u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
+            u = cache.get(a);
+            if(u==null) {
+                if(logger.isLoggable(Level.FINE))
+                    logger.fine(String.format("Get location of %s", a));
+                u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
+                cache.put(a, u);
+            }
         } catch (ResolverException e) {
-            logger.log(Level.WARNING, e, "Could not resolve %s", a);
+            logger.log(Level.WARNING, String.format("Could not resolve %s", a), e);
             throw new IOException(e.getLocalizedMessage());
         }
 
@@ -88,5 +104,19 @@ public class Handler extends URLStreamHandler {
             return u.openConnection();
 
         return null;
+    }
+
+    private class SnapShotReaper implements Runnable {
+        public void run() {
+            List<Artifact> removals = new ArrayList<Artifact>();
+            for(Map.Entry<Artifact, URL> entry : cache.entrySet()) {
+                if(entry.getKey().getVersion().endsWith("SNAPSHOT")) {
+                    removals.add(entry.getKey());
+                }
+            }
+            for(Artifact a : removals) {
+                cache.remove(a);
+            }
+        }
     }
 }
