@@ -69,10 +69,8 @@ class GroovyConfig implements Configuration {
                 args.each { a ->
                     buffer.append(a).append(' ')
                 }
-                throw new ConfigurationException(
-                    'When providing multiple configuration files, '+
-                    'they must all be Groovy configurations '+
-                    '['+buffer.toString()+']');
+                throw new ConfigurationException('When providing multiple configuration files, '+
+                                                 'they must all be Groovy configurations ['+buffer.toString()+']');
             }
         }
     }
@@ -100,13 +98,9 @@ class GroovyConfig implements Configuration {
                 }
                 parseAndLoad(is, gcl)
             } catch (FileNotFoundException e) {
-                throw new ConfigurationNotFoundException("The configuration file "+
-                                                         "["+groovyFile+"] "+
-                                                         "does not exist", e)
+                throw new ConfigurationNotFoundException("The configuration file [${groovyFile}] does not exist", e)
             } catch(Throwable t) {
-                throw new ConfigurationException("The configuration file "+
-                                                 "["+groovyFile+"] "+
-                                                 "could not be parsed", t)
+                throw new ConfigurationException("The configuration file [${groovyFile}] could not be parsed", t)
             } finally {
                 if (is != null) {
                     try {
@@ -115,9 +109,7 @@ class GroovyConfig implements Configuration {
                     }
                 }
                 if(logger.isLoggable(Level.FINE))
-                    logger.fine 'Time to parse '+groovyFile+' : '+
-                                 (System.currentTimeMillis()-t0)+' '+
-                                 'milliseconds'
+                    logger.fine "Time to parse ${groovyFile} : ${(System.currentTimeMillis()-t0)} milliseconds"
             }
         }
         gcl = null
@@ -152,12 +144,11 @@ class GroovyConfig implements Configuration {
                         component = getComponentName(gO.getMetaClass())
                     }
                     if (!validQualifiedIdentifier(component)) {
-                        throw new IllegalArgumentException(
-                            "component must be a valid qualified identifier");
+                        throw new IllegalArgumentException("component must be a valid qualified identifier");
                     }
                     groovyConfigs.put(component, gO)
                 }
-            }            
+            }
         }
     }
 
@@ -166,7 +157,7 @@ class GroovyConfig implements Configuration {
         component = component.replace("_", ".")
         return component
     }
-    
+
     def Object getEntry(String component, String name, Class type) {
         return getEntry(component, name, type, NO_DEFAULT);
     }
@@ -208,9 +199,8 @@ class GroovyConfig implements Configuration {
         }
         if(groovyConfig==null) {
             if(defaultValue==NO_DEFAULT)
-                throw new NoSuchEntryException('component name ['+component+'] '+
-                                               'not found in Groovy files, '+
-                                               'and no default value was given.')
+                throw new NoSuchEntryException("component name [${component}] not found in Groovy files, "+
+                                               "and no default value was given.")
             else
                 return defaultValue;
         }
@@ -220,10 +210,8 @@ class GroovyConfig implements Configuration {
             try {
                 value = groovyConfig.getProperty(name)
                 if(logger.isLoggable(Level.FINER))
-                    logger.finer 'Configuration entry '+
-                                 '['+component+'.'+name+'] found in '+
-                                 'GroovyObject '+groovyConfig+', '+
-                                 'assign returned value: '+value
+                    logger.finer "Configuration entry [${component}.${name}] found in "+
+                                 "GroovyObject ${groovyConfig}, assign returned value: ${value}"
             } catch(MissingPropertyException e) {
                 if(!e.getProperty().equals(name))
                     throw new ConfigurationException(e.getMessage(), e)
@@ -231,18 +219,14 @@ class GroovyConfig implements Configuration {
                 if(logger.isLoggable(Level.FINEST))
                     logger.log(Level.FINEST,
                                "${e.getClass().getName()}: looking for configuration entry "+
-                                 "[${component}.${name}] in GroovyObject "+
-                                 groovyConfig)
+                               "[${component}.${name}] in GroovyObject "+
+                               groovyConfig)
                 if(defaultValue==NO_DEFAULT) {
-                    throw new NoSuchEntryException("entry not found for "+
-                                                   "component: "+component +", "+
-                                                   "name: " + name, e);
+                    throw new NoSuchEntryException("entry not found for component: $component, name: $name", e);
                 } else {
                     if(logger.isLoggable(Level.FINER))
-                        logger.finer 'Configuration entry '+
-                                     '['+component+'.'+name+'] not found in '+
-                                     'GroovyObject '+groovyConfig+', '+
-                                     'assign provided default: '+defaultValue
+                        logger.finer "Configuration entry [${component}.${name}] not found in "+
+                                     "GroovyObject ${groovyConfig}, assign provided default: ${defaultValue}"
                     value = defaultValue;
                 }
             }
@@ -254,8 +238,7 @@ class GroovyConfig implements Configuration {
                 for(MetaMethod m : methods) {
                     if(m.name==methodName) {
                         if(logger.isLoggable(Level.FINEST))
-                            logger.finest "Found matching method name [${methodName}], "+
-                                          "check for type match"
+                            logger.finest "Found matching method name [${methodName}], check for type match"
                         Class[] paramTypes = m.nativeParameterTypes
                         if(paramTypes.length==1 && paramTypes[0].isAssignableFrom(data.class)) {
                             mm = m;
@@ -265,19 +248,16 @@ class GroovyConfig implements Configuration {
                 }
                 if(mm==null) {
                     if(defaultValue==NO_DEFAULT)
-                        throw new NoSuchEntryException("entry not found for "+
-                                                       "component: "+component+", "+
-                                                       "name: " + name+", "+
-                                                       "data argument: "+data);
+                        throw new NoSuchEntryException("entry not found for component: $component, "+
+                                                       "name: $name, data argument: $data");
 
                     value = defaultValue;
                 } else {
                     value = mm.invoke(groovyConfig, data)
                 }
             } catch(MissingPropertyException e) {
-                throw new NoSuchEntryException("entry not found for component: " +
-                                               component +", name: " + name+", "+
-                                                   "data argument: "+data, e);
+                throw new NoSuchEntryException("entry not found for component: $component, name: $name, "+
+                                               "data argument: $data", e);
             }
         }
 
@@ -291,10 +271,9 @@ class GroovyConfig implements Configuration {
                 mismatch = true
             }
             if(mismatch) {
-                throw new ConfigurationException(
-                    "entry for component " + component + ", name " + name +" "+
-                    "is of wrong type: " +value.getClass().name+", "+
-                    "expected: "+type.name);
+                throw new ConfigurationException("entry for component $component, name $name "+
+                                                 "is of wrong type: ${value.getClass().name}, "+
+                                                 "expected: ${type.name}");
             }
         }
         return value
