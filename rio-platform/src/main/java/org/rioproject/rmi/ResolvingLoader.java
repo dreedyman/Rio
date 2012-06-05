@@ -104,6 +104,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 return resolveCodebase(builder.toString());
             }
         }*/
+
         return loader.getClassAnnotation(aClass);
     }
 
