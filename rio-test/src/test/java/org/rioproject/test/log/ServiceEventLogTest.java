@@ -67,11 +67,9 @@ public class ServiceEventLogTest {
 
         Entry[] attrs = new Entry[]{ServiceLogEvent.getEventDescriptor()};
         ServiceTemplate template = new ServiceTemplate(null, null, attrs);
-        ServiceItem[] items = testManager.getServiceDiscoveryManager().lookup(template,
-                                                                              Integer.MAX_VALUE,
-                                                                              null);
-        Assert.assertEquals("Expected 1 service", 1, items.length);
+        ServiceItem[] items = testManager.getServiceDiscoveryManager().lookup(template, Integer.MAX_VALUE, null);
         try {
+            Assert.assertEquals("Expected 1 service", 1, items.length);
             doVerifyLogging(items, simple, 1);
         } finally {
             testManager.undeployAll(monitor);
