@@ -1164,9 +1164,14 @@ public class AssociationMgmt implements AssociationManagement {
             decrement();
             lCache.discard(proxy);
             ServiceItem item = association.removeService(proxy);
-            if(logger.isLoggable(Level.FINER))
-                logger.finer(String.format("[%s] Service FAILURE : %s", clientName, item.service.getClass().getName()));
-            notifyOnFailure(item);
+            if(item!=null) {
+                notifyOnFailure(item);
+                if(logger.isLoggable(Level.FINER))
+                    logger.finer(String.format("[%s] Service FAILURE : %s", clientName, item.service.getClass().getName()));
+            } else {
+                logger.warning(String.format("Unable to notify Listeners on failure, returned ServiceItem is null for association %s",
+                                             association.getName()));
+            }
             fdhTable.remove(sid);
         }
 
