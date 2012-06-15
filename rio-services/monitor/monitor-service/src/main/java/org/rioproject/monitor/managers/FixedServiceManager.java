@@ -52,8 +52,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
      */
     public void process() {
         ServiceResource[] resources = context.getSelector().getServiceResources();
-        if(logger.isLoggable(Level.FINE)) {
-            logger.fine(String.format("%s processing %d resources", getType(), resources.length));
+        if(logger.isLoggable(Level.FINER)) {
+            logger.finer(String.format("%s processing %d resources", getType(), resources.length));
         }
         for (ServiceResource resource : resources)
             process(resource);
@@ -70,8 +70,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
             if (logger.isLoggable(Level.FINER))
                 logger.log(Level.FINER,  "Deploy [" + LoggingUtil.getLoggingName(request) + "]");
             ServiceResource[] resources = context.getSelector().getServiceResources(request.getServiceElement());
-            if(logger.isLoggable(Level.FINE)) {
-                logger.fine(String.format("%s processing %d resources", getType(), resources.length));
+            if(logger.isLoggable(Level.FINER)) {
+                logger.finer(String.format("%s processing %d resources", getType(), resources.length));
             }
             /* Filter out isolated associations and max per machine levels
              * set at the physical level */
@@ -103,8 +103,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
             return;
         inProcessResource.add(resource);
         InstantiatorResource ir = (InstantiatorResource) resource.getResource();
-        if(logger.isLoggable(Level.FINE)) {
-            logger.fine(String.format("%s processing %s", getType(), ir.getHostAddress()));
+        if(logger.isLoggable(Level.FINER)) {
+            logger.finer(String.format("%s processing %s", getType(), ir.getHostAddress()));
         }
         try {
             if(getSize() == 0)

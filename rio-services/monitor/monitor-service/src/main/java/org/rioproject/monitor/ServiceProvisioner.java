@@ -331,11 +331,11 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         boolean updated = false;
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
-            logger.fine("Update from [%s:%s], current serviceCount %d, serviceLimit %d",
-                        ir.getHostAddress(),
-                        preparedResource.toString(),
-                        deployedServices.size(),
-                        serviceLimit);
+            logger.finer("Update from [%s:%s], current serviceCount %d, serviceLimit %d",
+                         ir.getHostAddress(),
+                         preparedResource.toString(),
+                         deployedServices.size(),
+                         serviceLimit);
 
             logger.finest("Checking for InstantiatorResource match");
             if(ir.getInstantiator().equals(preparedResource)) {
@@ -352,13 +352,11 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                   ir.getServiceCount(), deployedServices.size());
                     ir.setDeployedServices(deployedServices);
                 } catch (Throwable t) {
-                    logger.log(Level.WARNING, "Getting ServiceRecords", t);
+                    logger.log(Level.WARNING, t, "Getting ServiceRecords from %s", ir.getHostAddress());
                 }
                 /* Process all provision types of Fixed first */
-                logger.finer("Process the %s", fixedServiceManager.getType());
                 fixedServiceManager.process(svcResource);
                 /* See if any dynamic provision types are pending */
-                logger.finer("Process the %s", pendingMgr.getType());
                 pendingMgr.process();
                 break;
             } else {
