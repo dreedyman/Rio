@@ -115,6 +115,8 @@ public class Handler extends URLStreamHandler {
                 }
             }
             for(Artifact a : removals) {
+                if(logger.isLoggable(Level.FINE))
+                    logger.fine("Removing "+a.toString()+" from cache");
                 cache.remove(a);
             }
         }
