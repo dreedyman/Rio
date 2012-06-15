@@ -142,7 +142,7 @@ public class OarMojo extends ClassDepAndJarMojo {
         if(encodeRepositories) {
             RepositoryEncoder repositoryEncoder = new RepositoryEncoder();
             File repoConfiguration = new File(System.getProperty("java.io.tmpdir"), "repositories.xml");
-            //repoConfiguration.deleteOnExit();
+            repoConfiguration.deleteOnExit();
             repositoryEncoder.encode(remoteRepositories, repoConfiguration);
             ZipFileSet fileSetRepositoryConfig = new ZipFileSet();
             fileSetRepositoryConfig.setDir(repoConfiguration.getParentFile());
