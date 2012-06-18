@@ -355,16 +355,34 @@ public final class AetherService {
                            final String artifactExt,
                            final List<RemoteRepository> repositories) throws ArtifactResolutionException,
                                                                              MalformedURLException {
+        List<RemoteRepository> myRepositories;
+        if(repositories==null || repositories.isEmpty())
+            myRepositories = getRemoteRepositories();
+        else
+            myRepositories = repositories;
 
-        setMirrorSelector(repositories);
-        applyAuthentication(repositories);
+        if(logger.isLoggable(Level.FINE)) {
+            StringBuilder builder = new StringBuilder();
+            if(myRepositories!=null && myRepositories.size()>0) {
+                for(RemoteRepository r : myRepositories) {
+                    if(builder.length()>0)
+                        builder.append(", ");
+                    builder.append(r.getUrl());
+                }
+            } else {
+                builder.append("<no provided repositories>");
+            }
+            logger.fine(String.format("Get location of %s using repositories %s", artifactCoordinates, builder.toString()));
+        }
+        setMirrorSelector(myRepositories);
+        applyAuthentication(myRepositories);
 
         DefaultArtifact a = new DefaultArtifact(artifactCoordinates);
         String extension = artifactExt==null? "jar":artifactExt;
         ArtifactRequest artifactRequest = new ArtifactRequest();
         DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), extension, a.getVersion());
         artifactRequest.setArtifact(artifact);
-        artifactRequest.setRepositories(repositories);
+        artifactRequest.setRepositories(myRepositories);
         ArtifactResult artifactResult = repositorySystem.resolveArtifact(repositorySystemSession, artifactRequest);
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
