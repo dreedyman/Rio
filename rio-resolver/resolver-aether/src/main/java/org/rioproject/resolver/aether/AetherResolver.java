@@ -63,7 +63,6 @@ public class AetherResolver implements Resolver {
             if(future==null) {
                 future = resolverExecutor.submit(new ResolvingRequestTask(request));
                 resolvingMap.put(request, future);
-                System.out.println(String.format("Created and set new ResolvingRequestTask for %s", artifact));
                 if(logger.isLoggable(Level.FINE)) {
                     logger.fine(String.format("Created and set new ResolvingTask for %s", artifact));
                 }
