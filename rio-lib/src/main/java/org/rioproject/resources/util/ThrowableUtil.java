@@ -30,6 +30,10 @@ public class ThrowableUtil {
             if(((ServiceBeanInstantiationException)e).getCauseExceptionDescriptor()!=null) {
                 ServiceBeanInstantiationException.ExceptionDescriptor exDesc =
                     ((ServiceBeanInstantiationException)e).getCauseExceptionDescriptor();
+
+                if(exDesc.getCauses().size()>0) {
+                    exDesc = exDesc.getCauses().get(0);
+                }
                 Throwable t = new Throwable(exDesc.getMessage());
                 t.setStackTrace(exDesc.getStacktrace());
                 return t;
