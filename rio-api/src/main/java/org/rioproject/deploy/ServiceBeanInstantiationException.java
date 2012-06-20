@@ -18,16 +18,16 @@ package org.rioproject.deploy;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Thrown when a Service Bean cannot be instantiated
+ * Thrown when a service cannot be instantiated
  *
  * @author Dennis Reedy
  */
 public class ServiceBeanInstantiationException extends Exception {
-    /**
-     * serialVersionUID
-     */
     @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
@@ -39,7 +39,7 @@ public class ServiceBeanInstantiationException extends Exception {
     private ExceptionDescriptor exDesc;
 
     /**
-     * Constructs a <code>ServiceBeanInstantiationException</code> with no detail
+     * Constructs a {@code ServiceBeanInstantiationException} with no detail
      * message.
      */
     public ServiceBeanInstantiationException() {
@@ -47,53 +47,47 @@ public class ServiceBeanInstantiationException extends Exception {
     }
 
     /**
-     * Constructs a <code>ServiceBeanInstantiationException</code> with the specified
+     * Constructs a {@code ServiceBeanInstantiationException} with the specified
      * detail message
      *
      * @param s the detail message.
      */
-    public ServiceBeanInstantiationException(String s) {
+    public ServiceBeanInstantiationException(final String s) {
         super(s);
     }
 
     /**
-     * Constructs a <code>ServiceBeanInstantiationException</code> with the specified
+     * Constructs a {@code ServiceBeanInstantiationException} with the specified
      * detail message and optional exception that was raised while instantiating
-     * the JSB
+     * the service
      *
      * @param s the detail message
-     * @param cause the exception that was raised while instantiating the JSB
+     * @param cause the exception that was raised while instantiating the service
      */
-    public ServiceBeanInstantiationException(String s, Throwable cause) {
+    public ServiceBeanInstantiationException(final String s, final Throwable cause) {
         super(s);
-        this.exDesc = new ExceptionDescriptor(cause.getClass().getName(),
-                                              cause.getLocalizedMessage(),
-                                              cause.getStackTrace());
+        this.exDesc = new ExceptionDescriptor(cause);
     }
 
     /**
-     * Constructs a <code>ServiceBeanInstantiationException</code> with the specified
+     * Constructs a {@code ServiceBeanInstantiationException} with the specified
      * detail message, optional exception that was raised while instantiating
-     * the JSB and whether
+     * the service and whether
      *
      * @param s The detail message
-     * @param cause The exception that was raised while instantiating the JSB
+     * @param cause The exception that was raised while instantiating the service
      * @param unInstantiable - Whether the raised exception is in reference to a
      * ServiceBean that is not instantiable, due to such reasons as missing
      * classes or resources
      */
-    public ServiceBeanInstantiationException(String s,
-                                             Throwable cause,
-                                             boolean unInstantiable) {
+    public ServiceBeanInstantiationException(final String s, final Throwable cause, final boolean unInstantiable) {
         super(s);
-        this.exDesc = new ExceptionDescriptor(cause.getClass().getName(),
-                                              cause.getLocalizedMessage(),
-                                              cause.getStackTrace());
+        this.exDesc = new ExceptionDescriptor(cause);
         this.unInstantiable = unInstantiable;
     }    
 
     /**
-     * Returns whether the raised exception is in reference to a ServiceBean
+     * Returns whether the raised exception is in reference to a service
      * that is not instantiable, due to such reasons as missing classes or
      * resources
      *
@@ -114,10 +108,10 @@ public class ServiceBeanInstantiationException extends Exception {
 
     /**
      * Prints the stack backtrace to the specified print stream. If an exception
-     * occurred during JSB instantiation it prints that exception's stack trace,
+     * occurred during service instantiation it prints that exception's stack trace,
      * or else prints the stack backtrace of this exception.
      */
-    public void printStackTrace(PrintStream ps) {
+    public void printStackTrace(final PrintStream ps) {
         super.printStackTrace(ps);
         if(exDesc!=null) {
             ps.print(exDesc.format());
@@ -129,7 +123,7 @@ public class ServiceBeanInstantiationException extends Exception {
      * occurred during class loading it prints that exception's stack trace, or
      * else prints the stack backtrace of this exception.
      */
-    public void printStackTrace(PrintWriter pw) {
+    public void printStackTrace(final PrintWriter pw) {
         super.printStackTrace(pw);
         if(exDesc!=null) {
             pw.print(exDesc.format());
@@ -137,22 +131,35 @@ public class ServiceBeanInstantiationException extends Exception {
     }
 
     /**
-     * The <code>ExceptionDescriptor</code> is used to capture details of an exception that has been raised by
+     * The {@code ExceptionDescriptor} is used to capture details of an exception that has been raised by
      * underlying software that may include classes that are not available on the clients classpath or may
      * include non-serializable objects.
      */
     public static class ExceptionDescriptor implements Serializable {
-        private String className;
-        private String message;
-        private StackTraceElement[] stackTrace;
+        private final String className;
+        private final String message;
+        private final StackTraceElement[] stackTrace;
+        private final List<ExceptionDescriptor> causes = new ArrayList<ExceptionDescriptor>();
 
-        public ExceptionDescriptor(String className,
-                                   String message,
-                                   StackTraceElement[] stackTrace) {
+        public ExceptionDescriptor(final Throwable exception) {
+            this.className = exception.getClass().getName();
+            this.message = exception.getLocalizedMessage();
+            this.stackTrace = exception.getStackTrace();
+            Throwable cause = exception;
+            while(cause.getCause()!=null) {
+                this.causes.add(new ExceptionDescriptor(cause.getCause().getClass().getName(),
+                                                        cause.getCause().getLocalizedMessage(),
+                                                        cause.getCause().getStackTrace()));
+                cause = cause.getCause();
+            }
+        }
+
+        private ExceptionDescriptor(final String className, final String message, final StackTraceElement[] stackTrace) {
             this.className = className;
             this.message = message;
             this.stackTrace = stackTrace;
         }
+
 
         public String getClassName() {
             return className;
@@ -166,14 +173,18 @@ public class ServiceBeanInstantiationException extends Exception {
             return stackTrace;
         }
 
+        public List<ExceptionDescriptor> getCauses() {
+            return Collections.unmodifiableList(causes);
+        }
+
         public String format() {
             StringBuilder sb = new StringBuilder();
-            sb.append("Caused by: ")
-                .append(className)
-                .append(": ")
-                .append(message).append("\n");
+            sb.append("Caused by: ").append(className).append(": ").append(message).append("\n");
             for(StackTraceElement e : stackTrace) {
                 sb.append("\t").append("at ").append(e).append("\n");
+            }
+            for(ExceptionDescriptor cause : causes) {
+                sb.append(cause.format());
             }
             return sb.toString();
         }
