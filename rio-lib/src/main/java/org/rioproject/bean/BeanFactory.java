@@ -57,7 +57,7 @@ public class BeanFactory implements ServiceBeanFactory {
         } catch(Exception e) {
             if(e instanceof ServiceBeanInstantiationException)
                 throw (ServiceBeanInstantiationException)e;
-            throw new ServiceBeanInstantiationException("Service Instantiation Exception", e);
+            throw new ServiceBeanInstantiationException("Service Instantiation Exception", e, true);
         }
         return (new Created(bean, proxy));
     }
