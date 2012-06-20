@@ -326,8 +326,11 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         if(resource instanceof RemoteMethodControl)
             preparedResource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
         ServiceResource[] svcResources = selector.getServiceResources();
-        if(svcResources.length == 0)
+        if(svcResources.length == 0) {
+            logger.warning("Force removal of all Leases, we have no registered Cybernodes");
+            landlord.removeAll();
             throw new UnknownLeaseException("Empty Collection, no leases");
+        }
         boolean updated = false;
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
