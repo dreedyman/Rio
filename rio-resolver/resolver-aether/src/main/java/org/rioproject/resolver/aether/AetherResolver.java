@@ -279,7 +279,7 @@ public class AetherResolver implements Resolver {
                 break;
             }
         }
-        return request;
+        return request==null?r : request;
     }
 
     /**
