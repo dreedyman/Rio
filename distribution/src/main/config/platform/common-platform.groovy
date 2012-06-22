@@ -24,9 +24,7 @@ class CommonPlatformConfig {
     def getPlatformCapabilityConfigs() {
         def configs = []
         String libDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator
-        /*configs << new PlatformCapabilityConfig("CGLib",
-                                                "2.2",
-                                                libDir+"cglib-nodep.jar")*/
+
         configs << new PlatformCapabilityConfig("Commons Compress",
                                                 "1.0",
                                                 "Apache Commons Compress",
