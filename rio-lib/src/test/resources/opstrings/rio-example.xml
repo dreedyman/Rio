@@ -10,7 +10,7 @@
         </Groups>
 
         <SystemRequirements id="Spring">
-            <SystemComponent Name="SoftwareSupport">
+            <SystemComponent ClassName="SoftwareSupport">
                 <Attribute Name="Name" Value="Spring"/>
                 <Attribute Name="Version" Value="2.5"/>
             </SystemComponent>
