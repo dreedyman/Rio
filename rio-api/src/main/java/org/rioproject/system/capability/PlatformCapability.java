@@ -17,7 +17,7 @@ package org.rioproject.system.capability;
 
 import org.rioproject.core.provision.DownloadRecord;
 import org.rioproject.core.provision.StagedSoftware;
-import org.rioproject.core.provision.SystemRequirements.SystemComponent;
+import org.rioproject.core.provision.SystemComponent;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.costmodel.ResourceCostProducer;
@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  <br>
  PlatformCapability attributes will be stored as (key,&nbsp;value) pairs
  in a HashMap and tested for supportability against {@link
- org.rioproject.core.provision.SystemRequirements.SystemComponent} attributes.
+ org.rioproject.core.provision.SystemComponent} attributes.
  Attributes obtained from the <code>SystemRequirement</code>
  class will be tested for supportability using regular expression
  matching. <br>
@@ -124,8 +124,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     public static final int STATIC = 1;
     /** Indicates that the PlatformCapability may be provisioned */
     public static final int PROVISIONABLE = 2;
-    /** The type of this PlatformCapability, STATIC or PROVISIONABLE. 
-     * Defaults to STATIC */
+    /** The type of this PlatformCapability, STATIC or PROVISIONABLE. Defaults to STATIC */
     private int type = STATIC;
     /** Map of platform capability key and values */
     protected final Hashtable<String, Object> capabilities = new Hashtable<String, Object>();
@@ -133,14 +132,11 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     protected String description;
     /** StagedSoftware defining where the software for this
      * PlatformCapability can be downloaded from */
-    private final List<StagedSoftware> stagedSoftware =
-        new ArrayList<StagedSoftware>();
+    private final List<StagedSoftware> stagedSoftware = new ArrayList<StagedSoftware>();
     /** List DownloadRecord instances indicating that software for
      * this PlatformCapability has been downloaded */
-    private final List<DownloadRecord> downloadRecords =
-        new ArrayList<DownloadRecord>();
-    /** The path on an accessible filesystem where the PlatformCapability is 
-     * installed*/
+    private final List<DownloadRecord> downloadRecords = new ArrayList<DownloadRecord>();
+    /** The path on an accessible filesystem where the PlatformCapability is installed*/
     private String path;
     /** The ResourceCostModel, determining how to charge for use of the 
      * PlatformCapability */
@@ -200,8 +196,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * determined by values in the <code>NativeLibsKey</code> using the
      * <code>System.loadLibrary</code> method.
      *
-     * Libraries are loaded from the location pointed to by the
-     * <code>java.library.path</code>
+     * <p>Libraries are loaded from the location pointed to by the <code>java.library.path</code>
      */
     public void loadResources() {
         String values = (String)capabilities.get(NATIVE_LIBS);
@@ -282,49 +277,15 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     }
 
     /**
-     * Determine if the provided PlatformCapability be supported. A
-     * PlatformCapability can be supported if this PlatformCapability is the
-     * same classname as the input PlatformCapability and all key,value
-     * parameters provided in the input PlatformCapability are found and equal
-     * to mappings in this PlatformCapability
-     * 
-     * @param requirement The PlatformCapability to requirement
-     * @return True if supported, false otherwise
-     * 
-     * @deprecated
-     */
-    public boolean supports(final PlatformCapability requirement) {
-        boolean supports = getClass().getName().equals(requirement.getClass().getName());
-        if(supports) {
-            String[] keys = requirement.getPlatformKeys();
-            for (String key : keys) {
-                if (capabilities.containsKey(key)) {
-                    Object myMapping = capabilities.get(key);
-                    Object theirMapping = requirement.getValue(key);
-                    if (!(myMapping.equals(theirMapping))) {
-                        supports = false;
-                        break;
-                    }
-                } else {
-                    supports = false;
-                    break;
-                }
-            }
-        }
-        return(supports);
-    }
-
-
-    /**
      * Determine if the provided 
-     * {@link org.rioproject.core.provision.SystemRequirements.SystemComponent} can
+     * {@link org.rioproject.core.provision.SystemComponent} can
      * be supported. A SystemRequirement can be supported if this
      * PlatformCapability is the same class name (sans the package name) as
      * the input <code>SystemRequirement.getClassName()</code> or the same
      * fully qualified classname as provided by the
      * <code>SystemRequirement.getClassName()</code> property and all
      * key,value parameters provided in the input SystemRequirement
-     * are found and equal to mappings in this PlatformCapability
+     * are found and equal to mappings in this PlatformCapability.
      * 
      * @param requirement The SystemRequirement to test for supportability.
      *  

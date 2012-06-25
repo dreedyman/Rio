@@ -17,7 +17,7 @@ package org.rioproject.system
 
 import net.jini.config.Configuration
 import net.jini.config.EmptyConfiguration
-import org.rioproject.core.provision.SystemRequirements.SystemComponent
+import org.rioproject.core.provision.SystemComponent
 
 /**
  * Test measurables

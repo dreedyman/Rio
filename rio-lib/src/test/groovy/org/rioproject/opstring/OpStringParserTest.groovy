@@ -20,7 +20,7 @@ import org.rioproject.core.provision.StagedSoftware
 
 import org.rioproject.opstring.ServiceElement.MachineBoundary
 import org.rioproject.exec.ServiceExecutor
-import org.rioproject.core.provision.SystemRequirements.SystemComponent
+import org.rioproject.core.provision.SystemComponent
 
 import org.rioproject.core.provision.SystemRequirements
 import org.rioproject.sla.ServiceLevelAgreements
@@ -149,14 +149,17 @@ class OpStringParserTest extends GroovyTestCase {
         assertTrue "Memory threshold low value should be 0.1", tVals.getLowThreshold()==0.1
 
         SystemComponent[] sysComps = sysReqs.getSystemComponents()
-        assertEquals "There should be 4 SystemComponents", 4, sysComps.length
+        assertEquals "There should be 4 SystemComponents", 7, sysComps.length
         boolean checkedMemory = false
         boolean checkedStorageCapability = false
+        boolean checkedOperatingSystem = false
+        boolean checkedProcessorArchitecture = false
+        boolean checkedNativeLib = false
         for(SystemComponent sc : sysComps) {
             assertNotNull sc.attributes
-            if(sc.name.equals("Memory")) {
+            if(sc.name.equals("SystemMemory")) {
                 Map attrs = new HashMap()
-                attrs.put("Name", SystemWatchID.JVM_MEMORY)
+                attrs.put("Name", SystemWatchID.SYSTEM_MEMORY)
                 attrs.put("Available", "4g")
                 attrs.put("Capacity", "20g")
                 checkSystemComponent sc, attrs
@@ -170,9 +173,31 @@ class OpStringParserTest extends GroovyTestCase {
                 checkSystemComponent sc, attrs
                 checkedStorageCapability = true
             }
+            if(sc.className.equals("OperatingSystem")) {
+                Map attrs = new HashMap()
+                attrs.put("Name", "Mac OSX")
+                attrs.put("Version", "10.7*")
+                checkSystemComponent sc, attrs
+                checkedOperatingSystem = true
+            }
+            if(sc.name.equals("Processor")) {
+                Map attrs = new HashMap()
+                attrs.put("Available", "8")
+                checkSystemComponent sc, attrs
+                checkedProcessorArchitecture = true
+            }
+            if(sc.className.equals("NativeLibrarySupport")) {
+                Map attrs = new HashMap()
+                attrs.put("Name", "libbrlcad.19")
+                checkSystemComponent sc, attrs
+                checkedNativeLib = true
+            }
         }
         assertTrue checkedMemory
         assertTrue checkedStorageCapability
+        assertTrue checkedOperatingSystem
+        assertTrue checkedProcessorArchitecture
+        assertTrue checkedNativeLib
         
         /* Make sure we have no system requirements */
         slas = elems[3].getServiceLevelAgreements()
@@ -197,8 +222,8 @@ class OpStringParserTest extends GroovyTestCase {
         SystemRequirements sysReqs = slas.systemRequirements
         SystemComponent[] sysComps = sysReqs.getSystemComponents()
         assertEquals "There should be 1 SystemComponent", 1, sysComps.length
-        assertTrue "SystemComponent name should be \"SoftwareSupport\", not \"${sysComps[0].getName()}\"",
-                   sysComps[0].getName().equals("SoftwareSupport")
+        assertTrue "SystemComponent name should be \"SoftwareSupport\", not \"${sysComps[0].getClassName()}\"",
+                   sysComps[0].getClassName().equals("SoftwareSupport")
         Map attributes = sysComps[0].attributes
         String name = attributes.get("Name")
         assertTrue "Service \"$s\" \"SoftwareSupport\" Name should be \"name$s\" not \"$name\"", name.equals("name"+s)
@@ -252,7 +277,7 @@ class OpStringParserTest extends GroovyTestCase {
         SystemComponent[] sysComp = sysReqs.getSystemComponents()
         assertEquals "There should be one SystemComponent", 1, sysComp.length
         assertEquals "SystemComponent should be [SoftwareSupport]",
-                     "SoftwareSupport", sysComp[0].name
+                     "SoftwareSupport", sysComp[0].className
         def attrs = sysComp[0].attributes
         assertEquals "Value for Name should be [Spring DM]", "Spring DM", attrs.get("Name")
         assertEquals "Value for Version should be [1.0.0]", "1.0.0", attrs.get("Version")
@@ -710,7 +735,7 @@ class OpStringParserTest extends GroovyTestCase {
 
         assertEquals 1, service.serviceLevelAgreements.systemRequirements.getSystemComponents().size()
         def SystemComponent systemComponent = service.serviceLevelAgreements.systemRequirements.getSystemComponents()[0]
-        assertEquals 'SoftwareSupport', systemComponent.name
+        assertEquals 'SoftwareSupport', systemComponent.className
         assertEquals 2, systemComponent.attributes.size()
         assertEquals 'Spring', systemComponent.attributes.Name
         assertEquals '2.5', systemComponent.attributes.Version

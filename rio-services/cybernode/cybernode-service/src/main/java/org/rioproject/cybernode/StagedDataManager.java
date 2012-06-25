@@ -15,12 +15,9 @@
  */
 package org.rioproject.cybernode;
 
+import org.rioproject.core.provision.*;
 import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.core.provision.SystemRequirements;
-import org.rioproject.core.provision.DownloadRecord;
-import org.rioproject.core.provision.StagedSoftware;
-import org.rioproject.core.provision.StagedData;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.OperatingSystemType;
 import org.rioproject.system.capability.PlatformCapability;
@@ -175,12 +172,12 @@ public class StagedDataManager {
             throw new IllegalStateException("ServiceElement has not been set");
         /* If there are provisionable capabilities, or data staging, perform
          * the stagedData/installation */
-        Collection<SystemRequirements.SystemComponent> installableComponents =
+        Collection<SystemComponent> installableComponents =
             sElem.getProvisionablePlatformCapabilities();
         install(installableComponents);
 
         /* Verify missing components. If there are any, go get them */
-        Collection<SystemRequirements.SystemComponent> missing = verifyPlatformCapabilities();
+        Collection<SystemComponent> missing = verifyPlatformCapabilities();
         if(!missing.isEmpty()) {
             install(missing);
             logger.info("Missing requirements have been provisioned");
@@ -225,17 +222,16 @@ public class StagedDataManager {
     /**
      * Verify that required platform capabilities are present
      *
-     * @return A collection of SystemRequirements.SystemComponent components
-     * that are not found. If there are no missing components, return an empty
-     * collection
+     * @return A collection of {@code SystemComponent}s that are not found.
+     * If there are no missing requirements, return an empty collection
      */
-    public Collection<SystemRequirements.SystemComponent> verifyPlatformCapabilities() {
+    public Collection<SystemComponent> verifyPlatformCapabilities() {
         if(sElem==null)
             throw new IllegalStateException("ServiceElement has not been set");
         PlatformCapability[] platformCapabilities = computeResource.getPlatformCapabilities();
-        SystemRequirements.SystemComponent[] jsbRequirements =
+        SystemComponent[] jsbRequirements =
             sElem.getServiceLevelAgreements().getSystemRequirements().getSystemComponents();
-        ArrayList<SystemRequirements.SystemComponent> missing = new ArrayList<SystemRequirements.SystemComponent>();
+        ArrayList<SystemComponent> missing = new ArrayList<SystemComponent>();
 
         /*
          * If there are no PlatformCapability requirements we can return
@@ -246,7 +242,7 @@ public class StagedDataManager {
         /*
          * Check each of our PlatformCapability objects for supportability
          */
-        for (SystemRequirements.SystemComponent jsbRequirement : jsbRequirements) {
+        for (SystemComponent jsbRequirement : jsbRequirements) {
             boolean supported = false;
             /*
              * Iterate through all resource PlatformCapability objects and see
@@ -297,9 +293,9 @@ public class StagedDataManager {
     /*
      * Install Platform capabilities
      */
-    private void install(Collection<SystemRequirements.SystemComponent> toInstall)
+    private void install(Collection<SystemComponent> toInstall)
         throws IllegalAccessException, InstantiationException,ClassNotFoundException {
-        for (SystemRequirements.SystemComponent sysComp : toInstall) {
+        for (SystemComponent sysComp : toInstall) {
             String className = sysComp.getClassName();
             if (className == null) {
                 Map<String, String> pCapMap =
@@ -307,7 +303,6 @@ public class StagedDataManager {
                 className = pCapMap.get(sysComp.getName());
             }
             PlatformCapability pCap = JSBContext.createPlatformCapability(className,
-                                                                          sysComp.getClasspath(),
                                                                           sysComp.getAttributes());
             installedPlatformCapabilities.add(pCap);
             StagedSoftware[] staged = sysComp.getStagedSoftware();

@@ -19,7 +19,7 @@ import java.lang.reflect.Method
 import org.rioproject.associations.AssociationDescriptor
 
 import org.rioproject.core.provision.SystemRequirements
-import org.rioproject.core.provision.SystemRequirements.SystemComponent
+import org.rioproject.core.provision.SystemComponent
 import org.rioproject.exec.ExecDescriptor
 import org.rioproject.exec.ServiceExecutor
 import org.rioproject.opstring.OpStringLoader.XMLErrorHandler

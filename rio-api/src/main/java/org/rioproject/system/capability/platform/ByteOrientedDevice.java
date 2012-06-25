@@ -15,7 +15,7 @@
  */
 package org.rioproject.system.capability.platform;
 
-import org.rioproject.core.provision.SystemRequirements.SystemComponent;
+import org.rioproject.core.provision.SystemComponent;
 import org.rioproject.system.capability.PlatformCapability;
 
 import java.util.Map;
@@ -26,6 +26,7 @@ import java.util.Map;
  * @author Dennis Reedy
  */
 public class ByteOrientedDevice extends PlatformCapability {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Available resource units (in bytes) */
     public final static String AVAILABLE = "Available";
@@ -48,9 +49,10 @@ public class ByteOrientedDevice extends PlatformCapability {
     public void define(String key, Object value) {
         if(key == null || value == null)
             return;
+
         if(key.equals(CAPACITY)) {
             try {
-                Double dCap = new Double((String)value);
+                Double dCap = makeDouble(value);
                 capabilities.put(CAPACITY, dCap);
             } catch(NumberFormatException e) {
                 System.out.println("Bad value for Capacity");
@@ -58,7 +60,7 @@ public class ByteOrientedDevice extends PlatformCapability {
             }
         } else if(key.equals(AVAILABLE)) {
             try {
-                Double dAvail = new Double((String)value);
+                Double dAvail = makeDouble(value);
                 capabilities.put(AVAILABLE, dAvail);
             } catch(NumberFormatException e) {
                 System.out.println("Bad value for Available");
@@ -85,20 +87,19 @@ public class ByteOrientedDevice extends PlatformCapability {
             Map<String, Object> attributes = requirement.getAttributes();
             for (Map.Entry<String, Object> entry : attributes.entrySet()) {
                 String key = entry.getKey();
-                String value = (String) entry.getValue();
-                if (value == null)
+                if (entry.getValue() == null)
                     continue;
                 if (key.equals(CAPACITY)) {
                     Double dCap = (Double) getValue(CAPACITY);
                     if (dCap != null) {
-                        supports = evaluate(value, dCap);
+                        supports = evaluate(entry.getValue(), dCap);
                     }
                     break;
                 }
                 if (key.equals(AVAILABLE)) {
                     Double dAvail = (Double) getValue(AVAILABLE);
                     if (dAvail != null) {
-                        supports = evaluate(value, dAvail);
+                        supports = evaluate(entry.getValue(), dAvail);
                     }
                     break;
                 }
@@ -110,6 +111,25 @@ public class ByteOrientedDevice extends PlatformCapability {
 
     /**
      * Evaluate the input against a measures amount. Based on the
+     *
+     * @param input The value of either the CAPACITY or the AVAILABLE key.
+     * @param val The measured value, either the total or the available property
+     *
+     * @return True if the amount requested can be supported, or false if not
+     */
+    protected boolean evaluate(Object input, double val) {
+        if(input instanceof String) {
+            return (evaluate((String)input, val));
+        }
+        if(input instanceof Double) {
+            Double requestedSize = (Double)input;
+            return (requestedSize < val);
+        }
+        return false;
+    }
+
+    /**
+     * Evaluate the input against a measures amount.
      *
      * @param input The value of either the CAPACITY or the AVAILABLE key. Must
      * end in 'm' or 'M' for megabytes, 'k' or 'K' for kilobytes, 'g' or 'G'
@@ -143,5 +163,36 @@ public class ByteOrientedDevice extends PlatformCapability {
             }
         }
         return (supports);
+    }
+
+    Double makeDouble(Object input) {
+        if(input instanceof String) {
+            return makeDouble((String)input);
+        }
+        return (Double)input;
+    }
+
+    Double makeDouble(String input) {
+        Double d;
+        if(input.endsWith("k") || input.endsWith("K")) {
+            String s = input.substring(0, input.length()-1);
+            Double base = Double.parseDouble(s);
+            d = base * KB;
+        } else if(input.endsWith("m") || input.endsWith("M")) {
+            String s = input.substring(0, input.length()-1);
+            Double base = Double.parseDouble(s);
+            d = base * MB;
+        } else if(input.endsWith("g") || input.endsWith("G")) {
+            String s = input.substring(0, input.length()-1);
+            Double base = Double.parseDouble(s);
+            d = base * GB;
+        } else if(input.endsWith("t") || input.endsWith("T")) {
+            String s = input.substring(0, input.length()-1);
+            Double base = Double.parseDouble(s);
+            d = base * TB;
+        } else {
+            d = Double.parseDouble(input);
+        }
+        return d;
     }
 }

@@ -15,9 +15,9 @@
  */
 package org.rioproject.opstring;
 
+import org.rioproject.core.provision.SystemComponent;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.core.provision.StagedData;
-import org.rioproject.core.provision.SystemRequirements;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.sla.RuleMap;
@@ -71,8 +71,7 @@ public class ServiceElement implements Serializable {
     /** Array of ClassBundles containing the export codebase */
     private ClassBundle[] exportBundles = new ClassBundle[0];
     /** Collection of provisionable PlatformCapability objects  */
-    private final Collection<SystemRequirements.SystemComponent>
-        provisionableCapabilities = new ArrayList<SystemRequirements.SystemComponent>();
+    private final Collection<SystemComponent> provisionableCapabilities = new ArrayList<SystemComponent>();
     /** The ServiceLevelAgreements object defines system and service level 
      * objectives that are to be monitored, metered and acted on by policy 
      * handlers */
@@ -634,7 +633,7 @@ public class ServiceElement implements Serializable {
      * @param downloadableCapabilities The downloadableCapabilities
      */
     public void setProvisionablePlatformCapabilities(
-        Collection<SystemRequirements.SystemComponent> downloadableCapabilities) {
+        Collection<SystemComponent> downloadableCapabilities) {
         synchronized(provisionableCapabilities) {
             provisionableCapabilities.clear();
             provisionableCapabilities.addAll(downloadableCapabilities);
@@ -650,8 +649,8 @@ public class ServiceElement implements Serializable {
      * no provisionable SystemRequirement instances, this method returns an
      * empty Collection.
      */
-    public Collection<SystemRequirements.SystemComponent> getProvisionablePlatformCapabilities() {
-        Collection<SystemRequirements.SystemComponent> collection = new ArrayList<SystemRequirements.SystemComponent>();
+    public Collection<SystemComponent> getProvisionablePlatformCapabilities() {
+        Collection<SystemComponent> collection = new ArrayList<SystemComponent>();
         synchronized(provisionableCapabilities) {
             collection.addAll(provisionableCapabilities);
         }

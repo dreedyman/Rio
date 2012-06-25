@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 package org.rioproject.core.provision;
 
 import org.rioproject.watch.ThresholdValues;
-import org.rioproject.exec.ExecDescriptor;
 
 import java.io.Serializable;
 import java.util.*;
-import java.net.URL;
 
 /**
  * The SystemRequirements class provides context on the attributes required to
@@ -37,13 +35,11 @@ public class SystemRequirements implements Serializable {
     /**
      * Array of system  components
      */
-    private final List<SystemComponent> systemComponents =
-        new ArrayList<SystemComponent>();
+    private final List<SystemComponent> systemComponents = new ArrayList<SystemComponent>();
     /**
      * Array of system requirement SLAs
      */
-    private final Map<String, ThresholdValues> systemThresholds =
-        new HashMap<String, ThresholdValues>();
+    private final Map<String, ThresholdValues> systemThresholds = new HashMap<String, ThresholdValues>();
 
     /**
      * Add a system required ThresholdValue
@@ -53,7 +49,7 @@ public class SystemRequirements implements Serializable {
      * @param tVals ThresholdValues specifying operational criteria which must
      * be met in order for the service to be provisioned to a compute resource
      */
-    public void addSystemThreshold(String identifier, ThresholdValues tVals) {
+    public void addSystemThreshold(final String identifier, final ThresholdValues tVals) {
         if (identifier == null)
             throw new IllegalArgumentException("identifier is null");
         if (tVals == null)
@@ -91,7 +87,7 @@ public class SystemRequirements implements Serializable {
      *         there is no matching ThresholdValues object for the system
      *         identifier a null will be returned
      */
-    public ThresholdValues getSystemThresholdValue(String identifier) {
+    public ThresholdValues getSystemThresholdValue(final String identifier) {
         if (identifier == null)
             throw new IllegalArgumentException("identifier is null");
         ThresholdValues tVals;
@@ -108,8 +104,7 @@ public class SystemRequirements implements Serializable {
      *         no values return an empty map
      */
     public Map<String, ThresholdValues> getSystemThresholds() {
-        Map<String, ThresholdValues> map =
-            new HashMap<String, ThresholdValues>();
+        Map<String, ThresholdValues> map = new HashMap<String, ThresholdValues>();
         synchronized (systemThresholds) {
             map.putAll(systemThresholds);
         }
@@ -119,10 +114,9 @@ public class SystemRequirements implements Serializable {
     /**
      * Add a SystemComponent as a system requirement.
      *
-     * @param requirements SystemComponent representing a system component
-     * requirement
+     * @param requirements SystemComponent representing a system component requirement
      */
-    public void addSystemComponent(SystemComponent... requirements) {
+    public void addSystemComponent(final SystemComponent... requirements) {
         if (requirements == null)
             return;
         synchronized (systemComponents) {
@@ -162,163 +156,6 @@ public class SystemRequirements implements Serializable {
         }
         return (false);
     }
-
-    /**
-     * Simple data structure that holds details for a system component
-     */
-    public static class SystemComponent implements Serializable {
-        static final long serialVersionUID = 1L;
-        private String name;
-        private String className;
-        private Map<String, Object> attributes = new HashMap<String, Object>();
-        private final List<StagedSoftware> stagedSoftware =
-            new ArrayList<StagedSoftware>();
-        private ExecDescriptor execDescriptor;
-        private URL[] location;
-
-        /**
-         * Create a SystemComponent
-         *
-         * @param name A short name, typically the name of the class sans the
-         * package name. Must not be null
-         * @param attrs Collection of name value pairs to evaluate, optional
-         */
-        public SystemComponent(String name, Map<String, Object> attrs) {
-            this(name, null, attrs);
-        }
-
-        /**
-         * Create a SystemComponent
-         *
-         * @param name A short name, typically the name of the class sans the
-         * package name, if null, is derived from the className parameter. Must
-         * not be null if the classname parameter is null
-         * @param className The fully qualified classname, must not be null if
-         * the name parameter is null
-         * @param attrs Collection of name value pairs to evaluate, optional
-         */
-        public SystemComponent(String name,
-                               String className,
-                               Map<String, Object> attrs) {
-            if (name == null && className == null)
-                throw new IllegalArgumentException("name and className are null");
-            this.className = className;
-            if (name == null) {
-                int ndx = className.lastIndexOf(".");
-                if (ndx > 0)
-                    this.name = className.substring(ndx + 1);
-                else
-                    this.name = className;
-            } else {
-                this.name = name;
-            }
-            if (attrs != null)
-                attributes.putAll(attrs);
-        }
-
-        /**
-         * Get the className property
-         *
-         * @return the classname
-         */
-        public String getClassName() {
-            return (className);
-        }
-
-        /**
-         * Get the name property
-         *
-         * @return The name
-         */
-        public String getName() {
-            return (name);
-        }
-
-        /**
-         * Get the attribute Map. If there are no attributes an empty Map will
-         * be returned
-         *
-         * @return The attribute Map
-         */
-        public Map<String, Object> getAttributes() {
-            return (attributes);
-        }
-
-        /**
-         * Set the StagedSoftware for this system component
-         *
-         * @param staged Associated StagedSoftware
-         */
-        public void setStagedSoftware(StagedSoftware... staged) {
-            stagedSoftware.addAll(Arrays.asList(staged));
-        }
-
-        /**
-         * Get the StagedSoftware for this system component
-         *
-         * @return The associated StagedSoftware. If there is no
-         * StagedSoftware, return a zero-length array
-         */
-        public StagedSoftware[] getStagedSoftware() {
-            return (stagedSoftware.toArray(
-                new StagedSoftware[stagedSoftware.size()]));
-        }
-
-        /**
-         * Set the classpath URLs to load this capability
-         *
-         * @param urls An array of URLs
-         */
-        public void setClasspath(URL[] urls) {
-            if (urls != null) {
-                location = new URL[urls.length];
-                System.arraycopy(urls, 0, location, 0, location.length);
-            }
-        }
-
-        /**
-         * Get the classpath URLs to load this capability
-         *
-         * @return The classpath URLs to load the capability
-         */
-        public URL[] getClasspath() {
-            if (location == null)
-                location = new URL[0];
-            return (location);
-        }
-
-        /**
-         * Get the ExecDescriptor
-         *
-         * @return The ExecDescriptor
-         */
-        public ExecDescriptor getExecDescriptor() {
-            return execDescriptor;
-        }
-
-        /**
-         * Set the ExecDescriptor
-         *
-         * @param execDescriptor The ExecDescriptor
-         */
-        public void setExecDescriptor(ExecDescriptor execDescriptor) {
-            this.execDescriptor = execDescriptor;
-        }
-
-        /**
-         * Provide a String representation
-         */
-        public String toString() {
-            StringBuffer buff = new StringBuffer();
-            buff.append("Name=").append(name == null ? "<null>" : name).append(
-                ", ");
-            buff.append("ClassName=").append(
-                className == null ? "<null>" : className).append(", ");
-            buff.append("Attributes=").append(attributes.toString());
-            return (buff.toString());
-        }
-    }
-
 
     public String toString() {
         return "SystemRequirements{" +

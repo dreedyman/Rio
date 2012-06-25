@@ -25,8 +25,8 @@ import net.jini.discovery.DiscoveryGroupManagement;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.core.provision.SystemComponent;
 import org.rioproject.opstring.*;
-import org.rioproject.core.provision.SystemRequirements;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.sla.SLA;
@@ -554,15 +554,14 @@ public final class ServiceElementUtil {
     public static PlatformCapability[] getMatchedPlatformCapabilities(ServiceElement sElem,
                                                                       PlatformCapability[] pCaps) {
         ServiceLevelAgreements slas = sElem.getServiceLevelAgreements();
-        SystemRequirements.SystemComponent[] requirements =
-            slas.getSystemRequirements().getSystemComponents();
+        SystemComponent[] requirements = slas.getSystemRequirements().getSystemComponents();
         List<PlatformCapability> list = new ArrayList<PlatformCapability>();
         if(requirements.length >= 0) {
             /*
              * Iterate through all resource PlatformCapability objects to
              * determine which ones support our declared requirements
              */
-            for (SystemRequirements.SystemComponent requirement : requirements) {
+            for (SystemComponent requirement : requirements) {
                 for (PlatformCapability pCap : pCaps) {
                     if (pCap.supports(requirement)) {
                         list.add(pCap);

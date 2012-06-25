@@ -23,6 +23,7 @@ package org.rioproject.system.capability.software;
  * @author Dennis Reedy
  */
 public class NativeLibrarySupport extends SoftwareSupport {
+    @SuppressWarnings("unused")
 	static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "Native Library Support";
     /** 
@@ -34,7 +35,7 @@ public class NativeLibrarySupport extends SoftwareSupport {
      * Create a NativeLibrarySupport
      */
     public NativeLibrarySupport() {
-        this.description = DEFAULT_DESCRIPTION;
+        this(DEFAULT_DESCRIPTION);
     }
 
     /** 

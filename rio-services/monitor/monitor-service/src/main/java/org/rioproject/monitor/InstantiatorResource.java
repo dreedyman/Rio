@@ -22,7 +22,7 @@ import org.rioproject.deploy.*;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.provision.*;
-import org.rioproject.core.provision.SystemRequirements.SystemComponent;
+import org.rioproject.core.provision.SystemComponent;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.MeasuredResource;

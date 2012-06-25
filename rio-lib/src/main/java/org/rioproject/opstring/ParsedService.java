@@ -22,7 +22,7 @@ import org.rioproject.opstring.ServiceElement.MachineBoundary;
 import org.rioproject.opstring.ServiceElement.ProvisionType;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.core.provision.StagedData;
-import org.rioproject.core.provision.SystemRequirements.SystemComponent;
+import org.rioproject.core.provision.SystemComponent;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.resources.servicecore.Service;
@@ -315,12 +315,6 @@ public class ParsedService extends GlobalAttrs{
      * @return ClassBundle for the component
      */
     public ClassBundle getComponentBundle() {
-        /*
-        if(componentBundle!=null) {
-            if(componentBundle.getCodebase()==null)
-                componentBundle.setCodebase(getCodebase());
-        }
-        */
         return (componentBundle);
     }
 
