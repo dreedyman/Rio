@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * Utility for accessing configuration arguments
+ * Utility for accessing configuration arguments.
  *
  * @author Dennis Reedy
  */
@@ -69,10 +69,8 @@ public class ConfigHelper {
      * configuration argument
      * </ul>
      *
-     * @throws IllegalArgumentException if the args parameter is null or of zero
-     *                                  length
-     * @throws IOException              if there are errors accessing the file
-     *                                  system
+     * @throws IllegalArgumentException if the args parameter is null or of zero length
+     * @throws IOException if there are errors accessing the file system
      */
     public static String[] getConfigArgs(final String... args) throws IOException {
         return getConfigArgs(args, Thread.currentThread().getContextClassLoader());
@@ -82,8 +80,7 @@ public class ConfigHelper {
      * Get configuration arguments to create a
      * {@link net.jini.config.Configuration} object
      *
-     * @param args Arguments to be used by a
-     * {@link net.jini.config.ConfigurationProvider}
+     * @param args Arguments to be used by a {@link net.jini.config.ConfigurationProvider}
      * to create a {@link net.jini.config.Configuration}
      * @param cl The ClassLoader to use if resources need to be loaded.
      *
@@ -114,7 +111,7 @@ public class ConfigHelper {
      * </ul>
      *
      * @throws IllegalArgumentException if the args parameter is null or of zero length, or if the ClassLoader is {@code null}
-     * @throws IOException              if there are errors accessing the file system
+     * @throws IOException if there are errors accessing the file system
      */
     public static String[] getConfigArgs(final String[] args, final ClassLoader cl) throws IOException {
         if (args == null)
