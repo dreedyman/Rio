@@ -369,8 +369,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
             }
 
             emc.memory = { Map attributes ->
-                builder.SystemComponent(Name: "Memory") {
-                    Attribute(Name: 'Name', Value: SystemWatchID.JVM_MEMORY)
+                builder.SystemComponent(Name: "SystemMemory") {
+                    Attribute(Name: 'Name', Value: SystemWatchID.SYSTEM_MEMORY)
                     if(attributes.available)
                         Attribute(Name: 'Available', Value: attributes.available)
                     if(attributes.capacity)
@@ -385,6 +385,19 @@ class GroovyDSLOpStringParser implements OpStringParser {
                         Attribute(Name: 'Available', Value: attributes.available)
                     if(attributes.capacity)
                         Attribute(Name: 'Capacity', Value: attributes.capacity)
+                }
+            }
+
+            emc.operatingSystem = { Map attributes ->
+                builder.SystemComponent(ClassName: "OperatingSystem") {
+                    Attribute(Name: 'Name', Value: attributes.name)
+                    Attribute(Name: 'Version', Value: attributes.version)
+                }
+            }
+
+            emc.processor = { Map attributes ->
+                builder.SystemComponent(Name: "Processor") {
+                    Attribute(Name: 'Available', Value: attributes.available)
                 }
             }
 
@@ -717,10 +730,6 @@ class GroovyDSLOpStringParser implements OpStringParser {
         // do nothing by default -- this is here so that subclasses can add additional behaviour!
     }
 
-    Map<String, List<OpString>> getNestedTable() {
-        return nestedTable
-    }
-
     private generateSystemRequirements(MarkupBuilder builder, Map attributes, def parent) {
         def componentClass = attributes.type == null ? SoftwareSupport.class.simpleName : attributes.type
         if (!parent) {
@@ -744,6 +753,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
         builder.SystemComponent(ClassName: componentClass) {
             for(Map.Entry<String, String> entry : attributes.entrySet()) {
                 def key = entry.key.substring(0,1).toUpperCase() + entry.key.substring(1);
+                if(key.equals("Type"))
+                    continue
                 def value = entry.value
                 Attribute(Name: key, Value: value)
             }

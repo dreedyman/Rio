@@ -1,6 +1,3 @@
-import java.util.logging.ConsoleHandler
-import java.util.logging.Level
-
 /*
 * Copyright to the original author or authors.
 *
@@ -34,6 +31,12 @@ deployment(name: 'systemRequirements declarations', debug:true) {
         
         software name: 'name3', version: '3.0', manufacturer: 'Acme', comment: 'Wily E Coyote'
         software name: 'name3.1', version: '3.1'
+
+        operatingSystem name:'Mac OSX', version:'10.7*'
+
+        processor available: 8
+
+        platformRequirement type: "NativeLibrarySupport", name: 'libbrlcad.19'
     }
 
     ['1', '2', '3', '4'].each {s ->
