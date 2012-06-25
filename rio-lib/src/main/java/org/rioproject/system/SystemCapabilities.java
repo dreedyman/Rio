@@ -23,6 +23,13 @@ import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.resources.util.FileUtils;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
+import org.rioproject.system.capability.connectivity.TCPConnectivity;
+import org.rioproject.system.capability.platform.OperatingSystem;
+import org.rioproject.system.capability.platform.ProcessorArchitecture;
+import org.rioproject.system.capability.platform.StorageCapability;
+import org.rioproject.system.capability.software.J2SESupport;
+import org.rioproject.system.capability.software.NativeLibrarySupport;
+import org.rioproject.system.capability.software.RioSupport;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.SigarHelper;
 import org.rioproject.system.measurable.cpu.CPU;
@@ -48,15 +55,15 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     public static final String COMPONENT = "org.rioproject.system";
     public static final String CAPABILITY = COMPONENT+".capability";
     public static final String NATIVE_LIBS = COMPONENT+".native";
-    public static final String PROCESSOR = CAPABILITY+".platform.ProcessorArchitecture";
-    public static final String OPSYS = CAPABILITY+".platform.OperatingSystem";
-    public static final String TCPIP = CAPABILITY+".connectivity.TCPConnectivity";
-    public static final String J2SE = CAPABILITY+".software.J2SESupport";
-    public static final String MEMORY = CAPABILITY+".platform.Memory";
-    public static final String SYSTEM_MEMORY = CAPABILITY+".platform.SystemMemory";
-    public static final String STORAGE = CAPABILITY+".platform.StorageCapability";
-    public static final String NATIVE_LIB_CLASS = CAPABILITY+".software.NativeLibrarySupport";
-    public static final String RIO = CAPABILITY+".software.RioSupport";
+    public static final String PROCESSOR = ProcessorArchitecture.class.getName();
+    public static final String OPSYS = OperatingSystem.class.getName();
+    public static final String TCPIP = TCPConnectivity.class.getName();
+    public static final String J2SE = J2SESupport.class.getName();
+    public static final String MEMORY = org.rioproject.system.capability.platform.Memory.class.getName();
+    public static final String SYSTEM_MEMORY = org.rioproject.system.capability.platform.SystemMemory.class.getName();
+    public static final String STORAGE = StorageCapability.class.getName();
+    public static final String NATIVE_LIB_CLASS = NativeLibrarySupport.class.getName();
+    public static final String RIO = RioSupport.class.getName();
     static Logger logger = Logger.getLogger(COMPONENT);
     private String platformConfigDir;
     
@@ -216,14 +223,15 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             /* 
              * Load default platform (qualitative) capabilities
              */
-            PlatformCapability processor = getPlatformCapability(PROCESSOR);
-            processor.define("Architecture", System.getProperty("os.arch"));
-            processor.define("Available", Integer.toString(Runtime.getRuntime().availableProcessors()));
+            ProcessorArchitecture processor = new ProcessorArchitecture();
+            processor.define(ProcessorArchitecture.ARCHITECTURE, System.getProperty("os.arch"));
+            processor.define(ProcessorArchitecture.AVAILABLE, Integer.toString(Runtime.getRuntime()
+                                                                                   .availableProcessors()));
             platforms.add(processor);
 
-            PlatformCapability operatingSystem = getPlatformCapability(OPSYS);
-            operatingSystem.define("Name", System.getProperty("os.name"));
-            operatingSystem.define("Version", System.getProperty("os.version"));
+            PlatformCapability operatingSystem = new OperatingSystem();
+            operatingSystem.define(PlatformCapability.NAME, System.getProperty("os.name"));
+            operatingSystem.define(PlatformCapability.VERSION, System.getProperty("os.version"));
             platforms.add(operatingSystem);
 
             PlatformCapability tcpIP = getPlatformCapability(TCPIP);
@@ -231,9 +239,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
 
             String jvmName = System.getProperty("java.vm.name");
             if(jvmName!=null) {            
-                PlatformCapability j2se = getPlatformCapability(J2SE);                
-                j2se.define(PlatformCapability.VERSION, 
-                            System.getProperty("java.version"));
+                PlatformCapability j2se = new J2SESupport();
+                j2se.define(PlatformCapability.VERSION, System.getProperty("java.version"));
                 j2se.define(PlatformCapability.DESCRIPTION, jvmName);
                 j2se.define(PlatformCapability.NAME, "Java");
                 String javaHome = System.getProperty("java.home");
@@ -357,10 +364,10 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                             /*if (!OperatingSystemType.isWindows()) {
                                 name = fileName.substring(3, index);
                             } else {*/
-                                name = fileName.substring(0, index);
+                            name = fileName.substring(0, index);
                             //}
-                            nLib.define("Name", name);
-                            nLib.define("FileName", fileName);
+                            nLib.define(NativeLibrarySupport.NAME, name);
+                            nLib.define(NativeLibrarySupport.FILENAME, fileName);
                             nLib.setPath(dir.getCanonicalPath());
                             platforms.add(nLib);
                         } else {
@@ -494,16 +501,13 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             Map<String, Object> attrs = new HashMap<String, Object>();
             attrs.put(PlatformCapability.NAME, caps[i].getName());
             if(caps[i].getDescription()!=null)
-                attrs.put(PlatformCapability.DESCRIPTION,
-                          caps[i].getDescription());
+                attrs.put(PlatformCapability.DESCRIPTION, caps[i].getDescription());
             if(caps[i].getManufacturer()!=null)
-                attrs.put(PlatformCapability.MANUFACTURER,
-                          caps[i].getManufacturer());
+                attrs.put(PlatformCapability.MANUFACTURER, caps[i].getManufacturer());
             if(caps[i].getVersion()!=null)
                 attrs.put(PlatformCapability.VERSION, caps[i].getVersion());
             if(caps[i].getNativeLib()!=null)
-                attrs.put(PlatformCapability.NATIVE_LIBS,
-                          caps[i].getNativeLib());
+                attrs.put(PlatformCapability.NATIVE_LIBS, caps[i].getNativeLib());
             PlatformCapability pCap = (PlatformCapability)Class.forName(caps[i].getPlatformClass()).newInstance();
             pCap.defineAll(attrs);
             if(caps[i].getClasspath()!=null)
@@ -511,9 +515,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             if(caps[i].getPath()!=null)
                 pCap.setPath(caps[i].getPath());
             if(caps[i].geCostModelClass()!=null) {
-                ResourceCostModel costModel =
-                    (ResourceCostModel)Class.forName(
-                        caps[i].geCostModelClass()).newInstance();
+                ResourceCostModel costModel = (ResourceCostModel)Class.forName(caps[i].geCostModelClass()).newInstance();
                 pCap.setResourceCostModel(costModel);
             }
             PlatformCapabilityLoader.getLoadableClassPath(pCap);
