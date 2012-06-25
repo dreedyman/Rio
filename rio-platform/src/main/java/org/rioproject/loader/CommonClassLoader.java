@@ -19,8 +19,6 @@ import org.rioproject.logging.WrappedLogger;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -33,52 +31,12 @@ import java.util.logging.Level;
  * JARs that are added to the CommonClassLoader, making the classes accessible by 
  * all ClassLoader instances which delegate to the CommonClassLoader. In this 
  * fashion a platform can be declared, initialized and made available.
- * 
- * <p>The ClassLoader hierarchy when starting a Rio service is as follows :
- * <br>
-<table cellpadding="2" cellspacing="2" border="0"
- style="text-align: left; width: 50%;">
-  <tbody>
-    <tr>
-      <td style="vertical-align: top;">
-        <pre>
-                  AppCL
-                    |
-            CommonClassLoader (http:// URLs of common JARs)
-                   |
-            +-------+-------+----...---+
-            |               |          |
-        Service-1CL   Service-2CL  Service-nCL
-        </pre>
-      </td>
-    </tr>
-  </tbody>
-</table>
- <span style="font-weight: bold;">AppCL</span> - Contains the main()
-class of the container. Main-Class in
-manifest points to <span style="font-family: monospace;">com.sun.jini.start.ServiceStarter</span><br>
-Classpath:&nbsp; rio-start.jar, start.jar, jsk-platform.jar<br>
-Codebase: none<br>
-<br>
-<span style="font-weight: bold;">CommonClassLoader</span> - Contains
-the common Rio and
-Jini technology classes (and other declared common platform JARs) to be
-made available to its children.<br>
-Classpath: Common JARs such as rio-lib.jar<br>
-Codebase: Context dependent. The codebase returned is the codebase of
-the specific child CL that is the current context of the request.<br>
-<br>
-<span style="font-weight: bold;">Service-nCL</span> - Contains the
-service specific implementation classes.<br>
-Classpath: serviceImpl.jar<br>
-Codebase: "serviceX-dl.jar rio-api.jar jsk-lib-dl.jar"<br>
-
+ *
  @author Dennis Reedy
  */
 public final class CommonClassLoader extends URLClassLoader {
     private static final String COMPONENT = "org.rioproject.loader";
     private static WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
-    private static final Map<String, URL[]> components = new HashMap<String, URL[]>();
     private static CommonClassLoader instance;
 
 	/**
@@ -147,33 +105,6 @@ public final class CommonClassLoader extends URLClassLoader {
     }
 
     /**
-     * Test whether a named component (Class) exists.
-     *
-     * @param name The component name
-     * @return true If the requested component can be located, false
-     * otherwise.
-     */
-	public boolean testComponentExistence(final String name) {
-		boolean exists = false;
-		/* First check if the class is registered in the component Map */
-		synchronized(components) {
-			if(components.containsKey(name))
-				exists = true;
-		}		
-		if(!exists) {					
-			/* Although not registered, it may be in our search path, 
-			 * so try and load the class */
-			try {
-				loadClass(name);
-				exists = true;
-            } catch(Throwable t) {
-                logger.finest("Failed to find class %s", name);
-            }
-		}        
-		return(exists);
-	}
-    
-    /**
      * Add common JARs
      * 
      * @param jars Array of URLs
@@ -187,69 +118,6 @@ public final class CommonClassLoader extends URLClassLoader {
         }
     }
 
-	/**
-     * Registers a class name, and the code source which is used as the search
-     * path to load the class.
-     *
-     * @param name The name of the class
-     * @param urls Codebase for the class identified by the name parameter
-     */
-	public void addComponent(final String name, final URL[] urls) {
-		boolean added = false;
-		boolean toAdd = false;
-        boolean toReplace = false;
-		synchronized (components) {
-			if(components.containsKey(name)) {
-			    /* Check if codebase matches */
-                URL[] fetched = components.get(name);
-                if(fetched.length==urls.length) {                    
-                    for(int i=0; i<fetched.length; i++) {
-                        /* There is a difference, replace */
-                        if(!fetched[i].equals(urls[i])) {
-                            toReplace = true;
-                            break;
-                        }
-                    }
-                } else {
-                    /* Since the codebase is different, replace the entry */
-                    toReplace = true;
-                }
-				
-			} else {
-                /* Not found, add the entry */
-                toAdd = true;
-			}
-            
-			if(toAdd || toReplace) {
-                added = true;
-                if(logger.isLoggable(Level.FINEST)) {
-                    String action = (toAdd?"Adding":"Replacing");
-                    logger.finest(action+" %s Component %s ", action, name);
-                }
-                components.put(name, urls);
-            } else {
-                if(logger.isLoggable(Level.FINEST)) {
-                    StringBuilder buffer = new StringBuilder();
-                    URL[] codebase = components.get(name);
-                    for(int i=0; i<codebase.length; i++) {
-                        if(i>0)
-                            buffer.append(":");
-                        buffer.append(codebase[i].toExternalForm());
-                    }
-                    logger.finest("Component %s has already been registered with a codebase of %s",
-                                  name, buffer.toString());
-                }
-            }
-		}
-		if(added) {
-            for (URL url : urls) {
-                if (!hasURL(url)) {
-                    addURL(url);
-                }
-            }
-		}        
-	}
-    
     /*
      * Check if the URL already is registered
      */
