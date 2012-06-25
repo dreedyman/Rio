@@ -105,7 +105,7 @@ import java.util.logging.Logger;
 
 /**
  * The ServiceBeanAdapter implements the ServiceBean interface and provides the
- * necessary service infrastructure to make a service developer succesful.
+ * necessary service infrastructure to make a service developer successful.
  * Extend this class to take advantage of the Rio ServiceBean capabilities
  *
  * @author Dennis Reedy
@@ -142,8 +142,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     /** ServiceBean Remote Reference */
     private Remote serviceBeanRemoteRef;
     /**
-     * The proxy object for the service that will be registered into the lookup
-     * service
+     * The proxy object for the service that will be registered into the lookup service
      */
     protected Object proxy;
     /** The Exporter for the ServiceBean */
