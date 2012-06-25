@@ -194,6 +194,8 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             String[] args;
             try {
                 args = ConfigHelper.getConfigArgs(sElem.getServiceBeanConfig().getConfigArgs(), cCL);
+            } catch (IllegalArgumentException e) {
+                throw new ConfigurationException("Creating configuration", e);
             } catch (IOException e) {
                 throw new ConfigurationException("Creating configuration", e);
             }
@@ -204,7 +206,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                         sb.append("\n");
                     sb.append("\t").append(s);
                 }
-                logger.finer("===> CONFIG ARGS: \n"+sb);
+                logger.finer("CONFIG ARGS: \n"+sb);
             }
             if(sharedConfig!=null) {
                 serviceBeanConfig =  new AggregateConfig(sharedConfig, args, cCL);
@@ -498,54 +500,24 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     }
 
     /**
-     * @see org.rioproject.core.jsb.ComputeResourceManager#addPlatformCapability
-     */
-    public PlatformCapability addPlatformCapability(String className,
-                                                    URL location,
-                                                    Map<String, Object> mapping) {
-        if(className == null)
-            throw new IllegalArgumentException("className is null");
-        PlatformCapability pCap = null;
-        try {
-            pCap = createPlatformCapability(className,
-                                            (location==null?null:new URL[] {location}),
-                                            mapping);
-            computeResource.addPlatformCapability(pCap);
-            platformList.add(pCap);
-        } catch(Throwable t) {
-            Throwable cause = t;
-            if(t.getCause()!=null)
-                cause = t.getCause();
-            logger.log(Level.WARNING, "Adding PlatformCapability", cause);
-        }
-        return (pCap);
-    }
-    
-    /**
      * Create a PlatformCapability
-     * 
+     *
      * @param className The fully qualified classname to instantiate, must not be null
-     * @param classPath Array of <code>URL</code> locations defining the classpath to
-     * load the PlatformCapability. The common classloader will be checked first to 
-     * determine if the class can be loaded, if it cannot, and the classpath parameter 
-     * contains URL values, the classPath location(s) will be added to the common
-     * classloader
-     * @param mapping If not null, the attributes will be set to the instantiated 
+     * @param mapping If not null, the attributes will be set to the instantiated
      * PlatformCapability
-     * 
+     *
      * @return A PlatformCapability object with attributes applied
-     * 
+     *
      * @throws ClassNotFoundException If the platform capability class cannot
      * be found
      * @throws IllegalAccessException If there is a security exception
      * @throws InstantiationException If the class cannot be created
      */
     public static PlatformCapability createPlatformCapability(String className,
-                                                              URL[] classPath,
-                                                              Map<String, Object> mapping) 
+                                                              Map<String, Object> mapping)
     throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if(className == null)
-            throw new IllegalArgumentException("className is null");        
+            throw new IllegalArgumentException("className is null");
         PlatformCapability pCap;
         if(className.equals(SoftwareSupport.class.getSimpleName())) {
             pCap = new SoftwareSupport();
@@ -553,34 +525,12 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             pCap = new SoftwareSupport();
         } else {
             CommonClassLoader cl = CommonClassLoader.getInstance();
-            if(!cl.testComponentExistence(className)) {
-                if(classPath!=null && classPath.length!=0) {
-                    cl.addComponent(className, classPath);
-                } else {
-                    throw new IllegalArgumentException("Cannot load PlatformCapability "+
-                                                       "{"+className+"}, invalid classPath");
-                }
-            }
             Class clazz = cl.loadClass(className);
             pCap = (PlatformCapability)clazz.newInstance();
         }
         if(mapping!=null)
-            pCap.defineAll(mapping);            
+            pCap.defineAll(mapping);
         return (pCap);
-    }
-
-    /**
-     * @see org.rioproject.core.jsb.ComputeResourceManager#removePlatformCapability
-     */
-    public boolean removePlatformCapability(PlatformCapability pCap) {
-        if(pCap == null)
-            throw new IllegalArgumentException("pCap is null");
-        boolean removed = false;
-        if(platformList.contains(pCap)) {
-            removed = computeResource.removePlatformCapability(pCap, true);
-            platformList.remove(pCap);
-        }
-        return (removed);
     }
 
     /**

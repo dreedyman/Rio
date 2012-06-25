@@ -20,12 +20,9 @@ import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.ComputeResource;
 
-import java.net.URL;
-import java.util.Map;
-
 /**
  * The ComputeResourceManager provides the capabilities to access, set and
- * obtain information on ComputeResource mechanisms
+ * obtain information on {@link ComputeResource} mechanisms
  *
  * @author Dennis Reedy
  */
@@ -60,36 +57,7 @@ public interface ComputeResourceManager {
     PlatformCapability[] getMatchedPlatformCapabilities();
 
     /**
-     * Add a PlatformCapability. A PlatformCapability will be added to the
-     * ComputeResource object for the duration of the ServiceBean's lifetime
-     * 
-     * @param className The class name of the PlatformCapability. This name
-     * must be suitable for Class.forName use
-     * @param location An URL indicating where to load the PlatformCapability
-     * from. If this parmater is null, the PlatformCapability will be loaded
-     * from platform-capabilities.jar
-     * @param mapping The Map of name,value pairs the PlatformCapability will
-     * set
-     *
-     * @return The added PlatformCapability, or null if the PlatformCapability
-     * could not be created or added
-     */
-    PlatformCapability addPlatformCapability(String className,
-                                             URL location,
-                                             Map<String, Object> mapping);
-
-    /**
-     * Remove a PlatformCapability that was added by the
-     * ServiceBean. Only PlatformCapability instances that were added by the
-     * ServiceBean may be removed using this method
-     * 
-     * @param pCap The PlatformCapability to remove
-     * @return True if removed
-     */
-    boolean removePlatformCapability(PlatformCapability pCap);
-
-    /**
-     * Get the MeasurableCapability instances that match declared SLAs. 
+     * Get the MeasurableCapability instances that match declared SLAs.
      * 
      * @return An array of MeasurableCapability
      * instances that match declared operational requirements. If there are no
