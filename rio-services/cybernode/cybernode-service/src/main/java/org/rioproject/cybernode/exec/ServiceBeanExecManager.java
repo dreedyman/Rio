@@ -210,7 +210,8 @@ public class ServiceBeanExecManager {
         } catch (Exception e) {
             unregister(regPort, serviceBindName);
             logger.info("Terminate process for ServiceBean [%s]", serviceBindName);
-            manager.destroy(true);
+            if(manager!=null)
+                manager.destroy(true);
             throw e;
         }
         return instance;
