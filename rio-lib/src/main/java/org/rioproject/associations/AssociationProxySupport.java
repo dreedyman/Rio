@@ -19,6 +19,7 @@ import net.jini.core.discovery.LookupLocator;
 import org.rioproject.resources.util.ThrowableUtil;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -203,6 +204,8 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                         }
                     }
                 } else {
+                    if(t instanceof InvocationTargetException && t.getCause()!=null)
+                        t = t.getCause();
                     throw t;
                 }
             }
