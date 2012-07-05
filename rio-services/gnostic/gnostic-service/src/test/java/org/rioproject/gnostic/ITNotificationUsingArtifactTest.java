@@ -25,7 +25,6 @@ import org.rioproject.gnostic.test.TestService;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
-import sun.awt.windows.ThemeReader;
 
 import java.io.*;
 
