@@ -64,6 +64,7 @@ public class SLAWatchesRulesTest {
     public void setupDrools() {
         Properties props = new Properties();
         props.setProperty("drools.dialect.java.compiler", "JANINO");
+        props.setProperty("drools.dialect.java.compiler.lnglevel","1.6" );
         KnowledgeBuilderConfiguration config =
             KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(props);
 

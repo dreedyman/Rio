@@ -31,10 +31,7 @@ import org.drools.io.ResourceChangeScannerConfiguration;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -117,7 +114,12 @@ public class DroolsFactory {
         KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder(config);*/
         //KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder(config);
 
-        KnowledgeBuilderConfiguration kbConfig = null;
+        Properties props = new Properties();
+        props.setProperty("drools.dialect.java.compiler.lnglevel","1.6" );
+        KnowledgeBuilderConfiguration config = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(props);
+        KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder(config);
+
+        /*KnowledgeBuilderConfiguration kbConfig = null;
         if(loader!=null)
             kbConfig = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, loader);
 
@@ -125,7 +127,7 @@ public class DroolsFactory {
         if(kbConfig!=null)
             builder = KnowledgeBuilderFactory.newKnowledgeBuilder(kbConfig);
         else
-            builder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+            builder = KnowledgeBuilderFactory.newKnowledgeBuilder();*/
 
         //KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder();
         for(Map.Entry<Resource, ResourceType> entry : resources.entrySet()) {
