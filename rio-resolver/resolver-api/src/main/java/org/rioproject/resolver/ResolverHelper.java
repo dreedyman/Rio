@@ -15,8 +15,6 @@
  */
 package org.rioproject.resolver;
 
-import org.rioproject.resolver.maven2.Repository;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -48,8 +46,6 @@ import java.util.logging.Level;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class ResolverHelper {
-    public final static String M2_HOME = Repository.getLocalRepository().getAbsolutePath();
-    static final String M2_HOME_URI = Repository.getLocalRepository().toURI().toString();
     private static URLClassLoader resolverLoader;
     static final Logger logger = Logger.getLogger(ResolverHelper.class.getName());
     public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
@@ -82,26 +78,7 @@ public final class ResolverHelper {
      */
     public static String[] resolve(final String artifact, final Resolver resolver, final RemoteRepository[] repositories)
         throws ResolverException {
-        return resolve(artifact, resolver, repositories, M2_HOME_URI);
-    }
 
-    /**
-     * Resolve the classpath using the provided codebase
-     *
-     * @param artifact The artifact to resolve
-     * @param resolver The {@link Resolver} to use
-     * @param repositories The repositories to use for resolution
-     * @param codebase The codebase to set for jars that are located
-     * in the local Maven repository.
-     *
-     * @return The classpath for the artifact
-     *
-     * @throws ResolverException If there are exceptions resolving the artifact
-     */
-    public static String[] resolve(final String artifact,
-                                   final Resolver resolver,
-                                   final RemoteRepository[] repositories,
-                                   final String codebase) throws ResolverException {
         if(logger.isLoggable(Level.FINE))
             logger.fine(String.format("Using Resolver %s", resolver.getClass().getName()));
         List<String> jars = new ArrayList<String>();
@@ -111,22 +88,11 @@ public final class ResolverHelper {
                 String[] classPath = resolver.getClassPathFor(artifactPart, repositories);
                 for (String jar : classPath) {
                     String s = null;
-                    if(jar.startsWith(M2_HOME)) {
-                        String jarPart = jar.substring(M2_HOME.length());
-                        if(codebase.endsWith("/") && jarPart.startsWith(File.separator)) {
-                            jarPart = jarPart.substring(1, jarPart.length());
-                        }
-                        if(codebase.startsWith("http:")) {
-                            jarPart = handleWindowsHTTP(jarPart);
-                        }
-                        s = codebase+jarPart;
+                    File jarFile = new File(jar);
+                    if(jarFile.exists()) {
+                        s = jarFile.toURI().toString();
                     } else {
-                        File jarFile = new File(jar);
-                        if(jarFile.exists()) {
-                            s = jarFile.toURI().toString();
-                        } else {
-                            logger.warning(String.format("%s NOT FOUND", jarFile.getPath()));
-                        }
+                        logger.warning(String.format("%s NOT FOUND", jarFile.getPath()));
                     }
                     if(s!=null) {
                         s = handleWindows(s);
@@ -243,16 +209,6 @@ public final class ResolverHelper {
             if(s.startsWith("file:"))
                 newString = s.replace('/', '\\');
         }
-        return newString;
-    }
-
-    /*
-     * Trim leading '/'
-     */
-    private static String handleWindowsHTTP(final String s) {
-        String newString = s;
-        if (System.getProperty("os.name").startsWith("Windows"))
-            newString = s.replace('\\', '/');
         return newString;
     }
 }
