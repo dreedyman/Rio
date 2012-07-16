@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * The ServiceAdvertiser is a utility to help advertise a service with configured attributes.
  */
 public class ServiceAdvertiser {
-    static Logger logger = Logger.getLogger(ServiceAdvertiser.class.getName());
+    static Logger String.format( = Logger.getLogger(ServiceAdvertiser.class.getName());
 
     /**
      * Advertise a ServiceBean
@@ -99,7 +99,7 @@ public class ServiceAdvertiser {
                     JoinAdmin joinAdmin = (JoinAdmin) adminObject;
                     ArrayList<Entry> addList = new ArrayList<Entry>();
                     if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("OperationalString "+opStringName);
+                        logger.finest(String.format("OperationalString %s", opStringName));
                     }
                     /* Try and add an OperationalStringEntry */
                     if (opStringName != null && opStringName.length() > 0) {
@@ -108,26 +108,26 @@ public class ServiceAdvertiser {
                         if (opStringEntry != null) {
                             addList.add(opStringEntry);
                             if (logger.isLoggable(Level.FINEST)) {
-                                logger.warning("Added OperationalStringEntry ["+
-                                               ((OperationalStringEntry)opStringEntry).name+"] for "+serviceName);
+                                logger.warning(String.format("Added OperationalStringEntry [%s] for %s",
+                                                             ((OperationalStringEntry)opStringEntry).name, serviceName));
                             }
                         } else {
-                            logger.warning("Unable to obtain the OperationalStringEntry for "+serviceName);
+                            logger.warning(String.format("Unable to obtain the OperationalStringEntry for %s", serviceName));
                         }
 
                         Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, proxyCL);
                         if (hostEntry != null) {
                             addList.add(hostEntry);
                             if (logger.isLoggable(Level.FINEST)) {
-                                logger.warning("Added Host ["+((Host)hostEntry).hostName+"] for "+serviceName);
+                                logger.warning(String.format("Added Host [%s] for %s", ((Host)hostEntry).hostName, serviceName));
                             }
                         } else {
-                            logger.warning("Unable to obtain the Host entry for "+serviceName);
+                            logger.warning(String.format("Unable to obtain the Host entry for %s", serviceName));
                         }
                     } else {
                         if (logger.isLoggable(Level.FINEST)) {
                             String s = (opStringName == null ? "[null]" : "[empty string]");
-                            logger.finest("OperationalString name is " + s);
+                            logger.finest(String.format("OperationalString name is %s", s));
                         }
                     }
                     /* Process the net.jini.lookup.entry.Name attribute */
@@ -194,7 +194,7 @@ public class ServiceAdvertiser {
                                 buff.append(groups[i]);
                             }
                         }
-                        logger.finest("Setting groups [" + buff.toString() + "] using JoinAdmin.setLookupGroups");
+                        logger.finest(String.format("Setting groups [%s] using JoinAdmin.setLookupGroups", buff.toString()));
                     }
                     joinAdmin.setLookupGroups(groups);
                     if ((locators != null) && (locators.length > 0)) {
@@ -205,9 +205,8 @@ public class ServiceAdvertiser {
                                     buff.append(",");
                                 buff.append(locators[i].toString());
                             }
-                            logger.finest("Setting locators [" +
-                                          buff.toString() +
-                                          "] using JoinAdmin.setLookupLocators");
+                            logger.finest(String.format("Setting locators [%s] using JoinAdmin.setLookupLocators",
+                                                        buff.toString()));
                         }
                         joinAdmin.setLookupLocators(locators);
                     }
@@ -217,13 +216,13 @@ public class ServiceAdvertiser {
                 }
 
             } else {
-                throw new ServiceBeanControlException("Unable to obtain mechanism to advertise [" + serviceName + "]");
+                throw new ServiceBeanControlException(String.format("Unable to obtain mechanism to advertise [%s]", serviceName));
             }
         } catch (ServiceBeanControlException e) {
             /* If we throw a ServiceBeanControlException above, just rethrow it */
             throw e;
         } catch (Throwable t) {
-            logger.warning("Advertising ServiceBean, [" + t.getClass().getName() + ":" + t.getLocalizedMessage() + "]");
+            logger.warning(String.format("Advertising ServiceBean, [%s: %s]", t.getClass().getName(), t.getLocalizedMessage()));
             throw new ServiceBeanControlException("advertise", t);
         } finally {
             currentThread.setContextClassLoader(currentClassLoader);
@@ -270,7 +269,7 @@ public class ServiceAdvertiser {
             config = context.getConfiguration();
         } catch (ConfigurationException e) {
             logger.log(Level.WARNING,
-                       "Unable to obtain configuration for service [" + context.getServiceElement().getName() + "]",
+                       String.format("Unable to obtain configuration for service [%s]", context.getServiceElement().getName()),
                        e);
             return new Entry[0];
         }
@@ -310,25 +309,26 @@ public class ServiceAdvertiser {
                                                               exportCodebase == null ?
                                                               Configuration.NO_DATA : exportCodebase);
                 if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Obtained ["+serviceUIs.length+"] " +
-                                  "serviceUI declarations for "+
-                                  "["+serviceName+"] "+
-                                  "using component ["+serviceBeanComponent+"]");
+                    logger.finest(String.format("Obtained [%d] serviceUI declarations for [%s] using component [%s]",
+                                                serviceUIs.length, serviceName, serviceBeanComponent));
                 attrList.addAll(Arrays.asList(serviceUIs));
             } catch (ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Getting ServiceUIs for ["+serviceName+"]",
-                           e);
+                logger.log(Level.WARNING, String.format("Getting ServiceUIs for [%s]", serviceName), e);
             }
             /* 2. Get any additional attributes */
             try {
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest(String.format("Getting %s.initialAttributes", serviceBeanComponent));
                 Entry[] initialAttributes = (Entry[])config.getEntry(serviceBeanComponent,
                                                                      "initialAttributes",
                                                                      Entry[].class,
                                                                      new Entry[0]);
+                if(logger.isLoggable(Level.FINEST))
+                    logger.finest(String.format("Obtained [%d] initialAttribute declarations for [%s] using component [%s]",
+                                                initialAttributes.length, serviceName, serviceBeanComponent));
                 attrList.addAll(Arrays.asList(initialAttributes));
             } catch (ConfigurationException e) {
-                logger.log(Level.WARNING, "Getting initialAttributes for ["+serviceName+"]", e);
+                logger.log(Level.WARNING, String.format("Getting initialAttributes for [%s]", serviceName), e);
             }
         }
         return(attrList.toArray(new Entry[attrList.size()]));
@@ -360,14 +360,10 @@ public class ServiceAdvertiser {
         } catch(Exception e) {
             if(logger.isLoggable(Level.FINEST))
                 logger.log(Level.FINEST,
-                           entryClassName+" not " +
-                           "found, "+
-                           "cannot add an "+
-                           entryClassName,
+                           String.format("%s not found, cannot add an %s", entryClassName, entryClassName),
                            e);
             else
-                logger.warning(entryClassName+" not found, "+
-                               "cannot add "+entryClassName);
+                logger.warning(String.format("%s not found, cannot add %s"+entryClassName, entryClassName));
         }
         return(entry);
     }
@@ -384,7 +380,6 @@ public class ServiceAdvertiser {
                 logger.log(Level.FINEST, "Unable to add Entry attributes", e);
             else
                 logger.warning("Unable to add Entry attributes");
-            e.printStackTrace();
         }
     }
 }
