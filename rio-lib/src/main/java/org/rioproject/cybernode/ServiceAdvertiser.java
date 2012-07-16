@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * The ServiceAdvertiser is a utility to help advertise a service with configured attributes.
  */
 public class ServiceAdvertiser {
-    static Logger String.format( = Logger.getLogger(ServiceAdvertiser.class.getName());
+    static Logger logger = Logger.getLogger(ServiceAdvertiser.class.getName());
 
     /**
      * Advertise a ServiceBean
