@@ -2,7 +2,7 @@
  * Copyright 2005 GigaSpaces, Inc. All Rights Reserved.
  */
 
-package org.rioproject.tools.ui;
+package org.rioproject.tools.ui.servicenotification;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,89 +13,72 @@ import java.util.ArrayList;
 import java.util.Properties;
 import javax.swing.*;
 import javax.swing.table.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 
 import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.discovery.DiscoveryManagement;
+import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.*;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.ui.Util;
-import org.rioproject.tools.ui.treetable.DeploymentNode;
-import org.rioproject.tools.ui.treetable.JTreeTable;
+import org.rioproject.tools.ui.AbstractNotificationUtility;
+import org.rioproject.tools.ui.Constants;
 import org.rioproject.tools.ui.treetable.RemoteServiceEventNode;
+import org.rioproject.ui.Util;
 
 public class ProvisionFailureEventTable extends AbstractNotificationUtility {
-    JTreeTable eventTable;
-    ProvisionFailureEventTreeModel dataModel;
-    EC eventConsumer;
-    BasicEventConsumer provisionFailureEventConsumer;
-    BasicEventConsumer provisionMonitorEventConsumer;
-    DynamicEventConsumer serviceLogEventConsumer;
-    JScrollPane scroller;
-    JCheckBox autoRemove;
+    private JXTreeTable eventTable;
+    private ProvisionFailureEventTreeModel dataModel;
+    private EC eventConsumer;
+    private BasicEventConsumer provisionFailureEventConsumer;
+    private BasicEventConsumer provisionMonitorEventConsumer;
+    private DynamicEventConsumer serviceLogEventConsumer;
+    private JCheckBox autoRemove;
 
-    public ProvisionFailureEventTable(ColorManager colorManager,
-                                      Configuration config,
-                                      Properties props) {
+    public ProvisionFailureEventTable(Configuration config, Properties props) {
         super();        
         setLayout(new BorderLayout());
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("/");
-        dataModel = new ProvisionFailureEventTreeModel(root);
+        java.util.List<String> columns = new ArrayList<String>();
+        columns.add("Deployment");
+        columns.add("Description");
+        columns.add("When");
+        dataModel = new ProvisionFailureEventTreeModel(new RootNode(), columns);
 
         UIDefaults defaults = UIManager.getDefaults( );
-        Icon openIcon   = defaults.getIcon( "Tree.expandedIcon" );
-        Icon closedIcon = defaults.getIcon( "Tree.collapsedIcon" );
+        Icon openIcon   = defaults.getIcon("Tree.expandedIcon");
+        Icon closedIcon = defaults.getIcon("Tree.collapsedIcon");
 
-        eventTable = new JTreeTable(dataModel, colorManager, null);
-        eventTable.getTree().setRootVisible(false);
-        //eventTable.getTree().setShowsRootHandles(true);
+        eventTable = new JXTreeTable(dataModel);
+        eventTable.setRootVisible(false);
+        dataModel.setTreeTable(eventTable);
+        eventTable.setShowsRootHandles(false);
         eventTable.setAutoCreateColumnsFromModel(false);
         eventTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //eventTable.getTableHeader().setReorderingAllowed(false);
+
         //no icons
-        DefaultTreeCellRenderer treeRenderer =
-            ((DefaultTreeCellRenderer) eventTable.getTree().getCellRenderer());
-        treeRenderer.setLeafIcon(null);
-        treeRenderer.setOpenIcon(openIcon);
-        treeRenderer.setClosedIcon(closedIcon);
+        eventTable.setLeafIcon(null);
+        eventTable.setOpenIcon(openIcon);
+        eventTable.setClosedIcon(closedIcon);
 
         eventTable.addMouseListener(new RowListener());
-        dataModel.setTreeTable(eventTable);
-
-        //String[] columns = new String[]{ "Status", "Description", "When" };
-        String[] columns = new String[]{"Description", "When" };
-        // Ensure that auto-create is off
-        if (eventTable.getAutoCreateColumnsFromModel()) {
-            throw new IllegalStateException();
-        }
-        for(String column : columns) {
-            DefaultTableModel model = (DefaultTableModel)eventTable.getModel();
-            TableColumn col = new TableColumn(model.getColumnCount());
-
-            col.setHeaderValue(column);
-            eventTable.addColumn(col);
-            model.addColumn(column);
-        }
 
         TableColumnModel cm = eventTable.getColumnModel();
         cm.getColumn(0).setPreferredWidth(100);
         cm.getColumn(0).setMaxWidth(500);
-        //cm.getColumn(1).setPreferredWidth(50);
-        //cm.getColumn(1).setMaxWidth(100);
+
         cm.getColumn(1).setPreferredWidth(300);
         cm.getColumn(1).setMaxWidth(500);
         cm.getColumn(2).setPreferredWidth(150);
         cm.getColumn(2).setMaxWidth(500);
 
-        ((DefaultTableModel)eventTable.getModel()).fireTableDataChanged();
+        //((DefaultTableModel)eventTable.getModel()).fireTableDataChanged();
 
-        scroller = new JScrollPane(eventTable);
+        JScrollPane scroller = new JScrollPane(eventTable);
         scroller.getViewport().setBackground(Color.WHITE);
         add(scroller, BorderLayout.CENTER);
 
@@ -153,8 +136,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
     class EC implements RemoteServiceEventListener {
         public void notify(RemoteServiceEvent event) {
             try {
-                if(event instanceof ProvisionFailureEvent ||
-                   event instanceof ServiceLogEvent) {
+                if(event instanceof ProvisionFailureEvent || event instanceof ServiceLogEvent) {
                     dataModel.addItem(event);
                     notifyListeners();
                 } else if(event instanceof ProvisionMonitorEvent) {
@@ -162,19 +144,18 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                     synchronized(this) {
                         if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED)) {
                             for(RemoteServiceEventNode rsn : dataModel.getRemoteServiceEventNode(pme.getServiceElement())) {
-                                if(rsn instanceof ProvisionFailureEventTreeModel.EventNode) {
-                                    ProvisionFailureEventTreeModel.EventNode en = (ProvisionFailureEventTreeModel.EventNode)rsn;
+                                if(rsn instanceof ProvisionFailureEventNode) {
+                                    ProvisionFailureEventNode en = (ProvisionFailureEventNode)rsn;
                                     if(en.getStatus().equals("Resolved"))
                                         continue;
                                     if(autoRemove.isSelected()) {
-                                        dataModel.removeItem(en);
+                                        dataModel.removeItem(rsn);
                                         notifyListeners();
                                     } else {
                                         en.setStatus("Resolved");
-                                        dataModel.nodeChanged(en);
                                     }
+                                    break;
                                 }
-                                break;
                             }
                         } else if(pme.getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED)) {
                             DeploymentNode dn = dataModel.getDeploymentNode(pme.getOperationalStringName());
@@ -182,9 +163,9 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                                 return;
                             java.util.List<RemoteServiceEventNode> removals = new ArrayList<RemoteServiceEventNode>();
                             for (int i = 0; i < dn.getChildCount(); i++) {
-                                RemoteServiceEventNode rsn = (RemoteServiceEventNode)dn.getChildAt(i);
-                                if(rsn instanceof ProvisionFailureEventTreeModel.EventNode) {
-                                    removals.add(rsn);
+                                RemoteServiceEventNode child = (RemoteServiceEventNode)dn.getChildAt(i);
+                                if(child instanceof ProvisionFailureEventNode) {
+                                    removals.add(child);
                                 }
                             }
                             for(RemoteServiceEventNode rsn : removals)
@@ -193,10 +174,11 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                         }
                     }
                 }
+                eventTable.expandAll();
                 //setStatusErrorText("ProvisionFailureEvent received for "
                 //        + pfe.getServiceElement().getName());
             } catch (Throwable t) {
-                Util.showError(t, null, "Notification of a ProvisionFailureEvent");
+                Util.showError(t, eventTable, "Notification of a ProvisionFailureEvent");
             }
         }
     }
@@ -220,7 +202,10 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
     
     private RemoteServiceEvent getRemoteServiceEvent(int row) {
         if(row==-1)
-            return(null);
+            return null;
+        TreePath path = eventTable.getPathForRow(row);
+        if(path==null)
+            return null;
         return dataModel.getItem(row);
     }
 
@@ -264,8 +249,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                 details.addActionListener(
                     new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
-                            int row = eventTable.rowAtPoint(new Point(e.getX(), 
-                                                                      e.getY()));
+                            int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
                             showDetails(getRemoteServiceEvent(row));
                         }
                     });
@@ -295,7 +279,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
             thrown = pfe.getThrowable();
             String exception = getExceptionText(thrown);
             data = new Object[][] {
-                {"When", dataModel.getDateFormat().format(event.getDate())},
+                {"When", Constants.DATE_FORMAT.format(event.getDate())},
                 {"Deployment", elem.getOperationalStringName()},
                 {"Service", elem.getName()},
                 {"Class", impl},
@@ -308,7 +292,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
             thrown = sle.getLogRecord().getThrown();
             String exception = getExceptionText(thrown);
             data = new Object[][] {
-                {"When", dataModel.getDateFormat().format(event.getDate())},
+                {"When", Constants.DATE_FORMAT.format(event.getDate())},
                 {"Deployment", sle.getOpStringName()},
                 {"Service", sle.getServiceName()},
                 {"Machine", sle.getAddress().getHostName()},
@@ -413,7 +397,28 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         }
     }
 
+    class RootNode extends AbstractMutableTreeTableNode {
 
+        @Override
+        public Object getValueAt(int i) {
+            return null;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 2;
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return false;
+        }
+
+        @Override
+        public boolean getAllowsChildren() {
+            return true;
+        }
+    }
 
     class DetailsRowListener extends MouseAdapter {
         JTable table;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.treetable;
+package org.rioproject.tools.ui.cybernodeutilization;
 
 import net.jini.id.Uuid;
 import org.rioproject.opstring.ServiceElement;
@@ -27,8 +27,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  *
  * @author Dennis Reedy
  */
-public class ServiceNode extends DefaultMutableTreeNode
-    implements CRUNode {
+public class ServiceNode extends DefaultMutableTreeNode implements CRUNode {
     String name;
     Uuid uuid;
     ServiceElement sElem;

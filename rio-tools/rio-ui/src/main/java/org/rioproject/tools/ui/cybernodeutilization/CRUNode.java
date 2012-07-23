@@ -13,24 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.treetable;
+package org.rioproject.tools.ui.cybernodeutilization;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
+import org.rioproject.system.ComputeResourceUtilization;
 
 /**
- * Provides a base upon which to create a tree table
+ * A node that has {@link org.rioproject.system.ComputeResourceUtilization} property
+ * accessors
+ *
+ * @author Dennis Reedy
  */
-public abstract class AbstractTreeTableModel extends DefaultTreeModel
-    implements TreeTableModel {
-    protected DefaultMutableTreeNode root;
-
-    public AbstractTreeTableModel(DefaultMutableTreeNode root) {
-        super(root);
-        this.root = root;
-    }
-
-    public DefaultMutableTreeNode getRoot() {
-        return root;
-    }
+public interface CRUNode {
+    void setComputeResourceUtilization(ComputeResourceUtilization cru);
+    ComputeResourceUtilization getComputeResourceUtilization();
 }

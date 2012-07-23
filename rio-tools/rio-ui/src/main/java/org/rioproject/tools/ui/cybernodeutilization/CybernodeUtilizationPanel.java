@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui;
+package org.rioproject.tools.ui.cybernodeutilization;
 
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.jmx.JMXUtil;
+import org.rioproject.tools.ui.ColorManager;
+import org.rioproject.tools.ui.Constants;
+import org.rioproject.tools.ui.GraphViewAdapter;
+import org.rioproject.tools.ui.cybernodeutilization.CRUNode;
+import org.rioproject.tools.ui.cybernodeutilization.CybernodeNode;
+import org.rioproject.tools.ui.cybernodeutilization.ServiceNode;
 import org.rioproject.ui.Util;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
@@ -111,8 +117,7 @@ public class CybernodeUtilizationPanel extends JPanel {
         treeTable.setAutoCreateColumnsFromModel(false);
         treeTable.getTableHeader().setReorderingAllowed(false);
         //no icons
-        DefaultTreeCellRenderer treeRenderer =
-            ((DefaultTreeCellRenderer) treeTable.getTree().getCellRenderer());
+        DefaultTreeCellRenderer treeRenderer = ((DefaultTreeCellRenderer) treeTable.getTree().getCellRenderer());
         treeRenderer.setLeafIcon(null);
         treeRenderer.setOpenIcon(null);
         treeRenderer.setClosedIcon(null);
@@ -539,28 +544,6 @@ public class CybernodeUtilizationPanel extends JPanel {
         g.drawString(inUse + ",   Cybernodes Free: " + free,
                      LEFT_MARGIN + sLen,
                      BASE_LINE + LINE_HEIGHT);
-        /*
-        NumberFormat percentFormatter = NumberFormat.getPercentInstance();
-        percentFormatter.setMaximumFractionDigits(2);
-
-        g.drawString("Highest Utilization:",
-                     LEFT_MARGIN,
-                     BASE_LINE + (LINE_HEIGHT * 2));
-        g.drawString(percentFormatter.format(uHigh) +
-                     ",  on " + uHighAt + ",  at " +
-                     new java.util.Date(uTime).toString(),
-                     LEFT_MARGIN + sLen,
-                     BASE_LINE + (LINE_HEIGHT * 2));
-
-        g.drawString("Highest CPU:",
-                     LEFT_MARGIN,
-                     BASE_LINE + (LINE_HEIGHT * 3));
-        g.drawString(percentFormatter.format(cpuHigh) +
-                     ",  on " + cpuHighAt + ",  at " + new java.util.Date(
-            cpuTime).toString(),
-                     LEFT_MARGIN + sLen,
-                     BASE_LINE + (LINE_HEIGHT * 3));
-                     */
     }
 
     public void addCybernode(CybernodeNode item) {

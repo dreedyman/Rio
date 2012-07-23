@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.treetable;
+package org.rioproject.tools.ui.servicenotification;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 
 /**
  * Tree node that describes a deployment name.
  */
-public class DeploymentNode extends DefaultMutableTreeNode {
+public class DeploymentNode extends AbstractMutableTreeTableNode {
     private String name;
 
     public DeploymentNode(String name) {
@@ -32,11 +32,6 @@ public class DeploymentNode extends DefaultMutableTreeNode {
         return name;
     }
 
-    @Override
-    public boolean getAllowsChildren() {
-        return true;
-    }
-
     public boolean isLeaf() {
         return false;
     }
@@ -44,5 +39,22 @@ public class DeploymentNode extends DefaultMutableTreeNode {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public Object getValueAt(int column) {
+        if(column==0)
+            return name;
+        return null;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return 3;
+    }
+
+    @Override
+    public boolean getAllowsChildren() {
+        return true;
     }
 }

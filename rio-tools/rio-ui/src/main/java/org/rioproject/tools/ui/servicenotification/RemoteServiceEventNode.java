@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.treetable;
+package org.rioproject.tools.ui.servicenotification;
 
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.event.RemoteServiceEvent;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,7 +25,7 @@ import java.util.Date;
  * Container that holds information about a remote event
  */
 @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
-public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent> extends DefaultMutableTreeNode {
+public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent> extends AbstractMutableTreeTableNode {
     private T event;
 
     public RemoteServiceEventNode(T event) {
@@ -48,12 +49,18 @@ public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent> exte
         return event;
     }
 
-    public boolean isLeaf() {
-        return true;
+    @Override
+    public int getColumnCount() {
+        return 3;
     }
 
     @Override
     public boolean getAllowsChildren() {
         return false;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return true;
     }
 }

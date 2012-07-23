@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.treetable;
+package org.rioproject.tools.ui.cybernodeutilization;
 
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
@@ -30,8 +30,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  *
  * @author Dennis Reedy
  */
-public class CybernodeNode extends DefaultMutableTreeNode
-    implements CRUNode {
+public class CybernodeNode extends DefaultMutableTreeNode implements CRUNode {
     ServiceItem item;
     Cybernode cybernode;
     ComputeResourceUtilization cru;
