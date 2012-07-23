@@ -15,6 +15,7 @@
  */
 package org.rioproject.tools.ui;
 
+import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.prefs.PreferencesDialog;
 
 import java.awt.*;

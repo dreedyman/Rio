@@ -16,27 +16,28 @@
 package org.rioproject.tools.ui.cybernodeutilization;
 
 import net.jini.id.Uuid;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.system.ComputeResourceUtilization;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Simple data structure for a contained service node
  *
  * @author Dennis Reedy
  */
-public class ServiceNode extends DefaultMutableTreeNode implements CRUNode {
-    String name;
-    Uuid uuid;
-    ServiceElement sElem;
-    ComputeResourceUtilization cru;
+public class ServiceNode extends AbstractMutableTreeTableNode implements CRUNode {
+    private final String name;
+    private final Uuid uuid;
+    private final ServiceElement sElem;
+    private ComputeResourceUtilization cru;
+    private final ColumnHelper columnHelper;
 
-    public ServiceNode(ServiceRecord record) {
+    public ServiceNode(final ServiceRecord record, final ColumnHelper columnHelper) {
         this.name = record.getServiceElement().getName();
         uuid = record.getServiceID();
         sElem = record.getServiceElement();
+        this.columnHelper = columnHelper;
     }
 
     public Uuid getUuid() {
@@ -72,7 +73,26 @@ public class ServiceNode extends DefaultMutableTreeNode implements CRUNode {
         return cru;
     }
 
-    public void setComputeResourceUtilization(ComputeResourceUtilization cru) {
+    public void setComputeResourceUtilization(final ComputeResourceUtilization cru) {
         this.cru = cru;
+    }
+
+    @Override
+    public Object getValueAt(final int column) {
+        String value = null;
+        if(column==0) {
+            value = getName();
+        } else {
+            if(getComputeResourceUtilization()!=null) {
+                ComputeResourceUtilization cru = getComputeResourceUtilization();
+                value = columnHelper.getColumnValue(column, cru, false);
+            }
+        }
+        return value;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnHelper.getColumnCount();
     }
 }

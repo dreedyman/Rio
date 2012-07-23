@@ -47,6 +47,7 @@ import org.rioproject.resolver.Artifact;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.tools.discovery.RecordingDiscoveryListener;
+import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.discovery.GroupSelector;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
@@ -58,7 +59,6 @@ import org.rioproject.tools.ui.prefs.PreferencesDialog;
 import org.rioproject.tools.ui.progresspanel.WaitingDialog;
 import org.rioproject.tools.ui.serviceui.ServiceAdminManager;
 import org.rioproject.tools.ui.serviceui.UndeployPanel;
-import org.rioproject.tools.ui.treetable.CybernodeNode;
 import org.rioproject.tools.ui.util.SwingDeployHelper;
 import org.rioproject.tools.ui.util.SwingWorker;
 import org.rioproject.tools.webster.InternalWebster;
@@ -365,7 +365,7 @@ public class Main extends JFrame {
                                             startupProps);
         cup.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200));
 
-        utilities = new UtilitiesPanel(cup, colorManager, config, startupProps);
+        utilities = new UtilitiesPanel(cup, config, startupProps);
 
         JPanel utilitiesPanel = makeUtilitiesPanel(utilities);
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
@@ -985,11 +985,10 @@ public class Main extends JFrame {
                     CybernodeAdmin cAdmin;
                     try {
                         cAdmin = (CybernodeAdmin)c.getAdmin();
-                        cup.addCybernode(
-                            new CybernodeNode(
-                                item,
-                                cAdmin,
-                                getComputeResourceUtilization(cAdmin, item)));
+                        cup.addCybernode(item,
+                                         cAdmin,
+                                         getComputeResourceUtilization(cAdmin, item),
+                                         utilizationColumnManager);
                         cruTask.addCybernode(item);
                     } catch (RemoteException e) {
                         e.printStackTrace();
@@ -1200,9 +1199,8 @@ public class Main extends JFrame {
                 Cybernode cybernode = (Cybernode)item.service;
                 CybernodeAdmin cAdmin = mapEntry.getValue();
                 try {
-                    ComputeResourceUtilization cru =
-                        getComputeResourceUtilization(cAdmin, item);
-                    cup.update(new CybernodeNode(item, cAdmin, cru));
+                    ComputeResourceUtilization cru = getComputeResourceUtilization(cAdmin, item);
+                    cup.update(item, cAdmin, cru, utilizationColumnManager);
                 } catch (Throwable e) {
                     if(!ThrowableUtil.isRetryable(e) &&
                        !(e instanceof NullPointerException)) {

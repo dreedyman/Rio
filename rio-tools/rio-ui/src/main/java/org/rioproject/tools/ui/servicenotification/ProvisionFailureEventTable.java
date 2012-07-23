@@ -27,7 +27,6 @@ import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.tools.ui.AbstractNotificationUtility;
 import org.rioproject.tools.ui.Constants;
-import org.rioproject.tools.ui.treetable.RemoteServiceEventNode;
 import org.rioproject.ui.Util;
 
 public class ProvisionFailureEventTable extends AbstractNotificationUtility {
@@ -76,8 +75,6 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         cm.getColumn(2).setPreferredWidth(150);
         cm.getColumn(2).setMaxWidth(500);
 
-        //((DefaultTableModel)eventTable.getModel()).fireTableDataChanged();
-
         JScrollPane scroller = new JScrollPane(eventTable);
         scroller.getViewport().setBackground(Color.WHITE);
         add(scroller, BorderLayout.CENTER);
@@ -119,7 +116,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         }
     }
 
-    void setDiscoveryManagement(DiscoveryManagement dMgr) {
+    public void setDiscoveryManagement(DiscoveryManagement dMgr) {
         try {
             serviceLogEventConsumer = new DynamicEventConsumer(ServiceLogEvent.getEventDescriptor(),
                                                                eventConsumer,
@@ -129,7 +126,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         }
     }
 
-    boolean getAutoRemove() {
+    public boolean getAutoRemove() {
         return autoRemove.isSelected();
     }
 
@@ -143,7 +140,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
                     ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
                     synchronized(this) {
                         if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED)) {
-                            for(RemoteServiceEventNode rsn : dataModel.getRemoteServiceEventNode(pme.getServiceElement())) {
+                            for(RemoteServiceEventNode rsn : dataModel.getRemoteServiceEventNodes(pme.getServiceElement())) {
                                 if(rsn instanceof ProvisionFailureEventNode) {
                                     ProvisionFailureEventNode en = (ProvisionFailureEventNode)rsn;
                                     if(en.getStatus().equals("Resolved"))
@@ -206,7 +203,7 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
         TreePath path = eventTable.getPathForRow(row);
         if(path==null)
             return null;
-        return dataModel.getItem(row);
+        return dataModel.getRemoteServiceEvent(row);
     }
 
     public int getTotalItemCount() {
@@ -217,11 +214,20 @@ public class ProvisionFailureEventTable extends AbstractNotificationUtility {
 
         public void mouseClicked(MouseEvent e) {
             int clickCount = e.getClickCount();
+            int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
+            if(row==-1)
+                return;
             if(clickCount==2) {
-                int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
-                if(row==-1)
-                    return;
                 showDetails(getRemoteServiceEvent(row));
+            } else if(clickCount==1) {
+                AbstractMutableTreeTableNode node = dataModel.getNode(row);
+                if(node instanceof DeploymentNode) {
+                    if(eventTable.isExpanded(row)) {
+                        eventTable.collapseRow(row);
+                    } else {
+                        eventTable.expandRow(row);
+                    }
+                }
             }
         }
 

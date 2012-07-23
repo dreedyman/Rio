@@ -16,6 +16,12 @@
 package org.rioproject.tools.ui.cybernodeutilization;
 
 import net.jini.core.lookup.ServiceItem;
+import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.renderer.*;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+import org.jdesktop.swingx.treetable.MutableTreeTableNode;
+import org.jdesktop.swingx.treetable.TreeTableNode;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
@@ -23,24 +29,17 @@ import org.rioproject.jmx.JMXUtil;
 import org.rioproject.tools.ui.ColorManager;
 import org.rioproject.tools.ui.Constants;
 import org.rioproject.tools.ui.GraphViewAdapter;
-import org.rioproject.tools.ui.cybernodeutilization.CRUNode;
-import org.rioproject.tools.ui.cybernodeutilization.CybernodeNode;
-import org.rioproject.tools.ui.cybernodeutilization.ServiceNode;
+import org.rioproject.tools.ui.UtilizationColumnManager;
+import org.rioproject.tools.ui.servicenotification.DeploymentNode;
 import org.rioproject.ui.Util;
 import org.rioproject.system.ComputeResourceUtilization;
-import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.SystemWatchID;
-import org.rioproject.system.measurable.cpu.CpuUtilization;
-import org.rioproject.system.measurable.disk.DiskSpaceUtilization;
-import org.rioproject.system.measurable.memory.ProcessMemoryUtilization;
-import org.rioproject.system.measurable.memory.SystemMemoryUtilization;
 import org.rioproject.tools.ui.serviceui.ServiceAdminManager;
-import org.rioproject.tools.ui.treetable.*;
 
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -49,7 +48,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -67,7 +65,7 @@ public class CybernodeUtilizationPanel extends JPanel {
      * The model for the Cybernode utilization table
      */
     private final UtilizationTreeModel utilizationModel;
-    private final JTreeTable treeTable;
+    private final JXTreeTable treeTable;
     /**
      * For showing cybernode stats
      */
@@ -82,21 +80,18 @@ public class CybernodeUtilizationPanel extends JPanel {
     private boolean expandAll = false;
     private ColorManager colorManager;
     private final Executor updateHandler = Executors.newSingleThreadExecutor();
-    private final DefaultMutableTreeNode root = new DefaultMutableTreeNode("/");
     public static final Font COMMON_FONT = new Font("Lucida Grande", 0, 10);
     private ImageIcon arrowUpIcon;
     private ImageIcon arrowDownIcon;
     private boolean autoSort;
-    private static final double KB = 1024;
-    //private static final double MB = Math.pow(KB, 2);
-    private static final double GB = Math.pow(KB, 3);
+
     private TableCellRenderer iconHeaderRenderer;
     private final GraphViewAdapter graphViewAdapter;
 
     public CybernodeUtilizationPanel(final GraphViewAdapter graphViewAdapter,
-                                     ColorManager colorManager,
-                                     String[] selectedColumns,
-                                     Properties props) {
+                                     final ColorManager colorManager,
+                                     final String[] selectedColumns,
+                                     final Properties props) {
         super(new BorderLayout(8, 8));
         this.colorManager= colorManager;
         this.graphViewAdapter = graphViewAdapter;
@@ -108,19 +103,39 @@ public class CybernodeUtilizationPanel extends JPanel {
 
         String columnToSort = props.getProperty(Constants.TREE_TABLE_SORTED_COLUMN_NAME, "Utilization");
 
-        utilizationModel = new UtilizationTreeModel(root);
+        List<String> columns = new ArrayList<String>();
+        columns.add(ColumnHelper.FIXED_COLUMN);
+        Collections.addAll(columns, selectedColumns);
+
+        utilizationModel = new UtilizationTreeModel(new RootNode(), columns);
         utilizationModel.tableComparator.columnName = columnToSort;
 
-        treeTable = new UtilizationTreeTable(utilizationModel);
-        treeTable.getTree().setRootVisible(false);
-        treeTable.getTree().setShowsRootHandles(true);
+        treeTable = new JXTreeTable();
+        treeTable.setTreeTableModel(utilizationModel);
+        treeTable.setRootVisible(false);
+        treeTable.setShowsRootHandles(true);
         treeTable.setAutoCreateColumnsFromModel(false);
         treeTable.getTableHeader().setReorderingAllowed(false);
+
+        final Icon forkedIcon = Util.getImageIcon("org/rioproject/tools/ui/images/forkedService.gif");
+        IconValue iv = new IconValue() {
+            public Icon getIcon(Object value) {
+                System.out.println("===> "+value.getClass().getName());
+                /*String txt = (String) value;
+                if (txt.equals("Action A")) {
+                    return forkedIcon;
+                }*/
+                return null;
+            }
+        };
+        TreeCellRenderer r = new DefaultTreeRenderer(new WrappingProvider(iv));
+
+        //treeTable.setTreeCellRenderer(r);
         //no icons
-        DefaultTreeCellRenderer treeRenderer = ((DefaultTreeCellRenderer) treeTable.getTree().getCellRenderer());
-        treeRenderer.setLeafIcon(null);
-        treeRenderer.setOpenIcon(null);
-        treeRenderer.setClosedIcon(null);
+        treeTable.setLeafIcon(null);
+        treeTable.setOpenIcon(null);
+        treeTable.setClosedIcon(null);
+
         component = this;
 
         treeTable.addMouseListener(new MouseAdapter() {
@@ -191,24 +206,35 @@ public class CybernodeUtilizationPanel extends JPanel {
             }
 
             public void mouseClicked(MouseEvent e) {
+                int row = treeTable.getSelectedRow();
+                if (row == -1)
+                    return;
                 if (e.getClickCount() == 2) {
-                    int row = treeTable.getSelectedRow();
-                    if (row == -1)
-                        return;
-                    DefaultMutableTreeNode node = utilizationModel.getNode(row);
+                    AbstractMutableTreeTableNode node = utilizationModel.getNode(row);
                     if(node instanceof ServiceNode) {
-                        ServiceItem item =
-                            graphViewAdapter.getServiceItem(
-                                ((ServiceNode)node).getServiceElement(),
-                                ((ServiceNode)node).getUuid());
+                        ServiceItem item = graphViewAdapter.getServiceItem(((ServiceNode)node).getServiceElement(),
+                                                                           ((ServiceNode)node).getUuid());
                         if(item!=null)
                             adminManager.doShowAdminUI(item, graphViewAdapter.getMain());
-                    }                    
+                    } else if(node instanceof CybernodeNode) {
+                        ServiceItem item = ((CybernodeNode)node).getServiceItem();
+                        if(item!=null)
+                            adminManager.doShowAdminUI(item, graphViewAdapter.getMain());
+                    }
+                } else if(e.getClickCount()==1) {
+                    AbstractMutableTreeTableNode node = utilizationModel.getNode(row);
+                    if(node instanceof DeploymentNode) {
+                        if(treeTable.isExpanded(row)) {
+                            treeTable.collapseRow(row);
+                        } else {
+                            treeTable.expandRow(row);
+                        }
+                    }
                 }
             }
         });
 
-        treeTable.setColumnSelectionAllowed(false);
+        //treeTable.setColumnSelectionAllowed(false);
         //treeTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         treeTable.getTableHeader().addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -217,7 +243,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                                                                 e.getY()));
                     String columnName = utilizationModel.getColumnName(ndx);
                     utilizationModel.tableComparator.setColumnToSort(columnName);
-                    utilizationModel.sortTable();
+                    //utilizationModel.sortTable();
                     e.getComponent().repaint();                    
                 }
             }
@@ -235,8 +261,10 @@ public class CybernodeUtilizationPanel extends JPanel {
         /* Set first column renderer */
         TableColumn tc = treeTable.getColumnModel().getColumn(0);
         tc.setHeaderRenderer (iconHeaderRenderer);
+        tc.setCellRenderer(new IconTableCellRenderer(graphViewAdapter));
 
-        setSelectedColumns(selectedColumns);                               
+
+        //setSelectedColumns(selectedColumns);
 
         JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
         toolBar.setFloatable(false);
@@ -257,9 +285,9 @@ public class CybernodeUtilizationPanel extends JPanel {
         collapse.setToolTipText("Collapse all Cybernodes");
         collapse.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int row = treeTable.getTree().getRowCount() - 1;
+                int row = treeTable.getRowCount() - 1;
                 while (row >= 0) {
-                    treeTable.getTree().collapseRow(row);
+                    treeTable.collapseRow(row);
                     row--;
                 }
                 expandAll = false;
@@ -274,8 +302,8 @@ public class CybernodeUtilizationPanel extends JPanel {
         expand.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int row = 0;
-                while (row < treeTable.getTree().getRowCount()) {
-                    treeTable.getTree().expandRow(row);
+                while (row < treeTable.getRowCount()) {
+                    treeTable.expandRow(row);
                     row++;
                 }
                 expandAll = true;
@@ -332,20 +360,24 @@ public class CybernodeUtilizationPanel extends JPanel {
                 treeTable.getColumnModel().removeColumn(col);
         }
         for(String col : selectedColumns) {
-            TableColumn tc = insertColumn(col, treeTable.getColumnCount());
-            tc.setHeaderRenderer (iconHeaderRenderer);
+            //TableColumn tc = insertColumn(col, treeTable.getColumnCount());
+            //tc.setHeaderRenderer (iconHeaderRenderer);
         }
 
-        ((DefaultTableModel)treeTable.getModel()).fireTableDataChanged();
+        java.util.List<String> columns = new ArrayList<String>();
+        Collections.addAll(columns, selectedColumns);
+        utilizationModel.setColumnIdentifiers(columns);
+
+        //((DefaultTableModel)treeTable.getModel()).fireTableDataChanged();
     }
 
-    TableColumn insertColumn(String headerLabel, int vColIndex) {
+    /*TableColumn insertColumn(String headerLabel, int vColIndex) {
         TableColumn col = betterAddColumn(treeTable, headerLabel);
         treeTable.moveColumn(treeTable.getColumnCount()-1, vColIndex);
         return col;
     }
 
-    TableColumn betterAddColumn(JTable table, String headerLabel) {
+    TableColumn betterAddColumn(JXTreeTable table, String headerLabel) {
         DefaultTableModel model = (DefaultTableModel)table.getModel();
         TableColumn col = new TableColumn(model.getColumnCount());
 
@@ -355,9 +387,8 @@ public class CybernodeUtilizationPanel extends JPanel {
         }
         col.setHeaderValue(headerLabel);
         table.addColumn(col);
-        model.addColumn(headerLabel);
         return col;
-    }
+    }*/
 
     public boolean getExpandAll() {
         return expandAll;
@@ -380,14 +411,14 @@ public class CybernodeUtilizationPanel extends JPanel {
     }*/
 
     public void sortTable() {
-        utilizationModel.sortTable();
+        //utilizationModel.sortTable();
     }
 
     public int getCount() {
         return treeTable.getRowCount();
     }
 
-    class UtilizationTreeTable extends JTreeTable {
+/*    class UtilizationTreeTable extends JTreeTable {
         public UtilizationTreeTable(TreeTableModel model) {
             super(model, colorManager, graphViewAdapter);
         }
@@ -453,9 +484,9 @@ public class CybernodeUtilizationPanel extends JPanel {
             return component;
         }
 
-        /*
+        *//*
          * Returns the appropriate background color for the given row.
-         */
+         *//*
         //protected Color colorForRow(int row) {
         //    return (row % 2 == 0) ? Color.LIGHT_GRAY : getBackground();
         //}
@@ -474,7 +505,7 @@ public class CybernodeUtilizationPanel extends JPanel {
             }
             return mRes;
         }
-    }
+    }*/
 
     private JPanel createStatusPanel() {
         final JPanel panel = new JPanel() {
@@ -495,12 +526,12 @@ public class CybernodeUtilizationPanel extends JPanel {
         int LINE_HEIGHT = 14;
         int BASE_LINE = 15;
 
-        ComputeResourceUtilization[] crus = utilizationModel.getValues();
+        /*ComputeResourceUtilization[] crus = utilizationModel.getValues();*/
 
         //long uTime = System.currentTimeMillis();
         //long cpuTime = uTime;
 
-        for (ComputeResourceUtilization cru : crus) {
+        /*for (ComputeResourceUtilization cru : crus) {
             if (cru == null)
                 continue;
             double value = cru.getUtilization();
@@ -509,9 +540,9 @@ public class CybernodeUtilizationPanel extends JPanel {
                 //uHighAt = crus[i].getAddress();
                 //uTime = System.currentTimeMillis();
             }
-        }
+        }*/
 
-        for (ComputeResourceUtilization cru : crus) {
+        /*for (ComputeResourceUtilization cru : crus) {
             if (cru == null)
                 continue;
             double value = getMeasuredValue("CPU", cru);
@@ -520,7 +551,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                 //cpuHighAt = crus[i].getAddress();
                 //cpuTime = System.currentTimeMillis();
             }
-        }
+        }*/
 
         Font defaultFont = COMMON_FONT;
         FontMetrics fontMetrics = g.getFontMetrics(defaultFont);
@@ -546,9 +577,17 @@ public class CybernodeUtilizationPanel extends JPanel {
                      BASE_LINE + LINE_HEIGHT);
     }
 
-    public void addCybernode(CybernodeNode item) {
-        utilizationModel.addItem(item);
+    public void addCybernode(final ServiceItem item,
+                             final CybernodeAdmin admin,
+                             final ComputeResourceUtilization cru,
+                             final UtilizationColumnManager utilizationColumnManager) {
+        CybernodeNode node = new CybernodeNode(item,
+                                               admin,
+                                               cru,
+                                               new ColumnHelper(utilizationColumnManager, treeTable));
+        utilizationModel.addItem(node);
         statusPanel.repaint();
+        treeTable.expandAll();
     }
 
     public void removeCybernode(Cybernode item) {
@@ -556,10 +595,17 @@ public class CybernodeUtilizationPanel extends JPanel {
         statusPanel.repaint();
     }    
 
-    public void update(CybernodeNode item) {
-        int row = utilizationModel.getItemRow(item.getCybernode());
+    public void update(final ServiceItem item,
+                       final CybernodeAdmin admin,
+                       final ComputeResourceUtilization cru,
+                       final UtilizationColumnManager utilizationColumnManager) {
+        CybernodeNode node = new CybernodeNode(item,
+                                               admin,
+                                               cru,
+                                               new ColumnHelper(utilizationColumnManager, treeTable));
+        int row = utilizationModel.getItemRow(node.getCybernode());
         if (row != -1) {
-            utilizationModel.setValueAt(item, row);
+            utilizationModel.setValueAt(node, row);
         } else {
             System.err.println("Could not update Cybernode at ["+item+"], " +
                                "unable to find table row");
@@ -571,19 +617,18 @@ public class CybernodeUtilizationPanel extends JPanel {
             List<CybernodeNode> nodes = new ArrayList<CybernodeNode>();
             public void run() {
                 for(int i=0; i<utilizationModel.getRoot().getChildCount(); i++) {
-                    nodes.add((CybernodeNode)utilizationModel.getChild(
-                        utilizationModel.getRoot(), i));
+                    nodes.add((CybernodeNode)utilizationModel.getChild(utilizationModel.getRoot(), i));
                 }
 
-                TreePath selectionPath = treeTable.getTree().getSelectionPath();
+                //TreePath selectionPath = treeTable.getSelectionPath();
                 for(CybernodeNode node : nodes) {
                     if(node.getHostName().equals(hostAddress)) {
                         utilizationModel.setServices(node);
                     }
                 }
-                if(selectionPath!=null) {
-                    treeTable.getTree().setSelectionPath(selectionPath);
-            }
+                //if(selectionPath!=null) {
+                //    treeTable.setSelectionPath(selectionPath);
+            //}
             }
         });
     }
@@ -592,33 +637,35 @@ public class CybernodeUtilizationPanel extends JPanel {
      * The UtilizationModel extends AbstractTableModel providing the model to
      * display usage information on Cybernodes
      */
-    class UtilizationTreeModel extends AbstractTreeTableModel {
+    class UtilizationTreeModel extends DefaultTreeTableModel {
         final UtilizationComparator tableComparator = new UtilizationComparator();
         final static String FIXED_COLUMN = "Host Name";
-        NumberFormat percentFormatter;
-        NumberFormat numberFormatter;
 
 
-        public UtilizationTreeModel(DefaultMutableTreeNode root) {
-            super(root);
-            percentFormatter = NumberFormat.getPercentInstance();
-            numberFormatter = NumberFormat.getNumberInstance();
-            /* Display 3 digits of precision */
-            percentFormatter.setMaximumFractionDigits(3);
-            /* Display 2 digits of precision */
-            numberFormatter.setGroupingUsed(false);
-            numberFormatter.setMaximumFractionDigits(2);
+        public UtilizationTreeModel(TreeTableNode root, java.util.List<String> columns) {
+            super(root, columns);
         }
 
-        public boolean isCellEditable(Object node, int column) {
+        /*ComputeResourceUtilization[] getValues() {
+            ComputeResourceUtilization[] crus =
+                new ComputeResourceUtilization[getRoot().getChildCount()];
+            for (int i = 0; i < getRoot().getChildCount(); i++) {
+                crus[i] = ((CybernodeNode) getRoot().getChildAt(i)).getComputeResourceUtilization();
+            }
+            return (crus);
+        }*/
+
+
+
+        /*public boolean isCellEditable(Object node, int column) {
             return column == 0;
         }
 
         public Class getColumnClass(int column) {
             return (column == 0 ? TreeTableModel.class : String.class);
         }
-
-        public Object getValueAt(Object node, int columnIndex) {
+*/
+        /*public Object getValueAt(Object node, int columnIndex) {
             if (node instanceof ServiceNode) {
                 ServiceNode sn = (ServiceNode)node;
                 if (columnIndex > 0) {
@@ -634,7 +681,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                 return node.toString();
             }
             String value;
-            if(node!=null) {
+            if(node!=null && node instanceof CybernodeNode) {
                 CybernodeNode c = (CybernodeNode) node;
                 if(columnIndex==0) {
                     value =  c.getHostName();
@@ -646,113 +693,14 @@ public class CybernodeUtilizationPanel extends JPanel {
                 value = "";
             }
             return value;
-        }
-
-        String getColumnValue(int columnIndex,
-                              ComputeResourceUtilization cru,
-                              boolean includeSystemInfo) {
-            String cName = getColumnName(columnIndex);
-
-            if(cName==null) {
-                System.out.println(">> FAILED!!!, getColumnValue for index ("+columnIndex+")");
-                return null;
-            }
-            String value = null;
-
-            if(cru==null)
-                return "?";
-
-            if(includeSystemInfo) {
-                if(cName.equals(Constants.UTIL_PERCENT_CPU)) {
-                    CpuUtilization cpu = cru.getCpuUtilization();
-                    value = (cpu == null ? "?" : formatPercent(cpu.getValue()));
-
-                } else if(cName.equals(Constants.UTIL_PERCENT_MEMORY)) {
-                    SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-                    value = (mem == null ? "?" : formatPercent(mem.getValue()));
-
-                } else if(cName.equals(Constants.UTIL_TOTAL_MEMORY)) {
-                    SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-                    value = (mem == null ? "?" : format(mem.getTotal()," MB"));
-
-                } else if(cName.equals(Constants.UTIL_FREE_MEMORY)) {
-                    SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-                    value = (mem == null ? "?" : format(mem.getFree()," MB"));
-
-                } else if(cName.equals(Constants.UTIL_USED_MEMORY)) {
-                    SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-                    value = (mem == null ? "?" : format(mem.getUsed()," MB"));
-
-                } else if(cName.equals(Constants.UTIL_PERCENT_DISK)) {
-                    DiskSpaceUtilization disk = cru.getDiskSpaceUtilization();
-                    value = (disk==null?"?" : formatPercent(disk.getValue()));
-
-                } else if(cName.equals(Constants.UTIL_AVAIL_DISK)) {
-                    DiskSpaceUtilization disk = cru.getDiskSpaceUtilization();
-                    value = (disk==null?"?" : format(disk.getAvailable()/GB," GB"));
-
-                } else if(cName.equals(Constants.UTIL_TOTAL_DISK)) {
-                    DiskSpaceUtilization disk = cru.getDiskSpaceUtilization();
-                    value = (disk==null?"?" : format(disk.getCapacity()/GB," GB"));
-                }
-            }
-
-            if(cName.equals(Constants.UTIL_PERCENT_CPU_PROC)) {
-                value = formatPercent(getMeasuredValue(SystemWatchID.PROC_CPU, cru));
-
-            } else if(cName.equals(Constants.UTIL_PERCENT_HEAP_JVM)) {
-                value = formatPercent(getMeasuredValue(SystemWatchID.JVM_MEMORY, cru));
-                //ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-                //value = (mem==null?"?" : format(mem.getUsedHeap()));
-
-            } else if(cName.equals(Constants.UTIL_HEAP_MEM_JVM)) {
-                ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-                //value = (mem==null?"?" : format(mem.getCommittedHeap())+" MB");
-                value = (mem==null?"?" : format(mem.getUsedHeap()," MB"));
-
-            } else if(cName.equals(Constants.UTIL_HEAP_MEM_AVAIL)) {
-                ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-                //value = (mem==null?"?" : format(mem.getCommittedHeap())+" MB");
-                value = (mem==null?"?" : format(mem.getCommittedHeap(), " MB"));
-
-            } else if(cName.equals(Constants.UTIL_REAL_MEM_PROC)) {
-                ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-                value = (mem==null?"?" : format(mem.getResident(), " MB"));
-            }
-
-            return (value);
-        }
-
-        String formatPercent(Double value) {
-            if (value != null && !Double.isNaN(value))
-                return (percentFormatter.format(value.doubleValue()));
-            return ("?");
-        }
-
-        String format(Double value, String units) {
-            if (value != null && !Double.isNaN(value) && value!=-1)
-                return (numberFormatter.format(value.doubleValue())+units);
-            return ("?");
-        }
-
-
-        ComputeResourceUtilization[] getValues() {
-            ComputeResourceUtilization[] crus =
-                new ComputeResourceUtilization[getRoot().getChildCount()];
-            for (int i = 0; i < root.getChildCount(); i++) {
-                crus[i] = ((CybernodeNode) root.getChildAt(i)).getComputeResourceUtilization();
-            }
-            return (crus);
-        }
+        }*/
 
         int getNumInUse() {
             int inUse = 0;
-            for (int i = 0; i < root.getChildCount(); i++) {
-                CybernodeNode node = (CybernodeNode) root.getChildAt(i);
+            for (int i = 0; i < getRoot().getChildCount(); i++) {
+                CybernodeNode node = (CybernodeNode) getRoot().getChildAt(i);
                 try {
-                    Integer num =
-                        ((CybernodeAdmin) node.getCybernode().getAdmin()).
-                            getServiceCount();
+                    Integer num = ((CybernodeAdmin) node.getCybernode().getAdmin()).getServiceCount();
                     if (num > 0)
                         inUse++;
                 } catch (Throwable t) {
@@ -766,19 +714,19 @@ public class CybernodeUtilizationPanel extends JPanel {
         }
 
         private synchronized void addItem(CybernodeNode item) {
-            insertNodeInto(item, root, root.getChildCount());
-            treeTable.getTree().makeVisible(new TreePath(item.getPath()));
+            insertNodeInto(item, (MutableTreeTableNode)getRoot(), getRoot().getChildCount());
+            //treeTable.makeVisible(new TreePath(item.getPath()));
             setServices(item);
             if(autoSort)
                 sortTable();
         }
 
         void removeItem(Cybernode item) {
-            for (int i = 0; i < root.getChildCount(); i++) {
-                CybernodeNode node = (CybernodeNode) root.getChildAt(i);
+            for (int i = 0; i < getRoot().getChildCount(); i++) {
+                CybernodeNode node = (CybernodeNode) getRoot().getChildAt(i);
                 if (item.equals(node.getCybernode())) {
                     removeNodeFromParent(node);
-                    nodeStructureChanged(root);
+                    //nodeStructureChanged(getRoot());
                     if(autoSort)
                         sortTable();
                     break;
@@ -788,8 +736,8 @@ public class CybernodeUtilizationPanel extends JPanel {
 
         int getItemRow(Cybernode item) {
             int rowCounter = 0;
-            for (int i = 0; i < root.getChildCount(); i++) {
-                CybernodeNode node = (CybernodeNode) root.getChildAt(i);
+            for (int i = 0; i < getRoot().getChildCount(); i++) {
+                CybernodeNode node = (CybernodeNode) getRoot().getChildAt(i);
                 if (item.equals(node.getCybernode())) {
                     return (rowCounter);
                 }
@@ -797,7 +745,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                 for (int j = 0; j < node.getChildCount(); j++) {
                     DefaultMutableTreeNode t =
                         (DefaultMutableTreeNode) node.getChildAt(j);
-                    if (treeTable.getTree().isVisible(new TreePath(t.getPath()))) {
+                    if (treeTable.isVisible(new TreePath(t.getPath()))) {
                         rowCounter++;
                     }
                 }
@@ -806,36 +754,35 @@ public class CybernodeUtilizationPanel extends JPanel {
         }
 
         ServiceNode getServiceNode(int row) {
-            DefaultMutableTreeNode t = getNode(row);
+            AbstractMutableTreeTableNode t = getNode(row);
             return (t instanceof ServiceNode ? (ServiceNode)t : null);
         }
 
         public CybernodeNode getCybernodeCRU(int row) {
-            DefaultMutableTreeNode t = getNode(row);
+            AbstractMutableTreeTableNode t = getNode(row);
             return (t instanceof CybernodeNode ? (CybernodeNode)t : null);
         }
 
-        public CRUNode getCRUNode(int row) {
-            DefaultMutableTreeNode t = getNode(row);
+        /*public CRUNode getCRUNode(int row) {
+            AbstractMutableTreeTableNode t = getNode(row);
             return (t instanceof CRUNode ?
                     (CRUNode)t : null);
         }
 
-        public DefaultMutableTreeNode getNode(int row) {
+        */public AbstractMutableTreeTableNode getNode(int row) {
             int rowCounter = 0;
-            DefaultMutableTreeNode node = null;
+            AbstractMutableTreeTableNode node = null;
 
-            for (int i = 0; i < root.getChildCount(); i++) {
-                DefaultMutableTreeNode tn = (DefaultMutableTreeNode)root.getChildAt(i);
+            for (int i = 0; i < getRoot().getChildCount(); i++) {
+                AbstractMutableTreeTableNode tn = (AbstractMutableTreeTableNode) getRoot().getChildAt(i);
                 if (rowCounter == row) {
                     node = tn;
                     break;
                 }
                 rowCounter++;
                 for (int j = 0; j < tn.getChildCount(); j++) {
-                    DefaultMutableTreeNode t =
-                        (DefaultMutableTreeNode) tn.getChildAt(j);
-                    if (treeTable.getTree().isVisible(new TreePath(t.getPath()))) {
+                    AbstractMutableTreeTableNode t = (AbstractMutableTreeTableNode) tn.getChildAt(j);
+                    if (treeTable.isVisible(treeTable.getPathForRow(rowCounter))) {
                         if (rowCounter == row) {
                             node = t;
                             break;
@@ -844,23 +791,23 @@ public class CybernodeUtilizationPanel extends JPanel {
                     }
                 }
 
-                if(node!=null)
+                if (node != null)
                     break;
             }
             return node;
         }
 
-        public int getColumnCount() {
+        /*public int getColumnCount() {
             return (treeTable==null?1:
                     treeTable.getColumnModel().getColumnCount());
             //return (columnNames.length);
-        }
+        }*/
 
         public int getCybernodeCount() {
-            return (root.getChildCount());
+            return (getRoot().getChildCount());
         }
 
-        public String getColumnName(int index) {
+        /*public String getColumnName(int index) {
             if(index==0)
                 return FIXED_COLUMN;
             String cName = null;
@@ -869,32 +816,31 @@ public class CybernodeUtilizationPanel extends JPanel {
                 cName = (String)column.getHeaderValue();
             }
             return cName;
-        }
+        }*/
 
         public void setValueAt(Object item, int row) {
             CybernodeNode node = getCybernodeCRU(row);
-            TreePath selectionPath = treeTable.getTree().getSelectionPath();
+            //TreePath selectionPath = treeTable.getSelectionPath();
             if (node != null) {
                 node.setComputeResourceUtilization(((CybernodeNode)item).getComputeResourceUtilization());
                 setServices(node);
-                nodeChanged(node);
+                //nodeChanged(node);
             }
 
-            if(selectionPath!=null) {
+            /*if(selectionPath!=null) {
                 treeTable.getTree().setSelectionPath(selectionPath);
             }
-            if(autoSort)
+            */if(autoSort)
                 sortTable();
         }
 
-        @SuppressWarnings("unchecked")
+        /*@SuppressWarnings("unchecked")
         void sortTable() {
             Map<CybernodeNode, Boolean> expandMap = new HashMap<CybernodeNode, Boolean>();
-            ArrayList<CybernodeNode> children = Collections.list(root.children());
+            ArrayList<CybernodeNode> children = Collections.list(getRoot().children());
             for (CybernodeNode child : children) {
                 expandMap.put(child,
-                              treeTable.getTree().isExpanded(
-                                  new TreePath(child.getPath())));
+                              treeTable.isExpanded(new TreePath(child.getPath())));
 
             }
 
@@ -903,24 +849,22 @@ public class CybernodeUtilizationPanel extends JPanel {
             Collections.sort(sortedChildren, tableComparator);
             if(sortedChildren.equals(children))
                 return;
-            root.removeAllChildren();
+            getRoot().removeAllChildren();
             for (CybernodeNode child : sortedChildren) {
                 root.add(child);
             }
             nodeStructureChanged(root);
-            children = Collections.list(root.children());
+            children = Collections.list(getRoot().children());
             for (CybernodeNode child : children) {
                 if(expandMap.get(child))
                     treeTable.getTree().expandPath(new TreePath(child.getPath()));
             }
-        }
+        }*/
 
         private void setServices(CybernodeNode node) {
             java.util.List<ServiceRecord> serviceList = new ArrayList<ServiceRecord>();
             try {
-                ServiceRecord[] records =
-                    node.getCybernode()
-                        .getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
+                ServiceRecord[] records = node.getCybernode().getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
                 serviceList.addAll(Arrays.asList(records));
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -952,12 +896,12 @@ public class CybernodeUtilizationPanel extends JPanel {
 
             /* Add new services */
             for (ServiceRecord record : serviceList) {
-                ServiceNode sNode = new ServiceNode(record);
+                ServiceNode sNode = new ServiceNode(record, node.getColumnHelper());
                 setServiceNodeUtilization(sNode, node.getAdmin());
                 utilizationModel.insertNodeInto(sNode, node, node.getChildCount());
-                if(expandAll) {
-                    treeTable.getTree().makeVisible(new TreePath(sNode.getPath()));
-                }
+            }
+            if(expandAll) {
+                treeTable.expandRow(this.getItemRow(node.getCybernode()));
             }
         }
 
@@ -1000,8 +944,8 @@ public class CybernodeUtilizationPanel extends JPanel {
                 String hn2 = cru2.getHostName();
                 order = getOrder(hn1.compareTo(hn2));
             } else  {
-                Double d1 = getMeasuredResourceValue(columnName, cru1);
-                Double d2 = getMeasuredResourceValue(columnName, cru2);
+                Double d1 = MeasuredValueHelper.getMeasuredResourceValue(columnName, cru1);
+                Double d2 = MeasuredValueHelper.getMeasuredResourceValue(columnName, cru2);
                 order = getOrder(d1.compareTo(d2));
             }
             return (order);
@@ -1019,77 +963,9 @@ public class CybernodeUtilizationPanel extends JPanel {
             }
             return (order);
         }
-
     }
 
-    private Double getMeasuredValue(String label,
-                                    ComputeResourceUtilization cru) {
-        Double value = Double.NaN;
-        for (MeasuredResource mRes : cru.getMeasuredResources()) {
-            if (mRes.getIdentifier().equals(label)) {
-                value = mRes.getValue();
-                break;
-            }
-        }
-        return value;
-    }
 
-    private double getMeasuredResourceValue(String cName,
-                                            ComputeResourceUtilization cru) {
-        double value = 0;
-        if(cName.equals(Constants.UTIL_PERCENT_CPU)) {
-            CpuUtilization cpu = cru.getCpuUtilization();
-            value = (cpu == null ? 0 : cpu.getValue());
-
-        } else if(cName.equals(Constants.UTIL_PERCENT_MEMORY)) {
-            SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-            value = (mem == null ? 0 : mem.getValue());
-
-        } else if(cName.equals(Constants.UTIL_TOTAL_MEMORY)) {
-            SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-            value = (mem == null ? 0 : mem.getTotal());
-
-        } else if(cName.equals(Constants.UTIL_FREE_MEMORY)) {
-            SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-            value = (mem == null ? 0 : mem.getFree());
-
-        } else if(cName.equals(Constants.UTIL_USED_MEMORY)) {
-            SystemMemoryUtilization mem = cru.getSystemMemoryUtilization();
-            value = (mem == null ? 0 : mem.getUsed());
-
-        } else if(cName.equals(Constants.UTIL_PERCENT_DISK)) {
-            DiskSpaceUtilization disk = cru.getDiskSpaceUtilization();
-            value = (disk==null?0 : disk.getValue());
-
-        } else if(cName.equals(Constants.UTIL_AVAIL_DISK)) {
-            DiskSpaceUtilization disk = cru.getDiskSpaceUtilization();
-            value = (disk==null?0 : disk.getAvailable()/GB);
-
-        } else if(cName.equals(Constants.UTIL_TOTAL_DISK)) {
-            DiskSpaceUtilization disk = cru.getDiskSpaceUtilization();
-            value = (disk==null?0 : disk.getCapacity()/GB);
-
-        } else if(cName.equals(Constants.UTIL_PERCENT_CPU_PROC)) {
-            value = getMeasuredValue("CPU (JVM)", cru);
-
-        } else if(cName.equals(Constants.UTIL_PERCENT_HEAP_JVM)) {
-            value = getMeasuredValue("Memory", cru);
-
-        } else if(cName.equals(Constants.UTIL_HEAP_MEM_JVM)) {
-            ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-            value = (mem==null?0 : mem.getUsedHeap());
-
-        } else if(cName.equals(Constants.UTIL_HEAP_MEM_AVAIL)) {
-            ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-            value = (mem==null?0 : mem.getCommittedHeap());
-
-        } else if(cName.equals(Constants.UTIL_REAL_MEM_PROC)) {
-            ProcessMemoryUtilization mem = cru.getProcessMemoryUtilization();
-            value = (mem==null?0 : mem.getResident());
-        }
-
-        return value;
-    }
 
     /**
      * Renderer to draw sort direction icons
@@ -1126,11 +1002,26 @@ public class CybernodeUtilizationPanel extends JPanel {
         }
     }
 
-
+    class ServiceNodeTreeCellRenderer extends DefaultTreeCellRenderer {
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree,
+                                                      Object value,
+                                                      boolean sel,
+                                                      boolean expanded,
+                                                      boolean leaf,
+                                                      int row,
+                                                      boolean hasFocus) {
+            Component component = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            if(value instanceof ServiceNode) {
+                System.out.println("===> "+component.getClass().getName());
+            }
+            return component;
+        }
+    }
     class ServiceItemAccessor {
-        DefaultMutableTreeNode node;
+        TreeTableNode node;
 
-        ServiceItemAccessor(DefaultMutableTreeNode node) {
+        ServiceItemAccessor(TreeTableNode node) {
             this.node = node;
         }
 
@@ -1139,11 +1030,33 @@ public class CybernodeUtilizationPanel extends JPanel {
             if(node instanceof CybernodeNode) {
                 item = ((CybernodeNode)node).getServiceItem();
             } else {
-                item = graphViewAdapter.getServiceItem(
-                    ((ServiceNode)node).getServiceElement(),
-                    ((ServiceNode)node).getUuid());
+                item = graphViewAdapter.getServiceItem(((ServiceNode)node).getServiceElement(),
+                                                       ((ServiceNode)node).getUuid());
             }
             return item;
+        }
+    }
+
+    class RootNode extends AbstractMutableTreeTableNode {
+
+        @Override
+        public Object getValueAt(int i) {
+            return null;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 2;
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return false;
+        }
+
+        @Override
+        public boolean getAllowsChildren() {
+            return true;
         }
     }
 }

@@ -19,6 +19,8 @@ import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.discovery.DiscoveryManagement;
 import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
+import org.rioproject.tools.ui.servicenotification.ProvisionFailureEventTable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,14 +34,11 @@ public class UtilitiesPanel extends JPanel {
     private ProvisionFailureEventTable provisionFailureEventTable;
 
     public UtilitiesPanel(CybernodeUtilizationPanel cup,
-                          ColorManager colorManager,
                           Configuration config,
                           Properties props) {
         super(new BorderLayout());
 
-        provisionFailureEventTable = new ProvisionFailureEventTable(colorManager,
-                                                                    config,
-                                                                    props);
+        provisionFailureEventTable = new ProvisionFailureEventTable(config, props);
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.add("Utilization", cup);

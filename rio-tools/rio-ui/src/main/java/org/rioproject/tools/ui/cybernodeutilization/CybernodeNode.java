@@ -17,12 +17,11 @@ package org.rioproject.tools.ui.cybernodeutilization;
 
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.system.ComputeResourceUtilization;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Simple data structure for holding cybernode proxy and compute resource
@@ -30,23 +29,32 @@ import javax.swing.tree.DefaultMutableTreeNode;
  *
  * @author Dennis Reedy
  */
-public class CybernodeNode extends DefaultMutableTreeNode implements CRUNode {
-    ServiceItem item;
-    Cybernode cybernode;
-    ComputeResourceUtilization cru;
-    String hostName;
-    CybernodeAdmin admin;
+public class CybernodeNode extends AbstractMutableTreeTableNode implements CRUNode {
+    private final ServiceItem item;
+    private final Cybernode cybernode;
+    private ComputeResourceUtilization cru;
+    private String hostName;
+    private final CybernodeAdmin admin;
+    private final ColumnHelper columnHelper;
 
-    public CybernodeNode(ServiceItem item, CybernodeAdmin admin, ComputeResourceUtilization cru) {
+    public CybernodeNode(final ServiceItem item,
+                         final CybernodeAdmin admin,
+                         final ComputeResourceUtilization cru,
+                         final ColumnHelper columnHelper) {
         super(item);
         this.item = item;
         this.cybernode = (Cybernode) item.service;
         this.admin = admin;
         this.cru = cru;
+        this.columnHelper = columnHelper;
     }
 
     public CybernodeAdmin getAdmin() {
         return admin;
+    }
+
+    public ColumnHelper getColumnHelper() {
+        return columnHelper;
     }
 
     public String getHostName() {
@@ -78,7 +86,7 @@ public class CybernodeNode extends DefaultMutableTreeNode implements CRUNode {
         return true;
     }
 
-    public void setComputeResourceUtilization(ComputeResourceUtilization cru) {
+    public void setComputeResourceUtilization(final ComputeResourceUtilization cru) {
         this.cru = cru;
     }
 
@@ -92,5 +100,21 @@ public class CybernodeNode extends DefaultMutableTreeNode implements CRUNode {
 
     public Cybernode getCybernode() {
         return cybernode;
+    }
+
+    @Override
+    public Object getValueAt(final int column) {
+        String value;
+        if(column==0) {
+            value =  getHostName();
+        } else {
+            value = columnHelper.getColumnValue(column, getComputeResourceUtilization(), true);
+        }
+        return value;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnHelper.getColumnCount();
     }
 }

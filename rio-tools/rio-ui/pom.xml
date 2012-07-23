@@ -48,6 +48,13 @@
             <groupId>net.jini.lookup</groupId>
             <artifactId>serviceui</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swingx</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -70,6 +77,7 @@
                                     <include>org.rioproject:rio-api</include>
                                     <include>net.jini.lookup:jmx-lookup</include>
                                     <include>net.jini.lookup:serviceui</include>
+                                    <include>org.swinglabs:swingx</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

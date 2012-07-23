@@ -2,7 +2,6 @@ package org.rioproject.tools.ui.servicenotification;
 
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.tools.ui.Constants;
-import org.rioproject.tools.ui.treetable.RemoteServiceEventNode;
 
 import java.util.logging.LogRecord;
 

@@ -50,11 +50,6 @@ public abstract class RemoteServiceEventNode <T extends RemoteServiceEvent> exte
     }
 
     @Override
-    public int getColumnCount() {
-        return 3;
-    }
-
-    @Override
     public boolean getAllowsChildren() {
         return false;
     }

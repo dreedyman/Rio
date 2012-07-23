@@ -23,10 +23,6 @@ import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
-import org.rioproject.tools.ui.servicenotification.DeploymentNode;
-import org.rioproject.tools.ui.servicenotification.ProvisionFailureEventNode;
-import org.rioproject.tools.ui.servicenotification.ServiceLogEventNode;
-import org.rioproject.tools.ui.treetable.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +69,6 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
 
     private void addItem(AbstractMutableTreeTableNode node, AbstractMutableTreeTableNode parent) {
         insertNodeInto(node, parent, parent.getChildCount());
-        //treeTable.makeVisible(new TreePath(node.getPath()));
     }
 
     public void removeItem(int row) {
@@ -89,7 +84,7 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
         }
     }
 
-    public RemoteServiceEvent getItem(int row) {
+    public RemoteServiceEvent getRemoteServiceEvent(int row) {
         AbstractMutableTreeTableNode node = getNode(row);
         RemoteServiceEvent event = null;
         if(node instanceof RemoteServiceEventNode) {
@@ -98,7 +93,7 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
         return event;
     }
 
-    public List<RemoteServiceEventNode> getRemoteServiceEventNode(ServiceElement elem) {
+    public List<RemoteServiceEventNode> getRemoteServiceEventNodes(ServiceElement elem) {
         List<RemoteServiceEventNode> eNodes = new ArrayList<RemoteServiceEventNode>();
         for (int i = 0; i < getRoot().getChildCount(); i++) {
             AbstractMutableTreeTableNode dn =(AbstractMutableTreeTableNode) getRoot().getChildAt(i);
@@ -147,7 +142,6 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
             rowCounter++;
             for (int j = 0; j < tn.getChildCount(); j++) {
                 AbstractMutableTreeTableNode t = (AbstractMutableTreeTableNode) tn.getChildAt(j);
-
                 if (treeTable.isVisible(treeTable.getPathForRow(rowCounter))) {
                     if (rowCounter == row) {
                         node = t;
@@ -171,6 +165,5 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
         }
         return rowCounter;
     }
-
 
 }

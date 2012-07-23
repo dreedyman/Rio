@@ -2,7 +2,6 @@ package org.rioproject.tools.ui.servicenotification;
 
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.tools.ui.Constants;
-import org.rioproject.tools.ui.treetable.RemoteServiceEventNode;
 
 /**
  * @author Dennis Reedy
@@ -46,6 +45,11 @@ public class ProvisionFailureEventNode extends RemoteServiceEventNode<ProvisionF
     @Override
     public String toString() {
         return getServiceName();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return 3;
     }
 
     @Override
