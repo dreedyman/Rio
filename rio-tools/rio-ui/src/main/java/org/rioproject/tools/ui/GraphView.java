@@ -73,7 +73,6 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicToolTipUI;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.io.BufferedReader;
@@ -90,8 +89,8 @@ import java.util.Vector;
  * @author Dennis Reedy
  */
 public class GraphView extends Display {
-    private Graph g;
-    private Node root;
+    private final Graph g;
+    private final Node root;
     //private SearchTupleSet search;
     private static final Schema DECORATOR_SCHEMA = PrefuseLib.getVisualItemSchema();
     static {
@@ -99,21 +98,20 @@ public class GraphView extends Display {
     	DECORATOR_SCHEMA.setDefault(VisualItem.TEXTCOLOR, ColorLib.rgb(255,250,250));
     	DECORATOR_SCHEMA.setDefault(VisualItem.FONT, FontLib.getFont("Tahoma",12));
     }
-    private NodeLinkTreeLayout graphLayout;
-    private JFrame frame;
+    private final NodeLinkTreeLayout graphLayout;
+    private final JFrame frame;
     private final Visualization vis = m_vis;
-    private static final Predicate rootFilter =
-        ExpressionParser.predicate("INDEGREE()==0");
+    private static final Predicate rootFilter = ExpressionParser.predicate("INDEGREE()==0");
     private int orientation;
     private SingleComponentInfiniteProgress progressPanel;
-    private Configuration config;
-    private ColorManager colorManager;
+    private final Configuration config;
+    private final ColorManager colorManager;
     private static final String COMPONENT = GraphView.class.getPackage().getName();
 
-    public GraphView(JFrame frame,
-                     Configuration config,
-                     ColorManager colorManager,
-                     int orientation) {
+    public GraphView(final JFrame frame,
+                     final Configuration config,
+                     final ColorManager colorManager,
+                     final int orientation) {
         super(new Visualization());
         this.frame = frame;
         this.config = config;
@@ -322,7 +320,9 @@ public class GraphView extends Display {
                                                   "waitMessage",
                                                   String.class,
                                                   waitMessage);
-        } catch (ConfigurationException e) {}
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+        }
         progressPanel.setText(waitMessage);
         progressPanel.start();
     }
@@ -357,12 +357,12 @@ public class GraphView extends Display {
         }
     }
 
-    public void zoom(double degree) {
+    /*public void zoom(final double degree) {
         zoom(new Point2D.Float(),degree);
         repaint();
-    }
+    }*/
 
-    public void setOrientation(int orientation) {
+    public void setOrientation(final int orientation) {
         this.orientation = orientation;
         synchronized(vis) {
             DefaultRendererFactory drf = new DefaultRendererFactory();
@@ -380,7 +380,7 @@ public class GraphView extends Display {
         }             
     }
 
-    private prefuse.render.Renderer getEdgeTypeRenderer(int orientation) {
+    private prefuse.render.Renderer getEdgeTypeRenderer(final int orientation) {
         prefuse.render.Renderer edgeTypeRenderer;
         if(orientation==prefuse.Constants.ORIENT_TOP_BOTTOM) {
             edgeTypeRenderer = new EdgeRenderer(prefuse.Constants.EDGE_TYPE_LINE);
@@ -398,7 +398,7 @@ public class GraphView extends Display {
     /*
      * Add an OperationalString
      */
-    public void addOpString(ProvisionMonitor monitor, OperationalString opstring) {
+    public void addOpString(final ProvisionMonitor monitor, final OperationalString opstring) {
         if(getOpStringNode(opstring.getName())==null) {
             synchronized(vis) {
                 vis.cancel("filter");
@@ -432,7 +432,7 @@ public class GraphView extends Display {
         //vis.run("filter");
     }
 
-    void removeOpString(String name) {
+    void removeOpString(final String name) {
         synchronized(vis) {
             GraphUtil.removeOpString(g, vis, name);
         }
@@ -448,7 +448,7 @@ public class GraphView extends Display {
     /*
      * Update an OperationalString
      */
-    void updateOpString(ProvisionMonitor monitor, OperationalString opString) {
+    void updateOpString(final ProvisionMonitor monitor, final OperationalString opString) {
         synchronized(vis) {
             vis.cancel("filter");
             GraphNode opStringNode = getOpStringNode(opString.getName());
@@ -552,7 +552,7 @@ public class GraphView extends Display {
         return(list.toArray(new String[list.size()]));
     }
 
-    void addServiceElement(ServiceElement sElem, ProvisionMonitor monitor) {
+    void addServiceElement(final ServiceElement sElem, final ProvisionMonitor monitor) {
         synchronized(vis) {
             vis.cancel("filter");
             doAddServiceElement(sElem, monitor);
@@ -560,43 +560,34 @@ public class GraphView extends Display {
         }
     }
 
-    private void doAddServiceElement(ServiceElement sElem, ProvisionMonitor monitor) {
+    private void doAddServiceElement(final ServiceElement sElem, final ProvisionMonitor monitor) {
         GraphNode opStringNode =
             getOpStringNode(sElem.getOperationalStringName());
         if(opStringNode!=null) {
             GraphNode elemNode = getServiceElementNode(opStringNode, sElem);
             if(elemNode == null) {
-                Node serviceNode = GraphUtil.addService(g,
-                                                        opStringNode.getTableNode(),
-                                                        sElem);
+                Node serviceNode = GraphUtil.addService(g, opStringNode.getTableNode(), sElem);
                 GraphNode sgn =
                     (GraphNode)serviceNode.get(Constants.USER_OBJECT);
                 sgn.setProvisionMonitor(monitor);
                 for(int i=0; i<sElem.getPlanned(); i++) {
-                    doAddServiceBeanInstance(opStringNode.getOpStringName(),
-                                             serviceNode,
-                                             monitor);
+                    doAddServiceBeanInstance(opStringNode.getOpStringName(), serviceNode, monitor);
                 }
                 setOpStringState(sElem.getOperationalStringName());
             }
         }
     }
 
-    private GraphNode doAddServiceBeanInstance(String opStringName,
-                                               Node serviceNode,
-                                               ProvisionMonitor monitor) {
-        Node instanceNode =
-            GraphUtil.addServiceInstance(g,
-                                         serviceNode,
-                                         opStringName,
-                                         Constants.AVAILABLE_ID);
-        GraphNode serviceInstance =
-            (GraphNode)instanceNode.get(Constants.USER_OBJECT);
+    private GraphNode doAddServiceBeanInstance(final String opStringName,
+                                               final Node serviceNode,
+                                               final ProvisionMonitor monitor) {
+        Node instanceNode = GraphUtil.addServiceInstance(g, serviceNode, opStringName, Constants.AVAILABLE_ID);
+        GraphNode serviceInstance = (GraphNode)instanceNode.get(Constants.USER_OBJECT);
         serviceInstance.setProvisionMonitor(monitor);
         return serviceInstance;
     }
 
-    void removeServiceElement(ServiceElement elem) {
+    void removeServiceElement(final ServiceElement elem) {
         synchronized(vis) {
             vis.cancel("filter");
             GraphNode serviceElementNode = getServiceElementNode(elem);
@@ -612,7 +603,7 @@ public class GraphView extends Display {
     /*
      * Indicate that a service has been terminated or failed
      */
-    void serviceDown(ServiceElement sElem, ServiceBeanInstance instance) {
+    void serviceDown(final ServiceElement sElem, final ServiceBeanInstance instance) {
         synchronized(vis) {
             GraphNode node = getServiceBeanInstance(sElem, instance);
             if(node!=null) {
@@ -627,8 +618,7 @@ public class GraphView extends Display {
                                            "ServiceElement node is null");
                         return;
                     }
-                    GraphNode[] children = GraphUtil.getChildren(g,
-                                                                 sElemNode.getTableNode());
+                    GraphNode[] children = GraphUtil.getChildren(g, sElemNode.getTableNode());
                     if(children.length>sElem.getPlanned()) {
                         vis.cancel("filter");
                         g.removeTuple(node.getTableNode());
@@ -642,16 +632,15 @@ public class GraphView extends Display {
                     vis.run("repaint");
                 }
             } else {
-                if (instance != null && instance.getServiceBeanConfig() != null)
+                if (instance != null && instance.getServiceBeanConfig() != null) {
                     System.err.println("!!! serviceDown(): " +
                                        "["+sElem.getName()+"] " +
                                        "instance ["+
                                        instance.getServiceBeanConfig().getInstanceID()+"] " +
                                        "node is null");
-                else
-                    System.err.println("!!! serviceDown(): " +
-                                       "["+sElem.getName()+"] " +
-                                       "instance [??] node is null");
+                } else {
+                    System.err.println("!!! serviceDown(): ["+sElem.getName()+"] instance [??] node is null");
+                }
             }
         }
     }
@@ -659,24 +648,25 @@ public class GraphView extends Display {
     /*
      * Indicate that a service instance has been terminated or failed
      */
-    private void serviceInstanceDown(ServiceElement sElem,
-                                     ServiceBeanInstance instance,
-                                     GraphNode node) {
+    private void serviceInstanceDown(final ServiceElement sElem,
+                                     final ServiceBeanInstance instance,
+                                     final GraphNode node) {
         node.setInstance(null);
         node.setServiceItem(null);
-        if(node.getTableNode()!=null)
+        if(node.getTableNode()!=null) {
             node.getTableNode().set(Constants.STATE, Constants.FAILED);
-        else
+        } else {
             System.err.println("!!! ["+sElem.getName()+"] " +
                                "instance ["+
                                instance.getServiceBeanConfig().getInstanceID()+"] " +
                                "no TableNode");
+        }
     }
 
     /*
      * Indicate that a service is active
      */
-    GraphNode serviceUp(ServiceElement sElem, ServiceBeanInstance instance) {
+    GraphNode serviceUp(final ServiceElement sElem, final ServiceBeanInstance instance) {
         GraphNode node;
         synchronized(vis) {
             node = getServiceBeanInstance(sElem, instance);
@@ -715,7 +705,7 @@ public class GraphView extends Display {
     /*
      * Increment a service instance
      */
-    void serviceIncrement(ServiceElement sElem) {
+    void serviceIncrement(final ServiceElement sElem) {
         synchronized(vis) {
             vis.cancel("filter");
             GraphNode sElemNode = getServiceElementNode(sElem);
@@ -730,7 +720,7 @@ public class GraphView extends Display {
     /*
      * Decrement a service instance
      */
-    void serviceDecrement(ServiceElement sElem, ServiceBeanInstance instance) {
+    void serviceDecrement(final ServiceElement sElem, final ServiceBeanInstance instance) {
         GraphNode node;
         synchronized(vis) {
             GraphNode sElemNode = getServiceElementNode(sElem);
@@ -754,16 +744,15 @@ public class GraphView extends Display {
     /*
      * Set the state of the OperationalString
      */
-    void setOpStringState(String name) {
+    void setOpStringState(final String name) {
         GraphNode opStringNode = getOpStringNode(name);
         if(opStringNode==null)
-            throw new IllegalStateException("Expected to obtain an " +
-                                            "opstring node for ["+name+"]");
+            throw new IllegalStateException("Expected to obtain an opstring node for ["+name+"]");
         GraphUtil.setOpStringState(g, opStringNode);
         vis.run("repaint");
     }
 
-    void setGraphNodeServiceItem(GraphNode node, ServiceItem item) {
+    void setGraphNodeServiceItem(final GraphNode node, final ServiceItem item) {
         if(item!=null && node !=null) {
             node.setServiceItem(item);
             if(node.getTableNode()!=null) {
@@ -776,8 +765,7 @@ public class GraphView extends Display {
     /*
      * Get the GraphNode for a ServiceBeanInstance
      */
-    GraphNode getServiceBeanInstance(ServiceElement sElem,
-                                     ServiceBeanInstance instance) {
+    GraphNode getServiceBeanInstance(final ServiceElement sElem, final ServiceBeanInstance instance) {
         GraphNode instanceNode = null;
         GraphNode sElemNode = getServiceElementNode(sElem);
         if(sElemNode!=null) {
@@ -789,8 +777,7 @@ public class GraphView extends Display {
     /*
      * Get the GraphNode for a ServiceBeanInstance
      */
-    GraphNode getServiceBeanInstance(GraphNode sElemNode,
-                                     ServiceBeanInstance instance) {
+    GraphNode getServiceBeanInstance(final GraphNode sElemNode, final ServiceBeanInstance instance) {
         GraphNode instanceNode = null;
         GraphNode[] instances = new GraphNode[0];
         if(sElemNode.getCollapsedVertex()!=null) {
@@ -831,7 +818,7 @@ public class GraphView extends Display {
     /*
      * Get the GraphNode for a ServiceBeanInstance
      */
-    GraphNode getServiceBeanInstance(GraphNode sElemNode, Uuid uuid) {
+    GraphNode getServiceBeanInstance(final GraphNode sElemNode, final Uuid uuid) {
         GraphNode instanceNode = null;
         GraphNode[] instances = new GraphNode[0];
         if(sElemNode.getCollapsedVertex()!=null) {
@@ -858,15 +845,13 @@ public class GraphView extends Display {
     /*
      * Get the TableNode for a ServiceElement
      */
-    GraphNode getServiceElementNode(ServiceElement sElem) {
+    GraphNode getServiceElementNode(final ServiceElement sElem) {
         GraphNode sElemNode = null;
-        GraphNode opStringNode =
-            getOpStringNode(sElem.getOperationalStringName());
+        GraphNode opStringNode = getOpStringNode(sElem.getOperationalStringName());
         if(opStringNode!=null) {
             sElemNode = getServiceElementNode(opStringNode, sElem);
         } else {
-            System.err.println("### getServiceElementNode: " +
-                               "OpString node null for ["+sElem.getOperationalStringName()+"]");
+            System.err.println("### getServiceElementNode: OpString node null for ["+sElem.getOperationalStringName()+"]");
         }
         return(sElemNode);
     }
@@ -874,16 +859,14 @@ public class GraphView extends Display {
     /*
      * Get the TableNode for a ServiceElement
      */
-    GraphNode getServiceElementNode(GraphNode opStringNode, ServiceElement sElem) {
+    GraphNode getServiceElementNode(final GraphNode opStringNode, final ServiceElement sElem) {
         GraphNode sElemNode = null;
         GraphNode[] nodes;
         if(opStringNode.isCollapsed()) {
             ArrayList<GraphNode> list = new ArrayList<GraphNode>();
             GraphListener.CollapsedOpString collapsed =
-                (GraphListener.CollapsedOpString)
-                    opStringNode.getCollapsedVertex();
-            GraphListener.CollapsedServiceElement[] elems =
-                collapsed.getInstances();
+                (GraphListener.CollapsedOpString)opStringNode.getCollapsedVertex();
+            GraphListener.CollapsedServiceElement[] elems = collapsed.getInstances();
             for(GraphListener.CollapsedServiceElement elem : elems) {
                 list.add(elem.getServiceElementNode());
             }
@@ -905,7 +888,7 @@ public class GraphView extends Display {
     /*
      * Get an OperationalString GraphNode
      */
-    GraphNode getOpStringNode(String name) {        
+    GraphNode getOpStringNode(final String name) {
         GraphNode opStringNode = null;
         for(Iterator it=g.neighbors(root); it.hasNext();) {
             Tuple t = (Tuple)it.next();
@@ -925,7 +908,7 @@ public class GraphView extends Display {
     /*
      * Remove a ServiceElement's instances
      */
-    int removeServiceInstances(GraphNode node) {
+    int removeServiceInstances(final GraphNode node) {
         ArrayList<GraphNode> list = new ArrayList<GraphNode>();
         for (Iterator it = g.outNeighbors(node.getTableNode()); it.hasNext();) {
             Tuple t = (Tuple) it.next();
@@ -951,11 +934,11 @@ public class GraphView extends Display {
      * desired root
      */
     class TreeRootAction extends GroupAction {
-        public TreeRootAction(String graphGroup) {
+        public TreeRootAction(final String graphGroup) {
             super(graphGroup);
         }
 
-        public void run(double frac) {
+        public void run(final double frac) {
             TupleSet focus = vis.getGroup(Visualization.FOCUS_ITEMS);
             if (focus == null || focus.getTupleCount() == 0)
                 return;            
@@ -984,7 +967,7 @@ public class GraphView extends Display {
      * Set node label colors
      */
     class TextColorAction extends ColorAction {
-        public TextColorAction(String group) {
+        public TextColorAction(final String group) {
             super(group, VisualItem.TEXTCOLOR, ColorLib.gray(0));
             add("_hover", ColorLib.rgb(255, 250, 250));
         }
@@ -994,7 +977,7 @@ public class GraphView extends Display {
      * Set node label labels
      */
     class MyLabelRenderer extends LabelRenderer {
-          public String getText(VisualItem vi) {
+          public String getText(final VisualItem vi) {
               if(vi.getRow()==-1)
                   return("");
               Object o = vi.get(Constants.USER_OBJECT);
@@ -1036,12 +1019,11 @@ public class GraphView extends Display {
      * Renders shapes for the graph
      */
     class CustomShapeRenderer extends ShapeRenderer {
-         private Rectangle2D frame = new Rectangle2D.Double();
-         private final RoundRectangle2D theRoundRectangle =
-             new RoundRectangle2D.Float();
+         private final Rectangle2D frame = new Rectangle2D.Double();
+         private final RoundRectangle2D theRoundRectangle = new RoundRectangle2D.Float();
          private final GeneralPath thePolygon = new GeneralPath();
 
-        protected Shape getRawShape(VisualItem item) {
+        protected Shape getRawShape(final VisualItem item) {
             Shape shape;
             if(item.getRow()==-1 || item.getSourceTuple().getRow()==-1) {
                 return(null);
@@ -1110,7 +1092,7 @@ public class GraphView extends Display {
         /*
          * Returns a hexagon shape of the given dimenisions.
          */
-        private Shape getCollapsedShape(float x, float y, float width, float height) {
+        private Shape getCollapsedShape(final float x, final float y, final float width, final float height) {
             thePolygon.reset();
             thePolygon.moveTo(x, y);
             thePolygon.lineTo(x+width, y);
@@ -1131,10 +1113,10 @@ public class GraphView extends Display {
      * of those bounds.
      */
     class LabelPositionLayout extends Layout {
-        public LabelPositionLayout(String group) {
+        public LabelPositionLayout(final String group) {
             super(group);
         }
-        public void run(double frac) {
+        public void run(final double frac) {
             Iterator iter = vis.items(m_group);
             while (iter.hasNext() ) {
                 DecoratorItem decorator = (DecoratorItem)iter.next();
@@ -1165,7 +1147,7 @@ public class GraphView extends Display {
     public static class MultiLineToolTipUI extends BasicToolTipUI {
         private String[] strs;
 
-        public void paint(Graphics g, JComponent c) {
+        public void paint(final Graphics g, final JComponent c) {
             FontMetrics metrics = g.getFontMetrics();
             Dimension size = c.getSize();
             g.setColor(c.getBackground());
@@ -1178,7 +1160,7 @@ public class GraphView extends Display {
             }
         }
 
-        public Dimension getPreferredSize(JComponent c) {
+        public Dimension getPreferredSize(final JComponent c) {
             FontMetrics metrics = c.getFontMetrics(c.getFont());
             String tipText = ((JToolTip) c).getTipText();
             if (tipText == null) {

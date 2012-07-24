@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author Dennis Reedy
@@ -38,6 +40,7 @@ import java.util.List;
 public class UtilizationTreeModel extends DefaultTreeTableModel {
     private boolean expandAll;
     private final JXTreeTable treeTable;
+    private final Executor updateHandler = Executors.newSingleThreadExecutor();
 
     public UtilizationTreeModel(final TreeTableNode root,
                                 final java.util.List<String> columns,
@@ -60,9 +63,6 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
                     inUse++;
             } catch (Throwable t) {
                 t.printStackTrace();
-                //if(!ThrowableUtil.isRetryable(t)) {
-                //    removeCybernode(node.cybernode);
-                //}
             }
         }
         return (inUse);
@@ -127,13 +127,29 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
         return (getRoot().getChildCount());
     }
 
-    public void updateCybernode(CybernodeNode node) {
+    public void updateCybernode(final CybernodeNode node) {
         int row = getCybernodeRow(node.getCybernode());
         if (row != -1) {
             setValueAt(node, row);
         } else {
             System.err.println("Could not update Cybernode at ["+node+"], unable to find table row");
         }
+    }
+
+    public void updateCybernodesAt(final String hostAddress) {
+        updateHandler.execute(new Runnable() {
+            List<CybernodeNode> nodes = new ArrayList<CybernodeNode>();
+            public void run() {
+                for(int i=0; i<getRoot().getChildCount(); i++) {
+                    nodes.add((CybernodeNode)getChild(getRoot(), i));
+                }
+                for(CybernodeNode node : nodes) {
+                    if(node.getHostName().equals(hostAddress)) {
+                        setServices(node);
+                    }
+                }
+            }
+        });
     }
 
     public void setValueAt(final Object item, final int row) {
@@ -145,7 +161,7 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
         }
     }
 
-    public void setServices(final CybernodeNode node) {
+    private void setServices(final CybernodeNode node) {
         java.util.List<ServiceRecord> serviceList = new ArrayList<ServiceRecord>();
         try {
             ServiceRecord[] records = node.getCybernode().getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);

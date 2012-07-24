@@ -40,8 +40,6 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * The CybernodeUtilizationPanel displays graphed and tabular information about
@@ -64,7 +62,6 @@ public class CybernodeUtilizationPanel extends JPanel {
     /* a reference to 'self' */
     private JPanel component;
     private boolean expandAll = false;
-    private final Executor updateHandler = Executors.newSingleThreadExecutor();
     private final GraphViewAdapter graphViewAdapter;
 
     public CybernodeUtilizationPanel(final GraphViewAdapter graphViewAdapter,
@@ -374,24 +371,7 @@ public class CybernodeUtilizationPanel extends JPanel {
     }
 
     public void updateCybernodesAt(final String hostAddress) {
-        updateHandler.execute(new Runnable() {
-            List<CybernodeNode> nodes = new ArrayList<CybernodeNode>();
-            public void run() {
-                for(int i=0; i<utilizationModel.getRoot().getChildCount(); i++) {
-                    nodes.add((CybernodeNode)utilizationModel.getChild(utilizationModel.getRoot(), i));
-                }
-
-                //TreePath selectionPath = treeTable.getSelectionPath();
-                for(CybernodeNode node : nodes) {
-                    if(node.getHostName().equals(hostAddress)) {
-                        utilizationModel.setServices(node);
-                    }
-                }
-                //if(selectionPath!=null) {
-                //    treeTable.setSelectionPath(selectionPath);
-            //}
-            }
-        });
+        utilizationModel.updateCybernodesAt(hostAddress);
     }
 
     /**
