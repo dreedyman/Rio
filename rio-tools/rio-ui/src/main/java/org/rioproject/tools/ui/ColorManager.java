@@ -39,16 +39,10 @@ public class ColorManager {
     public static final int OKAY_COLOR_RGB = ColorLib.rgb(35, 142, 35);
     public static final int FAILURE_COLOR_RGB = ColorLib.rgb(205,38,38);
     public static final int EDGE_COLOR_RGB = ColorLib.rgb(153, 153, 153);
-    public static final int NO_SERVICE_ITEM_BORDER_COLOR_RGB = ColorLib.rgb(255,0,0);
-    static final Color ROW_COLOR_1 = new Color(255, 255, 224);
-    static final Color ROW_COLOR_2 = new Color(230, 230, 250);
-    static final Color ROW_COLOR_3 = new Color(238, 233, 233);
-    static final Color ROW_COLOR_4 = new Color(255, 255, 240);
-    static final Color ROW_COLOR_5 = new Color(237, 237, 237);
+
     private Color okayColor;
     private Color warningColor;
     private Color failureColor;
-    private Color altRowColor;
     private ColorAction colorAction;
     private Predicate okayFilter;
     private Predicate ambiguousFilter;
@@ -58,10 +52,7 @@ public class ColorManager {
     public ColorManager(Properties props) {
         if(props==null)
             throw new IllegalArgumentException("properties is null");
-        int rgb = Integer.parseInt(props.getProperty(Constants.ALT_ROW_COLOR, Integer.toString(ROW_COLOR_5.getRGB())));
-        setAltRowColor(new Color(rgb));
-
-        rgb = Integer.parseInt(props.getProperty(Constants.FAILURE_COLOR, Integer.toString(FAILURE_COLOR_RGB)));
+        int rgb = Integer.parseInt(props.getProperty(Constants.FAILURE_COLOR, Integer.toString(FAILURE_COLOR_RGB)));
         setFailureColor(new Color(rgb));
 
         rgb = Integer.parseInt(props.getProperty(Constants.OKAY_COLOR, Integer.toString(OKAY_COLOR_RGB)));
@@ -133,19 +124,8 @@ public class ColorManager {
         }
     }
 
-    public Color getAltRowColor() {
-        return altRowColor;
-    }
-
-    public void setAltRowColor(Color altRowColor) {
-        if(altRowColor==null)
-            throw new IllegalArgumentException("color is null");
-        this.altRowColor = altRowColor;
-    }
-
     public Map<String, Color> getDefaultColorMap() {
         Map<String, Color> map = new HashMap<String, Color>();
-        map.put(Constants.ALT_ROW_COLOR, ColorManager.ROW_COLOR_5);
         map.put(Constants.FAILURE_COLOR, new Color(FAILURE_COLOR_RGB));
         map.put(Constants.OKAY_COLOR, new Color(OKAY_COLOR_RGB));
         map.put(Constants.WARNING_COLOR, new Color(WARNING_COLOR_RGB));

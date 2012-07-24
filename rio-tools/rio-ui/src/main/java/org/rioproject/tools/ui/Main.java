@@ -360,7 +360,6 @@ public class Main extends JFrame {
         }
 
         cup = new CybernodeUtilizationPanel(new GraphViewAdapter(this),
-                                            colorManager,
                                             utilizationColumnManager.getSelectedColumns(),
                                             startupProps);
         cup.setPreferredSize(new Dimension(Integer.MAX_VALUE, 200));
@@ -691,15 +690,11 @@ public class Main extends JFrame {
         props.put(Constants.FRAME_Y_POS, Double.toString(point.getY()));
 
         props.put(Constants.TREE_TABLE_AUTO_EXPAND, Boolean.toString(cup.getExpandAll()));
-        props.put(Constants.TREE_TABLE_AUTO_SORT, Boolean.toString(cup.getAutoSort()));
-        props.put(Constants.TREE_TABLE_SORTED_COLUMN_NAME, cup.getSortedColumnName());
 
         if(lastArtifact!=null)
             props.put(Constants.LAST_ARTIFACT, lastArtifact);
         props.put(Constants.LAST_DIRECTORY, lastDir.getAbsolutePath());
 
-        props.put(Constants.ALT_ROW_COLOR,
-                  Integer.toString(colorManager.getAltRowColor().getRGB()));
         props.put(Constants.FAILURE_COLOR,
                   Integer.toString(colorManager.getFailureColor().getRGB()));
         props.put(Constants.OKAY_COLOR,

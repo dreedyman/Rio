@@ -27,21 +27,17 @@ import org.rioproject.system.ComputeResourceUtilization;
  * @author Dennis Reedy
  */
 public class ServiceNode extends AbstractMutableTreeTableNode implements CRUNode {
-    private final String name;
-    private final Uuid uuid;
-    private final ServiceElement sElem;
     private ComputeResourceUtilization cru;
-    private final ColumnHelper columnHelper;
+    private final ColumnValueHelper columnValueHelper;
+    private final ServiceRecord serviceRecord;
 
-    public ServiceNode(final ServiceRecord record, final ColumnHelper columnHelper) {
-        this.name = record.getServiceElement().getName();
-        uuid = record.getServiceID();
-        sElem = record.getServiceElement();
-        this.columnHelper = columnHelper;
+    public ServiceNode(final ServiceRecord record, final ColumnValueHelper columnValueHelper) {
+        this.serviceRecord = record;
+        this.columnValueHelper = columnValueHelper;
     }
 
     public Uuid getUuid() {
-        return uuid;
+        return serviceRecord.getServiceID();
     }
 
     public boolean isLeaf() {
@@ -49,7 +45,7 @@ public class ServiceNode extends AbstractMutableTreeTableNode implements CRUNode
     }
 
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
@@ -58,15 +54,15 @@ public class ServiceNode extends AbstractMutableTreeTableNode implements CRUNode
     }
 
     public ServiceElement getServiceElement() {
-        return sElem;
+        return serviceRecord.getServiceElement();
     }
 
     public String getName() {
-        return name;
+        return serviceRecord.getServiceElement().getName();
     }
 
     public boolean isForked() {
-        return (sElem.forkService() || sElem.getExecDescriptor()!=null);
+        return (getServiceElement().forkService() || getServiceElement().getExecDescriptor()!=null);
     }
 
     public ComputeResourceUtilization getComputeResourceUtilization() {
@@ -79,13 +75,13 @@ public class ServiceNode extends AbstractMutableTreeTableNode implements CRUNode
 
     @Override
     public Object getValueAt(final int column) {
-        String value = null;
+        Object value = null;
         if(column==0) {
             value = getName();
         } else {
             if(getComputeResourceUtilization()!=null) {
                 ComputeResourceUtilization cru = getComputeResourceUtilization();
-                value = columnHelper.getColumnValue(column, cru, false);
+                value = columnValueHelper.getColumnValue(column, cru, false);
             }
         }
         return value;
@@ -93,6 +89,6 @@ public class ServiceNode extends AbstractMutableTreeTableNode implements CRUNode
 
     @Override
     public int getColumnCount() {
-        return columnHelper.getColumnCount();
+        return columnValueHelper.getColumnCount();
     }
 }

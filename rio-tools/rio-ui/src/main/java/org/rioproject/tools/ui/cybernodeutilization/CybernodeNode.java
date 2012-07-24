@@ -35,26 +35,26 @@ public class CybernodeNode extends AbstractMutableTreeTableNode implements CRUNo
     private ComputeResourceUtilization cru;
     private String hostName;
     private final CybernodeAdmin admin;
-    private final ColumnHelper columnHelper;
+    private final ColumnValueHelper columnValueHelper;
 
     public CybernodeNode(final ServiceItem item,
                          final CybernodeAdmin admin,
                          final ComputeResourceUtilization cru,
-                         final ColumnHelper columnHelper) {
+                         final ColumnValueHelper columnValueHelper) {
         super(item);
         this.item = item;
         this.cybernode = (Cybernode) item.service;
         this.admin = admin;
         this.cru = cru;
-        this.columnHelper = columnHelper;
+        this.columnValueHelper = columnValueHelper;
     }
 
     public CybernodeAdmin getAdmin() {
         return admin;
     }
 
-    public ColumnHelper getColumnHelper() {
-        return columnHelper;
+    public ColumnValueHelper getColumnHelper() {
+        return columnValueHelper;
     }
 
     public String getHostName() {
@@ -104,17 +104,17 @@ public class CybernodeNode extends AbstractMutableTreeTableNode implements CRUNo
 
     @Override
     public Object getValueAt(final int column) {
-        String value;
+        Object value;
         if(column==0) {
             value =  getHostName();
         } else {
-            value = columnHelper.getColumnValue(column, getComputeResourceUtilization(), true);
+            value = columnValueHelper.getColumnValue(column, getComputeResourceUtilization(), true);
         }
         return value;
     }
 
     @Override
     public int getColumnCount() {
-        return columnHelper.getColumnCount();
+        return columnValueHelper.getColumnCount();
     }
 }

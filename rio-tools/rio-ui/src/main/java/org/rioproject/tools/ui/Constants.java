@@ -61,7 +61,6 @@ public interface Constants {
 
     final String LAST_ARTIFACT = "last.artifact";
     final String LAST_DIRECTORY = "last.dir";
-    final String ALT_ROW_COLOR = "color.alt.row";
     final String FAILURE_COLOR = "color.failure";
     final String OKAY_COLOR = "color.okay";
     final String WARNING_COLOR = "color.warning";
@@ -77,8 +76,6 @@ public interface Constants {
     final String GRAPH_ORIENTATION_WEST = "0";
 
     final String TREE_TABLE_AUTO_EXPAND = "tree.table.expand";
-    final String TREE_TABLE_AUTO_SORT = "tree.table.sort";
-    final String TREE_TABLE_SORTED_COLUMN_NAME = "tree.table.sort.column";
 
     final String CYBERNODE_REFRESH_RATE = "cybernode.refresh.rate";
 

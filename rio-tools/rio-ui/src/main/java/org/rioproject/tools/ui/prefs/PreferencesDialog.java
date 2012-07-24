@@ -32,11 +32,13 @@ import java.util.Map;
  * @author Dennis Reedy
  */
 public class PreferencesDialog extends JDialog {
+    private final JFrame frame;
 
     public PreferencesDialog(final Main frame,
                              final GraphView graphView,
                              final CybernodeUtilizationPanel cybernodeUtil) {
         super(frame);
+        this.frame = frame;
         String frameTitle = frame.getTitle();
         frameTitle = (frameTitle.equals("")?"Rio UI":frameTitle);
         setTitle(frameTitle+" Preferences");
@@ -44,14 +46,10 @@ public class PreferencesDialog extends JDialog {
         JPanel pane = new JPanel();
         pane.setLayout(new BorderLayout(8, 8));
         final ColorManager colorManager = graphView.getColorManager();
-        final ColorPanel colorPanel =
-            new ColorPanel(colorManager.getAltRowColor(),
-                           colorManager.getFailureColor(),
-                           colorManager.getOkayColor(),
-                           colorManager.getWarningColor());
+        final ColorPanel colorPanel = new ColorPanel(colorManager.getFailureColor(),
+                                                     colorManager.getOkayColor(),
+                                                     colorManager.getWarningColor());
 
-        final TableSortPanel tableSortPanel =
-            new TableSortPanel(cybernodeUtil.getAutoSort());
 
         final CybernodePanel cybernodePanel =
             new CybernodePanel(frame.getCybernodeRefreshRate(),
@@ -61,7 +59,6 @@ public class PreferencesDialog extends JDialog {
         
         tabs.add("Utilization Table", cybernodePanel);
         tabs.add("Color Settings", colorPanel);
-        tabs.add("Sort Options", tableSortPanel);
         
         //pane.add(colorPanel, BorderLayout.CENTER);
         pane.add(tabs, BorderLayout.CENTER);
@@ -73,33 +70,25 @@ public class PreferencesDialog extends JDialog {
 
                 int refreshRate = cybernodePanel.getRefreshRate();
                 if(refreshRate==0) {
-                    JOptionPane.showMessageDialog(null,
-                                                  "The Cybernode Table " +
-                                                  "RefreshRate must be > 0",
+                    JOptionPane.showMessageDialog(frame,
+                                                  "The Cybernode Table RefreshRate must be > 0",
                                                   "Invalid Value",
                                                   JOptionPane.ERROR_MESSAGE);
                     tabs.setSelectedIndex(2);
                     return;
                 }
 
-                if(!colorManager.getAltRowColor().equals(
-                    colorPanel.getAltRowColor()))
-                    colorManager.setAltRowColor(colorPanel.getAltRowColor());
-
-                if(!colorManager.getFailureColor().equals(
-                    colorPanel.getFailureColor())) {
+                if(!colorManager.getFailureColor().equals(colorPanel.getFailureColor())) {
                     colorManager.setFailureColor(colorPanel.getFailureColor());
                     runVis = true;
                 }
 
-                if(!colorManager.getOkayColor().equals(
-                    colorPanel.getOkayColor())) {
+                if(!colorManager.getOkayColor().equals(colorPanel.getOkayColor())) {
                     colorManager.setOkayColor(colorPanel.getOkayColor());
                     runVis = true;
                 }
 
-                if(!colorManager.getWarningColor().equals(
-                    colorPanel.getWarningColor())) {
+                if(!colorManager.getWarningColor().equals(colorPanel.getWarningColor())) {
                     colorManager.setWarningColor(colorPanel.getWarningColor());
                     runVis = true;
                 }
@@ -111,8 +100,6 @@ public class PreferencesDialog extends JDialog {
                 String[] cols = cybernodePanel.getSelectedColumns();
                 frame.getUtilizationColumnManager().setSelectedColumns(cols);
                 cybernodeUtil.setSelectedColumns(cols);
-                cybernodeUtil.setAutoSort(tableSortPanel.getAutoSort());
-                cybernodeUtil.sortTable();
 
                 //System.out.println(getSize());
                 dispose();
@@ -126,7 +113,6 @@ public class PreferencesDialog extends JDialog {
         reset.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent event) {
                 Map<String, Color> colorMap = colorManager.getDefaultColorMap();
-                colorPanel.setAltRowColor(colorMap.get(Constants.ALT_ROW_COLOR));
                 colorPanel.setFailureColor(colorMap.get(Constants.FAILURE_COLOR));
                 colorPanel.setOkayColor(colorMap.get(Constants.OKAY_COLOR));
                 colorPanel.setWarningColor(colorMap.get(Constants.WARNING_COLOR));
@@ -146,27 +132,13 @@ public class PreferencesDialog extends JDialog {
             int height = 435;
             pack();
             setSize(width, height);
-            Dimension screenSize =
-                Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             int widthLoc = screenSize.width / 2 - width / 2;
             int heightLoc = screenSize.height / 2 - height / 2;
             setLocation(widthLoc, heightLoc);
+            setLocationRelativeTo(frame);
         }
         super.setVisible(visible);
-    }
-
-    class DisposeActionListener implements ActionListener {
-        JDialog dialog;
-
-        public DisposeActionListener(JDialog dialog) {
-            this.dialog = dialog;
-        }
-
-        public void actionPerformed(ActionEvent ae) {
-            //System.out.println("Size="+dialog.getSize());
-            //System.out.println("Source="+ae.getSource());
-            dialog.dispose();
-        }
     }
 
 }

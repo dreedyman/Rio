@@ -27,21 +27,17 @@ import java.lang.reflect.Field;
  * @author Dennis Reedy
  */
 public class ColorPanel extends JPanel {
-    Color altRowColor;
-    Color failureColor;
-    Color okayColor;
-    Color warningColor;
-    JComponent okayColorComp;
-    JComponent failureColorComp;
-    JComponent warningColorComp;
-    JComponent rowColorComp;
+    private Color failureColor;
+    private Color okayColor;
+    private Color warningColor;
+    private final JComponent okayColorComp;
+    private final JComponent failureColorComp;
+    private final JComponent warningColorComp;
            
-    public ColorPanel(Color altRowColor,
-                      Color failureColor,
+    public ColorPanel(Color failureColor,
                       Color okayColor,
                       Color warningColor) {
         super(new GridBagLayout());
-        this.altRowColor = altRowColor;
         this.warningColor = warningColor;
         this.failureColor = failureColor;
         this.okayColor = okayColor;
@@ -76,14 +72,6 @@ public class ColorPanel extends JPanel {
                                "warning status. The warning status is used if a deployed service is not registered into any lookup services",
                                setWarningColor);
 
-        Field setAltRowColor = getField("altRowColor", getClass());
-        rowColorComp =
-            makeColorComponent(altRowColor,
-                               "Alternate Row Color",
-                               "Press to choose the color for " +
-                               "alternating row color in the " +
-                               "Cybernode table",
-                               setAltRowColor);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 3;
@@ -116,14 +104,6 @@ public class ColorPanel extends JPanel {
         gbc.gridx = 3;
         gbc.gridy = 4;
         add(warningColorComp, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        add(new JLabel("Alternate Table Row"), gbc);
-
-        gbc.gridx = 3;
-        gbc.gridy = 5;
-        add(rowColorComp, gbc);
     }
 
     public Color getWarningColor() {
@@ -136,15 +116,6 @@ public class ColorPanel extends JPanel {
 
     public Color getFailureColor() {
         return failureColor;
-    }
-
-    public Color getAltRowColor() {
-        return altRowColor;
-    }
-
-    public void setAltRowColor(Color altRowColor) {
-        this.altRowColor = altRowColor;
-        rowColorComp.setBackground(altRowColor);
     }
 
     public void setFailureColor(Color failureColor) {
