@@ -1479,8 +1479,12 @@ public class ServiceElementManager implements InstanceIDManager {
 
         /* Remove all instances of the ServiceElement from InstantiatorResource objects */
         for(InstantiatorResource ir : instantiators) {
-            instance = ir.removeServiceElementInstance(svcElement, instance==null?serviceUuid:instance.getServiceBeanID());
-            if(instance!=null) {
+            ServiceBeanInstance sbi = ir.removeServiceElementInstance(svcElement, instance==null?serviceUuid:instance.getServiceBeanID());
+            if(sbi!=null) {
+                if(instance==null) {
+                    logger.warning("RESOLVED!!!!");
+                    instance = sbi;
+                }
                 mgrLogger.finer("Removed [%s] instance from %s",
                                 LoggingUtil.getLoggingName(svcElement), ir.getHostAddress());
                 break;
