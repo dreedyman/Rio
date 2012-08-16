@@ -113,18 +113,18 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
     /** The maximum time for a Lease: 1 day */
     public static final long DEFAULT_MAX_LEASE_TIME = 1000 * 60 * 60  * 24;
     /** This LandlordLessor's uuid */
-    Uuid uuid;
+    private final Uuid uuid;
     /** The Remote Landlord */
-    Landlord landlord;
+    private final Landlord landlord;
     /** The Exporter for the Landlord */
-    Exporter exporter;
+    private Exporter exporter;
     /** Factory we use to create leases */
-    LeaseFactory leaseFactory;
+    private final LeaseFactory leaseFactory;
     /** LeasePolicy */
-    LeasePeriodPolicy leasePolicy;
+    private LeasePeriodPolicy leasePolicy;
     /** Component for reading configuration entries and getting the Logger */
-    static final String COMPONENT = "org.rioproject.resources.servicecore";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    private static final String COMPONENT = "org.rioproject.resources.servicecore";
+    private static Logger logger = Logger.getLogger(COMPONENT);
 
     /**
      * Create a LandlordLessor
@@ -137,6 +137,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
     public LandlordLessor(Configuration config) throws RemoteException {
         this(config, null);
     }
+
     /**
      * Create a LandlordLessor
      * 
@@ -147,8 +148,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      *
      * @throws RemoteException if errors occur setting up infrastructure
      */
-    public LandlordLessor(Configuration config, LeasePeriodPolicy leasePolicy)
-    throws RemoteException {
+    public LandlordLessor(Configuration config, LeasePeriodPolicy leasePolicy) throws RemoteException {
         super();
         if (config == null)
             throw new IllegalArgumentException("config is null");
@@ -156,32 +156,23 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
         /* Get the LeasePeriodPolicy */
         final LeasePeriodPolicy defaultLeasePeriodPolicy =
             (leasePolicy==null?
-                new FixedLeasePeriodPolicy(DEFAULT_MAX_LEASE_TIME,
-                                           DEFAULT_LEASE_TIME):
+                new FixedLeasePeriodPolicy(DEFAULT_MAX_LEASE_TIME, DEFAULT_LEASE_TIME):
                 leasePolicy);
 
         try {
-            this.leasePolicy =
-            (LeasePeriodPolicy)Config.getNonNullEntry(config,
-                                                      COMPONENT,
-                                                      "landlordLeasePeriodPolicy",
-                                                      LeasePeriodPolicy.class,
-                                                      defaultLeasePeriodPolicy);
+            this.leasePolicy = (LeasePeriodPolicy)Config.getNonNullEntry(config,
+                                                                         COMPONENT,
+                                                                         "landlordLeasePeriodPolicy",
+                                                                         LeasePeriodPolicy.class,
+                                                                         defaultLeasePeriodPolicy);
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Getting LeasePeriodPolicy in LandlordLessor",
-                       e);
+            logger.log(Level.WARNING, "Getting LeasePeriodPolicy in LandlordLessor", e);
         }
         
         /* Create the default Exporter */
-        final Exporter defaultExporter = 
-            new BasicJeriExporter(TcpServerEndpoint.getInstance(0), 
-                                  new BasicILFactory());
+        final Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory());
         try {            
-            exporter = ExporterConfig.getExporter(config,
-                                                COMPONENT,
-                                                "landlordExporter", 
-                                                defaultExporter);
+            exporter = ExporterConfig.getExporter(config, COMPONENT, "landlordExporter", defaultExporter);
         } catch (ConfigurationException e) {
             logger.log(Level.WARNING, "Getting Exporter in LandlordLessor", e);
         }
@@ -209,9 +200,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
             unexported = exporter.unexport(force);
         } catch (Exception e) {
             if(logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
-                           "Unexporting LandlordLessor",
-                           e);
+                logger.log(Level.FINEST, "Unexporting LandlordLessor", e);
             }
         }
         return (unexported);
@@ -222,12 +211,9 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * 
      * @see org.rioproject.resources.servicecore.ResourceLessor#newLease
      */
-    public Lease newLease(LeasedResource resource, long duration)
-    throws LeaseDeniedException {
-        LeasePeriodPolicy.Result leasePeriod = leasePolicy.grant(resource,
-                                                                 duration);
-        Lease lease = leaseFactory.newLease(resource.getCookie(),
-                                            leasePeriod.expiration);
+    public Lease newLease(LeasedResource resource, long duration) throws LeaseDeniedException {
+        LeasePeriodPolicy.Result leasePeriod = leasePolicy.grant(resource, duration);
+        Lease lease = leaseFactory.newLease(resource.getCookie(), leasePeriod.expiration);
         resource.setExpiration(leasePeriod.expiration);
         addLeasedResource(resource);
         notifyLeaseRegistration(resource);
@@ -242,27 +228,23 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * <code>Lease.renew()</code> call
      * @return The new duration the lease should have
      */
-    public long renew(Uuid cookie, long extension) throws LeaseDeniedException,
-                                                          UnknownLeaseException {
+    public long renew(Uuid cookie, long extension) throws LeaseDeniedException, UnknownLeaseException {
         LeasedResource resource = getLeasedResource(cookie);
         long granted;
         if (resource == null)
             throw new UnknownLeaseException("No lease for cookie: " + cookie);
         long now = System.currentTimeMillis();
         if (resource.getExpiration() <= now) {
-            UnknownLeaseException e =
-                new UnknownLeaseException("Lease has already expired");
+            UnknownLeaseException e = new UnknownLeaseException("Lease has already expired");
             if(logger.isLoggable(Level.FINEST)) {
                 logger.finest("Lease has already expired by ["+
                               (now-resource.getExpiration())+"] milliseconds, "+
-                              "["+(now-resource.getExpiration())/1000+"] "+
-                              "seconds");
+                              "["+(now-resource.getExpiration())/1000+"] seconds");
                 logger.throwing(this.getClass().getName(), "renew", e);
             }
             throw e;
         }
-        LeasePeriodPolicy.Result leasePeriod = leasePolicy.renew(resource,
-                                                                 extension);
+        LeasePeriodPolicy.Result leasePeriod = leasePolicy.renew(resource, extension);
         resource.setExpiration(leasePeriod.expiration);
         granted = leasePeriod.duration;
         addLeasedResource(resource);
@@ -281,14 +263,12 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
     public Landlord.RenewResults renewAll(Uuid[] cookie, long[] extension) {
         int size = cookie.length;
         long[] granted = new long[size];
-        Exception[] denied = null;
+        Exception[] denied = new Exception[size];
         for (int i = 0; i < size; i++) {
             try {
                 granted[i] = renew(cookie[i], extension[i]);
                 denied[i] = null;
             } catch (Exception e) {
-                if (denied == null)
-                    denied = new Exception[size];
                 denied[i] = e;
             }
         }
@@ -312,16 +292,15 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * @param cookies Associated with the lease when it was created <br>
      */
     public Map cancelAll(Uuid[] cookies) {
-        int size = cookies.length;
         Map<Uuid, Exception> exceptionMap = null;
-        for (int i = 0; i < size; i++) {
+        for (Uuid cookie : cookies) {
             try {
-                cancel(cookies[i]);
+                cancel(cookie);
             } catch (Exception e) {
                 if (exceptionMap == null) {
                     exceptionMap = new HashMap<Uuid, Exception>();
                 }
-                exceptionMap.put(cookies[i], e);
+                exceptionMap.put(cookie, e);
             }
         }
         /*
