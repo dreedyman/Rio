@@ -31,6 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public abstract class ResourceLessor {
     /** A hash of resources to cookies */
     private final Map<Uuid, LeasedResource> resources = new ConcurrentHashMap<Uuid, LeasedResource>();
@@ -51,7 +52,7 @@ public abstract class ResourceLessor {
      * @return Returns true if the lease on the passed resource has not expired
      * yet
      */
-    public boolean ensure(LeasedResource resource) {
+    public boolean ensure(final LeasedResource resource) {
         return(resource.getExpiration() > currentTime());
     }
 
@@ -74,7 +75,7 @@ public abstract class ResourceLessor {
      *
      * @return true if the lease was removed
      */
-    public boolean remove(ServiceResource resource) {
+    public boolean remove(final LeasedResource resource) {
         return (remove(resource.getCookie()));
     }
 
@@ -94,7 +95,7 @@ public abstract class ResourceLessor {
      *
      * @return boolean True if removed false if not removed
      */
-    boolean remove(Uuid cookie) {
+    boolean remove(final Uuid cookie) {
         LeasedResource resource;
         boolean removed = false;
         synchronized(resources) {
@@ -112,7 +113,7 @@ public abstract class ResourceLessor {
      * 
      * @param listener the LeaseListener to add
      */
-    public void addLeaseListener(LeaseListener listener) {
+    public void addLeaseListener(final LeaseListener listener) {
         listeners.add(listener);
     }
 
@@ -121,7 +122,7 @@ public abstract class ResourceLessor {
      * 
      * @param listener the LeaseListener to remove
      */
-    public void removeLeaseListener(LeaseListener listener) {
+    public void removeLeaseListener(final LeaseListener listener) {
         listeners.remove(listener);
     }
 
@@ -143,7 +144,7 @@ public abstract class ResourceLessor {
      *
      * @throws IllegalArgumentException if the resource is null
      */
-    protected void addLeasedResource(LeasedResource resource) {
+    protected void addLeasedResource(final LeasedResource resource) {
         if(resource == null)
             throw new IllegalArgumentException("resource is null");
         synchronized(this) {
@@ -167,7 +168,7 @@ public abstract class ResourceLessor {
      *
      * @throws IllegalArgumentException if the cookie is null
      */
-    protected LeasedResource getLeasedResource(Uuid cookie) {
+    protected LeasedResource getLeasedResource(final Uuid cookie) {
         if(cookie == null)
             throw new IllegalArgumentException("cookie is null");
         LeasedResource resource;
@@ -198,7 +199,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseRegistration(LeasedResource resource) {
+    protected void notifyLeaseRegistration(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.register(resource);
     }
@@ -208,7 +209,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseRenewal(LeasedResource resource) {
+    protected void notifyLeaseRenewal(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.renewed(resource);
     }
@@ -218,7 +219,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseExpiration(ServiceResource resource) {
+    protected void notifyLeaseExpiration(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.expired(resource);
     }
@@ -228,7 +229,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseRemoval(LeasedResource resource) {
+    protected void notifyLeaseRemoval(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.removed(resource);
     }
@@ -284,7 +285,7 @@ public abstract class ResourceLessor {
                                            ((ServiceResource) lr).getResource(),
                                            lr.getCookie()});
                         remove(lr.getCookie());
-                        notifyLeaseExpiration((ServiceResource)lr);
+                        notifyLeaseExpiration(lr);
                     }
                 }
             }
