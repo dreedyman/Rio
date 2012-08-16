@@ -42,19 +42,19 @@ public interface LeaseListener {
      * 
      * @param resource The resource associated with the expiration
      */
-    public void expired(LeasedResource resource);
+    void expired(LeasedResource resource);
 
     /**
      * Notifies the manager of a lease removal <br>
      * 
      * @param resource The resource associated with the removal
      */
-    public void removed(LeasedResource resource);
+    void removed(LeasedResource resource);
 
     /**
      * Notifies the manager of a lease renewel <br>
      * 
      * @param resource The resource associated with the renewal
      */
-    public void renewed(LeasedResource resource);
+    void renewed(LeasedResource resource);
 }
