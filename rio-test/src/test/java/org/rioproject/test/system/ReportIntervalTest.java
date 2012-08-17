@@ -71,7 +71,7 @@ public class ReportIntervalTest {
         for (MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
             mCap.setPeriod(5000);
         }
-        Utils.sleep(5000);
+        Utils.sleep(6000);
         Assert.assertEquals("Should have been notified once", 1, cro.count);
     }
 
