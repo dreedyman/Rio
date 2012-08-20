@@ -46,6 +46,7 @@ import org.rioproject.resources.servicecore.LandlordLessor;
 import org.rioproject.resources.servicecore.LeaseListenerAdapter;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.system.ResourceCapability;
+import org.rioproject.util.TimeConstants;
 import org.rioproject.watch.GaugeWatch;
 
 import java.io.IOException;
@@ -127,11 +128,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             throw new IllegalArgumentException("config is null");
         if(failureHandler==null)
             throw new IllegalArgumentException("failureHandler is null");
-        long ONE_MINUTE = 1000 * 60;
         /* 5 minute default Lease time */
-        long DEFAULT_LEASE_TIME = ONE_MINUTE*5;
+        long DEFAULT_LEASE_TIME = TimeConstants.FIVE_MINUTES;
         /* 1 day max lease time */
-        long DEFAULT_MAX_LEASE_TIME = ONE_MINUTE*60*24;
+        long DEFAULT_MAX_LEASE_TIME = TimeConstants.ONE_DAY;
 
         /* Get the Lease policy */
         LeasePeriodPolicy provisionerLeasePolicy =

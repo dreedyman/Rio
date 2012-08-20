@@ -36,6 +36,7 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.TimeConstants;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.StopWatch;
 import org.rioproject.watch.Watch;
@@ -78,7 +79,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     protected long sktime, ektime;
     protected MarshalledObject handback = null;
     /** Default Lease duration is 5 minutes */
-    public static final int DEFAULT_LEASE_DURATION = 1000 * 60 *5;
+    protected static final long DEFAULT_LEASE_DURATION = TimeConstants.FIVE_MINUTES;
     protected long leaseDuration = DEFAULT_LEASE_DURATION;
     protected StopWatch responseWatch = null;
     protected WatchDataSourceRegistry watchRegistry = null;
@@ -87,7 +88,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     private static final int DEFAULT_CONNECT_RETRY_COUNT = 3;
     /** How long to wait between retries */
     private long retryWait;
-    private static final int DEFAULT_RETRY_WAIT = 1000;
+    private static final long DEFAULT_RETRY_WAIT = TimeConstants.ONE_SECOND;
     public static final String RESPONSE_WATCH = "Response Time";
     static final String COMPONENT = "org.rioproject.event";
     /** The Logger */
@@ -276,8 +277,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @param handback The MarshalledObject to be used as a handback
      * @return true if the RemoteServiceEventListener has been added
      */
-    public boolean register(final RemoteServiceEventListener listener,
-                            final MarshalledObject handback) {
+    public boolean register(final RemoteServiceEventListener listener, final MarshalledObject handback) {
         this.handback = handback;
         boolean added = eventSubscribers.add(listener);
         return (added);
@@ -428,9 +428,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         EventRegistration eReg = null;
         Lease lease = connect(eventProducer, eventDesc);
         if(lease!=null) {
-            leaseTable.put(serviceID, new EventLeaseManager(eventProducer,
-                                                            lease,
-                                                            eventDesc));
+            leaseTable.put(serviceID, new EventLeaseManager(eventProducer, lease, eventDesc));
             eReg = eventRegistrationTable.get(eventDesc.eventID);
         }
         return (eReg);
@@ -448,34 +446,23 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         Lease lease = null;
         for(int i=0; i<connectRetries; i++) {
             try {
-                EventRegistration eReg = producer.register(eDesc,
-                                                           eventConsumer,
-                                                           handback,
-                                                           leaseDuration);
+                EventRegistration eReg = producer.register(eDesc, eventConsumer, handback, leaseDuration);
                 eventRegistrationTable.put(eDesc.eventID, eReg);
                 lease = (Lease)eventLeasePreparer.prepareProxy(eReg.getLease());
                 long leaseTime = lease.getExpiration() - System.currentTimeMillis();
                 if(leaseTime>0) {
                     if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Event Registration Lease acquired and prepared. "
-                                      + "Duration="
-                                      + leaseTime
-                                      + "("
-                                      + (leaseTime / 1000)
-                                      + " seconds)");
+                        logger.finest("Event Registration Lease acquired and prepared. " +
+                                      "Duration="+leaseTime+ " ("+ (leaseTime / 1000)+ " seconds)");
                     }
                     break;
                 } else {
-                    logger.log(Level.WARNING,
-                               "Invalid Lease time ["+leaseTime+"], "+
-                               "retry count ["+i+"]");
+                    logger.warning("Invalid Lease time ["+leaseTime+"], retry count ["+i+"]");
                     try {
                         lease.cancel();
                     } catch(Exception e ) {
                         if(logger.isLoggable(Level.FINEST))
-                            logger.log(Level.FINEST,
-                                       "Cancelling Lease with invalid lease time",
-                                       e);
+                            logger.log(Level.FINEST, "Cancelling Lease with invalid lease time", e);
                     }
                     if(retryWait>0) {
                         try {
@@ -522,8 +509,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * eventID, otherwise returns null
      */
     public Object getEventRegistrationSource(final long eventID) {
-        EventRegistration eReg = eventRegistrationTable.get(
-            eventID);
+        EventRegistration eReg = eventRegistrationTable.get(eventID);
         Object source = null;
         if(eReg!=null)
             source = eReg.getSource();
@@ -577,29 +563,6 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             throw new UnknownEventException("Unsupported event class");
         RemoteServiceEvent rsEvent = (RemoteServiceEvent)rEvent;
         service.submit(new ClientNotification(rsEvent));
-        /*long startTime = System.currentTimeMillis();
-        if(logger.isLoggable(Level.FINEST)) {
-            logger.finest("Received RemoteEvent ["
-                          + rEvent.getClass().getName()
-                          + "], "
-                          + "Number of subscribers : "
-                          + eventSubscribers.size());
-        }
-
-        RemoteServiceEventListener[] listeners = getListeners();
-        for (RemoteServiceEventListener listener : listeners) {
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Notify subscriber ["+listener.getClass().getName() + "]");
-            listener.notify(rsEvent);
-            received++;
-            printStats();
-        }
-
-        if(responseWatch != null) {
-            long now = System.currentTimeMillis();
-            long elapsed = now - startTime;
-            responseWatch.setElapsedTime(elapsed, now);
-        }*/
     }
 
     /**
@@ -621,8 +584,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @return An EventDescriptor if found or null if no match
      */
-    protected EventDescriptor getDescriptor(final Entry[] attrs,
-                                            final EventDescriptor template) {
+    protected EventDescriptor getDescriptor(final Entry[] attrs, final EventDescriptor template) {
         EventDescriptor matchedDescriptor = null;
         /* Traverse the attribute collection, for each EventDescriptor
          * attribute, first check if the attribute has a "matches" method. If it
@@ -631,8 +593,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             if (attr instanceof EventDescriptor) {
                 EventDescriptor ed = (EventDescriptor) attr;
                 try {
-                    ed.getClass().getMethod("matches",
-                                            EventDescriptor.class);
+                    ed.getClass().getMethod("matches", EventDescriptor.class);
                 } catch (NoSuchMethodException e) {
                     logger.log(Level.WARNING,
                                "Rio version mismatch, " +
@@ -648,8 +609,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             }
         }
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("Matched ["+template.toString()+"] ? "+
-                          (matchedDescriptor==null?"NO":"YES"));
+            logger.finest("Matched ["+template.toString()+"] ? "+(matchedDescriptor==null?"NO":"YES"));
         return (matchedDescriptor);
     }
 
@@ -667,13 +627,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         if(m == 0 && received > 0) {
             ektime = System.currentTimeMillis();
             float tmp = (ektime - sktime) / 1000.f;
-            logger.finest("Recvd ["
-                          + received
-                          + "]\t[1000/"
-                          + tmp
-                          + "]\t["
-                          + (1000.f / tmp)
-                          + "/Second]");
+            logger.finest(String.format("Recvd [%d], \t[1000/%f]\t[%f/Second]", received, tmp, 1000.f/tmp));
             sktime = System.currentTimeMillis();
         }
     }
@@ -725,9 +679,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         public void run() {
             long startTime = System.currentTimeMillis();
             if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("Received RemoteServiceEvent ["
-                              + rsEvent.getClass().getName()
-                              + "], Number of subscribers : "+ eventSubscribers.size());
+                logger.finest("Received RemoteServiceEvent ["+ rsEvent.getClass().getName()+ "], " +
+                              "Number of subscribers : "+ eventSubscribers.size());
             }
 
             RemoteServiceEventListener[] listeners = getListeners();

@@ -33,6 +33,7 @@ import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
+import org.rioproject.util.TimeConstants;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -109,9 +110,9 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
                                                               ReferentUuid,
                                                               ServerProxyTrust {
     /** The default time for a Lease: 1 hour */
-    public static final long DEFAULT_LEASE_TIME = 1000 * 60 * 60;
+    public static final long DEFAULT_LEASE_TIME = TimeConstants.ONE_HOUR;
     /** The maximum time for a Lease: 1 day */
-    public static final long DEFAULT_MAX_LEASE_TIME = 1000 * 60 * 60  * 24;
+    public static final long DEFAULT_MAX_LEASE_TIME = TimeConstants.ONE_DAY;
     /** This LandlordLessor's uuid */
     private final Uuid uuid;
     /** The Remote Landlord */
@@ -123,7 +124,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
     /** LeasePolicy */
     private LeasePeriodPolicy leasePolicy;
     /** Component for reading configuration entries and getting the Logger */
-    private static final String COMPONENT = "org.rioproject.resources.servicecore";
+    private static final String COMPONENT = LandlordLessor.class.getPackage().getName();
     private static Logger logger = Logger.getLogger(COMPONENT);
 
     /**

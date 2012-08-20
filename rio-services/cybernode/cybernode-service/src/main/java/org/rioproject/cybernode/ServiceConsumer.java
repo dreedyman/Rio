@@ -30,24 +30,28 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
-import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.deploy.DeployedService;
+import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
-import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.ResourceCapabilityChangeListener;
-import org.rioproject.util.TimeUtil;
 import org.rioproject.system.ComputeResource;
+import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.ResourceCapability;
+import org.rioproject.system.ResourceCapabilityChangeListener;
+import org.rioproject.util.TimeConstants;
+import org.rioproject.util.TimeUtil;
 
 import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.security.AccessControlException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -114,8 +118,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             throw new IllegalArgumentException("config is null");
         this.adapter = adapter;
         /* Establish the lease duration */
-        long ONE_MINUTE = 1000*60;
-        long DEFAULT_LEASE_TIME = ONE_MINUTE*30; /* 30 minutes */
+        long DEFAULT_LEASE_TIME = TimeConstants.ONE_MINUTE*30; /* 30 minutes */
         long MIN_LEASE_TIME = 10*1000; /* 10 seconds */
         provisionerLeaseDuration = Config.getLongEntry(config,
                                                        CONFIG_COMPONENT,
