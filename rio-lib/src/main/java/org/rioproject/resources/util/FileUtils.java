@@ -85,6 +85,8 @@ public final class FileUtils {
         boolean removed;
         if(file.isDirectory()) {
             File[] files = file.listFiles();
+            if(files==null)
+                return false;
             for (File f : files) {
                 if (f.isDirectory())
                     remove(f);
