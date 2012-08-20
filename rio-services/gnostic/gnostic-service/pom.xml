@@ -100,7 +100,7 @@
             <id>run-integration-test</id>
             <activation>
                 <file>
-                    <exists>${basedir}/../../../distribution/target/rio-${project.version}/lib</exists>
+                    <exists>${basedir}/../../../distribution/target/rio.dist</exists>
                 </file>
             </activation>
             <build>

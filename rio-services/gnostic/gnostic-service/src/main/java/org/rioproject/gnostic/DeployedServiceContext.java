@@ -29,6 +29,7 @@ import java.util.logging.Level;
 /**
  * Context for operating with deployed services
  */
+@SuppressWarnings("unused")
 public class DeployedServiceContext {
     private ProvisionMonitor monitor;
     private final static Map<ServiceElement, OperationalStringManager> deployed = new HashMap<ServiceElement, OperationalStringManager>();
