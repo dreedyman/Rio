@@ -45,7 +45,6 @@ import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
-import org.rioproject.jsb.JSBContext;
 import org.rioproject.jsb.JSBManager;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanActivation.LifeCycleManager;
@@ -56,8 +55,8 @@ import org.rioproject.opstring.*;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.persistence.SnapshotHandler;
-import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.ComputeResource;
@@ -78,8 +77,10 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.rmi.*;
-import java.rmi.activation.ActivationID;
+import java.rmi.AccessException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.NumberFormat;
@@ -96,6 +97,7 @@ import java.util.logging.Level;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                  ServiceBeanContainerListener,
                                                                  CybernodeImplMBean,
@@ -168,26 +170,10 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      *
      * @throws Exception if bootstrapping fails
      */
-    public CybernodeImpl(String[] configArgs, LifeCycle lifeCycle)
-    throws Exception {
+    public CybernodeImpl(String[] configArgs, LifeCycle lifeCycle) throws Exception {
         super();
         this.lifeCycle = lifeCycle;
         bootstrap(configArgs);
-    }
-
-    /**
-     * Create a Cybernode that uses RMI Activation
-     *
-     * @param activationID The ActivationID
-     * @param data Startup data as a MarshalledObject
-     *
-     * @throws Exception if bootstrapping fails
-     */
-    public CybernodeImpl(ActivationID activationID, MarshalledObject data)
-    throws Exception {
-        super();
-        this.activationID = activationID;
-        bootstrap((String[])data.get());
     }
 
     @Override
@@ -1155,6 +1141,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                          "Unable to create proxy for " +
                                          "OperationalStringManager, using provided OperationalStringManager",
                                          ThrowableUtil.getRootCause(e));
+                        if(shutdownSequence.get()) {
+                            throw new ServiceBeanInstantiationException(
+                                String.format("Cancel allocation of %s, Cybernode is shutting down",
+                                              CybernodeLogUtil.logName(event)));
+                        }
                         opMgr = event.getOperationalStringManager();
                     }
                 }
@@ -1199,7 +1190,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     void createContainer() throws ConfigurationException {
         Configuration config = context.getConfiguration();
-        ServiceBeanContainer defaultContainer = new JSBContainer(config, ((JSBContext)context).getConfigurationFiles());
+        ServiceBeanContainer defaultContainer = new JSBContainer(config);
 
         this.container = (ServiceBeanContainer)config.getEntry(getConfigComponent(),
                                                                "serviceBeanContainer",

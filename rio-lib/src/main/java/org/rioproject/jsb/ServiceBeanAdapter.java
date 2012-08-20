@@ -19,8 +19,6 @@ import com.sun.jini.config.Config;
 import com.sun.jini.proxy.BasicProxyTrustVerifier;
 import com.sun.jini.reliableLog.LogException;
 import com.sun.jini.start.ServiceProxyAccessor;
-import net.jini.activation.ActivationExporter;
-import net.jini.activation.ActivationGroup;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
@@ -40,23 +38,18 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.JoinManager;
 import net.jini.lookup.entry.*;
 import net.jini.lookup.ui.AdminUI;
-import net.jini.security.BasicProxyPreparer;
-import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
-import org.rioproject.cybernode.CybernodeLogUtil;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
-import org.rioproject.entry.ComputeResourceInfo;
-import org.rioproject.net.HostUtil;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.*;
+import org.rioproject.cybernode.CybernodeLogUtil;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.entry.StandardServiceType;
 import org.rioproject.entry.UIDescriptorFactory;
@@ -66,10 +59,16 @@ import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;
 import org.rioproject.fdh.HeartbeatClient;
 import org.rioproject.jmx.JMXUtil;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.log.ServiceLogEventHandler;
+import org.rioproject.net.HostUtil;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.persistence.PersistentStore;
-import org.rioproject.resources.servicecore.*;
+import org.rioproject.resources.servicecore.Joiner;
+import org.rioproject.resources.servicecore.LandlordLessor;
+import org.rioproject.resources.servicecore.ServiceProvider;
+import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.sla.SLAThresholdEventAdapter;
@@ -85,12 +84,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.rmi.MarshalledObject;
 import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.activation.ActivationException;
-import java.rmi.activation.ActivationID;
-import java.rmi.activation.ActivationSystem;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -111,15 +105,14 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 @SuppressWarnings("PMD.EmptyMethodInAbstractClassShouldBeAbstract")
-public abstract class ServiceBeanAdapter extends ServiceProvider
-        implements
-        ServiceBean,
-        ServiceProxyAccessor,
-        ServerProxyTrust,
-        ProxyAccessor,
-        ServiceBeanAdapterMBean,
-        MBeanRegistration,
-        NotificationEmitter {
+public abstract class ServiceBeanAdapter extends ServiceProvider implements
+                                                                 ServiceBean,
+                                                                 ServiceProxyAccessor,
+                                                                 ServerProxyTrust,
+                                                                 ProxyAccessor,
+                                                                 ServiceBeanAdapterMBean,
+                                                                 MBeanRegistration,
+                                                                 NotificationEmitter {
     /** Logger name */
     static final String LOGGER = "org.rioproject.jsb";
     /**
@@ -185,13 +178,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * ServiceBean */
     protected ServiceBeanState jsbState = new ServiceBeanState();
     /**
-     * The activation id for this service. This attribute will be valid if and
-     * only if the object has been registered with the activation system, and
-     * the Service that extends this class sets the ActivationID provided by
-     * the activation system as part of its constructor.
-     */
-    protected ActivationID activationID;
-    /**
      * Component name we use to find items in the configuration. The value is
      * set to the package name of the concrete implementation of this class.
      * If the class has no package name, the component is the name of the class
@@ -199,10 +185,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
     protected String serviceBeanComponent;
     /** Logger */
     static final Logger logger = Logger.getLogger(LOGGER);
-    /** The associated ActivationSystem, or null if not activatable */
-    private ActivationSystem activationSystem;
-    /** The HeartbeatClient, which will manage sending heartbeat
-     * announcements */
+    /** The HeartbeatClient, which will manage sending heartbeat announcements */
     private HeartbeatClient heartbeatClient;
     /** Our login context, for logging out */
     private LoginContext loginContext;
@@ -921,14 +904,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
         if(jsbState.getState()!=ServiceBeanState.ABORTED)
             jsbState.verifyTransition(ServiceBeanState.STOPPED);
 
-        /* Unregister before unexporting */
-        if (activationID != null) {
-            try {
-                activationSystem.unregisterObject(activationID);
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Exception calling ActivationSystem.unregisterObject", e);
-            }
-        }
         UnexportTask unexportTask = new UnexportTask(exporter, force);
         unexportTask.start();
         try {
@@ -946,17 +921,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
          */
         if(monitorLandlord!=null)
             monitorLandlord.stop(true);
-        /* Inform the activation system to make this service inactive */
-        if (activationID != null) {
-            try {
-                ActivationGroup.inactive(activationID, exporter);
-            } catch (ActivationException e) {
-                logger.log(Level.INFO, "ActivationGroup.inactive failed, "
-                                       + e.getLocalizedMessage() + ", service is stopped");
-            } catch (RemoteException e) {
-                logger.log(Level.WARNING, "Calling ActivationGroup.inactive", e);
-            }
-        }
     }
 
     /**
@@ -1239,43 +1203,18 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
      * <li>distributed garbage collection turned off,
      * <li>keep alive on.
      * </ul>
-     * If activatable, the same default will be used but wrapped in an
-     * ActivationExporter and created with the service's ActivationID
      * @throws Exception If there are errors getting the Exporter
      */
     protected Exporter getExporter(Configuration config) throws Exception {
         if(config==null)
             throw new IllegalArgumentException("config is null");
-        Exporter exporter;
         String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         final Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
                                                                new BasicILFactory(),
                                                                false,
                                                                true);
-        if(isActivatable() && activationID != null) {
-            ProxyPreparer activationIdPreparer = (ProxyPreparer)Config.getNonNullEntry(config,
-                                                                                       serviceBeanComponent,
-                                                                                       "activationIdPreparer",
-                                                                                       ProxyPreparer.class,
-                                                                                       new BasicProxyPreparer());
-            ProxyPreparer activationSystemPreparer =
-                (ProxyPreparer)Config.getNonNullEntry(config,
-                                                      serviceBeanComponent,
-                                                      "activationSystemPreparer",
-                                                      ProxyPreparer.class,
-                                                      new BasicProxyPreparer());
-            this.activationID = (ActivationID)activationIdPreparer.prepareProxy(activationID);
-            activationSystem = (ActivationSystem)activationSystemPreparer.prepareProxy(ActivationGroup.getSystem());
-            
-            exporter = (Exporter)Config.getNonNullEntry(config,
-                                                        serviceBeanComponent,
-                                                        "serverExporter",
-                                                        Exporter.class,
-                                                        new ActivationExporter(activationID, defaultExporter),
-                                                        activationID);
-        } else {
-            exporter = ExporterConfig.getExporter(config, serviceBeanComponent, "serverExporter", defaultExporter);
-        }
+
+        Exporter exporter = ExporterConfig.getExporter(config, serviceBeanComponent, "serverExporter", defaultExporter);
         return(exporter);
     }
 
@@ -1346,24 +1285,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider
                        new Object[]{ServiceElementUtil.getLoggingName(context), adminExporter.toString()});
         }
         return(adminExporter);
-    }
-
-    /**
-     * Checks the constructor to see if it matches the signature of
-     * java.rmi.activation.Activatable.
-     * 
-     * @return If the Constructor for the concrete implementation of
-     * this class has a signature which matches a signature in the
-     * java.rmi.activation.Activatable class return true, otherwise returns
-     * false
-     */
-    private boolean isActivatable() {
-        try {
-            this.getClass().getConstructor(ActivationID.class, MarshalledObject.class);
-            return (true);
-        } catch (NoSuchMethodException e) {
-            return (false);
-        }
     }
 
     public void removeNotificationListener(NotificationListener listener, NotificationFilter filter, Object object)

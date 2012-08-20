@@ -29,19 +29,21 @@ import net.jini.lookup.entry.ServiceInfo;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
-import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.deploy.ServiceProvisionListener;
-import org.rioproject.event.*;
+import org.rioproject.event.DispatchEventHandler;
+import org.rioproject.event.EventDescriptor;
+import org.rioproject.event.EventHandler;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanActivation.LifeCycleManager;
 import org.rioproject.jsb.ServiceBeanAdapter;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.handlers.DeployHandler;
 import org.rioproject.monitor.handlers.DeployHandlerMonitor;
@@ -64,13 +66,13 @@ import org.rioproject.watch.ThreadDeadlockMonitor;
 
 import javax.management.MBeanServer;
 import javax.management.openmbean.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.*;
-import java.rmi.activation.ActivationID;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.AccessController;
@@ -131,20 +133,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         super();
         this.lifeCycle = lifeCycle;
         bootstrap(configArgs);
-    }
-
-    /**
-     * Create a ProvisionMonitor using RMI Activation
-     *
-     * @param activationID The ActivationID
-     * @param data Serialized data for initialization
-     *
-     * @throws Exception If the ProvisionMonitorImpl cannot be created
-     */
-    public ProvisionMonitorImpl(ActivationID activationID, MarshalledObject data) throws Exception {
-        super();
-        this.activationID = activationID;
-        bootstrap((String[]) data.get());
     }
 
     /**
