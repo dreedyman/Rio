@@ -19,6 +19,7 @@ import com.sun.jini.landlord.LeasedResource;
 import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.id.Uuid;
+import org.rioproject.util.TimeConstants;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -37,10 +38,11 @@ public abstract class ResourceLessor {
     private final Map<Uuid, LeasedResource> resources = new ConcurrentHashMap<Uuid, LeasedResource>();
     /** A Thread which will clean up stale leases */
     private Thread reaper = null;
+    private long reapingInterval = TimeConstants.ONE_SECOND*10;
     /** A LinkedList of LeaseListener objects */
     private final List<LeaseListener> listeners = new LinkedList<LeaseListener>();
     /** Component for getting the Logger */
-    private static final String COMPONENT_NAME = "org.rioproject.resources.servicecore";
+    private static final String COMPONENT_NAME = ResourceLessor.class.getPackage().getName();
     /** The Logger */
     private static final Logger logger = Logger.getLogger(COMPONENT_NAME);
 
@@ -56,6 +58,10 @@ public abstract class ResourceLessor {
         return(resource.getExpiration() > currentTime());
     }
 
+    public void setReapingInterval(long reapingInterval) {
+        this.reapingInterval = reapingInterval;
+    }
+
     /**
      * Create a new lease <br>
      * 
@@ -65,8 +71,7 @@ public abstract class ResourceLessor {
      * @throws LeaseDeniedException If the lease has been denied
      * @return A new Lease
      */
-    public abstract Lease newLease(LeasedResource resource, long duration)
-        throws LeaseDeniedException;
+    public abstract Lease newLease(LeasedResource resource, long duration) throws LeaseDeniedException;
 
     /**
      * Remove a leased resource from the list of managed leases. <br>
@@ -84,8 +89,9 @@ public abstract class ResourceLessor {
      */
     public void removeAll() {
         LeasedResource[] resources = getLeasedResources();
-        for (LeasedResource resource : resources)
+        for (LeasedResource resource : resources) {
             remove(resource.getCookie());
+        }
     }
 
     /**
@@ -95,7 +101,7 @@ public abstract class ResourceLessor {
      *
      * @return boolean True if removed false if not removed
      */
-    boolean remove(final Uuid cookie) {
+    public boolean remove(final Uuid cookie) {
         LeasedResource resource;
         boolean removed = false;
         synchronized(resources) {
@@ -144,12 +150,12 @@ public abstract class ResourceLessor {
      *
      * @throws IllegalArgumentException if the resource is null
      */
-    protected void addLeasedResource(final LeasedResource resource) {
+    public void addLeasedResource(final LeasedResource resource) {
         if(resource == null)
             throw new IllegalArgumentException("resource is null");
         synchronized(this) {
             if(reaper==null) {
-                reaper = new LeaseReaper();
+                reaper = new LeaseReaper(reapingInterval);
                 reaper.setDaemon(true);
                 reaper.start();
             }
@@ -168,7 +174,7 @@ public abstract class ResourceLessor {
      *
      * @throws IllegalArgumentException if the cookie is null
      */
-    protected LeasedResource getLeasedResource(final Uuid cookie) {
+    public LeasedResource getLeasedResource(final Uuid cookie) {
         if(cookie == null)
             throw new IllegalArgumentException("cookie is null");
         LeasedResource resource;
@@ -185,7 +191,7 @@ public abstract class ResourceLessor {
      * objects are found return a zero-length array. A new array is returned
      * each time
      */
-    protected LeasedResource[] getLeasedResources() {
+    public LeasedResource[] getLeasedResources() {
         LeasedResource[] leasedResources;
         synchronized(resources) {
             Collection<LeasedResource> c = resources.values();
@@ -199,7 +205,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseRegistration(final LeasedResource resource) {
+    public void notifyLeaseRegistration(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.register(resource);
     }
@@ -209,7 +215,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseRenewal(final LeasedResource resource) {
+    public void notifyLeaseRenewal(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.renewed(resource);
     }
@@ -219,7 +225,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseExpiration(final LeasedResource resource) {
+    public void notifyLeaseExpiration(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.expired(resource);
     }
@@ -229,7 +235,7 @@ public abstract class ResourceLessor {
      * 
      * @param resource The LeasedResource
      */
-    protected void notifyLeaseRemoval(final LeasedResource resource) {
+    public void notifyLeaseRemoval(final LeasedResource resource) {
         for (LeaseListener listener : listeners)
             listener.removed(resource);
     }
@@ -237,7 +243,7 @@ public abstract class ResourceLessor {
     /**
      * Stop and clean up all resources
      */
-    protected void stop() {
+    public void stop() {
         if(reaper!=null)
             reaper.interrupt();
         reaper = null;
@@ -251,7 +257,7 @@ public abstract class ResourceLessor {
      *
      * @return The current time
      */
-    protected long currentTime() {
+    public long currentTime() {
         return (System.currentTimeMillis());
     }
     
@@ -260,14 +266,17 @@ public abstract class ResourceLessor {
      * stale leases
      */
     protected class LeaseReaper extends Thread {
-        public LeaseReaper() {
+        private final long reapingInterval;
+
+        public LeaseReaper(long reapingInterval) {
             super("LeaseReaper");
+            this.reapingInterval = reapingInterval;
         }
         
         public void run() {
             while (reaper != null || !isInterrupted()) {
                 try {
-                    Thread.sleep(30 * 1000L);
+                    Thread.sleep(reapingInterval);
                 } catch(InterruptedException e) {
                     break;
                 }
