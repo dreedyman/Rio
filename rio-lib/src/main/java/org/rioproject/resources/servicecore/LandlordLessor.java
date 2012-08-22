@@ -78,7 +78,32 @@ import java.util.logging.Logger;
  * </tbody> </table></li>
  * </ul>
  *
+ *
+ *
  * <ul>
+ * <li><span style="font-weight: bold;">reapingInterval</span> <table
+ * cellpadding="2" *="" cellspacing="2" border="0" style="text-align: left;
+ * width: 100%;"> <tbody>
+ * <tr>
+ * <td style="vertical-align: top; text-align: right; font-weight: bold;">Type:</td>
+ * <td style="vertical-align: top;">long</td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top; text-align: right; font-weight: bold;">Default:</td>
+ * <td style="vertical-align: top;">10 seconds
+ * <br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top; text-align: right; font-weight: bold;">Description:</td>
+ * <td style="vertical-align: top;">The amount of time (in milliseconds) to check for expired leases.
+ * Must be a positive long value.</td>
+ * </tr>
+ * </tbody> </table>
+ * </li>
+ * </ul>
+ *
+ * * <ul>
  * <li><span style="font-weight: bold;">landlordLeasePeriodPolicy </span> <table
  * cellpadding="2" *="" cellspacing="2" border="0" style="text-align: left;
  * width: 100%;"> <tbody>
@@ -101,7 +126,8 @@ import java.util.logging.Logger;
  * initial grants and renewals of the leases on entries. Obtained at service
  * start and restart.</td>
  * </tr>
- * </tbody> </table></li>
+ * </tbody> </table>
+ * </li>
  * </ul>
  *
  * @author Dennis Reedy
@@ -168,6 +194,18 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
                                                                          defaultLeasePeriodPolicy);
         } catch (ConfigurationException e) {
             logger.log(Level.WARNING, "Getting LeasePeriodPolicy in LandlordLessor", e);
+        }
+
+        try {
+            final long reapingInterval = Config.getLongEntry(config,
+                                                             COMPONENT,
+                                                             "reapingInterval",
+                                                             TimeConstants.ONE_SECOND*10,
+                                                             1,
+                                                             Long.MAX_VALUE);
+            setReapingInterval(reapingInterval);
+        } catch (ConfigurationException e) {
+            logger.log(Level.WARNING, "Getting reapingInterval in LandlordLessor", e);
         }
         
         /* Create the default Exporter */
