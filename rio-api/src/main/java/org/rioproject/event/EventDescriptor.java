@@ -24,6 +24,7 @@ import net.jini.entry.AbstractEntry;
  * @author Dennis Reedy
  */
 public class EventDescriptor extends AbstractEntry {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * The event classes Class that this EventDescriptor describes
@@ -87,7 +88,7 @@ public class EventDescriptor extends AbstractEntry {
             if(template.eventClass==null)
                 matches = true;
             else if(this.eventClass!=null)
-                matches = this.eventClass.equals(template.eventClass);
+                matches = this.eventClass.getName().equals(template.eventClass.getName());
         } else {
             if(this.eventID!=null) 
                 matches = this.eventID.equals(template.eventID);
