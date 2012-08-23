@@ -381,6 +381,9 @@
         <module>rio-resolver/resolver-api</module>
         <module>rio-resolver/resolver-aether</module>
         <module>rio-resolver/resolver-project</module>
+        <module>rio-services/event-collector/event-collector-api</module>
+        <module>rio-services/event-collector/event-collector-proxy</module>
+        <module>rio-services/event-collector/event-collector-service</module>
         <module>rio-services/cybernode/cybernode-api</module>
         <module>rio-services/cybernode/cybernode-proxy</module>
         <module>rio-services/cybernode/cybernode-service</module>
