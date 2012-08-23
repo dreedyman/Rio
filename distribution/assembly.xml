@@ -121,6 +121,8 @@
                 <exclude>org.rioproject.cybernode:cybernode-api:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-proxy:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-ui:jar</exclude>
+                <exclude>org.rioproject.event-collector:event-collector-api:jar</exclude>
+                <exclude>org.rioproject.event-collector:event-collector-proxy:jar</exclude>
                 <exclude>org.rioproject.gnostic:gnostic-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
@@ -174,6 +176,8 @@
                 <include>org.rioproject.gnostic:gnostic-api:jar</include>
                 <include>org.rioproject.monitor:monitor-api:jar</include>
                 <include>org.rioproject.monitor:monitor-proxy:jar</include>
+                <include>org.rioproject.event-collector:event-collector-api:jar</include>
+                <include>org.rioproject.event-collector:event-collector-proxy:jar</include>
                 <include>org.rioproject:rio-api:jar</include>
                 <include>org.rioproject:watch-ui</include>
             </includes>

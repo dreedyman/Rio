@@ -106,6 +106,24 @@
         </dependency>
 
         <dependency>
+            <groupId>${project.groupId}.event-collector</groupId>
+            <artifactId>event-collector-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.event-collector</groupId>
+            <artifactId>event-collector-proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.event-collector</groupId>
+            <artifactId>event-collector-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.sun.jini</groupId>
             <artifactId>reggie</artifactId>
         </dependency>
