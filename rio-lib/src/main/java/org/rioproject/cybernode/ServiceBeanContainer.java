@@ -17,15 +17,13 @@ package org.rioproject.cybernode;
 
 import net.jini.config.Configuration;
 import net.jini.id.Uuid;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.opstring.ServiceElement;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.event.EventHandler;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.system.ComputeResource;
-
-import java.util.Collection;
 
 /**
  * The ServiceBeanContainer defines the semantics required to instantiate service 
@@ -45,16 +43,6 @@ public interface ServiceBeanContainer {
      * @see org.rioproject.config.AggregateConfig
      */
     Configuration getSharedConfiguration();
-
-    /**
-     * Get the file name(s) to that can be used to create the shared configuration.
-     *
-     * @return A collection of file names that can be used to create the shared configuration. If there are
-     * no file names a zero-length collection is returned. A new collection is created each time.
-     *
-     * @see org.rioproject.config.AggregateConfig
-     */
-    Collection<String> getSharedConfigurationFiles();
     
     /**
      * Set the computeResource property. The computeResource attribute represents 
