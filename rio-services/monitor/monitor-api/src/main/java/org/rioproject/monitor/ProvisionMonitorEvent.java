@@ -23,6 +23,8 @@ import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.resolver.RemoteRepository;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -294,15 +296,16 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
+        String format = "yyyy.MM.dd HH:mm:ss,SSS";
+        DateFormat formatter = new SimpleDateFormat(format);
         sb.append("ProvisionMonitorEvent: ");
         sb.append("action=").append(action);
         sb.append(", opStringName='").append(opStringName);
         if(sElem!=null)
             sb.append(", service=").append(sElem.getName());
         if(redeploymentParms!=null)
-            sb.append(", redeploymentParms=").append(Arrays.asList(
-                redeploymentParms)
-                .toString());
+            sb.append(", redeploymentParms=").append(Arrays.asList(redeploymentParms).toString());
+        sb.append(", when: ").append(formatter.format(date));
         return sb.toString();
     }
 }
