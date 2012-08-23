@@ -24,7 +24,7 @@ import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resources.client.LookupCachePool;
-import org.rioproject.resources.util.StringUtil;
+import org.rioproject.util.StringUtil;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
@@ -172,6 +172,7 @@ public class StaticCybernode {
      * @throws Exception If the <tt>OperationalString</tt> document results in
      * parsing errors or the bean(s) cannot be created.
      */
+    @SuppressWarnings("unused")
     public Map<String, Object> activate(Artifact artifact, String... beans) throws Exception {
         if(artifact==null)
             throw new IllegalArgumentException("artifact must not be null");
