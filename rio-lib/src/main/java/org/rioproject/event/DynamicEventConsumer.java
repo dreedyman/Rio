@@ -15,7 +15,6 @@
  */
 package org.rioproject.event;
 
-import net.jini.admin.Administrable;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import net.jini.core.entry.Entry;
@@ -27,17 +26,9 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.fdh.FaultDetectionHandler;
-import org.rioproject.fdh.FaultDetectionListener;
-import org.rioproject.admin.ServiceBeanAdmin;
-import org.rioproject.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 
 import java.rmi.MarshalledObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,10 +42,7 @@ import java.util.logging.Logger;
 public class DynamicEventConsumer extends BasicEventConsumer {
     private ServiceDiscoveryManager sdm;
     private LookupCache lCache;
-    /** Table of service IDs to FaultDetectionHandler instances, one for each service */
-    private Hashtable<ServiceID, FaultDetectionHandler> fdhTable =
-        new Hashtable<ServiceID, FaultDetectionHandler>();
-    static Logger logger = BasicEventConsumer.logger;
+    private static Logger logger = BasicEventConsumer.logger;
 
     /**
      * Create a DynamicEventConsumer with an EventDescriptor
@@ -129,7 +117,6 @@ public class DynamicEventConsumer extends BasicEventConsumer {
         Configuration configInstance = config==null?EmptyConfiguration.INSTANCE:config;
         sdm = new ServiceDiscoveryManager(dMgr, new LeaseRenewalManager(configInstance), configInstance);
         lCache = sdm.createLookupCache(template, null,  null);
-        
         lCache.addListener(new EventProducerManager());
     }
 
@@ -138,11 +125,6 @@ public class DynamicEventConsumer extends BasicEventConsumer {
      * ServiceDiscoveryManager
      */
     public void terminate() {
-        /* Stop all FaultDetectionHandler instances */
-        ArrayList<FaultDetectionHandler> list = Collections.list(fdhTable.elements());
-        for (FaultDetectionHandler fdh : list) {
-            fdh.terminate();            
-        }
         /* If this utility created a ServiceDiscoveryManager terminate it */
         if(sdm!=null) {
             try {
@@ -192,61 +174,11 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                         String name = item.service.getClass().getName();
                         logger.log(Level.FINEST, "EventProducer discovered {0}", name);
                     }
-                    FaultDetectionHandler<ServiceID> fdh = null;
-                    if(item.service instanceof Administrable) {
-                        try {                        
-                            Object admin = ((Administrable)item.service).getAdmin();
-                            if(admin instanceof ServiceBeanAdmin) {
-                                ServiceBeanAdmin sbAdmin = (ServiceBeanAdmin)admin;                
-                                ClassBundle fdhBundle =
-                                    sbAdmin.getServiceElement().getFaultDetectionHandlerBundle();
-                                fdh = FaultDetectionHandlerFactory.
-                                          getFaultDetectionHandler(fdhBundle,item.service.getClass().getClassLoader());
-                            } else {
-                                if(logger.isLoggable(Level.FINEST)) {
-                                    String name = item.service.getClass().getName();
-                                    logger.log(Level.FINEST,
-                                               "EventProducer {0} does not "+
-                                               "implement ServiceBeanAdmin, "+
-                                               "respond only to serviceRemoved "+
-                                               "notifications for service failure",
-                                               name);
-                                }
-                            }
-                        } catch (Exception e) {
-                            if(logger.isLoggable(Level.FINEST)) 
-                                logger.log(Level.WARNING,
-                                           "Unable to create FaultDetectionHandler "+
-                                           "for EventProducer "+
-                                           item.service.toString(),
-                                           e);
-                            else
-                                logger.log(Level.WARNING,
-                                           "Unable to create FaultDetectionHandler "+
-                                           "for EventProducer "+
-                                           item.service.toString());
-                        }
-                    } else {
-                        if(logger.isLoggable(Level.FINEST)) {
-                            String name = item.service.getClass().getName();
-                            logger.log(Level.FINEST,
-                                       "EventProducer {0} does not "+
-                                       "implement Administrable, "+
-                                       "respond only to serviceRemoved "+
-                                       "notifications for service failure",
-                                       name);
-                        }
-                    }
-                    
-                    ServiceFaultListener faultListener;
-                    if(fdh!=null) {
-                        faultListener = new ServiceFaultListener(false, item.serviceID);
-                        fdh.register(faultListener);
-                        fdhTable.put(item.serviceID, fdh);
-                        fdh.monitor(item.service, item.serviceID, lCache);                        
-                    }
-                    if(eventSubscribers.size() > 0)
+                    if(!eventSubscribers.isEmpty()) {
                         register(item);
+                        ServiceFaultListener faultListener = new ServiceFaultListener(item.serviceID);
+                        lCache.addListener(faultListener);
+                    }
                 } else {
                     logger.log(Level.WARNING, "Unable to register EventProducer {0}", item);
                 }
@@ -259,50 +191,28 @@ public class DynamicEventConsumer extends BasicEventConsumer {
     /**
      * Manage service failure notifications
      */
-    class ServiceFaultListener extends ServiceDiscoveryAdapter 
-    implements FaultDetectionListener<ServiceID> {
-        final boolean useLookupCache;
+    class ServiceFaultListener extends ServiceDiscoveryAdapter {
         final ServiceID serviceID;
         
-        ServiceFaultListener(final boolean useLookupCache, final ServiceID serviceID) {
-            this.useLookupCache = useLookupCache;
+        ServiceFaultListener(final ServiceID serviceID) {
             this.serviceID = serviceID;
-        }
-        
-        /**
-         * @see org.rioproject.fdh.FaultDetectionListener#serviceFailure
-         */
-        public synchronized void serviceFailure(final Object proxy, final ServiceID serviceID) {
-            if(logger.isLoggable(Level.FINEST)) {
-                String name = proxy.getClass().getName();
-                logger.log(Level.FINEST, 
-                           "EventProducer removed {0}", 
-                           name);
-            }            
-            terminate();
         }
         
         /**
          * An EventProducer has been removed
          */
         public void serviceRemoved(final ServiceDiscoveryEvent sdEvent) {
-            if(!useLookupCache)
-                return;
             ServiceItem item = sdEvent.getPreEventServiceItem();
             if(item.service != null) {
                 if(item.serviceID.equals(serviceID)) {
                     if(logger.isLoggable(Level.FINEST)) {
                         String name = item.service.getClass().getName();
-                        logger.log(Level.FINEST, 
-                                   "EventProducer removed {0}", 
-                                   name);
+                        logger.log(Level.FINEST, "EventProducer removed {0}", name);
                     }
                     terminate();                    
                 }
             } else {
-                logger.log(Level.SEVERE,
-                           "Unable to deregister EventProducer {0}, unknown service",
-                           item);
+                logger.log(Level.SEVERE, "Unable to deregister EventProducer {0}, unknown service", item);
             }
         }
         
@@ -310,7 +220,6 @@ public class DynamicEventConsumer extends BasicEventConsumer {
          * Stop listening and remove from local tables
          */
         void terminate() {
-            fdhTable.remove(serviceID);
             lCache.removeListener(this);
             deregister(serviceID);
         }
