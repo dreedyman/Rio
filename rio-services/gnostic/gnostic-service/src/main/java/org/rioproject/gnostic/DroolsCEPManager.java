@@ -25,7 +25,7 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 import org.drools.template.ObjectDataCompiler;
 import org.rioproject.logging.WrappedLogger;
-import org.rioproject.resources.util.StringUtil;
+import org.rioproject.util.StringUtil;
 import org.rioproject.sla.RuleMap;
 import org.rioproject.sla.SLA;
 import org.rioproject.watch.Calculable;

@@ -31,7 +31,7 @@ import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.resources.util.StringUtil;
+import org.rioproject.util.StringUtil;
 import org.rioproject.sla.RuleMap;
 
 import java.io.InputStream;
