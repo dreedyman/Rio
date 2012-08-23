@@ -32,16 +32,19 @@ import org.rioproject.bean.Started;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.cybernode.exec.ServiceBeanExecManager;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.event.EventHandler;
 import org.rioproject.exec.ServiceExecutor;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
-import org.rioproject.jsb.*;
+import org.rioproject.jsb.JSBContext;
+import org.rioproject.jsb.JSBManager;
+import org.rioproject.jsb.ServiceBeanSLAManager;
+import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
@@ -54,7 +57,10 @@ import org.rioproject.system.capability.PlatformCapability;
 import javax.management.ObjectName;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
@@ -79,8 +85,6 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private ServiceElement sElem;
     /** The OperationalStringManager for the JSB */
     private OperationalStringManager opStringMgr;
-    /** The ThreadGroup the JSB is started in */
-    //private ThreadGroup threadGroup;
     /** Throwable for ThreadGroup processing */
     private Throwable abortThrowable;
     /** The ServiceRecord */
@@ -107,8 +111,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private ServiceCostCalculator serviceCostCalculator;
     //private ServiceProvisionEvent provisionEvent;
     private ServiceBeanExecManager execManager;
-    private final Collection<PlatformCapability> installedPlatformCapabilities =
-        new ArrayList<PlatformCapability>();
+    private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<PlatformCapability>();
     private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
     private final static WrappedLogger logger = WrappedLogger.getLogger(JSBDelegate.class.getName());
@@ -195,6 +198,9 @@ public class JSBDelegate implements ServiceBeanDelegate {
      * has created a ServiceBean instance of
      */
     public boolean update(ServiceElement newElem, OperationalStringManager opMgr) {
+        if(terminated.get() || terminating.get())
+            return(false);
+
         if(execManager!=null) {
             try {
                 long waited = 0;
@@ -218,8 +224,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         }
         if(!this.sElem.equals(newElem))
             return(false);
-        if(terminated.get() || terminating.get())
-            return(false);
+
         synchronized(this) {
             if(serviceProxy==null) {
                 logger.finest("Cannot update [%s], Proxy is null", sElem.getName());

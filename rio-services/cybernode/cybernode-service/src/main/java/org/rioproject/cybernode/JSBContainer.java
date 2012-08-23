@@ -56,8 +56,6 @@ public class JSBContainer implements ServiceBeanContainer {
         Collections.synchronizedList(new ArrayList<ServiceBeanContainerListener>());
     /** Configuration object, which is also used as the shared configuration */
     private Configuration config;
-    /** Configuration files for the shared configuration*/
-    private final List<String> configurationFiles = new ArrayList<String>();
     /** Logger */
     private static final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.cybernode");
 
@@ -67,20 +65,7 @@ public class JSBContainer implements ServiceBeanContainer {
      * @param config The Configuration to use
      */
     public JSBContainer(Configuration config) {
-        this(config, (String)null);
-    }
-
-    /**
-     * Create a new ServiceBeanContainer
-     *
-     * @param config The Configuration to use
-     * @param configFiles Files used to create the shared configuration, may be null
-     */
-    public JSBContainer(Configuration config, String... configFiles) {
         this.config = config;
-        if(configFiles!=null) {
-            Collections.addAll(configurationFiles, configFiles);
-        }
     }
 
     /**
@@ -88,12 +73,6 @@ public class JSBContainer implements ServiceBeanContainer {
      */
     public Configuration getSharedConfiguration() {
         return (config);
-    }
-
-    public Collection<String> getSharedConfigurationFiles() {
-        List<String> list = new ArrayList<String>();
-        list.addAll(configurationFiles);
-        return list;
     }
 
     /**
@@ -242,7 +221,12 @@ public class JSBContainer implements ServiceBeanContainer {
         for (ServiceElement element : elements) {
             ServiceBeanDelegate[] delegates = getDelegates(element);
             for (ServiceBeanDelegate delegate : delegates) {
-                delegate.update(element, opStringMgr);
+                if(delegate.getServiceRecord().getDiscardedDate()!=null) {
+                    delegate.update(element, opStringMgr);
+                } else {
+                    logger.warning(String.format("Service %s has been discarded, do not update",
+                                                 CybernodeLogUtil.logName(element)));
+                }
             }
         }
     }
