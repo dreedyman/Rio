@@ -26,7 +26,7 @@ import java.rmi.RemoteException;
 
 /**
  * The EventProducer defines the support for an event consumer to register for 
- * events a service produces
+ * events a service produces.
  *
  * @author Dennis Reedy
  */
@@ -36,7 +36,7 @@ public interface EventProducer extends Remote {
      * {@link net.jini.core.event.EventRegistration} for the EventDescriptor
      * type passed in based on the requested lease duration. The implied
      * semantics of notification are dependant on 
-     * {@link org.rioproject.event.EventHandler} specializations.
+     * {@code org.rioproject.event.EventHandler} specializations.
      * 
      * @param descriptor The EventDescriptor to register
      * @param listener A RemoteEventListener
