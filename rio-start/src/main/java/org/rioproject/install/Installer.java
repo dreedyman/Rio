@@ -87,6 +87,9 @@ public final class Installer {
             rioArtifactJars.put(new Artifact("org.rioproject:rio-api:" + RioVersion.VERSION), "rio-api.jar");
             rioArtifactJars.put(new Artifact("org.rioproject:watch-ui:" + RioVersion.VERSION), "watch-ui.jar");
 
+            rioArtifactJars.put(new Artifact("org.rioproject.event-collector:event-collector-api:" + RioVersion.VERSION), "event-collector-api.jar");
+            rioArtifactJars.put(new Artifact("org.rioproject.event-collector:event-collector-proxy:" + RioVersion.VERSION), "event-collector-proxy.jar");
+
             File libDlDir = new File(rioHome + File.separator + "lib-dl");
             for (Map.Entry<Artifact, String> entry : rioArtifactJars.entrySet()) {
                 Artifact a = entry.getKey();
