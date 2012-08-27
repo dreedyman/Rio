@@ -77,7 +77,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
     private EventManager eventManager;
     private EventCollectorBackend eventCollectorBackendRef;
     private ScheduledExecutorService leaseReaperScheduler;
-    private static final BlockingQueue<RemoteEvent> eventQ = new LinkedBlockingQueue<RemoteEvent>();
+    private final BlockingQueue<RemoteEvent> eventQ = new LinkedBlockingQueue<RemoteEvent>();
     private static final String CONFIG_COMPONENT = EventCollectorImpl.class.getPackage().getName();
     private static final Logger logger = Logger.getLogger(EventCollectorImpl.class.getName());
 
@@ -370,7 +370,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                 try {
                     event = eventQ.take();
                 } catch (InterruptedException e) {
-                    logger.info("EventWorker breaking out of main loop");
+                    logger.info("EventNotifier breaking out of main loop");
                     break;
                 }
                 List<Uuid> removals = new ArrayList<Uuid>();
