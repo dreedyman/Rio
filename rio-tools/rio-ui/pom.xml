@@ -32,6 +32,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.rioproject.event-collector</groupId>
+            <artifactId>event-collector-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 		<dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>webster</artifactId>
@@ -75,6 +81,7 @@
                                     <include>org.rioproject.cybernode:cybernode-api</include>
                                     <include>org.rioproject.monitor:monitor-api</include>
                                     <include>org.rioproject:rio-api</include>
+                                    <include>org.rioproject.event-collector:event-collector-api</include>
                                     <include>net.jini.lookup:jmx-lookup</include>
                                     <include>net.jini.lookup:serviceui</include>
                                     <include>org.swinglabs:swingx</include>
