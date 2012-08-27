@@ -251,6 +251,11 @@ public class OpStringMangerController {
                     logger.log(Level.WARNING, "Creating OpStringManager", e);
                     return(null);
                 }
+                ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
+                                                                        ProvisionMonitorEvent.Action.OPSTRING_DEPLOYING,
+                                                                        opMgr.doGetOperationalString());
+                eventProcessor.processEvent(event);
+
                 synchronized(pendingManagers) {
                     pendingManagers.add(opMgr);
                 }
