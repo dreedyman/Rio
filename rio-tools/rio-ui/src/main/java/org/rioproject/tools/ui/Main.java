@@ -40,6 +40,7 @@ import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.eventcollector.api.EventCollector;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.*;
@@ -74,6 +75,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.rmi.server.ExportException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
 import java.util.List;
@@ -90,16 +92,16 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class Main extends JFrame {
     private final static long startTime = System.currentTimeMillis();
-    private JSplitPane splitPane;
+    private final JSplitPane splitPane;
     private File lastDir = new File(System.getProperty("user.dir"));
-    private Configuration config;
+    private final Configuration config;
     /** A DiscoveryListener that will record lookup service discovery/discard times */
     private RecordingDiscoveryListener recordingListener;
 	/** LookupDiscovery for discovering all groups */
     private LookupDiscovery lookupDiscovery;
     private static JiniClient jiniClient;
     private ServiceDiscoveryManager sdm;
-    private CybernodeUtilizationPanel cup;
+    private final CybernodeUtilizationPanel cup;
     /** A task to control ComputeResourceUtilization refreshes */
     private ComputeResourceUtilizationTask cruTask;
     /** Scheduler for Cybernode utilization gathering */
@@ -109,18 +111,18 @@ public class Main extends JFrame {
     private JButton deploy;
     private final GraphView graphView;
     private final Main frame;
-    private ColorManager colorManager;
-    private UtilizationColumnManager utilizationColumnManager;
-    private ImageIcon westIcon;
-    private ImageIcon westSelectedIcon;
-    private ImageIcon northIcon;
-    private ImageIcon northSelectedIcon;
+    private final ColorManager colorManager;
+    private final UtilizationColumnManager utilizationColumnManager;
+    private final ImageIcon westIcon;
+    private final ImageIcon westSelectedIcon;
+    private final ImageIcon northIcon;
+    private final ImageIcon northSelectedIcon;
     private int cybernodeRefreshRate;
-    private UtilitiesPanel utilities;
+    private final UtilitiesPanel utilities;
     private String lastArtifact = null;
     private BasicEventConsumer clientEventConsumer;
 
-    public Main(Configuration config, final boolean exitOnClose, Properties startupProps) {
+    public Main(Configuration config, final boolean exitOnClose, Properties startupProps) throws ExportException, ConfigurationException {
         this.config = config;
         String lastArtifactName = startupProps.getProperty(Constants.LAST_ARTIFACT);
         if(lastArtifactName!=null)
@@ -430,7 +432,7 @@ public class Main extends JFrame {
      */
     JMenuBar createMenu() {
         JMenuBar menuBar = new JMenuBar();
-        menuBar.setLayout(new BoxLayout(menuBar, 0));
+        menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.X_AXIS));
         JMenu fileMenu = null;
         if(!MacUIHelper.isMacOS()) {
             fileMenu = new JMenu("File");
@@ -615,13 +617,11 @@ public class Main extends JFrame {
             if (groups != null && groups.length > 0) {
                 for (String group1 : groups) {
                     if (group1.equals(group)) {
-                        JOptionPane
-                            .showMessageDialog(
-                                this,
-                                "The [" + group + "] group is already " +
-                                "part of the discovery listener",
-                                "Group Addition Error",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this,
+                                                      "The [" + group + "] group is already " +
+                                                      "part of the discovery listener",
+                                                      "Group Addition Error",
+                                                      JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                 }
@@ -884,15 +884,20 @@ public class Main extends JFrame {
         jiniClient = new JiniClient(new LookupDiscoveryManager(groups, locators, null, config));
         ServiceTemplate monitors = new ServiceTemplate(null, new Class[]{ProvisionMonitor.class}, null);
         ServiceTemplate cybernodes = new ServiceTemplate(null, new Class[]{Cybernode.class}, null);
+        ServiceTemplate eventCollectors = new ServiceTemplate(null, new Class[]{EventCollector.class}, null);
+
         sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(), new LeaseRenewalManager(), config);
+
         ServiceWatcher watcher = new ServiceWatcher();
+
         ProvisionClientEventConsumer provisionClientEventConsumer = new ProvisionClientEventConsumer();
+
         clientEventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(),
                                                      provisionClientEventConsumer,
                                                      config);
         monitorCache = sdm.createLookupCache(monitors, null, watcher);
         sdm.createLookupCache(cybernodes, null, watcher);
-        utilities.setDiscoveryManagement(jiniClient.getDiscoveryManager());
+        sdm.createLookupCache(eventCollectors, null, watcher);
     }
 
     void addProvisionMonitor(ServiceItem item) throws RemoteException, OperationalStringException {
@@ -937,7 +942,13 @@ public class Main extends JFrame {
         public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
             try {
                 ServiceItem item = sdEvent.getPostEventServiceItem();
-                utilities.addService(item);
+                if(item.service instanceof EventCollector) {
+                    try {
+                        utilities.addEventCollector((EventCollector)item.service);
+                    } catch(Exception e) {
+                        org.rioproject.ui.Util.showError(e, frame, "Cannot add Event Collector");
+                    }
+                }
                 if(item.service instanceof ProvisionMonitor) {
                     graphView.systemUp();
                     deploy.setEnabled(true);
@@ -961,8 +972,7 @@ public class Main extends JFrame {
                             ServiceBeanInstance[] instances =
                                 opStringMgr.getServiceBeanInstances(elem);
                             for(ServiceBeanInstance instance : instances) {
-                                GraphNode node =
-                                    graphView.serviceUp(elem, instance);
+                                GraphNode node = graphView.serviceUp(elem, instance);
                                 if(node!=null)
                                     ServiceItemFetchQ.write(node);
                                 else {
@@ -1423,7 +1433,7 @@ public class Main extends JFrame {
             }
 
             frame.startDiscovery();
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.pack();
 
             String s = props.getProperty(Constants.FRAME_WIDTH);

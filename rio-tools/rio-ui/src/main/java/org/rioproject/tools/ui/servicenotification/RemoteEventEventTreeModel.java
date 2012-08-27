@@ -19,22 +19,24 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableNode;
+import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
+import org.rioproject.sla.SLAThresholdEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The ProvisionFailureEventTreeModel extends DefaultTreeTableModel providing the model to
+ * The RemoteEventEventTreeModel extends DefaultTreeTableModel providing the model to
  * display {@link ProvisionFailureEvent}s and {@link ServiceLogEvent}s in a tree table.
  */
-public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
+public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
     private JXTreeTable treeTable;
 
-    public ProvisionFailureEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
+    public RemoteEventEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
         super(root, columns);
     }
 
@@ -53,6 +55,20 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
             } 
             addItem(new ProvisionFailureEventNode(pfe), node);
         }
+        if(event instanceof ProvisionMonitorEvent) {
+            ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
+            String name;
+            if(pme.getServiceElement()!=null)
+                name = pme.getServiceElement().getOperationalStringName();
+            else
+                name = pme.getOperationalStringName();
+            AbstractMutableTreeTableNode node = getDeploymentNode(name);
+            if(node==null) {
+                node = new DeploymentNode(name);
+                addItem(node, (AbstractMutableTreeTableNode) getRoot());
+            }
+            addItem(new ProvisionMonitorEventNode(pme), node);
+        }
         if(event instanceof ServiceLogEvent) {
             ServiceLogEvent sle = (ServiceLogEvent)event;
             String name = sle.getOpStringName();
@@ -64,6 +80,18 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
                 addItem(node, (AbstractMutableTreeTableNode) getRoot());
             }
             addItem(new ServiceLogEventNode(sle), node);
+        }
+        if(event instanceof SLAThresholdEvent) {
+            SLAThresholdEvent sla = (SLAThresholdEvent)event;
+            String name = sla.getServiceElement().getOperationalStringName();
+            if(name==null)
+                name = "Unknown";
+            DeploymentNode node = getDeploymentNode(name);
+            if(node==null) {
+                node = new DeploymentNode(name);
+                addItem(node, (AbstractMutableTreeTableNode) getRoot());
+            }
+            addItem(new SLAThresholdEventNode(sla), node);
         }
     }
 
@@ -104,7 +132,7 @@ public class ProvisionFailureEventTreeModel extends DefaultTreeTableModel {
                 if(dNode.getName().equals(elem.getOperationalStringName())) {
                     for (int j = 0; j < dn.getChildCount(); j++) {
                         RemoteServiceEventNode en = (RemoteServiceEventNode)dn.getChildAt(j);
-                        if(en.getServiceName().equals(elem.getName())) {
+                        if(en.getServiceName()!=null && en.getServiceName().equals(elem.getName())) {
                             eNodes.add(en);
                         }
                     }

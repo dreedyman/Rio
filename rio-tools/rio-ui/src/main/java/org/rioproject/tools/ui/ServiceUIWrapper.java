@@ -15,18 +15,20 @@
  */
 package org.rioproject.tools.ui;
 
+import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
 import net.jini.core.lookup.ServiceItem;
 
 import javax.swing.*;
 import java.awt.*;
+import java.rmi.server.ExportException;
 import java.util.Properties;
 
 /**
  * Used when the Rio UI is launched as a service UI
  */
 public class ServiceUIWrapper extends Main {
-    public ServiceUIWrapper(Object obj) {
+    public ServiceUIWrapper(Object obj) throws ExportException, ConfigurationException {
         super(EmptyConfiguration.INSTANCE, true, new Properties());
         System.err.println("===========================");
         getAccessibleContext().setAccessibleName("Provision Monitor UI");

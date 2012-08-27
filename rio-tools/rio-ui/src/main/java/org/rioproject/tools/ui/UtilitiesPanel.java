@@ -16,29 +16,32 @@
 package org.rioproject.tools.ui;
 
 import net.jini.config.Configuration;
-import net.jini.core.lookup.ServiceItem;
-import net.jini.discovery.DiscoveryManagement;
-import org.rioproject.monitor.ProvisionMonitor;
+import net.jini.config.ConfigurationException;
+import net.jini.core.lease.LeaseDeniedException;
+import org.rioproject.eventcollector.api.EventCollector;
+import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
-import org.rioproject.tools.ui.servicenotification.ProvisionFailureEventTable;
+import org.rioproject.tools.ui.servicenotification.RemoteEventTable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
+import java.rmi.server.ExportException;
 import java.util.Properties;
 
 /**
  * Container for utilities
  */
 public class UtilitiesPanel extends JPanel {
-    private ProvisionFailureEventTable provisionFailureEventTable;
+    private RemoteEventTable provisionFailureEventTable;
 
     public UtilitiesPanel(CybernodeUtilizationPanel cup,
                           Configuration config,
-                          Properties props) {
+                          Properties props) throws ExportException, ConfigurationException {
         super(new BorderLayout());
 
-        provisionFailureEventTable = new ProvisionFailureEventTable(config, props);
+        provisionFailureEventTable = new RemoteEventTable(config, props);
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.add("Utilization", cup);
@@ -56,10 +59,6 @@ public class UtilitiesPanel extends JPanel {
         return props;
     }
 
-    void setDiscoveryManagement(DiscoveryManagement dMgr) {
-        provisionFailureEventTable.setDiscoveryManagement(dMgr);
-    }
-
     private JLabel makeTabLabel(String name, NotificationUtility... comps) {
         NotificationNode nn = new NotificationNode(comps);
         for(NotificationUtility nu : comps)
@@ -69,9 +68,8 @@ public class UtilitiesPanel extends JPanel {
         return l;
     }
 
-    void addService(ServiceItem item) {
-        if(item.service instanceof ProvisionMonitor)
-            provisionFailureEventTable.addService(item);
+    void addEventCollector(EventCollector eventCollector) throws IOException, LeaseDeniedException, UnknownEventCollectorRegistration {
+        provisionFailureEventTable.addEventCollector(eventCollector);
     }
 
     void stopNotifications() {

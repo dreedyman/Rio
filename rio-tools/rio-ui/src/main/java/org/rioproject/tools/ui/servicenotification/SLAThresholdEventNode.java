@@ -15,39 +15,47 @@
  */
 package org.rioproject.tools.ui.servicenotification;
 
-import org.rioproject.log.ServiceLogEvent;
+import org.rioproject.sla.SLA;
+import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.Constants;
-
-import java.util.logging.LogRecord;
+import org.rioproject.watch.ThresholdEvent;
 
 /**
  * @author Dennis Reedy
  */
-public class ServiceLogEventNode extends RemoteServiceEventNode<ServiceLogEvent> {
+public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEvent> {
 
-    public ServiceLogEventNode(ServiceLogEvent event) {
+    public SLAThresholdEventNode(SLAThresholdEvent event) {
         super(event);
     }
 
     @Override
     public Throwable getThrown() {
-        return getEvent().getLogRecord().getThrown();
+        return null;
     }
 
     @Override
     public String getDescription() {
-        LogRecord logRecord = getEvent().getLogRecord();
-        return logRecord.getMessage();
+        StringBuilder builder = new StringBuilder();
+        SLA sla = getEvent().getSLA();
+        builder.append("Threshold low: ").append(sla.getCurrentLowThreshold());
+        builder.append(" high: ").append(sla.getCurrentHighThreshold());
+        builder.append(" value: ").append(getEvent().getCalculable().getValue());
+        return builder.toString();
     }
 
     @Override
     public String getOperationalStringName() {
-        return getEvent().getOpStringName();
+        return getEvent().getServiceElement().getOperationalStringName();
     }
 
     @Override
     public String getServiceName() {
-        return getEvent().getServiceName() == null ? "" : getEvent().getServiceName();
+        return getEvent().getServiceElement().getName();
+    }
+
+    public String getStatus() {
+        return getEvent().getType() == ThresholdEvent.BREACHED?"BREACHED":"CLEARED";
     }
 
     @Override
@@ -56,41 +64,21 @@ public class ServiceLogEventNode extends RemoteServiceEventNode<ServiceLogEvent>
     }
 
     @Override
-    public Object getValueAt(int column) {
-        String value;
-        if (column == 0) {
-            //value = getServiceName();
-            value = getEvent().getLogRecord().getLevel().toString()+" "+getServiceName();
-        } else if (column == 1) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(getDescription());
-            sb.append(". ");
-            Throwable t = getThrown();
-            if (t != null) {
-                if (t.getCause() != null) {
-                    t = t.getCause();
-                }
-                sb.append(t).append(" Exception raised.");
-            }
-            value = sb.toString();
-        } else {
-            value = Constants.DATE_FORMAT.format(getDate());
-        }
-        return value;
-    }
-
-    @Override
     public int getColumnCount() {
         return 3;
     }
 
     @Override
-    public boolean getAllowsChildren() {
-        return false;
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return true;
+    public Object getValueAt(int column) {
+        String value;
+        if (column == 0) {
+            value = getStatus();
+        } else if (column == 1) {
+            value = getDescription();
+        } else {
+            value = Constants.DATE_FORMAT.format(getDate());
+        }
+        return value;
     }
 }
+
