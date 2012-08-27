@@ -17,13 +17,12 @@ package org.rioproject.ui;
 
 import net.jini.admin.Administrable;
 import net.jini.io.UnsupportedConstraintException;
+import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.deploy.DeployAdmin;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -46,39 +45,6 @@ public class Util {
         DeployAdmin da = (DeployAdmin) ((Administrable)monitor).getAdmin();
         OperationalStringManager mgr = da.getOperationalStringManager(opStringName);
         return(mgr);
-    }
-
-    /**
-     * Get the color for  row in the tree table
-     *
-     * @param root The tree root
-     * @param node The tre node
-     * @param tree The tree
-     * @param defaultColor The default background color
-     * @param altRowColor The background color for alternate rows
-     *
-     * @return The row color
-     */
-    public static Color getRowColor(final DefaultMutableTreeNode root,
-                                    final DefaultMutableTreeNode node,
-                                    final JTree tree,
-                                    final Color defaultColor,
-                                    final Color altRowColor) {
-        Color color;
-        if(node.getAllowsChildren()) {
-            int ndx = tree.getModel().getIndexOfChild(root, node);
-            color = colorForRow(ndx, defaultColor, altRowColor);
-        } else {
-            DefaultMutableTreeNode parent =
-                (DefaultMutableTreeNode)node.getParent();
-            int ndx = tree.getModel().getIndexOfChild(root, parent);
-            color = colorForRow(ndx, defaultColor, altRowColor);
-        }
-        return color;
-    }
-
-    private static Color colorForRow(final int row, final Color defaultColor, final Color altRowColor) {
-        return (row % 2 == 0) ? altRowColor : defaultColor;
     }
 
     /**
@@ -142,7 +108,7 @@ public class Util {
         if (e.getCause() != null &&
             e.getCause() instanceof UnsupportedConstraintException) {
             Throwable cause = e.getCause();
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(comp,
                                           "<html><font face=monospace><font size=3>" +
                                           "Exception: " +
                                           cause.getClass().getName() +
