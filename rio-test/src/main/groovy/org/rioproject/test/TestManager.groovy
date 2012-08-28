@@ -156,29 +156,35 @@ class TestManager {
     }
 
     private void startConfiguredServices() {
-        int lookupCount = testConfig.getNumLookups()-countLookups();
-        for(int i=0; i<lookupCount; i++)
-            startReggie();
-
-        int monitorCount = testConfig.getNumMonitors()-countMonitors();
-        if(monitorCount>0) {
-            for(int i=0; i<monitorCount; i++)
-                startProvisionMonitor();
-            /*
-            * Need to get an instance of DiscoveryManagement and set
-            * it to the OpStringManagerProxy utility in order to
-            * discover ProvisionManager instances.
-            *
-            * This is required if test clients use association
-            * strategies, specifically the utilization strategy
-            */
-            OpStringManagerProxy.setDiscoveryManagement(
-                getServiceDiscoveryManager().getDiscoveryManager());
+        if(testConfig.getNumLookups()>0) {
+            int lookupCount = testConfig.getNumLookups()-countLookups();
+            for(int i=0; i<lookupCount; i++)
+                startReggie();
         }
 
-        int cybernodeCount = testConfig.getNumCybernodes()-countCybernodes();
-        for(int i=0; i<cybernodeCount; i++)
-            startCybernode();
+        if(testConfig.getNumMonitors()>0) {
+            int monitorCount = testConfig.getNumMonitors()-countMonitors();
+            if(monitorCount>0) {
+                for(int i=0; i<monitorCount; i++)
+                    startProvisionMonitor();
+                /*
+                * Need to get an instance of DiscoveryManagement and set
+                * it to the OpStringManagerProxy utility in order to
+                * discover ProvisionManager instances.
+                *
+                * This is required if test clients use association
+                * strategies, specifically the utilization strategy
+                */
+                OpStringManagerProxy.setDiscoveryManagement(
+                        getServiceDiscoveryManager().getDiscoveryManager());
+            }
+        }
+
+        if(testConfig.getNumCybernodes()>0) {
+            int cybernodeCount = testConfig.getNumCybernodes()-countCybernodes();
+            for(int i=0; i<cybernodeCount; i++)
+                startCybernode();
+        }
 
         postInit();
 
