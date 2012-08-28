@@ -82,7 +82,8 @@ public abstract class AbstractEventManager implements RemoteServiceEventListener
     }
 
     public void notify(RemoteServiceEvent event) {
-        logger.info(event.toString());
+        if(logger.isLoggable(Level.FINE))
+            logger.fine(event.toString());
         eventQ.offer(event);
         postNotify(event);
     }
