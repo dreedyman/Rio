@@ -40,6 +40,7 @@ import java.util.Collections;
  * @author Dennis Reedy
  */
 public class ProvisionMonitorEvent extends RemoteServiceEvent implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Unique Event ID */
     public static final long ID=2764185076071141340L;
@@ -59,9 +60,6 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
         /** Indicates that this event has been created and sent as a result of removing
          * a service from an OperationalString */
         SERVICE_ELEMENT_REMOVED,
-        /** Indicates that this event has been created and sent as a result that  an OperationalString
-         * is deploying */
-        OPSTRING_DEPLOYING,
         /** Indicates that this event has been created and sent as a result of deploying
          * an OperationalString */
         OPSTRING_DEPLOYED,
