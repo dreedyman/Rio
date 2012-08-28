@@ -67,11 +67,6 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceBeanActivation {
-    /**
-     * Default name of the OperationalString name this utility adds for services
-     * it activates
-     */
-    public static final String BOOT_OPSTRING="System-Core";
     static final String COMPONENT = Constants.BASE_COMPONENT+".jsb";
     public static final String QOS_COMPONENT = Constants.BASE_COMPONENT+".system";
     public static final String BOOT_COMPONENT = Constants.BASE_COMPONENT+".boot";
@@ -292,7 +287,7 @@ public class ServiceBeanActivation {
         if(serviceComment != null)
             configParms.put(ServiceBeanConfig.COMMENT, serviceComment);
         /* Get the log OperationalString name */
-        String opStringName = (String)config.getEntry(configComponent, "opStringName", String.class, BOOT_OPSTRING);
+        String opStringName = (String)config.getEntry(configComponent, "opStringName", String.class, Constants.CORE_OPSTRING);
         configParms.put(ServiceBeanConfig.OPSTRING, opStringName);        
         /* Get group values, default to all groups */
         String[] groups = (String[])config.getEntry(configComponent,

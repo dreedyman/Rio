@@ -90,4 +90,8 @@ public interface Constants {
      * are inclusive
      */
     static final String PORT_RANGE = BASE_COMPONENT+".portRange";
+    /**
+     * Default name of the OperationalString name for core-services
+     */
+    static final String CORE_OPSTRING="System-Core";
 }
