@@ -1949,6 +1949,18 @@ public class ServiceElementManager implements InstanceIDManager {
                  * use that ProvisionRequest. This allows a ServiceProvisionListener to be added */
                 ProvisionRequest provRequest = getRedeploymentProvisionRequest(proxy);
                 asResultOfRedeployment = (provRequest!=null);
+
+                /* Notify a service has failed */
+                if(!asResultOfRedeployment) {
+                    ProvisionMonitorEvent event = new ProvisionMonitorEvent(eventSource,
+                                                                            ProvisionMonitorEvent.Action.SERVICE_FAILED,
+                                                                            svcElement.getOperationalStringName(),
+                                                                            svcElement,
+                                                                            instance);
+                    processEvent(event);
+                    ServiceChannel channel = ServiceChannel.getInstance();
+                    channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.FAILED));
+                }
                 mgrLogger.finest("Redeployment ProvisionRequest for [%s] obtained: %s",
                                  LoggingUtil.getLoggingName(svcElement),
                                  (provRequest==null?"no":"yes"));
@@ -1989,17 +2001,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 mgrLogger.log(Level.SEVERE, t,
                               "Service Fault Detection for [%s]", LoggingUtil.getLoggingName(svcElement));
             }
-            /* Notify a service has failed */
-            if(!asResultOfRedeployment) {
-                ProvisionMonitorEvent event = new ProvisionMonitorEvent(eventSource,
-                                                                        ProvisionMonitorEvent.Action.SERVICE_FAILED,
-                                                                        svcElement.getOperationalStringName(),
-                                                                        svcElement,
-                                                                        instance);
-                processEvent(event);
-                ServiceChannel channel = ServiceChannel.getInstance();
-                channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.FAILED));
-            }
+
         }
 
         /*
