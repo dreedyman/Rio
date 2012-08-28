@@ -134,21 +134,22 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                     ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
                     synchronized(this) {
                         if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED)) {
-                            for(RemoteServiceEventNode rsn : dataModel.getRemoteServiceEventNodes(pme.getServiceElement())) {
-                                if(rsn instanceof ProvisionFailureEventNode) {
-                                    ProvisionFailureEventNode en = (ProvisionFailureEventNode)rsn;
-                                    if(en.getStatus().equals("Resolved"))
-                                        continue;
-                                    if(autoRemove.isSelected()) {
-                                        dataModel.removeItem(rsn);
-                                        notifyListeners();
-                                    } else {
-                                        dataModel.addItem(pme);
-                                        en.setStatus("Resolved");
-                                        notifyListeners();
+                            if(autoRemove.isSelected()) {
+                                for(RemoteServiceEventNode rsn : dataModel.getRemoteServiceEventNodes(pme.getServiceElement())) {
+                                    if(rsn instanceof ProvisionFailureEventNode) {
+                                        ProvisionFailureEventNode en = (ProvisionFailureEventNode)rsn;
+                                        if(en.getStatus().equals("Resolved"))
+                                            continue;
+                                        if(rsn.getServiceName().equals(pme.getServiceElement().getName())) {
+                                            dataModel.removeItem(rsn);
+                                            notifyListeners();
+                                            break;
+                                        }
                                     }
-                                    break;
                                 }
+                            } else {
+                                dataModel.addItem(pme);
+                                notifyListeners();
                             }
                         } else if(pme.getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED)) {
                             DeploymentNode dn = dataModel.getDeploymentNode(pme.getOperationalStringName());
@@ -208,13 +209,13 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         }
     }
     
-    private RemoteServiceEvent getRemoteServiceEvent(int row) {
+    private RemoteServiceEventNode getRemoteServiceEvent(int row) {
         if(row==-1)
             return null;
         TreePath path = eventTable.getPathForRow(row);
         if(path==null)
             return null;
-        return dataModel.getRemoteServiceEvent(row);
+        return dataModel.getRemoteServiceEventNode(row);
     }
 
     public int getTotalItemCount() {
@@ -279,7 +280,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         }
     }
 
-    void showDetails(final RemoteServiceEvent event) {
+    void showDetails(final RemoteServiceEventNode eventNode) {
         Component parent = SwingUtilities.getAncestorOfClass(JFrame.class, this);
         JDialog dialog = new JDialog((JFrame)parent);
         final String[] columns = {"Field", "Value"};
@@ -287,6 +288,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         final Object[][] data;
         String label;
         Throwable thrown;
+        RemoteServiceEvent event = eventNode.getEvent();
         if(event instanceof ProvisionFailureEvent) {
             label = "Provision Failure Event";
             ProvisionFailureEvent pfe = (ProvisionFailureEvent)event;
@@ -329,6 +331,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                                           {"When", Constants.DATE_FORMAT.format(event.getDate())},
                                           {"Deployment", pme.getOperationalStringName()},
                                           {"Action", pme.getAction().toString()},
+                                          {"Description", eventNode.getDescription()}
                 };
             }
 

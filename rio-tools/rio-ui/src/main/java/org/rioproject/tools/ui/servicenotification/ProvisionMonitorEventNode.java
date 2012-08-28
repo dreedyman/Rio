@@ -39,8 +39,7 @@ public class ProvisionMonitorEventNode extends RemoteServiceEventNode<ProvisionM
         if(getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED)) {
             builder.append(getServiceName()).append(" instantiated on ");
             builder.append(getEvent().getServiceBeanInstance().getHostAddress());
-        } else if(getEvent().getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_DEPLOYING) ||
-                  getEvent().getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_DEPLOYED) ||
+        } else if(getEvent().getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_DEPLOYED) ||
                   getEvent().getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED)) {
             for(ServiceElement service : getEvent().getOperationalString().getServices()) {
                 if(builder.length()>0) {
@@ -51,6 +50,12 @@ public class ProvisionMonitorEventNode extends RemoteServiceEventNode<ProvisionM
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_TERMINATED)) {
             builder.append(getServiceName()).append(" on ");
             builder.append(getEvent().getServiceBeanInstance().getHostAddress()).append(" terminated");
+        } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_FAILED)) {
+            builder.append(getServiceName()).append(" on ");
+            builder.append(getEvent().getServiceBeanInstance().getHostAddress()).append(" has failed");
+        } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.EXTERNAL_SERVICE_DISCOVERED)) {
+            builder.append(getServiceName()).append(" has been discovered on ");
+            builder.append(getEvent().getServiceBeanInstance().getHostAddress());
         }
         return builder.toString();
     }

@@ -19,14 +19,15 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableNode;
-import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
+import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLAThresholdEvent;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -35,6 +36,7 @@ import java.util.List;
  */
 public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
     private JXTreeTable treeTable;
+    private final RemoteServiceEventNodeComparator comparator = new RemoteServiceEventNodeComparator();
 
     public RemoteEventEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
         super(root, columns);
@@ -96,7 +98,18 @@ public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
     }
 
     private void addItem(AbstractMutableTreeTableNode node, AbstractMutableTreeTableNode parent) {
-        insertNodeInto(node, parent, parent.getChildCount());
+        int index = parent.getChildCount();
+        if(node instanceof RemoteServiceEventNode) {
+            RemoteServiceEventNode rNode = (RemoteServiceEventNode)node;
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                RemoteServiceEventNode childNode =(RemoteServiceEventNode)parent.getChildAt(i);
+                if(comparator.compare(childNode, rNode)>0) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        insertNodeInto(node, parent, index);
     }
 
     public void removeItem(int row) {
@@ -112,13 +125,13 @@ public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
         }
     }
 
-    public RemoteServiceEvent getRemoteServiceEvent(int row) {
+    public RemoteServiceEventNode getRemoteServiceEventNode(int row) {
         AbstractMutableTreeTableNode node = getNode(row);
-        RemoteServiceEvent event = null;
+        RemoteServiceEventNode eventNode = null;
         if(node instanceof RemoteServiceEventNode) {
-            event = ((RemoteServiceEventNode)node).getEvent();
+            eventNode = (RemoteServiceEventNode)node;
         }
-        return event;
+        return eventNode;
     }
 
     public List<RemoteServiceEventNode> getRemoteServiceEventNodes(ServiceElement elem) {
@@ -192,6 +205,12 @@ public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
             rowCounter += dn.getChildCount();
         }
         return rowCounter;
+    }
+
+    class RemoteServiceEventNodeComparator implements Comparator<RemoteServiceEventNode> {
+        public int compare(RemoteServiceEventNode node1, RemoteServiceEventNode node2) {
+            return node1.getDate().compareTo(node2.getDate());
+        }
     }
 
 }

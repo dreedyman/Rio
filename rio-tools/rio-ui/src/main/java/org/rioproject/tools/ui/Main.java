@@ -36,6 +36,7 @@ import net.jini.lookup.ServiceDiscoveryManager;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
@@ -884,7 +885,9 @@ public class Main extends JFrame {
         jiniClient = new JiniClient(new LookupDiscoveryManager(groups, locators, null, config));
         ServiceTemplate monitors = new ServiceTemplate(null, new Class[]{ProvisionMonitor.class}, null);
         ServiceTemplate cybernodes = new ServiceTemplate(null, new Class[]{Cybernode.class}, null);
-        ServiceTemplate eventCollectors = new ServiceTemplate(null, new Class[]{EventCollector.class}, null);
+        ServiceTemplate eventCollectors = new ServiceTemplate(null,
+                                                              new Class[]{EventCollector.class},
+                                                              new Entry[]{new OperationalStringEntry(org.rioproject.config.Constants.CORE_OPSTRING)});
 
         sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(), new LeaseRenewalManager(), config);
 

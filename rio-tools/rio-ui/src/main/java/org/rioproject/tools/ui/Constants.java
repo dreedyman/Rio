@@ -50,7 +50,7 @@ public interface Constants {
     final int DEFAULT_CYBERNODE_REFRESH_RATE = 30;
     final Font ITEM_FONT = new Font("Lucida Grande", 0, 12);
     final Font NOTIFY_COUNT_FONT = new Font("Verdana", 0, 11);
-    final DateFormat DATE_FORMAT = new SimpleDateFormat("hh:mm:ss aa, MMM dd, yyyy");
+    final DateFormat DATE_FORMAT = new SimpleDateFormat("hh:mm:ss,SSS aa, MMM dd, yyyy");
 
     /* Property values */
     final String FRAME_WIDTH = "frame.width";

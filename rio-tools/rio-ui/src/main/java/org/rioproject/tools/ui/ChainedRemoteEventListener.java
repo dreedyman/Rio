@@ -28,6 +28,10 @@ import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
+import org.rioproject.log.ServiceLogEvent;
+import org.rioproject.monitor.ProvisionFailureEvent;
+import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.sla.SLAThresholdEvent;
 
 import java.rmi.RemoteException;
 import java.rmi.server.ExportException;
@@ -76,7 +80,14 @@ public class ChainedRemoteEventListener implements RemoteEventListener, ServerPr
     }
 
     public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
-        eventQ.offer(remoteEvent);
+        if(remoteEvent instanceof ProvisionFailureEvent ||
+           remoteEvent instanceof ProvisionMonitorEvent ||
+           remoteEvent instanceof SLAThresholdEvent ||
+           remoteEvent instanceof ServiceLogEvent) {
+            eventQ.offer(remoteEvent);
+        } else {
+            throw new UnknownEventException(String.format("The %s is unknown to the Rio UI", remoteEvent.getClass().getName()));
+        }
     }
 
     @Override
