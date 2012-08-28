@@ -1919,10 +1919,9 @@ public class ServiceElementManager implements InstanceIDManager {
         public synchronized void serviceFailure(final Object proxy, final ServiceID sID) {
             if(shutdown.get())
                 return;
-            ServiceBeanInstance instance = null;
+            ServiceBeanInstance instance;
             Uuid uuid = UuidFactory.create(sID.getMostSignificantBits(),
                                            sID.getLeastSignificantBits());
-            boolean asResultOfRedeployment = false;
             try {
                 /* Clean up instances of the service and decrease the number
                  * of services if the service's proxy was removed from the
@@ -1948,7 +1947,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 /* If there is a ProvisionRequest in the redeployRequestList,
                  * use that ProvisionRequest. This allows a ServiceProvisionListener to be added */
                 ProvisionRequest provRequest = getRedeploymentProvisionRequest(proxy);
-                asResultOfRedeployment = (provRequest!=null);
+                boolean asResultOfRedeployment = (provRequest!=null);
 
                 /* Notify a service has failed */
                 if(!asResultOfRedeployment) {
