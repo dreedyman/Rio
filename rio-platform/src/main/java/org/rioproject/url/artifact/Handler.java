@@ -49,6 +49,9 @@ import java.util.logging.*;
  *     <code>artifact:org.rioproject.examples.calculator/calculator-proxy/2.0.1;http://www.rio-project.org@rio</code></li>
  * </ul>
  *
+ * <p>Once an artifact has been resolved to an {@code URL}, the {@code artifact:URL} pair is
+ * cached, avoiding future interactions with the underlying {@link Resolver}</p>
+ *
  * @author Dennis Reedy
  */
 public class Handler extends URLStreamHandler {
@@ -87,7 +90,6 @@ public class Handler extends URLStreamHandler {
 
         URL u;
         try {
-            //resolver.getClassPathFor(artifact, repositories.toArray(new RemoteRepository[repositories.size()]));
             u = cache.get(a);
             if(u==null) {
                 if(logger.isLoggable(Level.FINE))
@@ -106,6 +108,13 @@ public class Handler extends URLStreamHandler {
         return null;
     }
 
+    /**
+     * The {@code SnapShotReaper} is used to check if any cached artifacts are SNAPSHOTs. This class
+     * is run by a ScheduledExecutor every 3 hours to check the cache, if there are SNAPSHOTs in the cache
+     * they will be purged, meaning the next time the artifact gets resolved, it may be downloaded if necessary.
+     *
+     * TODO: The timing of this needs to be configurable.
+     */
     private class SnapShotReaper implements Runnable {
         public void run() {
             List<Artifact> removals = new ArrayList<Artifact>();
