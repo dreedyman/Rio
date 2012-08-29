@@ -92,19 +92,6 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     @Override
     public String getClassAnnotation(final Class<?> aClass) {
-        /*if(aClass.getClassLoader() instanceof URLClassLoader) {
-            URL[] urls = ((URLClassLoader)aClass.getClassLoader()).getURLs();
-            if(urls.length>0 && urls[0].getProtocol().equals("artifact")) {
-                StringBuilder builder = new StringBuilder();
-                for(URL u : urls) {
-                    if(builder.length()>0)
-                        builder.append(" ");
-                    builder.append(u.toExternalForm());
-                }
-                return resolveCodebase(builder.toString());
-            }
-        }*/
-
         return loader.getClassAnnotation(aClass);
     }
 
@@ -161,7 +148,6 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     }
 
     private synchronized static void findAndRemove(ClassLoader loader, Map loaderTable) {
-        //Map<ClassLoader, Object> toRemove = new HashMap<ClassLoader, Object>();
         for(Object o : loaderTable.entrySet()) {
             Map.Entry entry = (Map.Entry) o;
             Object key = entry.getKey();
@@ -171,7 +157,6 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 ClassLoader toCheck = (ClassLoader) parentField.get(key);
                 if (isDescendantOf(toCheck, loader)) {
                     parentField.set(key, null);
-                    //toRemove.put(toCheck, key);
                 }
             } catch (NoSuchFieldException e) {
                 logger.log(Level.WARNING, "Failure accessing the parent field", e);
@@ -179,13 +164,6 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 logger.log(Level.WARNING, "Failure accessing the parent field", e);
             }
         }
-
-        //for(Map.Entry<ClassLoader, Object> entry : toRemove.entrySet()) {
-            //System.out.println("===> REMOVED "+entry.getKey());
-            //loaderTable.remove(entry.getValue());
-            //System.err.println("LoaderEntry: " + loaderEntry);
-            //loaderEntry.removed = true;
-        //}
     }
 
     private static boolean isDescendantOf(ClassLoader toCheck, ClassLoader loader) {
