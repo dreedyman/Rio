@@ -32,7 +32,8 @@ import java.util.List;
 
 /**
  * The RemoteEventEventTreeModel extends DefaultTreeTableModel providing the model to
- * display {@link ProvisionFailureEvent}s and {@link ServiceLogEvent}s in a tree table.
+ * display {@link ProvisionFailureEvent}s, {@link ServiceLogEvent}s, {@code SLAThresholdEvent}s
+ * and {@code ProvisionMonitorEvent}s in a tree table.
  */
 public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
     private JXTreeTable treeTable;
