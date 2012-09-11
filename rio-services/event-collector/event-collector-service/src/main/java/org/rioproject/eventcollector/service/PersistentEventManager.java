@@ -22,11 +22,11 @@ import java.io.*;
 import java.rmi.MarshalledObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +37,6 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("unused")
 public class PersistentEventManager extends TransientEventManager {
-    private final AtomicInteger counter = new AtomicInteger(0);
     private File persistentEventDirectory;
     private static final BlockingQueue<RemoteServiceEvent> eventWriteQ = new LinkedBlockingQueue<RemoteServiceEvent>();
     private final DateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss.SSS");
@@ -56,10 +55,12 @@ public class PersistentEventManager extends TransientEventManager {
                 logger.fine(String.format("Created %s", persistentEventDirectory.getPath()));
             }
         }
-        getRemoteEventList().addAll(getPersistedEvents());
-        counter.set(getRemoteEventList().size());
+        List<RemoteServiceEvent> persistedEvents = getPersistedEvents();
+        if(!persistedEvents.isEmpty()) {
+            addRemoteEvents(persistedEvents);
+        }
         logger.info(String.format("Persistent event directory: %s, have %d persisted events",
-                                  persistentEventDirectory.getPath(), counter.get()));
+                                  persistentEventDirectory.getPath(), getNumberOfCollectedEvents()));
         if(logger.isLoggable(Level.FINEST)) {
             StringBuilder builder = new StringBuilder();
             for(RemoteEvent event : getEvents()) {
@@ -78,9 +79,34 @@ public class PersistentEventManager extends TransientEventManager {
         eventWriteQ.offer(event);
     }
 
+    @Override
+    public int delete(Collection<RemoteServiceEvent> events) {
+        for(RemoteServiceEvent event : events) {
+            File file = new File(persistentEventDirectory, createEventFileName(event));
+            if(file.exists()) {
+                if(file.delete()) {
+                    if(logger.isLoggable(Level.FINE))
+                        logger.fine(String.format("Deleted %s", file.getName()));
+                } else {
+                    logger.warning(String.format("Could not delete %s", file.getName()));
+                }
+            } else {
+                logger.warning(String.format("Could not delete %s, it does not exist", file.getName()));
+            }
+        }
+        return super.delete(events);
+    }
+
+    /*
+     * Added for testing support
+     */
+    File getPersistentEventDirectory() {
+        return persistentEventDirectory;
+    }
+
     @SuppressWarnings("unchecked")
-    private List<RemoteEvent> getPersistedEvents() {
-        List<RemoteEvent> events = new LinkedList<RemoteEvent>();
+    private List<RemoteServiceEvent> getPersistedEvents() {
+        List<RemoteServiceEvent> events = new LinkedList<RemoteServiceEvent>();
         File[] files = persistentEventDirectory.listFiles();
         if(files==null) {
             logger.warning(String.format("%s returned null file array", persistentEventDirectory.getPath()));
@@ -90,7 +116,7 @@ public class PersistentEventManager extends TransientEventManager {
             ObjectInputStream inputStream = null;
             try {
                 inputStream = new ObjectInputStream(new FileInputStream(file));
-                MarshalledObject<RemoteEvent> mo = (MarshalledObject<RemoteEvent>)inputStream.readObject();
+                MarshalledObject<RemoteServiceEvent> mo = (MarshalledObject<RemoteServiceEvent>)inputStream.readObject();
                 events.add(mo.get());
             } catch (Exception e) {
                 logger.log(Level.SEVERE,
@@ -109,6 +135,13 @@ public class PersistentEventManager extends TransientEventManager {
         return events;
     }
 
+    private String createEventFileName(RemoteServiceEvent event) {
+        StringBuilder nameBuilder = new StringBuilder();
+        nameBuilder.append(event.getSequenceNumber()).append("-").append(event.getClass().getName()).append("-");
+        nameBuilder.append(dateFormatter.format(event.getDate())).append(".evt");
+        return nameBuilder.toString();
+    }
+
     class EventWriter implements Runnable {
 
         public void run() {
@@ -120,22 +153,17 @@ public class PersistentEventManager extends TransientEventManager {
                     logger.fine("EventWriter breaking out of main loop");
                     break;
                 }
-                int count = counter.incrementAndGet();
-                StringBuilder nameBuilder = new StringBuilder();
-                nameBuilder.append(count).append("-").append(event.getClass().getName()).append("-");
-                nameBuilder.append(dateFormatter.format(event.getDate())).append(".evt");
-                File file = new File(persistentEventDirectory, nameBuilder.toString());
+                File file = new File(persistentEventDirectory, createEventFileName(event));
                 if(logger.isLoggable(Level.FINE))
                     logger.fine(String.format("Writing %s to %s", event, file.getPath()));
                 ObjectOutputStream outputStream = null;
                 try {
                     outputStream = new ObjectOutputStream(new FileOutputStream(file));
-                    outputStream.writeObject(new MarshalledObject<RemoteEvent>(event));
+                    outputStream.writeObject(new MarshalledObject<RemoteServiceEvent>(event));
                     if(logger.isLoggable(Level.FINE))
                         logger.fine(String.format("Wrote %d bytes to %s", file.length(), file.getPath()));
                 } catch (IOException e) {
                     logger.log(Level.SEVERE, "Could not write to disk", e);
-                    counter.decrementAndGet();
                 } finally {
                     if(outputStream!=null) {
                         try {
@@ -144,8 +172,6 @@ public class PersistentEventManager extends TransientEventManager {
                             logger.log(Level.WARNING, "Trying to close OOS", e);
                         }
                     }
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine(String.format("Have %d persisted events", count));
                 }
             }
         }

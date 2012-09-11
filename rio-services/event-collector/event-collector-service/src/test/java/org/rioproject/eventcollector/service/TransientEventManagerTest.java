@@ -24,7 +24,10 @@ import org.junit.Test;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -63,33 +66,38 @@ public class TransientEventManagerTest {
 
     @Test
     public void testGetEventsWithIndex() throws Exception {
-        for(RemoteServiceEvent event : createRemoteServiceEvents(50)) {
+        List<RemoteServiceEvent> events = createRemoteServiceEvents(50);
+        for(RemoteServiceEvent event : events) {
             eventManager.notify(event);
         }
-        Assert.assertEquals(10, eventManager.getEvents(40).size());
+        Date index = events.get(39).getDate();
+
+        DateFormat formatter = new SimpleDateFormat("HH:mm:ss,SSS");
+        int i = 1;
+        for(RemoteEvent event : eventManager.getEvents()) {
+            Date date = ((RemoteServiceEvent)event).getDate();
+            System.out.println("["+(i++)+"] event date: "+formatter.format(date));
+        }
+        System.out.print("\nRequested index from: "+formatter.format(index)+"\n\n");
+        Assert.assertEquals(10, eventManager.getEvents(index).size());
     }
 
     @Test
-    public void testGetEventsWithNegativeIndex() throws Exception {
+    public void testGetEventsWithNullIndex() throws Exception {
         for(RemoteServiceEvent event : createRemoteServiceEvents(50)) {
             eventManager.notify(event);
         }
-        Assert.assertEquals(50, eventManager.getEvents(-1).size());
+        Assert.assertEquals(50, eventManager.getEvents(null).size());
     }
 
-    @Test
-    public void testGetIndex() throws Exception {
-        for(RemoteServiceEvent event : createRemoteServiceEvents(50)) {
-            eventManager.notify(event);
-        }
-        Assert.assertEquals(new Integer(50), eventManager.getIndex());
-    }
-
-    private Iterable<RemoteServiceEvent> createRemoteServiceEvents(int count) {
+    static List<RemoteServiceEvent> createRemoteServiceEvents(int count) {
         List<RemoteServiceEvent> list = new ArrayList<RemoteServiceEvent>();
         for(int i=0; i<count; i++) {
-            list.add(new RemoteServiceEvent("Test Event "+i));
+            RemoteServiceEvent event = new RemoteServiceEvent("Test Event "+i);
+            event.setSequenceNumber(i);
+            list.add(event);
         }
+        Assert.assertEquals(count, list.size());
         return list;
     }
 }

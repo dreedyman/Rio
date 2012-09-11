@@ -34,6 +34,7 @@ import net.jini.security.ProxyPreparer;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventDescriptorFactory;
+import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.eventcollector.api.EventCollectorRegistration;
 import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.eventcollector.proxy.EventCollectorBackend;
@@ -226,6 +227,26 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
         logger.info(getServiceBeanContext().getServiceElement().getName()+": started ["+groups.toString()+"]");
     }
 
+    /**
+     * Override parent's getAdmin to return custom service admin
+     *
+     * @return A EventCollectorAdminImpl instance
+     */
+    public Object getAdmin() {
+        Object adminProxy = null;
+        try {
+            if(admin == null) {
+                Exporter adminExporter = getAdminExporter();
+                admin = new EventCollectorAdminImpl(this, adminExporter);
+            }
+            admin.setServiceBeanContext(getServiceBeanContext());
+            adminProxy = admin.getServiceAdmin();
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Getting EventCollectorAdminImpl", t);
+        }
+        return adminProxy;
+    }
+
     @Override
     protected Remote exportDo(Exporter exporter) throws Exception {
         if(exporter==null)
@@ -242,7 +263,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
         for(Map.Entry<Uuid, RegisteredNotification> entry : registrations.entrySet()) {
             RegisteredNotification registeredNotification = entry.getValue();
             if(registeredNotification.getEventListener()!=null) {
-                registeredNotification.setEventIndex(eventManager.getIndex());
+                registeredNotification.setEventIndex(eventManager.getLastRecordedDate());
                 registrationManager.update(registeredNotification);
             }
         }
@@ -306,7 +327,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
         RegisteredNotification registeredNotification = registrations.get(uuid);
         if(registeredNotification!=null) {
             registeredNotification.setRemoteEventListener(null);
-            registeredNotification.setEventIndex(eventManager.getIndex());
+            registeredNotification.setEventIndex(eventManager.getLastRecordedDate());
         } else {
             logger.warning("Unable to disable delivery for unknown registration ID");
             throw new UnknownEventCollectorRegistration("Unable to disable delivery for unknown registration ID");
@@ -333,6 +354,19 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             }
         }
         return LandlordUtil.cancelAll(localLandlord, uuids);
+    }
+
+
+    int delete(Collection<RemoteServiceEvent> events) {
+        logger.info(String.format("Delete %d events", events.size()));
+        return eventManager.delete(events);
+    }
+
+    /*
+     * Added for testing support
+     */
+    EventManager getEventManager() {
+        return eventManager;
     }
 
     private long renewDo(Uuid uuid, long duration) throws LeaseDeniedException, UnknownLeaseException {

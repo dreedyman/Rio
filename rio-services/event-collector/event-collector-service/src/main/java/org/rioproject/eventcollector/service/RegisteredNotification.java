@@ -25,9 +25,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.MarshalledObject;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Dennis Reedy
@@ -43,7 +44,7 @@ public class RegisteredNotification implements LeasedResource, Serializable {
     private long expiration;
     private final AtomicBoolean historyUpdating = new AtomicBoolean(false);
     private final List<RemoteEvent> missedEvents = new ArrayList<RemoteEvent>();
-    private final AtomicInteger eventIndex = new AtomicInteger(-1);
+    private final AtomicReference<Date> eventIndex = new AtomicReference<Date>();
     private final List<RemoteEvent> unknownEvents = new ArrayList<RemoteEvent>();
 
     public RegisteredNotification(Uuid registrationID) {
@@ -102,11 +103,11 @@ public class RegisteredNotification implements LeasedResource, Serializable {
         return list;
     }
 
-    public void setEventIndex(int index) {
+    public void setEventIndex(Date index) {
         eventIndex.set(index);
     }
 
-    public int getEventIndex() {
+    public Date getEventIndex() {
         return eventIndex.get();
     }
 

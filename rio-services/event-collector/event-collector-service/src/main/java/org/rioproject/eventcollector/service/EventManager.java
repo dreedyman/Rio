@@ -15,9 +15,10 @@
  */
 package org.rioproject.eventcollector.service;
 
-import net.jini.core.event.RemoteEvent;
+import org.rioproject.event.RemoteServiceEvent;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Defines the semantics for an {@code EventManager}, provided support to manage a collection of events.
@@ -37,27 +38,30 @@ public interface EventManager {
     void initialize(EventCollectorContext context) throws Exception;
 
     /**
-     * Get all known {@code RemoteEvent}s.
+     * Get all known {@code RemoteServiceEvent}s.
      *
      * @return A {@code Collection} of recorded {@code RemoteEvent}s. If there are no
      * {@code RemoteEvent}s, and empty {@code Collection} is returned.
      */
-    Collection<RemoteEvent> getEvents();
+    Collection<RemoteServiceEvent> getEvents();
 
     /**
-     * Get all {@code RemoteEvent}s that occur after an index.
+     * Get all {@code RemoteServiceEvent}s that occur after a provided {@link Date}.
      *
-     * @return A {@code Collection} of recorded {@code RemoteEvent}s. If there are no
-     * {@code RemoteEvent}s, and empty {@code Collection} is returned.
+     * @param from The {@code Date} to get recorded events from. May be {@code null}.
+     *
+     * @return A {@code Collection} of recorded {@code RemoteServiceEvent}s. If there are no
+     * {@code RemoteServiceEvent}s, and empty {@code Collection} is returned. If the provided {@code Date} is {@code null},
+     * return all recorded events.
      */
-    Collection<RemoteEvent> getEvents(int index);
+    Collection<RemoteServiceEvent> getEvents(Date from);
 
     /**
-     * Get the current index into the collection of recorded {@code RemoteEvent}s.
+     * Get the last recorded event {@code Date} from the collection of recorded {@code RemoteServiceEvent}s.
      *
-     * @return The index of the last recorded event.
+     * @return The {@code Date} of the last recorded event. If there are no recorded events, return {@code null}.
      */
-    Integer getIndex();
+    Date getLastRecordedDate();
 
     /**
      * A request to be notified of the event history.
@@ -67,6 +71,15 @@ public interface EventManager {
      * @throws IllegalArgumentException if the {@code registeredNotification} is {@code null}.
      */
     void historyNotification(RegisteredNotification registeredNotification);
+
+    /**
+     * Delete events from the collection of events
+     *
+     * @param events A {@code Collection} of events.
+     *
+     * @return The number of events deleted
+     */
+    int delete(Collection<RemoteServiceEvent> events);
 
     /**
      * Terminate the {@code EventManager}.
