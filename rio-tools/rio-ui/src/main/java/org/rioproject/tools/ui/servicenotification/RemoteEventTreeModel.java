@@ -31,15 +31,15 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * The RemoteEventEventTreeModel extends DefaultTreeTableModel providing the model to
+ * The RemoteEventTreeModel extends DefaultTreeTableModel providing the model to
  * display {@link ProvisionFailureEvent}s, {@link ServiceLogEvent}s, {@code SLAThresholdEvent}s
  * and {@code ProvisionMonitorEvent}s in a tree table.
  */
-public class RemoteEventEventTreeModel extends DefaultTreeTableModel {
+public class RemoteEventTreeModel extends DefaultTreeTableModel {
     private JXTreeTable treeTable;
     private final RemoteServiceEventNodeComparator comparator = new RemoteServiceEventNodeComparator();
 
-    public RemoteEventEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
+    public RemoteEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
         super(root, columns);
     }
 
