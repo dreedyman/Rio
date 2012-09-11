@@ -81,59 +81,61 @@ public interface Constants {
 
     final String AUTO_REMOVE_PROVISION_FAILURE_EVENTS = "auto.remove.provision.failure.events";
 
+    final String USE_EVENT_COLLECTOR = "use.event.collector";
+
     /*
      * Percentage of CPU utilization on the machine
      */
-    public final String UTIL_PERCENT_CPU = "%CPU";
+    final String UTIL_PERCENT_CPU = "%CPU";
     /*
      * Percentage of used memory on the machine
      */
-    public final String UTIL_PERCENT_MEMORY = "%Mem";
+    final String UTIL_PERCENT_MEMORY = "%Mem";
     /*
      * Total memory (in MB) on the machine
      */
-    public final String UTIL_TOTAL_MEMORY = "Mem Total";
+    final String UTIL_TOTAL_MEMORY = "Mem Total";
     /*
      * Amount (in MB) of free memory on the machine
      */
-    public final String UTIL_FREE_MEMORY = "Mem Free";
+    final String UTIL_FREE_MEMORY = "Mem Free";
     /*
      * Amount (in MB) of used memory on the machine
      */
-    public final String UTIL_USED_MEMORY = "Mem Used";
+    final String UTIL_USED_MEMORY = "Mem Used";
     /*
      * Percentage of used disk space
      */
-    public final String UTIL_PERCENT_DISK = "%Disk";
+    final String UTIL_PERCENT_DISK = "%Disk";
     /*
      * Amount (in GB) of available disk space
      */
-    public final String UTIL_AVAIL_DISK = "Disk Avail";
+    final String UTIL_AVAIL_DISK = "Disk Avail";
     /*
      * Amount (in GB) of total disk space
      */
-    public final String UTIL_TOTAL_DISK = "Disk Total";
+    final String UTIL_TOTAL_DISK = "Disk Total";
 
     /*
      * Percentage of CPU utilization for the process (cybernode and/or
      * forked services)
      */
-    public final String UTIL_PERCENT_CPU_PROC = "%CPU (Proc)";
+    final String UTIL_PERCENT_CPU_PROC = "%CPU (Proc)";
     /*
      * Percentage of Memory (heap) utilization for the JVM (cybernode and/or
      * forked java services)
      */
-    public final String UTIL_PERCENT_HEAP_JVM = "%Heap Mem";
+    final String UTIL_PERCENT_HEAP_JVM = "%Heap Mem";
     /*
      * Amount of heap memory (in MB) the JVM is using
      */
-    public final String UTIL_HEAP_MEM_JVM = "Heap Used";
+    final String UTIL_HEAP_MEM_JVM = "Heap Used";
     /*
      * Amount of heap memory (in MB) the JVM has available
      */
-    public final String UTIL_HEAP_MEM_AVAIL = "Heap Avail";
+    final String UTIL_HEAP_MEM_AVAIL = "Heap Avail";
     /*
      * Amount of real memory (in MB) the process has allocated
      */
-    public final String UTIL_REAL_MEM_PROC = "RMem";
+    final String UTIL_REAL_MEM_PROC = "RMem";
 }

@@ -901,6 +901,7 @@ public class Main extends JFrame {
         monitorCache = sdm.createLookupCache(monitors, null, watcher);
         sdm.createLookupCache(cybernodes, null, watcher);
         sdm.createLookupCache(eventCollectors, null, watcher);
+        utilities.setDiscoveryManagement(jiniClient.getDiscoveryManager());
     }
 
     void addProvisionMonitor(ServiceItem item) throws RemoteException, OperationalStringException {

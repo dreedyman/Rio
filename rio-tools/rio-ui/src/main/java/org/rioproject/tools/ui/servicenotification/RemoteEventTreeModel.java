@@ -104,9 +104,17 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
             RemoteServiceEventNode rNode = (RemoteServiceEventNode)node;
             for (int i = 0; i < parent.getChildCount(); i++) {
                 RemoteServiceEventNode childNode =(RemoteServiceEventNode)parent.getChildAt(i);
-                if(comparator.compare(childNode, rNode)>0) {
+                int result = comparator.compare(childNode, rNode);
+                if(result>0) {
                     index = i;
                     break;
+
+                /* Check for duplicate events */
+                } else if(result==0) {
+                    if(rNode.getEvent().getID()==childNode.getEvent().getID() &&
+                       rNode.getEvent().getSequenceNumber()==childNode.getEvent().getSequenceNumber()) {
+                        return;
+                    }
                 }
             }
         }

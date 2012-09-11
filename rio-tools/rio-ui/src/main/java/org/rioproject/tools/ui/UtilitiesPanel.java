@@ -18,6 +18,7 @@ package org.rioproject.tools.ui;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.lease.LeaseDeniedException;
+import net.jini.discovery.DiscoveryManagement;
 import org.rioproject.eventcollector.api.EventCollector;
 import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
@@ -34,20 +35,19 @@ import java.util.Properties;
  * Container for utilities
  */
 public class UtilitiesPanel extends JPanel {
-    private RemoteEventTable provisionFailureEventTable;
+    private final RemoteEventTable remoteEventTable;
 
     public UtilitiesPanel(CybernodeUtilizationPanel cup,
                           Configuration config,
                           Properties props) throws ExportException, ConfigurationException {
         super(new BorderLayout());
-
-        provisionFailureEventTable = new RemoteEventTable(config, props);
+        remoteEventTable = new RemoteEventTable(config, props);
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.add("Utilization", cup);
         JLabel label = makeTabLabel("Service Notifications",
-                                    provisionFailureEventTable);
-        tabs.addTab(null, provisionFailureEventTable);
+                                    remoteEventTable);
+        tabs.addTab(null, remoteEventTable);
         tabs.setTabComponentAt(1, label);
         add(tabs, BorderLayout.CENTER);
     }
@@ -55,8 +55,14 @@ public class UtilitiesPanel extends JPanel {
     Properties getOptions() {
         Properties props = new Properties();
         props.put(Constants.AUTO_REMOVE_PROVISION_FAILURE_EVENTS,
-                  Boolean.toString(provisionFailureEventTable.getAutoRemove()));
+                  Boolean.toString(remoteEventTable.getAutoRemove()));
+        props.put(Constants.USE_EVENT_COLLECTOR,
+                  Boolean.toString(remoteEventTable.getUseEventCollector()));
         return props;
+    }
+
+    void setDiscoveryManagement(DiscoveryManagement dMgr) throws Exception {
+        remoteEventTable.setDiscoveryManagement(dMgr);
     }
 
     private JLabel makeTabLabel(String name, NotificationUtility... comps) {
@@ -69,11 +75,11 @@ public class UtilitiesPanel extends JPanel {
     }
 
     void addEventCollector(EventCollector eventCollector) throws IOException, LeaseDeniedException, UnknownEventCollectorRegistration {
-        provisionFailureEventTable.addEventCollector(eventCollector);
+        remoteEventTable.addEventCollector(eventCollector);
     }
 
     void stopNotifications() {
-        provisionFailureEventTable.terminate();
+        remoteEventTable.terminate();
     }
 
     class TabLabel extends JLabel {

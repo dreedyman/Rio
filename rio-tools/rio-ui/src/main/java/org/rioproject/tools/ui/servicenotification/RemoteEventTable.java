@@ -17,15 +17,12 @@ package org.rioproject.tools.ui.servicenotification;
 
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import net.jini.core.event.RemoteEvent;
-import net.jini.core.event.RemoteEventListener;
-import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
+import net.jini.discovery.DiscoveryManagement;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.eventcollector.api.EventCollector;
-import org.rioproject.eventcollector.api.EventCollectorRegistration;
 import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
@@ -53,20 +50,26 @@ import java.util.Properties;
 
 public class RemoteEventTable extends AbstractNotificationUtility {
     private final JXTreeTable eventTable;
-    private final RemoteEventEventTreeModel dataModel;
-    private EventCollectorRegistration eventCollectorRegistration;
+    private final RemoteEventTreeModel dataModel;
     private final ChainedRemoteEventListener remoteEventListener;
     private final JCheckBox autoRemove;
+    private final JCheckBox useEventCollector;
+    private final RemoteEventConsumerManager eventConsumerManager;
+    private DiscoveryManagement dMgr;
+    private final Configuration config;
 
     public RemoteEventTable(Configuration config, Properties props) throws ExportException, ConfigurationException {
-        super();        
+        super();
+        this.config = config;
         setLayout(new BorderLayout());
+
+        eventConsumerManager = new RemoteEventConsumerManager();
 
         java.util.List<String> columns = new ArrayList<String>();
         columns.add("Deployment");
         columns.add("Description");
         columns.add("When");
-        dataModel = new RemoteEventEventTreeModel(new RootNode(), columns);
+        dataModel = new RemoteEventTreeModel(new RootNode(), columns);
 
         UIDefaults defaults = UIManager.getDefaults( );
         Icon openIcon   = defaults.getIcon("Tree.expandedIcon");
@@ -96,100 +99,94 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         cm.getColumn(2).setPreferredWidth(100);
         cm.getColumn(2).setMaxWidth(500);
 
-        JScrollPane scroller = new JScrollPane(eventTable);
+        final JScrollPane scroller = new JScrollPane(eventTable);
         scroller.getViewport().setBackground(Color.WHITE);
         add(scroller, BorderLayout.CENTER);
 
-        JPanel bottom = new JPanel();
+        final JPanel bottom = new JPanel();
         bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
         bottom.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         autoRemove = new JCheckBox("Auto remove provision failure events once a service is provisioned or undeployed");
+        setCheckBox(autoRemove, props, Constants.AUTO_REMOVE_PROVISION_FAILURE_EVENTS);
 
-        String s = props.getProperty(Constants.AUTO_REMOVE_PROVISION_FAILURE_EVENTS);
-        boolean remove = true;
-        if(s!=null)
-            remove = Boolean.parseBoolean(s);
+        useEventCollector = new JCheckBox();
+        setUseEventCollectorCheckBoxText();
+        setCheckBox(useEventCollector, props, Constants.USE_EVENT_COLLECTOR);
+        useEventCollector.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                try {
+                    createEventListener();
+                } catch (Exception e) {
+                    Util.showError(e, bottom, "Could not create Event Listener");
+                }
+            }
+        });
 
-        autoRemove.setSelected(remove);
-        autoRemove.setFont(Constants.ITEM_FONT);
+        bottom.add(useEventCollector);
         bottom.add(autoRemove);
 
         add(bottom, BorderLayout.SOUTH);
 
         /* Create the event consumer for EventCollector notification */
-        remoteEventListener = new ChainedRemoteEventListener(new EC(), config);
+        remoteEventListener = new ChainedRemoteEventListener(new RemoteEventConsumer(this), config);
+    }
+
+    private void setCheckBox(JCheckBox checkBox, Properties props, String propertyName) {
+        String s = props.getProperty(propertyName);
+        boolean value = true;
+        if(s!=null)
+            value = Boolean.parseBoolean(s);
+        checkBox.setSelected(value);
+        checkBox.setFont(Constants.ITEM_FONT);
     }
 
     public boolean getAutoRemove() {
         return autoRemove.isSelected();
     }
 
-    class EC implements RemoteEventListener {
-        public void notify(RemoteEvent event) {
-            try {
-                if(event instanceof ProvisionFailureEvent || event instanceof ServiceLogEvent) {
-                    dataModel.addItem((RemoteServiceEvent) event);
-                    notifyListeners();
-                } else if(event instanceof ProvisionMonitorEvent) {
-                    ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
-                    synchronized(this) {
-                        if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED)) {
-                            if(autoRemove.isSelected()) {
-                                for(RemoteServiceEventNode rsn : dataModel.getRemoteServiceEventNodes(pme.getServiceElement())) {
-                                    if(rsn instanceof ProvisionFailureEventNode) {
-                                        ProvisionFailureEventNode en = (ProvisionFailureEventNode)rsn;
-                                        if(en.getStatus().equals("Resolved"))
-                                            continue;
-                                        if(rsn.getServiceName().equals(pme.getServiceElement().getName())) {
-                                            dataModel.removeItem(rsn);
-                                            notifyListeners();
-                                            break;
-                                        }
-                                    }
-                                }
-                            } else {
-                                dataModel.addItem(pme);
-                                notifyListeners();
-                            }
-                        } else if(pme.getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED)) {
-                            DeploymentNode dn = dataModel.getDeploymentNode(pme.getOperationalStringName());
-                            dataModel.addItem(pme);
-                            if(autoRemove.isSelected()) {
-                                if(dn==null)
-                                    return;
-                                java.util.List<RemoteServiceEventNode> removals = new ArrayList<RemoteServiceEventNode>();
-                                for (int i = 0; i < dn.getChildCount(); i++) {
-                                    RemoteServiceEventNode child = (RemoteServiceEventNode)dn.getChildAt(i);
-                                    if(child instanceof ProvisionFailureEventNode) {
-                                        removals.add(child);
-                                    }
-                                }
-                                for(RemoteServiceEventNode rsn : removals)
-                                    dataModel.removeItem(rsn);
-                            }
-                            notifyListeners();
-                        } else {
-                            dataModel.addItem(pme);
-                            notifyListeners();
-                        }
-                    }
-                }
-                eventTable.expandAll();
-                //setStatusErrorText("ProvisionFailureEvent received for "
-                //        + pfe.getServiceElement().getName());
-            } catch (Throwable t) {
-                Util.showError(t, eventTable, "Notification of a ProvisionFailureEvent");
-            }
+    public boolean getUseEventCollector() {
+        return useEventCollector.isSelected();
+    }
+
+    public void expandAll() {
+        eventTable.expandAll();
+    }
+
+    public RemoteEventTreeModel getDataModel() {
+        return dataModel;
+    }
+
+    public void setDiscoveryManagement(DiscoveryManagement dMgr) throws Exception {
+        this.dMgr = dMgr;
+        createEventListener();
+    }
+
+    public void createEventListener() throws Exception {
+        if(getUseEventCollector()) {
+            eventConsumerManager.terminate();
+            eventConsumerManager.setUseEventCollector(true);
+            eventConsumerManager.registerForEventCollectorNotification(remoteEventListener, config);
+        } else {
+            if(dMgr==null)
+                throw new IllegalStateException("Cannot register for service notifications without a DiscoveryManagement instance");
+            eventConsumerManager.terminate();
+            eventConsumerManager.setUseEventCollector(false);
+            eventConsumerManager.registerForAllServiceNotification(new RemoteEventConsumer(this),
+                                                                   dMgr);
         }
     }
-    
+
     public void addEventCollector(EventCollector eventCollector) throws LeaseDeniedException,
                                                                         IOException,
                                                                         UnknownEventCollectorRegistration {
-        if(eventCollectorRegistration==null) {
-            eventCollectorRegistration = eventCollector.register(Lease.ANY);
-            eventCollectorRegistration.enableDelivery(remoteEventListener.getRemoteEventListener());
-        }
+        eventConsumerManager.addEventCollector(eventCollector);
+        setUseEventCollectorCheckBoxText();
+    }
+
+    private void setUseEventCollectorCheckBoxText() {
+        useEventCollector.setText(String.format("Use EventCollector (discovered %d EventCollectors)",
+                                                eventConsumerManager.getEventControllerCount()));
+
     }
 
     private void removeEvent(int row) {
@@ -199,14 +196,8 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
     public void terminate() {
         remoteEventListener.terminate();
-        if(eventCollectorRegistration!=null) {
-            try {
-                eventCollectorRegistration.disableDelivery();
-                eventCollectorRegistration.getLease().cancel();
-            } catch (Exception e) {
-                  e.printStackTrace();
-            }
-        }
+        if(eventConsumerManager!=null)
+            eventConsumerManager.terminate();
     }
     
     private RemoteServiceEventNode getRemoteServiceEvent(int row) {

@@ -43,7 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A simple {@code RemoteEventListener} that sends recdived events to a {@code RemoteServiceEventListener}
+ * A simple {@code RemoteEventListener} that sends received events to a {@code RemoteServiceEventListener}
  *
  * @author Dennis Reedy
  */
@@ -79,7 +79,7 @@ public class ChainedRemoteEventListener implements RemoteEventListener, ServerPr
         execService.shutdownNow();
     }
 
-    public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
+    public void notify(RemoteEvent remoteEvent) throws UnknownEventException {
         if(remoteEvent instanceof ProvisionFailureEvent ||
            remoteEvent instanceof ProvisionMonitorEvent ||
            remoteEvent instanceof SLAThresholdEvent ||

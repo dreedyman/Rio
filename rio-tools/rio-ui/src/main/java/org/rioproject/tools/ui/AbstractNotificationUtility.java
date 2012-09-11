@@ -43,7 +43,7 @@ public abstract class AbstractNotificationUtility extends JPanel implements Noti
         }
     }
 
-    protected void notifyListeners() {
+    public void notifyListeners() {
         NotificationUtilityListener[] nls =
             listeners.toArray(new NotificationUtilityListener[listeners.size()]);
         for(NotificationUtilityListener nl : nls)
