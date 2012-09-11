@@ -32,7 +32,8 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-public class EventDescriptorFactory {
+public final class EventDescriptorFactory {
+
     private EventDescriptorFactory() {
     }
 

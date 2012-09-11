@@ -54,6 +54,8 @@ import java.util.logging.*;
  *
  * @author Dennis Reedy
  */
+/* We want to throw a RuntimeException if we cannot get a Resolver */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class Handler extends URLStreamHandler {
     private static final Logger logger = Logger.getLogger(Handler.class.getName());
     private static Resolver resolver;

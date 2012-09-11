@@ -26,7 +26,7 @@ import org.rioproject.tools.ui.Constants;
 /**
  * @author Dennis Reedy
  */
-public class MeasuredValueHelper {
+public final class MeasuredValueHelper {
     public static final double KB = 1024;
     //private static final double MB = Math.pow(KB, 2);
     public static final double GB = Math.pow(KB, 3);
@@ -46,6 +46,7 @@ public class MeasuredValueHelper {
         return value;
     }
 
+    @SuppressWarnings("unused")
     static double getMeasuredResourceValue(final String cName,
                                            final ComputeResourceUtilization cru) {
         double value = 0;

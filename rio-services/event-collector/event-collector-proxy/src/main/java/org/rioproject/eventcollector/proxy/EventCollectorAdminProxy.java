@@ -28,7 +28,7 @@ import java.util.Collection;
  * Implementation of the {@link EventCollectorAdminProxy}.
  * @author Dennis Reedy
  */
-public class EventCollectorAdminProxy extends ServiceAdminProxy implements EventCollectorAdmin, Serializable {
+public final class EventCollectorAdminProxy extends ServiceAdminProxy implements EventCollectorAdmin, Serializable {
     private static final long serialVersionUID = 1L;
     private final EventCollectorAdmin eventCollectorAdmin;
 
