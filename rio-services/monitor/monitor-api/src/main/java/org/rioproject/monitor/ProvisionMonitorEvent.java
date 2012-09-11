@@ -306,7 +306,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
             sb.append(", service=").append(sElem.getName());
         if(redeploymentParms!=null)
             sb.append(", redeploymentParms=").append(Arrays.asList(redeploymentParms).toString());
-        sb.append(", when: ").append(formatter.format(date));
+        sb.append(", when: ").append(formatter.format(getDate()));
         return sb.toString();
     }
 }

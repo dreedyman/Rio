@@ -15,12 +15,11 @@
  */
 package org.rioproject.monitor;
 
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
+import org.rioproject.opstring.ServiceElement;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * This class is used to communicate to interested registrants that a provision
@@ -28,8 +27,8 @@ import java.util.Date;
  *
  * @author Dennis Reedy
  */
-public class ProvisionFailureEvent extends RemoteServiceEvent
-    implements Serializable {
+public class ProvisionFailureEvent extends RemoteServiceEvent implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Unique Event ID */
     public static final long ID = -7832310585750966248L;
@@ -56,7 +55,6 @@ public class ProvisionFailureEvent extends RemoteServiceEvent
         this.sElem = sElem;
         this.reason = reason;
         this.exception = exception;
-        this.date = new Date();
     }
 
     /**

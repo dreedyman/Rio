@@ -36,7 +36,7 @@ import java.util.Date;
 public class RemoteServiceEvent extends RemoteEvent implements Serializable {
     static final long serialVersionUID = 1L;
     /** The time this event was fired */
-    protected Date date;
+    private final Date date;
 
     /**
      * Create a new <code>RemoteServiceEvent</code>. This creates
@@ -53,7 +53,7 @@ public class RemoteServiceEvent extends RemoteEvent implements Serializable {
          * EventObject, which rejects a null for <code>source</code>.
          */
         super(source, 0, 0, null);
-        date = new Date();
+        date = new Date(System.nanoTime());
     }
 
     /**
