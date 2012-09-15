@@ -27,7 +27,7 @@ import org.rioproject.opstring.ServiceElement;
 public interface ServiceElementChangeListener {
     /**
      * A ServiceElementChangeListener is notified if the ServiceElement has changed.
-     * Details on what has changed in the ServiceELement are undefined
+     * Details on what has changed in the ServiceElement are undefined
      * 
      * @param preElem The ServiceElement before the change
      * @param postElem The ServiceElement after the change
