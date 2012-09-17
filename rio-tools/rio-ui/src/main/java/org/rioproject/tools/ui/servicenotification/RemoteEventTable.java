@@ -272,6 +272,8 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     }
 
     void showDetails(final RemoteServiceEventNode eventNode) {
+        if(eventNode==null)
+            return;
         Component parent = SwingUtilities.getAncestorOfClass(JFrame.class, this);
         JDialog dialog = new JDialog((JFrame)parent);
         final String[] columns = {"Field", "Value"};
