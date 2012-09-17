@@ -56,6 +56,10 @@ public class ProvisionMonitorEventNode extends RemoteServiceEventNode<ProvisionM
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.EXTERNAL_SERVICE_DISCOVERED)) {
             builder.append(getServiceName()).append(" has been discovered on ");
             builder.append(getEvent().getServiceBeanInstance().getHostAddress());
+        } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_ELEMENT_REMOVED)) {
+            builder.append(getServiceName()).append(" has been removed ");
+        } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_ELEMENT_ADDED)) {
+            builder.append(getServiceName()).append(" has been added ");
         }
         return builder.toString();
     }
