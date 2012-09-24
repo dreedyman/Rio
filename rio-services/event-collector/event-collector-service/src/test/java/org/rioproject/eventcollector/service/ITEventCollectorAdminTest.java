@@ -31,7 +31,7 @@ import java.util.Map;
  * Tests getting and using the {@code EventCollectorAdmin}
  * @author Dennis Reedy
  */
-public class EventCollectorAdminTest {
+public class ITEventCollectorAdminTest {
     static StaticCybernode cybernode;
     EventCollectorImpl eventCollector;
 

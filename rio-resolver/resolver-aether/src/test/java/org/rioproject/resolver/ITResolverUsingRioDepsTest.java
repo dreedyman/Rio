@@ -44,10 +44,11 @@ public class ITResolverUsingRioDepsTest {
 
     @Test
     public void testExcludeRioDeps() throws ResolverException, IOException {
+        System.clearProperty(RESOLVER_PRUNE_PLATFORM);
         String[] classPath = getClassPath();
         Assert.assertTrue(classPath.length>0);
         System.out.println("EXCLUDE:\n"+Utils.formatClassPath(classPath)+"\n");
-        Assert.assertTrue(classPath.length==1);
+        Assert.assertTrue("Expected classPath length of 1, got "+classPath.length, classPath.length==1);
     }
 
     @Test
