@@ -28,7 +28,7 @@ public interface ThresholdListener {
      * Get the ID of the ThresholdWatch the ThresholdListener is associated to
      *
      * @return The identifier (ID) of the ThresholdWatch the
-     * ThresholdListener is asscociated to
+     * ThresholdListener is associated to
      */
     String getID();
 
