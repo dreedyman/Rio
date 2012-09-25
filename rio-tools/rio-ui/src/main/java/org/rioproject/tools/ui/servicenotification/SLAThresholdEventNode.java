@@ -20,13 +20,19 @@ import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.Constants;
 import org.rioproject.watch.ThresholdEvent;
 
+import java.text.NumberFormat;
+
 /**
  * @author Dennis Reedy
  */
 public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEvent> {
+    private final NumberFormat numberFormatter;
 
     public SLAThresholdEventNode(SLAThresholdEvent event) {
         super(event);
+        numberFormatter = NumberFormat.getNumberInstance();
+        numberFormatter.setGroupingUsed(false);
+        numberFormatter.setMaximumFractionDigits(2);
     }
 
     @Override
@@ -38,9 +44,11 @@ public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEv
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         SLA sla = getEvent().getSLA();
-        builder.append("Threshold low: ").append(sla.getCurrentLowThreshold());
-        builder.append(" high: ").append(sla.getCurrentHighThreshold());
-        builder.append(" value: ").append(getEvent().getCalculable().getValue());
+        builder.append(sla.getIdentifier()).append(": ");
+        builder.append("value: ").append(numberFormatter.format(getEvent().getCalculable().getValue()));
+        builder.append(" declared thresholds: ");
+        builder.append("low=").append(numberFormatter.format(sla.getCurrentLowThreshold()));
+        builder.append(" high=").append(numberFormatter.format(sla.getCurrentHighThreshold()));
         return builder.toString();
     }
 
