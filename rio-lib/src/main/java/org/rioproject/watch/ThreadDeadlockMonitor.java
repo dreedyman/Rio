@@ -46,11 +46,11 @@ public class ThreadDeadlockMonitor {
         if(deadlockCount>0) {
             String detail = formatDeadlockedThreadInfo();
             metric.setDetail(detail);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine(detail);
+            if(logger.isLoggable(Level.FINEST))
+                logger.finest(detail);
         } else {
-             if(logger.isLoggable(Level.FINE))
-                logger.fine("No deadlocked threads");
+             if(logger.isLoggable(Level.FINEST))
+                logger.finest("No deadlocked threads");
         }
         return metric;
     }
