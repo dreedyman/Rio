@@ -28,15 +28,16 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     /** The graphical view for this Watch */
     static final String VIEW = "org.rioproject.watch.ThresholdCalculableView";
     /** The ThresholdManager */
-    private ThresholdManager thresholdManager = new BoundedThresholdManager();
+    private final ThresholdManager thresholdManager;
 
     /**
      * Create a new ThresholdWatch
      * 
      * @param id The identifier for this watch
      */
-    public ThresholdWatch(String id) {
+    public ThresholdWatch(final String id) {
         super(id);
+        thresholdManager = new BoundedThresholdManager(id);
         setView(VIEW);
     }
 
@@ -49,8 +50,9 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * @param config Configuration object used for constructing a
      * WatchDataSource
      */
-    public ThresholdWatch(String id, Configuration config) {
+    public ThresholdWatch(final String id, final Configuration config) {
         super(id, config);
+        thresholdManager = new BoundedThresholdManager(id);
         setView(VIEW);
     }    
     
@@ -60,8 +62,9 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * @param watchDataSource The watch data source associated with this watch
      * @param id The identifier for this watch
      */    
-    public ThresholdWatch(WatchDataSource watchDataSource, String id) {
+    public ThresholdWatch(final WatchDataSource watchDataSource, final String id) {
         super(watchDataSource, id);
+        thresholdManager = new BoundedThresholdManager(id);
         setView(VIEW);
     }
     
@@ -82,9 +85,11 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * 
      * @param listener The ThresholdListener
      */
-    public void addThresholdListener(ThresholdListener listener) {
+    public void addThresholdListener(final ThresholdListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
+        if(logger.isLoggable(Level.FINE))
+            logger.fine(String.format("%s added ThresholdListener %s", getId(), listener));
         thresholdManager.addThresholdListener(listener);
     }
 
@@ -93,9 +98,11 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * 
      * @param listener The ThresholdListener
      */
-    public void removeThresholdListener(ThresholdListener listener) {
+    public void removeThresholdListener(final ThresholdListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
+        if(logger.isLoggable(Level.FINE))
+            logger.fine(String.format("%s removed ThresholdListener %s", getId(), listener));
         thresholdManager.removeThresholdListener(listener);
     }
 
@@ -104,7 +111,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * 
      * @param tValues The ThresholdValues
      */
-    public void setThresholdValues(ThresholdValues tValues) {
+    public void setThresholdValues(final ThresholdValues tValues) {
         if(tValues == null)
             throw new IllegalArgumentException("tValues is null");
         thresholdManager.setThresholdValues(tValues);
@@ -116,13 +123,12 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
                     watchDataSource.setThresholdValues(getThresholdValues());
                 } catch(RemoteException e) {
                     logger.log(Level.WARNING,
-                               "Setting ThresholdValues for a remote "+
-                               "WatchDataSource",
+                               "Setting ThresholdValues for a remote WatchDataSource",
                                e);
                 }
             } else {
-                logger.warning("No WatchDataSource set for ["+getId()+"] " +
-                               "watch, unable to apply threshold values: ["+tValues+"]");
+                logger.warning(String.format("%s No WatchDataSource set for watch, unable to apply threshold values: %s",
+                                             getId(), tValues));
             }
         }
     }
@@ -140,7 +146,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * Override parent's addRecord to check for threshold(s) being crossed
      */
     @Override
-    public void addWatchRecord(Calculable record) {
+    public void addWatchRecord(final Calculable record) {
         super.addWatchRecord(record);        
         thresholdManager.checkThreshold(record);
     }
@@ -169,7 +175,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     /**
      * @see org.rioproject.watch.ThresholdWatchMBean#setCurrentHighThreshold
      */
-    public void setCurrentHighThreshold(double threshold) {
+    public void setCurrentHighThreshold(final double threshold) {
         ThresholdValues tVals = getThresholdValues();
         tVals.setCurrentHighThreshold(threshold);
         thresholdManager.setThresholdValues(tVals);
@@ -178,7 +184,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     /**
      * @see org.rioproject.watch.ThresholdWatchMBean#setCurrentLowThreshold
      */
-    public void setCurrentLowThreshold(double threshold) {
+    public void setCurrentLowThreshold(final double threshold) {
         ThresholdValues tVals = getThresholdValues();
         tVals.setCurrentLowThreshold(threshold);
         thresholdManager.setThresholdValues(tVals);

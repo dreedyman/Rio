@@ -151,7 +151,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     /** Component for accessing configuration and getting a Logger */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A suitable Logger */
-    protected static WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
+    protected static WrappedLogger logger = WrappedLogger.getLogger(WatchDataSourceImpl.class.getName());
     private final List<WatchDataReplicator> replicators = new ArrayList<WatchDataReplicator>();
 
     /**

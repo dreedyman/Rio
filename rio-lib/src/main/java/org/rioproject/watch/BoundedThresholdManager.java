@@ -31,12 +31,22 @@ public class BoundedThresholdManager extends ThresholdManager {
     private static final int BREACHED_LOWER = 1;
     private static final int BREACHED_UPPER = 2;
     private int direction = 0;
+    private final String id;
     static Logger logger = Logger.getLogger("org.rioproject.watch");
+
+    public BoundedThresholdManager(String id) {
+        this.id = id;
+    }
 
     public boolean getThresholdCrossed() {
         return (thresholdCrossed);
     }
-    
+
+    @Override
+    protected String getID() {
+        return id;
+    }
+
     public void checkThreshold(Calculable calculable) {
         ThresholdValues thresholdValues = getThresholdValues();
         double value = calculable.getValue();

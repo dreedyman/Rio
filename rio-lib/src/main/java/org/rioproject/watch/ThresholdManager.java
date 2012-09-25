@@ -29,11 +29,10 @@ import java.util.logging.Logger;
  * crossed
  */
 public abstract class ThresholdManager {
-    protected final transient List<ThresholdListener> thresholdListeners =
-        new LinkedList<ThresholdListener>();
+    protected final transient List<ThresholdListener> thresholdListeners = new LinkedList<ThresholdListener>();
     /** Holds value of property thresholdValues */
     protected ThresholdValues thresholdValues = new ThresholdValues();
-    static Logger logger = Logger.getLogger("org.rioproject.watch");
+    static Logger logger = Logger.getLogger(ThresholdManager.class.getName());
 
     /**
      * Check the threshold and determine if any action needs to occur
@@ -41,6 +40,11 @@ public abstract class ThresholdManager {
      * @param calculable The Calculable to check
      */
     public abstract void checkThreshold(Calculable calculable);
+
+    /**
+     * Get the identifier for the  ThresholdManager
+     */
+    protected abstract String getID();
 
     /**
      * Get the type of threshold that has been crossed
@@ -66,10 +70,10 @@ public abstract class ThresholdManager {
     public void setThresholdValues(ThresholdValues thresholdValues) {
         this.thresholdValues = thresholdValues;
         if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                       "Set ThresholdValues, low={0}, high={1}",
-                       new Object[]{thresholdValues.getLowThreshold(),
-                                    thresholdValues.getHighThreshold()});
+            logger.finest(String.format("%s Set ThresholdValues, low=%f, high=%s",
+                                        getID(),
+                                        thresholdValues.getLowThreshold(),
+                                        thresholdValues.getHighThreshold()));
     }
 
     /**
@@ -81,8 +85,9 @@ public abstract class ThresholdManager {
     protected void notifyListeners(Calculable calculable, int type) {
         ThresholdListener[] tListeners = getThresholdListeners();
         if(logger.isLoggable(Level.FINEST))
-            logger.finest("Notify ThresholdListeners, number to notify: "
-                          + tListeners.length);
+            logger.finest(String.format("%s Notify ThresholdListeners, number to notify: %d",
+                                        getID(),
+                                        tListeners.length));
         ThresholdValues thresholds = null;
         try {
             thresholds = (ThresholdValues)thresholdValues.clone();
@@ -105,8 +110,9 @@ public abstract class ThresholdManager {
             if(!thresholdListeners.contains(listener))
                 thresholdListeners.add(listener);
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Added a ThresholdListener, number now: "
-                              + thresholdListeners.size());
+                logger.finest(String.format("%s Added a ThresholdListener, number now: %d",
+                                            getID(),
+                                            thresholdListeners.size()));
         }
     }
 
@@ -119,8 +125,9 @@ public abstract class ThresholdManager {
         synchronized(thresholdListeners) {
             thresholdListeners.remove(listener);
             if(logger.isLoggable(Level.FINEST))
-                logger.finest("Removed a ThresholdListener, number now: "
-                              + thresholdListeners.size());
+                logger.finest(String.format("%s Removed a ThresholdListener, number now: %d",
+                                            getID(),
+                                            thresholdListeners.size()));
         }
     }
 
@@ -134,8 +141,7 @@ public abstract class ThresholdManager {
     public ThresholdListener[] getThresholdListeners() {
         ThresholdListener[] tListeners;
         synchronized(thresholdListeners) {
-            tListeners = thresholdListeners.toArray(
-                             new ThresholdListener[thresholdListeners.size()]);
+            tListeners = thresholdListeners.toArray(new ThresholdListener[thresholdListeners.size()]);
         }
         return (tListeners);
     }
