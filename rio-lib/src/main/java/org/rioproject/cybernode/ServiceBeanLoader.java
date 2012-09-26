@@ -29,6 +29,7 @@ import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceBeanControl;
+import org.rioproject.bean.BeanAdapter;
 import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
@@ -103,6 +104,8 @@ public class ServiceBeanLoader {
         private final ServiceBeanContext context;
         /** Uuid of the service */
         private final Uuid serviceID;
+        /* The wrapping BeanAdapter, may be null */
+        private final BeanAdapter beanAdapter;
 
         /**
          * Trivial constructor. Simply assigns each argument
@@ -113,9 +116,14 @@ public class ServiceBeanLoader {
          * @param m The proxy as a MarshalledInstance
          * @param s The id of the service
          */
-        public Result(final ServiceBeanContext c, final Object o, final MarshalledInstance m, final Uuid s) {
+        public Result(final ServiceBeanContext c,
+                      final Object o,
+                      final BeanAdapter beanAdapter,
+                      final MarshalledInstance m,
+                      final Uuid s) {
             context = c;
             impl = o;
+            this.beanAdapter = beanAdapter;
             mi = m;
             serviceID = s;
         }
@@ -134,6 +142,10 @@ public class ServiceBeanLoader {
 
         public Uuid getServiceID() {
             return serviceID;
+        }
+
+        public BeanAdapter getBeanAdapter() {
+            return beanAdapter;
         }
     }
 
@@ -230,9 +242,8 @@ public class ServiceBeanLoader {
                               final Uuid serviceID,
                               final ServiceBeanManager jsbManager,
                               final ServiceBeanContainer container) throws ServiceBeanInstantiationException {
-        Object proxy;
-        MarshalledInstance mi = null;
-        Object impl = null;
+        ServiceBeanFactory.Created created = null;
+        MarshalledInstance marshalledProxy = null;
         ServiceBeanContext context;
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
         ComputeResource computeResource = container.getComputeResource();
@@ -401,9 +412,9 @@ public class ServiceBeanLoader {
                                                            new JSBLoader());
             logger.finest("service = %s, serviceBeanFactory = %s",
                           CybernodeLogUtil.logName(sElem), serviceBeanFactory);
-            ServiceBeanFactory.Created created = serviceBeanFactory.create(context);
+            created = serviceBeanFactory.create(context);
             logger.finest("Created ServiceBeanFactory.Created %s", created);
-            impl = created.getImpl();
+            Object impl = created.getImpl();
             logger.finest("Obtained implementation %s", impl);
             
             if(context.getServiceElement().getComponentBundle()==null) {
@@ -424,7 +435,7 @@ public class ServiceBeanLoader {
                                                                                   ProxyPreparer.class,
                                                                                   new BasicProxyPreparer());
             logger.finest("Getting the proxy");
-            proxy = created.getProxy();
+            Object proxy = created.getProxy();
             logger.finest("Obtained the proxy %s", proxy);
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
@@ -434,8 +445,8 @@ public class ServiceBeanLoader {
              * Set the MarshalledInstance into the ServiceBeanManager
              */
             logger.finest("Set the MarshalledInstance into the ServiceBeanManager");
-            mi = new MarshalledInstance(proxy);
-            ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(mi);
+            marshalledProxy = new MarshalledInstance(proxy);
+            ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(marshalledProxy);
             /*
              * The service may have created it's own serviceID
              */
@@ -473,8 +484,7 @@ public class ServiceBeanLoader {
         } finally {                
             currentThread.setContextClassLoader(currentClassLoader);
         }
-        
-        return(new Result(context, impl, mi, serviceIDToUse));
+        return(new Result(context, created.getImpl(), created.getBeanAdapter(), marshalledProxy, serviceIDToUse));
     }  
 
     static synchronized Map<String, ProvisionedResources> provisionService(final ServiceElement elem,

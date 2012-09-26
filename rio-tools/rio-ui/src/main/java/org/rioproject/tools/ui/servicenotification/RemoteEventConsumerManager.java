@@ -29,6 +29,7 @@ import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
 
 import java.io.IOException;
@@ -48,6 +49,7 @@ public class RemoteEventConsumerManager {
     private DynamicEventConsumer provisionFailureEventConsumer;
     private DynamicEventConsumer provisionMonitorEventConsumer;
     private DynamicEventConsumer serviceLogEventConsumer;
+    private DynamicEventConsumer slaThresholdEventConsumer;
     private AtomicBoolean useEventCollector = new AtomicBoolean(true);
     private final List<EventCollector> eventCollectors = new LinkedList<EventCollector>();
     private PendingEventCollectorRegistration pendingEventCollectionRegistration;
@@ -89,6 +91,9 @@ public class RemoteEventConsumerManager {
         serviceLogEventConsumer = new DynamicEventConsumer(ServiceLogEvent.getEventDescriptor(),
                                                            remoteEventListener,
                                                            dMgr);
+        slaThresholdEventConsumer = new DynamicEventConsumer(SLAThresholdEvent.getEventDescriptor(),
+                                                             remoteEventListener,
+                                                             dMgr);
 
     }
 
@@ -136,6 +141,10 @@ public class RemoteEventConsumerManager {
         if(serviceLogEventConsumer!=null) {
             serviceLogEventConsumer.terminate();
             serviceLogEventConsumer = null;
+        }
+        if(slaThresholdEventConsumer!=null) {
+            slaThresholdEventConsumer.terminate();
+            slaThresholdEventConsumer = null;
         }
     }
 

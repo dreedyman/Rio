@@ -98,46 +98,28 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
         List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
         /* Create the Memory MeasurableCapability. This will measure memory
          * for the JVM */
-        try {
-            MeasurableCapability memory =
-                (MeasurableCapability)config.getEntry(COMPONENT,
-                                                      "memory",
-                                                      MeasurableCapability.class,
-                                                      new Memory(config),
-                                                      config);
-            if(memory.isEnabled())
-                measurables.add(memory);
-        } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading Memory MeasurableCapability", e);
-        }
+        MeasurableCapability memory =  new Memory(config);
+        if(memory.isEnabled())
+            measurables.add(memory);
 
         /* If SIGAR is available, create a Memory MeasurableCapability for the
          * physical machine as well */
         boolean haveSigar = SigarHelper.sigarAvailable();
         if(haveSigar) {
-            try {
-                MeasurableCapability memory =
-                    (MeasurableCapability)config.getEntry(COMPONENT,
-                                                          "systemMemory",
-                                                          MeasurableCapability.class,
-                                                          new SystemMemory(config),
-                                                          config);
-                if(memory.isEnabled())
-                    measurables.add(memory);
-            } catch(ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Loading System Memory MeasurableCapability", e);
-            }
+            MeasurableCapability systemMemory = new SystemMemory(config);
+            if(systemMemory.isEnabled())
+                measurables.add(systemMemory);
+
         }
 
         /* Load memory pool management */
         try {
             MeasurableCapability[] pools =
                 (MeasurableCapability[])config.getEntry(COMPONENT+".memory.pool",
-                                                      "memoryPools",
-                                                      MeasurableCapability[].class,
-                                                      null,
-                                                      config);
+                                                        "memoryPools",
+                                                        MeasurableCapability[].class,
+                                                        null,
+                                                        config);
             if(pools!=null)
                 measurables.addAll(Arrays.asList(pools));
         } catch(ConfigurationException e) {
@@ -145,34 +127,14 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
         }
 
         /* Create the CPU MeasurableCapability */
-        try {
-            MeasurableCapability cpu =
-                (MeasurableCapability)config.getEntry(COMPONENT,
-                                                      "cpu",
-                                                      MeasurableCapability.class,
-                                                      new CPU(config),
-                                                      config);
-            if(cpu.isEnabled())
-                measurables.add(cpu);
-        } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading CPU MeasurableCapability", e);
-        }
+        MeasurableCapability cpu = new CPU(config);
+        if(cpu.isEnabled())
+            measurables.add(cpu);
 
-        try {
-            MeasurableCapability cpu =
-                (MeasurableCapability)config.getEntry(COMPONENT+"cpu",
-                                                      "jvm",
-                                                      MeasurableCapability.class,
-                                                      new CPU(config, SystemWatchID.PROC_CPU, true),
-                                                      config);
-            if(cpu.isEnabled())
-                measurables.add(cpu);
-        } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Loading Process CPU MeasurableCapability", e);
-        } catch (RuntimeException e) {
-            logger.warning("Process CPU monitoring not supported");
-        }
+        MeasurableCapability jvmCpu = new CPU(config, SystemWatchID.PROC_CPU, true);
+        if(jvmCpu.isEnabled())
+            measurables.add(jvmCpu);
+
 
         /*
          * Load the DiskSpace capability only if we have SIGAR or if SIGAR is
@@ -201,9 +163,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 measurables.addAll(Arrays.asList(mCaps));
             }
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, 
-                       "Loading MeasurableCapability array",
-                       e);
+            logger.log(Level.WARNING, "Loading MeasurableCapability array", e);
         }
         return(measurables.toArray(new MeasurableCapability[measurables.size()]));
     }        

@@ -42,7 +42,6 @@ import org.rioproject.deploy.*;
 import org.rioproject.entry.BasicStatus;
 import org.rioproject.entry.UIDescriptorFactory;
 import org.rioproject.event.EventDescriptor;
-import org.rioproject.event.EventHandler;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
 import org.rioproject.jsb.JSBManager;
@@ -137,6 +136,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     //PersistentStore store;
     /** ThreadPool for SLAThresholdEvent processing */
     private Executor thresholdTaskPool;
+    private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     /** This flag indicates whether the Cybernode has been configured to install
      * external software  defined by ServiceBean instances */
     private boolean provisionEnabled=true;
@@ -191,6 +191,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             if(serviceRecordUpdateTask!=null)
                 serviceRecordUpdateTask.cancel();
             shutdownSequence.set(true);
+            if(computeResourcePolicyHandler!=null) {
+                computeResourcePolicyHandler.terminate();
+            }
             /* Shutdown the ComputeResource */
             if(computeResource!=null)
                 computeResource.shutdown();
@@ -779,7 +782,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
         /* Create a computeResourcePolicyHandler to watch for thresholds
          * being crossed */
-        new ComputeResourcePolicyHandler(computeResource, getSLAEventHandler());
+        computeResourcePolicyHandler = new ComputeResourcePolicyHandler(context.getServiceElement(),
+                                                                        getSLAEventHandler(),
+                                                                        svcConsumer,
+                                                                        makeServiceBeanInstance());
+        computeResource.addThresholdListener(computeResourcePolicyHandler);
 
         /* Ensure we have a serviceID */
         if(serviceID==null) {
@@ -1341,119 +1348,6 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                            "Could not send a SLA Threshold Notification as a " +
                            "result of compute resource threshold " +
                            "[%s] being crossed", calculable.getId());
-            }
-        }
-    }
-
-    /**
-     * If thresholds get crossed for memory related MeasurableCapability components, this class
-     * will either request immediate garbage collection or (in the case of perm gen)
-     * release as a provisionable resource:
-     */
-    class ComputeResourcePolicyHandler implements ThresholdListener {
-        ComputeResource computeResource;
-        EventHandler thresholdEventHandler;
-
-        ComputeResourcePolicyHandler(ComputeResource computeResource, EventHandler thresholdEventHandler) {
-            this.computeResource = computeResource;
-            this.thresholdEventHandler = thresholdEventHandler;
-            computeResource.addThresholdListener(this);
-        }
-
-        /**
-         * @see org.rioproject.watch.ThresholdListener#getID
-         */
-        public String getID() {
-            return("org.rioproject.cybernode.ComputeResource");
-        }
-
-        /**
-         * @see org.rioproject.watch.ThresholdListener#setThresholdManager
-         */
-        public void setThresholdManager(ThresholdManager manager) {
-            // implemented for interface compatibility
-        }
-
-        public void notify(Calculable calculable, ThresholdValues thresholdValues, int type) {
-            if(shutdownSequence.get())
-                return;
-            String status = (type == ThresholdEvent.BREACHED?"breached":"cleared");
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Threshold=%s, Status=%s, Value=%d, Low=%d, High=%d",
-                            calculable.getId(),
-                            status,
-                            calculable.getValue(),
-                            thresholdValues.getLowThreshold(),
-                            thresholdValues.getHighThreshold());
-
-            if(type==ThresholdEvent.BREACHED)  {
-                double tValue = calculable.getValue();
-                if(tValue>thresholdValues.getCurrentHighThreshold()) {
-                    svcConsumer.updateMonitors();
-                    if(calculable.getId().equals("Memory")) {
-                        logger.info("Memory utilization is %d, threshold set at %d, request immediate garbage collection",
-                                    calculable.getValue(), thresholdValues.getCurrentHighThreshold());
-                        System.gc();
-                    }
-                    if(calculable.getId().contains("Perm Gen")) {
-                        logger.info("Perm Gen has breached with utilization > %d",
-                                    thresholdValues.getCurrentHighThreshold());
-                        //if(isEnlisted())
-                        //release(false);
-                        //svcConsumer.cancelRegistrations();
-                    }
-
-                }
-            } else if(type== ThresholdEvent.CLEARED) {
-                //setChanged(StatusType.WARNING);
-                svcConsumer.updateMonitors();
-            }
-
-            try {
-                double[] range = new double[]{
-                    thresholdValues.getCurrentLowThreshold(),
-                    thresholdValues.getCurrentHighThreshold()
-                };
-
-                SLA sla = new SLA(calculable.getId(), range);
-                ServiceBeanInstance instance = makeServiceBeanInstance();
-                SLAThresholdEvent event = new SLAThresholdEvent(proxy,
-                                                                context.getServiceElement(),
-                                                                instance,
-                                                                calculable,
-                                                                sla,
-                                                                "Cybernode Resource " +
-                                                                "Policy Handler",
-                                                                instance.getHostAddress(),
-                                                                type);
-                thresholdTaskPool.execute(new SLAThresholdEventTask(event, thresholdEventHandler));
-            } catch(Exception e) {
-                logger.log(Level.WARNING, e,
-                           "Could not send a SLA Threshold Notification as a " +
-                           "result of compute resource threshold " +
-                           "[%s] being crossed", calculable.getId());
-            }
-        }
-    }
-
-    /**
-     * This class is used as by a PoolableThread to notify registered
-     * event consumers of a SLAThresholdEvent
-     */
-    static class SLAThresholdEventTask implements Runnable {
-        SLAThresholdEvent event;
-        EventHandler thresholdEventHandler;
-
-        SLAThresholdEventTask(SLAThresholdEvent event, EventHandler thresholdEventHandler) {
-            this.event = event;
-            this.thresholdEventHandler = thresholdEventHandler;
-        }
-
-        public void run() {
-            try {
-                thresholdEventHandler.fire(event);
-            } catch(Exception e) {
-                logger.log(Level.SEVERE, "Fire SLAThresholdEvent", e);
             }
         }
     }

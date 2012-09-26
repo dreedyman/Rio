@@ -44,11 +44,11 @@ public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEv
     public String getDescription() {
         StringBuilder builder = new StringBuilder();
         SLA sla = getEvent().getSLA();
-        builder.append(sla.getIdentifier()).append(": ");
+        builder.append(getEvent().getServiceElement().getName()).append(" on ");
+        builder.append(getEvent().getHostAddress()).append(" SLA ");
+        builder.append("\"").append(sla.getIdentifier()).append("\"").append(" ");
+        builder.append(getStatus().toLowerCase()).append(", ");
         builder.append("value: ").append(numberFormatter.format(getEvent().getCalculable().getValue()));
-        builder.append(" declared thresholds: ");
-        builder.append("low=").append(numberFormatter.format(sla.getCurrentLowThreshold()));
-        builder.append(" high=").append(numberFormatter.format(sla.getCurrentHighThreshold()));
         return builder.toString();
     }
 

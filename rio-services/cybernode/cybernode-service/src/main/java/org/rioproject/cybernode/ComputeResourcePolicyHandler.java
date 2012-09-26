@@ -20,6 +20,7 @@ import org.rioproject.event.EventHandler;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
+import org.rioproject.system.SystemWatchID;
 import org.rioproject.watch.*;
 
 import java.util.concurrent.Executor;
@@ -58,7 +59,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
      * @see org.rioproject.watch.ThresholdListener#getID
      */
     public String getID() {
-        return("org.rioproject.cybernode.ComputeResource");
+        return(ComputeResourcePolicyHandler.class.getName());
     }
 
     public void terminate() {
@@ -90,12 +91,12 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                 if(serviceConsumer!=null) {
                     serviceConsumer.updateMonitors();
                 }
-                if(calculable.getId().equals("Memory")) {
+                if(calculable.getId().equals(SystemWatchID.JVM_MEMORY)) {
                     logger.info(String.format("Memory utilization is %f, threshold set at %f, request immediate garbage collection",
                                               calculable.getValue(), thresholdValues.getCurrentHighThreshold()));
                     System.gc();
                 }
-                if(calculable.getId().contains("Perm Gen")) {
+                if(calculable.getId().contains(SystemWatchID.JVM_PERM_GEN)) {
                     logger.info(String.format("Perm Gen has breached with utilization > %f",
                                 thresholdValues.getCurrentHighThreshold()));
                     //if(isEnlisted())
@@ -120,8 +121,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                                                             instance,
                                                             calculable,
                                                             sla,
-                                                            "Cybernode Resource " +
-                                                            "Policy Handler",
+                                                            serviceElement.getName()+" Resource Policy Handler",
                                                             instance.getHostAddress(),
                                                             type);
             thresholdTaskPool.execute(new SLAThresholdEventTask(event, thresholdEventHandler));

@@ -28,6 +28,7 @@ import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.AbstractNotificationUtility;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
 import org.rioproject.tools.ui.Constants;
@@ -45,6 +46,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.rmi.server.ExportException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -57,11 +59,16 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     private final RemoteEventConsumerManager eventConsumerManager;
     private DiscoveryManagement dMgr;
     private final Configuration config;
+    private final NumberFormat numberFormatter;
 
     public RemoteEventTable(Configuration config, Properties props) throws ExportException, ConfigurationException {
         super();
         this.config = config;
         setLayout(new BorderLayout());
+
+        numberFormatter = NumberFormat.getNumberInstance();
+        numberFormatter.setGroupingUsed(false);
+        numberFormatter.setMaximumFractionDigits(2);
 
         eventConsumerManager = new RemoteEventConsumerManager();
 
@@ -280,7 +287,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         String impl = "<not declared>";
         final Object[][] data;
         String label;
-        Throwable thrown;
+        Throwable thrown = null;
         RemoteServiceEvent event = eventNode.getEvent();
         if(event instanceof ProvisionFailureEvent) {
             label = "Provision Failure Event";
@@ -328,7 +335,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                 };
             }
 
-        } else {
+        } else if(event instanceof ServiceLogEvent) {
             label = "Service Log Event";
             ServiceLogEvent sle = (ServiceLogEvent)event;
             thrown = sle.getLogRecord().getThrown();
@@ -340,6 +347,21 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                 {"Machine", sle.getAddress().getHostName()},
                 {"Message", sle.getLogRecord().getLevel()+": "+sle.getLogRecord().getMessage()},
                 {"Exception", exception}
+            };
+        } else {
+            label = "SLA Threshold Event";
+            SLAThresholdEvent slaEvent = (SLAThresholdEvent)event;
+            StringBuilder builder = new StringBuilder();
+            builder.append("low=").append(slaEvent.getSLA().getCurrentLowThreshold());
+            builder.append(" high=").append(slaEvent.getSLA().getCurrentHighThreshold());
+            data = new Object[][] {
+                                      {"When", Constants.DATE_FORMAT.format(event.getDate())},
+                                      {"Deployment", slaEvent.getServiceElement().getOperationalStringName()},
+                                      {"Service", slaEvent.getServiceElement().getName()},
+                                      {"Machine", slaEvent.getHostAddress()},
+                                      {"Value", numberFormatter.format(slaEvent.getCalculable().getValue())},
+                                      {"Threshold Values", builder.toString()},
+                                      {"Policy Handler", slaEvent.getSLAPolicyHandlerDescription()}
             };
         }
         JTable table = new JTable(data, columns);

@@ -660,12 +660,15 @@ public class JSBDelegate implements ServiceBeanDelegate {
         return loadResult.getImpl();
     }
 
-
     /*
      * Get the service proxy
      */
     Object getProxy() {
         return serviceProxy;
+    }
+
+    public ServiceBeanLoader.Result getLoadedServiceResult() {
+        return loadResult;
     }
 
     /*

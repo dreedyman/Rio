@@ -74,8 +74,7 @@ public final class ServiceElementUtil {
      * @throws IllegalArgumentException if the ServiceElement parameter is null
      */
     public static void setThreadDeadlockDetector(ServiceElement sElem, MBeanServerConnection mbsc) {
-        WatchDescriptor threadDeadlockDesc =
-            getWatchDescriptor(sElem, ThreadDeadlockMonitor.ID);
+        WatchDescriptor threadDeadlockDesc = getWatchDescriptor(sElem, ThreadDeadlockMonitor.ID);
 
         if(threadDeadlockDesc == null) {
             SLA sla = new SLA(ThreadDeadlockMonitor.ID, 0, 1);

@@ -133,7 +133,7 @@ public class ServiceBeanSLAManager {
                     /* Load the SLA PolicyHandler and set attributes */
                     handler = createSLAPolicyHandler(sla, null);
 
-                    ThresholdManager tMgr = new BoundedThresholdManager();
+                    ThresholdManager tMgr = new BoundedThresholdManager(mCap.getId());
                     tMgr.setThresholdValues(sla);
                     handler.setThresholdManager(tMgr);
                     mCap.addSecondaryThresholdManager(tMgr);

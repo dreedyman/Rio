@@ -17,33 +17,31 @@ package org.rioproject.cybernode.exec;
 
 import com.sun.jini.start.LifeCycle;
 import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
-import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceElement;
-import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.cybernode.*;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
-import org.rioproject.cybernode.Environment;
-import org.rioproject.cybernode.JSBContainer;
-import org.rioproject.cybernode.ServiceBeanContainerListener;
+import org.rioproject.event.EventHandler;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
 import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jsb.ServiceBeanActivation;
+import org.rioproject.jsb.ServiceBeanAdapter;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.opstring.OpStringManagerProxy;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
-import org.rioproject.system.SystemCapabilities;
 import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.measurable.MeasurableCapability;
@@ -79,6 +77,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     private ServiceBeanExecListener listener;
     private JMXFaultDetectionHandler fdh;
     private ComputeResource computeResource;
+    private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     private Logger logger = Logger.getLogger(CONFIG_COMPONENT);
 
@@ -211,7 +210,30 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         /* Set up thread deadlock detection */
         ServiceElementUtil.setThreadDeadlockDetector(sElem, null);
 
-        return container.activate(sElem, opMgr, null);
+        /* Get the SLA ThresholdEvent wired up */
+        EventHandler slaThresholdEventHandler = null;
+        ServiceBeanInstance instance = container.activate(sElem, opMgr, null);
+        JSBDelegate delegate = (JSBDelegate) container.getServiceBeanDelegate(instance.getServiceBeanID());
+        ServiceBeanLoader.Result result = delegate.getLoadedServiceResult();
+        if(result.getImpl() instanceof ServiceBeanAdapter) {
+            slaThresholdEventHandler = ((ServiceBeanAdapter)result.getImpl()).getSLAEventHandler();
+        } else {
+            if(result.getBeanAdapter()!=null) {
+                slaThresholdEventHandler = result.getBeanAdapter().getSLAEventHandler();
+            } else {
+                String className = result.getImpl()==null?"<NO IMPLEMENTATION>":result.getImpl().getClass().getName();
+                logger.warning(String.format("Unable to create ComputeResourcePolicyHandler, unknown service class %s",
+                                             className));
+            }
+        }
+        if(slaThresholdEventHandler!=null) {
+            computeResourcePolicyHandler = new ComputeResourcePolicyHandler(sElem,
+                                                                            slaThresholdEventHandler,
+                                                                            null,
+                                                                            instance);
+            computeResource.addThresholdListener(computeResourcePolicyHandler);
+        }
+        return instance;
     }
 
     public void update(ServiceElement element,
@@ -237,6 +259,10 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     public void serviceDiscarded(ServiceRecord record) {
         logger.info("Destroying ServiceBeanExecutor for "+execBindName);
         fdh.terminate();
+
+        if(computeResourcePolicyHandler!=null) {
+            computeResourcePolicyHandler.terminate();
+        }
 
         exporter.unexport(true);
         try {
@@ -290,32 +316,14 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     private MeasurableCapability[] loadMeasurables(Configuration config) {
         List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
         /* Create the Memory MeasurableCapability */
-        try {
-            MeasurableCapability memory =
-                (MeasurableCapability)config.getEntry(SystemCapabilities.COMPONENT,
-                                                      "memory",
-                                                      MeasurableCapability.class,
-                                                      new Memory(config),
-                                                      config);
-            if(memory.isEnabled())
-                measurables.add(memory);
-        } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading Memory MeasurableCapability", e);
-        }
+        MeasurableCapability memory = new Memory(config);
+        if(memory.isEnabled())
+            measurables.add(memory);
 
-        try {
-            MeasurableCapability cpu =
-                (MeasurableCapability)config.getEntry(SystemCapabilities.COMPONENT+"cpu",
-                                                      "jvm",
-                                                      MeasurableCapability.class,
-                                                      new CPU(config,
-                                                              SystemWatchID.PROC_CPU,
-                                                              true),
-                                                      config);
+        try{
+            MeasurableCapability cpu = new CPU(config, SystemWatchID.PROC_CPU, true);
             if(cpu.isEnabled())
                 measurables.add(cpu);
-        } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading CPU MeasurableCapability", e);
         } catch (RuntimeException e) {
             logger.warning("JVM CPU monitoring not supported");
         }

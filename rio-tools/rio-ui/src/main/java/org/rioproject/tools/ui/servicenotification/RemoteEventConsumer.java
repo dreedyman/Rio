@@ -4,8 +4,6 @@ import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.log.ServiceLogEvent;
-import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.ui.Util;
 
@@ -23,10 +21,7 @@ public class RemoteEventConsumer implements RemoteEventListener, RemoteServiceEv
 
     public void notify(RemoteEvent event) {
         try {
-            if(event instanceof ProvisionFailureEvent || event instanceof ServiceLogEvent) {
-                remoteEventTable.getDataModel().addItem((RemoteServiceEvent) event);
-                remoteEventTable.notifyListeners();
-            } else if(event instanceof ProvisionMonitorEvent) {
+            if(event instanceof ProvisionMonitorEvent) {
                 ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
                 synchronized(this) {
                     if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED)) {
@@ -69,10 +64,12 @@ public class RemoteEventConsumer implements RemoteEventListener, RemoteServiceEv
                         remoteEventTable.notifyListeners();
                     }
                 }
+            }  else {
+                /* The event is either a ProvisionFailureEvent, ServiceLogEvent or SLAThresholdEvent */
+                remoteEventTable.getDataModel().addItem((RemoteServiceEvent) event);
+                remoteEventTable.notifyListeners();
             }
             remoteEventTable.expandAll();
-            //setStatusErrorText("ProvisionFailureEvent received for "
-            //        + pfe.getServiceElement().getName());
         } catch (Throwable t) {
             Util.showError(t, remoteEventTable, "Notification of a ProvisionFailureEvent");
         }

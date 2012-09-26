@@ -73,7 +73,6 @@ import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.sla.SLAThresholdEventAdapter;
 import org.rioproject.system.ComputeResource;
-import org.rioproject.system.ComputeResourceObserver;
 import org.rioproject.watch.WatchRegistry;
 
 import javax.management.*;
@@ -148,7 +147,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * to reflect a change in the quantitative and/or qualitative mechanisms
      * reflected by the ComputeResource object
      */
-    protected ComputeResourceObserver computeResourceObserver;
+    //protected ComputeResourceObserver computeResourceObserver;
     /** Thread that will do snapshots */
     protected SnapshotThread snapshotter;
     /** Manages persistence of the ServiceBeanContext */
@@ -328,9 +327,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
                 getServiceProxy();
             }
             jsbState.setState(ServiceBeanState.STARTED);
-        } else {
+        } /*else {
             computeResourceObserver.setSource(proxy);
-        }
+        }*/
         return (proxy);
     }
 
@@ -432,8 +431,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         * Create the ComputeResource observer object that will listen for
         * changes to the ComputeResource component
         */
-        computeResourceObserver = new ComputeResourceObserver(computeResource, context, slaEventHandler);
-        computeResourceObserver.setSource(getServiceProxy());
+        /*computeResourceObserver = new ComputeResourceObserver(computeResource, context, slaEventHandler);
+        computeResourceObserver.setSource(getServiceProxy());*/
         /*
          * Create a ServiceElementChangeManager to listen for updates to the
          * ServiceElement object by the ServiceBeanManager
@@ -975,14 +974,14 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if (snapshotter != null)
             snapshotter.interrupt();
 
-        if (computeResourceObserver != null) {
+        /*if (computeResourceObserver != null) {
             if(logger.isLoggable(Level.FINEST)) {
                 logger.log(Level.FINEST, "[{0}] Disconnect from ComputeResource",
                            ServiceElementUtil.getLoggingName(context));
             }
             computeResourceObserver.setIgnore(true);
             computeResourceObserver.disconnect();
-        }
+        }*/
         /* Unregister the ServiceElement observer */
         if(sElemChangeMgr!=null) {
             if(logger.isLoggable(Level.FINEST)) {

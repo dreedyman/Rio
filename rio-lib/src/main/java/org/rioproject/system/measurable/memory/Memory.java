@@ -98,6 +98,9 @@ public class Memory extends MeasurableCapability {
                                                                      "thresholdValues",
                                                                      ThresholdValues.class,
                                                                      new ThresholdValues(0.0, 1.0));
+            if(logger.isLoggable(Level.FINE)) {
+                logger.fine(String.format("%s threshold values: %s", getId(), tVals.toString()));
+            }
             setThresholdValues(tVals);
             
             ResourceCostModel rCostModel = (ResourceCostModel)config.getEntry(getComponentName(),

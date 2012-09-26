@@ -15,6 +15,7 @@
  */
 package org.rioproject.core.jsb;
 
+import org.rioproject.bean.BeanAdapter;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 
 /**
@@ -35,7 +36,9 @@ public interface ServiceBeanFactory {
         private final Object impl;
         /** The service proxy */
         private final Object proxy;
-        
+        /* The wrapping BeanAdapter */
+        private final BeanAdapter beanAdapter;
+
         /**
          * Trivial constructor. Simply assigns each argument
          * to the appropriate field.
@@ -43,9 +46,22 @@ public interface ServiceBeanFactory {
          * @param o The service implementation
          * @param p The service proxy
          */
-        public Created(Object o, Object p) {
+        public Created(final Object o, final Object p) {
+            this(o, p, null);
+        }
+
+        /**
+         * Trivial constructor. Simply assigns each argument
+         * to the appropriate field.
+         *
+         * @param o The service implementation
+         * @param p The service proxy
+         * @param beanAdapter The {@code BeanAdapter}
+         */
+        public Created(final Object o, final Object p, final BeanAdapter beanAdapter) {
             impl = o;
             proxy = p;
+            this.beanAdapter = beanAdapter;
         }
 
         public Object getImpl() {
@@ -56,9 +72,13 @@ public interface ServiceBeanFactory {
             return proxy;
         }
 
+        public BeanAdapter getBeanAdapter() {
+            return beanAdapter;
+        }
+
         @Override
         public String toString() {
-            return "impl=" + impl +", proxy=" + proxy;
+            return "impl=" + impl +", proxy=" + proxy+", beanAdapter="+beanAdapter;
         }
     }
     

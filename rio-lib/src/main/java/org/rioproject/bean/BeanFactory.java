@@ -46,12 +46,13 @@ public class BeanFactory implements ServiceBeanFactory {
      *
      * @see org.rioproject.core.jsb.ServiceBeanFactory#create
      */
-    public Created create(ServiceBeanContext context) throws ServiceBeanInstantiationException {
+    public Created create(final ServiceBeanContext context) throws ServiceBeanInstantiationException {
         Object bean;
         Object proxy;
+        BeanAdapter adapter;
         try {
             bean = getBean(context);
-            BeanAdapter adapter = new BeanAdapter(bean);
+            adapter = new BeanAdapter(bean);
             /* Invoke the start method */
             proxy = adapter.start(context);
         } catch(Exception e) {
@@ -59,7 +60,7 @@ public class BeanFactory implements ServiceBeanFactory {
                 throw (ServiceBeanInstantiationException)e;
             throw new ServiceBeanInstantiationException("Service Instantiation Exception", e, true);
         }
-        return (new Created(bean, proxy));
+        return (new Created(bean, proxy, adapter));
     }
 
     /**
@@ -71,7 +72,7 @@ public class BeanFactory implements ServiceBeanFactory {
      *
      * @throws Exception If there are errors loading the bean
      */
-    protected Object getBean(ServiceBeanContext context) throws Exception {
+    protected Object getBean(final ServiceBeanContext context) throws Exception {
         final Thread currentThread = Thread.currentThread();
         ClassBundle bundle = context.getServiceElement().getComponentBundle();
         ClassLoader beanCL = currentThread.getContextClassLoader();

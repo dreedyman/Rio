@@ -52,10 +52,10 @@ public class JSBLoader implements ServiceBeanFactory {
      * @see org.rioproject.cybernode.ServiceBeanFactory#create(org.rioproject.core.jsb.ServiceBeanContext)
      */
     public Created create(ServiceBeanContext context) throws ServiceBeanInstantiationException {
-        Object proxy;
-        Object impl;
+
         final Thread currentThread = Thread.currentThread();
         final ClassLoader jsbCL = currentThread.getContextClassLoader();
+        Created created;
         try {
             ClassBundle jsbBundle = context.getServiceElement().getComponentBundle();
             if(logger.isLoggable(Level.FINEST))
@@ -68,7 +68,8 @@ public class JSBLoader implements ServiceBeanFactory {
                 constructor.setAccessible(true);
                 LifeCycle lifeCycle = (LifeCycle)context.getServiceBeanManager().getDiscardManager();
                 String[] args = ConfigHelper.getConfigArgs(context.getServiceBeanConfig().getConfigArgs());
-                impl = constructor.newInstance(args, lifeCycle);
+                Object impl = constructor.newInstance(args, lifeCycle);
+                Object proxy;
                 if(logger.isLoggable(Level.FINEST))
                     logger.log(Level.FINEST, "Obtained implementation instance: {0}", impl);
                 if(impl instanceof ServiceProxyAccessor) {
@@ -78,6 +79,7 @@ public class JSBLoader implements ServiceBeanFactory {
                 } else {
                     proxy = null; // just for insurance
                 }
+                created = new Created(impl, proxy);
 
             } else {
                 if(isServiceBean(implClass)) {
@@ -86,16 +88,15 @@ public class JSBLoader implements ServiceBeanFactory {
                     Constructor constructor = implClass.getConstructor((Class[])null);
                     if(logger.isLoggable(Level.FINEST))
                         logger.log(Level.FINEST, "Obtained implementation constructor: {0}", constructor);
-                    impl = constructor.newInstance((Object[])null);
+                    Object impl = constructor.newInstance((Object[])null);
                     ServiceBean instance = (ServiceBean)impl;
                     if(logger.isLoggable(Level.FINEST))
                         logger.log(Level.FINEST, "Obtained implementation instance: {0}", instance);
-                    proxy = instance.start(context);
+                    Object proxy = instance.start(context);
+                    created = new Created(impl, proxy);
                 } else {
                     BeanFactory beanFactory = new BeanFactory();
-                    Created created = beanFactory.create(context);
-                    impl = created.getImpl();
-                    proxy = created.getProxy();
+                    created = beanFactory.create(context);
                 }
             }
 
@@ -110,7 +111,7 @@ public class JSBLoader implements ServiceBeanFactory {
             }
             throw new ServiceBeanInstantiationException("Service Instantiation Exception", t, true);
         }
-        return (new Created(impl, proxy));
+        return created;
     }
 
     /*

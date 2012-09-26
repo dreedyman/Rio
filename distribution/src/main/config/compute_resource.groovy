@@ -124,7 +124,15 @@ class MeasurableMemory extends BasicMeasurable {
  * BasicMeasurable, allowing it to have the same default values.
  */
 @Component('org.rioproject.system.measurable.systemMemory')
-class MeasurableSystemMemory extends BasicMeasurable {    }
+class MeasurableSystemMemory extends BasicMeasurable {
+    /*
+     * Memory utilization should be capped at 95%
+     */
+    @Override
+    ThresholdValues getThresholdValues() {
+        return new ThresholdValues(0.0, 0.95);
+    }
+}
 
 /*
  * Configuration for the DiskSpace measurable capability. It just extends
