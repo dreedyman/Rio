@@ -166,8 +166,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
         if (numAllowed > 0) {
             long currentID = req.getServiceElement().getServiceBeanConfig().getInstanceID();
             StringBuilder b = new StringBuilder();
-            b.append("doDeploy ").append(numAllowed).append(" [")
-                .append(LoggingUtil.getLoggingName(req)).append("] instances");
+            b.append("doDeploy ").append(numAllowed).append(" [");
+            b.append(LoggingUtil.getLoggingName(req)).append("] instances");
 
             for (int i = 0; i < numAllowed; i++) {
                 ProvisionRequest request = ProvisionRequest.copy(req);
