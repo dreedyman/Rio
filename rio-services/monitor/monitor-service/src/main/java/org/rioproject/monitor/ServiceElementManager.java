@@ -500,6 +500,7 @@ public class ServiceElementManager implements InstanceIDManager {
                                                                 listener,
                                                                 opStringMgr,
                                                                 instanceIDMgr);
+                request.setServiceProvisionListener(provListener);
                 if(provisioner.getFixedServiceManager().hasServiceElement(svcElement)) {
                     mgrLogger.finer("Update [%s] instance in  FixedServiceManager", LoggingUtil.getLoggingName(svcElement));
                     provisioner.getFixedServiceManager().updateProvisionRequests(svcElement, provListener);
