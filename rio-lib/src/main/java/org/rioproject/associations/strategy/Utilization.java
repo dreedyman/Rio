@@ -273,7 +273,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                 if(serviceElements.isEmpty()) {
                     serviceElements.addAll(getMatchingServiceElements(dMap));
                     if(serviceElements.isEmpty())
-                        logger.warning("Unable to obtain matching ServiceElement(s)" +
+                        logger.warning("Unable to obtain matching ServiceElement(s) " +
                                        "for associated service ["+association.getName()+"]");
                 }
                 if(dMap!=null) {
