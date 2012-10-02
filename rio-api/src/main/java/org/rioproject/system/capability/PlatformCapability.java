@@ -99,6 +99,7 @@ import java.util.regex.Pattern;
 
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class PlatformCapability implements PlatformCapabilityMBean, ResourceCostProducer, Serializable {
     static final long serialVersionUID = 1L;
     /** Manufacturer information for the capability */
@@ -107,7 +108,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     public final static String MODEL = "Model";
     /** Name information for the capability */
     public final static String NAME = "Name";
-    /** Vender information for the capability */
+    /** Vendor information for the capability */
     public final static String VENDOR = "Vendor";
     /** Version information for the capability */
     public final static String VERSION = "Version";
