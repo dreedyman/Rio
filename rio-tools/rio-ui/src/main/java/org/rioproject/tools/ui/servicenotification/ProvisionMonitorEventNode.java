@@ -52,7 +52,9 @@ public class ProvisionMonitorEventNode extends RemoteServiceEventNode<ProvisionM
             builder.append(getEvent().getServiceBeanInstance().getHostAddress()).append(" terminated");
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_FAILED)) {
             builder.append(getServiceName()).append(" on ");
-            builder.append(getEvent().getServiceBeanInstance().getHostAddress()).append(" has failed");
+            String hostAddress = getEvent().getServiceBeanInstance()==null?"?":
+                                 getEvent().getServiceBeanInstance().getHostAddress();
+            builder.append(hostAddress).append(" has failed");
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.EXTERNAL_SERVICE_DISCOVERED)) {
             builder.append(getServiceName()).append(" has been discovered on ");
             builder.append(getEvent().getServiceBeanInstance().getHostAddress());
