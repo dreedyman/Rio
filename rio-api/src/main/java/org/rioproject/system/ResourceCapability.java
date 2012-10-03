@@ -24,7 +24,7 @@ import java.util.Collection;
 
 /**
  * Represents the capabilities of a compute resource. The ResourceCapability
- * class provides the utilization, platform and measurable capabilities for
+ * class provides the utilization, platform and measured resource capabilities for
  * a compute resource.
  *
  * @author Dennis Reedy
