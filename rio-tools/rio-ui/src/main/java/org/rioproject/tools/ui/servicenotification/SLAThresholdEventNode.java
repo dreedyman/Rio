@@ -26,13 +26,13 @@ import java.text.NumberFormat;
  * @author Dennis Reedy
  */
 public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEvent> {
-    private final NumberFormat numberFormatter;
+    private final NumberFormat percentFormatter;
 
     public SLAThresholdEventNode(SLAThresholdEvent event) {
         super(event);
-        numberFormatter = NumberFormat.getNumberInstance();
-        numberFormatter.setGroupingUsed(false);
-        numberFormatter.setMaximumFractionDigits(2);
+        percentFormatter = NumberFormat.getPercentInstance();
+        /* Display 3 digits of precision */
+        percentFormatter.setMaximumFractionDigits(3);
     }
 
     @Override
@@ -48,8 +48,14 @@ public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEv
         builder.append(getEvent().getHostAddress()).append(" SLA ");
         builder.append("\"").append(sla.getIdentifier()).append("\"").append(" ");
         builder.append(getStatus().toLowerCase()).append(", ");
-        builder.append("value: ").append(numberFormatter.format(getEvent().getCalculable().getValue()));
+        builder.append("value: ").append(formatPercent(getEvent().getCalculable().getValue()));
         return builder.toString();
+    }
+
+    private String formatPercent(final Double value) {
+        if (value != null && !Double.isNaN(value))
+            return (percentFormatter.format(value.doubleValue()));
+        return ("?");
     }
 
     @Override
