@@ -30,6 +30,7 @@ import java.util.Collection;
  * @author Dennis Reedy
  */
 public class ResourceCapability implements Comparable, Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Platform capabilities of the ComputeResource */
     private PlatformCapability[] platformCapabilities;
