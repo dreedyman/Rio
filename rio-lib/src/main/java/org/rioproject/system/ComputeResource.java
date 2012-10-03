@@ -19,8 +19,8 @@ package org.rioproject.system;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
-import org.rioproject.core.provision.DownloadRecord;
-import org.rioproject.core.provision.StagedSoftware;
+import org.rioproject.provision.DownloadRecord;
+import org.rioproject.provision.StagedSoftware;
 import org.rioproject.net.HostUtil;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class ComputeResource /*extends Observable*/ {
+public class ComputeResource {
     /** Name to use when getting Configuration values and to get the Logger */
     static final String COMPONENT = "org.rioproject.system";
     static Logger logger = Logger.getLogger(COMPONENT);
@@ -244,9 +244,9 @@ public class ComputeResource /*extends Observable*/ {
     }
     
     /**
-     * Provision a {@link org.rioproject.core.provision.StagedSoftware} for a
+     * Provision a {@link org.rioproject.provision.StagedSoftware} for a
      * {@link org.rioproject.system.capability.PlatformCapability} object. The
-     * provisioning of {@link org.rioproject.core.provision.StagedSoftware}
+     * provisioning of {@link org.rioproject.provision.StagedSoftware}
      * object for a{@link org.rioproject.system.capability.PlatformCapability}
      * component causes the state of this object to change, triggering the
      * notification of all registered {@link java.util.Observer} instances.
@@ -481,7 +481,6 @@ public class ComputeResource /*extends Observable*/ {
             return(false);
         if(measurables.add(capability)) {
             added = true;
-            //capabilityChannel.subscribe(capability);
             stateChange();
         }
         return(added);
@@ -555,8 +554,7 @@ public class ComputeResource /*extends Observable*/ {
     public PlatformCapability[] getPlatformCapabilities() {
         PlatformCapability[] pCaps;
         synchronized(platformCapabilities) {
-            pCaps = platformCapabilities.toArray(
-                                                    new PlatformCapability[platformCapabilities.size()]);
+            pCaps = platformCapabilities.toArray(new PlatformCapability[platformCapabilities.size()]);
         }
         return pCaps;
     }
@@ -797,7 +795,6 @@ public class ComputeResource /*extends Observable*/ {
                             mCap.addWatchDataReplicator(memory);
                         }
                     }
-
                 }
                 addMeasurableCapability(mCap);
                 mCap.start();
