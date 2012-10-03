@@ -77,7 +77,12 @@ public class CybernodeUtilizationPanel extends JPanel {
         treeTable = /*new JXTreeTable();*/
         new JXTreeTable() {
             @Override public TableCellRenderer getCellRenderer(int row, int column) {
-                Object value = super.getValueAt(row, column);
+                Object value;
+                try {
+                    value = super.getValueAt(row, column);
+                } catch (IllegalArgumentException e) {
+                    value = null;
+                }
                 if(value != null) {
                     if(value instanceof JLabel) {
                         return new JLabelCellRenderer(((JLabel)value));
