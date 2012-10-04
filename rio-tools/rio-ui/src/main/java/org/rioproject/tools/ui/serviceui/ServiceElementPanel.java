@@ -20,7 +20,7 @@ import net.jini.core.lookup.ServiceRegistrar;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.opstring.ServiceElement.ProvisionType;
-import org.rioproject.core.provision.SystemRequirements;
+import org.rioproject.deploy.SystemRequirements;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.opstring.*;
 import org.rioproject.sla.SLA;
