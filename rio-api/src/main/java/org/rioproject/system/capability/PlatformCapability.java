@@ -15,9 +15,9 @@
  */
 package org.rioproject.system.capability;
 
-import org.rioproject.core.provision.DownloadRecord;
-import org.rioproject.core.provision.StagedSoftware;
-import org.rioproject.core.provision.SystemComponent;
+import org.rioproject.deploy.DownloadRecord;
+import org.rioproject.deploy.StagedSoftware;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.costmodel.ResourceCostProducer;
@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  <br>
  PlatformCapability attributes will be stored as (key,&nbsp;value) pairs
  in a HashMap and tested for supportability against {@link
- org.rioproject.core.provision.SystemComponent} attributes.
+org.rioproject.deploy.SystemComponent} attributes.
  Attributes obtained from the <code>SystemRequirement</code>
  class will be tested for supportability using regular expression
  matching. <br>
@@ -279,7 +279,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
 
     /**
      * Determine if the provided 
-     * {@link org.rioproject.core.provision.SystemComponent} can
+     * {@link org.rioproject.deploy.SystemComponent} can
      * be supported. A SystemRequirement can be supported if this
      * PlatformCapability is the same class name (sans the package name) as
      * the input <code>SystemRequirement.getClassName()</code> or the same

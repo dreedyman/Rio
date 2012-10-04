@@ -17,7 +17,7 @@ package org.rioproject.cybernode;
 
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.core.provision.DownloadRecord;
+import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;

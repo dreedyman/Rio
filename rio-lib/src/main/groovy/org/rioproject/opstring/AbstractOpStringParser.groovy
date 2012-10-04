@@ -18,7 +18,7 @@ package org.rioproject.opstring
 import com.sun.jini.config.ConfigUtil
 
 import org.rioproject.associations.AssociationDescriptor
-import org.rioproject.core.provision.SystemRequirements
+import org.rioproject.deploy.SystemRequirements
 
 /**
  * Provides an abstract implementation of the OpStringParser

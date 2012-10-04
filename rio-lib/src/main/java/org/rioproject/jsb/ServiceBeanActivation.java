@@ -38,7 +38,7 @@ import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.core.provision.SystemRequirements;
+import org.rioproject.deploy.SystemRequirements;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.LookupCachePool;

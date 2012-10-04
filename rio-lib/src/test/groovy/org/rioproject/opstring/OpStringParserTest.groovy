@@ -16,13 +16,13 @@
 package org.rioproject.opstring
 
 import org.rioproject.associations.AssociationType
-import org.rioproject.core.provision.StagedSoftware
+import org.rioproject.deploy.StagedSoftware
 
 import org.rioproject.opstring.ServiceElement.MachineBoundary
 import org.rioproject.exec.ServiceExecutor
-import org.rioproject.core.provision.SystemComponent
+import org.rioproject.deploy.SystemComponent
 
-import org.rioproject.core.provision.SystemRequirements
+import org.rioproject.deploy.SystemRequirements
 import org.rioproject.sla.ServiceLevelAgreements
 import org.rioproject.sla.*
 import org.rioproject.watch.WatchDescriptor

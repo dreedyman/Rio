@@ -15,9 +15,9 @@
  */
 package org.rioproject.opstring.handlers
 
-import org.rioproject.core.provision.StagedData
-import org.rioproject.core.provision.StagedSoftware
-import org.rioproject.core.provision.StagedSoftware.PostInstallAttributes
+import org.rioproject.deploy.StagedData
+import org.rioproject.deploy.StagedSoftware
+import org.rioproject.deploy.StagedSoftware.PostInstallAttributes
 import org.rioproject.opstring.OpStringParser
 
 import org.rioproject.logging.GroovyLogger

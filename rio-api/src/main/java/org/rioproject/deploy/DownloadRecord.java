@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.core.provision;
+package org.rioproject.deploy;
 
 import java.io.Serializable;
 import java.net.URL;

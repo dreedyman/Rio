@@ -15,8 +15,8 @@
  */
 package org.rioproject.opstring;
 
-import org.rioproject.core.provision.DownloadRecord;
-import org.rioproject.core.provision.StagedData;
+import org.rioproject.deploy.DownloadRecord;
+import org.rioproject.deploy.StagedData;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
 
@@ -38,7 +38,7 @@ public class OARUtil {
      *
      * @param archive The URL of the archive
      * @param installDir The parent directory to install the archive into
-     * @return A {@link org.rioproject.core.provision.DownloadRecord}
+     * @return A {@link org.rioproject.deploy.DownloadRecord}
      * detailing the installation specifics
      *
      * @throws OARException If the manifest cannot be read

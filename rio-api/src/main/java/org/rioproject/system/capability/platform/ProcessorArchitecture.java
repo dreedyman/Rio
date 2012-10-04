@@ -15,7 +15,7 @@
  */
 package org.rioproject.system.capability.platform;
 
-import org.rioproject.core.provision.SystemComponent;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.system.capability.PlatformCapability;
 
 import java.util.Map;

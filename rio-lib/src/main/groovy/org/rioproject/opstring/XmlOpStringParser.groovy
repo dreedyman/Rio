@@ -18,8 +18,8 @@ package org.rioproject.opstring
 import java.lang.reflect.Method
 import org.rioproject.associations.AssociationDescriptor
 
-import org.rioproject.core.provision.SystemRequirements
-import org.rioproject.core.provision.SystemComponent
+import org.rioproject.deploy.SystemRequirements
+import org.rioproject.deploy.SystemComponent
 import org.rioproject.exec.ExecDescriptor
 import org.rioproject.exec.ServiceExecutor
 import org.rioproject.opstring.OpStringLoader.XMLErrorHandler
@@ -31,7 +31,7 @@ import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 import org.rioproject.opstring.handlers.*
 import org.rioproject.logging.GroovyLogger
-import org.rioproject.core.provision.StagedSoftware
+import org.rioproject.deploy.StagedSoftware
 
 /**
  * Handles the parsing of an XML OperationalString

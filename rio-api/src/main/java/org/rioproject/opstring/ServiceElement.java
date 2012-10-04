@@ -15,9 +15,10 @@
  */
 package org.rioproject.opstring;
 
-import org.rioproject.core.provision.SystemComponent;
+import org.rioproject.deploy.ServiceRequirementProbe;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.core.provision.StagedData;
+import org.rioproject.deploy.StagedData;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.sla.RuleMap;

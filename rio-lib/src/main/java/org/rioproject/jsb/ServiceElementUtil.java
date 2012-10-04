@@ -25,7 +25,7 @@ import net.jini.discovery.DiscoveryGroupManagement;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.core.provision.SystemComponent;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.log.LoggerConfig;

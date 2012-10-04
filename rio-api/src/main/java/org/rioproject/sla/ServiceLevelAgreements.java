@@ -15,7 +15,7 @@
  */
 package org.rioproject.sla;
 
-import org.rioproject.core.provision.SystemRequirements;
+import org.rioproject.deploy.SystemRequirements;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * ServiceLevelAgreements class provides context on the attributes required to
  * meet and monitor service level agreements for a service. Included in this
- * class are the {@link org.rioproject.core.provision.SystemRequirements} that
+ * class are the {@link org.rioproject.deploy.SystemRequirements} that
  * must be met in order for the service to be provisioned, and
  * {@link org.rioproject.sla.SLA} declarations that will monitor service behavior
  * and be managed by provided service level agreement manager.

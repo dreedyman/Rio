@@ -15,7 +15,10 @@
  */
 package org.rioproject.cybernode;
 
-import org.rioproject.core.provision.*;
+import org.rioproject.deploy.DownloadRecord;
+import org.rioproject.deploy.StagedData;
+import org.rioproject.deploy.StagedSoftware;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.system.ComputeResource;
@@ -135,9 +138,9 @@ public class StagedDataManager {
     /**
      * Get all DownloadRecords
      *
-     * @return An array of {@link org.rioproject.core.provision.DownloadRecord}
+     * @return An array of {@link org.rioproject.deploy.DownloadRecord}
      * instances that represent the download of a
-     * {@link org.rioproject.core.provision.StagedData} instance. If nothing
+     * {@link org.rioproject.deploy.StagedData} instance. If nothing
      * was downloaded return a zero-length array
      */
     public DownloadRecord[] getDownloadRecords() {
@@ -145,12 +148,12 @@ public class StagedDataManager {
     }
 
     /**
-     * Get the map of {@link org.rioproject.core.provision.StagedData} keys and
-     * {@link org.rioproject.core.provision.DownloadRecord} values for each
+     * Get the map of {@link org.rioproject.deploy.StagedData} keys and
+     * {@link org.rioproject.deploy.DownloadRecord} values for each
      * downloaded item.
      *
-     * @return A map of {@link org.rioproject.core.provision.StagedData} keys and
-     * {@link org.rioproject.core.provision.DownloadRecord} values for each
+     * @return A map of {@link org.rioproject.deploy.StagedData} keys and
+     * {@link org.rioproject.deploy.DownloadRecord} values for each
      * downloaded item. If nothing was downloaded, return an empty map
      */
     public Map<StagedData, DownloadRecord[]> getDownloadedArtifacts() {
@@ -160,8 +163,8 @@ public class StagedDataManager {
     /**
      * Download any artifacts the service requires
      *
-     * @return A map of {@link org.rioproject.core.provision.StagedData} keys and
-     * {@link org.rioproject.core.provision.DownloadRecord} values for each
+     * @return A map of {@link org.rioproject.deploy.StagedData} keys and
+     * {@link org.rioproject.deploy.DownloadRecord} values for each
      * downloaded item. If nothing was downloaded, return an empty map
      *
      * @throws Exception If errors occur downloading or creating

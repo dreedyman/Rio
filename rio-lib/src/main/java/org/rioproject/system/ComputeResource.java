@@ -19,8 +19,8 @@ package org.rioproject.system;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
-import org.rioproject.provision.DownloadRecord;
-import org.rioproject.provision.StagedSoftware;
+import org.rioproject.deploy.DownloadRecord;
+import org.rioproject.deploy.StagedSoftware;
 import org.rioproject.net.HostUtil;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
@@ -244,9 +244,9 @@ public class ComputeResource {
     }
     
     /**
-     * Provision a {@link org.rioproject.provision.StagedSoftware} for a
+     * Provision a {@link org.rioproject.deploy.StagedSoftware} for a
      * {@link org.rioproject.system.capability.PlatformCapability} object. The
-     * provisioning of {@link org.rioproject.provision.StagedSoftware}
+     * provisioning of {@link org.rioproject.deploy.StagedSoftware}
      * object for a{@link org.rioproject.system.capability.PlatformCapability}
      * component causes the state of this object to change, triggering the
      * notification of all registered {@link java.util.Observer} instances.

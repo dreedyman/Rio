@@ -15,7 +15,7 @@
  */
 package org.rioproject.opstring.handlers
 
-import org.rioproject.core.provision.StagedData
+import org.rioproject.deploy.StagedData
 import org.rioproject.opstring.ParsedService
 
 /**

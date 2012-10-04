@@ -21,8 +21,7 @@ import org.rioproject.associations.AssociationType;
 import org.rioproject.deploy.*;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.core.provision.*;
-import org.rioproject.core.provision.SystemComponent;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.MeasuredResource;
@@ -740,16 +739,15 @@ public class InstantiatorResource {
                 StringBuilder b = new StringBuilder();
                 b.append("Do not allocate ")
                     .append(provType)
-                    .append(" " + "service [")
+                    .append(" service [")
                     .append(LoggingUtil.getLoggingName(sElem))
                     .append("] to ")
                     .append(getName())
-                    .append(" " + "at [")
+                    .append(" at [")
                     .append(getHostAddress())
-                    .append("], " + "required colocated services not present: ");
+                    .append("], required colocated services not present: ");
                 AssociationDescriptor[] aDesc =
-                    ServiceElementUtil.getAssociationDescriptors(
-                        sElem, AssociationType.COLOCATED);
+                        ServiceElementUtil.getAssociationDescriptors(sElem, AssociationType.COLOCATED);
                 int found = 0;
                 for (AssociationDescriptor anADesc : aDesc) {
                     if (found > 0)
