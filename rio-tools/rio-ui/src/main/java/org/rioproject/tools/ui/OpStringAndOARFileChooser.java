@@ -25,10 +25,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileView;
 import javax.swing.text.Document;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.io.File;
 import java.net.URL;
 
@@ -145,26 +142,31 @@ public class OpStringAndOARFileChooser {
                 return "Rio OperationalString files";
             }
         });
-        deployButton.setEnabled(false);
-        artifactField.addFocusListener(new FocusListener() {
-            public void focusGained(FocusEvent event) {
-                lastFocused = LastFocused.artifactField;
-                if(artifactField.getText().length()>0) {
-                    if(!deployButton.isEnabled()) {
-                        deployButton.setEnabled(true);
-                    }
-                }
-            }
+        ArtifactOrFileListener focusListener = new ArtifactOrFileListener();
+        chooser.addFocusListener(focusListener);
 
-            public void focusLost(FocusEvent event) {
-                Component c = event.getOppositeComponent();
-                if(!(c instanceof JButton && ((JButton)c).getText().equals("Deploy")))
-                    lastFocused = LastFocused.other;
-            }
-        });
+        deployButton.setEnabled(false);
+        artifactField.addFocusListener(focusListener);
         if(lastArtifact!=null) {
             artifactField.setText(lastArtifact);
+        }
+    }
+
+    private class ArtifactOrFileListener implements FocusListener {
+
+        public void focusGained(FocusEvent event) {
             lastFocused = LastFocused.artifactField;
+            if(artifactField.getText().length()>0 || chooser.getSelectedFile()!=null) {
+                if(!deployButton.isEnabled()) {
+                    deployButton.setEnabled(true);
+                }
+            }
+        }
+
+        public void focusLost(FocusEvent event) {
+            Component c = event.getOppositeComponent();
+            if(!(c instanceof JButton && ((JButton)c).getText().equals("Deploy")))
+                lastFocused = LastFocused.other;
         }
     }
 
@@ -182,8 +184,9 @@ public class OpStringAndOARFileChooser {
                 selected = artifactField.getText();
             } else {
                 File file = chooser.getSelectedFile();
-                if(file!=null)
+                if(file!=null) {
                     selected = file.getAbsolutePath();
+                }
             }
             return selected;
         } else
@@ -191,7 +194,7 @@ public class OpStringAndOARFileChooser {
     }
 
     private boolean artifactHasBeenProvided() {
-        return lastFocused.equals(LastFocused.artifactField);
+        return lastFocused != null && lastFocused.equals(LastFocused.artifactField);
     }
 
     /**
