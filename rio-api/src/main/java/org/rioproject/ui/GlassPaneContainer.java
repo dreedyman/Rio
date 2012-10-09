@@ -21,7 +21,11 @@ import java.io.Serializable;
 
 /**
  * A utility that allows glass pane type effects to be applied to portions of
- * your UI instead of the entire UI
+ * your UI instead of the entire UI.
+ *
+ * <p>This class is part of the rio-api module because it will be downloaded with service ui
+ * classes. If we were to put it into the rio-lib module, the rio-lib module would have to
+ * be declared as part of the codebase (dependencies) of the watch-ui module.
  */
 @SuppressWarnings("PMD")
 public class GlassPaneContainer extends JPanel {
