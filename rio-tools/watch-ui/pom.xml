@@ -17,7 +17,7 @@
 
          <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>rio-lib</artifactId>
+            <artifactId>rio-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
