@@ -145,7 +145,7 @@ public class OpStringAndOARFileChooser {
         ArtifactOrFileListener focusListener = new ArtifactOrFileListener();
         chooser.addFocusListener(focusListener);
 
-        deployButton.setEnabled(false);
+        //deployButton.setEnabled(false);
         artifactField.addFocusListener(focusListener);
         if(lastArtifact!=null) {
             artifactField.setText(lastArtifact);
@@ -156,11 +156,11 @@ public class OpStringAndOARFileChooser {
 
         public void focusGained(FocusEvent event) {
             lastFocused = LastFocused.artifactField;
-            if(artifactField.getText().length()>0 || chooser.getSelectedFile()!=null) {
+            /*if(artifactField.getText().length()>=0 || chooser.getSelectedFile()!=null) {
                 if(!deployButton.isEnabled()) {
                     deployButton.setEnabled(true);
                 }
-            }
+            }*/
         }
 
         public void focusLost(FocusEvent event) {
