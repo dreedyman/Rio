@@ -450,9 +450,10 @@ public class ServiceBeanLoader {
             /*
              * The service may have created it's own serviceID
              */
-
             if(proxy instanceof ReferentUuid) {
                 serviceIDToUse = ((ReferentUuid)proxy).getReferentUuid();
+                if(logger.isLoggable(Level.FINE))
+                    logger.fine("Service has provided Uuid: "+serviceIDToUse);
                 ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
             }
             
