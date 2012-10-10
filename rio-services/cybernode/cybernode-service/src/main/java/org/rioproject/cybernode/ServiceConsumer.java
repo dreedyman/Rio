@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.security.AccessControlException;
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -358,10 +359,14 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         StringBuilder sb = new StringBuilder();
         sb.append("Deployed: ").append(deployedServices.size()).append(" Limit: ").append(serviceLimit);
         if(!resourceCapability.measuredResourcesWithinRange()) {
+            NumberFormat numberFormatter = NumberFormat.getNumberInstance();
+            numberFormatter.setGroupingUsed(false);
+            numberFormatter.setMaximumFractionDigits(3);
             for(MeasuredResource mr : resourceCapability.getMeasuredResources(ResourceCapability.MEASURED_RESOURCES_BREACHED)) {
-                sb.append(mr.getIdentifier())
-                    .append("\n\tBREACHED value: ").append(mr.getValue())
-                    .append(", threshold: ").append(mr.getThresholdValues().getHighThreshold());
+                sb.append(" ");
+                sb.append(mr.getIdentifier());
+                sb.append(" BREACHED value: ").append(numberFormatter.format(mr.getValue()));
+                sb.append(", threshold: ").append(mr.getThresholdValues().getHighThreshold());
             }
             logger.warning(sb.toString());
         } else{
