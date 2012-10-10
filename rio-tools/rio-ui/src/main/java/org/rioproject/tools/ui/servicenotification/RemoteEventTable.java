@@ -114,11 +114,11 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
         bottom.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         autoRemove = new JCheckBox("Auto remove provision failure events once a service is provisioned or undeployed");
-        setCheckBox(autoRemove, props, Constants.AUTO_REMOVE_PROVISION_FAILURE_EVENTS);
+        setCheckBox(autoRemove, props, Constants.AUTO_REMOVE_PROVISION_FAILURE_EVENTS, true);
 
         useEventCollector = new JCheckBox();
         setUseEventCollectorCheckBoxText();
-        setCheckBox(useEventCollector, props, Constants.USE_EVENT_COLLECTOR);
+        setCheckBox(useEventCollector, props, Constants.USE_EVENT_COLLECTOR, false);
         useEventCollector.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 try {
@@ -138,9 +138,9 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         remoteEventListener = new ChainedRemoteEventListener(new RemoteEventConsumer(this), config);
     }
 
-    private void setCheckBox(JCheckBox checkBox, Properties props, String propertyName) {
+    private void setCheckBox(JCheckBox checkBox, Properties props, String propertyName, boolean defaultValue) {
         String s = props.getProperty(propertyName);
-        boolean value = true;
+        boolean value = defaultValue;
         if(s!=null)
             value = Boolean.parseBoolean(s);
         checkBox.setSelected(value);
