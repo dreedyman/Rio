@@ -177,7 +177,7 @@ public class PosixProcessManager extends ProcessManager {
 
         String sPid = Integer.toString(pid);
         String processStatusFile = FileUtils.getFilePath(procStatusFile);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String str;
         BufferedReader in =
             new BufferedReader(new InputStreamReader(url.openStream()));
@@ -201,7 +201,7 @@ public class PosixProcessManager extends ProcessManager {
         URL url = Util.getResource(KILL_SCRIPT);
 
         String sPid = Integer.toString(pid);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String str;
         BufferedReader in =
             new BufferedReader(new InputStreamReader(url.openStream()));
@@ -302,11 +302,18 @@ public class PosixProcessManager extends ProcessManager {
                         try {
                             in.close();
                         } catch (IOException e) {
+                            if(logger.isLoggable(Level.FINEST)) {
+                                logger.log(Level.FINEST, "Problem closing "+procStatusFile.getName(), e);
+                            }
                         }
                 }
                 try {
                     Thread.sleep(3000);
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) {
+                    if(logger.isLoggable(Level.FINEST)) {
+                        logger.log(Level.FINEST, "Interrupted", e);
+                    }
+                }
             }
             if(logger.isLoggable(Level.FINE))
                 logger.info("Process ["+getPid()+"] terminated for command ["+commandLine+"]");
