@@ -24,7 +24,7 @@ import org.rioproject.boot.BootUtil
 import org.rioproject.entry.UIDescriptorFactory
 import org.rioproject.RioVersion
 import net.jini.lookup.ui.MainUI
-import org.rioproject.serviceui.UIComponentFactory
+import org.rioproject.serviceui.UIFrameFactory
 
 /*
 * Declare Provision Monitor properties
@@ -58,7 +58,7 @@ class MonitorConfig {
     Entry[] getServiceUIs(String codebase) {
         String uiClass = 'org.rioproject.tools.ui.ServiceUIWrapper'
         URL url = new URL("artifact:org.rioproject:rio-ui:${RioVersion.VERSION}")
-        def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIComponentFactory(url, uiClass))]
+        def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIFrameFactory(url, uiClass))]
         return entry as Entry[]
     }
 
