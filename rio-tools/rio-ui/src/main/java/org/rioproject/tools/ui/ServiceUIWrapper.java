@@ -30,27 +30,19 @@ import java.util.Properties;
 public class ServiceUIWrapper extends Main {
     public ServiceUIWrapper(Object obj) throws ExportException, ConfigurationException {
         super(EmptyConfiguration.INSTANCE, true, new Properties());
-        System.err.println("===========================");
         getAccessibleContext().setAccessibleName("Provision Monitor UI");
-        System.err.println("1");
+        System.setProperty(AS_SERVICE_UI, "");
         try {
             startDiscovery();
-            System.err.println("2");
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            System.err.println("3");
             pack();
-            System.err.println("4");
             int width = 700;
             int height = 690;
             setSize(new Dimension(width, height));
-            System.err.println("5");
             addProvisionMonitor((ServiceItem)obj);
-            System.err.println("6");
             setVisible(true);
-            System.err.println("7");
         } catch(Exception e) {
             e.printStackTrace();
         }
-        System.err.println("===========================");
     }
 }

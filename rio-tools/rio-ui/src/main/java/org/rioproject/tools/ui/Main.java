@@ -122,6 +122,7 @@ public class Main extends JFrame {
     private final UtilitiesPanel utilities;
     private String lastArtifact = null;
     private BasicEventConsumer clientEventConsumer;
+    final String AS_SERVICE_UI = "as.service.ui";
 
     public Main(Configuration config, final boolean exitOnClose, Properties startupProps) throws ExportException, ConfigurationException {
         this.config = config;
@@ -783,7 +784,8 @@ public class Main extends JFrame {
      */
     public void terminateAndClose() {
         terminate();
-        System.exit(0);
+        if(System.getProperty(AS_SERVICE_UI)==null)
+            System.exit(0);
     }
 
     private OperationalString[] parseOperationalString(File file) throws Exception {
