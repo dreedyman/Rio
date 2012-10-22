@@ -18,7 +18,6 @@ package org.rioproject.log;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.log.LoggerConfig;
 import org.rioproject.logging.RioLogFormatter;
 
 import java.io.IOException;
