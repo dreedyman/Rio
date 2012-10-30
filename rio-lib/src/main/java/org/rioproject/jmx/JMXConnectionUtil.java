@@ -95,7 +95,7 @@ public class JMXConnectionUtil {
      * creating the {@link javax.management.remote.JMXConnectorServer}
      */
     @SuppressWarnings("unchecked")
-    public static void createJMXConnection(Configuration config) throws Exception {
+    public static void createJMXConnection(final Configuration config) throws Exception {
         if(System.getProperty(Constants.JMX_SERVICE_URL)!=null)
             return;
         RegistryUtil.checkRegistry(config);
@@ -103,44 +103,29 @@ public class JMXConnectionUtil {
         int registryPort = Integer.parseInt(sPort);
 
         if(registryPort==0) {
-            logger.severe("RMI Registry property ["+Constants.REGISTRY_PORT+"] " +
-                          "not found, unable to create MBeanServer");
+            logger.severe("RMI Registry property ["+Constants.REGISTRY_PORT+"] not found, unable to create MBeanServer");
             throw new Exception("Unable to create the JMXConnectorServer");
         }
 
         String defaultAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
 
-        String hostAddress = (String) config.getEntry(COMPONENT,
-                                                      "hostAddress",
-                                                      String.class,
-                                                      defaultAddress);
+        String hostAddress = (String) config.getEntry(COMPONENT, "hostAddress", String.class, defaultAddress);
 
         MBeanServer mbs = MBeanServerFactory.getMBeanServer();
-        /*String jmxServiceURL = "service:jmx:rmi:///jndi/rmi://"+
-                               hostAddress+":"+registryPort+
-                               "/jmxrmi";
-*/
-         JMXServiceURL jmxServiceURL =
-                new JMXServiceURL("service:jmx:rmi://"+hostAddress+
-                                  ":"+registryPort+"/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
+
+        JMXServiceURL jmxServiceURL = new JMXServiceURL("service:jmx:rmi://"+hostAddress+":"+registryPort+
+                                                        "/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
 
         if(logger.isLoggable(Level.INFO))
             logger.info("JMXServiceURL="+jmxServiceURL);
 
         Map env = System.getProperties();
-        JMXConnectorServer jmxConn =
-            JMXConnectorServerFactory.newJMXConnectorServer(
-                //new JMXServiceURL(jmxServiceURL),
-                jmxServiceURL,
-                env,
-                //null,
-                mbs);
+        JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, env, mbs);
         if(jmxConn != null) {
             jmxConn.start();
             System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
             if(logger.isLoggable(Level.CONFIG))
-                logger.config(
-                    "JMX Platform MBeanServer exported with RMI Connector");
+                logger.config("JMX Platform MBeanServer exported with RMI Connector");
         } else {
             throw new Exception("Unable to create the JMXConnectorServer");
         }
@@ -156,7 +141,7 @@ public class JMXConnectionUtil {
      * @return A formatted string that can be used as input to create a
      * {@link javax.management.remote.JMXServiceURL}
      */
-    public static String getJMXServiceURL(int port, String hostAddress) {
+    public static String getJMXServiceURL(final int port, final String hostAddress) {
         if(hostAddress==null)
             throw new IllegalArgumentException("hostAddress is null");
         return "service:jmx:rmi:///jndi/rmi://"+hostAddress+":"+port+"/jmxrmi";
@@ -181,10 +166,10 @@ public class JMXConnectionUtil {
      * target Java virtual machine.
      * @throws AgentLoadException when an agent cannot be loaded into the target Java virtual machine.
      */
-    public static MBeanServerConnection attach(String id) throws IOException,
-                                                                 AttachNotSupportedException,
-                                                                 AgentInitializationException,
-                                                                 AgentLoadException {
+    public static MBeanServerConnection attach(final String id) throws IOException,
+                                                                       AttachNotSupportedException,
+                                                                       AgentInitializationException,
+                                                                       AgentLoadException {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {
             logger.info("The JMX Attach APIs require Java 6 or above. " +
@@ -238,8 +223,7 @@ public class JMXConnectionUtil {
 	}
 
     /**
-     * Using the <a
-     * href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">
+     * Using the <a href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">
      * JMX Attach API </a>, list the available local Java Virtual Machines.
      *
      * <p>This utility requires Java 6 or greater.

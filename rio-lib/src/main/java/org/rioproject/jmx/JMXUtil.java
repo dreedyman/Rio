@@ -38,6 +38,8 @@ import java.lang.reflect.Method;
 import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides utilities for using JMX.
@@ -46,6 +48,7 @@ import java.io.IOException;
  * @author Dennis Reedy
  */
 public class JMXUtil {
+    private static Logger logger = Logger.getLogger(JMXUtil.class.getName());
 
     /**
      * Get a platform MXBean proxy
@@ -55,20 +58,17 @@ public class JMXUtil {
      * @param mxBeanInterface The platform MXBean interface type to create
      * @return A platform MXBean proxy
      */
-    public static <T> T getPlatformMXBeanProxy(MBeanServerConnection mbsc,
-                                               String name,
-                                               Class<T> mxBeanInterface) {
+    public static <T> T getPlatformMXBeanProxy(final MBeanServerConnection mbsc,
+                                               final String name,
+                                               final Class<T> mxBeanInterface) {
         T mxBean = null;
         try {
             ObjectName objName = new ObjectName(name);
-            mxBean =
-                ManagementFactory.newPlatformMXBeanProxy(mbsc,
-                                                         objName.toString(),
-                                                         mxBeanInterface);
+            mxBean = ManagementFactory.newPlatformMXBeanProxy(mbsc, objName.toString(), mxBeanInterface);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Could not create PlatformMXBeanProxy", e);
         } catch (MalformedObjectNameException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Could not create PlatformMXBeanProxy", e);
         }
         return mxBean;
     }
@@ -87,10 +87,10 @@ public class JMXUtil {
      * on the MBean
      * @throws InvocationTargetException If the MBean cannot be instantiated
      */
-    public static Map toMap(Object data) throws
-                                         IntrospectionException,
-                                         IllegalAccessException,
-                                         InvocationTargetException {
+    public static Map toMap(final Object data) throws
+                                               IntrospectionException,
+                                               IllegalAccessException,
+                                               InvocationTargetException {
         Map<String, Object> map = new HashMap<String, Object>();
         BeanInfo beanInfo = Introspector.getBeanInfo(data.getClass());
         PropertyDescriptor[] propertyDescriptors =
@@ -124,12 +124,9 @@ public class JMXUtil {
      * @return The created CompositeType
      * @throws OpenDataException If the CompositeType cannot be created
      */
-    public static CompositeType createCompositeType(
-        final Map m,
-        final String compositeTypeName,
-        final String compositeTypeDescription)
-        throws OpenDataException {
-
+    public static CompositeType createCompositeType(final Map m,
+                                                    final String compositeTypeName,
+                                                    final String compositeTypeDescription) throws OpenDataException {
         String [] keys = new String[m.size()];
         OpenType [] types = new OpenType[m.size()];
         int index = 0;
@@ -139,11 +136,7 @@ public class JMXUtil {
             types[index] = getOpenType(m.get(key).getClass().getName(), null);
             index++;
         }
-        return new CompositeType(compositeTypeName,
-                                 compositeTypeDescription,
-                                 keys,
-                                 keys,
-                                 types);
+        return new CompositeType(compositeTypeName, compositeTypeDescription, keys, keys, types);
     }
 
     /**
@@ -158,8 +151,7 @@ public class JMXUtil {
      * @throws InvalidOpenTypeException if the class described by the
      * classString argument is not a valid open type
      */
-    public static OpenType getOpenType(String classString,
-                                       final OpenType defaultType) {
+    public static OpenType getOpenType(final String classString, final OpenType defaultType) {
         if(classString==null)
             throw new IllegalArgumentException("classString is null");
         if(classString.equals("void")) {
@@ -221,8 +213,8 @@ public class JMXUtil {
      * <tt>jmxName,uuid=uuid-string</tt>
      *
      */
-    public static String getJMXName(ServiceBeanContext context,
-                                    String defaultDomain) {
+    public static String getJMXName(final ServiceBeanContext context,
+                                    final String defaultDomain) {
         if(context==null)
             throw new IllegalArgumentException("context is null");
         Uuid uuid = context.getServiceBeanManager().getServiceID();
@@ -261,10 +253,9 @@ public class JMXUtil {
      * @return The created ObjectName
      * @throws MalformedObjectNameException If the constructed name is malformed
      */
-    public static ObjectName getObjectName(ServiceBeanContext context,
-                                           String defaultDomain,
-                                           String name)
-        throws MalformedObjectNameException {
+    public static ObjectName getObjectName(final ServiceBeanContext context,
+                                           final String defaultDomain,
+                                           final String name) throws MalformedObjectNameException {
         String jmxName = getJMXName(context, defaultDomain);
         String oName = jmxName+","+"name="+name;        
         return ObjectName.getInstance(oName);
@@ -287,15 +278,12 @@ public class JMXUtil {
      *
      * @throws MalformedObjectNameException If the constructed name is malformed
      */
-    public static ObjectName getObjectName(ServiceBeanContext context,
-                                           String defaultDomain,
-                                           String name,
-                                           String id)
-        throws MalformedObjectNameException {
+    public static ObjectName getObjectName(final ServiceBeanContext context,
+                                           final String defaultDomain,
+                                           final String name,
+                                           final String id) throws MalformedObjectNameException {
         String jmxName = getJMXName(context, defaultDomain);
-        String oName = jmxName+","+
-                       "name="+name+","+
-                       "id="+id;
+        String oName = jmxName+","+"name="+name+","+"id="+id;
         return (ObjectName.getInstance(oName));
     }
 
@@ -317,8 +305,7 @@ public class JMXUtil {
      *
      * @throws Exception If the RMI registry or JMXConnection cannot be created
      */
-    public static Entry[] getJMXConnectionEntries(Configuration config) throws
-                                                                        Exception {
+    public static Entry[] getJMXConnectionEntries(final Configuration config) throws Exception {
         Entry[] entries = new Entry[0];
         /* Check for JMXConnection */
         JMXConnectionUtil.createJMXConnection(config);
@@ -332,14 +319,14 @@ public class JMXUtil {
     }
 
     /**
-     * Get the String value found in the JMXConnection entry, or null if the attribute
-     * set does not include a JMXConnection
+     * Get the String value found in the JMXProperty entry, or null if the attribute
+     * set does not include a JMXProperty
      *
      * @param attributes An array of Entry attributes
      *
-     * @return The JMX Connection String
+     * @return The JMX Connection String obtained from a
      */
-    public static String getJMXConnection(Entry[] attributes) {
+    public static String getJMXConnection(final Entry[] attributes) {
         String jmxConn = null;
         for (Entry attribute : attributes) {
             if (attribute instanceof JMXProperty) {
