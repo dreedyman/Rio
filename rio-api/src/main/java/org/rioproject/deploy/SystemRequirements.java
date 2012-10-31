@@ -145,9 +145,9 @@ public class SystemRequirements implements Serializable {
      * Determine if any of the required PlatformCapability objects can be
      * provisioned
      *
-     * @return Return true if at least one PlatformCapability can be
-     *         provisioned
+     * @return Return true if at least one PlatformCapability can be provisioned
      */
+    @SuppressWarnings("unused")
     public boolean hasProvisionableCapability() {
         SystemComponent[] sysComponents = getSystemComponents();
         for (SystemComponent sysComp : sysComponents) {
@@ -158,9 +158,9 @@ public class SystemRequirements implements Serializable {
     }
 
     public String toString() {
-        return "SystemRequirements{" +
-               "systemComponents=" + systemComponents +
-               ", systemThresholds=" + systemThresholds +
-               '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("SystemRequirements: systemComponents=").append(systemComponents);
+        builder.append(", systemThresholds=").append(systemThresholds);
+        return builder.toString();
     }
 }

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ServiceLevelAgreements class provides context on the attributes required to
+ * The {@code ServiceLevelAgreements} class provides context on the attributes required to
  * meet and monitor service level agreements for a service. Included in this
  * class are the {@link org.rioproject.deploy.SystemRequirements} that
  * must be met in order for the service to be provisioned, and
@@ -32,6 +32,7 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class ServiceLevelAgreements implements Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** System  requirements */
     private SystemRequirements systemRequirements;
@@ -64,7 +65,7 @@ public class ServiceLevelAgreements implements Serializable {
     /**
      * Get the service specified SLAs
      *
-     * @return Array of service SLAs. A new array is aloocated each time. If
+     * @return Array of service SLAs. A new array is allocated each time. If
      * there are no service SLAs, a zero-length array is returned
      */
     public SLA[] getServiceSLAs() {
@@ -77,9 +78,9 @@ public class ServiceLevelAgreements implements Serializable {
 
     @Override
     public String toString() {
-        return "ServiceLevelAgreements{" +
-               "systemRequirements=" + systemRequirements +
-               ", serviceSLAs=" + serviceSLAs +
-               '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("ServiceLevelAgreements: ").append(systemRequirements);
+        builder.append(", serviceSLAs=").append(serviceSLAs);
+        return builder.toString();
     }
 }
