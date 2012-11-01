@@ -213,7 +213,7 @@ public class ITMonitorRulesTest {
         service.addWatches("load");
         services.add(service);
         RuleDefinition rule = new RuleDefinition("ScalingRuleHandler");
-        ruleMap.addRuleMapping(rule, services);
+        ruleMap.addRuleMapping(rule, services.toArray(new ServiceDefinition[services.size()]));
         return ruleMap;
     }
 
@@ -230,7 +230,7 @@ public class ITMonitorRulesTest {
 
         RuleDefinition rule = new RuleDefinition("ScalingRuleHandler");
 
-        ruleMap.addRuleMapping(rule, services);
+        ruleMap.addRuleMapping(rule, services.toArray(new ServiceDefinition[services.size()]));
         return ruleMap;
     }
 
