@@ -8,7 +8,7 @@ deployment(name:'SLA Threshold Event Notification') {
 
     codebase getCodebase()
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     service(name: 'SLA Threshold Event Producer') {
         interfaces {

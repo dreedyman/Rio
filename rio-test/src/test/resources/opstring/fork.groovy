@@ -6,7 +6,7 @@ deployment(name:'Forked Service Test') {
 
     codebase getCodebase()
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     /* Use a funky name to make sure illegal chars get converted. The resulting name
      * will be:   "T62___W_FL___SK_" */

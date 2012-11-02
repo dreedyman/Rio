@@ -6,7 +6,7 @@ deployment(name:'Out Of Memory') {
 
     codebase getCodebase()
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     service(name: 'OOME', fork:'yes') {
         interfaces {

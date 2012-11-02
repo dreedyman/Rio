@@ -4,7 +4,7 @@ deployment(name:'Simple Test') {
     artifact id:'service', 'org.rioproject.test.simple:simple-service:2.0'
     artifact id:'service-dl', 'org.rioproject.test.simple:simple-api:2.0'
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     service(name: 'Simple Simon') {
         interfaces {

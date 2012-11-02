@@ -4,7 +4,7 @@ deployment(name:'Instrumentation Accessor') {
     artifact id:'service', 'org.rioproject.test.instrumentation-accessor:instrumentation-accessor-service:2.0'
     artifact id:'service-dl', 'org.rioproject.test.instrumentation-accessor:instrumentation-accessor-api:2.0'
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     service(name: 'Instrumentation Accessor') {
         interfaces {

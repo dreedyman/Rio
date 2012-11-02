@@ -1,4 +1,3 @@
-import java.net.InetAddress
 import java.util.logging.Level
 
 def String getCodebase() {
@@ -9,7 +8,7 @@ deployment(name:'Scaling Service Test') {
 
     codebase getCodebase()
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     service(name: 'SettableLoadService') {
         interfaces {

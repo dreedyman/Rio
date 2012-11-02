@@ -14,7 +14,7 @@ def getLogDir() {
 
 deployment(name:'Harvester') {
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
     
     service(name: 'Harvester Agent', type: 'fixed') {
                 

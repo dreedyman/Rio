@@ -4,7 +4,7 @@ deployment(name:'ServiceLogEvent Test II') {
     artifact id:'service', 'org.rioproject.test.simple:simple-logging-service:2.0'
     artifact id:'service-dl', 'org.rioproject.test.simple:simple-api:2.0'
 
-    groups '${org.rioproject.groups}'
+    groups System.getProperty('org.rioproject.groups')
 
     service(name: 'Simple Logging Forked Simon', fork:'yes') {
         interfaces {
