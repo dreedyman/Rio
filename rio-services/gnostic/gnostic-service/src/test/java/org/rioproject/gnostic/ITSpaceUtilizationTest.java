@@ -76,6 +76,7 @@ public class ITSpaceUtilizationTest {
         file.deleteOnExit();
         long waited = 0;
         long duration = 1000;
+        System.out.println("wait 30 seconds to accumulate results...");
         while(waited<=WAIT) {
             try {
                 Thread.sleep(duration);
@@ -84,7 +85,7 @@ public class ITSpaceUtilizationTest {
             }
             waited += duration;
         }
-        Assert.assertTrue(file.exists());
+        Assert.assertTrue("Expected "+file.getPath()+" to exist, it does not", file.exists());
         int lineCount = 0;
         Throwable thrown = null;
         try {
@@ -104,7 +105,7 @@ public class ITSpaceUtilizationTest {
         Assert.assertTrue(lineCount>0);
     }
 
-    protected String getOutputFileName() {        
+    protected String getOutputFileName() {
         return "SpaceUtilizationTest.out";
     }
 }
