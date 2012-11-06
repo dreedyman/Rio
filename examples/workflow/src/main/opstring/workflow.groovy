@@ -23,7 +23,7 @@ deployment(name: 'Workflow Example') {
             }
             
             parameters {
-                parameter name: "template", value: "${state}"
+                parameter name: "template", value: state
             }
 
             association(type: "requires",
