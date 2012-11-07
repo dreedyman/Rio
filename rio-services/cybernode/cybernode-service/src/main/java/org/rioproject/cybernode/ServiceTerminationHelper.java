@@ -18,7 +18,6 @@ package org.rioproject.cybernode;
 import net.jini.config.ConfigurationException;
 import org.rioproject.config.AggregateConfig;
 import org.rioproject.config.GroovyConfig;
-import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.jsb.JSBContext;
 import org.rioproject.log.LoggerConfig;
@@ -26,7 +25,6 @@ import org.rioproject.log.LoggerConfig;
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Map;
 
 /**
  * Service termination helper.
@@ -41,8 +39,7 @@ public class ServiceTerminationHelper {
     public static void cleanup(ServiceBeanContext context) {
         if (context != null) {
             /* Release any created Handlers */
-            Map map = context.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] loggerConfigs = (LoggerConfig[]) map.get(ServiceBeanConfig.LOGGER);
+            LoggerConfig[] loggerConfigs = context.getServiceBeanConfig().getLoggerConfigs();
             if (loggerConfigs != null) {
                 for (LoggerConfig loggerConfig : loggerConfigs) {
                     loggerConfig.close();
