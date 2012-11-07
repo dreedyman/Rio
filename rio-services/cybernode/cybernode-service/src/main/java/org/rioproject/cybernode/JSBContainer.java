@@ -221,7 +221,7 @@ public class JSBContainer implements ServiceBeanContainer {
         for (ServiceElement element : elements) {
             ServiceBeanDelegate[] delegates = getDelegates(element);
             for (ServiceBeanDelegate delegate : delegates) {
-                if(delegate.getServiceRecord().getDiscardedDate()!=null) {
+                if(delegate.getServiceRecord()!=null && delegate.getServiceRecord().getDiscardedDate()!=null) {
                     delegate.update(element, opStringMgr);
                 } else {
                     logger.warning(String.format("Service %s has been discarded, do not update",
