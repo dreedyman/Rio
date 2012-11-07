@@ -16,11 +16,10 @@
 package org.rioproject.opstring;
 
 import net.jini.core.discovery.LookupLocator;
+import org.rioproject.log.LoggerConfig;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class defines configuration attributes for a ServiceBean instance. Some
@@ -36,6 +35,8 @@ public class ServiceBeanConfig implements Serializable {
     private final Map<String, Object> initParameters = new HashMap<String, Object>();
     /** Configuration parameters in the form of name,value pairs */
     private final Map<String, Object> configParms = new HashMap<String, Object>();
+    /** A collection on {@code LoggerConfigs}*/
+    private final Collection<LoggerConfig> loggerConfigs = new ArrayList<LoggerConfig>();
     /** The configArgs property used to create the Configuration object for the
      * ServiceBean */
     private String[] configArgs;
@@ -55,8 +56,6 @@ public class ServiceBeanConfig implements Serializable {
     public static final String GROUPS = "lookupGroups";
     /** Lookup Locators */
     public static final String LOCATORS = "lookupLocators";
-    /** Logger configurations */
-    public static final String LOGGER = "loggerConfig";
     /** Key for accessing list of hosts the ServiceBean has previously visited 
      * (been allocated to). If this is the first instantiation of the service,
      * an empty List has will be returned */
@@ -66,16 +65,11 @@ public class ServiceBeanConfig implements Serializable {
     public static final String INSTANCE_ID = "instanceID";
     /** Key for accessing service provisioning config */
     public static final String SERVICE_PROVISION_CONFIG = "provisionConfig";
-    /** Key for accessing the codebase property that was configured */
-    public static final String CONFIGURED_CODEBASE = "configuredCodebase";
     /** Key for accessing the initial value for the number of planned services.
      * This property is stored as an configuration parameter. The value for
      * this property is an Integer */
     public static final String INITIAL_PLANNED_SERVICES = "initial.planned";
-    /** Token that will be replaced by the instanceID when either a parameter or
-     * configuration element is retrieved */
-    public static final String INSTANCE_ID_TOKEN="$"+INSTANCE_ID;
-       /**
+    /**
      * Convenience constant used to request that attempts be made to
      * discover all lookup services that are within range, and which
      * belong to any group.
@@ -176,6 +170,27 @@ public class ServiceBeanConfig implements Serializable {
      */    
     public String getOrganization() {
         return ((String)configParms.get(ORGANIZATION));
+    }
+
+    /**
+     * Add a {@code LoggerConfig}
+     *
+     * @param loggerConfigs The {@code LoggerConfig}s to add. If {@code null} no-op.
+     */
+    public void addLoggerConfig(LoggerConfig... loggerConfigs) {
+        if(loggerConfigs!=null) {
+            Collections.addAll(this.loggerConfigs, loggerConfigs);
+        }
+    }
+
+    /**
+     * Get all configured {@code LoggerConfig}s.
+     *
+     * @return An array of configured {@code LoggerConfig}s. If there are no configured {@code LoggerConfig}s return an
+     * empty array. A new array is allocated each time.
+     */
+    public LoggerConfig[] getLoggerConfigs() {
+        return loggerConfigs.toArray(new LoggerConfig[loggerConfigs.size()]);
     }
     
     /**
@@ -315,6 +330,13 @@ public class ServiceBeanConfig implements Serializable {
     public Long getInstanceID() {
         return((Long)configParms.get(INSTANCE_ID));
     }
+
+    public void setConfigArgs(String[] configArgs) {
+        if(configArgs == null)
+            throw new IllegalArgumentException("configArgs is null");
+        this.configArgs = new String[configArgs.length];
+        System.arraycopy(configArgs, 0, this.configArgs, 0, this.configArgs.length);
+    }
     
     /**
      * Get the ServiceBean configuration arguments
@@ -330,32 +352,9 @@ public class ServiceBeanConfig implements Serializable {
             return (new String[]{"-"});
         String[] args = new String[configArgs.length];
         System.arraycopy(configArgs, 0, args, 0, configArgs.length);
-        Long id = getInstanceID();
-        if(id!=0) {
-            String iID = id.toString();
-            for(int i=0; i<args.length; i++) {
-                args[i] = replace(args[i], INSTANCE_ID_TOKEN, iID);
-            }
-        }
         return (args);
     }
 
-    /*
-     * Regular Expression Search and Replace
-     */
-    private String replace(final String str, final String pattern, final String replace) {
-        int s = 0;
-        int e;
-        StringBuilder result = new StringBuilder();
-
-        while((e = str.indexOf(pattern, s)) >= 0) {
-            result.append(str.substring(s, e));
-            result.append(replace);
-            s = e+pattern.length();
-        }
-        result.append(str.substring(s));
-        return result.toString();
-    }
 
     public String toString() {
         StringBuilder buffer = new StringBuilder();
@@ -388,15 +387,14 @@ public class ServiceBeanConfig implements Serializable {
             buffer.append("null");
         }
         buffer.append("}\n");
-        Object[] lConfigs = (Object[])configParms.get(LOGGER);
 
-        if(lConfigs!=null) {
+        if(!loggerConfigs.isEmpty()) {
             buffer.append("loggerConfig=\n");
-            for (Object lConfig : lConfigs) {
+            for (Object lConfig : loggerConfigs) {
                 buffer.append(lConfig.toString());
             }
         } else {
-            buffer.append("loggerConfig={null}\n");
+            buffer.append("loggerConfig={empty}\n");
         }
         buffer.append("instanceID=").append(getInstanceID()).append("\n");
         buffer.append("Initialization Parameters=\n");
