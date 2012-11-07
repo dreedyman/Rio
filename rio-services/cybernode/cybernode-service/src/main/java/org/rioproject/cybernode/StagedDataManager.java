@@ -277,8 +277,8 @@ public class StagedDataManager {
                 }
             }
             if (!supported) {
-                StagedSoftware[] data = jsbRequirement.getStagedSoftware();
-                if(data.length>0) {
+                StagedSoftware data = jsbRequirement.getStagedSoftware();
+                if(data!=null) {
                     missing.add(jsbRequirement);
                     logger.info("Service [%s] has a missing requirement [%s]. An attempt will be made to install it.",
                                 sElem.getName(), jsbRequirement);
@@ -308,9 +308,9 @@ public class StagedDataManager {
             PlatformCapability pCap = JSBContext.createPlatformCapability(className,
                                                                           sysComp.getAttributes());
             installedPlatformCapabilities.add(pCap);
-            StagedSoftware[] staged = sysComp.getStagedSoftware();
-            for (StagedSoftware sw : staged) {
-                DownloadRecord[] dlRecs = computeResource.provision(pCap, sw);
+            StagedSoftware staged = sysComp.getStagedSoftware();
+            if(staged!=null) {
+                DownloadRecord[] dlRecs = computeResource.provision(pCap, staged);
                 //downloadedArtifacts.put(sw, dlRecs);
                 Collections.addAll(dlRecords, dlRecs);
             }
