@@ -49,7 +49,10 @@ public class ProvisionMonitorEventNode extends RemoteServiceEventNode<ProvisionM
             }
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_TERMINATED)) {
             builder.append(getServiceName()).append(" on ");
-            builder.append(getEvent().getServiceBeanInstance().getHostAddress()).append(" terminated");
+            if(getEvent().getServiceBeanInstance()!=null)
+                builder.append(getEvent().getServiceBeanInstance().getHostAddress()).append(" terminated");
+            else
+                builder.append(" [uknown] terminated");
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_FAILED)) {
             builder.append(getServiceName()).append(" on ");
             String hostAddress = getEvent().getServiceBeanInstance()==null?"?":
@@ -62,6 +65,10 @@ public class ProvisionMonitorEventNode extends RemoteServiceEventNode<ProvisionM
             builder.append(getServiceName()).append(" has been removed ");
         } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_ELEMENT_ADDED)) {
             builder.append(getServiceName()).append(" has been added ");
+        } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_BEAN_INCREMENTED)) {
+            builder.append(getServiceName()).append(" has been incremented, now: ").append(getEvent().getServiceElement().getPlanned());
+        } else if (getEvent().getAction().equals(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED)) {
+            builder.append(getServiceName()).append(" has been decremented, now: ").append(getEvent().getServiceElement().getPlanned());
         }
         return builder.toString();
     }
