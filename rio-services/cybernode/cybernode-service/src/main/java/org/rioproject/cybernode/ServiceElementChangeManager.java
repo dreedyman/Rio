@@ -23,12 +23,10 @@ import org.rioproject.jsb.ServiceBeanSLAManager;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.logging.WrappedLogger;
-import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.ServiceLevelAgreements;
 
 import java.rmi.RemoteException;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,10 +69,8 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
 
         /* --- Update Logging --- */
         if (ServiceElementUtil.hasDifferentLoggerConfig(preElem, postElem)) {
-            Map map = postElem.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] newLoggerConfigs = (LoggerConfig[]) map.get(ServiceBeanConfig.LOGGER);
-            map = preElem.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] currentLoggerConfigs = (LoggerConfig[]) map.get(ServiceBeanConfig.LOGGER);
+            LoggerConfig[] newLoggerConfigs = postElem.getServiceBeanConfig().getLoggerConfigs();
+            LoggerConfig[] currentLoggerConfigs = preElem.getServiceBeanConfig().getLoggerConfigs();
             for (LoggerConfig newLoggerConfig : newLoggerConfigs) {
                 if (LoggerConfig.isNewLogger(newLoggerConfig, currentLoggerConfigs)) {
                     newLoggerConfig.getLogger();
