@@ -385,8 +385,11 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         //setChanged(StatusType.NORMAL);
         if(loaderLogger.isLoggable(Level.INFO)) {
             int instantiatedServiceCount = getInstantiatedServiceCount();
-            logger.info("Instantiated %s, total services active: %d",
-                        CybernodeLogUtil.logName(serviceRecord.getServiceElement()), instantiatedServiceCount);
+            ServiceElement service = serviceRecord.getServiceElement();
+            logger.info("Instantiated %s, %s, total services active: %d",
+                        CybernodeLogUtil.logName(service),
+                        CybernodeLogUtil.discoveryInfo(service),
+                        instantiatedServiceCount);
         }
     }
 
