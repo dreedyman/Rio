@@ -307,8 +307,7 @@ public class ServiceElementManager implements InstanceIDManager {
             }
             synchronized(serviceBeanList) {
                 for (ServiceBeanInstance sbi : serviceBeanList) {
-                    Long instanceID =
-                        sbi.getServiceBeanConfig().getInstanceID();
+                    Long instanceID = sbi.getServiceBeanConfig().getInstanceID();
                     ServiceBeanConfig updated = newElem.getServiceBeanConfig();
                     Map<String, Object> configParms = updated.getConfigurationParameters();
                     configParms.put(ServiceBeanConfig.INSTANCE_ID, instanceID);
@@ -1036,6 +1035,8 @@ public class ServiceElementManager implements InstanceIDManager {
      * @return An updated ServiceElement. If not incremented return null
      */
     synchronized ServiceElement increment(final boolean permanent, final ServiceProvisionListener svcProvisionListener) {
+        if(shutdown.get())
+            return null;
         boolean okayToIncrement = false;
         synchronized(svcElementRWLock) {
             int planned = svcElement.getPlanned();
@@ -1108,7 +1109,8 @@ public class ServiceElementManager implements InstanceIDManager {
      * Remove and decrement the number to maintain
      */
     synchronized ServiceElement decrement(final ServiceBeanInstance instance, final boolean mandate, final boolean destroy) {
-
+        if(shutdown.get())
+            return null;
         boolean okayToDecrement = true;
         synchronized(svcElementRWLock) {
             int current = getServiceBeanInstances().length;
@@ -1266,12 +1268,7 @@ public class ServiceElementManager implements InstanceIDManager {
             for(int i=0; i<numRequests; i++) {
                 long instanceID = getNextInstanceID();
                 ServiceElement newElem = ServiceElementUtil.prepareInstanceID(svcElement, instanceID);
-                requests[i] = new ProvisionRequest(newElem,
-                                                   listener,
-                                                   opStringMgr,
-                                                   instanceIDMgr,
-                                                   provListener,
-                                                   null);
+                requests[i] = new ProvisionRequest(newElem, listener, opStringMgr, instanceIDMgr, provListener, null);
             }
         }
         doDispatchProvisionRequests(requests);
