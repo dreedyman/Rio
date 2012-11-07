@@ -246,13 +246,14 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     }
 
     public void serviceInstantiated(ServiceRecord record) {
+        ServiceElement service = record.getServiceElement();
+        logger.info(String.format("Instantiated %s, %s",
+                    CybernodeLogUtil.logName(service), CybernodeLogUtil.discoveryInfo(service)));
         logger.info("Instantiated "+record.getServiceElement().getName());
         try {
             listener.serviceInstantiated(record);
         } catch (RemoteException e) {
-            logger.log(Level.WARNING,
-                       "Notifying Cybernode that the service is active",
-                       e);
+            logger.log(Level.WARNING, "Notifying Cybernode that the service is active", e);
         }
     }
 
@@ -268,15 +269,13 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         try {
             registry.unbind(execBindName);
         } catch (Exception e) {
-            logger.warning(e.getClass().getName()+": "+e.getMessage()+", " +
-                           "Unbinding from RMI Registry");
+            logger.warning(e.getClass().getName()+": "+e.getMessage()+", Unbinding from RMI Registry");
         }
         if(record!=null) {
             try {
                 listener.serviceDiscarded(record);
             } catch (RemoteException e) {
-                logger.warning(e.getClass().getName()+": "+e.getMessage()+", " +
-                               "Notifying Cybernode that we are exiting");
+                logger.warning(e.getClass().getName()+": "+e.getMessage()+", Notifying Cybernode that we are exiting");
             }
         }
         
