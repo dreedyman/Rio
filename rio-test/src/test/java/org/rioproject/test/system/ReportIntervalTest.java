@@ -28,10 +28,9 @@ import org.rioproject.test.Utils;
 
 import java.net.UnknownHostException;
 
-/**
+/**                                                                            ,
  * Test report interval notification
  */
-//@RunWith(RioTestRunner.class)
 public class ReportIntervalTest {
     private ComputeResource computeResource;
 
@@ -50,12 +49,9 @@ public class ReportIntervalTest {
         CRO cro = new CRO();
         computeResource.setReportInterval(1000);
         computeResource.boot();
-        computeResource.addListener(cro);
         Assert.assertEquals("Report interval should be 1000 millis",
                             1000, computeResource.getReportInterval());
-        for(MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
-            mCap.setPeriod(1000);
-        }
+        computeResource.addListener(cro);
         Utils.sleep(5000);
         Assert.assertEquals("Should have been notified 5 times", 5, cro.count);
     }
