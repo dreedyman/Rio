@@ -337,6 +337,7 @@ public class ClassBundle implements Serializable {
      * non-null classname, that classname must be equal. If this is not the
      * case then an IllegalArgumentException is thrown.
      */
+    @SuppressWarnings("unused")
     public static ClassBundle merge(final ClassBundle... bundles) {
         String className = null;
         for(ClassBundle bundle : bundles) {
