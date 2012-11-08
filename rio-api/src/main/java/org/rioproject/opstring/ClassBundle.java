@@ -16,10 +16,12 @@
 package org.rioproject.opstring;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class ClassBundle implements Serializable {
     @SuppressWarnings("unused")
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 2L;
     /**
      * The classname
      */
@@ -46,13 +48,9 @@ public class ClassBundle implements Serializable {
      */
     private final List<String> jarNames = Collections.synchronizedList(new ArrayList<String>());
     /**
-     * An artifact ID
+     * An artifact ID.
      */
     private String artifact;
-    /**
-     * A table of method names to Class[] objects
-     */
-    private final Map<String, Object[]> methodObjectTable = Collections.synchronizedMap(new HashMap<String, Object[]>());
     private static Logger logger = Logger.getLogger(ClassBundle.class.getName());
 
     /**
@@ -71,7 +69,6 @@ public class ClassBundle implements Serializable {
             throw new IllegalArgumentException("className is null");
         this.className = className;
     }
-
 
     /**
      * Create a new ClassBundle
@@ -227,87 +224,6 @@ public class ClassBundle implements Serializable {
     }
 
     /**
-     * Add a method name and the parameters to use for when reflecting on
-     * specified public member method of the class or interface represented by
-     * this ClassBundle object. The array of parameter types will be determined
-     * by the Class object for the Object types provided
-     * 
-     * @param methodName The public member method of the Class or interface
-     * represented by this ClassBundle
-     * @param parameters Array of Object parameters for use when reflecting on
-     * the method
-     */
-    public void addMethod(final String methodName, final Object[] parameters) {
-        if(methodName == null)
-            throw new IllegalArgumentException("methodName is null");
-        if(parameters == null) {
-            methodObjectTable.put(methodName, null);
-            return;
-        }
-        methodObjectTable.put(methodName, parameters);
-
-    }
-
-    /**
-     * Get all method names to reflect on
-     * 
-     * @return Array of String method names to reflect on. If there
-     * are no method names to reflect on this method will return an empty array
-     */
-    public String[] getMethodNames() {
-        Set<String> keys = methodObjectTable.keySet();
-        return (keys.toArray(new String[keys.size()]));
-    }
-
-    /**
-     * Get the corresponding Class[] parameters to reflect on a method
-     * 
-     * @param methodName The name of the public method to reflect on
-     * @return Array of Class objects to use when reflecting on the
-     * public method
-     */
-    public Class[] getMethodClasses(final String methodName) {
-        Object[] args = getMethodObjects(methodName);
-        Class[] classes = new Class[args.length];
-        for(int i = 0; i < classes.length; i++) {
-            classes[i] = args[i].getClass();
-        }
-
-        return classes;
-    }
-
-    /**
-     * Get the corresponding Class[] parameters to reflect on a method
-     * 
-     * @param methodName The name of the public method to reflect on
-     * @return Array of Object objects to use when reflecting on the
-     * public method
-     */
-    public Object[] getMethodObjects(final String methodName) {
-        if(methodName == null)
-            throw new IllegalArgumentException("methodName is null");
-        return (methodObjectTable.get(methodName));
-    }
-
-    /**
-     * Utility method to reflect on all added methods using an object
-     * instantiated from the Class loaded by the ClassBundle
-     * 
-     * @param object An instantiated Object from the Class loaded by the
-     * ClassBundle
-     *
-     * @throws Exception If there are errors running the known methods
-     */
-    public void runKnownMethods(final Object object) throws Exception {
-        String[] methods = getMethodNames();
-        for (String method : methods) {
-            Method m = object.getClass()
-                .getMethod(method, getMethodClasses(method));
-            m.invoke(object, getMethodObjects(method));
-        }
-    }
-
-    /**
      * Override hashCode
      */
     public int hashCode() {
@@ -373,9 +289,9 @@ public class ClassBundle implements Serializable {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("ClassName=").append(className).append("\n");
-        buffer.append("Artifact=").append(artifact).append("\n");
-        buffer.append("Codebase=").append(codebase).append("\n");
+        buffer.append("ClassName=").append(className).append(", ");
+        buffer.append("Artifact=").append(artifact).append(", ");
+        buffer.append("Codebase=").append(codebase).append(", ");
         String[] jars = getJARNames();
         if(jars.length>0) {
             buffer.append("Searchpath={");
@@ -438,7 +354,6 @@ public class ClassBundle implements Serializable {
             cb.addJARs(bundle.getJARNames());
             cb.setCodebase(bundle.getCodebase());
             cb.setClassName(bundle.getClassName());
-            cb.methodObjectTable.putAll(bundle.methodObjectTable);
         }
         return cb;
     }
