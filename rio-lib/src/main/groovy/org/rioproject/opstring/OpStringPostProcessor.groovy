@@ -27,12 +27,22 @@ class OpStringPostProcessor {
 
     def static process(def opStrings) {
         opStrings.each { opString ->
+            /* Check that services have a component bundle */
+            checkForComponentBundles(opString)
+
             /* Check for services that do not have any declared interfaces. If they do, add
              * default interface*/
             processServiceInterfaceDeclarations(opString)
 
             /* Fix up and validate associations as needed */
             processAssociations(opString)
+        }
+    }
+
+    def static checkForComponentBundles(OpString opString) {
+        for (ServiceElement service : opString.services) {
+            if(service.componentBundle == null)
+                throw new DSLException("The ${service.name} does not have a declared implementation")
         }
     }
 
