@@ -80,7 +80,7 @@ class OpStringParserHelper {
         if(globalSettings[LOGGERS])
             service.serviceBeanConfig.addLoggerConfig(globalSettings[LOGGERS] as LoggerConfig[])
         if (globalSettings[ASSOCIATIONS])
-            service.associationDescriptors = globalSettings[ASSOCIATIONS] as AssociationDescriptor[]
+            service.addAssociationDescriptors(globalSettings[ASSOCIATIONS] as AssociationDescriptor[])
 
         if(attributes.jmxName!=null)
             service.serviceBeanConfig.getConfigurationParameters().put(ServiceBeanConfig.JMX_NAME, attributes.jmxName)
