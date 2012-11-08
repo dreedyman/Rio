@@ -32,7 +32,7 @@ public class AssociationManagementSettingsTest {
     public void testAssociationManagementParsing() {
         File file = new File("src/test/resources/opstrings/association_management.groovy");
         OpStringParser dslParser = new GroovyDSLOpStringParser();
-        List<OpString> opstrings = dslParser.parse(file, null, false, null, null, null);
+        List<OpString> opstrings = dslParser.parse(file, null, null, null, null);
         Assert.assertEquals("There should be one and only one opstring", 1, opstrings.size());
         OpString opstring = opstrings.get(0);
         ServiceElement serviceElement = opstring.getServices()[0];
@@ -41,5 +41,10 @@ public class AssociationManagementSettingsTest {
         Assert.assertEquals("net.foo.space.SomeProxy", serviceElement.getAssociationDescriptors()[0].getProxyClass());
         Assert.assertEquals(Utilization.class.getName(), serviceElement.getAssociationDescriptors()[0].getServiceSelectionStrategy());
 
+        for(AssociationDescriptor associationDescriptor : serviceElement.getAssociationDescriptors()) {
+            Assert.assertNotNull(associationDescriptor.getGroups());
+            Assert.assertEquals(1, associationDescriptor.getGroups().length);
+            Assert.assertEquals("rio", associationDescriptor.getGroups()[0]);
+        }
     }
 }

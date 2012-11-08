@@ -38,10 +38,8 @@ public class DefaultOpStringParserSelectionStrategy implements OpStringParserSel
                                                     + source.getClass().getName() + " source");
         }
 
-        /* Determine if this is the XML format or the Groovy one */
-        if (filename.endsWith(".xml"))
-            parser = new XmlOpStringParser();
-        else if (filename.endsWith(".groovy"))
+        /* Determine we are using Groovy */
+        if (filename.endsWith(".groovy"))
             parser = new GroovyDSLOpStringParser();
         else
             throw new UnsupportedOperationException("There is no support for " + filename +  " format");

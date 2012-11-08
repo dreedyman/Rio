@@ -74,7 +74,6 @@ public class ServiceBeanActivation {
     static LifeCycleManager sbLifeCycleManager;
     static final Logger logger = Logger.getLogger(COMPONENT);
     static final String BOOT_COOKIE = "boot-cookie";
-    static final String FDH = "org.rioproject.fdh.AdminFaultDetectionHandler";
 
     /**
      * Create a ServiceBeanContext from the Configuration element.
@@ -194,14 +193,6 @@ public class ServiceBeanActivation {
             exportBundle.setArtifact(exportCodebase);
         }
 
-        /* Get the FaultDetectionHandler */
-        ClassBundle defaultFDHBundle = new ClassBundle(FDH);
-        defaultFDHBundle.addMethod("setConfiguration", new Object[] {new String[]{"-"} });
-        ClassBundle fdhBundle = (ClassBundle)config.getEntry(configComponent,
-                                                             "faultDetectionHandler",
-                                                             ClassBundle.class,
-                                                             defaultFDHBundle);
-
         /* Default system threshold is the number of available processors.
          * Since the system threshold is the summation of all depletion oriented
          * resources, total utilization is =
@@ -217,8 +208,7 @@ public class ServiceBeanActivation {
         ServiceElement sElem = new ServiceElement(ServiceElement.ProvisionType.EXTERNAL,
                                                   sbConfig,
                                                   sla,
-                                                  new ClassBundle[]{exportBundle},
-                                                  fdhBundle);
+                                                  new ClassBundle[]{exportBundle});
         if(sbLifeCycleManager == null)
             sbLifeCycleManager = new LifeCycleManager();
 

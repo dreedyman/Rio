@@ -513,6 +513,7 @@ public class ComputeResource {
     public void stateChange() {
         if(initializing)
             return;
+        System.out.println("STATE CHANGE!!!");
         notifyResourceCapabilityChangeListeners();
     }
 

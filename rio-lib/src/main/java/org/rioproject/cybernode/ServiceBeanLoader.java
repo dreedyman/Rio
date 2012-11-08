@@ -30,21 +30,23 @@ import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.bean.BeanAdapter;
-import org.rioproject.loader.ClassAnnotator;
-import org.rioproject.loader.CommonClassLoader;
-import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.logging.WrappedLogger;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.ServiceBeanConfig;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanContextFactory;
 import org.rioproject.core.jsb.ServiceBeanFactory;
 import org.rioproject.core.jsb.ServiceBeanManager;
-import org.rioproject.jsb.*;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.jsb.JSBLoader;
+import org.rioproject.jsb.JSBManager;
+import org.rioproject.jsb.ServiceBeanActivation;
+import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.loader.ClassAnnotator;
+import org.rioproject.loader.CommonClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.LoggerConfig;
+import org.rioproject.logging.WrappedLogger;
+import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
@@ -391,8 +393,7 @@ public class ServiceBeanLoader {
              * exceptions loading the configurations, log the appropriate
              * message and continue
              */
-            Map map = context.getServiceBeanConfig().getConfigurationParameters();
-            LoggerConfig[] loggerConfigs = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+            LoggerConfig[] loggerConfigs = context.getServiceBeanConfig().getLoggerConfigs();
             if(loggerConfigs != null) {
                 for (LoggerConfig loggerConfig : loggerConfigs) {
                     try {

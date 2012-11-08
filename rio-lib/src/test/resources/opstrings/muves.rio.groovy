@@ -9,7 +9,7 @@ deployment(name:'Muves', debug:true) {
 
     codebase getCodebase() 
 
-    include 'outrigger_lite.xml'
+    include 'outrigger_lite.groovy'
 
     groups '${user.name}'
 
@@ -54,7 +54,7 @@ deployment(name:'Muves', debug:true) {
     /*
      * insert the xml content from this file into the generated opstring
      */
-    insert 'jars.xml'        
+    //insert 'jars.xml'
 
     service(name: "Worker") {
         interfaces {
@@ -124,7 +124,7 @@ deployment(name:'Muves', debug:true) {
         maintain 1
     }
 
-    service(name: "GeometryService", fork: 'yes') {
+    service(name: "GeometryService", fork: 'yes', type: 'fixed', jvmArgs: '-Xmx512m', environment: "LD_LIBRARY_PATH=bar  DYLD_LIBRARY_PATH=foo" ) {
         interfaces {
             classes "mil.army.arl.geometryservice.GeometryService"
             resources ref:"client.jars"

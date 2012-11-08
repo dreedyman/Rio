@@ -726,8 +726,10 @@ public class DownloadManager {
             String downloadFrom = args[0];
             String installPath = args[1];
             System.setSecurityManager(new java.rmi.RMISecurityManager());
-            StagedSoftware download =
-                new StagedSoftware(downloadFrom, installPath, true);
+            StagedSoftware download = new StagedSoftware();
+            download.setLocation(downloadFrom);
+            download.setInstallRoot(installPath);
+            download.setUnarchive(true);
             DownloadManager slm = new DownloadManager(installPath, download);
             DownloadRecord record = slm.download();
             System.out.println("Details");

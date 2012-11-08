@@ -131,10 +131,8 @@ public final class ServiceElementUtil {
         if(sElem1==null || sElem2==null)
             throw new IllegalArgumentException("parameters cannot be null");
         boolean different = false;
-        Map map = sElem2.getServiceBeanConfig().getConfigurationParameters();
-        LoggerConfig[] loggerConfigs2 = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
-        map = sElem1.getServiceBeanConfig().getConfigurationParameters();
-        LoggerConfig[] loggerConfigs1 = (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+        LoggerConfig[] loggerConfigs2 = sElem2.getServiceBeanConfig().getLoggerConfigs();
+        LoggerConfig[] loggerConfigs1 = sElem1.getServiceBeanConfig().getLoggerConfigs();
 
         if(loggerConfigs1!=null && loggerConfigs2!=null) {
             for (LoggerConfig aLoggerConfigs2 : loggerConfigs2) {
@@ -362,12 +360,11 @@ public final class ServiceElementUtil {
      */
     public static ServiceElement copyServiceElement(ServiceElement sElem) {
         ServiceBeanConfig oldSBC = sElem.getServiceBeanConfig();
-        ServiceBeanConfig sbc =
-            new ServiceBeanConfig(oldSBC.getConfigurationParameters(),
-                                  oldSBC.getConfigArgs());
+        ServiceBeanConfig sbc = new ServiceBeanConfig(oldSBC.getConfigurationParameters(), oldSBC.getConfigArgs());
         for(Map.Entry<String, Object> entry : oldSBC.getInitParameters().entrySet()) {
             sbc.addInitParameter(entry.getKey(), entry.getValue());
         }
+        sbc.addLoggerConfig(oldSBC.getLoggerConfigs());
         ServiceElement elem = new ServiceElement(sElem.getProvisionType(),
                                                  sbc,
                                                  sElem.getServiceLevelAgreements(),
@@ -381,7 +378,7 @@ public final class ServiceElementUtil {
         elem.setMachineBoundary(sElem.getMachineBoundary());
         elem.setAutoAdvertise(sElem.getAutoAdvertise());
         elem.setDiscoveryManagementPooling(sElem.getDiscoveryManagementPooling());
-        elem.setAssociationDescriptors(sElem.getAssociationDescriptors());
+        elem.addAssociationDescriptors(sElem.getAssociationDescriptors());
         elem.setExecDescriptor(sElem.getExecDescriptor());
         elem.setStagedData(sElem.getStagedData());
         elem.setFork(sElem.forkService());
@@ -390,72 +387,6 @@ public final class ServiceElementUtil {
         elem.setRemoteRepositories(rr);
         elem.setRuleMaps(sElem.getRuleMaps());
         return(elem);
-    }
-
-    /**
-     * Create a dynamic ServiceElement
-     *
-     * @param serviceName The name of the service. Must not be null.
-     * @param implClassName The implementation classname. Must not be null.
-     * @param interfaceClassNames An iterable collection of interface classnames
-     * the service exports, must not be null.
-     * @param implJars An iterable collection of jars used to instantiate the
-     * service, must not be null.
-     * @param downloadJars An iterable collection of jars used as the codebase
-     * of the service; for the jars
-     * @param codebase The location the resources, both the implementation
-     * and codebase jars, can be accessed from
-     * @param group Name of the groups to use for discovery & join.
-     * @return A ServiceElement
-     *
-     * @throws Exception If the ServiceElement cannot be created.
-     */
-    public static ServiceElement create(String serviceName,
-                                        String implClassName,
-                                        Iterable<String> interfaceClassNames,
-                                        Iterable<String> implJars,
-                                        Iterable<String> downloadJars,
-                                        String codebase,
-                                        String... group) throws Exception {
-        if(serviceName==null)
-            throw new IllegalArgumentException("serviceName cannot be null");
-        if(implClassName==null)
-            throw new IllegalArgumentException("implClassName cannot be null");
-        if(interfaceClassNames==null)
-            throw new IllegalArgumentException("interfaceClassNames " +
-                                               "cannot be null");
-        if(implJars==null)
-            throw new IllegalArgumentException("implJars cannot be null");
-
-        ParsedService svc = new ParsedService();
-        List<ClassBundle> bundles = new ArrayList<ClassBundle>();
-        for(String iFace : interfaceClassNames) {
-            ClassBundle c = new ClassBundle(iFace);
-            for(String jar : downloadJars) {
-                c.addJAR(jar);
-            }
-            if(codebase!=null)
-                c.setCodebase(codebase);
-            bundles.add(c);
-        }
-        svc.setInterfaceBundles(bundles.toArray(new ClassBundle[bundles.size()]));
-        ClassBundle c = new ClassBundle(implClassName);
-        for(String jar : implJars) {
-            c.addJAR(jar);
-            if(codebase!=null)
-                c.setCodebase(codebase);
-        }
-        svc.setComponentBundle(c);
-        svc.setName(serviceName);
-        int  maintain = 1;
-        svc.setMaintain(Integer.toString(maintain));
-        svc.setDiscoveryManagementPooling("yes");
-        if(group!=null)
-            svc.setGroups(group, true);
-        svc.setMatchOnName(true);
-        svc.setProvisionType(ParsedService.DYNAMIC);
-
-        return OpStringLoader.makeServiceElement(svc, new HashMap<String, Map<String, AssociationDescriptor[]>>());
     }
 
     /**

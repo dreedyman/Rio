@@ -15,6 +15,7 @@
  */
 package org.rioproject.cybernode;
 
+import net.jini.core.discovery.LookupLocator;
 import org.rioproject.deploy.ServiceProvisionEvent;
 import org.rioproject.opstring.ServiceElement;
 
@@ -35,6 +36,30 @@ public final class CybernodeLogUtil {
         builder.append(element.getOperationalStringName()).append("/");
         builder.append(element.getName());
         builder.append(", instance:").append(getInstanceID(element));
+        builder.append("]");
+        return builder.toString();
+    }
+
+    public static String discoveryInfo(final ServiceElement element) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[groups: ");
+        int i=0;
+        for(String group : element.getServiceBeanConfig().getGroups()) {
+            if(i>0)
+                builder.append(", ");
+            builder.append(group);
+            i++;
+        }
+        if(element.getServiceBeanConfig().getLocators()!=null && element.getServiceBeanConfig().getLocators().length>0) {
+            builder.append(", locators: ");
+            i = 0;
+            for(LookupLocator locator : element.getServiceBeanConfig().getLocators()) {
+                if(i>0)
+                    builder.append(", ");
+                builder.append(locator.toString());
+                i++;
+            }
+        }
         builder.append("]");
         return builder.toString();
     }

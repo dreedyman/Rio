@@ -54,9 +54,10 @@ public class OARUtil {
             String dirName = oar.getCompoundName();
             if(dirName==null)
                 throw new IOException("Not an OAR");
-            StagedData artifact = new StagedData(archive.toExternalForm(),
-                                                 dirName,
-                                                 true);
+            StagedData artifact = new StagedData();
+            artifact.setLocation(archive.toExternalForm());
+            artifact.setInstallRoot(dirName);
+            artifact.setUnarchive(true);
             DownloadManager downloadMgr =
                 new DownloadManager(FileUtils.getFilePath(installDir), artifact);
             DownloadRecord record = downloadMgr.download();

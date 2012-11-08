@@ -23,14 +23,12 @@ import org.rioproject.sla.RuleMap.RuleDefinition
  * Test rule parsing
  */
 class RuleParseTest extends GroovyTestCase {
-    def OpStringParser xmlParser = new XmlOpStringParser()
     def OpStringParser dslParser = new GroovyDSLOpStringParser()
 
     void testRulesAsService() {
         File file = new File("src/test/resources/opstrings/rules.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        false,    // verify
                                         null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
@@ -39,7 +37,7 @@ class RuleParseTest extends GroovyTestCase {
         ServiceElement[] elems = opstring.getServices()
         assertEquals "There should be 1 service", 1, elems.length
         Collection<RuleMap> ruleMaps = elems[0].ruleMaps
-        assertEquals "There should be 2 RuleMaps", ruleMaps.size(), 2
+        assertEquals "There should be 2 RuleMaps", 2, ruleMaps.size()
         RuleMap ruleMap1 = ruleMaps.get(0)
         List<ServiceDefinition> serviceDef1 = ruleMap1.getServiceDefinitions()
         assertEquals "There should be 2 ServiceDefinitions", serviceDef1.size(), 2
@@ -70,7 +68,6 @@ class RuleParseTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/rules2.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        false,    // verify
                                         null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
@@ -79,7 +76,7 @@ class RuleParseTest extends GroovyTestCase {
         ServiceElement[] elems = opstring.getServices()
         assertEquals "There should be 1 service", 1, elems.length
         Collection<RuleMap> ruleMaps = elems[0].ruleMaps
-        assertEquals "There should be 2 RuleMaps", ruleMaps.size(), 2
+        assertEquals "There should be 2 RuleMaps", 2, ruleMaps.size()
         RuleMap ruleMap1 = ruleMaps.get(0)
         List<ServiceDefinition> serviceDef1 = ruleMap1.getServiceDefinitions()
         assertEquals "There should be 2 ServiceDefinitions", serviceDef1.size(), 2
@@ -110,7 +107,6 @@ class RuleParseTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/rules3.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        false,    // verify
                                         null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
@@ -119,7 +115,7 @@ class RuleParseTest extends GroovyTestCase {
         ServiceElement[] elems = opstring.getServices()
         assertEquals "There should be 2 services", 2, elems.length
         Collection<RuleMap> ruleMaps = elems[1].ruleMaps
-        assertEquals "There should be 1 RuleMap", ruleMaps.size(), 1
+        assertEquals "There should be 1 RuleMap", 1, ruleMaps.size()
         RuleMap ruleMap1 = ruleMaps.get(0)
         List<ServiceDefinition> serviceDef1 = ruleMap1.getServiceDefinitions()
         assertEquals "There should be 1 ServiceDefinition", serviceDef1.size(), 1

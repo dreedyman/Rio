@@ -15,17 +15,37 @@
  */
 package org.rioproject.opstring
 
-import groovy.xml.MarkupBuilder
+import net.jini.core.discovery.LookupLocator
+import org.rioproject.RioVersion
+import org.rioproject.associations.AssociationDescriptor
+import org.rioproject.deploy.StagedData
+import org.rioproject.deploy.StagedSoftware
+import org.rioproject.deploy.SystemComponent
+import org.rioproject.deploy.SystemRequirements
+import org.rioproject.exec.ExecDescriptor
+import org.rioproject.exec.ServiceExecutor
+import org.rioproject.log.LoggerConfig
+import org.rioproject.logging.GroovyLogger
+import org.rioproject.resolver.Resolver
+import org.rioproject.resolver.ResolverHelper
+import org.rioproject.sla.RuleMap
+import org.rioproject.sla.RuleMap.RuleDefinition
+import org.rioproject.sla.RuleMap.ServiceDefinition
+import org.rioproject.sla.SLA
+import org.rioproject.system.SystemWatchID
+import org.rioproject.system.capability.platform.OperatingSystem
+import org.rioproject.system.capability.platform.StorageCapability
+import org.rioproject.system.capability.platform.SystemMemory
+import org.rioproject.watch.ThresholdValues
+import org.rioproject.watch.WatchDescriptor
+
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.Manifest
 import java.util.logging.Level
-import org.rioproject.RioVersion
-import org.rioproject.resolver.Resolver
-import org.rioproject.resolver.ResolverHelper
-import org.rioproject.logging.GroovyLogger
-import org.rioproject.system.SystemWatchID
-import org.rioproject.system.capability.software.SoftwareSupport
+import javax.annotation.processing.Processor
+
+import static org.rioproject.opstring.OpStringParserGlobals.*
 
 /**
  * A parser that handles the Groovy Domain Specific Language support for Rio
@@ -35,12 +55,10 @@ import org.rioproject.system.capability.software.SoftwareSupport
  */
 class GroovyDSLOpStringParser implements OpStringParser {
     Map<String, List<OpString>> nestedTable = new HashMap<String, List<OpString>>()
-    def OpStringParser xmlParser = new XmlOpStringParser()
     def logger = new GroovyLogger(getClass().name);
 
     public List<OpString> parse(Object source,
                                 ClassLoader loader,
-                                boolean verify,
                                 String[] defaultExportJars,
                                 String[] defaultGroups,
                                 Object loadPath) {
@@ -48,11 +66,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
         ExpandoMetaClass.enableGlobally()
 
         def parent
-        def debug = false
-        def tempFile = File.createTempFile('rio-dsl', '.xml')
-        def writer = new FileWriter(tempFile)
-        def builder = new MarkupBuilder(writer)
-        builder.setOmitNullAttributes(true)
+
         URL sourceLocation = null
         if(source instanceof URL) {
             sourceLocation = (URL)source
@@ -61,142 +75,207 @@ class GroovyDSLOpStringParser implements OpStringParser {
             sourceLocation = ((File)source).toURL()
         }
 
-        //println "==> Parsing source $source"
         Script dslScript
         if(loader==null)
             dslScript = new GroovyShell().parse(source)
         else
             dslScript = new GroovyShell(loader).parse(source)
 
-        writer.write('<!DOCTYPE opstring PUBLIC "-/RIO//DTD" "http://www.rio-project.org/dtd/rio_opstring.dtd">\n')
-        writer.write('<opstring>\n')
+        def opStrings = []
+        OpStringParserHelper helper = new OpStringParserHelper()
 
-        dslScript.metaClass = createEMC(dslScript.class,
-                                        builder, {
+
+        /* Global settings referenced for all services being parsed and built */
+        Map<String, String> opStringArtifacts = new HashMap<String, String>()
+        def opStringResources = [:]
+        def globalSettings = [:]
+        Map<String, SystemRequirements> systemRequirementsTable = new HashMap<String, SystemRequirements>()
+        globalSettings[ASSOCIATIONS] = []
+        globalSettings[LOGGERS] = []
+        globalSettings[GROUPS] = defaultGroups
+
+        /* The 5 properties below represent in-flight objects that are referenced as the dsl gets parsed */
+        ServiceElement currentService
+        AssociationDescriptor currentAssociationDescriptor
+        SystemComponent currentSoftwareSystemComponent
+        SLA currentSLA
+
+        dslScript.metaClass = createEMC(dslScript.class, {
                                         ExpandoMetaClass emc ->
             def opStringName
+            OpString opString
 
             emc.deployment = { Map attributes, Closure cl ->
                 opStringName = attributes.name
-                nestedTable.put(opStringName, new ArrayList<OpString>())
-                debug = attributes.debug == null? false : attributes.debug
-
-                builder.OperationalString(Name: opStringName) {
-                    cl()
-                }
-
+                globalSettings[OPSTRING] = opStringName
+                opString = new OpString(opStringName, sourceLocation)
+                cl()
+                opStrings << opString
             }
 
             emc.groups = { String... groups ->
-                builder.Groups {
-                    groups.each { Group(it) }
+                def groupNames = []
+                groups.each { group ->
+                    groupNames << group
+                }
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.groups = groupNames as String[]
+                } else {
+                    globalSettings[GROUPS] = groupNames
                 }
             }
 
             emc.locators = { String... locators ->
-                builder.Locators {
-                    locators.each { Locator(it) }
+                def lookupLocators = []
+                locators.each { locator ->
+                    if(!locator.startsWith("jini:"))
+                        lookupLocators << new LookupLocator("jini://${locator}")
+                    else
+                        lookupLocators << new LookupLocator(locator)
+                }
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.locators = lookupLocators
+                } else {
+                    globalSettings[LOCATORS] = lookupLocators
                 }
             }
 
             emc.codebase = { String codebase ->
-                builder.Codebase(codebase)
+                globalSettings[CODEBASE] = codebase
             }
 
             emc.cluster = { String... machines ->
-                builder.Cluster {
-                    machines.each { Machine(it) }
+                if(currentService==null) {
+                    globalSettings[CLUSTER] = machines
+                } else {
+                    currentService.cluster = machines
                 }
             }
 
             emc.service = { Map attributes, Closure cl ->
                 def oldParent = parent
                 parent = "service"
-                builder.ServiceBean(Name: attributes.name,
-                                    ProvisionType: attributes.type,
-                                    Fork: attributes.fork,
-                                    JVMArgs: attributes.jvmArgs,
-                                    Environment: attributes.environment) {
-                    cl()
-                }
+                currentService = new ServiceElement()
+                helper.applyServiceElementAttributes(currentService, attributes, globalSettings)
+                cl()
+                opString.addService(currentService)
                 parent = oldParent
             }
 
             emc.serviceExec = { Map attributes, Closure cl ->
-                builder.ServiceExec(Name: attributes.name,
-                                    ProvisionType: attributes.type) {
-                    cl()
-                }
+                if(currentService!=null)
+                    opString.addService(currentService)
+                def oldParent = parent
+                parent = "service"
+                currentService = new ServiceElement()
+
+                helper.applyServiceElementAttributes(currentService, attributes, globalSettings)
+                ClassBundle componentBundle = new ClassBundle(ServiceExecutor.class.name)
+                currentService.componentBundle = componentBundle
+                cl()
+                opString.addService(currentService)
+                parent = oldParent
             }
 
             emc.spring = { Map attributes, Closure cl ->
-                builder.SpringBean(Name: attributes.name,
-                                   config: attributes.config,
-                                   ProvisionType: attributes.type,
-                                   Fork: attributes.fork,
-                                   JVMArgs: attributes.jvmArgs,
-                                   Environment: attributes.environment) {
-                    cl()
+                if(currentService!=null)
+                    opString.addService(currentService)
+                def oldParent = parent
+                parent = "service"
+                currentService = new ServiceElement()
+
+                helper.applyServiceElementAttributes(currentService, attributes, globalSettings)
+
+                def config = attributes.config
+                def st = new StringTokenizer(config, " \t\n\r\f,")
+                def sb = new StringBuffer()
+                sb.append("new String[]{")
+                for (int i = 0; st.hasMoreTokens(); i++) {
+                    if (i > 0)
+                        sb.append(",")
+                    sb.append("\"").append(st.nextToken()).append("\"")
                 }
-            }
-            emc.interfaces = { Closure cl ->
-                builder.Interfaces { cl() }
+                sb.append("}")
+
+                def springConfigParms = ['-',
+                        'spring.config=' + sb.toString(),
+                        'spring.beanName="'+attributes.name+'"',
+                        'service.load.serviceBeanFactory=new org.rioproject.bean.spring.SpringBeanFactory()']
+
+                currentService.serviceBeanConfig.setConfigArgs(springConfigParms as String[])
+                cl()
+                opString.addService(currentService)
+                parent = oldParent
             }
 
-            /* The DSL must support the declaration of an implementation with
-             * no resources (RIO-145) */
+            emc.interfaces = { Closure cl ->
+                def oldParent = parent
+                parent = "interfaces"
+                cl()
+                parent = oldParent
+            }
+
+            /* The DSL must support the declaration of an implementation with no resources (RIO-145) */
             emc.implementation = { Map attributes ->
-                builder.ImplementationClass(Name: attributes.class)
+                currentService.componentBundle = new ClassBundle(attributes.class)
             }
 
             emc.implementation = { Map attributes, Closure cl ->
-                builder.ImplementationClass(Name: attributes.class) { cl() }
+                currentService.componentBundle = new ClassBundle(attributes.class)
+                cl()
             }
 
             emc.execute = { Map attributes ->
-                builder.Exec() {
-                    if (attributes.inDirectory)
-                        WorkingDirectory(attributes.inDirectory)
-                    if (attributes.pidFile)
-                        PidFile(attributes.pidFile)
-                    def String[] cmd = attributes.command.tokenize()
-                    CommandLine(cmd[0])
-                    if (cmd.size() - 1 > 0)
-                        cmd[1..cmd.size() - 1].each { InputArg(' ' + it) }
+                ExecDescriptor execDescriptor = new ExecDescriptor()
+                if(attributes.inDirectory)
+                    execDescriptor.workingDirectory = attributes.inDirectory
+                if(attributes.pidFile)
+                    execDescriptor.pidFile = attributes.pidFile
+                if(attributes.command) {
+                    helper.handleCommandLine(execDescriptor, attributes.command)
+                }
+
+                if(parent=="service") {
+                    currentService.execDescriptor = execDescriptor
+                } else {
+                    StagedSoftware.PostInstallAttributes postInstall =
+                        new StagedSoftware.PostInstallAttributes(execDescriptor, null)
+                    currentSoftwareSystemComponent.stagedSoftware.postInstallAttributes = postInstall
                 }
             }
 
             emc.execute = { Map attributes, Closure cl ->
-                builder.Exec() {
-                    if (attributes.inDirectory)
-                        WorkingDirectory(attributes.inDirectory)
-                    if (attributes.pidFile)
-                        PidFile(attributes.pidFile)
-                    def String[] cmd = attributes.command.tokenize()
-                    CommandLine(cmd[0])
-                    if (cmd.size() - 1 > 0)
-                        cmd[1..cmd.size() - 1].each { InputArg(' ' + it) }
-                    cl()
-                }
+                ExecDescriptor execDescriptor = new ExecDescriptor()
+                if(attributes.inDirectory)
+                    execDescriptor.workingDirectory = attributes.inDirectory
+                if(attributes.pidFile)
+                    execDescriptor.pidFile = attributes.pidFile
+                if(attributes.command)
+                    helper.handleCommandLine(execDescriptor, attributes.command)
+
+                currentService.execDescriptor = execDescriptor
+
+                cl()
             }
 
             emc.environment { Closure cl ->
-                builder.Environment { cl() }
+                cl()
             }
 
             emc.property { Map attributes ->
-                builder.Property (Name: attributes.name, Value: attributes.value)
+                currentService.execDescriptor.getEnvironment().put(attributes.name, attributes.value)
             }
-
 
             emc.classes = { String... interfaceClasses ->
-                interfaceClasses.each { builder.Interface(it) }
+                def classBundles = []
+                interfaceClasses.each{ interfaceClass ->
+                    ClassBundle classBundle = new ClassBundle(interfaceClass)
+                    classBundles << classBundle
+                }
+                currentService.setExportBundles(classBundles as ClassBundle[])
             }
 
-            /*emc.artifact = { Map attributes, String artifact ->
-                builder.Artifact(attributes, artifact)
-            }*/
-                    
+            /* declared at the opstring level */
             emc.artifact = { Map attributes, String... artifacts ->
                 StringBuilder artifactBuilder = new StringBuilder()
                 for(String artifact : artifacts) {
@@ -204,7 +283,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                         artifactBuilder.append(" ")
                     artifactBuilder.append(artifact)
                 }
-                builder.Artifact(attributes, artifactBuilder.toString())
+                opStringArtifacts.put((String)attributes.get("id"), artifactBuilder.toString())
             }
 
             emc.artifact = { String... artifacts ->
@@ -214,307 +293,281 @@ class GroovyDSLOpStringParser implements OpStringParser {
                         artifactBuilder.append(" ")
                     artifactBuilder.append(artifact)
                 }
-                builder.Artifact(artifactBuilder.toString())
+                if(parent=="interfaces") {
+                    for(ClassBundle classBundle : currentService.getExportBundles()) {
+                        classBundle.setArtifact(artifactBuilder.toString())
+                    }
+                } else {
+                    currentService.componentBundle.artifact = artifactBuilder.toString()
+                }
             }
 
             emc.artifact = { Map attributes ->
-                builder.Artifact(attributes)
+                String refId = attributes.get("ref")
+                if(parent=="interfaces") {
+                    for(ClassBundle classBundle : currentService.getExportBundles()) {
+                        classBundle.setArtifact(opStringArtifacts.get(refId))
+                    }
+                } else {
+                    currentService.getComponentBundle().setArtifact(opStringArtifacts.get(refId))
+                }
             }
 
             emc.resources = { String... resources ->
-                builder.Resources {
-                    resources.each {
-                        //if(it && it.endsWith(".jar"))
-                        if(it)
-                            JAR(it)
-                    }
-                }
+                helper.processResources(parent, globalSettings[CODEBASE] as String, currentService, resources)
             }
 
             emc.resources = { Map attributes ->
-                builder.Resources(attributes)
+                def resources = opStringResources[attributes.get("ref")] as String[]
+                helper.processResources(parent, globalSettings[CODEBASE] as String, currentService, resources)
             }
 
             emc.resources = { Map attributes, String... resources ->
-                builder.Resources(id: attributes.id) {
-                    resources.each { JAR(it) }
-                }
-            }
-
-            emc.className = { String classname ->
-                builder.ClassName(classname)
-            }
-
-            emc.configuration = { String configuration ->
-                builder.Configuration(configuration)
+                opStringResources.put(attributes.get("id"), resources)
             }
 
             emc.comment = { String comment ->
-                builder.Comment(comment)
+                currentService.serviceBeanConfig.configurationParameters.put(ServiceBeanConfig.COMMENT, comment)
             }
 
+            //TODO: IS THIS STILL NEEDED?
+            emc.className = { String classname ->
+                println "===> parent: $parent, classname: $classname"
+            }
+
+            //TODO: IS THIS STILL NEEDED?
             emc.configuration = { Map<String, Map<String, String>> components  ->
-                if (!components.empty) {
-                    builder.Configuration {
-                        components.each { String componentName, Map<String, String> values ->
-                            builder.Component(Name: componentName) {
-                                values.each { String paramKey, String paramValue ->
-                                    builder.Parameter(Name: paramKey, Value: paramValue)
-                                }
-                            }
-                        }
-                    }
+                println "===> configuration: components:$components"
+            }
+
+            /* The configuration is being passed in as 'inline' */
+            emc.configuration = { String configuration ->
+                def configArg = [configuration]
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.configArgs = configArg as String[]
+                } else {
+                    globalSettings[CONFIGURATION] = configArg as String[]
                 }
             }
 
             emc.configuration = { Map<String, String> attributes  ->
                 String config = attributes.get("file")
+                def configArg = [config]
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.configArgs = configArg as String[]
+                } else {
+                    globalSettings[CONFIGURATION] = configArg as String[]
+                }
                 if(config==null)
-                    throw new DSLException(
-                            "There is no corresponding file entry for this "+
-                            "configuration element");
-                builder.Configuration(file: config)
+                    throw new DSLException("There is no corresponding file entry for this configuration element");
             }
 
             emc.associations = { Closure cl ->
-                builder.Associations { cl() }
+                cl()
             }
 
             emc.association = { Map attributes ->
-                def matchOnName = attributes.matchOnName == null? 'yes': (
-                                  attributes.matchOnName? 'yes' : 'no')
-                builder.Association(Name: attributes.name,
-                                    Type: attributes.type,
-                                    Interface: attributes.serviceType,
-                                    Property: attributes.property,
-                                    MatchOnName: matchOnName)
-
+                currentAssociationDescriptor = helper.createAssociationDescriptor(attributes, opStringName)
+                helper.addAssociationDescriptor(currentAssociationDescriptor,
+                                                currentService,
+                                                globalSettings[ASSOCIATIONS])
             }
 
             emc.association = { Map attributes, Closure cl ->
-                def matchOnName = attributes.matchOnName == null? 'yes': (
-                                  attributes.matchOnName? 'yes' : 'no')
-                builder.Association(Name: attributes.name,
-                                    Type: attributes.type,
-                                    Interface: attributes.serviceType,
-                                    Property: attributes.property,
-                                    MatchOnName: matchOnName) {
-                                        cl()
-                                    }
+                currentAssociationDescriptor = helper.createAssociationDescriptor(attributes, opStringName)
+                cl()
             }
 
-            emc.management = { Map attributes->
-                builder.Management(Proxy: attributes.proxy,
-                                   ProxyType: attributes.proxyType,
-                                   Strategy: attributes.strategy,
-                                   Filter: attributes.filter,
-                                   Inject: attributes.inject,
-                                   ServiceDiscoveryTimeout: attributes.serviceDiscoveryTimeout,
-                                   ServiceDiscoveryTimeoutUnits: attributes.serviceDiscoveryTimeoutUnits)
+            emc.management = { Map attributes ->
+                helper.addAssociationDescriptor(helper.createAssociationManagement(attributes,
+                                                                                   currentAssociationDescriptor),
+                                                currentService,
+                                                globalSettings[ASSOCIATIONS])
             }
 
             emc.management = { Map attributes, Closure cl ->
-                def unitsAttr = attributes.serviceDiscoveryTimeoutUnits == null? "minutes": attributes.units
-                builder.Management(Proxy: attributes.proxy,
-                                   ProxyType: attributes.proxyType,
-                                   Strategy: attributes.strategy,
-                                   Filter: attributes.filter,
-                                   Inject: attributes.inject,
-                                   ServiceDiscoveryTimeout: attributes.serviceDiscoveryTimeout,
-                                   ServiceDiscoveryTimeoutUnits: unitsAttr) {
-                                        cl()
-                                    }
+                helper.addAssociationDescriptor(helper.createAssociationManagement(attributes,
+                                                                                   currentAssociationDescriptor),
+                                                currentService,
+                                                globalSettings[ASSOCIATIONS])
+                cl()
             }
 
-            /*emc.serviceDiscoveryTimeout = { Map attributes ->
-                def unitsAttr = attributes.units == null? "minutes": attributes.units
-                builder.ServiceDiscovery(timeout: attributes.timeout, units: unitsAttr)
-            }*/
-
             emc.maintain = { Integer maintain ->
-                builder.Maintain(maintain)
+                currentService.planned = maintain
             }
 
             emc.maxPerMachine = { Integer max ->
-                builder.MaxPerMachine(max)
+                currentService.maxPerMachine = max
             }
 
             emc.maxPerMachine = { Map attributes, Integer max ->
-                if (attributes.type)
-                    builder.MaxPerMachine(max, type: attributes.type)
-                else
-                    builder.MaxPerMachine(max)
+                if (attributes.type) {
+                    currentService.machineBoundary = ServiceElement.MachineBoundary.valueOf(attributes.type.toUpperCase())
+                }
+                currentService.maxPerMachine = max
             }
 
-            emc.systemRequirements = { Map attributes ->
-                builder.SystemRequirements(ref: attributes.ref)
-            }
-
+            /* These are declared at the opstring level */
             emc.systemRequirements = { Map attributes, Closure cl ->
                 def oldParent = parent
-                parent = 'systemRequirements'
-                builder.SystemRequirements(id: attributes.id) {
-                    cl();
-                }
+                parent = "systemRequirements:id=${attributes.id}"
+                systemRequirementsTable[attributes.id] = new SystemRequirements()
+                cl()
                 parent = oldParent
             }
 
+            /* These are declared at the service level */
+            emc.systemRequirements = { Map attributes ->
+                SystemRequirements systemRequirements = systemRequirementsTable[attributes.ref]
+                SystemRequirements merged =
+                    helper.merge(currentService.serviceLevelAgreements.systemRequirements, systemRequirements)
+                currentService.serviceLevelAgreements.serviceRequirements = merged
+            }
+
+            /* These are declared at the service level */
             emc.systemRequirements = { Closure cl ->
                 def oldParent = parent
                 parent = 'systemRequirements'
-                builder.SystemRequirements {
-                    cl();
-                }
+                cl()
                 parent = oldParent
             }
 
             emc.memory = { Map attributes ->
-                builder.SystemComponent(Name: "SystemMemory") {
-                    Attribute(Name: 'Name', Value: SystemWatchID.SYSTEM_MEMORY)
-                    if(attributes.available)
-                        Attribute(Name: 'Available', Value: attributes.available)
-                    if(attributes.capacity)
-                        Attribute(Name: 'Capacity', Value: attributes.capacity)
-                }
+                Map attributeMap = [:]
+                attributeMap["Name"] = SystemWatchID.SYSTEM_MEMORY
+                attributeMap.putAll(helper.capitalizeFirstLetterOfEachKey(attributes))
+                SystemComponent memory = new SystemComponent("SystemMemory", SystemMemory.class.name, attributeMap)
+                helper.addSystemComponent(parent, memory, systemRequirementsTable, currentService)
             }
 
             emc.diskspace = { Map attributes ->
-                builder.SystemComponent(Name: "StorageCapability") {
-                    Attribute(Name: 'Name', Value: SystemWatchID.DISK_SPACE)
-                    if(attributes.available)
-                        Attribute(Name: 'Available', Value: attributes.available)
-                    if(attributes.capacity)
-                        Attribute(Name: 'Capacity', Value: attributes.capacity)
-                }
+                Map attributeMap = [:]
+                attributeMap["Name"] = SystemWatchID.DISK_SPACE
+                attributeMap.putAll(helper.capitalizeFirstLetterOfEachKey(attributes))
+                SystemComponent diskspace = new SystemComponent("StorageCapability", StorageCapability.class.name, attributeMap)
+                helper.addSystemComponent(parent, diskspace, systemRequirementsTable, currentService)
             }
 
             emc.operatingSystem = { Map attributes ->
-                builder.SystemComponent(ClassName: "OperatingSystem") {
-                    Attribute(Name: 'Name', Value: attributes.name)
-                    Attribute(Name: 'Version', Value: attributes.version)
-                }
+                Map attributeMap = [:]
+                attributeMap["Name"] = attributes.name
+                attributeMap["Version"] = attributes.version
+                SystemComponent operatingSystem = new SystemComponent("OperatingSystem", OperatingSystem.class.name, attributeMap)
+                helper.addSystemComponent(parent, operatingSystem, systemRequirementsTable, currentService)
             }
 
             emc.processor = { Map attributes ->
-                builder.SystemComponent(Name: "Processor") {
-                    Attribute(Name: 'Available', Value: attributes.available)
-                }
-            }
-
-            emc.utilization = { Map attributes ->
-                builder.Utilization(ID: attributes.id, High: attributes.high, Low: attributes.low)
+                Map attributeMap = [:]
+                attributeMap["Available"] = attributes.available
+                SystemComponent processor = new SystemComponent("Processor", Processor.class.name, attributeMap)
+                helper.addSystemComponent(parent, processor, systemRequirementsTable, currentService)
             }
 
             emc.platformRequirement = { Map attributes ->
-                generateSystemRequirements(builder, attributes, parent)
+                helper.createAndAddSystemComponent(parent, attributes, systemRequirementsTable, currentService)
             }
 
             emc.software = { Map attributes ->
-                generateSystemRequirements(builder, attributes, parent)
+                helper.createAndAddSystemComponent(parent, attributes, systemRequirementsTable, currentService)
+            }
+
+            emc.utilization = { Map attributes ->
+                SLA sysSLA = helper.createSLA(attributes, true)
+                def tVal = new ThresholdValues(sysSLA.lowThreshold, sysSLA.highThreshold)
+
+                if(helper.isSystemRequirementGlobal(parent)) {
+                    String id =  helper.getSystemRequirementID(parent)
+                    SystemRequirements systemRequirements = systemRequirementsTable[id]
+                    systemRequirements.addSystemThreshold(sysSLA.identifier, tVal)
+                } else {
+                    currentService.serviceLevelAgreements.systemRequirements.addSystemThreshold(sysSLA.identifier, tVal)
+                }
             }
 
             emc.software = { Map attributes, Closure cl ->
-                def componentName = attributes.type == null ? "SoftwareSupport" : attributes.type
-                builder.SystemRequirements {
-                    SystemComponent(ClassName: componentName) {
-                        for(Map.Entry<String, String> entry : attributes.entrySet()) {
-                            def skip = ['removeOnDestroy', 'type', 'classpathresource', 'overwrite']
-                            if(entry.key in skip) {
-                                continue;
-                            }
-
-                            def key = entry.key.substring(0,1).toUpperCase() + entry.key.substring(1);
-                            def value = entry.value
-                            Attribute(Name: key, Value: value)
-                        }
-                        def classpathresource = attributes.classpathresource == null? 'yes': (
-                                                    attributes.classpathresource? 'yes' : 'no')
-                        builder.SoftwareLoad(RemoveOnDestroy: attributes.removeOnDestroy ? 'yes' : 'no',
-                                             ClasspathResource: classpathresource) {
-                            cl()
-                        }
-                    }
-                }
+                currentSoftwareSystemComponent = helper.createSystemComponent(attributes,
+                                                                              /* the following args are attributes to skip */
+                                                                              "removeOnDestroy",
+                                                                              "type",
+                                                                              "classpathresource",
+                                                                              "overwrite")
+                StagedSoftware stagedSoftware = new StagedSoftware()
+                stagedSoftware.useAsClasspathResource =
+                    attributes.classpathresource == null? true: attributes.classpathresource
+                stagedSoftware.removeOnDestroy = attributes.removeOnDestroy
+                currentSoftwareSystemComponent.stagedSoftware = stagedSoftware
+                cl()
+                currentService.serviceLevelAgreements.systemRequirements.addSystemComponent(currentSoftwareSystemComponent)
             }
 
             emc.install = { Map attributes ->
-                builder.Download(InstallRoot: attributes.target,
-                                 Unarchive: attributes.unarchive ? 'yes' : 'no',
-                                 Overwrite: attributes.overwrite ? 'yes' : 'no',
-                                 Source: '') {
-                    Location(attributes.source)
-                }
+                currentSoftwareSystemComponent.getStagedSoftware().location = attributes.source
+                currentSoftwareSystemComponent.getStagedSoftware().installRoot = attributes.target
+                currentSoftwareSystemComponent.getStagedSoftware().unarchive = attributes.unarchive
             }
 
             emc.postInstall = { Map attributes, Closure cl ->
-                builder.PostInstall(RemoveOnCompletion: attributes.removeOnCompletion ? 'yes': 'no') { cl() }
+                def oldParent = parent
+                parent = "postInstall"
+                cl()
+                parent = oldParent
             }
 
             emc.data = { Map attributes ->
-                builder.Data(Unarchive: attributes.unarchive ? 'yes' : 'no',
-                             Perms: attributes.perms) {
-                    FileName('')
-                    Source(attributes.source)
-                    Target(attributes.target)
-                }
+                StagedData stagedData = new StagedData()
+                stagedData.location = attributes.source
+                stagedData.installRoot = attributes.target
+                stagedData.unarchive = attributes.unarchive
+                stagedData.perms = attributes.perms
+                if(attributes.removeOnDestroy)
+                    stagedData.removeOnDestroy = attributes.removeOnDestroy
+                if(attributes.overwrite)
+                    stagedData.overwrite = attributes.overwrite
+                currentService.stagedData = [stagedData]
             }
 
             emc.serviceLevelAgreements = { Closure cl ->
-                builder.ServiceLevelAgreements { cl() }
+                cl()
             }
 
             emc.sla = { Map attributes, Closure cl ->
-                builder.SLA(ID: attributes.id,
-                            Low: attributes.low,
-                            High: attributes.high) {
-                    cl()
-                }
+                currentSLA = helper.createSLA(attributes, false)
+                cl()
+                currentService.serviceLevelAgreements.addServiceSLA(currentSLA)
+                currentSLA = null
             }
 
             emc.policy = { Map attributes ->
-                builder.PolicyHandler(type: attributes.type,
-                                      handler: attributes.handler,
-                                      max: attributes.max,
-                                      lowerDampener: attributes.lowerDampener,
-                                      upperDampener: attributes.upperDampener)
+                currentSLA.slaPolicyHandler = helper.getSLAPolicyHandler(attributes.type)
+                if(attributes.lowerDampener)
+                    currentSLA.lowerThresholdDampeningTime = attributes.lowerDampener
+                if(attributes.upperDampener)
+                    currentSLA.upperThresholdDampeningTime = attributes.upperDampener
+                if(attributes.max)
+                    currentSLA.maxServices = attributes.max
             }
+
             emc.monitor = { Map attributes ->
-                builder.Monitor(name: attributes.name,
-                                objectName: attributes.objectName,
-                                property: attributes.property,
-                                attribute: attributes.attribute,
-                                period: attributes.period)
+                WatchDescriptor descriptor = new WatchDescriptor(attributes.name, attributes.period)
+                if(attributes.property)
+                    descriptor.property = attributes.property
+                if(attributes.objectName)
+                    descriptor.objectName = attributes.objectName
+                if(attributes.attribute)
+                    descriptor.attribute = attributes.attribute
+
+                currentSLA.watchDescriptors = [descriptor]
             }
 
             emc.insert = {String fileName ->
-                File file = null
-                if(fileName.startsWith(File.separator)) {
-                    file = new File(fileName)
-                } else {
-                    if (source instanceof File) {
-                        file = new File(((File)source).parent, fileName);
-                    } else if(sourceLocation!=null) {
-                        file = new File(new File(sourceLocation.toURI()).parent,
-                                        fileName)
-                    }
-                }
-                if(file && file.exists()) {
-                    if(file.name.endsWith(".groovy")) {
-                        throw new DSLException("groovy inserts are not supported");
-                    } else {
-                        writer.write(file.text)
-                    }
-                } else {
-                    throw new DSLException("Unable to resolve and include "+
-                                           fileName+", parent source "+
-                                           "["+source+"], location "+
-                                           "["+sourceLocation+"]")
-                }
+                throw new DSLException("inserts are no longer supported")
             }
 
             emc.include = { String opStringRef ->
                 def resolved = false
-                def asXML = opStringRef.endsWith(".xml")
+                if(opStringRef.endsWith(".xml"))
+                    throw new DSLException("Unable to process XML docuemnts.")
 
                 if (source instanceof File)
                     if (new File(((File)source).parent, opStringRef).exists())
@@ -537,7 +590,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                     Manifest manifest = jarConn.getManifest();
                     OAR oar = new OAR(manifest)
                     String includeOpString = oar.opStringName
-                    asXML = includeOpString.endsWith(".xml")
+
                     JarFile oarJar = jarConn.getJarFile()
                     JarEntry entry = oarJar.getJarEntry(includeOpString)
                     int ndx = includeOpString.lastIndexOf(".")
@@ -569,29 +622,17 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 }
 
                 if(location==null)
-                    throw new DSLException("Unable to resolve and include "+
-                                           opStringRef)
+                    throw new DSLException("Unable to resolve and include "+opStringRef)
                 def includes
                 try {
-                    if(asXML)
-                        includes = xmlParser.parse(location,
-                                                   loader,
-                                                   false,
-                                                   defaultExportJars,
-                                                   defaultGroups,
-                                                   loadPath)
-                    else {
-                        includes = parse(location,
-                                         loader,
-                                         false,
-                                         defaultExportJars,
-                                         defaultGroups,
-                                         loadPath)
-                        if(tempResolvedOpString!=null)
-                            tempResolvedOpString.delete()
-                    }
+                    includes = parse(location, loader, defaultExportJars, defaultGroups, loadPath)
+                    if(tempResolvedOpString!=null)
+                        tempResolvedOpString.delete()
+
                     includes.each {
                         List<OpString> nested = nestedTable.get(opStringName)
+                        if(nested ==null)
+                            nested = new ArrayList<OpString>();
                         nested.add(it)
                         //println ("\tAdd nested ["+it.name+"] to ["+opStringName+"] nested table, nested length="+nested.size())
                         nestedTable.put(opStringName, nested)
@@ -604,167 +645,151 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 }
             }
             emc.logging = { Closure cl ->
-                builder.Logging { cl() }
+                cl()
             }
 
             emc.logger = { String name ->
-                builder.Logger(Name: name, Level:Level.INFO)
+                LoggerConfig loggerConfig = new LoggerConfig(name, Level.INFO)
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.addLoggerConfig(loggerConfig)
+                } else {
+                    globalSettings[LOGGERS] << loggerConfig
+                }
             }
 
             emc.logger = { String name, Level level ->
-                builder.Logger(Name: name, Level:level.toString())
+                LoggerConfig loggerConfig = new LoggerConfig(name, level)
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.addLoggerConfig(loggerConfig)
+                } else {
+                    globalSettings[LOGGERS] << loggerConfig
+                }
             }
 
             emc.logger = { String name, String handler, Level level ->
-                builder.Logger(Name: name, Level:level.toString()) {
-                    builder.Handler(ClassName: handler, Level:level.toString())
+                LoggerConfig loggerConfig = new LoggerConfig(name,
+                                                             level,
+                                                             new LoggerConfig.LogHandlerConfig(handler, level))
+                if(currentService!=null) {
+                    currentService.serviceBeanConfig.addLoggerConfig(loggerConfig)
+                } else {
+                    globalSettings[LOGGERS] << loggerConfig
                 }
             }
 
             emc.parameters = { Closure cl ->
-                builder.Parameters { cl() }
+                cl()
             }
 
             emc.parameter = { Map attributes ->
-                builder.Parameter (Name: attributes.name, Value: attributes.value)
+                currentService.serviceBeanConfig.addInitParameter(attributes.name, attributes.value)
             }
 
             /* Used for rule declaration */
             emc.rules = { Closure cl->
                 /* If there is no enclosing parent, then generate a Gnostic service */
                 if(parent==null) {
-                    service(name: 'Gnostic') {
-                        interfaces {
-                            classes 'org.rioproject.gnostic.Gnostic'
-                            artifact "org.rioproject.gnostic:gnostic-api:${RioVersion.VERSION}"
-                        }
-                        implementation(class: 'org.rioproject.gnostic.GnosticImpl') {
-                            artifact "org.rioproject.gnostic:gnostic-service:${RioVersion.VERSION}"
-                        }
-                        rules {
-                            cl()
-                        }
-                        maintain 1
-                    }
+                    currentService = new ServiceElement()
+                    def attributes = [:]
+                    attributes["name"] = "Gnostic"
+                    helper.applyServiceElementAttributes(currentService, attributes, globalSettings)
+
+                    ClassBundle exportBundle = new ClassBundle()
+                    exportBundle.className = 'org.rioproject.gnostic.Gnostic'
+                    exportBundle.artifact = "org.rioproject.gnostic:gnostic-api:${RioVersion.VERSION}"
+
+                    ClassBundle componentBundle = new ClassBundle()
+                    componentBundle.className = 'org.rioproject.gnostic.GnosticImpl'
+                    componentBundle.artifact = "org.rioproject.gnostic:gnostic-service:${RioVersion.VERSION}"
+
+                    currentService.componentBundle = componentBundle
+                    currentService.exportBundles = [exportBundle]
+                    currentService.planned = 1
+
+                    cl()
+
+                    currentService.setRuleMaps(helper.inFlightRuleMaps)
+                    helper.inFlightRuleMaps.clear()
+                    opString.addService(currentService)
                 } else {
-                    builder.Rules { cl() }
+                    cl()
+                    currentService.setRuleMaps(helper.inFlightRuleMaps)
+                    helper.inFlightRuleMaps.clear()
                 }
             }
 
             emc.rule = { Closure cl->
-                builder.Rule { cl() }
+                helper.setInFlightRuleDefinition(new RuleDefinition())
+                cl()
+                RuleMap ruleMap = new RuleMap()
+                ruleMap.addRuleMapping(helper.inFlightRuleDefinition,
+                                       helper.inFlightRuleServiceDefinitions as ServiceDefinition[])
+                helper.inFlightRuleMaps << ruleMap
+                helper.inFlightRuleDefinition = null
+                helper.inFlightRuleServiceDefinition = null
+                helper.inFlightRuleServiceDefinitions.clear()
             }
 
             emc.ruleClassPath = { String ruleClassPath ->
-                builder.RuleClassPath(ruleClassPath)
+                helper.getInFlightRuleDefinition().ruleClassPath = ruleClassPath
             }
 
             emc.resource = { String resource ->
-                builder.Resource(resource)
+                helper.getInFlightRuleDefinition().resource = resource
             }
 
             emc.serviceFeed = { Map attributes, Closure cl->
-                builder.ServiceFeed(name: attributes.name, opstring: attributes.opstring) {
-                    cl()
-                }                
+                helper.inFlightRuleServiceDefinition = new ServiceDefinition(attributes.name, attributes.opstring)
+
+                cl()
+
+                helper.inFlightRuleServiceDefinitions << helper.inFlightRuleServiceDefinition
             }
 
             emc.watches = { String watches ->
-                builder.Watches(watches)
+                helper.inFlightRuleServiceDefinition.addWatches(helper.toArray(watches))
             }
 
             emc.faultDetectionHandler = { String fdh ->
-                builder.FaultDetectionHandler(ClassName: fdh)    
+                println "FIX: faultDetectionHandler"
+                //builder.FaultDetectionHandler(ClassName: fdh)
             }
         })
 
         dslScript.run()
 
-        writer.write('</opstring>\n')
-        writer.flush()
-        writer.close()
+       OpStringPostProcessor.process(opStrings)
 
-        List<OpString> opstrings = xmlParser.parse(tempFile,
-                                                   loader,
-                                                   verify,
-                                                   defaultExportJars,
-                                                   defaultGroups,
-                                                   loadPath)
-        for(OpString os : opstrings) {
+        /* Process nested opstrings */
+        for(OpString opString : opStrings) {
             for(Map.Entry<String, List<OpString>> entry : nestedTable.entrySet()) {
-                if(sourceLocation!=null)
-                    os.loadedFrom = sourceLocation
                 String name = entry.key;
                 List<OpString> nested = entry.value;
-                //println("["+name+"], : "+nested);
-                if(os.name.equals(name)) {
-                    //println "!!!! Found nested List for ["+os.name+"]"
+                if(opString.name.equals(name)) {
                     if(nested.size()>0) {
-                        //for(OpString n : nested) {
-                        //    println ("++++ Add nested ["+n.name+"] to ["+os.name+"]")
-                        //    os.addOperationalString(n)
-                        //}
-                        os.addOperationalString(nested.toArray(new OpString[nested.size]))
+                        opString.addOperationalString(nested.toArray(new OpString[nested.size()]))
                     }
                     break;
                 }
             }
         }
 
-        if(!debug)
-            tempFile.delete()
-
         //println ("Leaving parse $source")
 
         if(source instanceof InputStream)
             ((InputStream)source).close()
         
-        return opstrings
+        return opStrings
     }
 
-    public parseElement(Object element, GlobalAttrs global, ParsedService sDescriptor, OpString opString) {
-        throw new UnsupportedOperationException()
-    }
-
-    protected void processAdditionalTags(MarkupBuilder builder, ExpandoMetaClass emc) {
+    protected void processAdditionalTags(ExpandoMetaClass emc) {
         // do nothing by default -- this is here so that subclasses can add additional behaviour!
     }
-
-    private generateSystemRequirements(MarkupBuilder builder, Map attributes, def parent) {
-        def componentClass = attributes.type == null ? SoftwareSupport.class.simpleName : attributes.type
-        if (!parent) {
-            builder.SystemRequirements {
-                generateSystemComponent(builder, componentClass, attributes)
-            }
-        } else {
-            if(parent.equals("service")) {
-                builder.SystemRequirements {
-                    generateSystemComponent(builder, componentClass, attributes)
-                }
-            } else {
-                generateSystemComponent(builder, componentClass, attributes)
-            }
-        }
-    }
-
-    private generateSystemComponent(MarkupBuilder builder,
-                                    def componentClass,
-                                    Map attributes) {
-        builder.SystemComponent(ClassName: componentClass) {
-            for(Map.Entry<String, String> entry : attributes.entrySet()) {
-                def key = entry.key.substring(0,1).toUpperCase() + entry.key.substring(1);
-                if(key.equals("Type"))
-                    continue
-                def value = entry.value
-                Attribute(Name: key, Value: value)
-            }
-        }
-    }
     
-    def ExpandoMetaClass createEMC(Class clazz, MarkupBuilder builder, Closure cl) {
+    def ExpandoMetaClass createEMC(Class clazz, Closure cl) {
         ExpandoMetaClass emc = new ExpandoMetaClass(clazz, false)
         cl(emc)
-        processAdditionalTags(builder, emc)
+        processAdditionalTags(emc)
         emc.initialize()
         return emc
     }

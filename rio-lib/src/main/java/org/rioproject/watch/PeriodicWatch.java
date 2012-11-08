@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  * Copyright 2005 Sun Microsystems, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,18 +23,18 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * A PeriodicWatch provides a mechanism to obtain information at preset
- * intervals of time.
+ * A PeriodicWatch provides a mechanism to obtain information at preset intervals of time.
+ *
+ * @author Dennis Reedy
  */
-public abstract class PeriodicWatch extends ThresholdWatch implements
-        PeriodicWatchMBean {
+public abstract class PeriodicWatch extends ThresholdWatch implements PeriodicWatchMBean {
     /** Holds value of property period. */
     public static final long DEFAULT_PERIOD = 30 * 1000;
     private long period = DEFAULT_PERIOD;
     private Timer watchTimer;
 
     /**
-     * Creates new Periodic Watch
+     * Creates new {@code PeriodicWatch}
      * 
      * @param id the identifier for this watch
      */
@@ -43,8 +43,8 @@ public abstract class PeriodicWatch extends ThresholdWatch implements
     }
 
     /**
-     * Creates new PeriodicWatch, creates and exports a WatchDataSourceImpl if
-     * the WatchDataSource is null using the Configuration object provided
+     * Creates new {@code PeriodicWatch}, creates and exports a {@code WatchDataSourceImpl} if
+     * the {@code WatchDataSource} is {@code null} using the {@code Configuration} object provided
      * 
      * @param id The identifier for this watch
      * @param config Configuration object used for constructing a
@@ -55,9 +55,9 @@ public abstract class PeriodicWatch extends ThresholdWatch implements
     }    
 
     /**
-     * Creates new PeriodicWatch
+     * Creates new {@code PeriodicWatch}
      * 
-     * @param watchDataSource the watch data source associated with this watch
+     * @param watchDataSource the {@code WatchDataSource} associated with this watch
      * @param id the identifier for this watch
      */
     public PeriodicWatch(WatchDataSource watchDataSource, String id) {
@@ -71,7 +71,7 @@ public abstract class PeriodicWatch extends ThresholdWatch implements
         long now = System.currentTimeMillis();
         stop();
         watchTimer = new Timer(true);
-        watchTimer.schedule(new PeriodicTask(), new Date(now + period), period);
+        watchTimer.schedule(new PeriodicTask(), new Date(now+period), period);
     }
 
     /**
@@ -96,8 +96,7 @@ public abstract class PeriodicWatch extends ThresholdWatch implements
         if(newPeriod == period)
             return;
         if(newPeriod <= 0)
-            throw new IllegalArgumentException("period cannot be less "+
-                                               "then or equal to zero");
+            throw new IllegalArgumentException("period cannot be less then or equal to zero");
         this.period = newPeriod;
         if(watchTimer!=null) {
             stop();

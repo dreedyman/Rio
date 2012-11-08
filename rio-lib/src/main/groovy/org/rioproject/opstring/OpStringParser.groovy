@@ -15,10 +15,6 @@
  */
 package org.rioproject.opstring
 
-import org.rioproject.opstring.OpString
-import org.rioproject.opstring.GlobalAttrs
-import org.rioproject.opstring.ParsedService
-
 /**
  * Defines the semantics for an OperationalString parser
  *
@@ -27,13 +23,7 @@ import org.rioproject.opstring.ParsedService
 interface OpStringParser {
     def List<OpString> parse(source,
                              ClassLoader loader,
-                             boolean verify,
                              String[] defaultExportJars,
                              String[] defaultGroups,
                              loadPath)
-
-    def parseElement(element,
-                     GlobalAttrs global,
-                     ParsedService sDescriptor,
-                     OpString opString) throws Exception
 }

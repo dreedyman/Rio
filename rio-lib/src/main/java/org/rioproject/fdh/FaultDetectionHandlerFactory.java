@@ -17,11 +17,9 @@ package org.rioproject.fdh;
 
 import net.jini.core.lookup.ServiceID;
 import org.rioproject.associations.AssociationDescriptor;
+import org.rioproject.loader.ClassBundleLoader;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.loader.ClassBundleLoader;
-
-import java.util.List;
 
 /**
  * The FaultDetectionHandlerFactory class provides static methods to 
@@ -101,27 +99,12 @@ public final class FaultDetectionHandlerFactory {
         else
             fdhClass = ClassBundleLoader.loadClass(cl, theFdhBundle);
         FaultDetectionHandler fdh = (FaultDetectionHandler)fdhClass.newInstance();
-        theFdhBundle.runKnownMethods(fdh);
         return (fdh);
-    }
-
-    /**
-     * Get the ClassBundle for a FaultDetectionHandler declaration
-     *
-     * @param fdhClassName The class name of the FaultDetectionHandler
-     * @param configArgs List of configuration arguments
-     * @return A ClassBundle created based on the input arguments
-     */
-    public static ClassBundle getClassBundle(final String fdhClassName, final List<String> configArgs) {
-        String[] args = configArgs.toArray(new String[configArgs.size()]);
-        ClassBundle bundle = new ClassBundle(fdhClassName);
-        bundle.addMethod("setConfiguration", new Object[] {args});
-        return(bundle);
     }
 
     private static ClassBundle getClassBundle(ClassBundle cb) {
         if(cb==null)
-            return new ClassBundle("org.rioproject.fdh.AdminFaultDetectionHandler");
+            return new ClassBundle(AdminFaultDetectionHandler.class.getName());
         return cb;
     }
 

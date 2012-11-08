@@ -23,8 +23,8 @@ deployment(name: 'systemRequirements declarations', debug:true) {
     }
 
     systemRequirements(id: "3") {
-        utilization id:'CPU', high: '0.95'
-        utilization id:'Memory', low: 0.1, high: '0.99'
+        utilization id:'CPU', high: 0.95
+        utilization id:'Memory', low: 0.1, high: 0.99
 
         memory available: '4g', capacity: '20g'
         diskspace available: '100g', capacity: '20t'

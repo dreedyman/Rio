@@ -29,7 +29,6 @@ class OpStringNameChangeTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/calculator.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        false,    // verify
                                         null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
