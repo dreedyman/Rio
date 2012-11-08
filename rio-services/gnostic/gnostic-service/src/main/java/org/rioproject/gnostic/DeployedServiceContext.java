@@ -22,7 +22,9 @@ import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.resources.util.ThrowableUtil;
 
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -68,6 +70,13 @@ public class DeployedServiceContext {
             logger.fine("Increment service "+getNameForLogging(serviceElement));
         try {
             opMgr.increment(serviceElement, true, null);
+        } catch(RemoteException e) {
+            if(!ThrowableUtil.isRetryable(e)) {
+                logger.warning("Unable to connect to OperationalStringManager to increment service %s/%s",
+                               serviceElement.getOperationalStringName(), serviceElement.getName());
+            } else {
+                logger.log(Level.WARNING, e, "While trying to increment [%s] services", serviceName);
+            }
         } catch (Throwable t) {
             logger.log(Level.WARNING, t, "While trying to increment [%s] services", serviceName);
         }
@@ -199,7 +208,16 @@ public class DeployedServiceContext {
         ServiceElement serviceElement = entry.getKey();
         OperationalStringManager opMgr = entry.getValue();
         try {
-            ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(serviceElement);
+            ServiceBeanInstance[] instances = new ServiceBeanInstance[0];
+            try {
+                instances = opMgr.getServiceBeanInstances(serviceElement);
+            } catch(RemoteException e) {
+                if(!ThrowableUtil.isRetryable(e)) {
+                    logger.warning("Unable to connect to OperationalStringManager for instances of type %s, service: %s/%s",
+                                   type.getName(), serviceElement.getOperationalStringName(), serviceElement.getName());
+                    return services;
+                }
+            }
             StringBuilder sb = new StringBuilder();
             for(ServiceBeanInstance instance : instances) {
                 if(sb.length()>0) {
@@ -217,6 +235,7 @@ public class DeployedServiceContext {
                 logger.finer(sb.toString());
                 services.add((T)instance.getService());
             }
+
         } catch (Throwable t) {
             logger.log(Level.WARNING, t, "Getting service instances of type %s", type.getName());
         }
