@@ -20,6 +20,7 @@ import org.rioproject.watch.GaugeWatch;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  */
@@ -31,6 +32,7 @@ public class TestServiceImpl implements TestService {
     private AtomicInteger notificationCount = new AtomicInteger();
     private AtomicInteger rhsExecutedCount = new AtomicInteger();
     private GaugeWatch notification;
+    private Logger logger = Logger.getLogger(TestServiceImpl.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) {
         loadWatch = new GaugeWatch("load");
@@ -51,16 +53,14 @@ public class TestServiceImpl implements TestService {
         loadWatch.addValue(load);
         boolean verified = loadWatch.getLastCalculableValue() == load;
         if (!verified)
-            System.err.println(
-                "---> ["+instanceID+"] was [" + loadWatch.getLastCalculableValue() +
-                "], SET FAILED [" + load + "] " +
-                "breached=" +
-                loadWatch.getThresholdManager().getThresholdCrossed());
+            logger.warning("---> ["+instanceID+"] was [" + loadWatch.getLastCalculableValue() +
+                           "], SET FAILED [" + load + "] " +
+                           "breached=" +
+                           loadWatch.getThresholdManager().getThresholdCrossed());
         else
-            System.err.println(
-                "---> ["+name+"-"+instanceID+"] Load now [" + load + "] " +
-                "breached=" +
-                loadWatch.getThresholdManager().getThresholdCrossed());
+            logger.info("---> ["+name+"-"+instanceID+"] Load now [" + load + "] " +
+                        "breached=" +
+                        loadWatch.getThresholdManager().getThresholdCrossed());
     }
 
     public void setStatus(Status status) {

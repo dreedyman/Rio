@@ -74,7 +74,7 @@ public class SLAWatchesRulesTest {
             System.out.println("Could not create the KnowledgeBuilder using sla-watches.drl properly");
             for (KnowledgeBuilderError error : kbuilder.getErrors()) {
                 StringBuilder sb = new StringBuilder();
-                for(int i : error.getErrorLines()) {
+                for(int i : error.getLines()) {
                     if(sb.length()>0)
                         sb.append(", ");
                     sb.append(i);

@@ -57,6 +57,11 @@ public class ITNotificationUsingArtifactTest {
     }
 
     @Test
+    public void runTests() {
+        verifyChangingFileBasedRuleWorks();
+        verifyChangingRuleLoadedFromClassPathWorks();
+    }
+
     public void verifyChangingFileBasedRuleWorks() {
         Assert.assertNotNull(testManager);
 
@@ -109,7 +114,6 @@ public class ITNotificationUsingArtifactTest {
         sleep(8000);
     }
 
-    @Test
     public void verifyChangingRuleLoadedFromClassPathWorks() {
         Throwable thrown;
         Assert.assertNotNull(testManager);
@@ -148,6 +152,7 @@ public class ITNotificationUsingArtifactTest {
     }
 
     private static void writeRule(int count1, int count2, String name) throws IOException {
+        System.out.println("Write rule: "+name+" with lower bound: "+count1+" and upper bound: "+count2);
         File ruleFile = new File(System.getProperty("user.dir"), name);
         Writer output = new BufferedWriter(new FileWriter(ruleFile));
         output.write(getRulesContent(count1, count2));

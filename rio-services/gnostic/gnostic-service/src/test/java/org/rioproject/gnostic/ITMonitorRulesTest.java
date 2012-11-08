@@ -16,7 +16,6 @@
 package org.rioproject.gnostic;
 
 import junit.framework.Assert;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,10 +53,16 @@ public class ITMonitorRulesTest {
     public static void setup() throws Exception {
         gnostic = (Gnostic)testManager.waitForService(Gnostic.class);
         testManager.waitForService(TestService.class, "S1");
-        Assert.assertNotNull(gnostic);        
+        Assert.assertNotNull(gnostic);
     }
 
     @Test
+    public void runTests() throws ExecutionException, InterruptedException {
+        verifyScalingUpWorks();
+        verifyScalingDownWorks();
+        verifyScalingMultipleServicesWorks();
+    }
+
     @SuppressWarnings("unchecked")
     public void verifyScalingUpWorks() {
         Throwable thrown = null;
@@ -74,13 +79,13 @@ public class ITMonitorRulesTest {
             Assert.assertEquals("RuleMaps should be the same", ruleMap, ruleMappings.get(0));
             List<TestService> services = null;
             for(int i=1; i<COUNT; i++) {
-                services = (List<TestService>) testManager.getServices(TestService.class,
-                                                                       "S1");
+                services = (List<TestService>) testManager.getServices(TestService.class, "S1");
                 increaseLoad(services);
                 int z=0;
                 for(TestService t : s1Instances)
                     z++;
-                System.out.println("===> Num S1="+z);
+                if(services.size()==5)
+                System.out.println("[scale-up-test]          Num S1="+z);
             }
             Assert.assertNotNull(services);
             Assert.assertEquals("Should have 5 services", 5, services.size());
@@ -91,11 +96,9 @@ public class ITMonitorRulesTest {
         Assert.assertNull(thrown);
     }
 
-    @Test
     @SuppressWarnings("unchecked")
-    public void verifyScalingDownWorks() {
-        List<TestService> services =
-            (List<TestService>)testManager.getServices(TestService.class, "S1");
+    public void verifyScalingDownWorks() throws ExecutionException, InterruptedException {
+        List<TestService> services = (List<TestService>)testManager.getServices(TestService.class, "S1");
         while(services.size()>1) {
             for(TestService s : services) {
                 Throwable thrown = null;
@@ -112,7 +115,8 @@ public class ITMonitorRulesTest {
                 }
                 Assert.assertNull(thrown);                
             }
-            services = (List<TestService>)testManager.getServices(TestService.class);
+            services = (List<TestService>)testManager.getServices(TestService.class, "S1");
+            System.out.println("[scale-down-test]        Num S1="+services.size());
         }
         Throwable thrown = null;
         try {
@@ -131,13 +135,11 @@ public class ITMonitorRulesTest {
         Assert.assertNull(thrown);
     }
 
-    @Test
     @SuppressWarnings("unchecked")
     public void verifyScalingMultipleServicesWorks() {
         Throwable thrown = null;
         try {
-            testManager.deploy(new File("src"+File.separator+"test"+File.separator+"opstring",
-                                        "test-opstring1.groovy"));
+            testManager.deploy(new File("src"+File.separator+"test"+File.separator+"opstring", "test-opstring1.groovy"));
             try {
                 s1Instances = getServices("S1", TestService.class, testManager.getGroups());
                 s2Instances = getServices("S2", TestService.class, testManager.getGroups());
@@ -155,8 +157,7 @@ public class ITMonitorRulesTest {
             Assert.assertEquals("RuleMap #1 should be the same", ruleMap, ruleMaps.get(0));
             Assert.assertEquals("RuleMap #2 should be the same", ruleMap2, ruleMaps.get(1));
             for(int i=1; i<COUNT; i++) {
-                List<TestService> services =
-                    (List<TestService>)testManager.getServices(TestService.class);
+                List<TestService> services = (List<TestService>)testManager.getServices(TestService.class);
                 increaseLoad(services);
                 int z=0;
                 for(TestService t : s1Instances)
@@ -164,20 +165,19 @@ public class ITMonitorRulesTest {
                 int y=0;
                 for(TestService t : s2Instances)
                     y++;
-                System.out.println("===> Num S1="+z+", S2="+y);
+                System.out.println("[scale-up-multiple-test] Num S1="+z+", S2="+y);
             }
-            List<TestService> services =
-                (List<TestService>)testManager.getServices(TestService.class, "S1");
+            List<TestService> services = (List<TestService>)testManager.getServices(TestService.class, "S1");
 
             Assert.assertEquals("Should have 5 S1 services", 5, services.size());
-            services =
-                (List<TestService>)testManager.getServices(TestService.class, "S2");
+            services = (List<TestService>)testManager.getServices(TestService.class, "S2");
             Assert.assertEquals("Should have 3 S2 services", 3, services.size());
         } catch (Exception e) {
             e.printStackTrace();
             thrown = e;
         }
         Assert.assertNull(thrown);
+        System.out.println("Completed verifyScalingMultipleServicesWorks");
     }
 
     private void increaseLoad(Collection<TestService> services ) {
@@ -201,8 +201,7 @@ public class ITMonitorRulesTest {
         while(!hasRule(gnostic.get(), ruleMap))
             Thread.sleep(1000);
         added = gnostic.add(ruleMap);
-        Assert.assertFalse("Should have returned false for " +
-                           "re-adding an already existing RuleMap", added);
+        Assert.assertFalse("Should have returned false for re-adding an already existing RuleMap", added);
     }
 
     private static RuleMap getRuleMap() {
@@ -245,14 +244,10 @@ public class ITMonitorRulesTest {
         return hasRule;
     }
 
-    private <T> Iterable<T> getServices(String name,
-                                        Class<T> service,
-                                        String... groups) throws
-                                                          ExecutionException,
-                                                          InterruptedException {
+    private <T> Iterable<T> getServices(String name, Class<T> service, String... groups) throws ExecutionException,
+                                                                                                InterruptedException {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Iterable<T>> future =
-            executor.submit(new AssociationHelper<T>(name, service, groups));
+        Future<Iterable<T>> future = executor.submit(new AssociationHelper<T>(name, service, groups));
         return future.get();
     }
 
@@ -261,9 +256,7 @@ public class ITMonitorRulesTest {
         AssociationMgmt mgr;
         String serviceName;
 
-        AssociationHelper(String serviceName,
-                          Class<T> serviceClass,
-                          String... groups) {
+        AssociationHelper(String serviceName, Class<T> serviceClass, String... groups) {
             this.serviceName = serviceName;
             mgr = new AssociationMgmt();
             services = mgr.addAssociationDescriptor(AssociationDescriptor.create(serviceName,

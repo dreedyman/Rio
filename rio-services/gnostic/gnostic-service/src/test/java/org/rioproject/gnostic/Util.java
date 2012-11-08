@@ -146,8 +146,8 @@ public class Util {
     private static boolean hasRule(List<RuleMap> ruleMaps, String rule) {
         boolean hasRule = false;
         for (RuleMap ruleMap : ruleMaps) {
-            System.out.println("===> rule: " + ruleMap.getRuleDefinition().getResource());
-            if (ruleMap.getRuleDefinition().getResource().indexOf(rule) != -1) {
+            System.out.println("rule: " + ruleMap.getRuleDefinition().getResource());
+            if (ruleMap.getRuleDefinition().getResource().contains(rule)) {
                 hasRule = true;
                 break;
             }
@@ -159,7 +159,7 @@ public class Util {
         try {
             Thread.sleep(l);
         } catch (InterruptedException e) {
-
+            e.printStackTrace();
         }
     }
 

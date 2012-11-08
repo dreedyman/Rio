@@ -177,10 +177,13 @@ public class DroolsCEPManager implements CEPSession {
     }
 
     private void generateAndApplyChangeSet(List<String> rules) throws IOException {
+
+        //http://anonsvn.jboss.org/repos/labs/labs/jbossrules/trunk/drools-api/src/main/resources/change-set-1.0.0.xsd
         StringBuilder sb = new StringBuilder();
 		sb.append("<change-set xmlns='http://drools.org/drools-5.0/change-set'").append("\n");
 		sb.append("    xmlns:xs='http://www.w3.org/2001/XMLSchema-instance'").append("\n");
-		sb.append("    xs:schemaLocation='http://drools.org/drools-5.0/change-set drools-change-set-5.0.xsd' >").append("\n");
+		sb.append("    xs:schemaLocation='http://drools.org/drools-5.0/change-set ");
+        sb.append("http://anonsvn.jboss.org/repos/labs/labs/jbossrules/trunk/drools-api/src/main/resources/change-set-1.0.0.xsd' >").append("\n");
 		sb.append("    <add> ").append("\n");
         for(String rule : rules)
             sb.append("        <resource source=\'").append(rule).append("\' type='DRL' />").append("\n");

@@ -139,7 +139,7 @@ public class DroolsFactory {
                 logger.severe(String.format("Could not create the KnowledgeBuilder using %s properly", resource));
                 for (KnowledgeBuilderError error : builder.getErrors()) {
                     logger.severe(String.format("At lines %s, got error %s",
-                                                Arrays.toString(error.getErrorLines()),
+                                                Arrays.toString(error.getLines()),
                                                 error.getMessage()));
                 }
                 return null;

@@ -19,10 +19,12 @@ import edu.emory.mathcs.util.classloader.URIClassLoader;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.drools.agent.KnowledgeAgent;
-import org.drools.core.util.DroolsClassLoader;
 import org.drools.io.ResourceFactory;
 import org.drools.io.impl.ResourceChangeScannerImpl;
-import org.rioproject.associations.*;
+import org.rioproject.associations.Association;
+import org.rioproject.associations.AssociationDescriptor;
+import org.rioproject.associations.AssociationMgmt;
+import org.rioproject.associations.AssociationType;
 import org.rioproject.bean.Initialized;
 import org.rioproject.bean.PreDestroy;
 import org.rioproject.core.jsb.ServiceBeanContext;
@@ -31,8 +33,8 @@ import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.util.StringUtil;
 import org.rioproject.sla.RuleMap;
+import org.rioproject.util.StringUtil;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -164,8 +166,9 @@ public class GnosticImpl implements Gnostic {
                 return false;
         }
         synchronized(ruleMapsInProcess) {
-            if(ruleMapsInProcess.contains(ruleMap))
+            if(ruleMapsInProcess.contains(ruleMap)) {
                 return false;
+            }
             ruleMapsInProcess.add(ruleMap);
         }
         logger.info("Adding %s", ruleMap);
@@ -230,6 +233,7 @@ public class GnosticImpl implements Gnostic {
     @PreDestroy
     @SuppressWarnings("unused")
     public void cleanup() {
+        logger.info("Gnostic shutting down");
         try {
             context.getAssociationManagement().terminate();
             ResourceFactory.getResourceChangeNotifierService().stop();
@@ -398,7 +402,7 @@ public class GnosticImpl implements Gnostic {
         }
     }
 
-    class RulesClassLoader extends ClassLoader implements DroolsClassLoader {
+    class RulesClassLoader extends ClassLoader /*implements DroolsClassLoader*/ {
 
         RulesClassLoader(ClassLoader parent) {
             super(parent);
@@ -408,7 +412,7 @@ public class GnosticImpl implements Gnostic {
             return getParent().getResourceAsStream(name);
         }
 
-        public Class<?> fastFindClass(String name) {
+        /*public Class<?> fastFindClass(String name) {
             Class<?> cl = null;
             try {
                 cl = loadClass(name, false);
@@ -416,7 +420,7 @@ public class GnosticImpl implements Gnostic {
                 //
             }
             return cl;
-        }
+        }*/
 
         public Class<?> loadClass(String name, boolean resolve) throws
                                                                 ClassNotFoundException {
