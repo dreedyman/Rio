@@ -374,15 +374,6 @@ public class InstantiatorResource {
     }
 
     /**
-     * Clear the Table of ServiceElement instances
-     */
-    void clearServiceElementInstances() {
-        synchronized(serviceElementMap) {
-            serviceElementMap.clear();
-        }
-    }
-
-    /**
      * Get the number of ServiceElement instances
      *
      * @param sElem The ServiceElement to count
@@ -625,15 +616,6 @@ public class InstantiatorResource {
     }
 
     /**
-     * Get the host name of the ServiceBeanInstantiator
-     *
-     * @return The host name of the ServiceBeanInstantiator
-     */
-    String getHostName() {
-        return (resourceCapability.getHostName());
-    }
-
-    /**
      * Set the dynamicEnabled attribute to <code>true</code> indicating that
      * the ServiceBeanInstantiator is available for the provisioning of
      * ServiceBean objects which have a provisioning type of <i>dynamic </i>
@@ -841,7 +823,7 @@ public class InstantiatorResource {
                  */
                 boolean provisionableCaps = true;
                 for (SystemComponent sysReq : unsupportedReqs) {
-                    if (sysReq.getStagedSoftware().length == 0) {
+                    if (sysReq.getStagedSoftware()==null) {
                         provisionableCaps = false;
                         break;
                     }
@@ -864,8 +846,8 @@ public class InstantiatorResource {
                 IOException failed = null;
                 try {
                     for (SystemComponent sysReq : unsupportedReqs) {
-                        StagedSoftware[] downloads = sysReq.getStagedSoftware();
-                        for(StagedSoftware download : downloads) {
+                        StagedSoftware download = sysReq.getStagedSoftware();
+                        if(download!=null) {
                             int size = download.getDownloadSize();
                             if(size < 0) {
                                 logger.warning("Unable to obtain download size for "+
@@ -970,37 +952,6 @@ public class InstantiatorResource {
         for (PlatformCapability pCap : pCaps) {
             if (pCap instanceof
                 StorageCapability) {
-                try {
-                    StorageCapability storage = (StorageCapability) pCap;
-                    supports = storage.supports(requestedSize);
-                    break;
-                } catch (Throwable t) {
-                    return (false);
-                }
-            }
-        }
-        return (supports);
-    }
-
-    /**
-     * Determine if an Array of PlatformCapability components contains a
-     * StorageCapability and if that StorageCapability has the requested disk
-     * space size available
-     *
-     * @param requestedSize The size to verify
-     * @param requirement The class to ensure compatibility
-     * @param pCaps Array of PlatformCapability instances to use
-     *
-     * @return Return true if the Array of PlatformCapability components
-     *         contains a StorageCapability and if that StorageCapability has
-     *         the requested disk space size available
-     */
-    boolean supportsSystemRequirement(int requestedSize,
-                                      Class requirement,
-                                      PlatformCapability[] pCaps) {
-        boolean supports = false;
-        for (PlatformCapability pCap : pCaps) {
-            if (pCap.getClass().isAssignableFrom(requirement)) {
                 try {
                     StorageCapability storage = (StorageCapability) pCap;
                     supports = storage.supports(requestedSize);
