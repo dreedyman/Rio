@@ -117,6 +117,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private final static WrappedLogger logger = WrappedLogger.getLogger(JSBDelegate.class.getName());
     /** Result from loading the service */
     protected ServiceBeanLoader.Result loadResult;
+    private AtomicBoolean isDiscarded = new AtomicBoolean(false);
 
     /**
      * Create a JSBDelegate
@@ -181,6 +182,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
             }
         }
         return(serviceRecord);
+    }
+
+    public boolean isActive() {
+        return !isDiscarded.get();
     }
 
     /**
@@ -727,6 +732,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                 iterations++;
             }
         }
+        isDiscarded.set(true);
         if(serviceRecord==null) {
             logger.warning("Discarding [%s] service, has no ServiceRecord", sElem.getName());
             return;

@@ -26,7 +26,7 @@ import org.rioproject.event.EventHandler;
 
 /**
  * Defines the semantics of a class that the Cybernode delegates management of
- * created service instances
+ * created service instances to.
  *
  * @author Dennis Reedy
  */
@@ -118,4 +118,11 @@ public interface ServiceBeanDelegate {
      * Terminate the ServiceBeanDelegate and the represented service
      */
     void terminate();
+
+    /**
+     * If the service is active (not discarded).
+     *
+     * @return {@code true} if the service is not discarded.
+     */
+    boolean isActive();
 }
