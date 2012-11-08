@@ -343,20 +343,6 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                     } else if(item.detailsComponent instanceof ClassBundle) {
                         ClassBundle bundle = (ClassBundle)item.detailsComponent;
                         buffer.append(bundle.toString()).append("<br>");
-                        Object[] args = bundle.getMethodObjects("setConfiguration");
-                        if(args!=null) {
-                            for (Object arg : args) {
-                                if (arg instanceof String[]) {
-                                    buffer.append("<br><strong>Configuration</strong><br>");
-                                    String[] config = (String[]) arg;
-                                    for (String aConfig : config) {
-                                        if (aConfig.equals("-"))
-                                            continue;
-                                        buffer.append(aConfig).append("<br>");
-                                    }
-                                }
-                            }
-                        }
                     } else {
                         buffer.append(item.attributeDescription.getText());
                         buffer.append("<br<br>");
@@ -685,9 +671,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                     break;
                 case 19: /* Loggers */
                     tableItem = new ServiceAttributeTableItem();
-                    java.util.Map map = sElem.getServiceBeanConfig().getConfigurationParameters();
-                    LoggerConfig[] loggerConfigs =
-                        (LoggerConfig[])map.get(ServiceBeanConfig.LOGGER);
+                    LoggerConfig[] loggerConfigs = sElem.getServiceBeanConfig().getLoggerConfigs();
                     if(loggerConfigs == null) {
                         value = NOT_DECLARED;
                         addMore = false;
