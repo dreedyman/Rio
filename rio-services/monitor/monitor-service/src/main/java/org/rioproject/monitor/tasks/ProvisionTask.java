@@ -16,9 +16,9 @@
 package org.rioproject.monitor.tasks;
 
 import net.jini.core.event.UnknownEventException;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.DeployedService;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceProvisionEvent;
 import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.*;
@@ -29,6 +29,7 @@ import org.rioproject.resources.util.ThrowableUtil;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RMIClassLoader;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 
 /**
@@ -99,10 +100,17 @@ public class ProvisionTask implements Runnable {
                 }
                 /* Send a ProvisionFailureEvent */
                 if (thrown != null || result != 0) {
-                    processProvisionFailure(new ProvisionFailureEvent(context.getEventSource(),
-                                                                      context.getProvisionRequest().getServiceElement(),
-                                                                      failureReason,
-                                                                      thrown));
+                    try {
+                        processProvisionFailure(new ProvisionFailureEvent(context.getEventSource(),
+                                                                          context.getProvisionRequest().getServiceElement(),
+                                                                          failureReason,
+                                                                          thrown));
+                    } catch (RejectedExecutionException e) {
+                        logger.log(Level.WARNING, thrown,
+                                   "RejectedExecutionException: Unable to submit ProvisionFailureEvent for %s." +
+                                   "Provision Failure reason: %s.",
+                                   LoggingUtil.getLoggingName(context.getProvisionRequest()));
+                    }
                 }
                 /* If we have a ServiceProvisionListener,
                  * notify the listener */
