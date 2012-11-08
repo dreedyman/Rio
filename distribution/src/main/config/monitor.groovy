@@ -79,10 +79,4 @@ class MonitorConfig {
                                                                      null))
         return  new BasicProxyPreparer(false, serviceListenerConstraints, null);        
     }
-
-    ClassBundle getFaultDetectionHandler() {
-        def fdh = org.rioproject.fdh.HeartbeatFaultDetectionHandler.class.name
-        def fdhConf = ['-', fdh+'.heartbeatPeriod=10000', fdh+'.heartbeatGracePeriod=10000']
-        return FaultDetectionHandlerFactory.getClassBundle(fdh, fdhConf)
-    } 
 }

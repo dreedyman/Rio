@@ -60,10 +60,4 @@ class CybernodeConfig {
         def loggers = []
         return loggers as LoggerConfig[]
     }
-
-    ClassBundle getFaultDetectionHandler() {
-        def fdh = org.rioproject.fdh.HeartbeatFaultDetectionHandler.class.name
-        def fdhConf = ['-', fdh+'.heartbeatPeriod=10000', fdh+'.heartbeatGracePeriod=10000']
-        return FaultDetectionHandlerFactory.getClassBundle(fdh, fdhConf)
-    }
 }
