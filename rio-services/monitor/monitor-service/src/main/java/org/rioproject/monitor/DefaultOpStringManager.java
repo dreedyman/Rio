@@ -933,8 +933,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#trim
     */
-    public int trim(ServiceElement sElem, int trimUp)
-        throws OperationalStringException {
+    public int trim(ServiceElement sElem, int trimUp) throws OperationalStringException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
         if (!isActive())
@@ -951,10 +950,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 stateChanged(false);
                 ServiceElement updatedElement = svcElemMgr.getServiceElement();
                 updateServiceElements(new ServiceElement[]{updatedElement});
-                ProvisionMonitorEvent event =
-                    new ProvisionMonitorEvent(serviceProxy,
-                                              ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED,
-                                              updatedElement);
+                ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
+                                                                        ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED,
+                                                                        updatedElement);
                 eventProcessor.processEvent(event);
             }
             return (numTrimmed);
@@ -968,24 +966,19 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#decrement
     */
-    public void decrement(ServiceBeanInstance instance,
-                          boolean recommended,
-                          boolean destroy) throws OperationalStringException {
+    public void decrement(ServiceBeanInstance instance, boolean recommended, boolean destroy)
+        throws OperationalStringException {
         if (instance == null)
             throw new IllegalArgumentException("instance is null");
         if (!isActive())
-            throw new OperationalStringException(
-                                                    "not the primary OperationalStringManager");
+            throw new OperationalStringException("not the primary OperationalStringManager");
         ServiceElementManager svcElemMgr =
             getServiceElementManager(instance);
         if (svcElemMgr == null)
-            throw new OperationalStringException("Unmanaged " +
-                                                 "ServiceBeanInstance " +
-                                                 "[" + instance.toString() + "]",
-                                                 false);
-        ServiceElement sElem = svcElemMgr.decrement(instance,
-                                                    recommended,
-                                                    destroy);
+            throw new OperationalStringException("Unmanaged ServiceBeanInstance [" + instance.toString() + "]", false);
+        ServiceElement sElem = svcElemMgr.decrement(instance, recommended, destroy);
+        if(sElem==null)
+            return;
         stateChanged(false);
         updateServiceElements(new ServiceElement[]{sElem});
         ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
