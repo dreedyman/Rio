@@ -1,4 +1,4 @@
-deployment(name:'Events Example', debug:'yes') {
+deployment(name:'Events Example') {
     groups('rio')
 
     resources(id: 'impl.jars', 'events/lib/hello-event.jar')

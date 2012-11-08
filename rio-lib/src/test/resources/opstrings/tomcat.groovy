@@ -1,4 +1,4 @@
-deployment(name:'Tomcat Deploy', debug:true) {
+deployment(name:'Tomcat Deploy') {
     groups('rio')
     serviceExec(name:'Tomcat') {
         software(name:'Tomcat', version:'6.0.16', removeOnDestroy: true) {

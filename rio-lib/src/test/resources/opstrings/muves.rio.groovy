@@ -5,7 +5,7 @@ def String getCodebase() {
     return 'http://'+InetAddress.getLocalHost().getHostAddress()+":9000"
 }
 
-deployment(name:'Muves', debug:true) {
+deployment(name:'Muves') {
 
     codebase getCodebase() 
 

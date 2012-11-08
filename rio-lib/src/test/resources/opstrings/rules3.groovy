@@ -2,7 +2,7 @@ import org.rioproject.config.Constants
 
 import java.util.logging.Level
 
-deployment(name: 'Test using service and rules decl', debug:true) {
+deployment(name: 'Test using service and rules decl') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 

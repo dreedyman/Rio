@@ -1,5 +1,5 @@
 
-deployment(name:'Locators', debug:true) {
+deployment(name:'Locators') {
 
     locators 'machine1', 'machine2'
 

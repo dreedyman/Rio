@@ -57,7 +57,6 @@ public class OpStringLoader {
                                                                     "jsk-dl.jar",
                                                                     "jmx-lookup.jar",
                                                                     "serviceui.jar"};
-
     /**
      * Simple constructor that creates an {@code OpStringLoader}
      */
@@ -99,13 +98,13 @@ public class OpStringLoader {
      * @throws IllegalArgumentException if the groups parameter is null or
      * if the groups parameter is a zero-length array
      */
-    public void setDefaultGroups(String[] groups) {
+    public void setDefaultGroups(String... groups) {
         if(groups==null)
             throw new IllegalArgumentException("groups is null");
         if(groups.length == 0)
             throw new IllegalArgumentException("groups is empty");
         this.groups = new String[groups.length];
-        System.arraycopy(this.groups, 0, groups, 0, groups.length);
+        System.arraycopy(groups, 0, this.groups, 0, groups.length);
     }
 
     /**
@@ -229,32 +228,5 @@ public class OpStringLoader {
         }
         return(url);
     }
-
-    public static void main(String[] args) {
-        try {
-            OpStringLoader loader = new OpStringLoader();
-            if(args.length==0) {
-                BufferedReader br =
-                new BufferedReader(new InputStreamReader(System.in));
-                try {
-                    String pwd = System.getProperty("user.dir");
-                    System.out.println("["+pwd+"]");
-
-                    System.out.print("Enter OperationalString " +
-                                     "to parse> ");
-                    String opstring = br.readLine();
-                    loader.parseOperationalString(opstring);
-                } catch(Throwable t) {
-                    t.printStackTrace();
-                }
-
-            } else {
-                loader.parseOperationalString(args[0]);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
 }

@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-deployment(name: 'systemRequirements declarations', debug:true) {
+deployment(name: 'systemRequirements declarations') {
 
     groups('blah')
 
