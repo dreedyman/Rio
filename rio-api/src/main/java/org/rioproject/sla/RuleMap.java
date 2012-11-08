@@ -23,18 +23,17 @@ import java.util.*;
  */
 public class RuleMap implements Serializable {
     private RuleDefinition ruleDefinition;
-    private final List<ServiceDefinition> services =
-        new ArrayList<ServiceDefinition>();
+    private final List<ServiceDefinition> services = new ArrayList<ServiceDefinition>();
 
-    public void addRuleMapping(RuleDefinition rule, List<ServiceDefinition> services) {
+    public void addRuleMapping(RuleDefinition rule, ServiceDefinition... serviceDefinitions) {
         if(rule==null)
             throw new IllegalArgumentException("rule cannot be null");
         if(services==null)
-            throw new IllegalArgumentException("services cannot be null");
-        if(services.isEmpty())
-            throw new IllegalArgumentException("services cannot be empty");
+            throw new IllegalArgumentException("serviceDefinitions cannot be null");
+        if(serviceDefinitions.length==0)
+            throw new IllegalArgumentException("serviceDefinitions cannot be empty");
         this.ruleDefinition = rule;
-        this.services.addAll(services);
+        Collections.addAll(this.services, serviceDefinitions);
     }
 
     public RuleDefinition getRuleDefinition() {
@@ -81,13 +80,11 @@ public class RuleMap implements Serializable {
         private String resource;
         private String ruleClassPath;
 
-        public RuleDefinition(String resource) {
-            this.resource = resource;
+        public RuleDefinition() {
         }
 
-        public RuleDefinition(String resource, String ruleClassPath) {
+        public RuleDefinition(String resource) {
             this.resource = resource;
-            this.ruleClassPath = ruleClassPath;
         }
 
         public String getResource() {
@@ -96,6 +93,14 @@ public class RuleMap implements Serializable {
 
         public String getRuleClassPath() {
             return ruleClassPath;
+        }
+
+        public void setRuleClassPath(String ruleClassPath) {
+            this.ruleClassPath = ruleClassPath;
+        }
+
+        public void setResource(String resource) {
+            this.resource = resource;
         }
 
         @Override
