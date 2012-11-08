@@ -15,22 +15,18 @@
  */
 package org.rioproject.opstring;
 
-import org.rioproject.deploy.ServiceRequirementProbe;
-import org.rioproject.deploy.SystemComponent;
-import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.deploy.StagedData;
-import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.associations.AssociationDescriptor;
+import org.rioproject.deploy.StagedData;
+import org.rioproject.deploy.SystemComponent;
+import org.rioproject.exec.ExecDescriptor;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.sla.RuleMap;
 import org.rioproject.sla.ServiceLevelAgreements;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * The ServiceElement object provides context on how to provision and instantiate 
@@ -66,7 +62,7 @@ public class ServiceElement implements Serializable {
     private ServiceBeanConfig sbConfig;    
     /** Array of AssociationDescriptor instances, describing associations the 
      * ServiceElement has to other services */
-    private AssociationDescriptor[] associations;        
+    private final List<AssociationDescriptor> associations = new ArrayList<AssociationDescriptor>();
     /** The ClassBundle for the ServiceBean */
     private ClassBundle componentBundle;
     /** Array of ClassBundles containing the export codebase */
@@ -146,15 +142,13 @@ public class ServiceElement implements Serializable {
      * @param sbConfig The ServiceBeanConfig to set
      * @param slAgreements Attributes relating to SLAs
      * @param exports ClassBundle[] of JARs to use as the export codebase
-     * @param fdhBundle ClassBundle for the FaultDetectionHandler
      */
     public ServiceElement(ProvisionType provisionType,
                           ServiceBeanConfig sbConfig,
                           ServiceLevelAgreements slAgreements,
-                          ClassBundle[] exports,
-                          ClassBundle fdhBundle) {
+                          ClassBundle[] exports) {
 
-        this(provisionType, sbConfig, slAgreements, exports, fdhBundle, null);
+        this(provisionType, sbConfig, slAgreements, exports, null, null);
     }
 
     /**
@@ -171,8 +165,8 @@ public class ServiceElement implements Serializable {
                           ServiceBeanConfig sbConfig,
                           ServiceLevelAgreements slAgreements,
                           ClassBundle[] exports,
-                          ClassBundle fdhBundle,
                           /* Optional args */
+                          ClassBundle fdhBundle,
                           ClassBundle componentBundle) {
 
         if(sbConfig==null)
@@ -549,8 +543,7 @@ public class ServiceElement implements Serializable {
         ClassBundle[] bundle;
         if(exportBundles!=null) {
             bundle = new ClassBundle[exportBundles.length];
-            System.arraycopy(exportBundles, 0, bundle, 0,
-                             exportBundles.length);
+            System.arraycopy(exportBundles, 0, bundle, 0, exportBundles.length);
         } else {
             bundle = new ClassBundle[0];
         }
@@ -598,18 +591,31 @@ public class ServiceElement implements Serializable {
      * objectives that are to be monitored, metered and acted on by policy handlers
      */
     public ServiceLevelAgreements getServiceLevelAgreements() {
-        return (slAgreements==null?new ServiceLevelAgreements():slAgreements);
+        if(slAgreements==null)
+            slAgreements=new ServiceLevelAgreements();
+        return slAgreements;
     }
 
     /**
      * Set the associations for the service
      * 
-     * @param assocDescs An Array of AssociationDescriptor objects
+     * @param associationDescriptors An Array of AssociationDescriptor objects
      */
-    public void setAssociationDescriptors(AssociationDescriptor... assocDescs) {
-        if(assocDescs!=null) {
-            this.associations = new AssociationDescriptor[assocDescs.length];
-            System.arraycopy(assocDescs, 0, associations, 0, associations.length);
+    @Deprecated
+    public void setAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
+        if(associationDescriptors!=null) {
+            Collections.addAll(associations, associationDescriptors);
+        }
+    }
+
+    /**
+     * Add {@code AssociationDescriptor} for the service
+     *
+     * @param associationDescriptors An Array of AssociationDescriptor objects
+     */
+    public void addAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
+        if(associationDescriptors!=null) {
+            Collections.addAll(associations, associationDescriptors);
         }
     }
 
@@ -620,12 +626,7 @@ public class ServiceElement implements Serializable {
      * AssociationDescriptor objects, this method returns a zero-length array
      */
     public AssociationDescriptor[] getAssociationDescriptors() {
-        if(associations==null) 
-            return(new AssociationDescriptor[0]);
-        AssociationDescriptor[] aDescs = 
-            new AssociationDescriptor[associations.length];
-        System.arraycopy(associations, 0, aDescs, 0, associations.length);
-        return(aDescs);
+        return associations.toArray(new AssociationDescriptor[associations.size()]);
     }
     
     /**
