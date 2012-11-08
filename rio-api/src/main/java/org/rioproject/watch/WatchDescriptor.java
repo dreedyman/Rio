@@ -43,6 +43,23 @@ public class WatchDescriptor implements Serializable {
      * Create a WatchDescriptor
      *
      * @param name The name of the Watch
+     * @param period The period the Watch should use to collect data (in
+     * milliseconds). If the period is 0, the default period of 10 seconds will
+     * be used
+     *
+     * @throws IllegalArgumentException if the name argument is null
+     */
+    public WatchDescriptor(String name, long period) {
+        if(name == null)
+            throw new IllegalArgumentException("name is null");
+        this.name = name;
+        this.period = (period==0?DEFAULT_PERIOD:period);
+    }
+
+    /**
+     * Create a WatchDescriptor
+     *
+     * @param name The name of the Watch
      * @param property The bean property to invoke to obtain a value to record
      * in the Watch.
      * @param period The period the Watch should use to collect data (in
