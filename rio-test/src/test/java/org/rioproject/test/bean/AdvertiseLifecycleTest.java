@@ -155,7 +155,7 @@ public class AdvertiseLifecycleTest {
         descriptor.setMatchOnName(true);
         descriptor.setOperationalStringName(element2.getOperationalStringName());
         descriptor.setGroups(testManager.getGroups());
-        element1.setAssociationDescriptors(descriptor);
+        element1.addAssociationDescriptors(descriptor);
         OpString opString = new OpString("FooBar", null);
         opString.addService(element1);
         opString.addService(element2);
