@@ -151,7 +151,7 @@ public class SystemRequirements implements Serializable {
     public boolean hasProvisionableCapability() {
         SystemComponent[] sysComponents = getSystemComponents();
         for (SystemComponent sysComp : sysComponents) {
-            if (sysComp.getStagedSoftware().length > 0)
+            if (sysComp.getStagedSoftware()!=null)
                 return (true);
         }
         return (false);

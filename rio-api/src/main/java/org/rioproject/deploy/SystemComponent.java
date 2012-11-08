@@ -16,7 +16,6 @@
 package org.rioproject.deploy;
 
 import org.rioproject.exec.ExecDescriptor;
-import org.rioproject.system.capability.PlatformCapability;
 
 import java.io.Serializable;
 import java.util.*;
@@ -28,31 +27,22 @@ import java.util.*;
  */
 public class SystemComponent implements Serializable {
     @SuppressWarnings("unused")
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 2L;
     private final String name;
     private final String className;
     private final Map<String, Object> attributes = new HashMap<String, Object>();
-    private final List<StagedSoftware> stagedSoftware = new ArrayList<StagedSoftware>();
+    private StagedSoftware stagedSoftware;
     private ExecDescriptor execDescriptor;
-
-    /**
-     * Create a SystemComponent
-     */
-    public SystemComponent(final PlatformCapability pCap) {
-        name = pCap.getName();
-        className = pCap.getClass().getName();
-        attributes.putAll(pCap.getCapabilities());
-    }
 
     /**
      * Create a SystemComponent
      *
      * @param name A short name, typically the name of the class sans the
      * package name. Must not be null
-     * @param attrs Collection of name value pairs to evaluate, optional
+     * @param attributes Collection of name value pairs to evaluate, optional
      */
-    public SystemComponent(final String name, final Map<String, Object> attrs) {
-        this(name, null, attrs);
+    public SystemComponent(final String name, final Map<String, Object> attributes) {
+        this(name, null, attributes);
     }
 
     /**
@@ -63,17 +53,17 @@ public class SystemComponent implements Serializable {
      * not be null if the classname parameter is null
      * @param className Either the class simple name or the fully qualified classname,
      * must not be null if the name parameter is null
-     * @param attrs Collection of name value pairs to evaluate, optional
+     * @param attributes Collection of name value pairs to evaluate, optional
      */
     public SystemComponent(final String name,
                            final String className,
-                           final Map<String, Object> attrs) {
+                           final Map<String, Object> attributes) {
         if (name == null && className == null)
             throw new IllegalArgumentException("name and className are null");
         this.className = className;
         this.name = name;
-        if (attrs != null)
-            attributes.putAll(attrs);
+        if (attributes != null)
+            this.attributes.putAll(attributes);
     }
 
     /**
@@ -109,18 +99,18 @@ public class SystemComponent implements Serializable {
      *
      * @param staged Associated StagedSoftware
      */
-    public void setStagedSoftware(final StagedSoftware... staged) {
-        stagedSoftware.addAll(Arrays.asList(staged));
+    public void setStagedSoftware(final StagedSoftware staged) {
+        stagedSoftware = staged;
     }
 
     /**
      * Get the StagedSoftware for this system component
      *
      * @return The associated StagedSoftware. If there is no
-     * StagedSoftware, return a zero-length array
+     * StagedSoftware, return null
      */
-    public StagedSoftware[] getStagedSoftware() {
-        return (stagedSoftware.toArray(new StagedSoftware[stagedSoftware.size()]));
+    public StagedSoftware getStagedSoftware() {
+        return stagedSoftware;
     }
 
     /**

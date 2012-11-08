@@ -24,12 +24,12 @@ import java.net.URL;
 
 /**
  * The StagedData class defines the attributes needed to download and stage
- * data (and artifact typically software or data)
+ * data (an artifact typically software or data)
  *
  * @author Dennis Reedy
  */
 public class StagedData implements Serializable {
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 2L;
     /**
      * The location to download from
      */
@@ -61,91 +61,6 @@ public class StagedData implements Serializable {
      * Optional permissions to set on the staged data.
      */
     private String perms;
-    /**
-     * Optional target file name. If not set the target file name will be the
-     * same as the source file name
-     */
-    //private String targetFileName;
-
-    /**
-     * Create a StagedData instance
-     *
-     * @param location The location to download from, including the source file
-     * @param installRoot The directory for installation
-     * @param unarchive Whether to unarchive the download
-     */
-    public StagedData(String location,
-                      String installRoot,
-                      boolean unarchive) {
-        this(location, installRoot, unarchive, true, true, null);
-    }
-
-    /**
-     * Create a StagedData instance
-     *
-     * @param location The location to download from, including the source file
-     * @param installRoot The directory for installation
-     * @param unarchive Whether to unarchive the download
-     * @param removeOnDestroy True if the artifact should be removed on
-     * ServiceBean termination, false if not
-     */
-    public StagedData(String location,
-                      String installRoot,
-                      boolean unarchive,
-                      boolean removeOnDestroy) {
-        this(location, installRoot, unarchive, removeOnDestroy, true, null);
-    }
-
-    /**
-     * Create a StagedData instance
-     *
-     * @param location The location to download from, including the source file
-     * @param installRoot The directory for installation
-     * @param unarchive Whether to unarchive the download
-     * @param removeOnDestroy True if the artifact should be removed on
-     * ServiceBean termination, false if not
-     * @param overwrite True to overwrite a file at the target download
-     * location with the same name
-     */
-    public StagedData(String location,
-                      String installRoot,
-                      boolean unarchive,
-                      boolean removeOnDestroy,
-                      boolean overwrite) {
-        this(location, installRoot, unarchive, removeOnDestroy, overwrite, null);
-    }
-
-    /**
-     * Create a StagedData instance
-     *
-     * @param location The location to download from, including the source file
-     * @param installRoot The directory for installation
-     * @param unarchive Whether to unarchive the download
-     * @param removeOnDestroy True if the artifact should be removed on
-     * ServiceBean termination, false if not
-     * @param overwrite True to overwrite a file at the target download
-     * location with the same name
-     * @param perms Optional permissions to set on the staged data. The
-     * permissions need to be in the form of what the <tt>chmod</tt> command
-     * uses
-     */
-    public StagedData(String location,
-                      String installRoot,
-                      boolean unarchive,
-                      boolean removeOnDestroy,
-                      boolean overwrite,
-                      String perms) {
-        if (location == null)
-            throw new IllegalArgumentException("location is null");
-        if (installRoot == null)
-            throw new IllegalArgumentException("installRoot is null");
-        this.location = location;
-        this.installRoot = installRoot;
-        this.unarchive = unarchive;
-        this.removeOnDestroy = removeOnDestroy;
-        this.overwrite = overwrite;
-        this.perms = perms;
-    }
 
     /**
      * Get the download size
@@ -188,6 +103,12 @@ public class StagedData implements Serializable {
         return (location);
     }
 
+    public void setLocation(String location) {
+        if (location == null)
+            throw new IllegalArgumentException("location is null");
+        this.location = location;
+    }
+
     /**
      * Get the installation root
      *
@@ -198,6 +119,28 @@ public class StagedData implements Serializable {
      */
     public String getInstallRoot() {
         return (installRoot);
+    }
+
+    public void setInstallRoot(String installRoot) {
+        if (installRoot == null)
+            throw new IllegalArgumentException("installRoot is null");
+        this.installRoot = installRoot;
+    }
+
+    public void setUnarchive(boolean unarchive) {
+        this.unarchive = unarchive;
+    }
+
+    public void setRemoveOnDestroy(boolean removeOnDestroy) {
+        this.removeOnDestroy = removeOnDestroy;
+    }
+
+    public void setOverwrite(boolean overwrite) {
+        this.overwrite = overwrite;
+    }
+
+    public void setPerms(String perms) {
+        this.perms = perms;
     }
 
     /**
