@@ -82,7 +82,7 @@ public abstract class ThresholdManager {
      * @param calculable The Calculable record
      * @param type The type of threshold, breached or cleared
      */
-    protected void notifyListeners(Calculable calculable, int type) {
+    protected void notifyListeners(Calculable calculable, ThresholdType type) {
         ThresholdListener[] tListeners = getThresholdListeners();
         if(logger.isLoggable(Level.FINEST))
             logger.finest(String.format("%s Notify ThresholdListeners, number to notify: %d",

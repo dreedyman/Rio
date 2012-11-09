@@ -16,10 +16,11 @@
 package org.rioproject.sla;
 
 import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventDescriptor;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdEvent;
+import org.rioproject.watch.ThresholdType;
 
 import java.io.Serializable;
 
@@ -42,7 +43,6 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
     private final String hostAddress;
     /** The ServiceBeanInstance */
     private ServiceBeanInstance instance;
-    
 
     /**
      * Creates new SLAThresholdEvent 
@@ -61,7 +61,7 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
                              SLA sla, 
                              String slaPolicyHandlerDescription,
                              String hostAddress, 
-                             int type) {
+                             ThresholdType type) {
         super(source, calculable, sla, type);
         this.sElem = sElem;
         this.slaPolicyHandlerDescription = slaPolicyHandlerDescription;
@@ -86,8 +86,8 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
                              Calculable calculable, 
                              SLA sla, 
                              String slaPolicyHandlerDescription,
-                             String hostAddress, 
-                             int type) {
+                             String hostAddress,
+                             ThresholdType type) {
         this(source, sElem, calculable, sla, slaPolicyHandlerDescription, hostAddress, type);
         this.instance = instance;
     }

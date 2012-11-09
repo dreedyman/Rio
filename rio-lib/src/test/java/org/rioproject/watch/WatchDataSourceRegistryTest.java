@@ -603,7 +603,7 @@ public class WatchDataSourceRegistryTest {
      * of the class is to receive threshold events and log them
      * into a string buffer.
      */
-    private class LoggingThresholdListener implements ThresholdListener {
+    private class LoggingThresholdListener implements SettableThresholdListener {
 
         StringBuffer log;
 
@@ -611,10 +611,8 @@ public class WatchDataSourceRegistryTest {
             this.log = new StringBuffer();
         }
 
-        public void notify(Calculable calculable,
-                           ThresholdValues thresholdValues,
-                           int type) {
-            log.append(type == ThresholdEvent.BREACHED ? "breach(" : "clear(");
+        public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
+            log.append(type == ThresholdType.BREACHED ? "breach(" : "clear(");
             log.append(calculable.getId());
             log.append(":");
             log.append(calculable.getValue());

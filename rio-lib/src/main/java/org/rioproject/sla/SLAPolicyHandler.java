@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +44,7 @@ import java.util.logging.Logger;
  *
  * @author Dennis Reedy
  */
-public class SLAPolicyHandler implements ThresholdListener {
+public class SLAPolicyHandler implements SettableThresholdListener {
     /** The SLA */
     private SLA mySLA;    
     /** Event source object */
@@ -77,7 +76,7 @@ public class SLAPolicyHandler implements ThresholdListener {
      *
      * @param sla The SLA for the SLAPolicyHandler
      */
-    public SLAPolicyHandler(SLA sla) {
+    public SLAPolicyHandler(final SLA sla) {
         mySLA = sla;
         try {
             hostAddress = InetAddress.getLocalHost().getHostAddress();
@@ -97,9 +96,9 @@ public class SLAPolicyHandler implements ThresholdListener {
      * 
      * @throws IllegalArgumentException if any of the parameters are null
      */    
-    public void initialize(Object eventSource,
-                           EventHandler eventHandler,
-                           ServiceBeanContext context) {
+    public void initialize(final Object eventSource,
+                           final EventHandler eventHandler,
+                           final ServiceBeanContext context) {
         if(initialized) {
             if(logger.isLoggable(Level.FINEST))
                 logger.finest("["+getName()+"] "+getClass().getName()+
@@ -144,7 +143,7 @@ public class SLAPolicyHandler implements ThresholdListener {
      * 
      * @param sla The SLA
      */
-    public void setSLA(SLA sla) {
+    public void setSLA(final SLA sla) {
         if(sla==null)
             throw new IllegalArgumentException("sla is null");
         mySLA = sla;
@@ -181,13 +180,15 @@ public class SLAPolicyHandler implements ThresholdListener {
     }
 
     /**
-     * @see org.rioproject.watch.ThresholdListener#getID
+     * Get the ID of the ThresholdWatch the SLAPolicyHandler is associated to
+     *
+     * @return The identifier (ID) of the ThresholdWatch the SLAPolicyHandler is associated to
      */
     public String getID() {
         return(mySLA.getIdentifier());
     }
 
-    protected void setName(String name, long iID) {
+    protected void setName(final String name, final long iID) {
         if(iID > 0) {
             this.name = name+":"+iID;
         } else {
@@ -200,9 +201,11 @@ public class SLAPolicyHandler implements ThresholdListener {
     }
 
     /**
-     * @see org.rioproject.watch.ThresholdListener#setThresholdManager
+     * Set the ThresholdManager and connect to the ThresholdManager
+     *
+     * @param thresholdManager The ThresholdManager to connect to
      */
-    public void setThresholdManager(ThresholdManager thresholdManager) {
+    public void setThresholdManager(final ThresholdManager thresholdManager) {
         if(thresholdManager==null)
             throw new IllegalArgumentException("thresholdManager is null");
         if(this.thresholdManager!=null &&
@@ -239,11 +242,9 @@ public class SLAPolicyHandler implements ThresholdListener {
     /**
      * @see org.rioproject.watch.ThresholdListener#notify
      */
-    public void notify(Calculable calculable, 
-                       ThresholdValues thresholdValues, 
-                       int type) {
+    public void notify(final Calculable calculable, final ThresholdValues thresholdValues, final ThresholdType type) {
         if(logger.isLoggable(Level.FINE)) {            
-            String status = (type == ThresholdEvent.BREACHED?"breached":"cleared");
+            String status = type.name().toLowerCase();
             logger.fine("SLAPolicyHandler.notify() : "+calculable.getId()+", "+
                         "type="+status+" "+
                         "Value="+calculable.getValue()+", "+
@@ -261,7 +262,7 @@ public class SLAPolicyHandler implements ThresholdListener {
      *
      * @param listener The SLAPolicyEventListener
      */
-    public void registerListener(SLAPolicyEventListener listener) {
+    public void registerListener(final SLAPolicyEventListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
         synchronized(listeners) {
@@ -276,7 +277,7 @@ public class SLAPolicyHandler implements ThresholdListener {
      *
      * @param listener The SLAPolicyEventListener
      */
-    public void unregisterListener(SLAPolicyEventListener listener) {
+    public void unregisterListener(final SLAPolicyEventListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
         synchronized(listeners) {
@@ -289,7 +290,7 @@ public class SLAPolicyHandler implements ThresholdListener {
      *
      * @param event The SLAPolicyEvent
      */
-    protected void notifyListeners(SLAPolicyEvent event) {
+    protected void notifyListeners(final SLAPolicyEvent event) {
         synchronized (listeners) {
             for(SLAPolicyEventListener l : listeners)
                 l.policyAction(event);
@@ -303,26 +304,22 @@ public class SLAPolicyHandler implements ThresholdListener {
      * @param tValues The current thresholds
      * @param type The type of threshold event, breached or cleared
      */
-    protected void sendSLAThresholdEvent(Calculable calculable, 
-                                         ThresholdValues tValues, 
-                                         int type) {
+    protected void sendSLAThresholdEvent(final Calculable calculable,
+                                         final ThresholdValues tValues,
+                                         final ThresholdType type) {
         try {
-            double range[] = new double[]{tValues.getCurrentLowThreshold(), 
-                                          tValues.getCurrentHighThreshold()};
+            double range[] = new double[]{tValues.getCurrentLowThreshold(), tValues.getCurrentHighThreshold()};
             SLA sla = new SLA(mySLA.getIdentifier(), range);
-            SLAThresholdEvent event =
-                new SLAThresholdEvent(eventSource,
-                                      context.getServiceElement(),
-                                      context.getServiceBeanManager().getServiceBeanInstance(),
-                                      calculable,
-                                      sla,
-                                      getDescription(),
-                                      hostAddress,
-                                      type);
-            String sType =
-                (type == ThresholdEvent.BREACHED?"BREACHED":"CLEARED");
-            SLAPolicyEvent localEvent =
-                new SLAPolicyEvent(this, sla, "THRESHOLD_"+sType);
+            SLAThresholdEvent event = new SLAThresholdEvent(eventSource,
+                                                            context.getServiceElement(),
+                                                            context.getServiceBeanManager().getServiceBeanInstance(),
+                                                            calculable,
+                                                            sla,
+                                                            getDescription(),
+                                                            hostAddress,
+                                                            type);
+            String sType = type.name();
+            SLAPolicyEvent localEvent = new SLAPolicyEvent(this, sla, "THRESHOLD_"+sType);
             localEvent.setSLAThresholdEvent(event);
             notifyListeners(localEvent);
             
@@ -349,9 +346,7 @@ public class SLAPolicyHandler implements ThresholdListener {
                     /* */
                     break;
                 } catch(Exception e) {
-                    logger.log(Level.WARNING,
-                               "Notifying SLAThresholdEvent consumers",
-                               e);
+                    logger.log(Level.WARNING, "Notifying SLAThresholdEvent consumers", e);
                 }
             }
         }

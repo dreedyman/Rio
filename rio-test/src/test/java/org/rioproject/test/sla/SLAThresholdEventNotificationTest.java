@@ -18,13 +18,17 @@ package org.rioproject.test.sla;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.event.*;
+import org.rioproject.event.DynamicEventConsumer;
+import org.rioproject.event.EventDescriptor;
+import org.rioproject.event.RemoteServiceEvent;
+import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.rioproject.watch.Calculable;
+import org.rioproject.watch.ThresholdType;
 
 @RunWith(RioTestRunner.class)
 public class SLAThresholdEventNotificationTest {
@@ -97,9 +101,9 @@ public class SLAThresholdEventNotificationTest {
             SLAThresholdEvent slaEvent = (SLAThresholdEvent)event;
             SLA sla = slaEvent.getSLA();
             Calculable c = slaEvent.getCalculable();
-            String type = slaEvent.getType()==SLAThresholdEvent.BREACHED?"BREACHED":"CLEARED ";
+            String type = slaEvent.getThresholdType().name();
             System.out.println(type+" current: "+c.getValue()+", low: " + sla.getLowThreshold() + ", high: " + sla.getHighThreshold());
-            if(slaEvent.getType()==SLAThresholdEvent.BREACHED) {
+            if(slaEvent.getThresholdType()== ThresholdType.BREACHED) {
                 if(c.getValue()>sla.getHighThreshold())
                     upperBreachNotification = true;
                 if(c.getValue()<sla.getLowThreshold())

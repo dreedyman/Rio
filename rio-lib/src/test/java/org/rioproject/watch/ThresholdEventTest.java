@@ -44,22 +44,6 @@ public class ThresholdEventTest  {
     }
 
     /**
-     * Tests the <code>BREACHED</code> field.
-     */
-    @Test
-    public void testBreached() {
-        Assert.assertTrue(ThresholdEvent.BREACHED != ThresholdEvent.CLEARED);
-    }
-
-    /**
-     * Tests the <code>CLEARED</code> field.
-     */
-    @Test
-    public void testCleared() {
-        Assert.assertTrue(ThresholdEvent.CLEARED != ThresholdEvent.BREACHED);
-    }
-
-    /**
      * Tests the <code>ThresholdEvent(Object)</code> constructor.
      */
     @Test
@@ -76,7 +60,7 @@ public class ThresholdEventTest  {
         Assert.assertSame(obj, event.getSource());
         Assert.assertSame(null, event.getCalculable());
         Assert.assertSame(null, event.getThresholdValues());
-        Assert.assertEquals(0, event.getType());
+        Assert.assertEquals(null, event.getThresholdType());
 
         try {
             new ThresholdEvent(null);
@@ -102,14 +86,11 @@ public class ThresholdEventTest  {
          *   type:              BREACHED, CLEARED, 0, 12345
          */
 
-        final Object[] sources = new Object[] {
-                new Object(), null};
-        final Calculable[] calculables = new Calculable[] {
-                new Calculable(), null};
-        final ThresholdValues[] tvs = new ThresholdValues[] {
-                new ThresholdValues(), null};
-        final Integer[] types = ArrayUtils.asObjects(new int[] {
-                ThresholdEvent.BREACHED, ThresholdEvent.CLEARED, 0, 12345});
+        final Object[] sources = new Object[] { new Object(), null};
+        final Calculable[] calculables = new Calculable[] {new Calculable(), null};
+        final ThresholdValues[] tvs = new ThresholdValues[] { new ThresholdValues(), null};
+        final ThresholdType[] types = new ThresholdType[] {
+                ThresholdType.BREACHED, ThresholdType.CLEARED};
 
         Object[][] combinations = ArrayUtils.combinations(new Object[][] {
                 sources, calculables, tvs, types});
@@ -117,22 +98,20 @@ public class ThresholdEventTest  {
             Object source = combination[0];
             Calculable calculable = (Calculable) combination[1];
             ThresholdValues tv = (ThresholdValues) combination[2];
-            int type = (Integer) combination[3];
+            ThresholdType type = (ThresholdType) combination[3];
 
             if (source == null) {
                 try {
                     new ThresholdEvent(source, calculable, tv, type);
-                    Assert.fail("IllegalArgumentException expected"
-                                + " but not thrown");
+                    Assert.fail("IllegalArgumentException expected but not thrown");
                 } catch (IllegalArgumentException e) {
                 }
             } else {
-                ThresholdEvent event =
-                    new ThresholdEvent(source, calculable, tv, type);
+                ThresholdEvent event = new ThresholdEvent(source, calculable, tv, type);
                 Assert.assertSame(source, event.getSource());
                 Assert.assertSame(calculable, event.getCalculable());
                 Assert.assertSame(tv, event.getThresholdValues());
-                Assert.assertEquals(type, event.getType());
+                Assert.assertEquals(type, event.getThresholdType());
             }
         }
     }
@@ -149,26 +128,7 @@ public class ThresholdEventTest  {
     }
 
     /**
-     * Tests the <code>getType()</code> method.
-     */
-    @Test
-    public void testGetType() {
-
-        /* States:
-         *   Type: original, modified
-         * Argument combinations:
-         *   N/A
-         */
-
-        ThresholdEvent event = new ThresholdEvent(new Object());
-        Assert.assertEquals(0, event.getType());
-
-        event.setType(1);
-        Assert.assertEquals(1, event.getType());
-    }
-
-    /**
-     * Tests the <code>setType(int)</code> method.
+     * Tests the <code>setType(Type)</code> method.
      */
     @Test
     public void testSetType() {
@@ -181,17 +141,11 @@ public class ThresholdEventTest  {
 
         ThresholdEvent event = new ThresholdEvent(new Object());
 
-        event.setType(ThresholdEvent.BREACHED);
-        Assert.assertEquals(ThresholdEvent.BREACHED, event.getType());
+        event.setThresholdType(ThresholdType.BREACHED);
+        Assert.assertEquals(ThresholdType.BREACHED, event.getThresholdType());
 
-        event.setType(ThresholdEvent.CLEARED);
-        Assert.assertEquals(ThresholdEvent.CLEARED, event.getType());
-
-        event.setType(0);
-        Assert.assertEquals(0, event.getType());
-
-        event.setType(12345);
-        Assert.assertEquals(12345, event.getType());
+        event.setThresholdType(ThresholdType.CLEARED);
+        Assert.assertEquals(ThresholdType.CLEARED, event.getThresholdType());
     }
 
     /**

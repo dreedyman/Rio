@@ -57,7 +57,7 @@ public class BoundedThresholdManager extends ThresholdManager {
                     direction = CLEARED;
                     /* the next 2 lines produce a cleared event*/
                     thresholdValues.incThresholdClearedCount();
-                    notifyListeners(calculable, ThresholdEvent.CLEARED);
+                    notifyListeners(calculable, ThresholdType.CLEARED);
                     checkLowThresholdBreach(calculable);
                 } else {
                     checkHighThresholdBreach(calculable);
@@ -67,7 +67,7 @@ public class BoundedThresholdManager extends ThresholdManager {
                     thresholdCrossed = false;
                     direction = CLEARED;
                     thresholdValues.incThresholdClearedCount();
-                    notifyListeners(calculable, ThresholdEvent.CLEARED);
+                    notifyListeners(calculable, ThresholdType.CLEARED);
                     checkHighThresholdBreach(calculable);
                 } else {                    
                     checkLowThresholdBreach(calculable);
@@ -90,7 +90,7 @@ public class BoundedThresholdManager extends ThresholdManager {
             thresholdCrossed = true;
             direction = BREACHED_UPPER;
             thresholdValues.incThresholdBreachedCount();
-            notifyListeners(calculable, ThresholdEvent.BREACHED);
+            notifyListeners(calculable, ThresholdType.BREACHED);
         }
         if(logger.isLoggable(Level.FINEST) && calculable.getId().equals("load"))
             logger.log(Level.FINEST,
@@ -110,7 +110,7 @@ public class BoundedThresholdManager extends ThresholdManager {
             thresholdCrossed = true;
             direction = BREACHED_LOWER;
             thresholdValues.incThresholdBreachedCount();
-            notifyListeners(calculable, ThresholdEvent.BREACHED);
+            notifyListeners(calculable, ThresholdType.BREACHED);
         }
         if(logger.isLoggable(Level.FINEST) && calculable.getId().equals("load"))
             logger.log(Level.FINEST, "["

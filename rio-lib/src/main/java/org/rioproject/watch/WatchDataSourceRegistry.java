@@ -156,8 +156,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
     /**
      * @see org.rioproject.watch.WatchRegistry#addThresholdListener
      */
-    public void addThresholdListener(String id,
-                                     ThresholdListener thresholdListener) {
+    public void addThresholdListener(String id, ThresholdListener thresholdListener) {
         if(id==null)
             throw new IllegalArgumentException("id is null");
         if(thresholdListener==null)
@@ -188,8 +187,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
     /**
      * @see org.rioproject.watch.WatchRegistry#removeThresholdListener
      */
-    public void removeThresholdListener(String id,
-                                        ThresholdListener thresholdListener) {
+    public void removeThresholdListener(String id, ThresholdListener thresholdListener) {
         if(thresholdListenerTable.containsKey(id)) {
             Collection<ThresholdListener> collection = thresholdListenerTable.get(id);
             collection.remove(thresholdListener);
@@ -210,13 +208,14 @@ public class WatchDataSourceRegistry implements WatchRegistry {
             Collection<ThresholdListener> collection = thresholdListenerTable.get(tWatch.getId());
             for (ThresholdListener tListener : collection) {
                 if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Associate Watch [" + tWatch.getId() + "] to "
-                                  + "[" + tListener.getClass().getName() + "]");
+                    logger.finest("Associate Watch ["+tWatch.getId()+"] to ["+tListener.getClass().getName()+"]");
                 if (tListener instanceof SLAPolicyHandler) {
-                    tWatch.setThresholdValues(
-                        ((SLAPolicyHandler) tListener).getSLA());
+                    SLAPolicyHandler slaPolicyHandler = (SLAPolicyHandler)tListener;
+                    tWatch.setThresholdValues(slaPolicyHandler.getSLA());
                 }
-                tListener.setThresholdManager(tWatch.getThresholdManager());
+                if(tListener instanceof SettableThresholdListener) {
+                    ((SettableThresholdListener)tListener).setThresholdManager(tWatch.getThresholdManager());
+                }
             }
         }
     }

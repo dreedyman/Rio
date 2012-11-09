@@ -1319,15 +1319,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     private class DeadlockedThreadPolicyHandler implements ThresholdListener {
 
-        public String getID() {
-            return "Thread Deadlock Detector";
-        }
-
-        public void setThresholdManager(ThresholdManager thresholdManager) {
-            // implemented for interface compatibility
-        }
-
-        public void notify(Calculable calculable, ThresholdValues thresholdValues, int type) {
+        public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
             double[] range = new double[]{
                 thresholdValues.getCurrentLowThreshold(),
                 thresholdValues.getCurrentHighThreshold()

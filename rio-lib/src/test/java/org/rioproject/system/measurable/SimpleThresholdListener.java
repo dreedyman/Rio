@@ -15,29 +15,19 @@
  */
 package org.rioproject.system.measurable;
 
-import org.rioproject.watch.Calculable;
-import org.rioproject.watch.ThresholdListener;
-import org.rioproject.watch.ThresholdManager;
-import org.rioproject.watch.ThresholdValues;
+import org.rioproject.watch.*;
 
 /**
  * A ThresholdListener used for testing
  */
 public class SimpleThresholdListener implements ThresholdListener {
-    int type;
+    ThresholdType type;
 
-    public int getType() {
+    public ThresholdType getType() {
         return type;
     }
 
-    public String getID() {
-        return "foo";
-    }
-
-    public void setThresholdManager(ThresholdManager thresholdManager) {
-    }
-
-    public void notify(Calculable calculable, ThresholdValues thresholdValues, int type) {
+    public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
         this.type = type;
     }
 }

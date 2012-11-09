@@ -55,28 +55,16 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
         this.serviceConsumer = serviceConsumer;
     }
 
-    /**
-     * @see org.rioproject.watch.ThresholdListener#getID
-     */
-    public String getID() {
-        return(ComputeResourcePolicyHandler.class.getName());
-    }
 
     public void terminate() {
         terminate.set(true);
     }
 
-    /**
-     * @see org.rioproject.watch.ThresholdListener#setThresholdManager
-     */
-    public void setThresholdManager(ThresholdManager manager) {
-        // implemented for interface compatibility
-    }
 
-    public void notify(Calculable calculable, ThresholdValues thresholdValues, int type) {
+    public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
         if(terminate.get())
             return;
-        String status = (type == ThresholdEvent.BREACHED?"breached":"cleared");
+        String status = type.name().toLowerCase();
         if(logger.isLoggable(Level.FINE))
             logger.fine(String.format("Threshold=%s, Status=%s, Value=%f, Low=%f, High=%f",
                                       calculable.getId(),
@@ -85,7 +73,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                                       thresholdValues.getLowThreshold(),
                                       thresholdValues.getHighThreshold()));
 
-        if(type==ThresholdEvent.BREACHED)  {
+        if(type==ThresholdType.BREACHED)  {
             double tValue = calculable.getValue();
             if(tValue>thresholdValues.getCurrentHighThreshold()) {
                 if(serviceConsumer!=null) {
@@ -105,7 +93,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                 }
 
             }
-        } else if(type== ThresholdEvent.CLEARED) {
+        } else if(type== ThresholdType.CLEARED) {
             if(serviceConsumer!=null) {
                 serviceConsumer.updateMonitors();
             }

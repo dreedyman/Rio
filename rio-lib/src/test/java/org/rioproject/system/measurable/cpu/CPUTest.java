@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.SimpleThresholdListener;
-import org.rioproject.watch.ThresholdEvent;
 import org.rioproject.watch.ThresholdValues;
 
 /**
@@ -49,7 +48,7 @@ public class CPUTest {
         cpu.checkValue();
         double utilization = cpu.getUtilization();
         Assert.assertTrue("Utilization should be > 0", utilization>0);
-        Assert.assertTrue(l.getType()== ThresholdEvent.BREACHED);
+        Assert.assertTrue(l.getType()== null);
     }
 
     @Test
@@ -62,6 +61,6 @@ public class CPUTest {
         cpu.checkValue();
         double utilization = cpu.getUtilization();
         Assert.assertTrue("Utilization should be > 0", utilization>0);
-        Assert.assertTrue(l.getType()== ThresholdEvent.BREACHED);
+        Assert.assertTrue(l.getType()==null);
     }
 }

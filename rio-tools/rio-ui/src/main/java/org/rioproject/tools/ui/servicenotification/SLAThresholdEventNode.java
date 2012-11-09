@@ -18,7 +18,6 @@ package org.rioproject.tools.ui.servicenotification;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.Constants;
-import org.rioproject.watch.ThresholdEvent;
 
 import java.text.NumberFormat;
 
@@ -69,7 +68,7 @@ public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEv
     }
 
     public String getStatus() {
-        return getEvent().getType() == ThresholdEvent.BREACHED?"BREACHED":"CLEARED";
+        return getEvent().getThresholdType().name();
     }
 
     @Override

@@ -18,6 +18,7 @@ package org.rioproject.sla;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.UnknownEventException;
 import org.rioproject.event.EventNotificationAdapter;
+import org.rioproject.watch.ThresholdType;
 
 import javax.management.MBeanNotificationInfo;
 import javax.management.Notification;
@@ -31,12 +32,9 @@ import java.rmi.RemoteException;
  *
  * @author Dennis Reedy
  */
-public class SLAThresholdEventAdapter extends EventNotificationAdapter
-    implements SLAPolicyEventListener {
-    public static final String EVENT_TYPE_BREACHED =
-        "sla.SLAThresholdEvent.breached";
-    public static final String EVENT_TYPE_CLEARED =
-        "sla.SLAThresholdEvent.cleared";
+public class SLAThresholdEventAdapter extends EventNotificationAdapter implements SLAPolicyEventListener {
+    public static final String EVENT_TYPE_BREACHED = "sla.SLAThresholdEvent.breached";
+    public static final String EVENT_TYPE_CLEARED = "sla.SLAThresholdEvent.cleared";
 
     protected static final MBeanNotificationInfo NOTIFICATION_INFO =
         new MBeanNotificationInfo(
@@ -100,9 +98,9 @@ public class SLAThresholdEventAdapter extends EventNotificationAdapter
 
     private void buildAndSend(SLAThresholdEvent event) {
         String type=null;
-        if(event.getType() == SLAThresholdEvent.BREACHED) {
+        if(event.getThresholdType() == ThresholdType.BREACHED) {
             type = EVENT_TYPE_BREACHED;
-        } else if(event.getType() == SLAThresholdEvent.CLEARED) {
+        } else if(event.getThresholdType() == ThresholdType.CLEARED) {
             type = EVENT_TYPE_CLEARED;
         }
 
@@ -118,7 +116,7 @@ public class SLAThresholdEventAdapter extends EventNotificationAdapter
         return(event.getServiceElement().getName()+"."+
                    event.getServiceElement().getOperationalStringName()+" "+
                    "SLA ["+event.getSLA().getIdentifier()+"] "+
-                   (event.getType() == SLAThresholdEvent.BREACHED?"BREACHED":
+                   (event.getThresholdType() == ThresholdType.BREACHED?"BREACHED":
                     "CLEARED")+" " +
                     "low="+event.getSLA().getCurrentLowThreshold()+", " +
                     "high="+event.getSLA().getCurrentHighThreshold());

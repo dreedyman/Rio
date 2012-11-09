@@ -21,21 +21,20 @@ import java.io.Serializable;
 
 /**
  * The ThresholdEvent extends RemoteServiceEvent allowing for remote
- * notification of a Threshold being crossed
+ * notification of a Threshold being crossed.
+ *
+ * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
-    static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 2L;
     public static final long ID = 1000000000;
     /** Holds value of property Calculable */
     private Calculable calculable;
     /** Holds value of property ThresholdValue. */
     private ThresholdValues thresholdValues;
-    /** Indicates a threshold that has been breached */
-    public static final int BREACHED = 0;
-    /** Indicates a threshold that has been cleared */
-    public static final int CLEARED = 1;
     /** The type of the ThresholdEvent, breached or cleared */
-    private int type;
+    private ThresholdType type;
     /** Optional detail describing the ThresholdEvent */
     private String detail;
 
@@ -50,7 +49,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
 
     /**
      * Creates new ThresholdEvent
-     * 
+     *
      * @param source The event source
      * @param calculable Value of property calculable
      * @param thresholdValues Value of property thresholdValues
@@ -59,7 +58,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
     public ThresholdEvent(Object source, 
                           Calculable calculable,
                           ThresholdValues thresholdValues,
-                          int type) {
+                          ThresholdType type) {
         this(source, calculable, thresholdValues, type, null);
     }
 
@@ -75,7 +74,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
     public ThresholdEvent(Object source,
                           Calculable calculable,
                           ThresholdValues thresholdValues,
-                          int type,
+                          ThresholdType type,
                           String detail) {
         super(source);
         this.calculable = calculable;
@@ -89,16 +88,16 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
      * 
      * @return type Whether the threshold has been breached or cleared
      */
-    public int getType() {
+    public ThresholdType getThresholdType() {
         return (type);
     }
 
     /**
      * Setter for property type
-     * 
+     *
      * @param type Whether the threshold has been breached or cleared
      */
-    public void setType(int type) {
+    public void setThresholdType(ThresholdType type) {
         this.type = type;
     }
 

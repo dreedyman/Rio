@@ -388,9 +388,7 @@ public class ThresholdWatchTest extends WatchTest {
             this.log = log;
         }
 
-        public void notify(Calculable calculable,
-                           ThresholdValues thresholdValues,
-                           int type) {
+        public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
 
             /*String status =
                 (type == ThresholdEvent.BREACHED ? "breached" : "cleared");
@@ -400,17 +398,13 @@ public class ThresholdWatchTest extends WatchTest {
                 "low [" + thresholdValues.getCurrentLowThreshold() + "] " +
                 "high [" + thresholdValues.getCurrentHighThreshold() + "]");*/
             StringBuilder buf = new StringBuilder();
-            buf.append(type == ThresholdEvent.BREACHED ? "breach(" : "clear(");
+            buf.append(type == ThresholdType.BREACHED ? "breach(" : "clear(");
             buf.append(calculable.getId()).append(",");
             buf.append(calculable.getValue()).append(",");
             buf.append(thresholdValues.getLowThreshold()).append(",");
             buf.append(thresholdValues.getHighThreshold());
             buf.append(")");
             log.append(buf);
-        }
-
-        public void setThresholdManager(ThresholdManager thresholdManager) {
-            log.append("setThresholdManager()");
         }
 
         public String getID() {

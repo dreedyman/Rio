@@ -33,8 +33,8 @@ import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.watch.Calculable;
-import org.rioproject.watch.ThresholdEvent;
 import org.rioproject.watch.ThresholdManager;
+import org.rioproject.watch.ThresholdType;
 import org.rioproject.watch.ThresholdValues;
 
 import java.rmi.NoSuchObjectException;
@@ -328,7 +328,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                     getSLA().getLowerThresholdDampeningTime());
 
             if(logger.isLoggable(Level.FINE)) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 buffer.append("[").append(getName()).append("] ");
                 buffer.append(update?"UPDATED ":"INIT ");
                 buffer.append("ScalingPolicyHandler [").append(getID()).append("] properties: ");
@@ -349,19 +349,15 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
      * @see org.rioproject.watch.ThresholdListener#notify
      */
     @Override
-    public void notify(Calculable calculable, 
-                       ThresholdValues thresholdValues,
-                       int type) {
+    public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
         if(!connected) {
             if(logger.isLoggable(Level.FINE))
-                logger.fine("["+getName()+"] "+
-                            "ScalingPolicyHandler ["+getID()+"]: "+
-                            "has been disconnected");
+                logger.fine("["+getName()+"] ScalingPolicyHandler ["+getID()+"]: has been disconnected");
             return;
         }
         lastCalculable = calculable;
         lastThresholdValues = thresholdValues;
-        String status = (type == ThresholdEvent.BREACHED? "breached":"cleared");
+        String status = type.name().toLowerCase();
         if(logger.isLoggable(Level.INFO))
             logger.info("["+getName()+"] "+
                         "ScalingPolicyHandler ["+getID()+"]: "+
@@ -376,7 +372,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                            "unable to process event");
             return;
         }
-        if(type == ThresholdEvent.BREACHED) {
+        if(type == ThresholdType.BREACHED) {
             double tValue = calculable.getValue();
             try {
                 totalServices = getTotalKnownServices();

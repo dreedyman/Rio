@@ -30,8 +30,8 @@ import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.event.EventHandler;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.watch.Calculable;
-import org.rioproject.watch.ThresholdEvent;
 import org.rioproject.watch.ThresholdManager;
+import org.rioproject.watch.ThresholdType;
 import org.rioproject.watch.ThresholdValues;
 
 import java.rmi.RemoteException;
@@ -223,18 +223,16 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
      * @see org.rioproject.watch.ThresholdListener#notify
      */
     @Override
-    public void notify(Calculable calculable,
-                       ThresholdValues thresholdValues,
-                       int type) {
+    public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
         if(logger.isLoggable(Level.FINE)) {
-            String status = (type == ThresholdEvent.BREACHED? "breached":"cleared");
+            String status = type.name().toLowerCase();
             logger.fine("RelocationPolicyHandler [" + getID() + "]: Threshold ["
                         + calculable.getId() + "] " + status + " value ["
                         + calculable.getValue() + "\n] low ["
                         + thresholdValues.getCurrentLowThreshold() + "]" + " high ["
                         + thresholdValues.getCurrentHighThreshold() + "]");
         }
-        if(type == ThresholdEvent.BREACHED) {
+        if(type == ThresholdType.BREACHED) {
             double tValue = calculable.getValue();
             if(tValue > thresholdValues.getCurrentHighThreshold()) {
                 fireRelocation(upperThresholdDampeningTime, "upper");
