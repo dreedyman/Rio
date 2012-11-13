@@ -170,7 +170,7 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
     /** The Timer to use for scheduling heartbeat timeout tasks */
     private Timer taskTimer;
     /** Component name, used for config and logger */
-    private static final String COMPONENT = 
+    private static final String COMPONENT =
         "org.rioproject.fdh.HeartbeatFaultDetectionHandler";
     /** A Logger */
     static Logger logger = Logger.getLogger(COMPONENT);
@@ -196,14 +196,14 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                                                         DEFAULT_HEARTBEAT_GRACE_PERIOD,
                                                         0,
                                                         Long.MAX_VALUE));
-            ServerSocket defaultServerSocket = 
-                new ServerSocket(0, 
-                                 50, 
-                                 java.net.InetAddress.getLocalHost());            
-            serverSocket = 
+            ServerSocket defaultServerSocket =
+                new ServerSocket(0,
+                                 50,
+                                 java.net.InetAddress.getLocalHost());
+            serverSocket =
                 (ServerSocket)Config.getNonNullEntry(config,
                                                      COMPONENT,
-                                                     SERVER_SOCKET_KEY, 
+                                                     SERVER_SOCKET_KEY,
                                                      ServerSocket.class,
                                                      defaultServerSocket);
 

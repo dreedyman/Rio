@@ -148,7 +148,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
     public static final String INVOCATION_DELAY_KEY = "invocationDelay";
     private long invocationDelay = DEFAULT_INVOCATION_DELAY;
     /** Component name, used for config and logger */
-    private static final String COMPONENT = 
+    private static final String COMPONENT =
         "org.rioproject.fdh.AdminFaultDetectionHandler";
     /** A Logger */
     static Logger logger = Logger.getLogger(COMPONENT);
@@ -162,7 +162,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
         try {
             this.configArgs = new String[configArgs.length];
             System.arraycopy(configArgs, 0, this.configArgs, 0, configArgs.length);
-            
+
             this.config = ConfigurationProvider.getInstance(configArgs);
 
             setInvocationDelay(Config.getLongEntry(config,

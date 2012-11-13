@@ -22,8 +22,7 @@ import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceElement;
 
 /**
- * The FaultDetectionHandlerFactory class provides static methods to 
- * create FaultDetectionHandler instances
+ * The FaultDetectionHandlerFactory class provides static methods to create FaultDetectionHandler instances
  *
  * @author Dennis Reedy
  */
@@ -46,8 +45,7 @@ public final class FaultDetectionHandlerFactory {
      * @throws Exception If there are errors creating the FaultDetectionHandler
      */
     public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(final ServiceElement sElem,
-                                                                            final ClassLoader cl)
-    throws Exception {
+                                                                            final ClassLoader cl) throws Exception {
         return (getFaultDetectionHandler(sElem.getFaultDetectionHandlerBundle(), cl));
     }
     
@@ -67,8 +65,7 @@ public final class FaultDetectionHandlerFactory {
      * @throws Exception If there are errors creating the FaultDetectionHandler
      */
     public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(final AssociationDescriptor aDesc,
-                                                                            final ClassLoader cl)
-    throws Exception {
+                                                                            final ClassLoader cl) throws Exception {
         return (getFaultDetectionHandler(aDesc.getFaultDetectionHandlerBundle(), cl));
     }
     
@@ -90,8 +87,7 @@ public final class FaultDetectionHandlerFactory {
      */
     @SuppressWarnings("unchecked")
     public static FaultDetectionHandler<ServiceID> getFaultDetectionHandler(final ClassBundle fdhBundle,
-                                                                            final ClassLoader cl)
-    throws Exception {
+                                                                            final ClassLoader cl) throws Exception {
         Class fdhClass;
         ClassBundle theFdhBundle = getClassBundle(fdhBundle);
         if(cl==null)
