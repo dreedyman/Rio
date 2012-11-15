@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +42,7 @@ public class PersistentEventManager extends TransientEventManager {
     private static final BlockingQueue<RemoteServiceEvent> eventWriteQ = new LinkedBlockingQueue<RemoteServiceEvent>();
     private final DateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss.SSS");
     private static final Logger logger = Logger.getLogger(PersistentEventManager.class.getName());
+    private final AtomicBoolean initializing = new AtomicBoolean();
 
     @Override
     public void initialize(EventCollectorContext context) throws Exception {
@@ -56,9 +58,11 @@ public class PersistentEventManager extends TransientEventManager {
             }
         }
         List<RemoteServiceEvent> persistedEvents = getPersistedEvents();
+        initializing.set(true);
         if(!persistedEvents.isEmpty()) {
             addRemoteEvents(persistedEvents);
         }
+        initializing.set(false);
         logger.info(String.format("Persistent event directory: %s, have %d persisted events",
                                   persistentEventDirectory.getPath(), getNumberOfCollectedEvents()));
         if(logger.isLoggable(Level.FINEST)) {
@@ -71,12 +75,14 @@ public class PersistentEventManager extends TransientEventManager {
             logger.finest(builder.toString());
         }
         getExecutorService().submit(new EventWriter());
+
     }
 
     @Override
     public void postNotify(RemoteServiceEvent event) {
         super.postNotify(event);
-        eventWriteQ.offer(event);
+        if(!initializing.get())
+            eventWriteQ.offer(event);
     }
 
     @Override
