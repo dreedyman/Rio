@@ -20,6 +20,9 @@ import net.jini.config.ConfigurationException;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.discovery.DiscoveryManagement;
 import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.eventcollector.api.EventCollector;
@@ -32,6 +35,9 @@ import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.AbstractNotificationUtility;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
 import org.rioproject.tools.ui.Constants;
+import org.rioproject.tools.ui.servicenotification.filter.FilterCriteria;
+import org.rioproject.tools.ui.servicenotification.filter.FilterListener;
+import org.rioproject.tools.ui.servicenotification.filter.FilterPanel;
 import org.rioproject.ui.Util;
 
 import javax.swing.*;
@@ -62,15 +68,16 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     private final NumberFormat numberFormatter;
 
     public RemoteEventTable(Configuration config, Properties props) throws ExportException, ConfigurationException {
-        super();
+        super(new BorderLayout(8, 8));
         this.config = config;
-        setLayout(new BorderLayout());
 
         numberFormatter = NumberFormat.getNumberInstance();
         numberFormatter.setGroupingUsed(false);
         numberFormatter.setMaximumFractionDigits(2);
 
         eventConsumerManager = new RemoteEventConsumerManager();
+
+        add(new FilterPanel(new FilterApplier()), BorderLayout.NORTH);
 
         java.util.List<String> columns = new ArrayList<String>();
         columns.add("Deployment");
@@ -82,8 +89,75 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         Icon openIcon   = defaults.getIcon("Tree.expandedIcon");
         Icon closedIcon = defaults.getIcon("Tree.collapsedIcon");
 
+        Color normalBackground = new Color(215,225, 205);
+        Color warningBackground = new Color(255, 245, 205);
+        Color minorBackground = new Color(255, 235, 205);
+        Color criticalColor = new Color(245, 205, 205);
+        Color indeterminateColor = new Color(235, 235, 205);
         eventTable = new JXTreeTable(dataModel);
         eventTable.setRootVisible(false);
+        ColorHighlighter normalHighlighter = new ColorHighlighter(new HighlightPredicate() {
+            @Override
+            public boolean isHighlighted(Component component, ComponentAdapter componentAdapter) {
+                if(!componentAdapter.isLeaf())
+                    return false;
+                Object value = componentAdapter.getValue(0);
+                return value != null && (value.equals("SERVICE_BEAN_DECREMENTED") ||
+                                         value.equals("SERVICE_BEAN_INCREMENTED"));
+            }
+        });
+        normalHighlighter.setBackground(normalBackground);
+
+        ColorHighlighter indeterminateHighlighter = new ColorHighlighter(new HighlightPredicate() {
+            @Override
+            public boolean isHighlighted(Component component, ComponentAdapter componentAdapter) {
+                if(!componentAdapter.isLeaf())
+                    return false;
+                Object value = componentAdapter.getValue(0);
+                return value != null && (value.equals("SERVICE_PROVISIONED") ||
+                                         value.equals("OPSTRING_DEPLOYED") ||
+                                         value.equals("CLEARED"));
+            }
+        });
+        indeterminateHighlighter.setBackground(indeterminateColor);
+
+        ColorHighlighter minorHighlighter = new ColorHighlighter(new HighlightPredicate() {
+            @Override
+            public boolean isHighlighted(Component component, ComponentAdapter componentAdapter) {
+                Object value = componentAdapter.getValue(0);
+                return value != null && (value.equals("OPSTRING_UNDEPLOYED") ||
+                                         value.equals("SERVICE_TERMINATED"));
+            }
+        });
+        minorHighlighter.setBackground(minorBackground);
+
+        ColorHighlighter warningHighlighter = new ColorHighlighter(new HighlightPredicate() {
+            @Override
+            public boolean isHighlighted(Component component, ComponentAdapter componentAdapter) {
+                Object value = componentAdapter.getValue(0);
+                return value != null && value.equals("SERVICE_TERMINATED");
+            }
+        });
+
+        warningHighlighter.setBackground(warningBackground);
+
+        ColorHighlighter criticalHighlighter = new ColorHighlighter(new HighlightPredicate() {
+            @Override
+            public boolean isHighlighted(Component component, ComponentAdapter componentAdapter) {
+                Object value = componentAdapter.getValue(0);
+                return value != null && (value.equals("BREACHED") ||
+                                         value.equals("SERVICE_FAILED") ||
+                                         value.equals("PROVISION_FAILURE"));
+            }
+        });
+        criticalHighlighter.setBackground(criticalColor);
+
+        eventTable.addHighlighter(normalHighlighter);
+        eventTable.addHighlighter(warningHighlighter);
+        eventTable.addHighlighter(criticalHighlighter);
+        eventTable.addHighlighter(minorHighlighter);
+        eventTable.addHighlighter(indeterminateHighlighter);
+
         dataModel.setTreeTable(eventTable);
         eventTable.setShowsRootHandles(false);
         eventTable.setAutoCreateColumnsFromModel(false);
@@ -442,6 +516,16 @@ public class RemoteEventTable extends AbstractNotificationUtility {
             Util.showError(thrown,
                            parent,
                            "Stacktrace for " + label);
+        }
+    }
+
+    class FilterApplier implements FilterListener {
+
+        public void notify(FilterCriteria filterCriteria) {
+            if(filterCriteria==null && dataModel.getFilterCriteria()==null)
+                return;
+            dataModel.setFilterCriteria(filterCriteria);
+            eventTable.expandAll();
         }
     }
 

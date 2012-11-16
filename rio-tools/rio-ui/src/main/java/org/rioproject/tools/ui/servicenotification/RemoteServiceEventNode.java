@@ -18,7 +18,6 @@ package org.rioproject.tools.ui.servicenotification;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.rioproject.event.RemoteServiceEvent;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Date;
 
 /**

@@ -16,17 +16,20 @@
 package org.rioproject.tools.ui;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Gets notification updates.
+ *
+ * @author Dennis Reedy
  */
 public abstract class AbstractNotificationUtility extends JPanel implements NotificationUtility {
     final List<NotificationUtilityListener> listeners = new ArrayList<NotificationUtilityListener>();
 
-    public AbstractNotificationUtility() {
-        super();
+    protected AbstractNotificationUtility(LayoutManager layout) {
+        super(layout);
     }
 
     public void subscribe(NotificationUtilityListener listener) {

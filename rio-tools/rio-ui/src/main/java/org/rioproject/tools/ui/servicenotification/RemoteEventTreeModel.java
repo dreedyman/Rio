@@ -25,6 +25,8 @@ import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLAThresholdEvent;
+import org.rioproject.tools.ui.servicenotification.filter.FilterControl;
+import org.rioproject.tools.ui.servicenotification.filter.FilterCriteria;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +39,9 @@ import java.util.List;
  */
 public class RemoteEventTreeModel extends DefaultTreeTableModel {
     private JXTreeTable treeTable;
+    private FilterCriteria filterCriteria;
     private final RemoteServiceEventNodeComparator comparator = new RemoteServiceEventNodeComparator();
+    private final FilterControl filterControl = new FilterControl();
 
     public RemoteEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
         super(root, columns);
@@ -177,6 +181,63 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
             }
         }
         return dNode;
+    }
+
+    @Override
+    public int getChildCount(Object parent) {
+        if (filterCriteria == null) {
+            return super.getChildCount(parent);
+        } else {
+            int childCount = 0;
+            for (int i=0; i<super.getChildCount(parent); i++) {
+                AbstractMutableTreeTableNode node = (AbstractMutableTreeTableNode)super.getChild(parent, i);
+                if(node instanceof DeploymentNode) {
+                    childCount++;
+                }
+                if(node instanceof RemoteServiceEventNode) {
+                    if(filterControl.include(filterCriteria, node)) {
+                        childCount++;
+                    }
+                }
+            }
+            return childCount;
+        }
+    }
+
+    @Override
+    public Object getChild(Object parent, int index) {
+        if(filterCriteria==null) {
+            return super.getChild(parent, index);
+        } else {
+            int filteredPosition = 0;
+            for (int i = 0, cnt = 0; i < super.getChildCount(parent); i++) {
+                AbstractMutableTreeTableNode node = (AbstractMutableTreeTableNode)super.getChild(parent, i);
+                if(node instanceof DeploymentNode) {
+                    if (cnt++ == index) {
+                        filteredPosition = i;
+                        break;
+                    }
+                }
+                if(node instanceof RemoteServiceEventNode) {
+                    if(filterControl.include(filterCriteria, node)) {
+                        if (cnt++ == index) {
+                            filteredPosition = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            return super.getChild(parent, filteredPosition);
+        }
+    }
+
+    public void setFilterCriteria(FilterCriteria filterCriteria) {
+        this.filterCriteria =  filterCriteria;
+        this.modelSupport.fireNewRoot();
+    }
+
+    public FilterCriteria getFilterCriteria() {
+        return filterCriteria;
     }
 
     public AbstractMutableTreeTableNode getNode(int row) {
