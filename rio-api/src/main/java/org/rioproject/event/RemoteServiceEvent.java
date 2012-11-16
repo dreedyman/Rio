@@ -53,7 +53,7 @@ public class RemoteServiceEvent extends RemoteEvent implements Serializable {
          * EventObject, which rejects a null for <code>source</code>.
          */
         super(source, 0, 0, null);
-        date = new Date(System.nanoTime());
+        date = new Date(System.currentTimeMillis());
     }
 
     /**
