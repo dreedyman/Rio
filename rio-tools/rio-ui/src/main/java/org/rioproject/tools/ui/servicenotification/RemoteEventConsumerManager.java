@@ -121,10 +121,10 @@ public class RemoteEventConsumerManager {
             try {
                 eventCollectorRegistration.disableDelivery();
                 eventCollectorRegistration.getLease().cancel();
-                eventCollectorRegistration = null;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            eventCollectorRegistration = null;
         }
         if(remoteEventListener!=null) {
             remoteEventListener.terminate();
