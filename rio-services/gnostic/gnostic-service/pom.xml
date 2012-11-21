@@ -13,7 +13,7 @@
     <name>Module :: Gnostic Service Implementation</name>
 
     <properties>
-        <drools.version>5.4.0.FINAL</drools.version>
+        <drools.version>5.4.0.Final</drools.version>
     </properties>
 
     <dependencies>
