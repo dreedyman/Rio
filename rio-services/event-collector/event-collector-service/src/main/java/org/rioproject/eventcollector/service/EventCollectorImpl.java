@@ -70,7 +70,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
     private RegistrationManager registrationManager;
     private LeaseFactory leaseFactory;
     private ProxyPreparer listenerPreparer;
-    private final Map<Uuid, RegisteredNotification> registrations = new HashMap<Uuid, RegisteredNotification>();
+    private final Map<Uuid, RegisteredNotification> registrations = new ConcurrentHashMap<Uuid, RegisteredNotification>();
     private final ExecutorService execService = Executors.newSingleThreadExecutor();
     private LeasePeriodPolicy leasePolicy;
     private final LeaseListener leaseListener = new LeaseMonitor();
@@ -296,10 +296,8 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             logger.fine(String.format("Lease duration requested: %d, granted, expires %s, actual: %d",
                                       duration, formatter.format(new Date(lease.getExpiration())), actual));
         }
-
-        synchronized (registrations) {
-            registrations.put(registrationID, registeredNotification);
-        }
+        registrations.put(registrationID, registeredNotification);
+        leaseListener.register(registeredNotification);
         return new Registration((EventCollectorBackend)getServiceProxy(), registrationID, lease);
     }
 
@@ -402,9 +400,10 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             while (true) {
                 RemoteEvent event;
                 try {
+                    logger.info("EventNotifier waiting for an event");
                     event = eventQ.take();
                 } catch (InterruptedException e) {
-                    logger.info("EventNotifier breaking out of main loop");
+                    logger.warning("EventNotifier breaking out of main loop");
                     break;
                 }
                 List<Uuid> removals = new ArrayList<Uuid>();
@@ -426,15 +425,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                                             logger.warning(String.format("Unrecoverable RemoteException returned from listener: %s",
                                                                          e.getMessage()));
                                         }
-                                        try {
-                                            removals.add(entry.getKey());
-                                            cancelDo(entry.getValue().getCookie());
-                                        } catch (Exception ex) {
-                                            if (logger.isLoggable(Level.FINEST))
-                                                logger.log(Level.WARNING,
-                                                           "Removing resource and cancelling Lease",
-                                                           e);
-                                        }
+                                        removals.add(entry.getKey());
                                     }
                                 }
                             } else {
@@ -445,8 +436,9 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
 
                     /* Remove registrations if notifications have failed */
                     for(Uuid uuid : removals) {
-                        synchronized (registrations) {
-                            registrations.remove(uuid);
+                        RegisteredNotification registeredNotification = registrations.remove(uuid);
+                        if(registeredNotification!=null) {
+                            leaseListener.removed(registeredNotification);
                         }
                     }
                 }
@@ -509,23 +501,19 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
     class RegistrationLeaseReaper implements Runnable {
 
         public void run() {
-            Set<Map.Entry<Uuid, RegisteredNotification>> mapEntries;
-                synchronized (registrations) {
-                    mapEntries = registrations.entrySet();
-                }
-                for (Map.Entry<Uuid, RegisteredNotification> entry : mapEntries) {
-                    RegisteredNotification registeredNotification = entry.getValue();
-                    if (!ensure(registeredNotification)) {
-                        if (logger.isLoggable(Level.FINE)) {
-                            logger.log(Level.FINE,
-                                       "Lease expired for resource, cookie {0}",
-                                       new Object[]{registeredNotification.getCookie()});
-                        }
-                        registrations.remove(entry.getKey());
-                        leaseListener.removed(registeredNotification);
+            Set<Map.Entry<Uuid, RegisteredNotification>> mapEntries = registrations.entrySet();
+            for (Map.Entry<Uuid, RegisteredNotification> entry : mapEntries) {
+                RegisteredNotification registeredNotification = entry.getValue();
+                if (!ensure(registeredNotification)) {
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE,
+                                   "Lease expired for resource, cookie {0}",
+                                   new Object[]{registeredNotification.getCookie()});
                     }
+                    registrations.remove(entry.getKey());
+                    leaseListener.removed(registeredNotification);
                 }
-
+            }
         }
 
         private boolean ensure(final LeasedResource resource) {

@@ -42,8 +42,8 @@ public class TransientEventManager extends AbstractEventManager {
             return;
         }
         eventLog.put(key, event);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Added key: %s, we have %d events", key, eventLog.size()));
+        if(logger.isLoggable(Level.FINEST))
+            logger.finest(String.format("Added key: %s, we have %d events", key, eventLog.size()));
     }
 
     @Override
