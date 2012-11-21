@@ -22,8 +22,7 @@ import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
  *
  * @author Dennis Reedy
  */
-public class FilterControl {
-
+public class FilterHandler {
 
     public boolean include(FilterCriteria filterCriteria, AbstractMutableTreeTableNode node) {
         boolean includeType = filterCriteria.getEventTypes().isEmpty();
@@ -31,7 +30,7 @@ public class FilterControl {
         for (String eventFilter : filterCriteria.getEventTypes()) {
             if (eventFilter.endsWith("*")) {
                 String filterValue = eventFilter.substring(0, eventFilter.length() - 1);
-                includeType = eventType.startsWith(filterValue);
+                includeType = eventType.contains(filterValue);
             } else {
                 includeType = eventType.equals(eventFilter);
             }
@@ -39,13 +38,19 @@ public class FilterControl {
                 break;
             }
         }
-        boolean includeContains = filterCriteria.getContains().isEmpty();
-        for(String contains : filterCriteria.getContains()) {
-            String description = (String) node.getValueAt(1);
-            if(description.contains(contains)) {
-                includeContains = true;
+        boolean includeDescription = filterCriteria.getDescriptions().isEmpty();
+        for(String descriptionFilter : filterCriteria.getDescriptions()) {
+            String descriptionValue = (String) node.getValueAt(1);
+            if (descriptionFilter.endsWith("*")) {
+                String filterValue = descriptionFilter.substring(0, descriptionFilter.length() - 1);
+                includeDescription = descriptionValue.contains(filterValue);
+            } else {
+                includeDescription = descriptionValue.equals(descriptionFilter);
+            }
+            if(includeDescription) {
+                break;
             }
         }
-        return includeType && includeContains;
+        return includeType && includeDescription;
     }
 }

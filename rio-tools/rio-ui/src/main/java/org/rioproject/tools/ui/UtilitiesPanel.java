@@ -78,6 +78,10 @@ public class UtilitiesPanel extends JPanel {
         remoteEventTable.addEventCollector(eventCollector);
     }
 
+    void removeEventCollector(EventCollector eventCollector) {
+        remoteEventTable.removeEventCollector(eventCollector);
+    }
+
     void stopNotifications() {
         remoteEventTable.terminate();
     }

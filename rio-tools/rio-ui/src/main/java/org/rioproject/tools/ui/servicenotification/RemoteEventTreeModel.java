@@ -25,12 +25,11 @@ import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLAThresholdEvent;
-import org.rioproject.tools.ui.servicenotification.filter.FilterControl;
 import org.rioproject.tools.ui.servicenotification.filter.FilterCriteria;
+import org.rioproject.tools.ui.servicenotification.filter.FilterHandler;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import javax.swing.tree.TreePath;
+import java.util.*;
 
 /**
  * The RemoteEventTreeModel extends DefaultTreeTableModel providing the model to
@@ -41,9 +40,13 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
     private JXTreeTable treeTable;
     private FilterCriteria filterCriteria;
     private final RemoteServiceEventNodeComparator comparator = new RemoteServiceEventNodeComparator();
-    private final FilterControl filterControl = new FilterControl();
+    private final FilterHandler filterControl = new FilterHandler();
+    private final List<DeploymentNode> completeModel = new ArrayList<DeploymentNode>();
+    private final List<DeploymentNode> filteredModel = new ArrayList<DeploymentNode>();
+    private final String COMPLETE = "complete";
+    private final String FILTER = "filtered";
 
-    public RemoteEventTreeModel(TreeTableNode root, java.util.List<String> columns) {
+    public RemoteEventTreeModel(RootNode root, java.util.List<String> columns) {
         super(root, columns);
     }
 
@@ -52,77 +55,102 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
     }
 
     public synchronized void addItem(RemoteServiceEvent event) {
+        RemoteServiceEventNode remoteServiceEventNode = createRemoteServiceEventNode(event);
+        Map<String, DeploymentNode> nodes = getDeploymentNodes(remoteServiceEventNode.getOperationalStringName());
+        addItem(remoteServiceEventNode, nodes.get(COMPLETE), nodes.get(FILTER));
+    }
+
+    private RemoteServiceEventNode createRemoteServiceEventNode(RemoteServiceEvent event) {
+        RemoteServiceEventNode remoteServiceEventNode = null;
         if(event instanceof ProvisionFailureEvent) {
             ProvisionFailureEvent pfe = (ProvisionFailureEvent)event;
-            String name = pfe.getServiceElement().getOperationalStringName();
-            AbstractMutableTreeTableNode node = getDeploymentNode(name);
-            if(node==null) {
-                node = new DeploymentNode(name);
-                addItem(node, (AbstractMutableTreeTableNode) getRoot());
-            } 
-            addItem(new ProvisionFailureEventNode(pfe), node);
+            remoteServiceEventNode = new ProvisionFailureEventNode(pfe);
         }
         if(event instanceof ProvisionMonitorEvent) {
             ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
-            String name;
-            if(pme.getServiceElement()!=null)
-                name = pme.getServiceElement().getOperationalStringName();
-            else
-                name = pme.getOperationalStringName();
-            AbstractMutableTreeTableNode node = getDeploymentNode(name);
-            if(node==null) {
-                node = new DeploymentNode(name);
-                addItem(node, (AbstractMutableTreeTableNode) getRoot());
-            }
-            addItem(new ProvisionMonitorEventNode(pme), node);
+            remoteServiceEventNode = new ProvisionMonitorEventNode(pme);
         }
         if(event instanceof ServiceLogEvent) {
             ServiceLogEvent sle = (ServiceLogEvent)event;
-            String name = sle.getOpStringName();
-            if(name==null)
-                name = "Unknown";
-            DeploymentNode node = getDeploymentNode(name);
-            if(node==null) {
-                node = new DeploymentNode(name);
-                addItem(node, (AbstractMutableTreeTableNode) getRoot());
-            }
-            addItem(new ServiceLogEventNode(sle), node);
+            remoteServiceEventNode = new ServiceLogEventNode(sle);
         }
         if(event instanceof SLAThresholdEvent) {
             SLAThresholdEvent sla = (SLAThresholdEvent)event;
-            String name = sla.getServiceElement().getOperationalStringName();
-            if(name==null)
-                name = "Unknown";
-            DeploymentNode node = getDeploymentNode(name);
-            if(node==null) {
-                node = new DeploymentNode(name);
-                addItem(node, (AbstractMutableTreeTableNode) getRoot());
-            }
-            addItem(new SLAThresholdEventNode(sla), node);
+            remoteServiceEventNode = new SLAThresholdEventNode(sla);
         }
+        return remoteServiceEventNode;
     }
 
-    private void addItem(AbstractMutableTreeTableNode node, AbstractMutableTreeTableNode parent) {
+    private boolean hasRemoteServiceEventNode(RemoteServiceEventNode node, AbstractMutableTreeTableNode parent) {
+        boolean has = false;
+        for(int i=0; i< parent.getChildCount(); i++) {
+            RemoteServiceEventNode childNode =(RemoteServiceEventNode)parent.getChildAt(i);
+            if(comparator.compare(childNode, node)==0&&
+               (node.getEvent().getID()==childNode.getEvent().getID() &&
+                   node.getEvent().getSequenceNumber()==childNode.getEvent().getSequenceNumber())) {
+                has = true;
+                break;
+            }
+        }
+        return has;
+    }
+
+    private void addItem(AbstractMutableTreeTableNode node,
+                         AbstractMutableTreeTableNode parent,
+                         AbstractMutableTreeTableNode filterParent) {
         int index = parent.getChildCount();
         if(node instanceof RemoteServiceEventNode) {
             RemoteServiceEventNode rNode = (RemoteServiceEventNode)node;
-            for (int i = 0; i < parent.getChildCount(); i++) {
-                RemoteServiceEventNode childNode =(RemoteServiceEventNode)parent.getChildAt(i);
-                int result = comparator.compare(childNode, rNode);
-                if(result>0) {
-                    index = i;
-                    break;
+            if(hasRemoteServiceEventNode(rNode, parent))
+                return;
+            if(filterParent!=null && hasRemoteServiceEventNode(rNode, filterParent))
+                return;
+            /* If we have a filter and the node passes filter step, insert into filterModel */
+            if(filterCriteria!=null && filterParent!=null && filterControl.include(filterCriteria, rNode)) {
+                index = getItemIndex(rNode, filterParent);
+                if(index!=-1) {
+                    filterParent.insert(rNode, index);
+                    //this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(filterParent)), index, rNode);
+                    this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(filterParent)));
+                }
+            }
+            /* Always insert into the complete model */
+            index = getItemIndex(rNode, parent);
+            if(index!=-1) {
+                parent.insert(node, index);
+                if(filterCriteria==null) {
+                    this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index, rNode);
+                }
+            }
+        }  else {
+            parent.insert(node, index);
+            this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index, node);
+        }
+    }
+
+    private int getItemIndex(RemoteServiceEventNode rNode, AbstractMutableTreeTableNode parent) {
+        int index = parent.getChildCount();
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            RemoteServiceEventNode childNode =(RemoteServiceEventNode)parent.getChildAt(i);
+            int result = comparator.compare(childNode, rNode);
+
+            if(result>0) {
+                index = i;
+                break;
 
                 /* Check for duplicate events */
-                } else if(result==0) {
-                    if(rNode.getEvent().getID()==childNode.getEvent().getID() &&
-                       rNode.getEvent().getSequenceNumber()==childNode.getEvent().getSequenceNumber()) {
-                        return;
-                    }
+            } else if(result==0) {
+                if(rNode.getEvent().getID()==childNode.getEvent().getID() &&
+                   rNode.getEvent().getSequenceNumber()==childNode.getEvent().getSequenceNumber()) {
+                    return -1;
                 }
             }
         }
-        insertNodeInto(node, parent, index);
+        return index;
+    }
+
+    public void reset() {
+        this.modelSupport.fireNewRoot();
     }
 
     public void removeItem(int row) {
@@ -168,6 +196,32 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         return eNodes;
     }
 
+    private Map<String, DeploymentNode> getDeploymentNodes(String name) {
+        Map<String, DeploymentNode> nodeMap = new HashMap<String, DeploymentNode>();
+        DeploymentNode node = getDeploymentNode(name, completeModel);
+        if(node==null) {
+            node = new DeploymentNode(name);
+            completeModel.add(node);
+            if(filterCriteria==null) {
+                addItem(node, (AbstractMutableTreeTableNode)getRoot(), null);
+            }
+        }
+        nodeMap.put(COMPLETE, node);
+        if(filterCriteria!=null) {
+            DeploymentNode filteredNode = getDeploymentNode(name, filteredModel);
+            if(filteredNode==null) {
+                filteredNode = new DeploymentNode(name);
+                filteredModel.add(filteredNode);
+                addItem(filteredNode, (AbstractMutableTreeTableNode)getRoot(), null);
+            }
+            nodeMap.put(FILTER, filteredNode);
+        } else {
+            nodeMap.put(FILTER, null);
+        }
+
+        return nodeMap;
+    }
+
     public DeploymentNode getDeploymentNode(String name) {
         DeploymentNode dNode = null;
         for (int i = 0; i < getRoot().getChildCount(); i++) {
@@ -183,57 +237,56 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         return dNode;
     }
 
-    @Override
-    public int getChildCount(Object parent) {
-        if (filterCriteria == null) {
-            return super.getChildCount(parent);
-        } else {
-            int childCount = 0;
-            for (int i=0; i<super.getChildCount(parent); i++) {
-                AbstractMutableTreeTableNode node = (AbstractMutableTreeTableNode)super.getChild(parent, i);
-                if(node instanceof DeploymentNode) {
-                    childCount++;
-                }
-                if(node instanceof RemoteServiceEventNode) {
-                    if(filterControl.include(filterCriteria, node)) {
-                        childCount++;
-                    }
-                }
+    public DeploymentNode getDeploymentNode(String name, List<DeploymentNode> nodes) {
+        DeploymentNode dNode = null;
+        for(DeploymentNode node : nodes) {
+            if(node.getName().equals(name)) {
+                dNode = node;
+                break;
             }
-            return childCount;
         }
-    }
-
-    @Override
-    public Object getChild(Object parent, int index) {
-        if(filterCriteria==null) {
-            return super.getChild(parent, index);
-        } else {
-            int filteredPosition = 0;
-            for (int i = 0, cnt = 0; i < super.getChildCount(parent); i++) {
-                AbstractMutableTreeTableNode node = (AbstractMutableTreeTableNode)super.getChild(parent, i);
-                if(node instanceof DeploymentNode) {
-                    if (cnt++ == index) {
-                        filteredPosition = i;
-                        break;
-                    }
-                }
-                if(node instanceof RemoteServiceEventNode) {
-                    if(filterControl.include(filterCriteria, node)) {
-                        if (cnt++ == index) {
-                            filteredPosition = i;
-                            break;
-                        }
-                    }
-                }
-            }
-            return super.getChild(parent, filteredPosition);
-        }
+        return dNode;
     }
 
     public void setFilterCriteria(FilterCriteria filterCriteria) {
-        this.filterCriteria =  filterCriteria;
+        if(this.filterCriteria!=null && this.filterCriteria.equals(filterCriteria)) {
+            return;
+        }
+        this.filterCriteria = filterCriteria;
+        if(this.filterCriteria!=null) {
+            clearTree(filteredModel.isEmpty()?completeModel:filteredModel);
+            filteredModel.clear();
+            for(DeploymentNode node : completeModel) {
+                DeploymentNode newNode = new DeploymentNode(node.getName());
+                filteredModel.add(newNode);
+            }
+            for(DeploymentNode node : filteredModel) {
+                ((AbstractMutableTreeTableNode)getRoot()).insert(node, filteredModel.indexOf(node));
+            }
+            for(DeploymentNode node : completeModel) {
+                int index = 0;
+                for(int i=0; i < node.getChildCount(); i++) {
+                    RemoteServiceEventNode rNode = (RemoteServiceEventNode)node.getChildAt(i);
+                    RemoteServiceEventNode newNode = createRemoteServiceEventNode(rNode.getEvent());
+                    if(filterControl.include(this.filterCriteria, newNode)) {
+                        getDeploymentNode(node.getName(), filteredModel).insert(newNode, index++);
+                    }
+                }
+            }
+        } else {
+            clearTree(filteredModel);
+            filteredModel.clear();
+            for(DeploymentNode node : completeModel) {
+                ((AbstractMutableTreeTableNode)getRoot()).insert(node, completeModel.indexOf(node));
+            }
+        }
         this.modelSupport.fireNewRoot();
+    }
+
+    private void clearTree(Collection<DeploymentNode> nodes) {
+        for(DeploymentNode node : nodes) {
+            node.removeFromParent();
+        }
     }
 
     public FilterCriteria getFilterCriteria() {
@@ -268,14 +321,40 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         return node;
     }
 
+    @Override
+    public Object getValueAt(Object node, int column) {
+        /*if (!isValidTreeTableNode(node)) {
+            throw new IllegalArgumentException("node must be a valid node managed by this model");
+        }*/
+
+        if (column < 0 || column >= getColumnCount()) {
+            throw new IllegalArgumentException("column must be a valid index");
+        }
+
+        TreeTableNode ttn = (TreeTableNode) node;
+
+        if (column >= ttn.getColumnCount()) {
+            return null;
+        }
+
+        return ttn.getValueAt(column);
+        //return super.getValueAt(node, column);
+    }
+
+    @Override
+    public boolean isLeaf(Object node) {
+        return ((TreeTableNode) node).isLeaf();
+    }
+
     public int getRowCount() {
         int rowCounter = 0;
         for (int i = 0; i < getRoot().getChildCount(); i++) {
-            DeploymentNode dn =(DeploymentNode) getRoot().getChildAt(i);
+            DeploymentNode dn = (DeploymentNode)getRoot().getChildAt(i);
             rowCounter += dn.getChildCount();
         }
         return rowCounter;
     }
+
 
     class RemoteServiceEventNodeComparator implements Comparator<RemoteServiceEventNode> {
         public int compare(RemoteServiceEventNode node1, RemoteServiceEventNode node2) {

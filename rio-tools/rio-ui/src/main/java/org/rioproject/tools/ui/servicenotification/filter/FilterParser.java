@@ -15,10 +15,7 @@
  */
 package org.rioproject.tools.ui.servicenotification.filter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Parses a filter string.
@@ -33,6 +30,7 @@ public class FilterParser {
         keywords.add("=");
         keywords.add("is");
         keywords.add("contains");
+        keywords.add("~");
 
         operands.put("type", new HashMap<String, String>());
         operands.put("desc", new HashMap<String, String>());
@@ -43,6 +41,7 @@ public class FilterParser {
         if (s != null && s.length() > 0) {
             filterCriteria = new FilterCriteria();
             System.out.println(s);
+            String[] statements = getStatements(s);
             String[] parsed = s.split(" ");
             Map<String, String> map = null;
             for(int i=0; i<parsed.length; i++) {
@@ -63,12 +62,9 @@ public class FilterParser {
                     map = null;
                 }
             }
-
             for(Map.Entry<String, Map<String, String>> entry : operands.entrySet()) {
                 processMap(entry.getValue(), entry.getKey(), filterCriteria);
             }
-            System.out.println(filterCriteria);
-            System.out.println("======================");
             operands.get("type").clear();
             operands.get("desc").clear();
         }
@@ -81,17 +77,34 @@ public class FilterParser {
                 if(operand.equals("type")) {
                     filterCriteria.addEventType(entry.getValue());
                 } else {
-                    filterCriteria.addContains(entry.getValue());
+                    filterCriteria.addDescription(entry.getValue());
                 }
-            } else if(entry.getKey().equals("contains")) {
+            } else if(entry.getKey().equals("contains") || entry.getKey().equals("~")) {
+                String value;
+                if(entry.getValue().endsWith("*"))
+                    value = entry.getValue();
+                else
+                    value = entry.getValue()+"*";
                 if(operand.equals("type")) {
-                    filterCriteria.addEventType(entry.getValue()+"*");
+                    filterCriteria.addEventType(value);
                 } else {
-                    filterCriteria.addContains(entry.getValue());
+                    filterCriteria.addDescription(value);
                 }
             } else {
                 System.out.println("Unknown keyword "+entry.getKey());
             }
         }
+    }
+
+    /*
+     *
+     */
+    private String[] getStatements(String s) {
+        List<String> statements = new ArrayList<String>();
+        StringTokenizer tokenizer = new StringTokenizer(s, ";\n");
+        while (tokenizer.hasMoreTokens()) {
+            statements.add(tokenizer.nextToken());
+        }
+        return statements.toArray(new String[statements.size()]);
     }
 }

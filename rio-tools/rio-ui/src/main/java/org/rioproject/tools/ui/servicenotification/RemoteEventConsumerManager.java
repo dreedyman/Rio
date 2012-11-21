@@ -29,10 +29,12 @@ import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,8 +71,26 @@ public class RemoteEventConsumerManager {
             remoteEventListener = new ChainedRemoteEventListener(eventListener, config);
         }
         if(eventCollectorRegistration==null && useEventCollector.get()) {
-            eventCollectorRegistration = eventCollectors.get(0).register(Lease.ANY);
-            eventCollectorRegistration.enableDelivery(remoteEventListener.getRemoteEventListener());
+            List<EventCollector> removals = new ArrayList<EventCollector>();
+            for(EventCollector eventCollector : eventCollectors) {
+                try {
+                    eventCollectorRegistration = eventCollector.register(Lease.ANY);
+                    eventCollectorRegistration.enableDelivery(remoteEventListener.getRemoteEventListener());
+                } catch (IOException e) {
+                    if(!ThrowableUtil.isRetryable(e)) {
+                        removals.add(eventCollector);
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+            if(!removals.isEmpty()) {
+                for(EventCollector eventCollector : removals) {
+                    synchronized (eventCollectors) {
+                        eventCollectors.remove(eventCollector);
+                    }
+                }
+            }
         }
     }
 
@@ -116,10 +136,24 @@ public class RemoteEventConsumerManager {
         }
     }
 
+    public void removeEventCollector(EventCollector eventCollector) {
+        eventCollectors.remove(eventCollector);
+    }
+
+    public void refresh() throws UnknownEventCollectorRegistration, IOException {
+        if(eventCollectorRegistration!=null) {
+            eventCollectorRegistration.enableDelivery(remoteEventListener.getRemoteEventListener());
+        }
+    }
+
     public void terminate() {
         if(eventCollectorRegistration!=null) {
             try {
                 eventCollectorRegistration.disableDelivery();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
                 eventCollectorRegistration.getLease().cancel();
             } catch (Exception e) {
                 e.printStackTrace();

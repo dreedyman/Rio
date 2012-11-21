@@ -85,9 +85,9 @@ public class ChainedRemoteEventListener implements RemoteEventListener, ServerPr
            remoteEvent instanceof SLAThresholdEvent ||
            remoteEvent instanceof ServiceLogEvent) {
             eventQ.offer(remoteEvent);
-        } else {
+        } /*else {
             throw new UnknownEventException(String.format("The %s is unknown to the Rio UI", remoteEvent.getClass().getName()));
-        }
+        }*/
     }
 
     @Override

@@ -269,7 +269,7 @@ public class CybernodeUtilizationPanel extends JPanel {
         JScrollPane sp2 = new JScrollPane(treeTable);
         sp2.getViewport().setBackground(Color.WHITE);
         statusPanel = new StatusPanel(utilizationModel);
-        statusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+        statusPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 8));
 
         String bannerIcon = props.getProperty("bannerIcon");
         if(bannerIcon!=null) {

@@ -77,7 +77,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
         eventConsumerManager = new RemoteEventConsumerManager();
 
-        add(new FilterPanel(new FilterApplier()), BorderLayout.NORTH);
+        add(new FilterPanel(new FilterApplier(), new TreeExpander(), new EventRefreshControl()), BorderLayout.NORTH);
 
         java.util.List<String> columns = new ArrayList<String>();
         columns.add("Deployment");
@@ -184,6 +184,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         scroller.getViewport().setBackground(Color.WHITE);
         add(scroller, BorderLayout.CENTER);
 
+
         final JPanel bottom = new JPanel();
         bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
         bottom.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -230,8 +231,14 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     }
 
     public void expandAll() {
-        eventTable.expandAll();
+        //eventTable.scrollRowToVisible(dataModel.getRowCount());
+        try {
+            eventTable.expandAll();
+        } catch(IllegalArgumentException e) {
+            Util.showError(e, this, "Could not expand tree");
+        }
     }
+
 
     public RemoteEventTreeModel getDataModel() {
         return dataModel;
@@ -261,6 +268,11 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                                                                         IOException,
                                                                         UnknownEventCollectorRegistration {
         eventConsumerManager.addEventCollector(eventCollector);
+        setUseEventCollectorCheckBoxText();
+    }
+
+    public void removeEventCollector(EventCollector eventCollector) {
+        eventConsumerManager.removeEventCollector(eventCollector);
         setUseEventCollectorCheckBoxText();
     }
 
@@ -494,14 +506,17 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
     private String getExceptionText(Throwable t) {
         String exception;
-        if(t==null)
+        if(t==null) {
             exception = "No Exception";
-        else
-            exception = "<html><body>" +
-                        "<font face=monospace><font size=3><font color=red>" +
-                        t.getClass().getName()+
-                        "</font></font></font>" +
-                        "</body></html>";
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append("<html><body>");
+            builder.append("<font face=monospace><font size=3><font color=red>");
+            builder.append(t.getClass().getName());
+            builder.append("</font></font></font>");
+            builder.append("</body></html>");
+            exception = builder.toString();
+        }
         return exception;
     }
 
@@ -509,13 +524,40 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         Throwable cause = thrown.getCause();
         if(cause != null) {
             Throwable nested = cause.getCause();
-            Util.showError((nested==null?cause:nested),
-                           parent,
-                           "Stacktrace for "+label);
+            Util.showError((nested==null?cause:nested), parent, "Stacktrace for "+label);
         } else {
-            Util.showError(thrown,
-                           parent,
-                           "Stacktrace for " + label);
+            Util.showError(thrown, parent, "Stacktrace for " + label);
+        }
+    }
+
+    class TreeExpander implements TreeExpansionListener {
+
+        @Override
+        public void expand() {
+            eventTable.expandAll();
+        }
+
+        @Override
+        public void collapse() {
+            int row = eventTable.getRowCount() - 1;
+            while (row >= 0) {
+                eventTable.collapseRow(row);
+                row--;
+            }
+        }
+    }
+
+    class EventRefreshControl implements RefreshListener {
+        @Override
+        public void refresh() {
+            try {
+                dataModel.reset();
+                eventConsumerManager.refresh();
+            } catch (UnknownEventCollectorRegistration e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -542,29 +584,6 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
         public void actionPerformed(ActionEvent actionEvent) {
             showDetails(parent, label, thrown);
-        }
-    }
-
-    class RootNode extends AbstractMutableTreeTableNode {
-
-        @Override
-        public Object getValueAt(int i) {
-            return null;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 2;
-        }
-
-        @Override
-        public boolean isLeaf() {
-            return false;
-        }
-
-        @Override
-        public boolean getAllowsChildren() {
-            return true;
         }
     }
 

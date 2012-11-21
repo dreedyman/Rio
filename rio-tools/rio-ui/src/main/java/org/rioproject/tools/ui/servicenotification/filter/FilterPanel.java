@@ -15,28 +15,35 @@
  */
 package org.rioproject.tools.ui.servicenotification.filter;
 
+import org.rioproject.tools.ui.servicenotification.RefreshListener;
+import org.rioproject.tools.ui.servicenotification.TreeExpansionListener;
+import org.rioproject.ui.Util;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 /**
- * Provides filtering options for service notification eventTypes.
+ * Provides filtering options for service notifications.
  *
  * @author Dennis Reedy
  */
 public class FilterPanel extends JPanel {
-    private final JTextField filterQuery;
+    private final JComboBox<String> filterQuery;
     private final FilterParser filterParser = new FilterParser();
 
-    public FilterPanel(final FilterListener filterListener) {
+    public FilterPanel(final FilterListener filterListener,
+                       final TreeExpansionListener treeExpansionListener,
+                       final RefreshListener refreshListener) {
         super(new BorderLayout());
 
         setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
                                                      BorderFactory.createEmptyBorder(8, 8, 8, 8)));
-        filterQuery = new JTextField();
+        filterQuery = new JComboBox<String>();
+        filterQuery.setEditable(true);
+        filterQuery.addItem("");
+        filterQuery.setSelectedIndex(0);
+
         JLabel syntaxLink = new JLabel("<html><a href=\"file://\">Syntax help</a></html>");
         final JPanel parent = this;
         syntaxLink.addMouseListener(new MouseAdapter() {
@@ -65,22 +72,92 @@ public class FilterPanel extends JPanel {
         add(new JLabel("Filter Using "), BorderLayout.WEST);
         add(filterQuery, BorderLayout.CENTER);
 
-        filterQuery.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-            }
+        JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
+        toolBar.setFloatable(false);
+        toolBar.setRollover(true);
+        toolBar.setBorderPainted(false);
+        ImageIcon collapseIcon = Util.getImageIcon("org/rioproject/tools/ui/images/collapseall.gif");
+        ImageIcon expandIcon = Util.getImageIcon("org/rioproject/tools/ui/images/expandall.gif");
+        ImageIcon refreshIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/view-refresh.png",
+                                                        expandIcon.getIconWidth(),
+                                                        expandIcon.getIconHeight());
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    String query = filterQuery.getText().trim();
-                    filterListener.notify(filterParser.parse(query));
-                }
-            }
-            @Override
-            public void keyReleased(KeyEvent e) {
+        ImageIcon colorOptionsIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/color-options.png",
+                                                        expandIcon.getIconWidth(),
+                                                        expandIcon.getIconHeight());
+
+        JButton collapse = new JButton();
+        collapse.setIcon(collapseIcon);
+        collapse.setPreferredSize(new Dimension(22, 22));
+        collapse.setMaximumSize(new Dimension(22, 22));
+        collapse.setToolTipText("Collapse all nodes");
+        collapse.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                treeExpansionListener.collapse();
             }
         });
+
+        JButton expand = new JButton();
+        expand.setIcon(expandIcon);
+        expand.setPreferredSize(new Dimension(22, 22));
+        expand.setMaximumSize(new Dimension(22, 22));
+        expand.setToolTipText("Expand all nodes");
+        expand.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                treeExpansionListener.expand();
+
+            }
+        });
+        final JButton refresh = new JButton(refreshIcon);
+        refresh.setPreferredSize(new Dimension(22, 22));
+        refresh.setMaximumSize(new Dimension(22, 22));
+        refresh.getAccessibleContext().setAccessibleName("refresh events");
+        refresh.setToolTipText("Refresh the events");
+
+        final JButton colorOptions = new JButton(colorOptionsIcon);
+        colorOptions.setPreferredSize(new Dimension(22, 22));
+        colorOptions.setMaximumSize(new Dimension(22, 22));
+        colorOptions.getAccessibleContext().setAccessibleName("event tree color options");
+        colorOptions.setToolTipText("Event tree color options");
+
+        toolBar.add(collapse);
+        toolBar.add(expand);
+        toolBar.add(refresh);
+        refresh.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                refreshListener.refresh();
+            }
+        });
+        toolBar.add(colorOptions);
+        add(toolBar, BorderLayout.EAST);
+        filterQuery.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //if(e.getActionCommand().equals("comboBoxEdited")) {
+                    handleFilterQueryInput(filterListener);
+                //}
+            }
+        });
+    }
+
+    private void handleFilterQueryInput(final FilterListener filterListener) {
+        String query = (String) filterQuery.getSelectedItem();
+        if(query!=null) {
+            query = query.trim();
+            if(query.length()>0) {
+                boolean inHistory = false;
+                for(int i=0; i<filterQuery.getItemCount(); i++) {
+                    if(filterQuery.getItemAt(i).equals(query)) {
+                        inHistory = true;
+                        break;
+                    }
+
+                }
+                if(!inHistory)
+                    filterQuery.addItem(query);
+            }
+        }
+        filterListener.notify(filterParser.parse(query));
     }
 
     private String getSyntaxHelp() {
@@ -97,6 +174,7 @@ public class FilterPanel extends JPanel {
         builder.append("<li>=</li>");
         builder.append("<li>is</li>");
         builder.append("<li>contains</li>");
+        builder.append("<li>~</li>");
         builder.append("</ul>");
         builder.append("<p>Need examples and more details");
         builder.append("</body></html>");

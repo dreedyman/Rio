@@ -1024,6 +1024,9 @@ public class Main extends JFrame {
             if(item.service instanceof Cybernode) {
                 cup.removeCybernode((Cybernode)item.service);
             }
+            if(item.service instanceof EventCollector) {
+                utilities.removeEventCollector((EventCollector)item.service);
+            }
         }
     }
 
