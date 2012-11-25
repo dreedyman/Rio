@@ -2,39 +2,20 @@
  * Configuration for core system properties
  */
 
-import org.rioproject.config.Component
-
+import net.jini.export.Exporter
 import net.jini.jeri.BasicILFactory
 import net.jini.jeri.BasicJeriExporter
-import net.jini.jeri.tcp.TcpServerEndpoint
-import net.jini.export.Exporter
-import org.rioproject.net.PortRangeServerSocketFactory
-import javax.net.ServerSocketFactory
 import org.rioproject.bean.BeanInvocationLayerFactory
-import net.jini.jeri.ServerEndpoint
-import org.rioproject.config.Constants
-import org.rioproject.net.HostUtil
+import org.rioproject.config.Component
+import org.rioproject.config.ExporterConfig
 
 /*
  * The exporter to declare as the *default* exporter for services and utilities
  */
 @Component('org.rioproject')
-class ExporterConfig {
+class ExporterConfiguration {
     static  Exporter getDefaultExporter() {
-        return new BasicJeriExporter(getServerEndpoint(), new BasicILFactory())
-    }
-
-    static ServerEndpoint getServerEndpoint() {
-        String host = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
-        String range = System.getProperty(Constants.PORT_RANGE)
-        ServerSocketFactory factory = null
-        if(range!=null) {
-            String[] parts = range.split("-")
-            int start = Integer.parseInt(parts[0])
-            int end = Integer.parseInt(parts[1])
-            factory = new PortRangeServerSocketFactory(start, end)
-        }
-        return TcpServerEndpoint.getInstance(host, 0, null, factory)
+        return new BasicJeriExporter(ExporterConfig.getServerEndpoint(), new BasicILFactory())
     }
 }
 
@@ -42,9 +23,9 @@ class ExporterConfig {
  * Configure the POJO Exporter
  */
 @Component('org.rioproject.bean')
-class POJOExporter extends ExporterConfig {
+class POJOExporter extends ExporterConfiguration {
     Exporter getServerExporter() {
-        return new BasicJeriExporter(getServerEndpoint(),
+        return new BasicJeriExporter(ExporterConfig.getServerEndpoint(),
                                      new BeanInvocationLayerFactory(),
                                      false,
                                      true)
@@ -55,7 +36,7 @@ class POJOExporter extends ExporterConfig {
  * Configure the WatchDataSourceExporter
  */
 @Component('org.rioproject.watch')
-class WatchConfig extends ExporterConfig {
+class WatchConfig extends ExporterConfiguration {
     Exporter getWatchDataSourceExporter() {
         return getDefaultExporter()
     }
@@ -66,7 +47,7 @@ class WatchConfig extends ExporterConfig {
  * exporter in the ExporterConfig class
  */
 @Component('net.jini.lookup.ServiceDiscoveryManager')
-class SDMConfig extends ExporterConfig {
+class SDMConfig extends ExporterConfiguration {
     Exporter getEventListenerExporter() {
         return getDefaultExporter()
     }

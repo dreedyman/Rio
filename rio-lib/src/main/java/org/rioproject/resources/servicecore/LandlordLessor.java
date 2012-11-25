@@ -21,15 +21,11 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
-
 import net.jini.core.lease.UnknownLeaseException;
 import net.jini.export.Exporter;
 import net.jini.id.ReferentUuid;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
@@ -182,9 +178,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
            
         /* Get the LeasePeriodPolicy */
         final LeasePeriodPolicy defaultLeasePeriodPolicy =
-            (leasePolicy==null?
-                new FixedLeasePeriodPolicy(DEFAULT_MAX_LEASE_TIME, DEFAULT_LEASE_TIME):
-                leasePolicy);
+            (leasePolicy==null? new FixedLeasePeriodPolicy(DEFAULT_MAX_LEASE_TIME, DEFAULT_LEASE_TIME): leasePolicy);
 
         try {
             this.leasePolicy = (LeasePeriodPolicy)Config.getNonNullEntry(config,
@@ -209,15 +203,11 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
         }
         
         /* Create the default Exporter */
-        final Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory());
         try {            
-            exporter = ExporterConfig.getExporter(config, COMPONENT, "landlordExporter", defaultExporter);
+            exporter = ExporterConfig.getExporter(config, COMPONENT, "landlordExporter");
         } catch (ConfigurationException e) {
             logger.log(Level.WARNING, "Getting Exporter in LandlordLessor", e);
         }
-        if(exporter==null)
-            exporter = defaultExporter;
-        
         landlord = (Landlord) exporter.export(this);
         uuid = UuidFactory.generate(); 
         leaseFactory = new LeaseFactory(landlord, uuid);

@@ -15,6 +15,9 @@
  */
 package org.rioproject.net;
 
+import java.net.*;
+import java.util.Enumeration;
+
 /**
  * Utility for getting host name and address.
  */
@@ -24,15 +27,24 @@ public final class HostUtil {
     }
 
     /**
-     * Return the local host address using
-     * <code>java.net.InetAddress.getLocalHost().getHostAddress()</code>
+     * Return the local host address
      *
-     * @return The local host address
-     * @throws java.net.UnknownHostException if no IP address for the local
-     * host could be found.
+     * @return The first non-loopback address. If there are no non-loopback addresses,
+     * return the default host address obtained from {@link java.net.InetAddress#getLocalHost()}.
+     *
+     * @throws UnknownHostException if no IP address for the local host could be found.
      */
-    public static String getHostAddress() throws java.net.UnknownHostException {
-        return java.net.InetAddress.getLocalHost().getHostAddress();
+    public static InetAddress getInetAddress() throws UnknownHostException {
+        InetAddress address = null;
+        try {
+            address = getFirstNonLoopbackAddress(false, false);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        if(address==null) {
+            address = InetAddress.getLocalHost();
+        }
+        return address;
     }
 
     /**
@@ -43,44 +55,85 @@ public final class HostUtil {
      *
      * @return The local host address
      *
-     * @throws java.net.UnknownHostException if no IP address for the host name
+     * @throws UnknownHostException if no IP address for the host name
      * could be found.
      */
-    public static String getHostAddress(final String name) throws java.net.UnknownHostException {
-        return java.net.InetAddress.getByName(name).getHostAddress();
+    public static String getHostAddress(final String name) throws UnknownHostException {
+        return InetAddress.getByName(name).getHostAddress();
     }
 
     /**
      * Return the local host address based on the value of a system property.
      * using {@link java.net.InetAddress#getByName(String)}. If the system
-     * property is not resolvable, return the default host address obtained from
-     * {@link java.net.InetAddress#getLocalHost()}
+     * property is not resolvable, return the first non-loopback address. If there are non -non-loopback addresses,
+     * return the default host address obtained from {@link java.net.InetAddress#getLocalHost()}.
      *
      * @param property The property name to use
      *
      * @return The local host address
      *
-     * @throws java.net.UnknownHostException if no IP address for the host name
-     * could be found.
+     * @throws UnknownHostException if no IP address for the host name could be found.
      */
-    public static String getHostAddressFromProperty(final String property) throws java.net.UnknownHostException {
-        String host = getHostAddress();
-        String value = System.getProperty(property);
-        if(value != null) {
-            host = java.net.InetAddress.getByName(value).getHostAddress();
-        }
-        return(host);
+    public static String getHostAddressFromProperty(final String property) throws UnknownHostException {
+        return getInetAddressFromProperty(property).getHostAddress();
     }
 
     /**
-     * Return the local host name
-     * <code>java.net.InetAddress.getLocalHost().getHostName()</code>
+     * Return the {@code InetAddress} based on the value of a system property.
+     * using {@link java.net.InetAddress#getByName(String)}. If the system
+     * property is not resolvable, return the first non-loopback address. If there are non -non-loopback addresses,
+     * return the default host address obtained from {@link java.net.InetAddress#getLocalHost()}.
      *
-     * @return The local host name
-     * @throws java.net.UnknownHostException if no hostname for the local
-     * host could be found.
+     * @param property The property name to use
+     *
+     * @return The local host address
+     *
+     * @throws UnknownHostException if no IP address for the host name could be found.
      */
-    public static String getHostName() throws java.net.UnknownHostException {
-        return java.net.InetAddress.getLocalHost().getHostName();
+    public static InetAddress getInetAddressFromProperty(final String property) throws UnknownHostException {
+        InetAddress inetAddress = getInetAddress();
+        String value = System.getProperty(property);
+        if(value != null) {
+            inetAddress = InetAddress.getByName(value);
+        }
+        return inetAddress;
     }
+
+    /**
+     * Get the first non-loopback address.
+     *
+     * @param preferIpv4 If you want the Internet Protocol version 4 (IPv4) address, this value must be {@code true}.
+     * @param preferIPv6 If you want the  Internet Protocol version 6 (IPv6) address, this value must be {@code true}.
+     *                   If the {@code preferIpv4} is set to {@code true}, this value is ignored
+     * @return The first non loopback address or {@code null} if there are no non-loopback addresses.
+     * @throws SocketException If an I/O error occurs.
+     */
+    public static InetAddress getFirstNonLoopbackAddress(boolean preferIpv4, boolean preferIPv6) throws SocketException {
+        Enumeration en = NetworkInterface.getNetworkInterfaces();
+        while (en.hasMoreElements()) {
+            NetworkInterface i = (NetworkInterface) en.nextElement();
+            for (Enumeration en2 = i.getInetAddresses(); en2.hasMoreElements();) {
+                InetAddress addr = (InetAddress) en2.nextElement();
+                if (!addr.isLoopbackAddress()) {
+                    if (addr instanceof Inet4Address) {
+                        if (preferIPv6) {
+                            continue;
+                        }
+                        if(preferIpv4)
+                            return addr;
+                    }
+                    if (addr instanceof Inet6Address) {
+                        if (preferIpv4) {
+                            continue;
+                        }
+                        if(preferIPv6)
+                            return addr;
+                    } else
+                        return addr;
+                }
+            }
+        }
+        return null;
+    }
+
 }

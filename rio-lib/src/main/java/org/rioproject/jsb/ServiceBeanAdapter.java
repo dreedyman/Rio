@@ -31,9 +31,6 @@ import net.jini.export.Exporter;
 import net.jini.export.ProxyAccessor;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.JoinManager;
 import net.jini.lookup.entry.*;
@@ -62,7 +59,6 @@ import org.rioproject.jmx.JMXUtil;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.log.ServiceLogEventHandler;
-import org.rioproject.net.HostUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.servicecore.Joiner;
@@ -1207,13 +1203,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     protected Exporter getExporter(Configuration config) throws Exception {
         if(config==null)
             throw new IllegalArgumentException("config is null");
-        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        final Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
-                                                               new BasicILFactory(),
-                                                               false,
-                                                               true);
-
-        Exporter exporter = ExporterConfig.getExporter(config, serviceBeanComponent, "serverExporter", defaultExporter);
+        Exporter exporter = ExporterConfig.getExporter(config, serviceBeanComponent, "serverExporter");
         return(exporter);
     }
 
@@ -1270,15 +1260,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @throws UnknownHostException If the host is unknown
      */
     protected Exporter getAdminExporter() throws ConfigurationException, UnknownHostException {
-        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        Exporter basicExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(address, 0),
-                                                       new BasicILFactory(),
-                                                       false,
-                                                       true);
         Exporter adminExporter = ExporterConfig.getExporter(context.getConfiguration(),
                                                             serviceBeanComponent,
-                                                            "adminExporter",
-                                                            basicExporter);
+                                                            "adminExporter");
         if(logger.isLoggable(Level.FINER)) {
             logger.log(Level.FINER, "[{0}] using admin exporter: {1}",
                        new Object[]{ServiceElementUtil.getLoggingName(context), adminExporter.toString()});

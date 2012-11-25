@@ -21,9 +21,6 @@ import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
@@ -31,7 +28,8 @@ import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.deploy.*;
 import org.rioproject.monitor.persistence.StateManager;
-import org.rioproject.monitor.tasks.*;
+import org.rioproject.monitor.tasks.RedeploymentTask;
+import org.rioproject.monitor.tasks.TaskTimer;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.ResolverHelper;
@@ -136,10 +134,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
 
         this.config = config;
         this.opStringMangerController = opStringMangerController;
-        Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory());
         Configuration myConfig = (config == null ? EmptyConfiguration.INSTANCE : config);
         try {
-            exporter = ExporterConfig.getExporter(config, CONFIG_COMPONENT, "opStringManagerExporter", defaultExporter);
+            exporter = ExporterConfig.getExporter(config, CONFIG_COMPONENT, "opStringManagerExporter");
             if (logger.isLoggable(Level.FINER))
                 logger.finer("Deployment [" + opString.getName() + "] using exporter " + exporter);
 
