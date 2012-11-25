@@ -19,12 +19,12 @@ package org.rioproject.system;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
+import org.rioproject.config.Constants;
 import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.deploy.StagedSoftware;
 import org.rioproject.net.HostUtil;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
-import org.rioproject.util.StringUtil;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityWriter;
 import org.rioproject.system.capability.platform.StorageCapability;
@@ -32,6 +32,7 @@ import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.disk.DiskSpace;
 import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.system.measurable.memory.SystemMemory;
+import org.rioproject.util.StringUtil;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.ThresholdListener;
 
@@ -141,7 +142,7 @@ public class ComputeResource {
                         System.getProperty("os.arch")+", "+
                         System.getProperty("os.version");
         this.config = config;
-        String host = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+        String host = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         address = (InetAddress)config.getEntry(COMPONENT,
                                                "address",
                                                InetAddress.class,
