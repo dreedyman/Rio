@@ -182,7 +182,7 @@ public class ServiceBeanLoader {
     public static void unload(final ClassLoader loader, final ServiceElement elem) {
         if(globalPolicy!=null)
             globalPolicy.setPolicy(loader, null);
-        cleanJars(elem);
+        checkAndMaybeCleanProvisionedResources(elem);
         service.submit(new Runnable() {
             @Override
             public void run() {
@@ -198,12 +198,11 @@ public class ServiceBeanLoader {
     }
 
     /*
-    * Remove downloaded jars
-    */
-    private static void cleanJars(final ServiceElement elem) {
+     * Check and maybe remove provisioned resources collection
+     */
+    private static void checkAndMaybeCleanProvisionedResources(final ServiceElement elem) {
         List<ProvisionedResources> toRemove = new ArrayList<ProvisionedResources>();
-        ProvisionedResources[] copy =
-            provisionedResources.toArray(new ProvisionedResources[provisionedResources.size()]);
+        ProvisionedResources[] copy = provisionedResources.toArray(new ProvisionedResources[provisionedResources.size()]);
         for(ProvisionedResources pr : copy) {
             if(elem.getComponentBundle()!=null &&
                elem.getComponentBundle().getArtifact()!=null)
