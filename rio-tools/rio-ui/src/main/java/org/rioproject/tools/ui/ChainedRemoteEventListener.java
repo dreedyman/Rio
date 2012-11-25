@@ -22,9 +22,6 @@ import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import net.jini.export.Exporter;
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
@@ -59,14 +56,9 @@ public class ChainedRemoteEventListener implements RemoteEventListener, ServerPr
         if (eventListener == null)
             throw new IllegalArgumentException("eventListener must not be null");
         this.eventListener = eventListener;
-        final Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
-                                                               new BasicILFactory(),
-                                                               false,
-                                                               true);
         final Exporter exporter = ExporterConfig.getExporter(configuration,
                                                              "org.rioproject.event",
-                                                             "eventConsumerExporter",
-                                                             defaultExporter);
+                                                             "eventConsumerExporter");
         remoteEventListener = (RemoteEventListener) exporter.export(this);
         execService.submit(new EventNotifier());
     }
