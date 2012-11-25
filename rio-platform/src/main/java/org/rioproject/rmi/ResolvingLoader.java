@@ -23,10 +23,12 @@ import org.rioproject.url.artifact.ArtifactURLConfiguration;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.net.*;
+import java.net.MalformedURLException;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.RMIClassLoaderSpi;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
@@ -44,7 +46,17 @@ import java.util.logging.Level;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ResolvingLoader extends RMIClassLoaderSpi {
-    private final Map<String, String> artifactToCodebase = new HashMap<String, String>();
+    /**
+     * A table of artifacts to derived codebases. This improves performance by resolving the classpath once per
+     * artifact.
+     */
+    private final Map<String, String> artifactToCodebase = new ConcurrentHashMap<String, String>();
+    /**
+     * A table of classes to artifact: codebase. This will ensure that if the annotation is requested for a class that
+     * has it's classpath resolved from an artifact, that the artifact URL is passed back instead of the resolved
+     * (local) classpath.
+     */
+    private final Map<String, String> classAnnotationMap = new ConcurrentHashMap<String, String>();
     private static final Resolver resolver;
     private static final WrappedLogger logger = WrappedLogger.getLogger(ResolvingLoader.class.getName());
     static {
@@ -61,6 +73,12 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                               final String name,
                               final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
         String resolvedCodebase = resolveCodebase(codebase);
+        if(codebase!=null && codebase.startsWith("artifact:") && classAnnotationMap.get(name)==null) {
+            classAnnotationMap.put(name, codebase);
+            if(logger.isLoggable(Level.FINEST)) {
+                logger.finest("class: %s, codebase: %s, size now %d", name, codebase, classAnnotationMap.size());
+            }
+        }
         if(logger.isLoggable(Level.FINEST))
             logger.finest("Load class %s using codebase %s, resolved to %s", name, codebase, resolvedCodebase);
         return loader.loadClass(resolvedCodebase, name, defaultLoader);
@@ -92,7 +110,10 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     @Override
     public String getClassAnnotation(final Class<?> aClass) {
-        return loader.getClassAnnotation(aClass);
+        String annotation = classAnnotationMap.get(aClass.getName());
+        if(annotation == null)
+            annotation = loader.getClassAnnotation(aClass);
+        return annotation;
     }
 
     public static void release(final ClassLoader serviceLoader) {
@@ -111,9 +132,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     private String resolveCodebase(final String codebase) {
         String adaptedCodebase;
         if(codebase!=null && codebase.startsWith("artifact:")) {
-            synchronized (artifactToCodebase) {
-                adaptedCodebase = artifactToCodebase.get(codebase);
-            }
+            adaptedCodebase = artifactToCodebase.get(codebase);
             if(adaptedCodebase==null) {
                 try {
                     logger.fine("Resolve %s ", codebase);
@@ -131,9 +150,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                         }
                     }
                     adaptedCodebase = builder.toString();
-                    synchronized (artifactToCodebase) {
-                        artifactToCodebase.put(codebase, adaptedCodebase);
-                    }
+                    artifactToCodebase.put(codebase, adaptedCodebase);
                 } catch (ResolverException e) {
                     logger.log(Level.WARNING, e, "Unable to resolve %s", codebase);
                 } catch (MalformedURLException e) {
