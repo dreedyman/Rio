@@ -21,6 +21,6 @@ class ReggieConfig {
     }
 
     Exporter getServerExporter() {
-        return ExporterConfig.getDefaultExporter()
+        return ExporterConfiguration.getDefaultExporter()
     }
 }
