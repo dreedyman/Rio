@@ -94,9 +94,9 @@ installRioToLocalRepository() {
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1
 if [ -z "$NET_ADDR" ] ; then
-    NETWORK="-Djava.rmi.server.hostname="`hostname`
+    NETWORK=""
 else
-  NETWORK="-Djava.rmi.server.hostname="$NET_ADDR
+    NETWORK="-Djava.rmi.server.hostname="$NET_ADDR
 fi
 #echo $NETWORK
 
