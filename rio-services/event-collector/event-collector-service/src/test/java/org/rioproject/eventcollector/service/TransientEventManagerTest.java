@@ -96,6 +96,11 @@ public class TransientEventManagerTest {
             RemoteServiceEvent event = new RemoteServiceEvent("Test Event "+i);
             event.setSequenceNumber(i);
             list.add(event);
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         Assert.assertEquals(count, list.size());
         return list;
