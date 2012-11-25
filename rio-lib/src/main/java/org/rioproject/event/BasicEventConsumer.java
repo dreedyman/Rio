@@ -27,9 +27,6 @@ import net.jini.core.lease.Lease;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.export.Exporter;
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
@@ -166,10 +163,6 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                               final RemoteServiceEventListener listener,
                               final MarshalledObject handback,
                               final Configuration config) throws Exception {
-        Exporter defaultExporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
-                                                         new BasicILFactory(),
-                                                         false,
-                                                         true);
         ProxyPreparer basicLeasePreparer = new BasicProxyPreparer();
 
         this.config = config;
@@ -183,10 +176,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                                             1000*60,                // min
                                             Long.MAX_VALUE);        // max
 
-        exporter = ExporterConfig.getExporter(this.config,
-                                              COMPONENT,
-                                              "eventConsumerExporter",
-                                              defaultExporter);
+        exporter = ExporterConfig.getExporter(this.config, COMPONENT, "eventConsumerExporter");
 
         eventLeasePreparer = (ProxyPreparer)this.config.getEntry(COMPONENT,
                                                                  "eventLeasePreparer",
