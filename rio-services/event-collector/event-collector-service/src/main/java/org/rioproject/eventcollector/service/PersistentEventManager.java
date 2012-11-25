@@ -19,7 +19,7 @@ import net.jini.core.event.RemoteEvent;
 import org.rioproject.event.RemoteServiceEvent;
 
 import java.io.*;
-import java.rmi.MarshalledObject;
+import java.rmi.server.RMIClassLoader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -122,8 +122,8 @@ public class PersistentEventManager extends TransientEventManager {
             ObjectInputStream inputStream = null;
             try {
                 inputStream = new ObjectInputStream(new FileInputStream(file));
-                MarshalledObject<RemoteServiceEvent> mo = (MarshalledObject<RemoteServiceEvent>)inputStream.readObject();
-                events.add(mo.get());
+                RemoteServiceEventHolder remoteServiceEventHolder = (RemoteServiceEventHolder)inputStream.readObject();
+                events.add(remoteServiceEventHolder.getRemoteServiceEvent());
             } catch (Exception e) {
                 logger.log(Level.SEVERE,
                            String.format("Could not read serialized event [%s] from disk", file.getPath()),
@@ -164,8 +164,9 @@ public class PersistentEventManager extends TransientEventManager {
                     logger.fine(String.format("Writing %s to %s", event, file.getPath()));
                 ObjectOutputStream outputStream = null;
                 try {
+                    logger.warning(RMIClassLoader.getClassAnnotation(event.getClass()));
                     outputStream = new ObjectOutputStream(new FileOutputStream(file));
-                    outputStream.writeObject(new MarshalledObject<RemoteServiceEvent>(event));
+                    outputStream.writeObject(new RemoteServiceEventHolder(event));
                     if(logger.isLoggable(Level.FINE))
                         logger.fine(String.format("Wrote %d bytes to %s", file.length(), file.getPath()));
                 } catch (IOException e) {
