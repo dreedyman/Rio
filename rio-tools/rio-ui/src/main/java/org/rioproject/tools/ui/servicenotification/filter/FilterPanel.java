@@ -22,6 +22,8 @@ import org.rioproject.ui.Util;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Provides filtering options for service notifications.
@@ -44,18 +46,42 @@ public class FilterPanel extends JPanel {
         filterQuery.addItem("");
         filterQuery.setSelectedIndex(0);
 
-        JLabel syntaxLink = new JLabel("<html><a href=\"file://\">Syntax help</a></html>");
-        final JPanel parent = this;
-        syntaxLink.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                JOptionPane.showMessageDialog(parent,
-                                              getSyntaxHelp(),
-                                              "Syntax Help",
-                                              JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        add(syntaxLink, BorderLayout.SOUTH);
+        JPanel p = new JPanel(new BorderLayout(8, 8));
+
+        try {
+        final JEditorPane syntaxHelp = new JEditorPane(getSyntaxHelp());
+        syntaxHelp.setEditable(false);
+        syntaxHelp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+                                                                BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+            syntaxHelp.setVisible(false);
+
+            final JLabel syntaxLink = new JLabel("<html><a href=\"\">Syntax help</a></html>");
+            syntaxLink.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    syntaxLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    syntaxLink.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if(syntaxHelp.isVisible()) {
+                        syntaxHelp.setVisible(false);
+                    } else {
+                        syntaxHelp.setVisible(true);
+                    }
+                }
+            });
+            p.add(syntaxLink, BorderLayout.WEST);
+            p.add(syntaxHelp, BorderLayout.SOUTH);
+
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        add(p, BorderLayout.SOUTH);
 
         /*java.util.List<String> autoCompleteElements = new ArrayList<String>();
         autoCompleteElements.add("type");
@@ -160,25 +186,8 @@ public class FilterPanel extends JPanel {
         filterListener.notify(filterParser.parse(query));
     }
 
-    private String getSyntaxHelp() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("<html><body>");
-        builder.append("Help for filter query syntax<br><br>");
-        builder.append("<p>Operands");
-        builder.append("<ul>");
-        builder.append("<li>type</li>");
-        builder.append("<li>desc</li>");
-        builder.append("</ul>");
-        builder.append("<p>Keywords");
-        builder.append("<ul>");
-        builder.append("<li>=</li>");
-        builder.append("<li>is</li>");
-        builder.append("<li>contains</li>");
-        builder.append("<li>~</li>");
-        builder.append("</ul>");
-        builder.append("<p>Need examples and more details");
-        builder.append("</body></html>");
-        return  builder.toString();
+    private URL getSyntaxHelp() {
+        return Thread.currentThread().getContextClassLoader().getResource("filter-syntax-help.html");
     }
 
 }
