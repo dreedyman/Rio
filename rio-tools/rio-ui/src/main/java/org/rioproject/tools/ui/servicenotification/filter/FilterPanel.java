@@ -21,7 +21,10 @@ import org.rioproject.ui.Util;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 
@@ -47,17 +50,15 @@ public class FilterPanel extends JPanel {
         filterQuery.setSelectedIndex(0);
 
         JPanel p = new JPanel(new BorderLayout(8, 8));
-
         try {
             final JEditorPane syntaxHelp = new JEditorPane(getSyntaxHelp());
             syntaxHelp.setEditable(false);
             syntaxHelp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
                                                                     BorderFactory.createEmptyBorder(8, 8, 8, 8)));
             syntaxHelp.setVisible(false);
-            final JScrollPane scroller = new JScrollPane(syntaxHelp);
 
             final JLabel syntaxLink = new JLabel("<html><a href=\"\">Syntax help</a></html>");
-            scroller.addMouseListener(new MouseAdapter() {
+            syntaxLink.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     syntaxLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -68,15 +69,20 @@ public class FilterPanel extends JPanel {
                 }
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if(scroller.isVisible()) {
-                        scroller.setVisible(false);
-                    } else {
-                        scroller.setVisible(true);
-                    }
+                    /*Window parent = SwingUtilities.windowForComponent(syntaxHelp);
+                    if(parent!=null) {
+                        showSyntaxHelpDialog(parent, syntaxHelp);
+                    } else {*/
+                        if(syntaxHelp.isVisible()) {
+                            syntaxHelp.setVisible(false);
+                        } else {
+                            syntaxHelp.setVisible(true);
+                        }
+                    //}
                 }
             });
             p.add(syntaxLink, BorderLayout.WEST);
-            p.add(scroller, BorderLayout.SOUTH);
+            p.add(syntaxHelp, BorderLayout.SOUTH);
 
         } catch(IOException e) {
             e.printStackTrace();
@@ -185,6 +191,30 @@ public class FilterPanel extends JPanel {
             }
         }
         filterListener.notify(filterParser.parse(query));
+    }
+
+    @SuppressWarnings("unused")
+    private void showSyntaxHelpDialog(Window parent, JEditorPane syntaxHelp) {
+        syntaxHelp.setVisible(true);
+        final JDialog dialog = new JDialog(parent, "Filter Syntax Help");
+        JPanel panel = new JPanel(new BorderLayout(8, 8));
+        panel.add(new JScrollPane(syntaxHelp), BorderLayout.CENTER);
+        final JButton close = new JButton("Close");
+        close.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog.dispose();
+            }
+        });
+        JPanel buttonPane = new JPanel();
+        buttonPane.add(close);
+        panel.add(buttonPane, BorderLayout.SOUTH);
+
+        dialog.getContentPane().add(panel);
+        dialog.pack();
+        dialog.setSize(850, 405);
+        dialog.setLocationRelativeTo(parent);
+        dialog.setVisible(true);
     }
 
     private URL getSyntaxHelp() {
