@@ -49,14 +49,15 @@ public class FilterPanel extends JPanel {
         JPanel p = new JPanel(new BorderLayout(8, 8));
 
         try {
-        final JEditorPane syntaxHelp = new JEditorPane(getSyntaxHelp());
-        syntaxHelp.setEditable(false);
-        syntaxHelp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
-                                                                BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+            final JEditorPane syntaxHelp = new JEditorPane(getSyntaxHelp());
+            syntaxHelp.setEditable(false);
+            syntaxHelp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+                                                                    BorderFactory.createEmptyBorder(8, 8, 8, 8)));
             syntaxHelp.setVisible(false);
+            final JScrollPane scroller = new JScrollPane(syntaxHelp);
 
             final JLabel syntaxLink = new JLabel("<html><a href=\"\">Syntax help</a></html>");
-            syntaxLink.addMouseListener(new MouseAdapter() {
+            scroller.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     syntaxLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -67,15 +68,15 @@ public class FilterPanel extends JPanel {
                 }
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if(syntaxHelp.isVisible()) {
-                        syntaxHelp.setVisible(false);
+                    if(scroller.isVisible()) {
+                        scroller.setVisible(false);
                     } else {
-                        syntaxHelp.setVisible(true);
+                        scroller.setVisible(true);
                     }
                 }
             });
             p.add(syntaxLink, BorderLayout.WEST);
-            p.add(syntaxHelp, BorderLayout.SOUTH);
+            p.add(scroller, BorderLayout.SOUTH);
 
         } catch(IOException e) {
             e.printStackTrace();
