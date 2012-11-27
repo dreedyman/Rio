@@ -51,19 +51,22 @@ public class ColorPanel extends JPanel {
         okayColorComp = makeColorComponent(okayColor,
                                            "Okay Status Color",
                                            "<html>Press to choose the color for <b>Okay</b> status<html>",
-                                           setOkayColor);
+                                           setOkayColor,
+                                           this);
         Field setFailureColor = getField("failureColor", getClass());
         failureColorComp = makeColorComponent(failureColor,
                                               "Failure Status Color",
                                               "<html>Press to choose the color for <b>Failure</b> status<html>",
-                                              setFailureColor);
+                                              setFailureColor,
+                                              this);
 
         Field setWarningColor = getField("warningColor", getClass());
         warningColorComp = makeColorComponent(warningColor,
                                               "Warning Status Color",
                                               "<html>Press to choose the color for <b>Warning</b> status. " +
                                               "The <b>Warning</b> status is used if a deployed service is not registered into any lookup services<html>",
-                                              setWarningColor);
+                                              setWarningColor,
+                                              this);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -126,7 +129,8 @@ public class ColorPanel extends JPanel {
     private JComponent makeColorComponent(final Color color,
                                           final String desc,
                                           final String tooltip,
-                                          final Field field) {
+                                          final Field field,
+                                          final Object instance) {
         final JLabel comp = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>");
         comp.setOpaque(true);
         comp.setBackground(color);
@@ -142,7 +146,7 @@ public class ColorPanel extends JPanel {
                 color = JColorChooser.showDialog(comp, desc, color);
                 comp.setBorder(BorderFactory.createRaisedBevelBorder());
                 if(color!=null) {
-                    setField(field, color);
+                    setField(field, color, instance);
                     c.setBackground(color);
                 }
             }
@@ -166,9 +170,9 @@ public class ColorPanel extends JPanel {
         return field;
     }
 
-    private void setField(final Field field, final Color color) {
+    private void setField(final Field field, final Color color, final Object instance) {
         try {
-            field.set(this, color);
+            field.set(instance, color);
         } catch (Exception e) {
             e.printStackTrace();
         }

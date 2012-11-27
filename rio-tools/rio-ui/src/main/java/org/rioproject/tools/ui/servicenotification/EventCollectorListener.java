@@ -20,6 +20,8 @@ package org.rioproject.tools.ui.servicenotification;
  *
  * @author Dennis Reedy
  */
-public interface RefreshListener {
+public interface EventCollectorListener {
+    void handleEventCollectorRegistration(boolean useEventCollector);
+    int getEventControllerCount();
     void refresh();
 }

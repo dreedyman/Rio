@@ -58,6 +58,7 @@ public interface Constants {
     final String FRAME_X_POS = "frame.xpos";
     final String FRAME_Y_POS = "frame.ypos";
     final String FRAME_DIVIDER = "frame.divider";
+    final String EVENTS_DIVIDER = "events.divider";
 
     final String LAST_ARTIFACT = "last.artifact";
     final String LAST_DIRECTORY = "last.dir";

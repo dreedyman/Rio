@@ -55,6 +55,7 @@ public class UtilitiesPanel extends JPanel {
     Properties getOptions() {
         Properties props = new Properties();
         props.put(Constants.USE_EVENT_COLLECTOR, Boolean.toString(remoteEventTable.getUseEventCollector()));
+        props.put(Constants.EVENTS_DIVIDER, Integer.toString(remoteEventTable.getDividerLocation()));
         return props;
     }
 
