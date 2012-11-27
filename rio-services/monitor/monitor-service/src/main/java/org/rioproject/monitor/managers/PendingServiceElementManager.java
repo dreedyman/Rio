@@ -248,7 +248,7 @@ public abstract class PendingServiceElementManager {
                 }
             }
         } else {
-            logger.warning("%s: removing [%d] [%s] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
+            logger.warning("%s: There are no pending instances of [%s] to remove", type, LoggingUtil.getLoggingName(sElem));
         }
         return (removed.toArray(new ProvisionRequest[removed.size()]));
     }
