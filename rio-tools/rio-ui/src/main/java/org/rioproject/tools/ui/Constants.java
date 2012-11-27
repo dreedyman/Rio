@@ -79,8 +79,6 @@ public interface Constants {
 
     final String CYBERNODE_REFRESH_RATE = "cybernode.refresh.rate";
 
-    final String AUTO_REMOVE_PROVISION_FAILURE_EVENTS = "auto.remove.provision.failure.events";
-
     final String USE_EVENT_COLLECTOR = "use.event.collector";
 
     /*

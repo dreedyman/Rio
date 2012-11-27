@@ -54,10 +54,7 @@ public class UtilitiesPanel extends JPanel {
 
     Properties getOptions() {
         Properties props = new Properties();
-        props.put(Constants.AUTO_REMOVE_PROVISION_FAILURE_EVENTS,
-                  Boolean.toString(remoteEventTable.getAutoRemove()));
-        props.put(Constants.USE_EVENT_COLLECTOR,
-                  Boolean.toString(remoteEventTable.getUseEventCollector()));
+        props.put(Constants.USE_EVENT_COLLECTOR, Boolean.toString(remoteEventTable.getUseEventCollector()));
         return props;
     }
 
