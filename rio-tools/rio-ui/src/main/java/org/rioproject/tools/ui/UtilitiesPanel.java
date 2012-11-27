@@ -37,19 +37,22 @@ import java.util.Properties;
 public class UtilitiesPanel extends JPanel {
     private final RemoteEventTable remoteEventTable;
 
-    public UtilitiesPanel(CybernodeUtilizationPanel cup,
-                          Configuration config,
-                          Properties props) throws ExportException, ConfigurationException {
+    public UtilitiesPanel(final CybernodeUtilizationPanel cup,
+                          final Configuration config,
+                          final Properties props) throws ExportException, ConfigurationException {
         super(new BorderLayout());
         remoteEventTable = new RemoteEventTable(config, props);
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.add("Utilization", cup);
-        JLabel label = makeTabLabel("Service Notifications",
-                                    remoteEventTable);
+        JLabel label = makeTabLabel("Service Event Notifications", remoteEventTable);
         tabs.addTab(null, remoteEventTable);
         tabs.setTabComponentAt(1, label);
         add(tabs, BorderLayout.CENTER);
+    }
+
+    public void init(final Properties props) {
+        remoteEventTable.init(props);
     }
 
     Properties getOptions() {
@@ -59,11 +62,11 @@ public class UtilitiesPanel extends JPanel {
         return props;
     }
 
-    void setDiscoveryManagement(DiscoveryManagement dMgr) throws Exception {
+    void setDiscoveryManagement(final DiscoveryManagement dMgr) throws Exception {
         remoteEventTable.setDiscoveryManagement(dMgr);
     }
 
-    private JLabel makeTabLabel(String name, NotificationUtility... comps) {
+    private JLabel makeTabLabel(final String name, final NotificationUtility... comps) {
         NotificationNode nn = new NotificationNode(comps);
         for(NotificationUtility nu : comps)
             nu.subscribe(nn);
@@ -72,11 +75,11 @@ public class UtilitiesPanel extends JPanel {
         return l;
     }
 
-    void addEventCollector(EventCollector eventCollector) throws IOException, LeaseDeniedException, UnknownEventCollectorRegistration {
+    void addEventCollector(final EventCollector eventCollector) throws IOException, LeaseDeniedException, UnknownEventCollectorRegistration {
         remoteEventTable.addEventCollector(eventCollector);
     }
 
-    void removeEventCollector(EventCollector eventCollector) {
+    void removeEventCollector(final EventCollector eventCollector) {
         remoteEventTable.removeEventCollector(eventCollector);
     }
 
@@ -88,13 +91,13 @@ public class UtilitiesPanel extends JPanel {
         private NotificationNode node;
         Dimension originalSize;
 
-        TabLabel(String s, NotificationNode node) {
+        TabLabel(final String s, final NotificationNode node) {
             super(s);
             this.node = node;
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        protected void paintComponent(final Graphics g) {
             super.paintComponent(g);
             if(node.getCount()>0) {
                 String countString = Integer.toString(node.getCount());
@@ -146,11 +149,11 @@ public class UtilitiesPanel extends JPanel {
         JLabel label;
         NotificationUtility[] utility;
 
-        NotificationNode(NotificationUtility... utility) {
+        NotificationNode(final NotificationUtility... utility) {
             this.utility = utility;
         }
 
-        void setLabel(JLabel label) {
+        void setLabel(final JLabel label) {
             this.label = label;
         }
 
@@ -162,7 +165,7 @@ public class UtilitiesPanel extends JPanel {
             return count;
         }
 
-        public void notify(NotificationUtility nu) {
+        public void notify(final NotificationUtility nu) {
             //getCount();            
             if(label!=null)
                 label.repaint();

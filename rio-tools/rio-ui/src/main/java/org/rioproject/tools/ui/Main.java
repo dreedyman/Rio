@@ -124,7 +124,7 @@ public class Main extends JFrame {
     private BasicEventConsumer clientEventConsumer;
     final String AS_SERVICE_UI = "as.service.ui";
 
-    public Main(Configuration config, final boolean exitOnClose, Properties startupProps) throws ExportException, ConfigurationException {
+    public Main(final Configuration config, final boolean exitOnClose, final Properties startupProps) throws ExportException, ConfigurationException {
         this.config = config;
         String lastArtifactName = startupProps.getProperty(Constants.LAST_ARTIFACT);
         if(lastArtifactName!=null)
@@ -370,17 +370,14 @@ public class Main extends JFrame {
 
         utilities = new UtilitiesPanel(cup, config, startupProps);
 
-        JPanel utilitiesPanel = makeUtilitiesPanel(utilities);
+        final JPanel utilitiesPanel = makeUtilitiesPanel(utilities);
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
 
         splitPane.setTopComponent(topTabs);
         splitPane.setBottomComponent(utilitiesPanel);
         splitPane.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        String s = startupProps.getProperty(Constants.FRAME_DIVIDER);
-        int dividerLocation = (s==null?450:Integer.parseInt(s));
 
-        splitPane.setDividerLocation(dividerLocation);
         splitPane.setDividerSize(8);
 
         setJMenuBar(createMenu());
@@ -399,6 +396,23 @@ public class Main extends JFrame {
                     terminateAndClose();
                 else
                     terminate();
+            }
+        });
+    }
+
+    void setStartupLocations(final Properties startupProps) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int dividerLocation;
+                String s = startupProps.getProperty(Constants.FRAME_DIVIDER);
+                if(s==null) {
+                    dividerLocation = splitPane.getHeight()/2;
+                } else {
+                    dividerLocation = Integer.parseInt(s);
+                }
+                splitPane.setDividerLocation(dividerLocation);
+                utilities.init(startupProps);
             }
         });
     }
@@ -1459,6 +1473,7 @@ public class Main extends JFrame {
                 frame.setLocation((int)xPos, (int)yPos);
             }
             frame.setVisible(true);
+            frame.setStartupLocations(props);
         } catch(Exception e) {
             e.printStackTrace();
             System.exit(1);

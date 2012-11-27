@@ -49,6 +49,13 @@ import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.Properties;
 
+/**
+ * Utility to display {@link org.rioproject.event.RemoteServiceEvent}s using either an {@link EventCollector} or
+ * subscribe to services for notification(s). The utility also provides filtering support as well as other handy
+ * options.
+ *
+ * @author Dennis Reedy
+ */
 public class RemoteEventTable extends AbstractNotificationUtility {
     private final JXTreeTable eventTable;
     private final RemoteEventTreeModel dataModel;
@@ -187,16 +194,23 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         splitPane.add(topPanel, JSplitPane.TOP);
         splitPane.add(detailsPanel, JSplitPane.BOTTOM);
 
-        String s = props.getProperty(Constants.EVENTS_DIVIDER);
-        int dividerLocation = (s==null?450:Integer.parseInt(s));
-
-        splitPane.setDividerLocation(dividerLocation);
         splitPane.setDividerSize(8);
 
         add(splitPane, BorderLayout.CENTER);
 
         /* Create the event consumer for EventCollector notification */
         remoteEventListener = new ChainedRemoteEventListener(new RemoteEventConsumer(this), config);
+    }
+
+    public void init(final Properties props) {
+        String s = props.getProperty(Constants.EVENTS_DIVIDER);
+        int dividerLocation;
+        if(s==null) {
+            dividerLocation = splitPane.getHeight()/2;
+        } else {
+            dividerLocation = Integer.parseInt(s);
+        }
+        splitPane.setDividerLocation(dividerLocation);
     }
 
     public boolean getUseEventCollector() {
@@ -219,7 +233,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         return dataModel;
     }
 
-    public void setDiscoveryManagement(DiscoveryManagement dMgr) throws Exception {
+    public void setDiscoveryManagement(final DiscoveryManagement dMgr) throws Exception {
         this.dMgr = dMgr;
         createEventListener();
     }
@@ -238,19 +252,19 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         }
     }
 
-    public void addEventCollector(EventCollector eventCollector) throws LeaseDeniedException,
-                                                                        IOException,
-                                                                        UnknownEventCollectorRegistration {
+    public void addEventCollector(final EventCollector eventCollector) throws LeaseDeniedException,
+                                                                              IOException,
+                                                                              UnknownEventCollectorRegistration {
         eventConsumerManager.addEventCollector(eventCollector);
         filterPanel.setUseEventCollectorCheckBoxText();
     }
 
-    public void removeEventCollector(EventCollector eventCollector) {
+    public void removeEventCollector(final EventCollector eventCollector) {
         eventConsumerManager.removeEventCollector(eventCollector);
         filterPanel.setUseEventCollectorCheckBoxText();
     }
 
-    private void removeEvent(int row) {
+    private void removeEvent(final int row) {
         dataModel.removeItem(row);
         notifyListeners();
     }
@@ -261,7 +275,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
             eventConsumerManager.terminate();
     }
     
-    private RemoteServiceEventNode getRemoteServiceEventNode(int row) {
+    private RemoteServiceEventNode getRemoteServiceEventNode(final int row) {
         if(row==-1)
             return null;
         TreePath path = eventTable.getPathForRow(row);
@@ -276,7 +290,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
     class RowListener extends MouseAdapter {
 
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             int clickCount = e.getClickCount();
             int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
             if(row==-1)
@@ -293,11 +307,11 @@ public class RemoteEventTable extends AbstractNotificationUtility {
             }
         }
 
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             maybeShowPopup(e);
         }
 
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             maybeShowPopup(e);
         }
 
@@ -341,12 +355,12 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     class EventCollectorControl implements EventCollectorListener {
         Component parent;
 
-        EventCollectorControl(Component parent) {
+        EventCollectorControl(final Component parent) {
             this.parent = parent;
         }
 
         @Override
-        public void handleEventCollectorRegistration(boolean useEventCollector) {
+        public void handleEventCollectorRegistration(final boolean useEventCollector) {
             try {
                 createEventListener();
             } catch (Exception e) {
@@ -374,7 +388,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
     class FilterApplier implements FilterListener {
 
-        public void notify(FilterCriteria filterCriteria) {
+        public void notify(final FilterCriteria filterCriteria) {
             if(filterCriteria==null && dataModel.getFilterCriteria()==null)
                 return;
             dataModel.setFilterCriteria(filterCriteria);
