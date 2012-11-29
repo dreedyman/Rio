@@ -16,9 +16,8 @@
 package org.rioproject.associations;
 
 /**
- * The AssocationType defines the different types an 
- * {@link Association may} have. An AssociationType may be
- * either:
+ * The {@code AssociationType} defines the different types of an {@code Association}.
+ * An {@code AssociationType} may be either:
  * <ul>
  * <li><b><u>Uses</u> </b> <br>
  * A weak association relationship where if A uses B exists then, then B may be
