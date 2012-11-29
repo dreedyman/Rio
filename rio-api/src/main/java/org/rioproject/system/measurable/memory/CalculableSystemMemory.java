@@ -23,7 +23,7 @@ import org.rioproject.watch.Calculable;
  * @author Dennis Reedy
  */
 public class CalculableSystemMemory  extends Calculable {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     /**
      * Holds value of property containing details about system memory
      * utilization
@@ -47,12 +47,12 @@ public class CalculableSystemMemory  extends Calculable {
         final StringBuilder sb = new StringBuilder();
         sb.append("CalculableSystemMemory { ");
         sb.append("total=").append(memoryUtilization.getTotal());
-        sb.append(", free=" + memoryUtilization.getFree());
-        sb.append(", used=" + memoryUtilization.getUsed());
-        sb.append(", freePerc=" + memoryUtilization.getFreePercentage());
-        sb.append(", usedPerc=" + memoryUtilization.getUsedPercentage());
-        sb.append(", ram=" + memoryUtilization.getRam());
-        sb.append(", value=" + getValue());
+        sb.append(", free=").append(memoryUtilization.getFree());
+        sb.append(", used=").append(memoryUtilization.getUsed());
+        sb.append(", freePerc=").append(memoryUtilization.getFreePercentage());
+        sb.append(", usedPerc=").append(memoryUtilization.getUsedPercentage());
+        sb.append(", ram=").append(memoryUtilization.getRam());
+        sb.append(", value=").append(getValue());
         sb.append('}');
         return sb.toString();
     }
