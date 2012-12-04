@@ -19,18 +19,19 @@ import org.rioproject.bean.PreDestroy;
 import org.rioproject.bean.Started;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.exec.ExecDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Logger;
-import java.lang.management.RuntimeMXBean;
-import java.lang.management.ManagementFactory;
 
 public class ForkImpl implements Fork {
     ServiceBeanContext context;
-    static Logger logger = Logger.getLogger(Fork.class.getName());
+    static Logger logger = LoggerFactory.getLogger(Fork.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) {
         this.context = context;
@@ -38,12 +39,12 @@ public class ForkImpl implements Fork {
     
     public boolean verify() {
         if(context==null) {
-            logger.severe("Cannot verify with a null ServiceBeanContext");
+            logger.error("Cannot verify with a null ServiceBeanContext");
             return false;
         }
         ExecDescriptor exDesc = context.getServiceElement().getExecDescriptor();
         if(exDesc==null) {
-            logger.severe("Cannot verify with a null ExecDescriptor");
+            logger.error("Cannot verify with a null ExecDescriptor");
             return false;
         }        
         String[] declaredArgs = toArray(exDesc.getInputArgs());
@@ -59,7 +60,7 @@ public class ForkImpl implements Fork {
                 }
             }
             if (!matched) {
-                logger.severe("Expected to match ["+arg+"]");
+                logger.error("Expected to match ["+arg+"]");
                 return false;
             }
         }

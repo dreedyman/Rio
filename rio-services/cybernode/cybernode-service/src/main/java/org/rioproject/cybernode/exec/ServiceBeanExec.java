@@ -48,6 +48,8 @@ import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.cpu.CPU;
 import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.watch.WatchDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -55,8 +57,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides support to create a ServiceBean in it's own JVM.
@@ -79,7 +79,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     private ComputeResource computeResource;
     private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
-    private Logger logger = Logger.getLogger(CONFIG_COMPONENT);
+    private Logger logger = LoggerFactory.getLogger(CONFIG_COMPONENT);
 
     /**
      * Create a ServiceBeanExecutor launched from the ServiceStarter
@@ -95,17 +95,17 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         throws Exception {
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         if (Integer.parseInt(sPort) == 0)
-            logger.warning("The RMI Registry port provided " +
-                           "(or obtained by default) is 0. " +
-                           "Because it is 0, the port will default to "+
-                           Registry.REGISTRY_PORT+". This port may be " +
-                           "taken by another RMI Registry instance. If there is " +
-                           "an MBeanServer bound to that RMI Registry " +
-                           "instance, the ServiceBeanExec will monitor the " +
-                           "ability to connect to that MBeanServer. If that " +
-                           "MBeanServer is terminated, the ServiceBeanExec " +
-                           "will also terminate. Care should be taken to not " +
-                           "use the default RMI Registry port.");
+            logger.warn("The RMI Registry port provided " +
+                        "(or obtained by default) is 0. " +
+                        "Because it is 0, the port will default to "+
+                        Registry.REGISTRY_PORT+". This port may be " +
+                        "taken by another RMI Registry instance. If there is " +
+                        "an MBeanServer bound to that RMI Registry " +
+                        "instance, the ServiceBeanExec will monitor the " +
+                        "ability to connect to that MBeanServer. If that " +
+                        "MBeanServer is terminated, the ServiceBeanExec " +
+                        "will also terminate. Care should be taken to not " +
+                        "use the default RMI Registry port.");
         cybernodeRegistryPort = Integer.parseInt(sPort);
         execBindName = System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME, "ServiceBeanExec");
         bootstrap(configArgs);
@@ -126,8 +126,8 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         computeResource.setPersistentProvisioning(provisionEnabled);        
         String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
         if(provisionEnabled) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine(String.format("Software provisioning has been enabled, using provision root [%s]",
+            if(logger.isDebugEnabled())
+                logger.debug(String.format("Software provisioning has been enabled, using provision root [%s]",
                                           provisionRoot));
         }
         computeResource.setPersistentProvisioningRoot(provisionRoot);
@@ -199,11 +199,10 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                                                   opStringMgr,
                                                   context.getDiscoveryManagement());
         } catch (Exception e) {
-            logger.log(Level.WARNING,
-                       "Unable to create proxy for " +
-                       "OperationalStringManager, " +
-                       "using provided OperationalStringManager",
-                       ThrowableUtil.getRootCause(e));
+            logger.warn("Unable to create proxy for " +
+                        "OperationalStringManager, " +
+                        "using provided OperationalStringManager",
+                        ThrowableUtil.getRootCause(e));
 
         }
 
@@ -222,7 +221,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                 slaThresholdEventHandler = result.getBeanAdapter().getSLAEventHandler();
             } else {
                 String className = result.getImpl()==null?"<NO IMPLEMENTATION>":result.getImpl().getClass().getName();
-                logger.warning(String.format("Unable to create ComputeResourcePolicyHandler, unknown service class %s",
+                logger.warn(String.format("Unable to create ComputeResourcePolicyHandler, unknown service class %s",
                                              className));
             }
         }
@@ -253,7 +252,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         try {
             listener.serviceInstantiated(record);
         } catch (RemoteException e) {
-            logger.log(Level.WARNING, "Notifying Cybernode that the service is active", e);
+            logger.warn("Notifying Cybernode that the service is active", e);
         }
     }
 
@@ -269,13 +268,13 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         try {
             registry.unbind(execBindName);
         } catch (Exception e) {
-            logger.warning(e.getClass().getName()+": "+e.getMessage()+", Unbinding from RMI Registry");
+            logger.warn(e.getClass().getName()+": "+e.getMessage()+", Unbinding from RMI Registry");
         }
         if(record!=null) {
             try {
                 listener.serviceDiscarded(record);
             } catch (RemoteException e) {
-                logger.warning(e.getClass().getName()+": "+e.getMessage()+", Notifying Cybernode that we are exiting");
+                logger.warn(e.getClass().getName()+": "+e.getMessage()+", Notifying Cybernode that we are exiting");
             }
         }
         
@@ -288,7 +287,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     }
 
     public void serviceFailure(Object service, ServiceID serviceID) {
-        logger.warning("Parent Cybernode has orphaned us, exiting");
+        logger.warn("Parent Cybernode has orphaned us, exiting");
         container.terminate();
         serviceDiscarded(null);
     }
@@ -324,7 +323,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
             if(cpu.isEnabled())
                 measurables.add(cpu);
         } catch (RuntimeException e) {
-            logger.warning("JVM CPU monitoring not supported");
+            logger.warn("JVM CPU monitoring not supported");
         }
         return measurables.toArray(new MeasurableCapability[measurables.size()]);
     }
@@ -348,7 +347,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                 fdh.register(faultDetectionListener);
                 fdh.monitor();
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Unable to setup FDH to make sure Cybernode doesnt orphan us ", e);
+                logger.error("Unable to setup FDH to make sure Cybernode doesn't orphan us ", e);
             }
         }
     }

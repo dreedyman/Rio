@@ -2,25 +2,25 @@ package org.rioproject.eventcollector.service;
 
 import com.sun.jini.landlord.LeasedResource;
 import net.jini.security.ProxyPreparer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Dennis Reedy
  */
 public class RegistrationManager {
     private final File persistentRegistrationDirectory;
-    private static final Logger logger = Logger.getLogger(RegistrationManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RegistrationManager.class.getName());
 
     public RegistrationManager(EventCollectorContext context) {
         persistentRegistrationDirectory = new File(context.getPersistentDirectoryRoot(), "registrations");
         if(!persistentRegistrationDirectory.exists()) {
-            if(persistentRegistrationDirectory.mkdirs() && logger.isLoggable(Level.INFO)) {
-                logger.fine(String.format("Created %s", persistentRegistrationDirectory.getPath()));
+            if(persistentRegistrationDirectory.mkdirs() && logger.isInfoEnabled()) {
+                logger.debug(String.format("Created %s", persistentRegistrationDirectory.getPath()));
             }
         }
         String[] dirListing = persistentRegistrationDirectory.list();
@@ -38,16 +38,16 @@ public class RegistrationManager {
         try {
             outputStream = new ObjectOutputStream(new FileOutputStream(file));
             outputStream.writeObject(registeredNotification);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine(String.format("Wrote %d bytes to %s", file.length(), file.getPath()));
+            if(logger.isDebugEnabled())
+                logger.debug(String.format("Wrote %d bytes to %s", file.length(), file.getPath()));
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Could not write to disk", e);
+            logger.error("Could not write to disk", e);
         } finally {
             if(outputStream!=null) {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    logger.log(Level.WARNING, "Trying to close OOS", e);
+                    logger.warn("Trying to close OOS", e);
                 }
             }
         }
@@ -57,7 +57,7 @@ public class RegistrationManager {
         List<RegisteredNotification> registeredNotifications = new LinkedList<RegisteredNotification>();
         File[] files = persistentRegistrationDirectory.listFiles();
         if(files==null) {
-            logger.warning(String.format("%s returned null file array", persistentRegistrationDirectory.getPath()));
+            logger.warn(String.format("%s returned null file array", persistentRegistrationDirectory.getPath()));
             return registeredNotifications;
         }
         for(File file : files) {
@@ -70,19 +70,17 @@ public class RegistrationManager {
                     registeredNotifications.add(registeredNotification);
                 } else {
                     if(file.delete()) {
-                        logger.fine("Removed expired registration");
+                        logger.debug("Removed expired registration");
                     }
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE,
-                           String.format("Could not read serialized event [%s] from disk", file.getPath()),
-                           e);
+                logger.error(String.format("Could not read serialized event [%s] from disk", file.getPath()), e);
             } finally {
                 if(inputStream!=null) {
                     try {
                         inputStream.close();
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Trying to close OIS", e);
+                        logger.warn("Trying to close OIS", e);
                     }
                 }
             }
@@ -94,8 +92,8 @@ public class RegistrationManager {
         File file = new File(persistentRegistrationDirectory,
                              getRegisteredNotificationFileName(registeredNotification));
         if(file.exists()) {
-            if(file.delete() && logger.isLoggable(Level.FINE)) {
-                logger.fine("Removed registration.");
+            if(file.delete() && logger.isDebugEnabled()) {
+                logger.debug("Removed registration.");
             }
         }
     }

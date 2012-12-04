@@ -15,24 +15,24 @@
  */
 package org.rioproject.tools.harvest
 
-import net.jini.jeri.BasicJeriExporter
-import net.jini.jeri.BasicILFactory
-import net.jini.jeri.tcp.TcpServerEndpoint
-import org.rioproject.config.Constants
-import net.jini.export.Exporter
-import java.rmi.Remote
-import net.jini.lease.LeaseRenewalManager
-import net.jini.core.lookup.ServiceID
-import net.jini.id.Uuid
 import net.jini.core.entry.Entry
-import net.jini.id.UuidFactory
-import net.jini.lookup.entry.Name
-import net.jini.lookup.JoinManager
+import net.jini.core.lookup.ServiceID
 import net.jini.discovery.DiscoveryManagement
-import java.util.logging.Level
+import net.jini.export.Exporter
+import net.jini.id.Uuid
+import net.jini.id.UuidFactory
+import net.jini.jeri.BasicILFactory
+import net.jini.jeri.BasicJeriExporter
+import net.jini.jeri.tcp.TcpServerEndpoint
+import net.jini.lease.LeaseRenewalManager
+import net.jini.lookup.JoinManager
+import net.jini.lookup.entry.Name
+import org.rioproject.config.Constants
 import org.rioproject.deploy.ProvisionManager
 import org.rioproject.net.HostUtil
-import org.rioproject.logging.GroovyLogger
+import org.slf4j.LoggerFactory
+
+import java.rmi.Remote
 
 /**
  * Provides an implementation of  {@link Harvester}
@@ -41,7 +41,7 @@ class HarvesterBean implements Harvester {
     JoinManager joiner
     ProvisionManager monitor
     final List<HarvesterSession> agentsHandled = new ArrayList<HarvesterSession>()
-    def logger = new GroovyLogger(HarvesterBean.class.getName())
+    def logger = LoggerFactory.getLogger(HarvesterBean.class.getName())
     String harvestDir
 
     def HarvesterBean(DiscoveryManagement dMgr) {
@@ -110,7 +110,7 @@ class HarvesterBean implements Harvester {
         List<File> harvested = new ArrayList<File>()
         Socket socket = server.accept()
         SocketAddress sockAddr = socket.remoteSocketAddress
-        if (logger.isLoggable(Level.INFO))
+        if (logger.isInfoEnabled())
             logger.info "Connect from HarvesterAgent " +
                         "[$sockAddr.hostName, $sockAddr.port]"
         def line

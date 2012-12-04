@@ -25,13 +25,13 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceItemFilter;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The JMXFaultDetectionHandler is a fault detection handler that uses JMX remote
@@ -136,7 +136,7 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
     /**
      * A Logger
      */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     @Override
     public void monitor(Object proxy, final ServiceID id, LookupCache lCache)
@@ -189,7 +189,7 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
             setConfiguration(ConfigurationProvider.getInstance(configArgs));
         } catch (ConfigurationException e) {
-            logger.log(Level.SEVERE, "Setting Configuration", e);
+            logger.error("Setting Configuration", e);
         }
     }
 
@@ -233,8 +233,8 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
         @Override
         public void interrupt() {
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest("Terminating ServiceMonitor Thread");
+            if (logger.isTraceEnabled())
+                logger.trace("Terminating ServiceMonitor Thread");
             keepAlive = false;
             super.interrupt();
         }
@@ -256,42 +256,32 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
             boolean verified = false;
             JMXConnector connector = null;
             try {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Getting an MBeanServerConnection to " +
-                                  jmxConnection);
+                if (logger.isTraceEnabled())
+                    logger.trace("Getting an MBeanServerConnection to {}", jmxConnection);
                 connector =
                     JMXConnectorFactory.connect(new JMXServiceURL(jmxConnection),
                                                 null);
                 connector.getMBeanServerConnection();
 
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("MBeanServerConnection to " +
-                                  jmxConnection + " succeeded");
+                if (logger.isTraceEnabled())
+                    logger.trace("MBeanServerConnection to {} succeeded", jmxConnection);
                 verified = true;
             } catch (IOException e) {
-                if (logger.isLoggable(Level.FINE))
-                    logger.fine("Unable create MBeanServerConnection to " +
-                                "" + jmxConnection +
-                                ", service cannot be reached");
+                if (logger.isDebugEnabled())
+                    logger.debug("Unable create MBeanServerConnection to {}, service cannot be reached", jmxConnection);
                 keepAlive = false;
             } catch (Throwable t) {
                 if (!ThrowableUtil.isRetryable(t)) {
                     keepAlive = false;
-                    if (logger.isLoggable(Level.FINE))
-                        logger.log(Level.FINE,
-                                   "Unrecoverable Exception getting " +
-                                   "MBeanServerConnection",
-                                   t);
+                    if (logger.isDebugEnabled())
+                        logger.debug("Unrecoverable Exception getting MBeanServerConnection", t);
                 }
             } finally {
                 if(connector!=null) {
                     try {
                         connector.close();
                     } catch (IOException e) {
-                        logger.log(Level.WARNING,
-                                   "Non-fatal error, unable to close "+
-                                   "JMXConnector to ["+jmxConnection+"]",
-                                   e); 
+                        logger.warn("Non-fatal error, unable to close JMXConnector to ["+jmxConnection+"]", e);
                     }
                 }
             }
@@ -303,17 +293,15 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 if (!keepAlive) {
                     return;
                 }
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Wait for " +
-                                  "[" + invocationDelay + "] millis " +
-                                  "to obtain MBeanServerConnection for " +
-                                  jmxConnection);
+                if (logger.isTraceEnabled())
+                    logger.trace("Wait for [{}] millis to obtain MBeanServerConnection for {}",
+                                  invocationDelay, jmxConnection);
                 try {
                     sleep(invocationDelay);
                 } catch (InterruptedException ie) {
                     /* should not happen */
                 } catch (IllegalArgumentException iae) {
-                    logger.warning("Sleep time is off : "+ invocationDelay);
+                    logger.warn("Sleep time is off : "+ invocationDelay);
                 }
 
                 /*
@@ -321,23 +309,17 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 * not fatal, retry
                 */
                 if (!verify()) {
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.finest("Unable create MBeanServerConnection to " +
-                                      "" + jmxConnection +
-                                      ", retry [" + retryCount + "] " +
-                                      "times, waiting [" + retryTimeout + "] " +
-                                      "millis between attempts");
+                    if (logger.isTraceEnabled())
+                        logger.trace("Unable create MBeanServerConnection to {}, retry [{}] times, waiting [{}] " +
+                                     "millis between attempts", jmxConnection, retryCount, retryTimeout);
                     boolean connected = false;
                     for (int i = 0; i < retryCount; i++) {
                         long t0 = System.currentTimeMillis();
                         connected = verify();
                         if (!connected) {
                             long t1 = System.currentTimeMillis();
-                            if (logger.isLoggable(Level.FINEST))
-                                logger.finest(
-                                    "Invocation attempt [" + i + "] " +
-                                    "took [" + (t1 - t0) + "] " +
-                                    "millis to fail");
+                            if (logger.isTraceEnabled())
+                                logger.trace("Invocation attempt [{}] took [{}] millis to fail", i, (t1-t0));
                             if (retryTimeout > 0) {
                                 try {
                                     sleep(retryTimeout);
@@ -349,10 +331,9 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
                     }
                     if (!connected) {
                         keepAlive = false;
-                        if (logger.isLoggable(Level.FINEST)) {
-                            logger.finest(
-                                "Unable create MBeanServerConnection to " +
-                                jmxConnection +", notify listeners and exit");
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(
+                                "Unable create MBeanServerConnection to {}, notify listeners and exit", jmxConnection);
                         }
                         notifyListeners();
                         break;

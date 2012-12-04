@@ -33,13 +33,13 @@ import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdManager;
 import org.rioproject.watch.ThresholdType;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The RelocationPolicyHandler will inform the OperationalStringManager to
@@ -119,7 +119,7 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
     /** Component name */
     private static final String CONFIG_COMPONENT = "relocationPolicyHandler";
     /** Logger for this component */
-    static Logger logger = Logger.getLogger("org.rioproject.sla");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.sla");
 
     /**
      * Construct a RelocationPolicyHandler
@@ -159,10 +159,8 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
         try {
             exporter.unexport(true);
         } catch(IllegalStateException e) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "RelocationPolicyHandler unexport failed",
-                           e);
+            if(logger.isTraceEnabled())
+                logger.trace("RelocationPolicyHandler unexport failed", e);
         }
         ourRemoteRef = null;
         if(taskTimer != null)
@@ -185,9 +183,7 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
                                                       "provisionListenerExporter");
 
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Getting provisionListenerExporter, use default",
-                           e);
+                logger.warn("Getting provisionListenerExporter, use default", e);
             }
             /* If we still dont have an exporter create a default one */
             if(exporter==null) {
@@ -206,8 +202,8 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
                 (getSLA().getLowerThresholdDampeningTime()==0?1000:
                     getSLA().getLowerThresholdDampeningTime());
 
-            if(logger.isLoggable(Level.FINE)) {
-                logger.fine("["+context.getServiceElement().getName()+"] "+
+            if(logger.isDebugEnabled()) {
+                logger.debug("["+context.getServiceElement().getName()+"] "+
                             "RelocationPolicyHandler ["+getID()+"]: properties, "+
                             "low Threshold="+getSLA().getLowThreshold()+", "+
                             "high Threshold="+getSLA().getHighThreshold()+", "+
@@ -215,7 +211,7 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
                             "lowerThresholdDampeningTime="+lowerThresholdDampeningTime);
             }
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Getting Operational Configuration", e);
+            logger.error("Getting Operational Configuration", e);
         }
     }
 
@@ -224,9 +220,9 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
      */
     @Override
     public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             String status = type.name().toLowerCase();
-            logger.fine("RelocationPolicyHandler [" + getID() + "]: Threshold ["
+            logger.debug("RelocationPolicyHandler [" + getID() + "]: Threshold ["
                         + calculable.getId() + "] " + status + " value ["
                         + calculable.getValue() + "\n] low ["
                         + thresholdValues.getCurrentLowThreshold() + "]" + " high ["
@@ -258,8 +254,8 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
         if(dampener > 0) {
             relocationTask = new RelocationTask();
             long now = System.currentTimeMillis();
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("["+context.getServiceElement().getName()+"] "+
+            if(logger.isDebugEnabled())
+                logger.debug("["+context.getServiceElement().getName()+"] "+
                             "RelocationPolicyHandler ["+getID()+"]: "+
                             "Schedule relocation task in "+
                             "["+dampener+"] millis");
@@ -267,16 +263,15 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
                 taskTimer.schedule(relocationTask,
                                    new Date(now+ dampener));
             } catch(IllegalStateException e) {
-                logger.log(Level.WARNING,
-                           "Force disconnect of "+
+                logger.warn("Force disconnect of "+
                            "["+context.getServiceElement().getName()+"] "+
                            "RelocationPolicyHandler",
                            e);
                 disconnect();
             }
         } else {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("["+context.getServiceElement().getName()+"] "+
+            if(logger.isDebugEnabled())
+                logger.debug("["+context.getServiceElement().getName()+"] "+
                             "RelocationPolicyHandler ["+getID()+"]: "+
                             "no "+type+" dampener, perform relocation");
             doRelocate();
@@ -294,9 +289,7 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
                                                RELOCATION_SUCCEEDED,
                                                jsbInstance.getService()));
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Getting service to create SLAPolicyEvent",
-                       e);
+            logger.warn("Getting service to create SLAPolicyEvent", e);
         }
     }
 
@@ -313,8 +306,6 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
      * given proxy to this policy handler can be trusted
      */
     public TrustVerifier getProxyVerifier() {
-        if(logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");
         if(ourRemoteRef==null)
             exportDo();
         return (new BasicProxyTrustVerifier(ourRemoteRef));
@@ -327,7 +318,7 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
         try {            
             ourRemoteRef = exporter.export(this);
         } catch(RemoteException e) {
-            logger.log(Level.SEVERE, 
+            logger.error(
                        "Exporting RelocationPolicyHandler ["+getID()+"]",
                        e);
         }
@@ -348,13 +339,13 @@ public class RelocationPolicyHandler extends SLAPolicyHandler
                 (ServiceProvisionListener)ourRemoteRef,
                 null);               
         } catch(Exception e) {
-            if(!logger.isLoggable(Level.FINEST)) {
-                logger.warning("Attempt to invoke relocate method on " +
+            if(!logger.isTraceEnabled()) {
+                logger.warn("Attempt to invoke relocate method on " +
                                "ProvisionManager ["+
                                e.getClass().getName()+" : "+
                                e.getLocalizedMessage()+"]");
             } else {
-                logger.log(Level.WARNING,
+                logger.warn(
                            "Attempt to invoke relocate method on ProvisionManager",
                            e);
             }

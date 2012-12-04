@@ -15,16 +15,16 @@
  */
 package org.rioproject.monitor.persistence;
 
-import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.monitor.OpStringManager;
 import org.rioproject.monitor.OpStringMangerController;
+import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.persistence.StoreException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.rmi.MarshalledObject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages the state of OperationalStrings
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 public class StateManager {
     private OpStringLogHandler opStringLogHandler;
     private PersistentStore store;
-    static Logger logger = Logger.getLogger(StateManager.class.getName());
+    static Logger logger = LoggerFactory.getLogger(StateManager.class.getName());
     /** Snapshot thread */
     SnapshotThread snapshotter;
 
@@ -66,11 +66,9 @@ public class StateManager {
                                    new RecordHolder(opMgr.doGetOperationalString(),
                                                     action)));
         } catch(IllegalStateException ise) {
-            logger.log(Level.WARNING,
-                       "OperationalString state change notification", ise);
+            logger.warn("OperationalString state change notification", ise);
         } catch(Throwable t) {
-            logger.log(Level.WARNING,
-                       "OperationalString state change notification", t);
+            logger.warn("OperationalString state change notification", t);
         } finally {
             store.releaseMutatorLock();
         }

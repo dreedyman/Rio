@@ -27,38 +27,33 @@ import net.jini.lookup.entry.Name
 import org.junit.Assert
 import org.rioproject.config.Constants
 import org.rioproject.config.GroovyConfig
-import org.rioproject.opstring.OperationalString
-import org.rioproject.opstring.OperationalStringManager
-import org.rioproject.opstring.ServiceElement
-import org.rioproject.deploy.ServiceBeanInstantiator
 import org.rioproject.cybernode.Cybernode
+import org.rioproject.deploy.DeployAdmin
+import org.rioproject.deploy.ServiceBeanInstantiator
 import org.rioproject.exec.JVMOptionChecker
 import org.rioproject.exec.Util
-import org.rioproject.deploy.DeployAdmin
 import org.rioproject.monitor.ProvisionMonitor
-import org.rioproject.opstring.OpStringLoader
-import org.rioproject.opstring.OpStringManagerProxy
+import org.rioproject.resolver.Artifact
+import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resources.client.DiscoveryManagementPool
 import org.rioproject.resources.client.JiniClient
-import org.rioproject.util.PropertyHelper
+import org.rioproject.resources.servicecore.ServiceStopHandler
+import org.rioproject.resources.util.FileUtils
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
-import org.rioproject.opstring.OperationalStringException
-import org.rioproject.resolver.ResolverHelper
-import org.rioproject.resolver.Artifact
-import org.rioproject.resources.servicecore.ServiceStopHandler
-import org.rioproject.opstring.OAR
-import org.rioproject.resources.util.FileUtils
-import java.util.logging.Level
-import org.rioproject.logging.GroovyLogger
+import org.rioproject.util.PropertyHelper
+import org.slf4j.LoggerFactory
+import org.rioproject.opstring.*
 
 /**
  * Simplifies the running of core Rio services
+ * 
+ * @author Dennis Reedy
  */
 class TestManager {
     static final String TEST_HOSTS = 'org.rioproject.test.hosts'
-    def logger = new GroovyLogger(TestManager.class.getPackage().name);
+    def logger = LoggerFactory.getLogger(TestManager.class.getPackage().name);
     List<Webster> websters = new ArrayList<Webster>()
     List<Process> processes = new ArrayList<Process>()
     JiniClient client
@@ -108,11 +103,11 @@ class TestManager {
                     File f = new File((String)line)
                     if(f.exists()) {
                         if(FileUtils.remove(f)) {
-                            if(logger.isLoggable(Level.FINE))
-                            logger.fine "Removed ${f.name}"
+                            if(logger.isDebugEnabled())
+                                logger.debug "Removed ${f.name}"
                         } else {
-                            if(logger.isLoggable(Level.FINE))
-                                logger.fine "Could not remove ${f.name}, check permissions"
+                            if(logger.isDebugEnabled())
+                                logger.debug "Could not remove ${f.name}, check permissions"
                         }
                     }
                 }
@@ -222,8 +217,8 @@ class TestManager {
             exec(cybernodeStarter)
             cybernode =  (Cybernode)waitForService(Cybernode.class)
         } else {
-            logger.warning "A Cybernode has been declared to start in the test configuration "+
-                           "but there is no cybernodeStarter declared in the test-config"
+            logger.warn "A Cybernode has been declared to start in the test configuration "+
+                        "but there is no cybernodeStarter declared in the test-config"
         }
         return cybernode
     }
@@ -243,8 +238,8 @@ class TestManager {
             exec(cybernodeStarter)
             cybernode =  (Cybernode)waitForService(Cybernode.class)
         } else {
-            logger.warning "A Cybernode has been declared to start in the test configuration "+
-                           "but there is no cybernodeStarter declared in the test-config"
+            logger.warn "A Cybernode has been declared to start in the test configuration "+
+                        "but there is no cybernodeStarter declared in the test-config"
         }
         return cybernode
     }
@@ -262,8 +257,8 @@ class TestManager {
             exec(monitorStarter)
             monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         } else {
-            logger.warning "A Monitor has been declared to start in the test configuration "+
-                           "but there is no monitorStarter declared in the test-config"
+            logger.warn "A Monitor has been declared to start in the test configuration "+
+                        "but there is no monitorStarter declared in the test-config"
         }
         return monitor
     }
@@ -283,8 +278,8 @@ class TestManager {
             exec(monitorStarter)
             monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         } else {
-            logger.warning "A Monitor has been declared to start in the test configuration "+
-                           "but there is no monitorStarter declared in the test-config"
+            logger.warn "A Monitor has been declared to start in the test configuration "+
+                        "but there is no monitorStarter declared in the test-config"
         }
         return monitor
     }
@@ -316,8 +311,8 @@ class TestManager {
             exec(reggieStarter)
             reggie = (ServiceRegistrar)waitForService(ServiceRegistrar.class)
         } else {
-            logger.warning "A Lookup service has been declared to start in the test configuration "+
-                           "but there is no reggieStarter declared in the test-config"
+            logger.warn "A Lookup service has been declared to start in the test configuration "+
+                        "but there is no reggieStarter declared in the test-config"
         }
         return reggie
     }
@@ -361,7 +356,7 @@ class TestManager {
             ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
             return deploy(oar.loadOperationalStrings()[0], monitor)
         } else {
-            logger.warning "The [${opstring}] is not an artifact"
+            logger.warn "The [${opstring}] is not an artifact"
         }
         return null
     }
@@ -438,7 +433,7 @@ class TestManager {
     boolean undeploy(String name) {
         ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
         if(items.length==0) {
-            logger.warning "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
+            logger.warn "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
             return false
         }
         return undeploy(name, (ProvisionMonitor)items[0].service)
@@ -455,7 +450,7 @@ class TestManager {
             DeployAdmin dAdmin = (DeployAdmin)monitor.admin
             return dAdmin.undeploy(name)
         } else {
-            logger.warning "Cannot undeploy ${name}, ProvisionMonitor provided is null"
+            logger.warn "Cannot undeploy ${name}, ProvisionMonitor provided is null"
             return false
         }
     }
@@ -470,9 +465,9 @@ class TestManager {
         OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers();
         for (OperationalStringManager mgr : opStringMgrs) {
             String opStringName = mgr.getOperationalString().name
-            logger.finer "Undeploying ${opStringName} ..."
+            logger.debug "Undeploying ${opStringName} ..."
             deployAdmin.undeploy(opStringName);
-            logger.finer "Undeployed ${opStringName}"
+            logger.debug "Undeployed ${opStringName}"
             }
         }
 
@@ -561,7 +556,7 @@ class TestManager {
             ProvisionMonitor monitor
             ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
             if(items.length==0) {
-                logger.warning "No discovered ProvisionMonitor instances, cannot deploy HarvesterAgents"
+                logger.warn "No discovered ProvisionMonitor instances, cannot deploy HarvesterAgents"
                 return
             }
             monitor = (ProvisionMonitor)items[0].service
@@ -576,7 +571,7 @@ class TestManager {
             } catch (MalformedURLException e) {
                 File opstringFile = new File(opstring)
                 if(!opstringFile.exists())
-                    logger.warning "Cannot load [${opstringFile}], Unable to deploy Harvester support."
+                    logger.warn "Cannot load [${opstringFile}], Unable to deploy Harvester support."
                 opStringUrl = opstringFile.toURI().toURL()
             }
             OpStringLoader loader = new OpStringLoader(getClass().classLoader)
@@ -644,11 +639,9 @@ class TestManager {
         jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir
         String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpath+' '+mainClass+' '+starter
         logger.info "Logging for $service will be sent to ${logDir}"
-        if(logger.isLoggable(Level.INFO)) {
-            logger.info "Starting ${service}, using starter config [${starter}]"
-        }
-        if(logger.isLoggable(Level.FINE)) {
-            logger.fine "Exec command line: ${cmdLine}"
+        logger.info "Starting ${service}, using starter config [${starter}]"
+        if(logger.isDebugEnabled()) {
+            logger.debug "Exec command line: ${cmdLine}"
         }
         Process process = Runtime.runtime.exec(cmdLine)
         processes.add(process)

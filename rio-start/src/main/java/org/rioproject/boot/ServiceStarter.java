@@ -20,6 +20,8 @@ import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -28,10 +30,8 @@ import java.rmi.RMISecurityManager;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 
 /**
  * This class provides the main routine for starting shared groups,
@@ -104,7 +104,7 @@ public class ServiceStarter {
     /**
      * Configure logger
      */
-    static final Logger logger = Logger.getLogger(COMPONENT+".service.starter");
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT + ".service.starter");
     /**
      * Array of strong references to transient services
      */
@@ -200,9 +200,6 @@ public class ServiceStarter {
                                             final Configuration config,
                                             final LoginContext loginContext)
         throws Exception {
-        logger.entering(ServiceStarter.class.getName(),
-                        "createWithLogin",
-                        new Object[]{descs, config, loginContext});
         loginContext.login();
         Result[] results = null;
         try {
@@ -221,11 +218,9 @@ public class ServiceStarter {
             try {
                 loginContext.logout();
             } catch (LoginException le) {
-                logger.log(Level.FINE, "service.logout.exception", le);
+                logger.warn("service.logout.exception", le);
             }
         }
-        logger.exiting(ServiceStarter.class.getName(),
-                       "createWithLogin", results);
         return results;
     }
 
@@ -249,8 +244,6 @@ public class ServiceStarter {
     private static Result[] create(final ServiceDescriptor[] descs,
                                    final Configuration config)
         throws Exception {
-        logger.entering(ServiceStarter.class.getName(), "create",
-                        new Object[]{descs, config});
         List<Result> proxies = new ArrayList<Result>();
         for (ServiceDescriptor desc : descs) {
             Object result = null;
@@ -266,7 +259,6 @@ public class ServiceStarter {
             }
         }
 
-        logger.exiting(ServiceStarter.class.getName(), "create", proxies);
         return proxies.toArray(new Result[proxies.size()]);
     }
 
@@ -334,13 +326,12 @@ public class ServiceStarter {
      * @throws Exception If there are errors starting the services
      */
     private static Result[] doStart(String... args) throws Exception {
-        logger.entering(ServiceStarter.class.getName(), "doStart", args);
         Configuration config = ConfigurationProvider.getInstance(args);
         ServiceDescriptor[] descs = (ServiceDescriptor[])
             config.getEntry(COMPONENT, "serviceDescriptors",
                             ServiceDescriptor[].class, null);
         if (descs == null || descs.length == 0) {
-            logger.warning("service.config.empty");
+            logger.warn("service.config.empty");
             return new Result[0];
         }
         LoginContext loginContext =
@@ -353,7 +344,6 @@ public class ServiceStarter {
             results = createWithLogin(descs, config, loginContext);
         else
             results = create(descs, config);
-        logger.exiting(ServiceStarter.class.getName(), "doStart");
         return results;
     }
 
@@ -363,8 +353,6 @@ public class ServiceStarter {
     * transient services from getting garbage collected.
     */
     private static List<ServiceReference> getServiceReferences(Result[] results) {
-        logger.entering(ServiceStarter.class.getName(),
-                        "maintainNonActivatableReferences", results);
         List<ServiceReference> refs = new ArrayList<ServiceReference>();
         if (results.length == 0)
             return refs;
@@ -384,9 +372,6 @@ public class ServiceStarter {
                 }
             }
         }
-
-        logger.exiting(ServiceStarter.class.getName(),
-                       "maintainNonActivatableReferences");
         return refs;
     }
 
@@ -397,8 +382,6 @@ public class ServiceStarter {
      * collected.
      */
     private static void maintainNonActivatableReferences(Result[] results) {
-        logger.entering(ServiceStarter.class.getName(),
-           "maintainNonActivatableReferences", results);
         if (results.length == 0)
             return;
         for (Result result : results) {
@@ -406,13 +389,10 @@ public class ServiceStarter {
                 result.result != null &&
                 NonActivatableServiceDescriptor.class.equals(
                     result.descriptor.getClass())) {
-                logger.log(Level.FINEST, "Storing ref to: {0}",
-                           result.result);
+                logger.trace("Storing ref to: "+result.result);
                 transientServiceRefs.add(result.result);
             }
         }
-        logger.exiting(ServiceStarter.class.getName(),
-           "maintainNonActivatableReferences");
     }
 
     /*
@@ -420,24 +400,18 @@ public class ServiceStarter {
      * descriptor that produced an exception or that was null.
      */
     private static void checkResultFailures(Result[] results) {
-        logger.entering(ServiceStarter.class.getName(),
-                        "checkResultFailures", results);
         if (results.length == 0)
             return;
         for (int i = 0; i < results.length; i++) {
             if (results[i].exception != null) {
-                logger.log(Level.WARNING,
-                           "service.creation.unknown",
+                logger.warn("service.creation.unknown",
                            results[i].exception);
-                logger.log(Level.WARNING,
-                           "service.creation.unknown.detail",
+                logger.warn("service.creation.unknown.detail",
                            new Object[]{i, results[i].descriptor});
             } else if (results[i].descriptor == null) {
-                logger.log(Level.WARNING, "service.creation.null", i);
+                logger.warn("service.creation.null", i);
             }
         }
-        logger.exiting(ServiceStarter.class.getName(),
-                       "checkResultFailures");
     }
 
     /**
@@ -469,11 +443,10 @@ public class ServiceStarter {
             //TODO - kick off daemon thread to maintain refs via LifeCycle object
             maintainNonActivatableReferences(results);
         } catch (ConfigurationException cex) {
-            logger.log(Level.SEVERE, "service.config.exception", cex);
+            logger.error("service.config.exception", cex);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "service.creation.exception", e);
+            logger.error("service.creation.exception", e);
         }
-        logger.exiting(ServiceStarter.class.getName(), "main");
     }
 
 }

@@ -26,10 +26,12 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ProxyTrustIterator;
 import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
-import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.deploy.DeployedService;
+import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.resources.servicecore.AbstractProxy;
 import org.rioproject.system.ResourceCapability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -41,8 +43,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A <code>ProvisionMonitorProxy</code> is a proxy for the ProvisionMonitor
@@ -52,7 +52,7 @@ import java.util.logging.Logger;
  */
 class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, Serializable {
     private static final long serialVersionUID = 2L;
-    static final Logger logger = Logger.getLogger("org.rioproject.monitor");
+    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor");
     final ProvisionMonitor monitorProxy;
 
     /**
@@ -131,9 +131,9 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
                 serviceBeanInstantiators.add(marshalledObject.get());
             }
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Unwrapping a Cybernode", e);
+            logger.warn("Unwrapping a Cybernode", e);
         } catch (ClassNotFoundException e) {
-            logger.log(Level.WARNING, "Unwrapping a Cybernode", e);
+            logger.warn("Unwrapping a Cybernode", e);
         }
         return serviceBeanInstantiators.toArray(new ServiceBeanInstantiator[serviceBeanInstantiators.size()]);
     }

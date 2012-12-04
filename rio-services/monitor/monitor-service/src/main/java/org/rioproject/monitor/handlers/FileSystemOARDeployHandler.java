@@ -15,16 +15,15 @@
  */
 package org.rioproject.monitor.handlers;
 
-import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OAR;
 import org.rioproject.opstring.OARException;
 import org.rioproject.opstring.OARUtil;
+import org.rioproject.opstring.OperationalString;
 import org.rioproject.resources.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * A {@link DeployHandler} that handles OAR files. This <tt>DeployHandler</tt>
@@ -65,22 +64,22 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
         this.installDirectory = installDirectory;
         if(!dropDirectory.exists()) {
             if(dropDirectory.mkdirs()) {
-                if(logger.isLoggable(Level.FINE)) {
-                    logger.fine("Created dropDeployDir " +FileUtils.getFilePath(dropDirectory));
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Created dropDeployDir " +FileUtils.getFilePath(dropDirectory));
                 }
             }
         }                
         if(!installDirectory.exists()) {
             if(installDirectory.mkdirs()) {
-                if(logger.isLoggable(Level.FINE)) {
-                logger.fine("Created installDir " +FileUtils.getFilePath(installDirectory));
+                if(logger.isDebugEnabled()) {
+                logger.debug("Created installDir " +FileUtils.getFilePath(installDirectory));
                 }
             }
         }
         
-        if(logger.isLoggable(Level.CONFIG)) {
-            logger.config("OARs will be scanned for in this directory: "+FileUtils.getFilePath(dropDirectory));
-            logger.config("OARs will be installed into this directory: "+FileUtils.getFilePath(installDirectory));
+        if(logger.isDebugEnabled()) {
+            logger.debug("OARs will be scanned for in this directory: "+FileUtils.getFilePath(dropDirectory));
+            logger.debug("OARs will be installed into this directory: "+FileUtils.getFilePath(installDirectory));
         }
     }
 
@@ -93,15 +92,14 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
                     try {
                         install(file, installDirectory);
                     } catch (IOException e) {
-                        logger.log(Level.WARNING,
-                                   "Could not install ["+file.getName()+"] " +
-                                   "to ["+installDirectory.getName()+"]",
-                                   e);
+                        logger.warn("Could not install ["+file.getName()+"] " +
+                                    "to ["+installDirectory.getName()+"]",
+                                    e);
                         badOARs.put(file.getName(), new Date(file.lastModified()));
                     } catch (Exception e) {
-                        logger.warning("The ["+file.getName()+"] is an " +
-                                   "invalid OAR and cannot be installed, "+
-                                   e.getClass().getName()+": "+e.getMessage());
+                        logger.warn("The ["+file.getName()+"] is an " +
+                                    "invalid OAR and cannot be installed, "+
+                                    e.getClass().getName()+": "+e.getMessage());
                         badOARs.put(file.getName(), new Date(file.lastModified()));
                     }
                 }
@@ -117,13 +115,9 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
                         list.addAll(parseOAR(oar, from));
                     }
                 } catch (IOException e) {
-                    logger.log(Level.WARNING,
-                               "Loading [" + file.getName() + "]",
-                               e);
+                    logger.warn("Loading [" + file.getName() + "]", e);
                 } catch (OARException e) {
-                    logger.log(Level.WARNING,
-                               "Unable to install [" + file.getName() + "]",
-                               e);
+                    logger.warn("Unable to install [" + file.getName() + "]", e);
                 }
             }
         }

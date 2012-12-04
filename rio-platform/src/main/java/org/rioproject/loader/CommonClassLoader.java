@@ -15,11 +15,11 @@
  */
 package org.rioproject.loader;
 
-import org.rioproject.logging.WrappedLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.logging.Level;
 
 /**
  * The CommonClassLoader is created by the <code>RioServiceDescriptor</code> when starting a Rio
@@ -36,7 +36,7 @@ import java.util.logging.Level;
  */
 public final class CommonClassLoader extends URLClassLoader {
     private static final String COMPONENT = "org.rioproject.loader";
-    private static WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(COMPONENT);
     private static CommonClassLoader instance;
 
 	/**
@@ -69,14 +69,14 @@ public final class CommonClassLoader extends URLClassLoader {
     public URL[] getURLs() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         URL[] urls = doGetURLs(cl);
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             StringBuilder buffer = new StringBuilder();
             for(int i=0; i<urls.length; i++) {
                 if(i>0)
                     buffer.append(", ");
                 buffer.append(urls[i].toExternalForm());
             }
-            logger.finest("Context ClassLoader=%s URLs=%s", cl.toString(), buffer.toString());
+            logger.trace("Context ClassLoader=%s URLs=%s", cl.toString(), buffer.toString());
         } 
         return(urls);
     }

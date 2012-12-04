@@ -19,7 +19,6 @@ package org.rioproject.watch;
 import net.jini.config.Configuration;
 
 import java.rmi.RemoteException;
-import java.util.logging.Level;
 
 /**
  * A Watch that provides threshold processing semantics
@@ -88,8 +87,8 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     public void addThresholdListener(final ThresholdListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("%s added ThresholdListener %s", getId(), listener));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("%s added ThresholdListener %s", getId(), listener));
         thresholdManager.addThresholdListener(listener);
     }
 
@@ -101,8 +100,8 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     public void removeThresholdListener(final ThresholdListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("%s removed ThresholdListener %s", getId(), listener));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("%s removed ThresholdListener %s", getId(), listener));
         thresholdManager.removeThresholdListener(listener);
     }
 
@@ -122,13 +121,11 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
                 try {
                     watchDataSource.setThresholdValues(getThresholdValues());
                 } catch(RemoteException e) {
-                    logger.log(Level.WARNING,
-                               "Setting ThresholdValues for a remote WatchDataSource",
-                               e);
+                    logger.warn("Setting ThresholdValues for a remote WatchDataSource", e);
                 }
             } else {
-                logger.warning(String.format("%s No WatchDataSource set for watch, unable to apply threshold values: %s",
-                                             getId(), tValues));
+                logger.warn(String.format("%s No WatchDataSource set for watch, unable to apply threshold values: %s",
+                                          getId(), tValues));
             }
         }
     }

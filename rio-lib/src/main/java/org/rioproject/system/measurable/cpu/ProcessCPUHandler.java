@@ -19,11 +19,11 @@ import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.MXBeanMonitor;
 import org.rioproject.system.measurable.SigarHelper;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * CPU monitor that obtains process CPU utilization. This utility uses either
@@ -42,7 +42,7 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
     private long pid;
     private SigarHelper sigar;
     static Logger logger =
-        Logger.getLogger(ProcessCPUHandler.class.getPackage().getName());
+        LoggerFactory.getLogger(ProcessCPUHandler.class.getPackage().getName());
 
     public ProcessCPUHandler() {
         sigar = SigarHelper.getInstance();
@@ -102,10 +102,7 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
                 //System.out.println("------------")
                 pCpu = new ProcessCpuUtilization(id, percent, sys, user, tVals);
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "SIGAR exception getting ProcessCpu, get " +
-                           "CPU process utilization using JMX",
-                           e);
+                logger.warn("SIGAR exception getting ProcessCpu, get CPU process utilization using JMX", e);
                 double percent = getUtilizationUsingJMX();
                 pCpu = new ProcessCpuUtilization(id, percent, tVals);
             }

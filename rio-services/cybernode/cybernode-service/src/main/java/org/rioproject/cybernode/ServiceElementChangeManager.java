@@ -22,13 +22,12 @@ import org.rioproject.core.jsb.ServiceElementChangeListener;
 import org.rioproject.jsb.ServiceBeanSLAManager;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.log.LoggerConfig;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.ServiceLevelAgreements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Listen for ServiceElement changes
@@ -40,7 +39,7 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
     /* Manage declared SLAs */
     private final ServiceBeanSLAManager serviceBeanSLAManager;
     private final Object serviceProxy;
-    private static final WrappedLogger logger = WrappedLogger.getLogger(ServiceElementChangeManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ServiceElementChangeManager.class.getName());
 
     public ServiceElementChangeManager(ServiceBeanContext context,
                                        ServiceBeanSLAManager serviceBeanSLAManager,
@@ -54,8 +53,8 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
     * @see org.rioproject.core.jsb.ServiceElementChangeListener#changed
     */
     public void changed(ServiceElement preElem, ServiceElement postElem) {
-        if (logger.isLoggable(Level.FINEST))
-            logger.fine("[%s] ServiceElementChangeManager notified", context.getServiceElement().getName());
+        if (logger.isTraceEnabled())
+            logger.debug("[%s] ServiceElementChangeManager notified", context.getServiceElement().getName());
         /* ------------------------------------------*
        *  SLA Update Processing
        * ------------------------------------------*/
@@ -75,7 +74,7 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
                 if (LoggerConfig.isNewLogger(newLoggerConfig, currentLoggerConfigs)) {
                     newLoggerConfig.getLogger();
                 } else if (LoggerConfig.levelChanged(newLoggerConfig, currentLoggerConfigs)) {
-                    Logger.getLogger(newLoggerConfig.getLoggerName()).setLevel(newLoggerConfig.getLoggerLevel());
+                    java.util.logging.Logger.getLogger(newLoggerConfig.getLoggerName()).setLevel(newLoggerConfig.getLoggerLevel());
                 }
             }
         }
@@ -89,7 +88,7 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
         boolean hasDifferentGroups = ServiceElementUtil.hasDifferentGroups(preElem, postElem);
         boolean hasDifferentLocators = ServiceElementUtil.hasDifferentLocators(preElem, postElem);
         if (hasDifferentGroups || hasDifferentLocators) {
-            logger.finest("[%s] Discovery has changed", context.getServiceElement().getName());
+            logger.trace("[{}] Discovery has changed", context.getServiceElement().getName());
             if (serviceProxy instanceof Administrable) {
                 try {
                     Administrable admin = (Administrable) serviceProxy;
@@ -105,13 +104,13 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
                         if (hasDifferentLocators)
                             joinAdmin.setLookupLocators(postElem.getServiceBeanConfig().getLocators());
                     } else {
-                        logger.fine("No JoinAdmin capabilities for %s", context.getServiceElement().getName());
+                        logger.debug("No JoinAdmin capabilities for {}", context.getServiceElement().getName());
                     }
                 } catch (RemoteException e) {
-                    logger.log(Level.SEVERE, "Modifying Discovery attributes", e);
+                    logger.error("Modifying Discovery attributes", e);
                 }
             } else {
-                logger.fine("No Administrable capabilities for %s", serviceProxy.getClass().getName());
+                logger.debug("No Administrable capabilities for {}", serviceProxy.getClass().getName());
             }
             /* --- End Update Discovery --- */
         }

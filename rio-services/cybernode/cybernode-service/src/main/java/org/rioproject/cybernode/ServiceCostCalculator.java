@@ -15,8 +15,8 @@
  */
 package org.rioproject.cybernode;
 
-import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.SystemWatchID;
@@ -24,12 +24,12 @@ import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.Statistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Used to calculate resource costs for a service.
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class ServiceCostCalculator {
     private static String COMPONENT = "org.rioproject.cybernode.instrument";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     ComputeResource computeResource;
     DownloadRecord[] downloadRecords;
     ServiceBeanContext context;
@@ -138,10 +138,9 @@ public class ServiceCostCalculator {
                     costList.add(mCap.calculateResourceCost(
                         new Integer(size).doubleValue(), duration));
                 else {
-                    if (logger.isLoggable(Level.FINE))
-                        logger.log(Level.FINE,
-                                   "DiskSpace capability not found, " +
-                                   "cannot create ResourceCost");
+                    if (logger.isDebugEnabled()) {
+                        logger.warn("DiskSpace capability not found, cannot create ResourceCost");
+                    }
                 }
             }
         }
@@ -156,23 +155,19 @@ public class ServiceCostCalculator {
         return(costList.toArray(new ResourceCost[costList.size()]));
     }
 
-    private double getMean(MeasurableCapability mCap,
-                           long from,
-                           long to,
-                           double last) {
+    private double getMean(MeasurableCapability mCap, long from, long to, double last) {
         if(mCap==null)
             return 0;
         double mean = 0;
         try {
-            Calculable[] calcs = mCap.getWatchDataSource().getCalculable(from,
-                                                                         to);
+            Calculable[] calcs = mCap.getWatchDataSource().getCalculable(from, to);
             Statistics stats = new Statistics();
             stats.setValues(calcs);
             if (last != 0)
                 stats.addValue(last);
             mean = stats.mean();
         } catch (RemoteException e) {
-            e.printStackTrace();
+            logger.warn("Getting the mean", e);
         }
         return (Double.isNaN(mean)?0:mean);
     }

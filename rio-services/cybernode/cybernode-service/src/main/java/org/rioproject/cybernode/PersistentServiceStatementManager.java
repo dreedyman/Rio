@@ -19,12 +19,12 @@ import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import org.rioproject.deploy.ServiceStatement;
 import org.rioproject.deploy.ServiceStatementManager;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * The PersistentServiceStatementManager provides an implementation of the
@@ -53,7 +53,7 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
     /** A semaphore for reading/writing */
     final Object rwSemaphore = new Object();
     /** Logger */
-    static WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.cybernode");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.cybernode");
 
     /**
      * Create a PersistentServiceStatementManager
@@ -63,7 +63,7 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
     public PersistentServiceStatementManager(Configuration config) {
         try {
             recordRoot = Environment.setupRecordRoot(config);
-                logger.fine("Storing service statements in [%s]", recordRoot.getCanonicalPath());
+            logger.debug("Storing service statements in [{}]", recordRoot.getCanonicalPath());
             long age = clean;
             try {
                 age = Config.getLongEntry(config,
@@ -74,18 +74,18 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
                                           Long.MAX_VALUE);
                 age = age * DAY;
             } catch(Throwable t) {
-                logger.log(Level.WARNING, "PersistentServiceStatementManager : exception getting recordAge", t);
+                logger.warn("PersistentServiceStatementManager : exception getting recordAge", t);
             }
             if(age != ETERNITY) {
-                logger.fine( "ServiceStatement maximum age [%d] days", (age / DAY));
+                logger.debug( "ServiceStatement maximum age [{}] days", (age / DAY));
                 taskTimer = new Timer(true);
                 long now = System.currentTimeMillis();
                 taskTimer.scheduleAtFixedRate(new FileSweeper(age), new Date(now + SECOND), HOUR);
             } else {
-                logger.fine("ServiceStatements live forever");
+                logger.debug("ServiceStatements live forever");
             }
         } catch(IOException e) {
-            logger.log(Level.WARNING, "Accessing storage for ServiceRecords", e);
+            logger.warn("Accessing storage for ServiceRecords", e);
         }
     }
 
@@ -103,13 +103,15 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
     public ServiceStatement[] get() {
         List<ServiceStatement> list = new ArrayList<ServiceStatement>();
         File[] statements = recordRoot.listFiles();
-        for (File statement : statements) {
-            try {
-                ServiceStatement stmnt = read(statement);
-                if (stmnt != null)
-                    list.add(stmnt);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Getting ServiceStatement instances", e);
+        if(statements!=null) {
+            for (File statement : statements) {
+                try {
+                    ServiceStatement stmnt = read(statement);
+                    if (stmnt != null)
+                        list.add(stmnt);
+                } catch (Exception e) {
+                    logger.error("Getting ServiceStatement instances", e);
+                }
             }
         }
         return (list.toArray(new ServiceStatement[list.size()]));
@@ -123,9 +125,9 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
         try {            
             statement = read(makeName(sElem) + STATEMENT_EXT);
         } catch(IOException e) {
-            logger.log(Level.SEVERE, "Getting ServiceStatement", e);
+            logger.error("Getting ServiceStatement", e);
         } catch(ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Getting ServiceStatement", e);
+            logger.error("Getting ServiceStatement", e);
         }
         return (statement);
     }
@@ -137,7 +139,7 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
         try {
             write(statement);
         } catch(IOException e) {
-            logger.log(Level.SEVERE, "Writing ServiceStatement", e);
+            logger.error("Writing ServiceStatement", e);
         }
     }
 
@@ -148,11 +150,8 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
      */
     void write(ServiceStatement statement) throws IOException {
         synchronized(rwSemaphore) {
-            File record = new File(recordRoot, 
-                                   makeName(statement.getServiceElement())+
-                                            STATEMENT_EXT);
-            ObjectOutputStream oos = 
-                new ObjectOutputStream(new FileOutputStream(record));
+            File record = new File(recordRoot, makeName(statement.getServiceElement())+STATEMENT_EXT);
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(record));
             oos.writeObject(statement);
             oos.flush();
         }
@@ -164,8 +163,7 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
      * @param fileName The ServiceStatement file name
      * @return ServiceStatement
      */
-    ServiceStatement read(String fileName) throws ClassNotFoundException,
-        IOException {
+    ServiceStatement read(String fileName) throws ClassNotFoundException, IOException {
         File file = new File(recordRoot, fileName);
         if(file.exists())
             return (read(file));
@@ -221,8 +219,8 @@ public class PersistentServiceStatementManager implements ServiceStatementManage
                         long age = now - lastModified;
                         if (age > oldAge) {
                             file.delete();
-                            if (logger.isLoggable(Level.FINE))
-                                logger.fine("ServiceStatement [%s] has aged past [%d] days, file has been removed",
+                            if (logger.isDebugEnabled())
+                                logger.debug("ServiceStatement [{}] has aged past [{}] days, file has been removed",
                                             file.getName(), (oldAge/ DAY));
                         }
                     }

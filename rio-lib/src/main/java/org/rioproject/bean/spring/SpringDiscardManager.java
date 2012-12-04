@@ -16,10 +16,10 @@
 package org.rioproject.bean.spring;
 
 import org.rioproject.core.jsb.DiscardManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * Destroys the Spring application context once the bean is destroyed.
@@ -31,7 +31,7 @@ public class SpringDiscardManager implements DiscardManager {
     private Object springContext;
     private DiscardManager discardManager;
     static final String COMPONENT = "org.rioproject.bean";
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a SpringDiscardManager, destroying the Spring application
@@ -71,7 +71,7 @@ public class SpringDiscardManager implements DiscardManager {
                                                               (Class[])null);
             close.invoke(springContext, (Object[])null);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Closing Spring ApplicationContext", e);
+            logger.warn("Closing Spring ApplicationContext", e);
         } finally {
             discardManager.discard();
         }

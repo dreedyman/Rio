@@ -16,18 +16,18 @@
 package org.rioproject.monitor.persistence;
 
 import com.sun.jini.reliableLog.LogHandler;
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.monitor.OpStringManager;
 import org.rioproject.monitor.OpStringMangerController;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.resources.persistence.SnapshotHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.rmi.MarshalledObject;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class that manages the persistence details behind saving and restoring
@@ -57,7 +57,7 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
     /** Log format version */
     static final int LOG_VERSION = 1;
 
-    static Logger logger = Logger.getLogger(OpStringLogHandler.class.getName());
+    static Logger logger = LoggerFactory.getLogger(OpStringLogHandler.class.getName());
 
     void setOpStringMangerController(OpStringMangerController opStringMangerController) {
         this.opStringMangerController = opStringMangerController;
@@ -98,8 +98,8 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
         MarshalledObject mo = (MarshalledObject) oistream.readObject();
         List<OperationalString> list = (List<OperationalString>) mo.get();
         for (OperationalString opString : list) {
-            if (logger.isLoggable(Level.FINER))
-                logger.finer("Recovered : " + opString.getName());
+            if (logger.isDebugEnabled())
+                logger.debug("Recovered : " + opString.getName());
             //dumpOpString(opString);
             recoveredOpstrings.add(opString);
             opStringsRecovered = true;
@@ -169,7 +169,7 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
                     opStringMangerController.dumpOpStringError(map);
                 }
             } catch (Exception ex) {
-                logger.log(Level.WARNING, "Processing recovered OperationalStrings", ex);
+                logger.warn("Processing recovered OperationalStrings", ex);
             }
         }
         recoveredOpstrings.clear();
@@ -200,7 +200,7 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
                     undeploy(opString.getName(), false);
                 }*/
             } catch (Exception ex) {
-                logger.log(Level.WARNING, "Processing updated OperationalStrings", ex);
+                logger.warn("Processing updated OperationalStrings", ex);
             }
         }
         updatedOpstrings.clear();

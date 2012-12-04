@@ -17,9 +17,8 @@ package org.rioproject.monitor.tasks;
 
 import org.rioproject.event.EventHandler;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to notify registered event consumers of a
@@ -31,7 +30,7 @@ public class ProvisionMonitorEventTask implements Runnable {
     EventHandler eventHandler;
     ProvisionMonitorEvent event;
     private static final String COMPONENT = "org.rioproject.monitor";
-    private Logger logger = Logger.getLogger(COMPONENT);
+    private Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a ProvisionMonitorEventTask
@@ -54,9 +53,7 @@ public class ProvisionMonitorEventTask implements Runnable {
         try {
             eventHandler.fire(event);
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Exception notifying ProvisionMonitorEvent consumers",
-                       e);
+            logger.warn("Exception notifying ProvisionMonitorEvent consumers", e);
         }
     }
 }

@@ -19,14 +19,14 @@ import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.ServiceBean;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.exec.support.PosixShell;
 import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
@@ -39,6 +39,8 @@ import org.rioproject.system.measurable.cpu.ProcessCPUHandler;
 import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.system.measurable.memory.ProcessMemoryMonitor;
 import org.rioproject.watch.WatchDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServerConnection;
 import java.io.BufferedReader;
@@ -52,8 +54,6 @@ import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides support to execute an external service. If the external service is
@@ -185,7 +185,7 @@ public class ServiceExecutor {
     private Configuration config;
     private static final String COMPONENT = ServiceExecutor.class.getPackage().getName();
     private int pidFileWaitTime = 60; // number of seconds
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public ServiceExecutor() {
         sigar = SigarHelper.getInstance();
@@ -201,8 +201,7 @@ public class ServiceExecutor {
                                                                         String.class,
                                                                         null);
         } catch (ConfigurationException e) {
-            logger.warning("Cannot get shell template from configuration, " +
-                           "continue with default");
+            logger.warn("Cannot get shell template from configuration, continue with default");
         }
         try {
             pidFileWaitTime = Config.getIntEntry(context.getConfiguration(),
@@ -212,9 +211,7 @@ public class ServiceExecutor {
                                                  5,     //minimum of 5 second wait
                                                  60 * 5); // max of 5 minute wait
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Getting pidFileWaitTime, using default",
-                       e);
+            logger.warn("Getting pidFileWaitTime, using default", e);
         }
         execDescriptor = context.getServiceElement().getExecDescriptor();
         if(execDescriptor==null)
@@ -232,15 +229,12 @@ public class ServiceExecutor {
                     File toExec = new File(pCap.getPath(), cmdLine);
                     if(toExec.exists() && toExec.canRead()) {
                         matched = true;
-                        if(logger.isLoggable(Level.INFO)) {
-                            logger.info("Adding PlatformCapability PATH " +
-                                        "["+pCap.getPath()+"] to declared " +
-                                        "command line " +
-                                        "["+cmdLine+"]");
+                        if(logger.isInfoEnabled()) {
+                            logger.info("Adding PlatformCapability PATH [{}] to declared command line [{}]",
+                                        pCap.getPath(), cmdLine);
                         }
                         
-                        execDescriptor = Util.extendCommandLine(pCap.getPath(),
-                                                                execDescriptor);
+                        execDescriptor = Util.extendCommandLine(pCap.getPath(), execDescriptor);
                         break;
                     }
                 }
@@ -254,26 +248,25 @@ public class ServiceExecutor {
                     "found");
             }
         } else {
-            if(logger.isLoggable(Level.INFO)) {
-                logger.info("Using command line " +
-                            "["+execDescriptor.getCommandLine()+"]");
+            if(logger.isInfoEnabled()) {
+                logger.info("Using command line [{}]",  execDescriptor.getCommandLine());
             }
         }
 
         File toExec = new File(execDescriptor.getCommandLine());
         if(!toExec.exists())
             throw new ServiceBeanInstantiationException("The command line ["+
-                                                execDescriptor.getCommandLine()+
-                                                "] can not be found, " +
-                                                "unable to continue. Check " +
-                                                "that the directory structure " +
-                                                "matches that as found on the " +
-                                                "executing platform. If the " +
-                                                "ServiceExec is a result of " +
-                                                "software downloading make sure " +
-                                                "that all installation is " +
-                                                "correct and that downloaded " +
-                                                "software has been extracted");
+                                                        execDescriptor.getCommandLine()+
+                                                        "] can not be found, " +
+                                                        "unable to continue. Check " +
+                                                        "that the directory structure " +
+                                                        "matches that as found on the " +
+                                                        "executing platform. If the " +
+                                                        "ServiceExec is a result of " +
+                                                        "software downloading make sure " +
+                                                        "that all installation is " +
+                                                        "correct and that downloaded " +
+                                                        "software has been extracted");
         exec();
         processManager.manage();
         String pidFileName = execDescriptor.getPidFile();
@@ -289,7 +282,7 @@ public class ServiceExecutor {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "Waiting for pid file to appear, abort wait", e);
+                    logger.warn("Waiting for pid file to appear, abort wait", e);
                     break;
                 }
                 waited++;
@@ -301,7 +294,7 @@ public class ServiceExecutor {
             long t0 = System.currentTimeMillis();
             while(waited < 5) {
                 String[] ids = JMXConnectionUtil.listIDs();
-                StringBuffer s = new StringBuffer();
+                StringBuilder s = new StringBuilder();
                 for(int i=0; i<ids.length; i++) {
                     if(i>0)
                         s.append(", ");
@@ -326,7 +319,7 @@ public class ServiceExecutor {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "Waiting for pid to appear under JMX management, abort wait", e);
+                    logger.warn("Waiting for pid to appear under JMX management, abort wait", e);
                     break;
                 }
                 waited++;
@@ -340,7 +333,7 @@ public class ServiceExecutor {
             }
         } else {
             if(actualPID==-1)
-                logger.warning("No SIGAR support available, unable to obtain PID");
+                logger.warn("No SIGAR support available, unable to obtain PID");
         }
         if(actualPID!=-1) {
             logger.info("PID of exec'd process obtained: "+actualPID);
@@ -351,16 +344,13 @@ public class ServiceExecutor {
                 setThreadDeadlockDetector(context.getServiceElement());
                 checkWatchDescriptors(context.getServiceElement());
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Could not attach to the exec'd " +
-                           "JVM with PID: "+actualPID+", " +
-                           "continue service execution",
-                           e);
+                logger.warn("Could not attach to the exec'd JVM with PID: " +
+                            actualPID +
+                            ", continue service execution", e);
             }
         } else {
-            logger.info("Could not obtain actual PID of " +
-                        "exec'd process, process cpu and " +
-                        "java memory utilization are not available");
+            logger.info("Could not obtain actual PID of exec'd process, " +
+                        "process cpu and java memory utilization are not available");
         }
 
     }
@@ -451,16 +441,19 @@ public class ServiceExecutor {
         return cmd;
     }
 
+    @SuppressWarnings("unused")
     public void setExecDescriptor(ExecDescriptor execDescriptor) {
         if (execDescriptor == null)
             throw new IllegalArgumentException("ExecDescriptor is null");
         this.execDescriptor = execDescriptor;
     }
 
+    @SuppressWarnings("unused")
     public void setServiceBean(ServiceBean serviceBean) {
         this.serviceBean = serviceBean;
     }
 
+    @SuppressWarnings("unused")
     public void preDestroy() {
         terminate();
     }
@@ -485,8 +478,8 @@ public class ServiceExecutor {
         }
         processManager.registerListener(new ProcessManager.Listener() {
             public void processTerminated(int pid) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Process ["+pid+"] terminated");
+                if(logger.isDebugEnabled())
+                    logger.debug("Process [{}] terminated", pid);
                 if(serviceBean!=null)
                     serviceBean.destroy(true);
             }

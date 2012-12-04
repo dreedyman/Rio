@@ -36,7 +36,7 @@ public class ThresholdWatchTest extends WatchTest {
      *
      * @noinspection UNUSED_SYMBOL
      */
-    //private static Logger logger = Logger.getLogger("org.rioproject.watch");
+    //private static Logger logger = LoggerFactory.getLogger("org.rioproject.watch");
 
     /**
      * Constructs a <code>ThresholdWatchTest</code>.

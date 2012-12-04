@@ -20,12 +20,12 @@ import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.id.Uuid;
 import org.rioproject.util.TimeConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Abstract class to manage the service's leased resources.
@@ -44,7 +44,7 @@ public abstract class ResourceLessor {
     /** Component for getting the Logger */
     private static final String COMPONENT_NAME = ResourceLessor.class.getPackage().getName();
     /** The Logger */
-    private static final Logger logger = Logger.getLogger(COMPONENT_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT_NAME);
 
     /**
      * Check to make sure that the LeasedResource lease has not expired yet <br>
@@ -287,12 +287,9 @@ public abstract class ResourceLessor {
                 for (Entry<Uuid, LeasedResource> entry : mapEntries) {
                     LeasedResource lr = entry.getValue();
                     if (!ensure(lr)) {
-                        if (logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE,
-                                       "Lease expired for resource {0}, cookie {1}",
-                                       new Object[]{
-                                           ((ServiceResource) lr).getResource(),
-                                           lr.getCookie()});
+                        if (logger.isDebugEnabled())
+                            logger.debug("Lease expired for resource {}, cookie {}",
+                                         ((ServiceResource) lr).getResource().toString(), lr.getCookie());
                         remove(lr.getCookie());
                         notifyLeaseExpiration(lr);
                     }

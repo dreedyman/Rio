@@ -15,19 +15,19 @@
  */
 package org.rioproject.system.capability;
 
-import org.rioproject.deploy.DownloadRecord;
-import org.rioproject.deploy.StagedSoftware;
-import org.rioproject.deploy.SystemComponent;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.costmodel.ResourceCostProducer;
 import org.rioproject.costmodel.ZeroCostModel;
+import org.rioproject.deploy.DownloadRecord;
+import org.rioproject.deploy.StagedSoftware;
+import org.rioproject.deploy.SystemComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -150,7 +150,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
                                                 "$", "|", ")", "?", "+"};
     private String configurationFile;
     /** A suitable Logger */
-    protected static final Logger logger = Logger.getLogger("org.rioproject.system.capability");
+    protected static final Logger logger = LoggerFactory.getLogger("org.rioproject.system.capability");
 
     /**
      * Set the path of the PlatformCapability
@@ -206,13 +206,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
         StringTokenizer sTok = new StringTokenizer(values, " \t\n\r\f:");
         while(sTok.hasMoreTokens()) {
             String libName = sTok.nextToken();
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Loading ["+libName+"] for "+getClass().getName());
-            System.out.println("Loading ["+libName+"] for "+getClass().getName());
             System.loadLibrary(libName);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Loaded ["+libName+"] for "+getClass().getName());
-            System.out.println("Loaded ["+libName+"] for "+getClass().getName());
         }
     }
     

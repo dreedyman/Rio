@@ -18,14 +18,14 @@ package org.rioproject.rmi;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
-import org.rioproject.logging.WrappedLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.logging.Level;
 
 /**
  * Utility for getting/creating the RMI Registry.
@@ -117,7 +117,7 @@ public class RegistryUtil {
     public static final int DEFAULT_PORT = 1099;
     public static final int DEFAULT_RETRY_COUNT = 50;
     static final String COMPONENT = "org.rioproject.rmi";
-    static final WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Check if RMI Registry has been started for the VM, if not start it.
@@ -166,8 +166,8 @@ public class RegistryUtil {
                     s.close();
                     LocateRegistry.createRegistry(registryPort);
                 } catch (IOException e) {
-                    if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Failed to create RMI Registry for port range "+
+                    if(logger.isTraceEnabled())
+                            logger.trace("Failed to create RMI Registry for port range "+
                                           portRange[0]+"-"+portRange[1]);
                     registryPort = -1;
                 }
@@ -181,22 +181,19 @@ public class RegistryUtil {
                         registry = LocateRegistry.createRegistry(registryPort);
                         break;
                     } catch(RemoteException e1) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Failed to create RMI Registry using "+
-                                          "port ["+registryPort+"], increment " +
-                                          "port and try again");
+                        if(logger.isTraceEnabled())
+                            logger.trace("Failed to create RMI Registry using "+
+                                         "port ["+registryPort+"], increment " +
+                                         "port and try again");
                     }
                     registryPort++;
                 }
                 if(registry==null) {
-                    logger.warning("Unable to create RMI Registry using " +
-                                   "ports "+originalPort+
-                                   " through "+registryPort);
+                    logger.warn("Unable to create RMI Registry using ports "+originalPort+" through "+registryPort);
                     registryPort = -1;
                 } else {
-                    if(logger.isLoggable(Level.CONFIG))
-                        logger.config("Created RMI Registry on port="+
-                                      System.getProperty(Constants.REGISTRY_PORT));
+                    if(logger.isDebugEnabled())
+                        logger.debug("Created RMI Registry on port="+System.getProperty(Constants.REGISTRY_PORT));
                 }
             }
         }
@@ -216,12 +213,9 @@ public class RegistryUtil {
     static int getRegistryPort(Configuration config) {
         int registryPort = DEFAULT_PORT;
         try {
-            registryPort = (Integer) config.getEntry(COMPONENT,
-                                                     "registryPort",
-                                                     int.class,
-                                                     DEFAULT_PORT);
+            registryPort = (Integer) config.getEntry(COMPONENT, "registryPort", int.class, DEFAULT_PORT);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, e, "Reading %s .registryPort", COMPONENT);
+            logger.warn(String.format("Reading %s .registryPort", COMPONENT), e);
         }
         return(registryPort);
     }
@@ -243,7 +237,7 @@ public class RegistryUtil {
                 portRange[1] = Integer.valueOf(range[1]);
             } catch (Exception e) {
                 portRange = null;
-                logger.log(Level.WARNING, e, "Illegal range value specified, continue using default registryPort settings.");
+                logger.warn("Illegal range value specified, continue using default registryPort settings.", e);
             }
         }
         return(portRange);
@@ -268,7 +262,7 @@ public class RegistryUtil {
                                           Integer.class,
                                           DEFAULT_RETRY_COUNT);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, e, "Reading %s.registryRetries", COMPONENT);
+            logger.warn(String.format("Reading %s.registryRetries", COMPONENT), e);
         }
 
         return(retryCount);

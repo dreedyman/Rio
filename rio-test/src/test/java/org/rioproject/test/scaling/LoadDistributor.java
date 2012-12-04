@@ -21,10 +21,11 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.Random;
-import java.util.logging.Logger;
 
 /**
  * The class represents an object that distributes total load among
@@ -34,7 +35,7 @@ public class LoadDistributor {
     /**
      * The logger used by this class.
      */
-    static Logger logger = Logger.getLogger("org.rioproject.test.scaling");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.test.scaling");
     /**
      * The lookup cache used to monitor services.
      */

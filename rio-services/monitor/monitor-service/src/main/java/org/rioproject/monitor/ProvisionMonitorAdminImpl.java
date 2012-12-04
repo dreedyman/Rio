@@ -20,19 +20,17 @@ import net.jini.id.UuidFactory;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.admin.ServiceAdmin;
+import org.rioproject.admin.ServiceAdminImpl;
+import org.rioproject.deploy.ServiceProvisionListener;
+import org.rioproject.monitor.ProvisionMonitor.PeerInfo;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.deploy.ServiceProvisionListener;
-import org.rioproject.monitor.ProvisionMonitor.PeerInfo;
 import org.rioproject.resources.persistence.SnapshotHandler;
-import org.rioproject.admin.ServiceAdminImpl;
 
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ProvisionMonitorAdminImpl class implements the ServiceAdmin interface providing 
@@ -41,8 +39,6 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements ProvisionMonitorAdmin, ServerProxyTrust {
-    /** A Logger */
-    private final static Logger logger = Logger.getLogger("org.rioproject.monitor");
     /** Reference to the backend */
     private final ProvisionMonitorImpl backend;
     private ProvisionMonitorAdmin remoteRef;
@@ -80,8 +76,6 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
      *
      */
     public TrustVerifier getProxyVerifier() {
-        if (logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");
         return (new ProvisionMonitorAdminProxy.Verifier(remoteRef));
     }
 

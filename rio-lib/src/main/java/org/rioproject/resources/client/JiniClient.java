@@ -24,10 +24,12 @@ import net.jini.discovery.*;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.entry.Name;
 import org.rioproject.associations.AssociationDescriptor;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.loader.ClassBundleLoader;
+import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -35,8 +37,6 @@ import java.rmi.RemoteException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The JiniClient class is a helper class that Jini clients (or something that
@@ -54,7 +54,7 @@ public class JiniClient {
     public Listener listener = null;
     private List<ServiceRegistrar> regArray;
     private boolean createdDiscoverer = false;
-    private static Logger logger = Logger.getLogger("org.rioproject.resources.client");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.resources.client");
 
     /**
      * Create an instance of a JiniClient <br>
@@ -94,8 +94,8 @@ public class JiniClient {
                 parseGroups(System.getProperty(GROUPS_PROPERTY_NAME));
             LookupLocator[] locators = parseLocators(System.getProperty(
                 LOCATOR_PROPERTY_NAME));
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Starting discovery process...");
+            if(logger.isDebugEnabled())
+                logger.debug("Starting discovery process...");
             discoverer = new LookupDiscoveryManager(groups, locators, listener);
             createdDiscoverer = true;
         }
@@ -120,11 +120,11 @@ public class JiniClient {
         String[] groups;
         if(groupNames == null) {
             groups = LookupDiscovery.NO_GROUPS;
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Set groups to NO_GROUPS");
+            if(logger.isDebugEnabled())
+                logger.debug("Set groups to NO_GROUPS");
         } else {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Set groups to [" + groupNames + "]");
+            if(logger.isDebugEnabled())
+                logger.debug("Set groups to [" + groupNames + "]");
             StringTokenizer st = new StringTokenizer(groupNames, " \t\n\r\f,");
             groups = new String[st.countTokens()];
             if(groups.length == 1) {
@@ -161,8 +161,8 @@ public class JiniClient {
     public static LookupLocator[] parseLocators(String locatorUrls) throws MalformedURLException {
         LookupLocator[] locators = null;
         if(locatorUrls != null) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Use unicast discovery");
+            if(logger.isDebugEnabled())
+                logger.debug("Use unicast discovery");
             StringTokenizer st = new StringTokenizer(locatorUrls,
                                                      " \t\n\r\f,");
             List<LookupLocator> list = new LinkedList<LookupLocator>();
@@ -171,8 +171,8 @@ public class JiniClient {
                 if(!locator.startsWith("jini://"))
                     locator = "jini://"+locator;
                 list.add(new LookupLocator(locator));
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Add locator : " + locator);
+                if(logger.isDebugEnabled())
+                    logger.debug("Add locator : " + locator);
             }
             locators = list.toArray(new LookupLocator[list.size()]);
         }
@@ -519,7 +519,7 @@ public class JiniClient {
         try {
             return (((DiscoveryGroupManagement)discoverer).getGroups());
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Getting Registrar Groups", e);
+            logger.error("Getting Registrar Groups", e);
         }
         return (new String[0]);
     }
@@ -580,10 +580,10 @@ public class JiniClient {
             try {
                 ServiceRegistrar[] registrars = de.getRegistrars();
                 for (ServiceRegistrar registrar : registrars) {
-                    if (logger.isLoggable(Level.FINE) && createdDiscoverer) {
+                    if (logger.isDebugEnabled() && createdDiscoverer) {
                         LookupLocator lookup = registrar.getLocator();
                         String host = lookup.getHost();
-                        logger.fine("Discovered JLS on host [" + host + "]");
+                        logger.debug("Discovered JLS on host [" + host + "]");
                     }
                     regArray.add(registrar);
                 }
@@ -591,7 +591,7 @@ public class JiniClient {
                     notifyAll();
                 }
             } catch(RemoteException e) {
-                logger.log(Level.SEVERE, "Discovered ServiceRegistrar", e);
+                logger.error("Discovered ServiceRegistrar", e);
             }
         }
 
@@ -600,17 +600,15 @@ public class JiniClient {
             for (ServiceRegistrar registrar : registrars) {
                 for (ServiceRegistrar r : regArray) {
                     if (registrar.equals(r)) {
-                        if (logger.isLoggable(Level.FINE)) {
+                        if (logger.isDebugEnabled()) {
                             try {
                                 LookupLocator lookup = registrar.getLocator();
                                 String host = lookup.getHost();
-                                logger.fine("Discarded JLS on host ["
+                                logger.debug("Discarded JLS on host ["
                                             + host
                                             + "]");
                             } catch (RemoteException e) {
-                                logger.log(Level.SEVERE,
-                                           "Getting LookupLocator during discarded notification",
-                                           e);
+                                logger.error("Getting LookupLocator during discarded notification", e);
                             }
                         }
                         regArray.remove(regArray.indexOf(r));

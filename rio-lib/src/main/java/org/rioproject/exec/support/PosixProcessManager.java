@@ -17,14 +17,14 @@ package org.rioproject.exec.support;
 
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
-import org.rioproject.resources.util.StreamRedirector;
 import org.rioproject.resources.util.FileUtils;
+import org.rioproject.resources.util.StreamRedirector;
 import org.rioproject.system.OperatingSystemType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A ProcessManager implementation for posix compliant systems
@@ -42,7 +42,7 @@ public class PosixProcessManager extends ProcessManager {
     private static final String COMPONENT = PosixProcessManager.class.getPackage().getName();
     private static final String KILL_SCRIPT="ps-kill-template.sh";
     private static final String PROC_STATUS_SCRIPT="proc-status-template.sh";
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a PosixProcessManager
@@ -113,10 +113,7 @@ public class PosixProcessManager extends ProcessManager {
             if(processListener!=null)
                 processListener.interrupt();
         } catch (IOException e) {
-            logger.log(Level.WARNING,
-                       "Could not completely terminate " +
-                       "process and process children, will attempt to close " +
-                       "stdout and stderr",
+            logger.warn("Could not completely terminate process and process children, will attempt to close stdout and stderr",
                        e);
         }
         try {
@@ -124,7 +121,7 @@ public class PosixProcessManager extends ProcessManager {
             if(processListener!=null)
                 processListener.cleanFiles();
         } catch (InterruptedException e) {
-            logger.warning("process.waitFor() was interrupted, continuing");
+            logger.warn("process.waitFor() was interrupted, continuing");
         }
         if (outputStream != null)
             outputStream.interrupt();
@@ -138,10 +135,8 @@ public class PosixProcessManager extends ProcessManager {
 
         if(commandFile!=null) {
             if(commandFile.delete()) {
-                if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Command file ["+commandFile.getName()+"] " +
-                                  "for ["+getPid()+"], " +
-                                  "command ["+commandLine+"]");
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Command file [{}] for [{}], command [{}]", commandFile.getName(), getPid(), commandLine);
                 }
             }
         }
@@ -254,19 +249,15 @@ public class PosixProcessManager extends ProcessManager {
         void cleanFiles() {
             if(procStatusScript!=null) {
                 if(procStatusScript.delete()) {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Process status script for pid " +
-                                    "["+getPid()+"], command " +
-                                    "["+commandLine+"] deleted");
+                    if(logger.isDebugEnabled())
+                        logger.debug("Process status script for pid [{}], command [{}] deleted", getPid(), commandLine);
                 }
 
             }
             if(procStatusFile!=null)
                 if(procStatusFile.delete()) {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Process stats file for pid " +
-                                    "["+getPid()+"], command " +
-                                    "["+commandLine+"] deleted");
+                    if(logger.isDebugEnabled())
+                        logger.debug("Process stats file for pid [{}], command [{}] deleted", getPid(), commandLine);
                 }
         }
         
@@ -284,17 +275,15 @@ public class PosixProcessManager extends ProcessManager {
                     //System.out.println("process ["+pid+"] status="+s);
                     if(s!=null) {
                         if(Integer.parseInt(s)!=0) {
-                            if(logger.isLoggable(Level.FINE)) {
-                                logger.fine("Process status for pid " +
-                                            "["+getPid()+"], command " +
-                                            "["+commandLine+"] is: "+
-                                            Integer.parseInt(s));
+                            if(logger.isDebugEnabled()) {
+                                logger.debug("Process status for pid [{}], command [{}] is: {}",
+                                             getPid(), commandLine, Integer.parseInt(s));
                             }
                             break;
                         }
                     }
                 } catch (IOException e) {
-                    logger.warning("Non fatal exception trying to read " +
+                    logger.warn("Non fatal exception trying to read " +
                                    "process status file "+
                                    e.getClass().getName()+": "+e.getMessage());
                 } finally {
@@ -302,24 +291,24 @@ public class PosixProcessManager extends ProcessManager {
                         try {
                             in.close();
                         } catch (IOException e) {
-                            if(logger.isLoggable(Level.FINEST)) {
-                                logger.log(Level.FINEST, "Problem closing "+procStatusFile.getName(), e);
+                            if(logger.isTraceEnabled()) {
+                                logger.trace("Problem closing "+procStatusFile.getName(), e);
                             }
                         }
                 }
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.log(Level.FINEST, "Interrupted", e);
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("Interrupted", e);
                     }
                 }
             }
-            if(logger.isLoggable(Level.FINE))
+            if(logger.isDebugEnabled())
                 logger.info("Process ["+getPid()+"] terminated for command ["+commandLine+"]");
             notifyOnTermination();
-            if(procStatusFile.delete() && logger.isLoggable(Level.FINE))
-                logger.fine("Process stats file ["+getPid()+"] removed for command ["+commandLine+"]");
+            if(procStatusFile.delete() && logger.isDebugEnabled())
+                logger.debug("Process stats file [{}] removed for command [{}]", getPid(), commandLine);
         }
     }
 }

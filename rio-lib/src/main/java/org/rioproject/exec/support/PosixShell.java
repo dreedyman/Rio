@@ -19,8 +19,9 @@ import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Shell;
 import org.rioproject.exec.Util;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resources.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -36,13 +37,13 @@ public class PosixShell implements Shell {
     private static final String EXEC_SCRIPT="exec-template.sh";
     //private static final String EXEC_NOHUP_SCRIPT="exec-nohup-template.sh";
     private String template = EXEC_SCRIPT;
-    static final WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public void setShellTemplate(String template) {
         if(template==null)
             throw new IllegalArgumentException("template cannot be null");
         this.template = template;
-        logger.info("Set PosixShell template to: %s", template);
+        logger.info("Set PosixShell template to: {}", template);
     }
 
     /**
@@ -91,7 +92,7 @@ public class PosixShell implements Shell {
         Util.chmodX(generatedShellScript);        
 
         String toExec = FileUtils.getFilePath(generatedShellScript);
-        logger.fine("Executing command [%s]", commandLine);
+        logger.debug("Executing command [{}]", commandLine);
         ProcessBuilder pb = new ProcessBuilder(toExec);
 
         Map<String, String> declaredEnv = execDescriptor.getEnvironment();
@@ -102,15 +103,15 @@ public class PosixShell implements Shell {
                 String oldValue = entry.getValue();
                 String setValue = oldValue+File.pathSeparator+value;
                 environment.put(entry.getKey(), setValue);
-                logger.info("%s was [%s], now [%s]", entry.getKey(), oldValue, environment.get(entry.getKey()));
+                logger.info("{} was [{}], now [{}]", entry.getKey(), oldValue, environment.get(entry.getKey()));
             }
         }
         environment.putAll(execDescriptor.getEnvironment());
-        logger.finest("Process Builder's environment=%s", environment);
+        logger.trace("Process Builder's environment={}", environment);
 
         if(workingDirectory!=null) {
             pb = pb.directory(new File(workingDirectory));
-            logger.fine("Process Builder's working directory set to [%s]", pb.directory().getCanonicalFile());
+            logger.debug("Process Builder's working directory set to [{}]", pb.directory().getCanonicalFile());
         }
 
         pb.redirectErrorStream(true);
@@ -129,7 +130,7 @@ public class PosixShell implements Shell {
         int pid = Integer.parseInt(s);
         in.close();
         if(!pidFile.delete())
-            logger.warning("Non fatal, could not delete %s", FileUtils.getFilePath(pidFile));
+            logger.warn("Non fatal, could not delete {}", FileUtils.getFilePath(pidFile));
 
         PosixProcessManager processManager = new PosixProcessManager(process,
                                                                      pid,

@@ -1,6 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
- * Copyright 2005 Sun Microsystems, Inc.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +24,12 @@ import net.jini.jeri.ServerEndpoint;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.rioproject.net.HostUtil;
 import org.rioproject.net.PortRangeServerSocketFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ServerSocketFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ExporterConfig is a utility class used to get an 
@@ -46,7 +45,7 @@ import java.util.logging.Logger;
 public class ExporterConfig {
     public static final String DEFAULT_COMPONENT = "org.rioproject";
     public static final String ENTRY_NAME = "defaultExporter";
-    private static final Logger logger = Logger.getLogger(ExporterConfig.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ExporterConfig.class.getName());
 
     /**
      * Get an {@link net.jini.export.Exporter} instance from a {@link net.jini.config.Configuration}
@@ -86,13 +85,13 @@ public class ExporterConfig {
                 try {
                     exporter = new BasicJeriExporter(getServerEndpoint(), new BasicILFactory(), false, true);
                 } catch (UnknownHostException e) {
-                    logger.log(Level.WARNING, "Unable to get host address, defaulting to localhost", e);
+                    logger.warn("Unable to get host address, defaulting to localhost", e);
                     exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory(), false, true);
                 }
             }
         }
-        if(logger.isLoggable(Level.CONFIG))
-            logger.config(String.format("Created %s for %s.%s", exporter, component, entry));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Created %s for %s.%s", exporter, component, entry));
         return exporter;
     }
 
@@ -116,7 +115,7 @@ public class ExporterConfig {
                     builder.append("    at ").append(aTrace).append("\n");
                 }
             }
-            logger.warning(builder.toString());
+            logger.warn(builder.toString());
         }
         String range = System.getProperty(Constants.PORT_RANGE);
         ServerSocketFactory factory = null;

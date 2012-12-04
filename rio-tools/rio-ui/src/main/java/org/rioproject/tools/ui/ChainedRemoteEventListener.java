@@ -36,8 +36,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A simple {@code RemoteEventListener} that sends received events to a {@code RemoteServiceEventListener}
@@ -49,7 +47,6 @@ public class ChainedRemoteEventListener implements RemoteEventListener, ServerPr
     private final RemoteEventListener remoteEventListener;
     private final ExecutorService execService = Executors.newSingleThreadExecutor();
     private final BlockingQueue<RemoteEvent> eventQ = new LinkedBlockingQueue<RemoteEvent>();
-    private static final Logger logger = Logger.getLogger(ChainedRemoteEventListener.class.getName());
 
     public ChainedRemoteEventListener(RemoteEventListener eventListener,
                                       Configuration configuration) throws ConfigurationException, ExportException {
@@ -95,15 +92,15 @@ public class ChainedRemoteEventListener implements RemoteEventListener, ServerPr
                 try {
                     event = eventQ.take();
                 } catch (InterruptedException e) {
-                    logger.info("EventNotifier breaking out of main loop");
+                    System.err.println("EventNotifier breaking out of main loop");
                     break;
                 }
                 try {
                     eventListener.notify(event);
                 } catch (UnknownEventException e) {
-                    logger.log(Level.WARNING, "Unknown event "+event.getClass().getName(), e);
+                    e.printStackTrace();
                 } catch (RemoteException e) {
-                    logger.log(Level.WARNING, "Should not happen!", e);
+                    e.printStackTrace();
                 }
             }
         }

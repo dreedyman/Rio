@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Handle the parsing of the top command on Mac OS
@@ -39,7 +37,7 @@ public class MacTopOutputParser extends CPUExecHandler {
                 getExecutorService().execute(new Runner(in));
                 updateLock.wait();
             } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Waiting on updateLock", e);
+                logger.warn("Waiting on updateLock", e);
             }
         }
     }
@@ -69,7 +67,7 @@ public class MacTopOutputParser extends CPUExecHandler {
                 InputStreamReader isr = new InputStreamReader(in);
                 br = new BufferedReader(isr);
                 //String line;
-                /* Parse the output and grab the second occurance */
+                /* Parse the output and grab the second occurrence */
                 int i = 0;
                 while((line = br.readLine()) != null &&
                       !Thread.currentThread().isInterrupted()) {
@@ -96,10 +94,7 @@ public class MacTopOutputParser extends CPUExecHandler {
                     }
                 }
             } catch(IOException e) {
-                Logger.getAnonymousLogger().log(Level.INFO,
-                                                "Grabbing output of top, " +
-                                                "last line=["+line+"]",
-                                                e);
+                logger.info("Grabbing output of top, last line=["+line+"]", e);
             } finally {
                 if(br != null) {
                     try {

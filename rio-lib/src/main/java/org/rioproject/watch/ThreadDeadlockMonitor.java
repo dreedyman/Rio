@@ -15,14 +15,15 @@
  */
 package org.rioproject.watch;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Monitor thread deadlocks for a Java Virtual Machine.
@@ -32,11 +33,11 @@ public class ThreadDeadlockMonitor {
     public static final String ACCESSOR = "threadDeadlockCalculable";
     private ThreadMXBean threadMXBean;
     private final Map<Long, ThreadInfo> deadlockedThreads = new HashMap<Long, ThreadInfo>();
-    private static Logger logger = Logger.getLogger(ThreadDeadlockMonitor.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ThreadDeadlockMonitor.class.getName());
 
     public void setThreadMXBean(ThreadMXBean threadMXBean) {
         this.threadMXBean = threadMXBean;
-        if(logger.isLoggable(Level.INFO))
+        if(logger.isInfoEnabled())
             logger.info("ThreadMXBean set, monitoring current JVM for thread deadlocks");
     }
 
@@ -46,11 +47,11 @@ public class ThreadDeadlockMonitor {
         if(deadlockCount>0) {
             String detail = formatDeadlockedThreadInfo();
             metric.setDetail(detail);
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest(detail);
+            if(logger.isTraceEnabled())
+                logger.trace(detail);
         } else {
-             if(logger.isLoggable(Level.FINEST))
-                logger.finest("No deadlocked threads");
+             if(logger.isTraceEnabled())
+                logger.trace("No deadlocked threads");
         }
         return metric;
     }

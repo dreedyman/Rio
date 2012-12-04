@@ -20,12 +20,12 @@ import org.rioproject.monitor.DeploymentVerifier;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resources.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An abstract {@link DeployHandler} providing support for ease of code.
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractOARDeployHandler implements DeployHandler {
     protected OpStringLoader opStringLoader;
-    protected Logger logger = Logger.getLogger(getClass().getName());
+    protected Logger logger = LoggerFactory.getLogger(getClass().getName());
     protected abstract List<OperationalString> look(Date from);
 
     protected AbstractOARDeployHandler() {
@@ -42,9 +42,8 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
             opStringLoader =
                 new OpStringLoader(this.getClass().getClassLoader());
         } catch (Exception e) {
-            logger.log(Level.SEVERE,
-                       "Could not create OpStringLoader, unable to deploy " +
-                       "OperationalString Archive (OAR) files",
+            logger.error("Could not create OpStringLoader, unable to deploy " +
+                         "OperationalString Archive (OAR) files",
                        e);
         }
     }
@@ -54,8 +53,7 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         if (opStringLoader != null) {
             list.addAll(look(new Date(0)));
         } else {
-            logger.warning("No OpString loader found. Won't be able to list " +
-                           "OperationalStrings.");
+            logger.warn("No OpString loader found. Won't be able to list OperationalStrings.");
         }
         return Collections.unmodifiableList(list);
     }
@@ -67,8 +65,7 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         if (opStringLoader != null) {
             list.addAll(look(fromDate));
         } else {
-            logger.warning("No OpString loader found. Won't be able to list " +
-                           "OperationalStrings.");
+            logger.warn("No OpString loader found. Won't be able to list OperationalStrings.");
         }
         return Collections.unmodifiableList(list);
     }
@@ -91,39 +88,36 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
                             deploymentVerifier.verifyOperationalString(opString, repositories);
                             list.add(opString);
                         } catch(IOException e) {
-                            logger.log(Level.WARNING,
-                                       "Unable to resolve codebase for services " +
-                                       "in ["+opString.getName()+"] using codebase "+
-                                       System.getProperty(Constants.CODESERVER)+
-                                       ". Make sure that the codeserver is set " +
-                                       "up correctly to serve the service's " +
-                                       "jars, also make sure you have published " +
-                                       "the service jars to the correct " +
-                                       "location.",
-                                       e);
+                            logger.warn("Unable to resolve codebase for services " +
+                                        "in ["+opString.getName()+"] using codebase "+
+                                        System.getProperty(Constants.CODESERVER)+
+                                        ". Make sure that the codeserver is set " +
+                                        "up correctly to serve the service's " +
+                                        "jars, also make sure you have published " +
+                                        "the service jars to the correct " +
+                                        "location.",
+                                        e);
                         }
                     }
                     //list.addAll(Arrays.asList(opstrings));
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "Parsing ["+ FileUtils.getFilePath(opstringFile)+"]",
-                               e);
+                    logger.warn("Parsing ["+ FileUtils.getFilePath(opstringFile)+"]", e);
                 }
             } else {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("OperationalString file " +
-                                  "["+FileUtils.getFilePath(opstringFile)+"] " +
-                                  "has a last modified date of: "
-                                  +opstringDate+", which is before " +
-                                  "requested date: "+from);
+                if(logger.isTraceEnabled())
+                    logger.trace("OperationalString file " +
+                                 "["+FileUtils.getFilePath(opstringFile)+"] " +
+                                 "has a last modified date of: "
+                                 +opstringDate+", which is before " +
+                                 "requested date: "+from);
             }
         } else {
-            logger.warning("No OperationalString found in OAR: "+
-                           oar.getOpStringName()+", " +
-                           "deploy directory: "+FileUtils.getFilePath(dir)+". " +
-                           "The OAR may not be built correctly.");
+            logger.warn("No OperationalString found in OAR: "+
+                        oar.getOpStringName()+", " +
+                        "deploy directory: "+FileUtils.getFilePath(dir)+". " +
+                        "The OAR may not be built correctly.");
         }
-        if(logger.isLoggable(Level.FINER)) {
+        if(logger.isDebugEnabled()) {
             StringBuilder buffer = new StringBuilder();
             for(OperationalString opstring : list) {
                 if(buffer.length()>0)
@@ -132,10 +126,9 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
             }
 
             if(list.isEmpty())
-                logger.finer("Returning ["+list.size()+"] OperationalStrings");
+                logger.debug("Returning ["+list.size()+"] OperationalStrings");
             else
-                logger.finer("Returning ["+list.size()+"], " +
-                            "OperationalStrings: "+buffer.toString());
+                logger.debug("Returning ["+list.size()+"], OperationalStrings: "+buffer.toString());
         }
         return list;
     }

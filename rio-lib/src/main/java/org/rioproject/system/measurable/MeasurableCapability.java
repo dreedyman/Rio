@@ -27,9 +27,11 @@ import org.rioproject.system.MeasuredResource;
 import org.rioproject.watch.*;
 
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 /**
  * A MeasurableCapability refers to a depletion oriented resource or capability on
@@ -72,7 +74,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
         try {
             isEnabled.set((Boolean) config.getEntry(componentName, "enabled", boolean.class, Boolean.TRUE));
         } catch (ConfigurationException e) {
-            logger.log(Level.SEVERE, "Getting WatchDataSource Size", e);
+            logger.error("Getting WatchDataSource Size", e);
         }
         if(!isEnabled.get())
             return;
@@ -86,7 +88,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
                 doSetWatchDataSource(wds);
             }
         } catch (ConfigurationException e) {
-            logger.log(Level.SEVERE, "Getting WatchDataSource Size", e); 
+            logger.error("Getting WatchDataSource Size", e); 
         }
         if(localRef!=null) 
             localRef.setMaxSize(100);
@@ -99,7 +101,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
             try {
                 watchDataSource.addWatchDataReplicator(replicator);
             } catch (RemoteException e) {
-                logger.log(Level.WARNING, "Could not add WatchDataReplicator", e);
+                logger.warn("Could not add WatchDataReplicator", e);
             }
         }
     }
@@ -147,7 +149,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
             try {
                 watchDataSource.setMaxSize(100);
             } catch(Exception e) {
-                logger.log(Level.SEVERE, "Setting WatchDataSource Size", e);
+                logger.error("Setting WatchDataSource Size", e);
             }
         }
     }

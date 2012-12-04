@@ -21,16 +21,15 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.id.Uuid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The heartbeat client that produces heartbeat broadcasts
@@ -49,7 +48,7 @@ public class HeartbeatClient {
     private static final String COMPONENT = 
         "org.rioproject.fdh.HeartbeatFaultDetectionHandler";
     /** A Logger */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a HeartbeatClient with the uuid for the Service
@@ -97,13 +96,13 @@ public class HeartbeatClient {
                                                    0,
                                                    Long.MAX_VALUE);
         
-        if(logger.isLoggable(Level.FINEST)) {
-            StringBuffer buffer = new StringBuffer();
+        if(logger.isTraceEnabled()) {
+            StringBuilder buffer = new StringBuilder();
             buffer.append("HeartbeatClient Properties : ");
             buffer.append("heartbeatPeriod=").append(heartbeatPeriod).append(", ");
             buffer.append("heartbeatServer=").append(heartbeatServer).append(", ");
             buffer.append("port=").append(port);
-            logger.finest(buffer.toString());
+            logger.trace(buffer.toString());
         }
         try {
             InetAddress address = InetAddress.getByName(heartbeatServer);
@@ -141,70 +140,22 @@ public class HeartbeatClient {
                 socket.getOutputStream().write(uuid.toString().getBytes());
                 socket.close();
             } catch(java.net.NoRouteToHostException e) {
-                logger.warning(e.getClass().getName()+" "+
+                logger.warn(e.getClass().getName()+" "+
                                "Heartbeat server "+
                                "["+address.getHostAddress()+":"+port+"] "+
                                "cannot be reached, cancel HeartbeatTask");
                 cancel();
             } catch(IOException e) {
-                if(logger.isLoggable(Level.FINE)) 
-                    logger.fine(e.getClass().getName()+" "+
-                                "Heartbeat server communication dropped, "+
-                                "cancel HeartbeatTask to "+
-                                "["+address.getHostAddress()+":"+port+"]");
-                if(logger.isLoggable(Level.FINEST)) 
-                    logger.log(Level.FINEST,
-                               "Heartbeat server communication dropped, "+
-                               "cancel HeartbeatTask to "+
-                               "["+address.getHostAddress()+":"+port+"]",
-                               e);
+                StringBuilder s = new StringBuilder();
+                s.append("Heartbeat server communication dropped, cancel HeartbeatTask to [");
+                s.append(address.getHostAddress()).append(":").append(port).append("]");
+                if(logger.isDebugEnabled()) 
+                    logger.debug("{} {}",
+                                 e.getClass().getName(), s.toString());
+                if(logger.isTraceEnabled()) 
+                    logger.trace(s.toString(), e);
                 cancel();
             }
-        }
-    }
-
-    public static void main(String[] args) {
-        try {
-            ServerSocket serverSocket = new ServerSocket(7777);
-            HeartbeatClient heartbeat = 
-                new HeartbeatClient(net.jini.id.UuidFactory.generate());
-            String heartbeatServer = COMPONENT
-                                     + "."
-                                     + HEARTBEAT_SERVER_KEY
-                                     + "=\"localhost:7777\"";
-            String heartbeatPeriod = COMPONENT
-                                     + "."
-                                     + HEARTBEAT_PERIOD_KEY
-                                     + "=5000";
-            String[] configArgs = new String[]{"-",
-               com.sun.jini.config.ConfigUtil.concat(new Object[]{heartbeatServer}),
-               com.sun.jini.config.ConfigUtil.concat(new Object[]{heartbeatPeriod})};
-            heartbeat.addHeartbeatServer(configArgs);
-            long lastReceipt = System.currentTimeMillis();
-            while (true) {
-                Socket socket = serverSocket.accept();
-                long now = System.currentTimeMillis();
-                java.io.BufferedInputStream bis = 
-                    new java.io.BufferedInputStream(socket.getInputStream(),
-                                                    256);
-                StringBuffer buf = new StringBuffer(80);
-                while (bis.available() > 0) {
-                    System.out.println("bytes available : " + bis.available());
-                    byte[] data = new byte[bis.available()];
-                    bis.read(data);
-                    buf.append(new String(data));
-                }
-                System.out.println("heartbeat from : "
-                                   + buf.toString().trim()
-                                   + ", "
-                                   + "period ["
-                                   + (now - lastReceipt)
-                                   + "]");
-                lastReceipt = now;
-                socket.close();
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
         }
     }
 }

@@ -23,13 +23,13 @@ import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdType;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The RedeployPolicyHandler will redeploy a service based on declared
@@ -51,7 +51,7 @@ public class RedeployPolicyHandler extends SLAPolicyHandler {
     /** Actions that indicate status of a redeploy request */
     enum Action { REDEPLOY_PENDING, REDEPLOY_FAILURE, REDEPLOY_SUCCEEDED }    
     /** Logger for this component */
-    static Logger logger = Logger.getLogger("org.rioproject.sla");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.sla");
 
     /**
      * Construct a RedeployPolicyHandler
@@ -97,13 +97,15 @@ public class RedeployPolicyHandler extends SLAPolicyHandler {
 
     @Override
     public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             String status = (type == ThresholdType.BREACHED? "breached":"cleared");
-            logger.fine("RedeployPolicyHandler [" + getID() + "]: Threshold ["
-                        + calculable.getId() + "] " + status + " value ["
-                        + calculable.getValue() + "\n] low ["
-                        + thresholdValues.getCurrentLowThreshold() + "]" + " high ["
-                        + thresholdValues.getCurrentHighThreshold() + "]");
+            logger.debug("RedeployPolicyHandler [{}]: Threshold {}] {} value [{}\n] low [{}] high [{}]",
+                         getID(),
+                         calculable.getId(),
+                         status,
+                         calculable.getValue(),
+                         thresholdValues.getCurrentLowThreshold(),
+                         thresholdValues.getCurrentHighThreshold());
         }
         if(type == ThresholdType.BREACHED) {
             double tValue = calculable.getValue();
@@ -131,25 +133,18 @@ public class RedeployPolicyHandler extends SLAPolicyHandler {
         if(delay > 0) {
             redeployTask = new RedeployTask();
             long now = System.currentTimeMillis();
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("["+context.getServiceElement().getName()+"] "+
-                            "RedeployPolicyHandler ["+getID()+"]: "+
-                            "Schedule redeploy task in "+
-                            "["+delay+"] millis");
+            if(logger.isDebugEnabled())
+                logger.debug("[{}] RedeployPolicyHandler [{}]: Schedule redeploy task in [{}] millis",
+                             context.getServiceElement().getName(), getID(), delay);
             try {
                 taskTimer.schedule(redeployTask, new Date(now+delay));
             } catch(IllegalStateException e) {
-                logger.log(Level.WARNING,
-                           "Force disconnect of "+
-                           "["+context.getServiceElement().getName()+"] "+
-                           "RedeployPolicyHandler",
-                           e);
+                logger.warn("Force disconnect of ["+context.getServiceElement().getName()+"] RedeployPolicyHandler", e);
                 disconnect();
             }
         } else {
-            logger.info("["+context.getServiceElement().getName()+"] "+
-                        "RedeployPolicyHandler ["+getID()+"]: "+
-                        "no "+type+" dampener, perform redeploy");
+            logger.info("[{}] RedeployPolicyHandler [{}]: no {} dampener, perform redeploy",
+                        context.getServiceElement().getName(), getID(), type);
             doRedeploy();
         }
     }
@@ -175,32 +170,23 @@ public class RedeployPolicyHandler extends SLAPolicyHandler {
                                                getSLA(),
                                                Action.REDEPLOY_FAILURE.name()));
             if(!e.isManaged()) {
-                logger.warning("Attempt to redeploy service " +
-                               "["+context.getServiceElement().getName()+"] "+
-                               "failed, it is not under management control. " +
-                               "Terminating the service.");
+                logger.warn("Attempt to redeploy service [{}] failed, it is not under management control. Terminating the service.",
+                            context.getServiceElement().getName());
                 try {
                     Administrable admin =
                         (Administrable)mgr.getServiceBeanInstance().getService();
                     DestroyAdmin dAdmin = (DestroyAdmin) admin.getAdmin();
                     dAdmin.destroy();
                 } catch(Exception ex) {
-                    logger.log(Level.SEVERE,
-                               "Unable to destroy service "+
-                               "["+context.getServiceElement().getName()+"] "+
-                               ex);
+                    logger.error("Unable to destroy service ["+context.getServiceElement().getName()+"] ", ex);
                 }
             } else {
                 getSLA().resetHighThreshold();
                 getSLA().resetLowThreshold();
             }
         } catch(RemoteException e) {
-            logger.warning("Attempt to redeploy service failed ["+
-                           e.getClass().getName()+" : "+
-                           e.getLocalizedMessage()+"]");
-            notifyListeners(new SLAPolicyEvent(this,
-                                               getSLA(),
-                                               Action.REDEPLOY_FAILURE.name()));
+            logger.warn("Attempt to redeploy service failed [{}: {}]", e.getClass().getName(), e.getLocalizedMessage());
+            notifyListeners(new SLAPolicyEvent(this, getSLA(), Action.REDEPLOY_FAILURE.name()));
             getSLA().resetHighThreshold();
             getSLA().resetLowThreshold();
         }

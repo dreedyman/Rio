@@ -18,9 +18,8 @@ package org.rioproject.system.measurable.memory.pool;
 import org.rioproject.watch.Calculable;
 
 /**
- * Created by IntelliJ IDEA.
- * <p/>
- * User: dreedy Date: Sep 1, 2010 Time: 11:36:40 AM
+ * A @{code CalculableMemoryPool} holds details about memory pool utilization.
+ * @author Dennis Reedy
  */
 public class CalculableMemoryPool extends Calculable {
     /**

@@ -19,19 +19,19 @@ import org.drools.agent.KnowledgeAgent;
 import org.drools.impl.KnowledgeBaseImpl;
 import org.drools.reteoo.ReteooRuleBase;
 import org.rioproject.associations.*;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.sla.RuleMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 public class RuleMapAssociationController {
-    private static final WrappedLogger logger = WrappedLogger.getLogger(RuleMapAssociationController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RuleMapAssociationController.class.getName());
     private final RuleMap ruleMap;
     private final AssociationMgmt associationMgmt;
     private final List<Association<Object>> associations = new ArrayList<Association<Object>>();
@@ -125,18 +125,18 @@ public class RuleMapAssociationController {
     @SuppressWarnings("unused") /* association injection */
     public void setService(Association<Object> association) {
         if(closed.get()) {
-            logger.warning("The RuleMapAssociationController has been closed, setting the %s/%s service is not allowed",
-                           association.getOperationalStringName(), association.getName());
+            logger.warn("The RuleMapAssociationController has been closed, setting the {}/{} service is not allowed",
+                        association.getOperationalStringName(), association.getName());
             return;
         }
         associations.add(association);
         AssociatedServiceListener aListener = new AssociatedServiceListener(association);
         association.registerAssociationServiceListener(aListener);
         aListeners.add(aListener);
-        logger.fine("Set association for service: %s, received %d of %d",
+        logger.debug("Set association for service: {}, received {} of {}",
                     association.getName(), associations.size(), ruleMap.getServiceDefinitions().size());
         if (associations.size() == ruleMap.getServiceDefinitions().size()) {
-            logger.info(String.format("Have all services, starting replicator for [%s]", getRuleMap()));
+            logger.info("Have all services, starting replicator for [{}]", getRuleMap());
             boolean notInitialized = initializeEngine();
             if(listener!=null) {
                 if(notInitialized) {
@@ -164,13 +164,13 @@ public class RuleMapAssociationController {
             wdr = new AssociationsWatchDataReplicator(cepSession, context, monitor);
             List<ServiceHandle> serviceHandles = wdr.init(ruleMap, getAssociations());
             if(serviceHandles.isEmpty()) {
-                logger.warning("No service handles, cannot continue");
+                logger.warn("No service handles, cannot continue");
                 shutdownReplicator = true;
             } else {
-                logger.fine("Added WatchDataReplicators for [%s], creating KnowledgeSession...",
+                logger.debug("Added WatchDataReplicators for [{}], creating KnowledgeSession...",
                             ruleMap.toString());
                 cepSession.initialize(serviceHandles, ruleMap, ruleLoader);
-                logger.info(String.format("Created StatefulKnowledgeSession for %s", ruleMap));
+                logger.info("Created StatefulKnowledgeSession for {}", ruleMap.toString());
                 /* Add the watches */
                 for(ServiceHandle sh : serviceHandles) {
                     if(wdr!=null)
@@ -179,15 +179,13 @@ public class RuleMapAssociationController {
             }
         } catch(IllegalStateException e) {
             shutdownReplicator = true;
-            logger.warning(e.getMessage());
+            logger.warn(e.getMessage());
         } catch (ExportException e) {
             shutdownReplicator = true;
-            logger.log(Level.WARNING, e,
-                       "Could not create AssociationsWatchDataReplicator for [%s]" , ruleMap.toString());
+            logger.warn("Could not create AssociationsWatchDataReplicator for [{}]" , ruleMap.toString(), e);
         } catch (IOException e) {
             shutdownReplicator = true;
-            logger.log(Level.WARNING, e,
-                       "Could not initialize DroolsCEPManager for [%s]", ruleMap.toString());
+            logger.warn("Could not initialize DroolsCEPManager for [{}]", ruleMap.toString(), e);
         } finally {
             if(shutdownReplicator) {
                 if(wdr!=null)
@@ -206,7 +204,7 @@ public class RuleMapAssociationController {
         }
 
         public void serviceAdded(Object o) {
-            logger.fine("Added %s instance ", association.getName());
+            logger.debug("Added {} instance ", association.getName());
             if(wdr!=null)
                 wdr.addService(o, association, ruleMap);
         }

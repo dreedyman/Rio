@@ -26,8 +26,8 @@ import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test that non-Rio services have additional attributes
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 public class HasExtraAttributesTest {
     @SetTestManager
     static TestManager testManager;
-    private static final Logger logger = Logger.getLogger(HasExtraAttributesTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(HasExtraAttributesTest.class.getName());
 
     @Test
     public void testHasOperationalStringEntryAndName() {

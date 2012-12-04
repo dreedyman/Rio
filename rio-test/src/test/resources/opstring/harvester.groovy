@@ -2,7 +2,7 @@ import org.rioproject.tools.harvest.Harvester
 import org.rioproject.config.Constants
 
 def getLogDir() {
-    String logDir = '/tmp/logs'
+    String logDir = "/tmp/${System.getProperty('user.name')}/logs"
     String opSys = System.getProperty('os.name')
     if(opSys.startsWith("Windows")) {
         logDir = '${java.io.tmpdir}'

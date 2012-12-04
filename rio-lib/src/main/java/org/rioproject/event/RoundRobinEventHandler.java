@@ -16,14 +16,15 @@
 package org.rioproject.event;
 
 import net.jini.config.Configuration;
+import net.jini.config.EmptyConfiguration;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import org.rioproject.resources.servicecore.ServiceResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The <code>RoundRobinEventHandler</code> provides an implementation of an
@@ -44,7 +45,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class RoundRobinEventHandler extends EventHandler {
-    static Logger logger = Logger.getLogger("org.rioproject.event");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.event");
 
     /**
      * Construct a RoundRobinEventHandler with an EventDescriptor and default
@@ -55,7 +56,7 @@ public class RoundRobinEventHandler extends EventHandler {
      * @throws Exception If a landlord lease manager cannot be created
      */
     public RoundRobinEventHandler(final EventDescriptor descriptor) throws Exception {
-        super(descriptor);
+        this(descriptor, EmptyConfiguration.INSTANCE);
     }
 
     /**
@@ -109,7 +110,7 @@ public class RoundRobinEventHandler extends EventHandler {
                     resourceMgr.removeResource(sr);
                     landlord.cancel(sr.getCookie());
                 } catch(Exception ex) {
-                    logger.log(Level.WARNING, "Removing/Cancelling an EventConsumer from UnknownEventException", ex);
+                    logger.warn("Removing/Cancelling an EventConsumer from UnknownEventException", ex);
                 }
             } catch(RemoteException re) {
                 // Not sure if we are allowed to cancel the lease here, but
@@ -121,7 +122,7 @@ public class RoundRobinEventHandler extends EventHandler {
                     resourceMgr.removeResource(sr);
                     landlord.cancel(sr.getCookie());
                 } catch(Exception ex) {
-                    logger.log(Level.WARNING, "Removing/Cancelling an EventConsumer from RemoteException", ex);
+                    logger.warn("Removing/Cancelling an EventConsumer from RemoteException", ex);
                 }
             }
         }

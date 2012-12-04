@@ -15,20 +15,20 @@
  */
 package org.rioproject.exec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utility to replace JVM input args.
  */
 public class JVMOptionChecker {
-    static final Logger logger =
-        Logger.getLogger(JVMOptionChecker.class.getPackage().getName());
+    static final Logger logger = LoggerFactory.getLogger(JVMOptionChecker.class.getPackage().getName());
 
     public static String getJVMInputArgs(String userArgs) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
@@ -60,7 +60,7 @@ public class JVMOptionChecker {
             i++;
         }
 
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Runtime args: ");
             i = 0;
@@ -73,7 +73,7 @@ public class JVMOptionChecker {
             sb.append("\n");
             sb.append("User options: ");
             sb.append(userArgs);
-            logger.fine(sb.toString());
+            logger.debug(sb.toString());
         }
         
         for (String userArg : args) {
@@ -84,18 +84,15 @@ public class JVMOptionChecker {
                 if (argValue.equals(runtimeArgValue)) {
                     add = false;
                     int ndx = inputArgs.indexOf(runtimeArg);
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Replacing runtime arg [" + runtimeArg + "] " +
-                                    "(resolved as: " + runtimeArgValue + ") with " +
-                                    "user arg [" + userArg + "] " +
-                                    "(resolved as: " + argValue + ") at index [" +
-                                    ndx + "]");
+                    if(logger.isDebugEnabled())
+                        logger.debug("Replacing runtime arg [{}] (resolved as: {}) with user arg [{}] (resolved as: {}) at index [{}]",
+                                     runtimeArg, runtimeArgValue, userArg, argValue, ndx);
                     inputArgs.set(ndx, userArg);
                 }
             }
             if (add) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Adding user arg [" + userArg + "]");
+                if(logger.isDebugEnabled())
+                    logger.debug("Adding user arg [{}]", userArg);
                 inputArgs.add(userArg);
             }
         }

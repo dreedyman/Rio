@@ -30,12 +30,12 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.util.TimeConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The LandlordLessor manages leased resources using the Landlord protocol.
@@ -147,7 +147,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
     private LeasePeriodPolicy leasePolicy;
     /** Component for reading configuration entries and getting the Logger */
     private static final String COMPONENT = LandlordLessor.class.getPackage().getName();
-    private static Logger logger = Logger.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a LandlordLessor
@@ -187,7 +187,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
                                                                          LeasePeriodPolicy.class,
                                                                          defaultLeasePeriodPolicy);
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting LeasePeriodPolicy in LandlordLessor", e);
+            logger.warn("Getting LeasePeriodPolicy in LandlordLessor", e);
         }
 
         try {
@@ -199,14 +199,14 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
                                                              Long.MAX_VALUE);
             setReapingInterval(reapingInterval);
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting reapingInterval in LandlordLessor", e);
+            logger.warn("Getting reapingInterval in LandlordLessor", e);
         }
         
         /* Create the default Exporter */
         try {            
             exporter = ExporterConfig.getExporter(config, COMPONENT, "landlordExporter");
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting Exporter in LandlordLessor", e);
+            logger.warn("Getting Exporter in LandlordLessor", e);
         }
         landlord = (Landlord) exporter.export(this);
         uuid = UuidFactory.generate(); 
@@ -228,8 +228,8 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
         try {
             unexported = exporter.unexport(force);
         } catch (Exception e) {
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST, "Unexporting LandlordLessor", e);
+            if(logger.isTraceEnabled()) {
+                logger.trace("Unexporting LandlordLessor", e);
             }
         }
         return (unexported);
@@ -265,11 +265,9 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
         long now = System.currentTimeMillis();
         if (resource.getExpiration() <= now) {
             UnknownLeaseException e = new UnknownLeaseException("Lease has already expired");
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("Lease has already expired by ["+
-                              (now-resource.getExpiration())+"] milliseconds, "+
-                              "["+(now-resource.getExpiration())/1000+"] seconds");
-                logger.throwing(this.getClass().getName(), "renew", e);
+            if(logger.isTraceEnabled()) {
+                logger.trace("Lease has already expired by [{}] milliseconds, [{}] seconds",
+                             (now-resource.getExpiration()),  ((now-resource.getExpiration())/1000));
             }
             throw e;
         }

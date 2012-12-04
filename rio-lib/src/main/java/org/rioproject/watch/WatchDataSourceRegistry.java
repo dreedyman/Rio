@@ -21,12 +21,12 @@ import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
 import org.rioproject.sla.SLAPolicyHandler;
 import org.rioproject.system.SystemWatchID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.*;
 import java.rmi.NoSuchObjectException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An implementation of a {@link org.rioproject.watch.WatchRegistry}
@@ -35,13 +35,11 @@ public class WatchDataSourceRegistry implements WatchRegistry {
     /** Collection of Watch instances that have been registered */
     protected final List<Watch> watchRegistry = new ArrayList<Watch>();
     /** Table of ThresholdWatch classnames and ThresholdListener objects */
-    protected final
-        Map<String, Collection<ThresholdListener>> thresholdListenerTable =
-        new Hashtable<String, Collection<ThresholdListener>>();
+    protected final Map<String, Collection<ThresholdListener>> thresholdListenerTable = new Hashtable<String, Collection<ThresholdListener>>();
     /** The ServiceBeanContext */
     private ServiceBeanContext context;
     /** A Logger */
-    private static Logger logger = Logger.getLogger("org.rioproject.watch");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.watch");
 
     /**
      * @see org.rioproject.watch.WatchRegistry#deregister
@@ -57,10 +55,10 @@ public class WatchDataSourceRegistry implements WatchRegistry {
                 watch.getWatchDataSource().close();
 
             } catch (NoSuchObjectException e) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Deregistering Watch", e);
+                if (logger.isTraceEnabled())
+                    logger.trace("Deregistering Watch", e);
             } catch (Throwable t) {
-                logger.log(Level.WARNING, "Deregistering Watch", t);
+                logger.warn("Deregistering Watch", t);
             }
             /// unregister ThresholdListeners
             if(thresholdListenerTable.containsKey(watch.getId())) {
@@ -77,11 +75,11 @@ public class WatchDataSourceRegistry implements WatchRegistry {
             if(MBeanServerFactory.getMBeanServer().isRegistered(objectName))
                MBeanServerFactory.getMBeanServer().unregisterMBean(objectName);
         } catch (MalformedObjectNameException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (InstanceNotFoundException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (MBeanRegistrationException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         }
     }
 
@@ -99,7 +97,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
                 if (wd != null)
                     wd.close();
             } catch (Throwable t) {
-                logger.log(Level.WARNING, "Closing WatchDataSource", t);
+                logger.warn("Closing WatchDataSource", t);
             }
         }        
     }
@@ -124,13 +122,13 @@ public class WatchDataSourceRegistry implements WatchRegistry {
             MBeanServer mbeanServer = MBeanServerFactory.getMBeanServer();
             mbeanServer.registerMBean(watch, objectName);
         } catch (MalformedObjectNameException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (MBeanRegistrationException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (InstanceAlreadyExistsException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (NotCompliantMBeanException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         }
     }
 
@@ -168,16 +166,14 @@ public class WatchDataSourceRegistry implements WatchRegistry {
             collection = new ArrayList<ThresholdListener>();
         }
         if(!collection.contains(thresholdListener)) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Add [" + thresholdListener.getClass().getName()
-                              + "] for watch [" + id + "]");
+            if(logger.isTraceEnabled())
+                logger.trace("Add [{}] for watch [{}]", thresholdListener.getClass().getName(), id);
             collection.add(thresholdListener);
             thresholdListenerTable.put(id, collection);
 
             Watch watch = findWatch(id);
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Found [" + (watch==null?0:1)
-                              + "] previously registered watch [" + id + "]");
+            if(logger.isTraceEnabled())
+                logger.trace("Found [{}] previously registered watch [{}]", (watch==null?0:1), id);
             if(watch!=null) {
                 associateThresholdListener(watch);
             }
@@ -207,8 +203,8 @@ public class WatchDataSourceRegistry implements WatchRegistry {
         if(thresholdListenerTable.containsKey(tWatch.getId())) {
             Collection<ThresholdListener> collection = thresholdListenerTable.get(tWatch.getId());
             for (ThresholdListener tListener : collection) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Associate Watch ["+tWatch.getId()+"] to ["+tListener.getClass().getName()+"]");
+                if (logger.isTraceEnabled())
+                    logger.trace("Associate Watch [{}] to [{}]", tWatch.getId(), tListener.getClass().getName());
                 if (tListener instanceof SLAPolicyHandler) {
                     SLAPolicyHandler slaPolicyHandler = (SLAPolicyHandler)tListener;
                     tWatch.setThresholdValues(slaPolicyHandler.getSLA());

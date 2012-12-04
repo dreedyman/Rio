@@ -19,19 +19,21 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.cybernode.Cybernode;
+import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jmx.JMXUtil;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.test.IfPropertySet;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.rioproject.test.simple.Fork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServerConnection;
 import java.lang.management.ManagementFactory;
@@ -39,8 +41,6 @@ import java.lang.management.RuntimeMXBean;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Tests simple deploy scenario that forks a service
@@ -51,7 +51,7 @@ public class SimpleForkTest {
     @SetTestManager
     static TestManager testManager;
     Cybernode cybernode;
-    static Logger logger = Logger.getLogger(RioTestRunner.class.getName());
+    static Logger logger = LoggerFactory.getLogger(RioTestRunner.class.getName());
 
     @Before
     public void setup() {
@@ -115,10 +115,10 @@ public class SimpleForkTest {
                 String pid = managedVM.substring(0, managedVM.indexOf(" "));
                 long forkedPID = Long.valueOf(pid);
                 if(forkedPID!=-1) {
-                    logger.fine("PID of exec'd process obtained: "+forkedPID);
+                    logger.debug("PID of exec'd process obtained: "+forkedPID);
                     try {
                         MBeanServerConnection mbsc = JMXConnectionUtil.attach(Long.toString(forkedPID));
-                        logger.fine("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
+                        logger.debug("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
                         RuntimeMXBean runtime = JMXUtil.getPlatformMXBeanProxy(mbsc,
                                                                                ManagementFactory.RUNTIME_MXBEAN_NAME,
                                                                                RuntimeMXBean.class);
@@ -128,14 +128,13 @@ public class SimpleForkTest {
                             }
                         }
                     } catch(Exception e) {
-                        logger.log(Level.WARNING,
-                                   "Could not attach to the exec'd JVM with pid: "+forkedPID+", continue service execution",
+                        logger.warn("Could not attach to the exec'd JVM with pid: "+forkedPID+", continue service execution",
                                    e);
                     }
                 }
             } else {
-                logger.fine("Could not obtain actual pid of exec'd process, " +
-                            "process cpu and java memory utilization are not available");
+                logger.debug("Could not obtain actual pid of exec'd process, " +
+                             "process cpu and java memory utilization are not available");
             }
         }
         return null;

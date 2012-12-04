@@ -23,7 +23,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 /**
  * An implementation of a {@link PeriodicWatch} that samples a bean's method
@@ -76,19 +75,13 @@ public class SamplingWatch extends PeriodicWatch {
             if(value==null) {
                 int count = nullReturnCount.incrementAndGet();
                 if(count>3) {
-                    logger.log(Level.WARNING,
-                               "SamplingWatch ["+getId()+"], " +
-                               "Invoking ["+bean.getClass().getName()+"."+
-                               accessor.getName()+"] returned null " +
-                               "["+count+"] times. Halting periodic sampling " +
-                               "due to null returns");
+                    logger.warn("SamplingWatch [{}], Invoking [{}.{}] returned null " +
+                               "[{}] times. Halting periodic sampling due to null returns",
+                                getId(), bean.getClass().getName(), accessor.getName(), count);
                     stop();
                 } else {
-                    logger.log(Level.WARNING,
-                               "SamplingWatch ["+getId()+"], " +
-                               "Invoking ["+bean.getClass().getName()+"."+
-                               accessor.getName()+"] returned null. " +
-                               "Verify the underlying object");
+                    logger.warn("SamplingWatch [{}], Invoking [{}.{}] returned null. Verify the underlying object",
+                               getId(), bean.getClass().getName(), accessor.getName());
                 }
                 return;
             } else {
@@ -107,11 +100,7 @@ public class SamplingWatch extends PeriodicWatch {
             addWatchRecord(metric);
             
         } catch(Throwable t) {
-            logger.log(Level.WARNING,
-                       "SamplingWatch ["+getId()+"], " +
-                       "Invoking ["+accessor.getReturnType().getName()+
-                       "="+
-                       accessor.getName()+"()]",
+            logger.warn("SamplingWatch ["+getId()+"], Invoking ["+accessor.getReturnType().getName()+"="+accessor.getName()+"()]",
                        t);
         }
     }
@@ -136,22 +125,16 @@ public class SamplingWatch extends PeriodicWatch {
                 if (m != null) {
                     accessor = m;
                 } else {
-                    logger.warning("SamplingWatch " +
-                                   "[" + getId() + "], " +
-                                   "with declared propertyName " +
-                                   "[" + property + "], " +
-                                   "matched, no readMethod found " +
-                                   "on target object " +
-                                   "[" + bean.getClass().getName() + "]");
+                    logger.warn("SamplingWatch [{}], with declared propertyName " +
+                                "[{}], matched, no readMethod found on target object [{}]",
+                                getId(), property, bean.getClass().getName());
                 }
             }
         }
 
         if(!propertyMatch) {
-            logger.warning("SamplingWatch ["+getId()+"] "+
-                           "with property ["+property+"] "+
-                           "not found on target object "+
-                           "["+bean.getClass().getName()+"]");
+            logger.warn("SamplingWatch [{}] with property [{}] not found on target object {}",
+                        getId(), property, bean.getClass().getName());
         }
 
         return accessor;

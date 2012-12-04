@@ -16,10 +16,11 @@
  */
 package org.rioproject.watch;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ThresholdManager is the keeper of ThresholdValues and determines when
@@ -32,7 +33,7 @@ public abstract class ThresholdManager {
     protected final transient List<ThresholdListener> thresholdListeners = new LinkedList<ThresholdListener>();
     /** Holds value of property thresholdValues */
     protected ThresholdValues thresholdValues = new ThresholdValues();
-    static Logger logger = Logger.getLogger(ThresholdManager.class.getName());
+    static Logger logger = LoggerFactory.getLogger(ThresholdManager.class.getName());
 
     /**
      * Check the threshold and determine if any action needs to occur
@@ -69,8 +70,8 @@ public abstract class ThresholdManager {
      */
     public void setThresholdValues(ThresholdValues thresholdValues) {
         this.thresholdValues = thresholdValues;
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest(String.format("%s Set ThresholdValues, low=%f, high=%s",
+        if(logger.isTraceEnabled())
+            logger.trace(String.format("%s Set ThresholdValues, low=%f, high=%s",
                                         getID(),
                                         thresholdValues.getLowThreshold(),
                                         thresholdValues.getHighThreshold()));
@@ -84,8 +85,8 @@ public abstract class ThresholdManager {
      */
     protected void notifyListeners(Calculable calculable, ThresholdType type) {
         ThresholdListener[] tListeners = getThresholdListeners();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest(String.format("%s Notify ThresholdListeners, number to notify: %d",
+        if(logger.isTraceEnabled())
+            logger.trace(String.format("%s Notify ThresholdListeners, number to notify: %d",
                                         getID(),
                                         tListeners.length));
         ThresholdValues thresholds = null;
@@ -109,8 +110,8 @@ public abstract class ThresholdManager {
         synchronized(thresholdListeners) {
             if(!thresholdListeners.contains(listener))
                 thresholdListeners.add(listener);
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest(String.format("%s Added a ThresholdListener, number now: %d",
+            if(logger.isTraceEnabled())
+                logger.trace(String.format("%s Added a ThresholdListener, number now: %d",
                                             getID(),
                                             thresholdListeners.size()));
         }
@@ -124,8 +125,8 @@ public abstract class ThresholdManager {
     public void removeThresholdListener(ThresholdListener listener) {
         synchronized(thresholdListeners) {
             thresholdListeners.remove(listener);
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest(String.format("%s Removed a ThresholdListener, number now: %d",
+            if(logger.isTraceEnabled())
+                logger.trace(String.format("%s Removed a ThresholdListener, number now: %d",
                                             getID(),
                                             thresholdListeners.size()));
         }

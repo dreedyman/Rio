@@ -16,23 +16,22 @@
 package org.rioproject.loader;
 
 import com.sun.jini.start.ClassLoaderUtil;
+import edu.emory.mathcs.util.classloader.URIClassLoader;
+import org.rioproject.opstring.ClassBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
-import edu.emory.mathcs.util.classloader.URIClassLoader;
-import java.security.PrivilegedAction;
 import java.security.AccessController;
-import java.util.logging.Logger;
-
-import org.rioproject.opstring.ClassBundle;
+import java.security.PrivilegedAction;
 
 /**
  * Utility for loading classes defined by a {@link org.rioproject.opstring.ClassBundle}
  */
 public class ClassBundleLoader {
-    private static Logger logger = Logger.getLogger(ClassBundleLoader.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ClassBundleLoader.class.getName());
 
     /**
      * Load the class using resources in the {@code ClassBundle}. If there are no
@@ -97,9 +96,8 @@ public class ClassBundleLoader {
                 throw new MalformedURLException("Creating URIs");
             }
         }
-        if(logger.isLoggable(Level.FINEST)) {
-            logger.finest("Using ClassLoader ["+loader.getClass().getName()+"] " +
-                          "to load class "+className);
+        if(logger.isTraceEnabled()) {
+            logger.trace("Using ClassLoader [{}] to load class {}", loader.getClass().getName(), className);
             ClassLoaderUtil.displayClassLoaderTree(loader);
         }
         return (loader.loadClass(className));

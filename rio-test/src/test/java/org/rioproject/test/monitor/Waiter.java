@@ -16,9 +16,8 @@
 package org.rioproject.test.monitor;
 
 import org.rioproject.test.TimeoutException;
-
-import java.util.logging.Logger;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class represents an object that can be used to wait for a condition to
@@ -28,7 +27,7 @@ public class Waiter {
     /**
      * The logger used by this class.
      */
-    private static Logger logger = Logger.getLogger("org.rioproject.test");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.test");
 
     /**
      * The maximum timeout.

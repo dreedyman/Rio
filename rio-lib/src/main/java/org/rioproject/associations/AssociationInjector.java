@@ -16,13 +16,15 @@
 package org.rioproject.associations;
 
 import org.rioproject.associations.strategy.FailOver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The AssociationInjector is an AssociationListener implementation that provides 
@@ -72,7 +74,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
         new HashMap<Association, AssociationProxy<T>>();
     private String targetPropertyName;
     static final String COMPONENT = "org.rioproject.associations";
-    private static final Logger logger = Logger.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create an AssociationInjector
@@ -112,12 +114,12 @@ public class AssociationInjector<T> implements AssociationListener<T> {
      * terminated
      */
     public void terminate() {
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Terminating injector, proxyMap size="+proxyMap.size());
+        if(logger.isTraceEnabled())
+            logger.trace("Terminating injector, proxyMap size={}", proxyMap.size());
         for(Map.Entry<Association, AssociationProxy<T>> entry : proxyMap.entrySet()) {
             AssociationProxy<T> aProxy = entry.getValue();
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Terminating association proxy "+aProxy);
+            if(logger.isTraceEnabled())
+                logger.trace("Terminating association proxy {}", aProxy.toString());
             aProxy.terminate();
         }
         this.target = null;
@@ -161,10 +163,9 @@ public class AssociationInjector<T> implements AssociationListener<T> {
     private void inject(Association association, T service) {
         String propertyName = getTargetPropertyName(association);
         if(propertyName==null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finer("Association ["+association.toString()+"], "+
-                             "does not have a declared propertyName, "+
-                             "injection aborted");
+            if(logger.isTraceEnabled())
+                logger.trace("Association [{}], does not have a declared propertyName, injection aborted", 
+                             association.toString());
             return;
         }
 
@@ -175,10 +176,9 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                     AssociationProxy<T> associationProxy = proxyMap.get(association);
                     if(associationProxy!=null)
                         associationProxy.discovered(association, service);
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Association ["+association.getName()+"] "+
-                                    "has already been injected to " +
-                                    "["+method+"]");
+                    if(logger.isDebugEnabled())
+                        logger.debug("Association [{}] has already been injected to [{}]",
+                                     association.getName(), method.toString());
                     return;
                 }
                 String proxyClass =
@@ -187,35 +187,27 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                  * Check for null proxyFactoryClass. If null,
                  * AssociationProxySupport is default
                  */
-                proxyClass = (proxyClass==null?
-                              AssociationProxySupport.class.getName() : proxyClass);
+                proxyClass = (proxyClass==null? AssociationProxySupport.class.getName() : proxyClass);
 
-                String strategyClass =
-                     association.getAssociationDescriptor().getServiceSelectionStrategy();
+                String strategyClass = association.getAssociationDescriptor().getServiceSelectionStrategy();
                 /*
                  * Check for null strategyClass. If null, FailOver is default
                  */
-                strategyClass = (strategyClass==null?
-                                 FailOver.class.getName() : strategyClass);
+                strategyClass = (strategyClass==null? FailOver.class.getName() : strategyClass);
                 try {
                     AssociationProxy associationProxy =
-                        (AssociationProxy)AssociationProxyFactory.createProxy(
-                            proxyClass, strategyClass, association, getCallerClassLoader());
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.fine("Association "+
-                                    "["+association.getName()+"], " +
-                                    "is DISCOVERED, inject dependency");
+                        (AssociationProxy)AssociationProxyFactory.createProxy(proxyClass,
+                                                                              strategyClass,
+                                                                              association,
+                                                                              getCallerClassLoader());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Association [{}], is DISCOVERED, inject dependency", association.getName());
                     }
-                    method.invoke(target, getInjectionArg(method,
-                                                          association,
-                                                          (T)associationProxy));
-                    if (logger.isLoggable(Level.FINE)) {
+                    method.invoke(target, getInjectionArg(method, association, (T)associationProxy));
+                    if (logger.isDebugEnabled()) {
                         String targetClass=target==null?"null":target.getClass().getName();
-                        logger.fine("Association "+
-                                    "["+association.getName()+"], " +
-                                    "is INJECTED using method " +
-                                    "["+method.getName()+"] " +
-                                    "on target class ["+targetClass+"]");
+                        logger.debug("Association [{}], is INJECTED using method [{}] on target class [{}]",
+                                     association.getName(), method.toString(), targetClass);
                     }
                     proxyMap.put(association, associationProxy);
                     //injected.add(method.toString());
@@ -226,21 +218,16 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                     if(service!=null)
                         svc = service.getClass().getName();
                     String nested = (t.getCause() == null ? "" :"\nCAUSE:");
-                    logger.log(Level.WARNING,
-                               "Injecting Association " +
-                               "["+association.getName()+"], " +
-                               "Service [" + svc + "]" + nested,
-                               (t.getCause() == null ? t : t.getCause()));
+                    StringBuilder s = new StringBuilder();
+                    s.append("Injecting Association [").append(association.getName()).append("], Service [");
+                    s.append(svc).append("]").append(nested);
+                    logger.warn(s.toString(), (t.getCause() == null ? t : t.getCause()));
                 }
             }
         } else {
-            logger.log(Level.WARNING,
-                       "Association ["+association.getName()+"], "+
-                       "with declared propertyName ["+propertyName+"] "+
-                       "not found on target object "+
-                       "["+target.getClass().getName()+"], Check method name " +
-                       "matches setXXX and that the setter has a single " +
-                       "parameter");
+            logger.warn("Association [{}], with declared propertyName [{}] not found on target object "+
+                       "[{}], Check method name matches setXXX and that the setter has a single " +
+                       "parameter", association.getName(), propertyName, target.getClass().getName());
         }
     }
 
@@ -262,8 +249,8 @@ public class AssociationInjector<T> implements AssociationListener<T> {
             }
         }
         sb.append("Selected method: ").append(method);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(sb.toString());
+        if(logger.isDebugEnabled())
+            logger.debug(sb.toString());
         return(method);
     }
 

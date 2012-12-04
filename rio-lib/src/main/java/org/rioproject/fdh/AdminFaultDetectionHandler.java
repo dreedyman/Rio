@@ -20,10 +20,10 @@ import net.jini.admin.Administrable;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The AdminFaultDetectionHandler is used to monitor services that implement
@@ -151,7 +151,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
     private static final String COMPONENT =
         "org.rioproject.fdh.AdminFaultDetectionHandler";
     /** A Logger */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * @see FaultDetectionHandler#setConfiguration
@@ -184,16 +184,16 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                                                 0,
                                                 Long.MAX_VALUE));
             
-            if(logger.isLoggable(Level.FINEST)) {
+            if(logger.isTraceEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 buffer.append("AdminFaultDetectionHandler Properties : ");
                 buffer.append("invocation delay=").append(invocationDelay).append(", ");
                 buffer.append("retry count=").append(retryCount).append(", ");
                 buffer.append("retry timeout=").append(retryTimeout);
-                logger.finest(buffer.toString());
+                logger.trace(buffer.toString());
             }
         } catch(ConfigurationException e) {
-            logger.log(Level.SEVERE, "Setting Configuration", e);
+            logger.error("Setting Configuration", e);
         }
     }
 
@@ -240,12 +240,12 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
         }
 
         public void interrupt() {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Terminating ServiceMonitor Thread...");
+            if(logger.isTraceEnabled())
+                logger.trace("Terminating ServiceMonitor Thread...");
             keepAlive = false;
             super.interrupt();
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("ServiceMonitor Thread Terminated");
+            if(logger.isTraceEnabled())
+                logger.trace("ServiceMonitor Thread Terminated");
         }
 
         /**
@@ -257,26 +257,23 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 return (false);
             boolean verified = false;
             try {
-                if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Invoke getAdmin() on : "
+                if(logger.isTraceEnabled())
+                        logger.trace("Invoke getAdmin() on : "
                                       + proxy.getClass().getName());
                     ((Administrable)proxy).getAdmin();
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Invocation to getAdmin() on : "
+                    if(logger.isTraceEnabled())
+                        logger.trace("Invocation to getAdmin() on : "
                                       + proxy.getClass().getName()+" returned");
                 verified = true;
             } catch(RemoteException e) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("RemoteException reaching service, "+
-                                  "service cannot be reached");
+                if(logger.isDebugEnabled())
+                    logger.debug("RemoteException reaching service, service cannot be reached");
                 keepAlive = false;
             } catch(Throwable t) {
                 if(!ThrowableUtil.isRetryable(t)) {
                     keepAlive = false;
-                    if(logger.isLoggable(Level.FINE))
-                        logger.log(Level.FINE,
-                                   "Unrecoverable Exception invoking getAdmin()",
-                                   t);
+                    if(logger.isDebugEnabled())
+                        logger.debug("Unrecoverable Exception invoking getAdmin()", t);
                 }
             }
             return (verified);
@@ -287,69 +284,57 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 if(!keepAlive) {
                     return;
                 }
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("ServiceAdminManager: Wait for "+
-                                  "["+invocationDelay+"] millis "+
-                                  "to invoke getAdmin() on "+
-                                  proxy.getClass().getName());
+                if(logger.isTraceEnabled())
+                    logger.trace("ServiceAdminManager: Wait for [{}] millis to invoke getAdmin() on {}",
+                                  invocationDelay, proxy.getClass().getName());
                 try {
                     sleep(invocationDelay);
                 } catch(InterruptedException ie) {
                     /* should not happen */
                 } catch(IllegalArgumentException iae) {
-                    logger.warning("ServiceAdminManager: sleep time is off : "
-                                   + invocationDelay);
+                    logger.warn("ServiceAdminManager: sleep time is off : {}", invocationDelay);
                 }
                 try {
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Invoke getAdmin() on : "
+                    if(logger.isTraceEnabled())
+                        logger.trace("Invoke getAdmin() on : "
                                       + proxy.getClass().getName());
                     ((Administrable)proxy).getAdmin();
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Invocation to getAdmin() on : "
+                    if(logger.isTraceEnabled())
+                        logger.trace("Invocation to getAdmin() on : "
                                       + proxy.getClass().getName()+" returned");
                 } catch(Exception e) {
                     if(!ThrowableUtil.isRetryable(e)) {
                         keepAlive = false;
-                        if(logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE,
-                                       "Unrecoverable Exception invoking getAdmin()",
-                                       e);
+                        if(logger.isDebugEnabled())
+                            logger.debug("Unrecoverable Exception invoking getAdmin()", e);
                     }
                     /*
                      * If we failed to invoke the method and the failure is
                      * not fatal, retry
                      */
                     if(keepAlive) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Failed to invoke getAdmin() on : "
-                                          + proxy.getClass().getName()
-                                          + ", retry ["+retryCount+"] "+
-                                          "times, waiting ["+retryTimeout+"] "+
-                                          "millis between attempts");
+                        if(logger.isTraceEnabled())
+                            logger.trace("Failed to invoke getAdmin() on : {}, retry [{}] times, waiting [{}] millis between attempts",
+                                         proxy.getClass().getName(), retryCount, retryTimeout);
                         boolean connected = false;
                         for(int i = 0; i < retryCount; i++) {
                             long t0 = 0;
                             long t1;
                             try {
-                                if(logger.isLoggable(Level.FINEST))
-                                    logger.finest("Attempt to invoke getAdmin() "+
-                                                  "on : "+proxy.getClass().getName()+
-                                                  ", attempt ["+i+"]");
+                                if(logger.isTraceEnabled())
+                                    logger.trace("Attempt to invoke getAdmin() on : {}, attempt [{}]",
+                                                 proxy,getClass().getName(), i);
                                 t0 = System.currentTimeMillis();
                                 ((Administrable)proxy).getAdmin();
-                                if(logger.isLoggable(Level.FINEST))
-                                    logger.finest("Re-established connection to : "+
-                                                  proxy.getClass().getName());
+                                if(logger.isTraceEnabled())
+                                    logger.trace("Re-established connection to : {}", proxy.getClass().getName());
                                 connected = true;
                                 break;
                             } catch(Exception e1) {
                                 t1 = System.currentTimeMillis();
-                                if(logger.isLoggable(Level.FINEST))
-                                    logger.finest("Invocation attempt ["+i+"] "+
-                                                  "took ["+(t1 - t0)+"] "+
-                                                  "millis to fail for : "+
-                                                  proxy.getClass().getName());
+                                if(logger.isTraceEnabled())
+                                    logger.trace("Invocation attempt [{}] took [{}] millis to fail for : {}",
+                                                  i, (t1 - t0), proxy.getClass().getName());
                                 if(retryTimeout > 0) {
                                     try {
                                         sleep(retryTimeout);
@@ -360,15 +345,9 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                             }
                         }
                         if(!connected) {
-                            if(logger.isLoggable(Level.FINEST)) {
-                                if(proxy != null)
-                                    logger.finest("Unable to invoke getAdmin() on "+
-                                                  "["+proxy.getClass().getName()+
-                                                  "], notify listeners and exit");
-                                else
-                                    logger.finest("Unable to invoke getAdmin() "+
-                                                  "[null proxy], notify listeners "+
-                                                  "and exit");
+                            if(logger.isTraceEnabled()) {
+                                String proxyName = (proxy==null?"null proxy":proxy.getClass().getName());
+                                logger.trace("Unable to invoke getAdmin() on [{}], notify listeners and exit", proxyName);
                             }
                             notifyListeners();
                             break;

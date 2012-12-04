@@ -20,8 +20,10 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventHandler;
 
 import java.lang.reflect.Constructor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility to create a SLAPolicyHandler based on a Configuration
@@ -30,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class SLAPolicyHandlerFactory {
     private static final String COMPONENT="org.rioproject.sla";
-    private static Logger logger = Logger.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a SLAPolicyHandler based on the provided SLA
@@ -60,8 +62,8 @@ public class SLAPolicyHandlerFactory {
         SLAPolicyHandler slaPolicyHandler = (SLAPolicyHandler)cons.newInstance(sla);
         /* Initialize the policy handler for processing */
         slaPolicyHandler.initialize(eventSource, eventHandler, context);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("SLAPolicyHandler "+
+        if(logger.isDebugEnabled())
+            logger.debug("SLAPolicyHandler "+
                         "["+slaPolicyHandler.getClass().getName()+"] created");
         return(slaPolicyHandler);
     }  

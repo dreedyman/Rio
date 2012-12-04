@@ -19,18 +19,19 @@ import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.deploy.StagedData;
 import org.rioproject.deploy.StagedSoftware;
 import org.rioproject.deploy.SystemComponent;
-import org.rioproject.logging.WrappedLogger;
+import org.rioproject.exec.Util;
+import org.rioproject.jsb.JSBContext;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.resources.util.DownloadManager;
+import org.rioproject.resources.util.FileUtils;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.OperatingSystemType;
 import org.rioproject.system.capability.PlatformCapability;
-import org.rioproject.jsb.JSBContext;
-import org.rioproject.resources.util.DownloadManager;
-import org.rioproject.resources.util.FileUtils;
-import org.rioproject.exec.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
 import java.io.File;
+import java.util.*;
 
 /**
  * A utility to assist in downloading and installing data for a service.
@@ -46,7 +47,7 @@ public class StagedDataManager {
     private ServiceElement sElem;
     private ComputeResource computeResource;
     /** Logger */
-    static WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.cybernode");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.cybernode");
 
     /**
      * Create a StagedDataManager
@@ -201,7 +202,7 @@ public class StagedDataManager {
             }
             if (data.getPerms() != null) {
                 if (OperatingSystemType.isWindows()) {
-                    logger.warning("Cannot apply permissions [%s] to StagedData on Windows", data.getPerms());
+                    logger.warn("Cannot apply permissions [{}] to StagedData on Windows", data.getPerms());
                 } else {
                     File toChmod;
                     StringBuilder perms = new StringBuilder();
@@ -212,7 +213,7 @@ public class StagedDataManager {
                         toChmod = new File(FileUtils.makeFileName(dlRec.getPath(), dlRec.getName()));
                     }
                     perms.append(data.getPerms());
-                    logger.info("Applying permissions [%s] to data staged at [%s]",
+                    logger.info("Applying permissions [{}] to data staged at [{}]",
                                 perms.toString(), FileUtils.getFilePath(toChmod));
                     Util.chmod(toChmod, perms.toString());
                 }
@@ -259,10 +260,10 @@ public class StagedDataManager {
                      * provisionable that it is not being removed */
                     if(pCap.getType()==PlatformCapability.PROVISIONABLE &&
                         computeResource.removalInProcess(pCap)) {
-                        logger.warning("Service [%s] has a requirement [%s] that " +
-                                       "is being removed as part of a previous " +
-                                       "instantiation. An attempt will be made " +
-                                       "to install the software", sElem.getName(), jsbRequirement);
+                        logger.warn("Service [{}] has a requirement [{}] that " +
+                                    "is being removed as part of a previous " +
+                                    "instantiation. An attempt will be made " +
+                                    "to install the software", sElem.getName(), jsbRequirement);
                         missing.add(jsbRequirement);
                         logger.info("Wait for the removal to finish...");
                         do {
@@ -280,12 +281,12 @@ public class StagedDataManager {
                 StagedSoftware data = jsbRequirement.getStagedSoftware();
                 if(data!=null) {
                     missing.add(jsbRequirement);
-                    logger.info("Service [%s] has a missing requirement [%s]. An attempt will be made to install it.",
+                    logger.info("Service [{}] has a missing requirement [{}]. An attempt will be made to install it.",
                                 sElem.getName(), jsbRequirement);
                 } else {
-                    logger.severe("Service [%s] has a requirement for [%s], and it is not found on the Cybernode, not " +
-                                  "is it downloadable. The capability may have been administratively removed during the " +
-                                  "instantiation of the service", sElem.getName(), jsbRequirement);
+                    logger.error("Service [{}] has a requirement for [{}], and it is not found on the Cybernode, not " +
+                                 "is it downloadable. The capability may have been administratively removed during the " +
+                                 "instantiation of the service", sElem.getName(), jsbRequirement);
                 }
             }
         }

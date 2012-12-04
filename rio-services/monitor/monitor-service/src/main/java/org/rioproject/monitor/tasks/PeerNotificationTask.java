@@ -16,9 +16,8 @@
 package org.rioproject.monitor.tasks;
 
 import org.rioproject.monitor.ProvisionMonitor;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used as by a Thread to notify all known ProvisionMonitor
@@ -27,7 +26,7 @@ import java.util.logging.Logger;
 public class PeerNotificationTask implements Runnable {
     ProvisionMonitor[] peers;
     ProvisionMonitor.PeerInfo info;
-    static Logger logger = Logger.getLogger(PeerNotificationTask.class.getName());
+    static Logger logger = LoggerFactory.getLogger(PeerNotificationTask.class.getName());
 
     public PeerNotificationTask(ProvisionMonitor[] peers, ProvisionMonitor.PeerInfo info) {
         this.peers = peers;
@@ -39,7 +38,7 @@ public class PeerNotificationTask implements Runnable {
             try {
                 peer.update(info);
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Exception notifying ProvisionMonitor", e);
+                logger.warn("Exception notifying ProvisionMonitor", e);
             }
         }
     }

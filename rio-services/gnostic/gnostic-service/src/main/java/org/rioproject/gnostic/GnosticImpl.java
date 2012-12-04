@@ -28,13 +28,14 @@ import org.rioproject.associations.AssociationType;
 import org.rioproject.bean.Initialized;
 import org.rioproject.bean.PreDestroy;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.sla.RuleMap;
 import org.rioproject.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -46,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 /**
  * Gnostic provides support for Complex Event Processing, associating
@@ -66,7 +66,7 @@ public class GnosticImpl implements Gnostic {
     private final List<RuleMap> ruleMapsInProcess = new ArrayList<RuleMap>();
     private static BlockingQueue<RuleMap> addRuleMapQ = new LinkedBlockingQueue<RuleMap>();
     private final List<RuleMapAssociationController> controllers = new ArrayList<RuleMapAssociationController>();
-    private static final WrappedLogger logger = WrappedLogger.getLogger(Gnostic.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Gnostic.class.getName());
     private final AtomicBoolean droolsInitialized = new AtomicBoolean(false);
 
     /*
@@ -102,8 +102,7 @@ public class GnosticImpl implements Gnostic {
                                                                                int.class,
                                                                                scannerInterval);
             } catch (ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Non-fatal error, unable to obtain scannerInterval from configuration, defaulting to 30 seconds",
+                logger.warn("Non-fatal error, unable to obtain scannerInterval from configuration, defaulting to 30 seconds",
                            e);
             }
             kAgent = DroolsFactory.createKnowledgeAgent(scannerInterval);
@@ -120,9 +119,7 @@ public class GnosticImpl implements Gnostic {
                                                            List.class,
                                                            null);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Non-fatal error, unable to obtain ruleMappings from configuration",
-                       e);
+            logger.warn("Non-fatal error, unable to obtain ruleMappings from configuration", e);
         }
         if(otherMappings!=null)
             ruleMappings.addAll(otherMappings);
@@ -137,11 +134,11 @@ public class GnosticImpl implements Gnostic {
     private void checkDroolsHasInitialized() {
         long t0 = System.currentTimeMillis();
         while(!droolsInitialized.get()) {
-            logger.info("Waiting for Drools to initialize ... %d", (System.currentTimeMillis()-t0));
+            logger.info("Waiting for Drools to initialize ... {}", (System.currentTimeMillis()-t0));
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Interrupted while waiting for Drools to initialize", e);
+                logger.warn("Interrupted while waiting for Drools to initialize", e);
             }
         }
     }
@@ -171,7 +168,7 @@ public class GnosticImpl implements Gnostic {
             }
             ruleMapsInProcess.add(ruleMap);
         }
-        logger.info("Adding %s", ruleMap);
+        logger.info("Adding {}", ruleMap);
         addRuleMapQ.add(ruleMap);
         return true;
     }
@@ -180,7 +177,7 @@ public class GnosticImpl implements Gnostic {
         verify(ruleMap);
         synchronized(managedRuleMaps) {
             if(!managedRuleMaps.contains(ruleMap)) {
-                logger.fine("RuleMap not found in collection of managed RuleMaps. %s", ruleMap);
+                logger.debug("RuleMap not found in collection of managed RuleMaps. {}", ruleMap);
                 return false;
             }
         }        
@@ -202,9 +199,9 @@ public class GnosticImpl implements Gnostic {
             synchronized(managedRuleMaps) {
                 managedRuleMaps.remove(ruleMap);
             }
-            logger.info("Removed %s", ruleMap);
+            logger.info("Removed {}", ruleMap);
         } else {
-            logger.fine("RuleMap not managed by any controllers. %s", ruleMap);
+            logger.debug("RuleMap not managed by any controllers. {}", ruleMap);
         }
         return removed;
     }
@@ -284,7 +281,7 @@ public class GnosticImpl implements Gnostic {
                 try {
                     ruleMap = addRuleMapQ.take();
                 } catch (InterruptedException e) {
-                    logger.fine("RuleMapWorker breaking out of main loop");
+                    logger.debug("RuleMapWorker breaking out of main loop");
                     break;
                 }
                 if (ruleMap != null) {
@@ -307,19 +304,16 @@ public class GnosticImpl implements Gnostic {
                         controllers.add(controller);
                         controller.process();
                     } catch (ResolverException e) {
-                        logger.log(Level.WARNING, e,
-                                   "Unable to provision artifact [%s] for RuleMap %s",
-                                   ruleMap.getRuleDefinition().getRuleClassPath(), ruleMap);
+                        logger.warn("Unable to provision artifact [{}] for RuleMap {}",
+                                   ruleMap.getRuleDefinition().getRuleClassPath(), ruleMap, e);
                     } catch (MalformedURLException e) {
-                        logger.log(Level.WARNING, e,
-                                   "Unable to create URL from rule classpath [%s], cannot set classpath for rule classpath jars",
-                                   ruleMap.getRuleDefinition().getRuleClassPath());
+                        logger.warn("Unable to create URL from rule classpath [{}], cannot set classpath for rule classpath jars",
+                                   ruleMap.getRuleDefinition().getRuleClassPath(), e);
                     } catch (URISyntaxException e) {
-                        logger.log(Level.WARNING, e,
-                                   "Unable to create URI from rule classpath [%s], cannot set classpath for rule classpath jars",
-                                   ruleMap.getRuleDefinition().getRuleClassPath());
+                        logger.warn("Unable to create URI from rule classpath [{}], cannot set classpath for rule classpath jars",
+                                    ruleMap.getRuleDefinition().getRuleClassPath(), e);
                     } catch (IllegalArgumentException e) {
-                        logger.log(Level.WARNING, "Unable to create RuleMapAssociationController", e);
+                        logger.warn("Unable to create RuleMapAssociationController", e);
                     } finally {
                         if(currentCL!=null)
                             Thread.currentThread().setContextClassLoader(currentCL);
@@ -354,14 +348,14 @@ public class GnosticImpl implements Gnostic {
                             cp[i].startsWith("file:") ? cp[i] : "file:" + cp[i];
                         classPath[i] = ResolverHelper.handleWindows(s);
                     }
-                    if(logger.isLoggable(Level.FINE)) {
+                    if(logger.isDebugEnabled()) {
                         StringBuilder sb = new StringBuilder();
                         for(String s : classPath) {
                             if(sb.length()>0)
                                 sb.append(", ");
                             sb.append(s);
                         }
-                        logger.fine("Resolved classpath for rule artifact [%s]: %s", ruleClassPath, sb.toString());
+                        logger.debug("Resolved classpath for rule artifact [{}]: {}", ruleClassPath, sb.toString());
                     }
                 } else {
                     classPath = StringUtil.toArray(ruleClassPath, " ,");
@@ -387,11 +381,11 @@ public class GnosticImpl implements Gnostic {
                 managedRuleMaps.add(ruleMap);
             }
             remove(ruleMap);
-            logger.info("Added %s", ruleMap);
+            logger.info("Added {}", ruleMap);
         }
 
         public void failed(RuleMap ruleMap) {
-            logger.info("Failed to add %s", ruleMap);
+            logger.info("Failed to add {}", ruleMap);
             remove(ruleMap);
         }
 

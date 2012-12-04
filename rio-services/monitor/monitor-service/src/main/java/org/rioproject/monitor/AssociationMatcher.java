@@ -15,14 +15,13 @@
  */
 package org.rioproject.monitor;
 
-import org.rioproject.associations.AssociationMatchFilter;
 import org.rioproject.associations.AssociationDescriptor;
+import org.rioproject.associations.AssociationMatchFilter;
 import org.rioproject.associations.AssociationType;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.jsb.ServiceElementUtil;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility to match Associations to ServiceElements.
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class AssociationMatcher {
     /** The Logger */
-    static final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
+    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
 
     /**
      * This method verifies whether the InstantiatorResource can support any
@@ -43,7 +42,7 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      * colocation requirements
      */
-    static boolean meetsColocationRequirements(ServiceElement sElem, InstantiatorResource ir) {
+    static boolean meetsColocationRequirements(final ServiceElement sElem, final InstantiatorResource ir) {
         boolean provisionable = true;
         AssociationDescriptor[] aDescs = sElem.getAssociationDescriptors();
         for (AssociationDescriptor aDesc : aDescs) {
@@ -73,7 +72,7 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      *         opposed requirements
      */
-    static boolean meetsOpposedRequirements(ServiceElement sElem, InstantiatorResource ir) {
+    static boolean meetsOpposedRequirements(final ServiceElement sElem, final InstantiatorResource ir) {
         return(meetsAssociatedRequirements(sElem, AssociationType.OPPOSED, ir, null));
     }
     /**
@@ -88,9 +87,9 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      *         isolation requirements
      */
-    public static boolean meetsIsolatedRequirements(ServiceElement sElem,
-                                                    InstantiatorResource ir,
-                                                    InstantiatorResource[] known) {
+    public static boolean meetsIsolatedRequirements(final ServiceElement sElem,
+                                                    final InstantiatorResource ir,
+                                                    final InstantiatorResource[] known) {
         return(meetsAssociatedRequirements(sElem, AssociationType.ISOLATED, ir, known));
 
     }
@@ -108,10 +107,10 @@ public class AssociationMatcher {
      * @return Return true if the provided InstantiatorResource meets service
      *         declared requirements
      */
-    private static boolean meetsAssociatedRequirements(ServiceElement sElem,
-                                                       AssociationType type,
-                                                       InstantiatorResource ir,
-                                                       InstantiatorResource[] known) {
+    private static boolean meetsAssociatedRequirements(final ServiceElement sElem,
+                                                       final AssociationType type,
+                                                       final InstantiatorResource ir,
+                                                       final InstantiatorResource[] known) {
         boolean provisionable = true;
         StringBuilder errorLog = new StringBuilder();
 
@@ -165,10 +164,7 @@ public class AssociationMatcher {
             StringBuffer b = new StringBuffer();
             int found = getCount(sElem, ir.getServiceElements(), type, b);
             if(found==0) {
-                found = getCount(sElem,
-                                 ir.getServiceElementsInprocess(sElem),
-                                 type,
-                                 b);
+                found = getCount(sElem, ir.getServiceElementsInprocess(sElem), type, b);
             }
             if (found > 0) {
                 String provType = sElem.getProvisionType().toString();
@@ -201,8 +197,8 @@ public class AssociationMatcher {
                 provisionable = false;
         }
         
-        if (!provisionable && logger.isLoggable(Level.FINER))
-            logger.finer(errorLog.toString());
+        if (!provisionable && logger.isDebugEnabled())
+            logger.debug(errorLog.toString());
 
         return (provisionable);
     }
@@ -216,7 +212,7 @@ public class AssociationMatcher {
      * @return If the candidate has a host address that is in the known set,
      * return true, otherwise return false
      */
-    static boolean inKnownSet(InstantiatorResource candidate, InstantiatorResource[] knownOnes) {
+    static boolean inKnownSet(final InstantiatorResource candidate, final InstantiatorResource[] knownOnes) {
         boolean inKnownSet = false;
         if(candidate!=null && knownOnes!=null) {
             for (InstantiatorResource knownOne : knownOnes) {
@@ -237,7 +233,7 @@ public class AssociationMatcher {
      * @param elems Array of ServiceElement instances
      * @return True if the AssociationFilter matches a ServiceElement
      */
-    static boolean matches(AssociationDescriptor descriptor, ServiceElement[] elems) {
+    static boolean matches(final AssociationDescriptor descriptor, final ServiceElement[] elems) {
         boolean matches = false;
         AssociationMatchFilter filter = getAssociationMatchFilter(descriptor);
         for (ServiceElement elem : elems) {
@@ -252,8 +248,7 @@ public class AssociationMatcher {
     /*
      * Get the AssociationMatchFilter for an AssociationDescriptor
      */
-    private static AssociationMatchFilter
-        getAssociationMatchFilter(AssociationDescriptor descriptor) {
+    private static AssociationMatchFilter getAssociationMatchFilter(final AssociationDescriptor descriptor) {
         AssociationMatchFilter defaultFilter = new DefaultAssociationMatchFilter();
         AssociationMatchFilter filter;
         try {
@@ -266,10 +261,7 @@ public class AssociationMatcher {
             }
         } catch(Exception e) {
             filter = defaultFilter;
-            logger.log(Level.WARNING,
-                       "Getting AssociationMatchFilter for association " +
-                       "["+descriptor.toString()+"]",
-                       e);
+            logger.warn("Getting AssociationMatchFilter for association ["+descriptor.toString()+"]", e);
         }
         return(filter);
     }
@@ -277,15 +269,13 @@ public class AssociationMatcher {
     /*
      * Get matching ServiceElement count
      */
-    private static int getCount(ServiceElement sElem,
-                                ServiceElement[] elems,
-                                AssociationType type,
-                                StringBuffer b) {
+    private static int getCount(final ServiceElement sElem,
+                                final ServiceElement[] elems,
+                                final AssociationType type,
+                                final StringBuffer b) {
         int found = 0;
         for (ServiceElement elem : elems) {
-            AssociationDescriptor[] ads =
-                ServiceElementUtil.getAssociationDescriptors(elem,
-                                                             type);
+            AssociationDescriptor[] ads = ServiceElementUtil.getAssociationDescriptors(elem, type);
             for (AssociationDescriptor ad : ads) {
                 if (matches(ad, new ServiceElement[]{sElem})) {
                     if (found > 0)
@@ -304,13 +294,11 @@ public class AssociationMatcher {
      */
     static class DefaultAssociationMatchFilter implements AssociationMatchFilter {
 
-        public boolean check(AssociationDescriptor descriptor,
-                             ServiceElement element) {
-            return(ServiceElementUtil.matchesServiceElement(
-                       element,
-                       descriptor.getName(),
-                       descriptor.getInterfaceNames(),
-                       descriptor.getOperationalStringName()));
+        public boolean check(final AssociationDescriptor descriptor, final ServiceElement element) {
+            return(ServiceElementUtil.matchesServiceElement(element,
+                                                            descriptor.getName(),
+                                                            descriptor.getInterfaceNames(),
+                                                            descriptor.getOperationalStringName()));
         }
     }
 }

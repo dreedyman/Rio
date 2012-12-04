@@ -28,6 +28,8 @@ import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.ServiceExecutor;
 import org.rioproject.exec.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -37,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -63,7 +63,7 @@ public class DownloadManager {
     private List<File> postInstallExtractList;
     private boolean showDownloadTo = true;
     /** A suitable Logger */
-    private static final Logger logger = Logger.getLogger(DownloadManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DownloadManager.class.getName());
 
     /**
      * Create an instance of the DownloadManager
@@ -149,8 +149,8 @@ public class DownloadManager {
         File targetPath = new File(FileUtils.makeFileName(installPath, installRoot));
         if(!targetPath.exists()) {
             if(targetPath.mkdirs()) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Created "+targetPath.getPath());
+                if(logger.isTraceEnabled())
+                    logger.trace("Created "+targetPath.getPath());
             }
             if(!targetPath.exists())
                 throw new IOException("Failed to create : " + installPath);
@@ -168,24 +168,18 @@ public class DownloadManager {
         File targetFile = new File(FileUtils.makeFileName(target, software));
         if (targetFile.exists()) {
             if(!dAttrs.overwrite()) {
-                logger.log(Level.WARNING,
+                logger.warn(
                            "{0} exists, stagedData attributes indicate to "+
                            "not overwrite file",
                            FileUtils.getFilePath(targetFile));
                 return null;
             } else {
                 if(showDownloadTo)
-                    logger.log(Level.INFO,
-                               "Overwriting {0} with {1}",
-                               new Object[]{FileUtils.getFilePath(targetFile),
-                                            location});
+                    logger.info("Overwriting {} with {}", FileUtils.getFilePath(targetFile), location);
             }
         } else {
             if(showDownloadTo)
-                logger.log(Level.INFO,
-                           "Downloading {0} to {1}",
-                           new Object[]{location,
-                                        FileUtils.getFilePath(targetFile)});
+                logger.info("Downloading {} to {}", location, FileUtils.getFilePath(targetFile));
         }
         long t0 = System.currentTimeMillis();
 
@@ -199,8 +193,7 @@ public class DownloadManager {
         long downloadSecs = downloadTime/1000;
         Date downloadDate = new Date();
         ExtractResults results;
-        logger.info("Wrote "+(downloadedSize/1024)+"K " +
-                           "in "+(downloadSecs<1?"< 1":downloadSecs)+" seconds");
+        logger.info("Wrote "+(downloadedSize/1024)+"K in "+(downloadSecs<1?"< 1":downloadSecs)+" seconds");
         String extractedToPath = null;
         if(unarchive) {
             t0 = System.currentTimeMillis();
@@ -267,15 +260,15 @@ public class DownloadManager {
         } catch(FileNotFoundException e) {
             // catch so we can delete the file
             if(file.delete()) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Deleted "+file.getName());
+                if(logger.isTraceEnabled())
+                    logger.trace("Deleted "+file.getName());
             }
             throw e;
         } catch(IOException e) {
             // catch so we can delete the file
             if(file.delete()) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Deleted "+file.getName());
+                if(logger.isTraceEnabled())
+                    logger.trace("Deleted "+file.getName());
             }
             throw e;
         } finally {
@@ -338,8 +331,8 @@ public class DownloadManager {
                 if(zipEntry.isDirectory()) {
                     File file = makeChildFile(directory, zipEntry.getName());
                     if(file.mkdirs()) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Created "+file.getPath());
+                        if(logger.isTraceEnabled())
+                            logger.trace("Created "+file.getPath());
                     }
                     if(extractedToPath==null) {
                         extractedToPath = getExtractedToPath(file, directory);
@@ -354,8 +347,8 @@ public class DownloadManager {
                     File targetPath = new File(installPath);
                     if(!targetPath.exists()) {
                         if(targetPath.mkdirs()) {
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.finest("Created "+file.getPath());
+                            if(logger.isTraceEnabled())
+                                logger.trace("Created "+file.getPath());
                         }
                         if(!targetPath.exists())
                             throw new IOException("Failed to create : "
@@ -381,7 +374,7 @@ public class DownloadManager {
         do {
             parent = path.getParentFile();
             if(parent==null) {
-                logger.warning("No parent for "+
+                logger.warn("No parent for "+
                                FileUtils.getFilePath(path));
                 break;
             }
@@ -401,7 +394,7 @@ public class DownloadManager {
         File output = new File(gzip.getParentFile().getPath(),
                                gzip.getName().substring(0, ndx));
         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(gzip));
-        logger.log(Level.INFO, "Writing {0} ...", FileUtils.getFilePath(output));
+        logger.info("Writing {0} ...", FileUtils.getFilePath(output));
         long t0 = System.currentTimeMillis();
 
         int downloadedSize = writeFileFromInputStream(gzipInputStream,
@@ -433,19 +426,19 @@ public class DownloadManager {
                 File f = new File(target, entry.getName());
                 if(entry.isDirectory()) {
                     if(f.mkdirs()) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Created directory "+f.getPath());
+                        if(logger.isTraceEnabled())
+                            logger.trace("Created directory "+f.getPath());
                     }
                 } else {
                     if(!f.getParentFile().exists()) {
                         if(f.getParentFile().mkdirs()) {
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.finest("Created "+f.getParentFile().getPath());
+                            if(logger.isTraceEnabled())
+                                logger.trace("Created "+f.getParentFile().getPath());
                         }
                     }
                     if(f.createNewFile()) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Created "+f.getName());
+                        if(logger.isTraceEnabled())
+                            logger.trace("Created "+f.getName());
                     }
                     OutputStream out = new FileOutputStream(f);
                     IOUtils.copy(in, out);
@@ -642,8 +635,8 @@ public class DownloadManager {
         File software = new File(FileUtils.makeFileName(record.getPath(),
                                                         record.getName()));
         if(!software.exists()) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Software recorded at "+
+            if(logger.isDebugEnabled())
+                logger.debug("Software recorded at "+
                             "["+ FileUtils.getFilePath(software)+"] " +
                             "does not exist or has already been removed "+
                             "from the file system, removal aborted");
@@ -682,7 +675,7 @@ public class DownloadManager {
                         FileUtils.remove(file);
                     }
                 } catch (ZipException e) {
-                    logger.log(Level.SEVERE, "Error in opening zip file " +FileUtils.getFilePath(software), e);
+                    logger.error("Error in opening zip file " +FileUtils.getFilePath(software), e);
                 } catch(Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -690,7 +683,7 @@ public class DownloadManager {
                         try {
                             zipFile.close();
                         } catch (IOException e) {
-                            logger.log(Level.SEVERE, "Could not close zip file", e);
+                            logger.error("Could not close zip file", e);
                         }
                     }
                 }

@@ -18,14 +18,16 @@ package org.rioproject.resources.util;
 import org.rioproject.util.PropertyHelper;
 
 import java.io.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for working with Files.
  */
 public final class FileUtils {
-    private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(FileUtils.class.getName());
 
     private FileUtils() {}
 
@@ -43,7 +45,7 @@ public final class FileUtils {
             path = f.getCanonicalPath();
         } catch (IOException e) {
             path = f.getAbsolutePath();
-            logger.warning("Unable to obtain canonical path for file " +
+            logger.warn("Unable to obtain canonical path for file " +
                            "["+f.getName()+"], returning absolute path: "+path);
         }
         return path;
@@ -92,32 +94,32 @@ public final class FileUtils {
                     remove(f);
                 else {
                     if(f.delete()) {
-                        if(logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE,
+                        if(logger.isDebugEnabled())
+                            logger.debug(
                                        "Removed "+ getFilePath(f));
                     } else {
                         if(f.exists())
-                            logger.warning("Unable to remove "+ getFilePath(f));
+                            logger.warn("Unable to remove "+ getFilePath(f));
                     }
                 }
             }
             removed = file.delete();
             if(removed) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE,
+                if(logger.isDebugEnabled())
+                    logger.debug(
                                "Removed "+ getFilePath(file));
             } else {
                 if(file.exists())
-                    logger.warning("Unable to remove "+ getFilePath(file));
+                    logger.warn("Unable to remove "+ getFilePath(file));
             }
         } else {
             removed = file.delete();
             if(removed) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE, "Removed "+ getFilePath(file));
+                if(logger.isDebugEnabled())
+                    logger.debug( "Removed "+ getFilePath(file));
             } else {
                 if(file.exists())
-                    logger.warning("Unable to remove "+ getFilePath(file));
+                    logger.warn("Unable to remove "+ getFilePath(file));
             }
         }
         return removed;

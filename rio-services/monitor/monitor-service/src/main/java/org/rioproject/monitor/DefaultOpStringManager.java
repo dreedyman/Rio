@@ -35,13 +35,13 @@ import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The DefaultOpStringManager provides the management for an OperationalString that
@@ -54,7 +54,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /** Logger */
     static final String LOGGER = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    static Logger logger = Logger.getLogger(LOGGER);
+    static Logger logger = LoggerFactory.getLogger(LOGGER);
 
     private OperationalString opString;
     /**
@@ -137,8 +137,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         Configuration myConfig = (config == null ? EmptyConfiguration.INSTANCE : config);
         try {
             exporter = ExporterConfig.getExporter(config, CONFIG_COMPONENT, "opStringManagerExporter");
-            if (logger.isLoggable(Level.FINER))
-                logger.finer("Deployment [" + opString.getName() + "] using exporter " + exporter);
+            if (logger.isDebugEnabled())
+                logger.debug("Deployment [" + opString.getName() + "] using exporter " + exporter);
 
             /* Get the ProxyPreparer for ServiceProvisionListener instances */
             serviceProvisionListenerPreparer = (ProxyPreparer) myConfig.getEntry(CONFIG_COMPONENT,
@@ -146,7 +146,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                                                  ProxyPreparer.class,
                                                                                  new BasicProxyPreparer());
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting opStringManager Exporter", e);
+            logger.warn("Getting opStringManager Exporter", e);
         }
 
         proxy = (OperationalStringManager) exporter.export(this);
@@ -164,7 +164,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 oar = new OAR(f);
                 oar.setDeployDir(f.getParent());
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Could no create OAR", e);
+                logger.warn("Could no create OAR", e);
             }
         }
     }
@@ -209,8 +209,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                     mgr.setActive(active);
                     list.add(mgr.getServiceElement());
                 }
-                if (logger.isLoggable(Level.FINER))
-                    logger.finer("OperationalStringManager for [" + getProxy().toString() + "] " +
+                if (logger.isDebugEnabled())
+                    logger.debug("OperationalStringManager for [" + getProxy().toString() + "] " +
                                  "set active [" + active + "] for OperationalString [" + getName() + "]");
                 if (active) {
                     ServiceElement[] sElems = list.toArray(new ServiceElement[list.size()]);
@@ -225,8 +225,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 }
 
             } else {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("OperationalStringManager for [" + opString.getName() + "] already " +
+                if (logger.isTraceEnabled())
+                    logger.trace("OperationalStringManager for [" + opString.getName() + "] already " +
                                   "has active state of [" + active + "]");
             }
         }
@@ -325,18 +325,17 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 } else {
                     String message = "Service [" + sElem.getName() + "] has no " +
                                      "declared interfaces, cannot deploy";
-                    logger.warning(message);
+                    logger.warn(message);
                     map.put(sElem.getName(), new Exception(message));
                 }
             } catch (Exception e) {
                 Throwable cause = e.getCause();
                 if (cause == null)
                     cause = e;
-                logger.log(Level.WARNING,
-                           "Creating ServiceElementManager for " +
-                           "[" + sElem.getName() + "], " +
-                           "deployment [" + sElem.getOperationalStringName() + "]",
-                           e);
+                logger.warn("Creating ServiceElementManager for " +
+                            "[" + sElem.getName() + "], " +
+                            "deployment [" + sElem.getOperationalStringName() + "]",
+                            e);
                 map.put(sElem.getName(), cause);
                 throw e;
             }
@@ -383,7 +382,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                                   mgr.getServiceElement()});
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Starting ServiceElementManager", e);
+                logger.warn("Starting ServiceElementManager", e);
             }
         }
     }
@@ -429,7 +428,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (!isActive()) {
             OperationalStringManager primary = opStringMangerController.getPrimary(getName());
             if (primary == null) {
-                logger.warning("Primary testManager not located, force state to active for [" + getName() + "]");
+                logger.warn("Primary testManager not located, force state to active for [" + getName() + "]");
                 setActive(true);
             } else {
                 logger.info("Forwarding update request to primary testManager for [" + getName() + "]");
@@ -463,7 +462,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (newOpString == null)
             throw new IllegalArgumentException("OperationalString cannot be null");
 
-        if (logger.isLoggable(Level.INFO)) {
+        if (logger.isInfoEnabled()) {
             logger.info("Updating " + newOpString.getName() + " deployment");
         }
         Map<String, Throwable> map = new HashMap<String, Throwable>();
@@ -481,7 +480,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 }
             } catch (Exception e) {
                 map.put(sElem.getName(), e);
-                logger.log(Level.WARNING, "Refreshing ServiceElementManagers", e);
+                logger.warn("Refreshing ServiceElementManagers", e);
             }
         }
         /*
@@ -500,7 +499,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                     if (cause == null)
                         cause = e;
                     map.put(sElems[i].getName(), cause);
-                    logger.log(Level.WARNING, "Adding nested OperationalString [" + nested[i].getName() + "]", e);
+                    logger.warn("Adding nested OperationalString [" + nested[i].getName() + "]", e);
                 }
             } else {
                 OpStringManager nestedMgr = opStringMangerController.getOpStringManager(nested[i].getName());
@@ -576,12 +575,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 (InstantiatorResource) resource.getResource();
             for (ServiceElement element : elements) {
                 int count = ir.getServiceElementCount(element);
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               ir.getName() + " at " +
-                               "[" + ir.getHostAddress() + "] has " +
-                               "[" + count + "] of " +
-                               "[" + element.getName() + "]");
+                if (logger.isTraceEnabled())
+                    logger.trace(ir.getName() + " at " +
+                                 "[" + ir.getHostAddress() + "] has " +
+                                 "[" + count + "] of " +
+                                 "[" + element.getName() + "]");
                 if (count > 0) {
                     List<ServiceElement> list = map.get(ir);
                     if (list == null)
@@ -599,22 +597,19 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             ServiceElement[] elems = list.toArray(new ServiceElement[list.size()]);
             try {
                 ServiceBeanInstantiator sbi = ir.getInstantiator();
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
+                if (logger.isTraceEnabled())
+                    logger.trace(
                                "Update " + ir.getName() + " at [" + ir.getHostAddress() + "] " +
                                "with [" + elems.length + "] elements");
                 sbi.update(elems, getProxy());
             } catch (RemoteException e) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.log(Level.FINEST,
-                               "Updating ServiceElement for " + ir.getName() + " at [" + ir.getHostAddress() + "]",
-                               e);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Updating ServiceElement for " + ir.getName() + " at [" + ir.getHostAddress() + "]", e);
                 } else {
-                    logger.log(Level.INFO,
-                               e.getClass().getName() + ": " + e.getLocalizedMessage() + " " +
-                               "Updating ServiceElement for " +
-                               ir.getName() + " at [" +
-                               ir.getHostAddress() + "]");
+                    logger.info(e.getClass().getName() + ": " + e.getLocalizedMessage() + " " +
+                                "Updating ServiceElement for " +
+                                ir.getName() + " at [" +
+                                ir.getHostAddress() + "]");
                 }
             }
         }
@@ -635,8 +630,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         try {
             exporter.unexport(true);
         } catch (IllegalStateException e) {
-            if (logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE, "OperationalStringManager not unexported");
+            if (logger.isDebugEnabled())
+                logger.debug("OperationalStringManager not unexported");
         }
         /* Remove ourselves from the collection */
         opStringMangerController.remove(this);
@@ -664,8 +659,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 nestedMgr.removeParent(this);
             }
         }
-        if (logger.isLoggable(Level.FINE))
-            logger.fine("OpStringManager [" + getName() + "] terminated");
+        if (logger.isDebugEnabled())
+            logger.debug("OpStringManager [" + getName() + "] terminated");
         return (terminated.toArray(new OperationalString[terminated.size()]));
     }
 
@@ -705,8 +700,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         } catch (Throwable t) {
             throw new OperationalStringException("Adding ServiceElement", t);
         }
-        if (logger.isLoggable(Level.FINE))
-            logger.log(Level.FINE, "Added service [" + sElem.getOperationalStringName() + "/" + sElem.getName() + "]");
+        if (logger.isDebugEnabled())
+            logger.debug("Added service [" + sElem.getOperationalStringName() + "/" + sElem.getName() + "]");
     }
 
 
@@ -753,8 +748,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 throw (OperationalStringException) t;
             throw new OperationalStringException("Removing ServiceElement", t);
         }
-        if (logger.isLoggable(Level.FINE))
-            logger.log(Level.FINE, "Removed service [" +sElem.getOperationalStringName() + "/" + sElem.getName() + "]");
+        if (logger.isDebugEnabled())
+            logger.debug("Removed service [" +sElem.getOperationalStringName() + "/" + sElem.getName() + "]");
     }
 
     /**
@@ -769,7 +764,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                  false);
         svcElemMgr.stopManager(destroy);
         if (!svcElemMgrs.remove(svcElemMgr))
-            logger.warning("UNABLE to remove ServiceElementManager for " +
+            logger.warn("UNABLE to remove ServiceElementManager for " +
                            "[" + sElem.getOperationalStringName() +
                            "/" + sElem.getName() + "]");
         else {
@@ -795,7 +790,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy, action, sElem);
             eventProcessor.processEvent(event);
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "Updating ServiceElement [" + sElem.getName() + "]", t);
+            logger.warn("Updating ServiceElement [" + sElem.getName() + "]", t);
             throw new OperationalStringException("Updating ServiceElement [" + sElem.getName() + "]", t);
         }
     }
@@ -838,7 +833,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 throw new OperationalStringException("Service must be dynamic to be relocated");
             svcElemMgr.relocate(instance, preparedListener, uuid);
         } catch (Throwable t) {
-            logger.warning("Relocating ServiceBeanInstance [" +
+            logger.warn("Relocating ServiceBeanInstance [" +
                            t.getClass().getName() + ":" + t.getMessage() + "]");
             if (t instanceof OperationalStringException)
                 throw (OperationalStringException) t;
@@ -861,7 +856,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                                     instance);
             eventProcessor.processEvent(event);
         } catch (Throwable t) {
-            logger.warning("Updating ServiceBeanInstance [" +
+            logger.warn("Updating ServiceBeanInstance [" +
                            "[" + instance.getServiceBeanConfig().getName() + "] [" +
                            t.getClass().getName() + ":" + t.getMessage() + "]");
             throw new OperationalStringException("Updating ServiceBeanInstance", t);
@@ -909,7 +904,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         } catch (Throwable t) {
             String message = "Incrementing ServiceElement [" + sElem.getName() +"] " +
                              "["+t.getClass().getName() + ":" + t.getMessage() + "]";
-            logger.warning(message);
+            logger.warn(message);
             throw new OperationalStringException(message, t);
         }
     }
@@ -954,7 +949,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             }
             return (numTrimmed);
         } catch (Throwable t) {
-            logger.warning("Trimming ServiceElement [" + sElem.getName() + "] " +
+            logger.warn("Trimming ServiceElement [" + sElem.getName() + "] " +
                            t.getClass().getName() + ":" + t.getMessage() + "]");
             throw new OperationalStringException("Trimming ServiceElement ["+sElem.getName()+"]", t);
         }
@@ -1013,11 +1008,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         try {
             mgr = getServiceElementManager(proxy);
         } catch (IOException e) {
-            if (logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "Getting ServiceElementManager for proxy", e);
+            if (logger.isTraceEnabled())
+                logger.trace("Getting ServiceElementManager for proxy", e);
         }
         if (mgr == null)
-            logger.warning("No ServiceElementManager found for proxy " + proxy);
+            logger.warn("No ServiceElementManager found for proxy " + proxy);
         ServiceElement element = null;
         if (mgr != null) {
             element = mgr.getServiceElement();
@@ -1037,7 +1032,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 throw new OperationalStringException("Unmanaged ServiceElement [" + sElem.getName() + "]", false);
             return (mgr.getServiceBeanInstances());
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "Getting ServiceBeanInstances for ServiceElement [" + sElem.getName() + "]", t);
+            logger.warn("Getting ServiceBeanInstances for ServiceElement [" + sElem.getName() + "]", t);
             if (t instanceof OperationalStringException)
                 throw (OperationalStringException) t;
             else
@@ -1129,12 +1124,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 preparedListener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
             } catch (RemoteException e) {
                 Throwable cause = ThrowableUtil.getRootCause(e);
-                if (logger.isLoggable(Level.FINER))
-                    logger.log(Level.FINER,
-                               "Notifying ServiceProvisionListener of " +
-                               "redeployment, continue with redeployment. " +
-                               cause.getClass().getName() + ": " +
-                               cause.getLocalizedMessage());
+                if (logger.isDebugEnabled())
+                    logger.debug("Notifying ServiceProvisionListener of " +
+                                 "redeployment, continue with redeployment. " +
+                                 cause.getClass().getName() + ": " +
+                                 cause.getLocalizedMessage());
             }
         }
 
@@ -1262,10 +1256,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                                 parms);
         eventProcessor.processEvent(event);
 
-        if (logger.isLoggable(Level.FINEST)) {
+        if (logger.isTraceEnabled()) {
             String name = (instance == null ? sElem.getName() : instance.getServiceBeanConfig().getName());
             String item = (instance == null ? "ServiceElement" : "ServiceBeanInstance");
-            logger.finest("Schedule [" + name + "] " + item + " redeploy in [" + delay + "] millis");
+            logger.trace("Schedule [" + name + "] " + item + " redeploy in [" + delay + "] millis");
         }
     }
 
@@ -1356,7 +1350,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                     if (instance.getService().equals(proxy))
                         return (mgr);
                 } catch (ClassNotFoundException e) {
-                    logger.log(Level.WARNING, "Unable to obtain proxy", e);
+                    logger.warn("Unable to obtain proxy", e);
                 }
             }
         }
@@ -1415,8 +1409,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * given proxy to this policy handler can be trusted
      */
     public TrustVerifier getProxyVerifier() {
-        if (logger.isLoggable(Level.FINEST))
-            logger.entering(DefaultOpStringManager.class.getName(), "getProxyVerifier");
         return (new BasicProxyTrustVerifier(proxy));
     }
 

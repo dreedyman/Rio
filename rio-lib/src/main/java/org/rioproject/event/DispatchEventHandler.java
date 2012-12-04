@@ -20,12 +20,13 @@ import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.lang.String.format;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static java.lang.String.format;
 
 /**
  * The <code>DispatchEventHandler</code> provides an implementation of an
@@ -41,7 +42,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class DispatchEventHandler extends EventHandler {
-    static Logger logger = Logger.getLogger("org.rioproject.event");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.event");
 
     /**
      * Construct a DispatchEventHandler with an EventDescriptor and default
@@ -76,29 +77,26 @@ public class DispatchEventHandler extends EventHandler {
         event.setEventID(descriptor.eventID);
         event.setSequenceNumber(sequenceNumber);
         ServiceResource[] resources = resourceMgr.getServiceResources();
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest(format("DispatchEventHandler: notify [%d] listeners " +
-                    "with event [%s]", resources.length,
-                    event.getClass().getName()));
+        if(logger.isTraceEnabled())
+            logger.trace(format("DispatchEventHandler: notify [%d] listeners " +
+                                "with event [%s]", resources.length,
+                                event.getClass().getName()));
         for (ServiceResource sr : resources) {
             EventRegistrationResource er =
                 (EventRegistrationResource) sr.getResource();
             if (!landlord.ensure(sr)) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest(format(
-                        "DispatchEventHandler.fire() Could not ensure " +
-                        "lease for ServiceResource " +
-                        "[%s] resources count now : %d",
-                        er.getListener().getClass().getName(),
-                        resourceMgr.getServiceResources().length));
+                if (logger.isTraceEnabled())
+                    logger.trace(format("DispatchEventHandler.fire() Could not ensure " +
+                                        "lease for ServiceResource " +
+                                        "[%s] resources count now : %d",
+                                        er.getListener().getClass().getName(),
+                                        resourceMgr.getServiceResources().length));
                 try {
                     resourceMgr.removeResource(sr);
                     landlord.remove(sr);
                 } catch (Exception e) {
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.log(Level.WARNING,
-                                   "Removing Resource and Cancelling Lease",
-                                   e);
+                    if (logger.isTraceEnabled())
+                        logger.trace("Removing Resource and Cancelling Lease", e);
                 }
                 continue;
             }
@@ -115,38 +113,27 @@ public class DispatchEventHandler extends EventHandler {
                 sent++;
                 printStats();
             } catch (UnknownEventException uee) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.WARNING, format(
-                               "UnknownEventException for " +
-                               "EventDescriptor [%s]",
-                               descriptor.toString()),
-                               uee);
+                if (logger.isTraceEnabled())
+                    logger.trace(format("UnknownEventException for EventDescriptor [%s]", descriptor.toString()), uee);
                 /* We are allowed to cancel the lease here */
                 try {
                     resourceMgr.removeResource(sr);
                     landlord.cancel(sr.getCookie());
                 } catch (Exception e) {
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.log(Level.WARNING,
-                                   "Removing resource and cancelling Lease",
-                                   e);
+                    if (logger.isTraceEnabled())
+                        logger.warn("Removing resource and cancelling Lease", e);
                 }
             } catch (RemoteException re) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.log(Level.WARNING, format(
-                               "fire() for EventDescriptor [%s]",
-                                descriptor.toString()),
-                               re);
+                if (logger.isTraceEnabled())
+                    logger.trace(format("fire() for EventDescriptor [%s]", descriptor.toString()), re);
                 /* Cancel the Lease if the EventConsumer is unreachable */
                 if(!ThrowableUtil.isRetryable(re)) {
                     try {
                         resourceMgr.removeResource(sr);
                         landlord.cancel(sr.getCookie());
                     } catch (Exception e) {
-                        if (logger.isLoggable(Level.FINEST))
-                            logger.log(Level.WARNING,
-                                       "Removing resource and cancelling Lease",
-                                       e);
+                        if (logger.isTraceEnabled())
+                            logger.trace("Removing resource and cancelling Lease", e);
                     }
                 }
             }

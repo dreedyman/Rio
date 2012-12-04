@@ -2,17 +2,17 @@ package org.rioproject.monitor.persistence;
 
 import com.sun.jini.reliableLog.LogException;
 import org.rioproject.resources.persistence.PersistentStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InterruptedIOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A Thread that will perform snapshots. Snapshots, done in a separate
  * thread so it will not hang up in progress remote calls
  */
 public class SnapshotThread extends Thread {
-    static Logger logger = Logger.getLogger(SnapshotThread.class.getName());
+    static Logger logger = LoggerFactory.getLogger(SnapshotThread.class.getName());
     PersistentStore store;
 
     SnapshotThread(String name, PersistentStore store) {
@@ -55,7 +55,7 @@ public class SnapshotThread extends Thread {
                 * send a notification this issue will be addressed at a
                 * later time
                 */
-                logger.log(Level.WARNING, "Snapshotting ServiceBean", e);
+                logger.warn("Snapshotting ServiceBean", e);
             }
         }
     }

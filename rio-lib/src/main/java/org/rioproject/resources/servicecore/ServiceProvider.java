@@ -29,12 +29,12 @@ import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;
 import org.rioproject.watch.WatchDataSource;
 import org.rioproject.watch.WatchRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ServiceProvider is an abstract class that provides the infrastructure
@@ -102,7 +102,7 @@ public abstract class ServiceProvider implements Service {
     /** Name for use accessing Configuration elements and getting a Logger */
     private static final String COMPONENT = "org.rioproject.resources.servicecore";
     /** A Logger */
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Set the Configuration for the ServiceProvider
@@ -119,7 +119,7 @@ public abstract class ServiceProvider implements Service {
                                                                         ProxyPreparer.class,
                                                                         listenerPreparer);
             } catch(Exception e) {
-                logger.log(Level.WARNING, "Getting eventListenerPreparer", e);
+                logger.warn("Getting eventListenerPreparer", e);
             }
         }
     }
@@ -152,15 +152,13 @@ public abstract class ServiceProvider implements Service {
 
         /* Prepare the RemoteEventListener */
         RemoteEventListener preparedListener = (RemoteEventListener)listenerPreparer.prepareProxy(listener);
-        if(logger.isLoggable(Level.FINE))
-            logger.log(Level.FINE,
-                       "Register listener {0} for Event {1}",
-                       new Object[] {preparedListener, descriptor});
+        if(logger.isDebugEnabled())
+            logger.debug("Register listener {} for Event {}", preparedListener.toString(), descriptor.toString());
         Object o = getServiceProxy();
         if(!(o instanceof EventProducer)) {
             String reason = "Proxy returned from getServiceProxy() does " +
                            "not implement "+EventProducer.class.getName();
-            logger.warning(reason);
+            logger.warn(reason);
             throw new ClassCastException(reason);
         }
         
@@ -200,7 +198,7 @@ public abstract class ServiceProvider implements Service {
         if(watchRegistry != null) {
             wds = watchRegistry.fetch();
         } else {
-            logger.warning("WatchRegistry is null");
+            logger.warn("WatchRegistry is null");
         }
         return(wds);
     }
@@ -213,7 +211,7 @@ public abstract class ServiceProvider implements Service {
         if(watchRegistry!=null) {
             wds = watchRegistry.fetch(id);
         } else {
-            logger.warning("WatchRegistry is null");
+            logger.warn("WatchRegistry is null");
         }
         return(wds);
     }    

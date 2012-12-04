@@ -25,12 +25,12 @@ import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.NotificationBroadcasterSupport;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implement ServiceBeanManager support
@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class JSBManager implements ServiceBeanManager {
     private static final String COMPONENT="org.rioproject.jsb";
-    private static Logger logger = Logger.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(COMPONENT);
     private DiscardManager discardManager;
     private OperationalStringManager opStringManager;
     private ServiceElement sElem;
@@ -194,15 +194,12 @@ public class JSBManager implements ServiceBeanManager {
         if(sbConfig==null)
             throw new IllegalArgumentException("ServiceBeanConfig is null");
         if(sElem==null) {
-            logger.log(Level.WARNING,
-                       "No ServiceElement to update ServiceBeanConfig");
+            logger.warn("No ServiceElement to update ServiceBeanConfig");
             return;
         }
         if(updating) {            
-            if(logger.isLoggable(Level.FINER))
-                logger.log(Level.FINER,
-                           "Updating ServiceElement, ServiceBeanConfig "+
-                           "update ignored");
+            if(logger.isTraceEnabled())
+                logger.trace("Updating ServiceElement, ServiceBeanConfig update ignored");
             return;
         }
         ServiceElement preElem = ServiceElementUtil.copyServiceElement(sElem);
@@ -213,13 +210,10 @@ public class JSBManager implements ServiceBeanManager {
                                                          false,
                                                          instanceID);
         else
-            logger.log(Level.WARNING, "No instanceID for ["+sElem.getName()+"] "+
-                                      "to update");        
+            logger.warn("No instanceID for [{}] to update", sElem.getName());
         
         if(opStringManager==null) {
-            if(logger.isLoggable(Level.WARNING))
-                logger.log(Level.WARNING,
-                           "No OperationalStringManager to update ServiceBeanConfig");
+            logger.warn("No OperationalStringManager to update ServiceBeanConfig");
             return;
         }
         
@@ -241,9 +235,7 @@ public class JSBManager implements ServiceBeanManager {
      */
     public void increment(ServiceProvisionListener listener) throws Exception {
         if(opStringManager==null) {
-            if(logger.isLoggable(Level.WARNING))
-                logger.log(Level.WARNING,
-                           "No OperationalStringManager to increment service");
+            logger.warn("No OperationalStringManager to increment service");
             return;
         }
         opStringManager.increment(sElem, false, listener);
@@ -254,9 +246,7 @@ public class JSBManager implements ServiceBeanManager {
      */
     public void decrement(boolean destroy) throws Exception {
         if(opStringManager==null) {
-            if(logger.isLoggable(Level.WARNING))
-                logger.log(Level.WARNING,
-                           "No OperationalStringManager to decrement service");
+            logger.warn("No OperationalStringManager to decrement service");
             return;
         }
         opStringManager.decrement(getServiceBeanInstance(), false, destroy);
@@ -268,9 +258,7 @@ public class JSBManager implements ServiceBeanManager {
     public void relocate(ServiceProvisionListener listener, 
                          Uuid uuid) throws Exception {
         if(opStringManager==null) {
-            if(logger.isLoggable(Level.WARNING))
-                logger.log(Level.WARNING,
-                           "No OperationalStringManager to relocate service");
+            logger.warn("No OperationalStringManager to relocate service");
             return;
         }
         if(sElem.getProvisionType()!= ServiceElement.ProvisionType.DYNAMIC)

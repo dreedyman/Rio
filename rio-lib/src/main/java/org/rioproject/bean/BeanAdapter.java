@@ -28,14 +28,17 @@ import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.jsb.ServiceBeanAdapter;
 import org.rioproject.net.HostUtil;
 import org.rioproject.resources.servicecore.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.Remote;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The BeanAdapter provides a basic concrete implementation of a ServiceBean,
@@ -111,7 +114,7 @@ import java.util.logging.Logger;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class BeanAdapter extends ServiceBeanAdapter {
     private static final String COMPONENT = "org.rioproject.bean";
-    private static final Logger logger = Logger.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     private Object bean;
     private Remote delegatingProxy;
 
@@ -168,8 +171,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
          * the lifecycle method (RIO-141) */
         Boolean rioStarting =
             (Boolean)context.getServiceBeanConfig().getConfigurationParameters().get(Constants.STARTING);
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest(String.format("The bean [%s], is in the process of being instantiated: %s",
+        if(logger.isTraceEnabled())
+            logger.trace(String.format("The bean [%s], is in the process of being instantiated: %s",
                                         bean.getClass().getName(), (rioStarting==null?"false":rioStarting)));
         if(!(rioStarting!=null && rioStarting)) {
             BeanHelper.invokeLifeCycle(Started.class, "postStart", bean);
@@ -318,18 +321,13 @@ public class BeanAdapter extends ServiceBeanAdapter {
             BeanHelper.invokeLifeCycle(PreDestroy.class, "preDestroy", bean);
         } catch(Exception e) {
             String s = bean==null?"<unknown:null>":bean.getClass().getName();
-            logger.log(Level.WARNING, "Invoking Bean ["+s+"] preDestroy()", e);
+            logger.warn("Invoking Bean ["+s+"] preDestroy()", e);
         }
         try {
             super.destroy();
         } finally {
             bean = null;
             if(delegatingProxy!=null) {
-                /*if(ProxyCache.release(delegatingProxy)) {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Released delegating proxy for "+
-                                    getServiceBeanContext().getServiceElement().getName());
-                }*/
                 delegatingProxy = null;
             }
         }
@@ -348,11 +346,6 @@ public class BeanAdapter extends ServiceBeanAdapter {
             Class[] interfaces = getInterfaceClasses(bean.getClass());
             Remote proxy = (Remote) BeanDelegator.getInstance(this, bean, interfaces);
             return(proxy);
-            //Remote proxy = (Remote)ProxyCache.getProxy(bean,
-            //                                           this,
-            //                                           getClass().getClassLoader());
-            //return(proxy);
-
         } catch (Exception e) {
             logger.info("exporting a standard proxy");
             throw new RuntimeException("could not create proxy", e);
@@ -399,8 +392,8 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                              false,
                                              true);
         }
-        if(logger.isLoggable(Level.FINER))
-            logger.finer("["+bean.getClass().getName()+"] using exporter "+exporter.toString());
+        if(logger.isDebugEnabled())
+            logger.debug("[{}] using exporter {}", bean.getClass().getName(), exporter.toString());
         return exporter;
     }
 
@@ -436,7 +429,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                             new Object[]{proxy});
             }
         } catch (Exception e) {
-            logger.warning("Count not set bean proxy");
+            logger.warn("Count not set bean proxy");
             throw new RuntimeException("Could not set bean proxy", e);
         }
         return (proxy);
@@ -481,7 +474,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                 proxy = super.createProxy();
             }*/
         } catch (Exception e) {
-            logger.warning("Could not create bean proxy");
+            logger.warn("Could not create bean proxy");
             throw new RuntimeException("could not create bean proxy", e);
         }
         return proxy;

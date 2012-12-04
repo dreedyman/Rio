@@ -15,18 +15,18 @@
  */
 package org.rioproject.bean.spring;
 
-import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.bean.BeanFactory;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanManager;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.jsb.JSBManager;
-import org.rioproject.bean.BeanFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Instantiates a Plain Old Java Object (POJO) using Spring, providing support
@@ -47,7 +47,7 @@ public class SpringBeanFactory extends BeanFactory {
     /** Component name for the logger */
     static final String COMPONENT = "org.rioproject.bean.spring";
     /** A Logger */
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Get the bean object
@@ -62,22 +62,21 @@ public class SpringBeanFactory extends BeanFactory {
             throw new ServiceBeanInstantiationException("No Spring service " +
                                                 "configuration");
         }
-        String codebase =
-            context.getServiceElement().getExportBundles()[0].getCodebase();
+        String codebase = context.getServiceElement().getExportBundles()[0].getCodebase();
         for(int i=0; i<configs.length; i++) {
             if(configs[i].contains(CODEBASE_TOK + "/")) {
                 configs[i] = replace(configs[i], CODEBASE_TOK+"/", codebase);
                 useCodebase = true;
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Loading application context ["+configs[i]+"]");
+                if(logger.isDebugEnabled())
+                    logger.debug("Loading application context [{}]", configs[i]);
             } else if (configs[i].contains(CLASSPATH_TOK + "/")) {
                 configs[i] = replace(configs[i], CLASSPATH_TOK+"/", codebase);
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Loading application context ["+configs[i]+"]");
+                if(logger.isDebugEnabled())
+                    logger.debug("Loading application context [{}]", configs[i]);
             } else {
                 configs[i] = replace(configs[i], CODEBASE_TOK, codebase);
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Loading application context ["+configs[i]+"]");
+                if(logger.isDebugEnabled())
+                    logger.debug("Loading application context [{}]", configs[i]);
             }
         }
         final Thread currentThread = Thread.currentThread();
@@ -164,7 +163,7 @@ public class SpringBeanFactory extends BeanFactory {
             SpringDiscardManager sdm = new SpringDiscardManager(ctx, context.getServiceBeanManager().getDiscardManager());
             ((JSBManager)mgr).setDiscardManager(sdm);
         } else {
-            logger.warning("Unable to set Spring DiscardManager, unrecognized ServiceBeanManager");
+            logger.warn("Unable to set Spring DiscardManager, unrecognized ServiceBeanManager");
         }
         String beanName = context.getServiceElement().getName();
         Method ctx_getBean = ctxClass.getMethod("getBean", String.class);

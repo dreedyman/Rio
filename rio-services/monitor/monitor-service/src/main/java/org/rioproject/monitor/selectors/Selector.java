@@ -19,15 +19,14 @@ import org.rioproject.monitor.InstantiatorResource;
 import org.rioproject.monitor.ProvisionException;
 import org.rioproject.monitor.ProvisionRequest;
 import org.rioproject.resources.servicecore.ServiceResource;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Select a {@link org.rioproject.resources.servicecore.ServiceResource} based on a {@link org.rioproject.opstring.ServiceElement}
  */
 public class Selector {
-    private static final Logger logger = Logger.getLogger("org.rioproject.monitor.selector");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.selector");
 
     /**
      * Get a ServiceBeanInstantiator that meets the operational requirements of a
@@ -69,7 +68,7 @@ public class Selector {
                 request.getListener().uninstantiable(request);
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Getting ServiceResource", e);
+            logger.warn("Getting ServiceResource", e);
         }
         return resource;
     }

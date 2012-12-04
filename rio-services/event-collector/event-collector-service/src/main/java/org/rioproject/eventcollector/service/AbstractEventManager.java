@@ -31,6 +31,8 @@ import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -38,8 +40,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides basic support for an {@code EventManager}.
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public abstract class AbstractEventManager implements RemoteServiceEventListener, EventManager {
-    private static final Logger logger = Logger.getLogger(AbstractEventManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AbstractEventManager.class.getName());
     private BlockingQueue<RemoteEvent> eventQ;
     private final List<EventProducerManager> eventProducerManagers = new ArrayList<EventProducerManager>();
     private final ExecutorService execService = Executors.newCachedThreadPool();
@@ -82,8 +82,8 @@ public abstract class AbstractEventManager implements RemoteServiceEventListener
     }
 
     public void notify(RemoteServiceEvent event) {
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(event.toString());
+        if(logger.isDebugEnabled())
+            logger.debug(event.toString());
         eventQ.offer(event);
         postNotify(event);
     }
@@ -119,10 +119,10 @@ public abstract class AbstractEventManager implements RemoteServiceEventListener
             ServiceItem item = sdEvent.getPostEventServiceItem();
             try {
                 if(item != null && item.service != null) {
-                    if(logger.isLoggable(Level.INFO)) {
+                    if(logger.isInfoEnabled()) {
                         String name = item.service.getClass().getName();
-                        if(logger.isLoggable(Level.FINE)) {
-                            logger.fine(String.format("EventProducer discovered %s for EventDescriptor %s",
+                        if(logger.isDebugEnabled()) {
+                            logger.debug(String.format("EventProducer discovered %s for EventDescriptor %s",
                                                       name, eventDescriptor.toString()));
                         }
                     }
@@ -141,10 +141,10 @@ public abstract class AbstractEventManager implements RemoteServiceEventListener
                                                                                   eventConsumer);
                     lookupCache.addListener(faultListener);
                 } else {
-                    logger.log(Level.WARNING, "Unable to register EventProducer {0}", item);
+                    logger.warn("Unable to register EventProducer {}", item);
                 }
             } catch(Exception e) {
-                logger.log(Level.SEVERE, "Adding EventProducer", e);
+                logger.error("Adding EventProducer", e);
             }
         }
 
@@ -188,14 +188,14 @@ public abstract class AbstractEventManager implements RemoteServiceEventListener
             ServiceItem item = sdEvent.getPreEventServiceItem();
             if(item.service != null) {
                 if(item.serviceID.equals(serviceID)) {
-                    if(logger.isLoggable(Level.FINEST)) {
+                    if(logger.isTraceEnabled()) {
                         String name = item.service.getClass().getName();
-                        logger.log(Level.FINEST, "EventProducer removed {0}", name);
+                        logger.trace("EventProducer removed {}", name);
                     }
                     terminate();
                 }
             } else {
-                logger.log(Level.SEVERE, "Unable to deregister EventProducer {0}, unknown service", item);
+                logger.error("Unable to deregister EventProducer {}, unknown service", item);
             }
         }
 
@@ -243,15 +243,13 @@ public abstract class AbstractEventManager implements RemoteServiceEventListener
                     registeredNotification.getEventListener().notify(event);
                 success = true;
             } catch (UnknownEventException e) {
-                logger.log(Level.WARNING, "UnknownEventException return from listener", e);
+                logger.warn("UnknownEventException return from listener", e);
                 registeredNotification.addUnknown(event);
             } catch (RemoteException e) {
-                logger.log(Level.WARNING, "RemoteException return from listener", e);
+                logger.warn("RemoteException return from listener", e);
                 if(!ThrowableUtil.isRetryable(e)) {
-                    logger.log(Level.WARNING, String.format("Unrecoverable exception from %s",
-                                                            registeredNotification));
+                    logger.warn(String.format("Unrecoverable exception from %s", registeredNotification));
                 }
-
             }
             return success;
         }

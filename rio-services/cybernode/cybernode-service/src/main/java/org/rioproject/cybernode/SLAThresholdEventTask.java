@@ -18,9 +18,8 @@ package org.rioproject.cybernode;
 
 import org.rioproject.event.EventHandler;
 import org.rioproject.sla.SLAThresholdEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used as by a to notify registered event consumers of a SLAThresholdEvent
@@ -30,7 +29,7 @@ import java.util.logging.Logger;
 public class SLAThresholdEventTask implements Runnable {
     private final SLAThresholdEvent event;
     private final EventHandler thresholdEventHandler;
-    private static final Logger logger = Logger.getLogger(SLAThresholdEventTask.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SLAThresholdEventTask.class.getName());
 
     public SLAThresholdEventTask(SLAThresholdEvent event, EventHandler thresholdEventHandler) {
         this.event = event;
@@ -41,7 +40,7 @@ public class SLAThresholdEventTask implements Runnable {
         try {
             thresholdEventHandler.fire(event);
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Fire SLAThresholdEvent", e);
+            logger.error("Fire SLAThresholdEvent", e);
         }
     }
 }

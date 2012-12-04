@@ -15,15 +15,17 @@
  */
 package org.rioproject.test.simple;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * A bean that will deadlock
  */
 public class Deadlock {
     int visitorNumber = 1;
-    static final Logger logger = Logger.getLogger("deadlock.service");
+    static final Logger logger = LoggerFactory.getLogger("deadlock.service");
 
     public void setParameters(Map<String, Object> params) {
         System.err.println("***********");
@@ -33,7 +35,7 @@ public class Deadlock {
     }
 
     public void postStart() {
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
         buff.append("***********\n");
         buff.append("Started, kick off threads for deadlock test\n");
 

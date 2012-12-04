@@ -20,8 +20,20 @@ import org.rioproject.config.Constants
  */
 manager {
 
-    execClassPath =
-        '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib${/}resolver-api.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+    String rioHome = System.getProperty("RIO_HOME")
+    StringBuilder classPath = new StringBuilder()
+    ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
+        if(classPath.length()>0)
+            classPath.append(File.pathSeparator)
+        classPath.append("$rioHome/lib/$jar")
+    }
+
+    File loggingLibDir = new File("$rioHome/lib/logging")
+    loggingLibDir.eachFile() { file ->
+        classPath.append(File.pathSeparator).append("${loggingLibDir.path}/${file.name}")
+    }
+    classPath.append(File.pathSeparator).append(System.getProperty("JAVA_HOME")).append("/lib/tools.jar")
+    execClassPath = classPath.toString()
 
     inheritOptions = true
 

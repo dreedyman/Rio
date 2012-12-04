@@ -16,8 +16,9 @@
 package org.rioproject.deploy;
 
 import net.jini.id.Uuid;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
@@ -39,7 +40,7 @@ public class ServiceStatement implements Serializable {
      */
     private final Map<Uuid, List<ServiceRecord>> serviceRecords = new HashMap<Uuid, List<ServiceRecord>>();
 
-    private final static WrappedLogger logger = WrappedLogger.getLogger(ServiceStatement.class.getName());
+    private final static Logger logger = LoggerFactory.getLogger(ServiceStatement.class.getName());
 
     /**
      * Create a ServiceStatement
@@ -228,7 +229,7 @@ public class ServiceStatement implements Serializable {
             sb.append(":").append(record.getServiceElement().getServiceBeanConfig().getInstanceID());
             sb.append(" ").append(record.getServiceID().toString());
         }
-        logger.finer(sb.toString());
+        logger.trace(sb.toString());
         return (list.toArray(new ServiceRecord[list.size()]));
     }
 

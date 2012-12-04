@@ -15,11 +15,13 @@
  */
 package org.rioproject.monitor.handlers;
 
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.OpStringManager;
 import org.rioproject.monitor.OpStringMangerController;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.Date;
@@ -28,8 +30,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Use DeployHandlers to provide hot deployment capability
@@ -40,7 +40,7 @@ public class DeployHandlerMonitor {
     private long lastRecordedTime;
     private OpStringMangerController opStringMangerController;
     private DeployAdmin deployAdmin;
-    static Logger logger = Logger.getLogger(DeployHandlerMonitor.class.getName());
+    static Logger logger = LoggerFactory.getLogger(DeployHandlerMonitor.class.getName());
 
     public DeployHandlerMonitor(DeployHandler[] deployHandlers,
                                 long deployScan,
@@ -89,18 +89,15 @@ public class DeployHandlerMonitor {
                     }
                     if (!result.isEmpty()) {
                         for (Map.Entry<String, Throwable> entry : result.entrySet()) {
-                            logger.log(Level.WARNING,
-                                       "Deploying service " +
-                                       "[" + entry.getKey() + "] resulted in " +
-                                       "the following exception",
-                                       entry.getValue());
+                            logger.warn("Deploying service [" + entry.getKey() + "] resulted in " +
+                                        "the following exception",
+                                        entry.getValue());
                         }
                     }
                 } catch (OperationalStringException e) {
-                    logger.log(Level.WARNING,
-                               "Unable to " + action + " [" + opstring.getName() + "], "+e.getMessage());
+                    logger.warn("Unable to " + action + " [" + opstring.getName() + "], "+e.getMessage());
                 } catch (RemoteException e) {
-                    logger.log(Level.WARNING, "Unable to " + action + " [" + opstring.getName() + "]", e);
+                    logger.warn("Unable to " + action + " [" + opstring.getName() + "]", e);
                 }
             }
         }

@@ -22,11 +22,11 @@ import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The MemoryPool is used to monitor a JMX memory pool.
@@ -45,7 +45,7 @@ public class MemoryPool extends MeasurableCapability {
     /** Component for Configuration and Logging */
     private static final String COMPONENT = "org.rioproject.system.memory.pool";
     private static final String VIEW = "org.rioproject.system.memory.CalculableMemoryPoolView";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Construct a MemoryPool object
@@ -67,9 +67,8 @@ public class MemoryPool extends MeasurableCapability {
                     poolNames.append(", ");
                 poolNames.append(mBean.getName());
             }
-            logger.warning("Unable to obtain a monitor for "+id+", " +
-                           "available memory pools are ["+poolNames+"]. " +
-                           "Cannot monitor the requested memory pool");
+            logger.warn("Unable to obtain a monitor for {}, available memory pools are [{}]. " +
+                        "Cannot monitor the requested memory pool", id, poolNames);
         }
         try {
             sampleSize = Config.getIntEntry(config,
@@ -80,8 +79,7 @@ public class MemoryPool extends MeasurableCapability {
                                             10); /* max */
             setSampleSize(sampleSize);
         } catch (ConfigurationException e) {
-            logger.warning("Unable to obtain "+COMPONENT+".sampleSize " +
-                           "from configuration, use default and continue");
+            logger.warn("Unable to obtain {}.sampleSize from configuration, use default and continue", COMPONENT);
         }
 
         try {
@@ -93,8 +91,7 @@ public class MemoryPool extends MeasurableCapability {
                                                   Integer.MAX_VALUE); /* max */
             setPeriod(reportRate);
         } catch (ConfigurationException e) {
-            logger.warning("Unable to obtain "+COMPONENT+".reportRate " +
-                           "from configuration, use default and continue");
+            logger.warn("Unable to obtain {}.reportRate from configuration, use default and continue", COMPONENT);
         }
     }
 
@@ -139,8 +136,8 @@ public class MemoryPool extends MeasurableCapability {
             count = 0;
             tempUtilization = 0;
         }
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Memory : utilization="+utilization);
+        if(logger.isTraceEnabled())
+            logger.trace("Memory : utilization={}", utilization);
 
         return utilization;
     }

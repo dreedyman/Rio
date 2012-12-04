@@ -20,14 +20,14 @@ import org.rioproject.monitor.OpStringMangerController;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.peer.ProvisionMonitorPeer;
 import org.rioproject.monitor.persistence.StateManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Scheduled Task which will load configured OperationalString files
@@ -38,7 +38,7 @@ public class InitialOpStringLoadTask extends TimerTask {
     private DeployAdmin deployAdmin;
     private OpStringMangerController opStringMangerController;
     private String[] initialOpStrings;
-    static Logger logger = Logger.getLogger(InitialOpStringLoadTask.class.getName());
+    static Logger logger = LoggerFactory.getLogger(InitialOpStringLoadTask.class.getName());
 
     public InitialOpStringLoadTask(String[] initialOpStrings,
                                    DeployAdmin deployAdmin,
@@ -80,7 +80,7 @@ public class InitialOpStringLoadTask extends TimerTask {
                     Map errorMap = deployAdmin.deploy(opstringURL, null);
                     opStringMangerController.dumpOpStringError(errorMap);
                 } catch (Throwable t) {
-                    logger.log(Level.WARNING, "Loading OperationalString : " +initialOpString, t);
+                    logger.warn("Loading OperationalString : " +initialOpString, t);
                 }
             }
 
@@ -101,8 +101,8 @@ public class InitialOpStringLoadTask extends TimerTask {
     void waitForPeers() {
         ProvisionMonitor.PeerInfo[] peers = provisionMonitorPeer.getBackupInfo();
         long t0 = System.currentTimeMillis();
-        if (logger.isLoggable(Level.FINE))
-            logger.fine("Number of peers to wait on [" + peers.length + "]");
+        if (logger.isDebugEnabled())
+            logger.debug("Number of peers to wait on [" + peers.length + "]");
         if (peers.length == 0)
             return;
         boolean peersReady = false;
@@ -135,14 +135,14 @@ public class InitialOpStringLoadTask extends TimerTask {
                     b.append("Peer [" + 0 + "] exception " + "[");
                     b.append(e.getMessage());
                     b.append("], continue");
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, "Getting PeerInfo", e);
+                    if (logger.isTraceEnabled())
+                        logger.trace("Getting PeerInfo", e);
                     numPeersReady++;
                 }
 
             }
-            if (logger.isLoggable(Level.FINE))
-                logger.fine(b.toString());
+            if (logger.isDebugEnabled())
+                logger.debug(b.toString());
             b.delete(0, b.length());
             if (numPeersReady == peers.length) {
                 peersReady = true;
@@ -155,8 +155,8 @@ public class InitialOpStringLoadTask extends TimerTask {
             }
         }
         long t1 = System.currentTimeMillis();
-        if (logger.isLoggable(Level.FINER))
-            logger.finer("Peer state resolution took " + (t1 - t0) + " millis");
+        if (logger.isDebugEnabled())
+            logger.debug("Peer state resolution took " + (t1 - t0) + " millis");
     }
 
     private String getStateName(int state) {

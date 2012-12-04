@@ -22,15 +22,12 @@ import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
+import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.cybernode.CybernodeLogUtil;
+import org.rioproject.cybernode.ServiceBeanContainer;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
-import org.rioproject.logging.WrappedLogger;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceElement;
-import org.rioproject.core.jsb.DiscardManager;
-import org.rioproject.cybernode.ServiceBeanContainer;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.JVMOptionChecker;
 import org.rioproject.exec.ProcessManager;
@@ -38,10 +35,14 @@ import org.rioproject.exec.support.PosixShell;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
 import org.rioproject.jmx.JMXConnectionUtil;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.util.FileUtils;
 import org.rioproject.resources.util.RMIServiceNameHelper;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.util.PropertyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +53,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Creates and manages a service bean in it's own process
@@ -70,7 +70,7 @@ public class ServiceBeanExecManager {
     private int forkedServiceWaitTime = 60; // number of seconds
     private static final String CONFIG_COMPONENT = "service.load";
     private static final String COMPONENT = "org.rioproject.cybernode";
-    private static final WrappedLogger logger = WrappedLogger.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public ServiceBeanExecManager(final ServiceElement sElem,
                                   final ServiceBeanContainer container) {
@@ -84,7 +84,7 @@ public class ServiceBeanExecManager {
                                                        5,     //minimum of 5 second wait
                                                        60*5); // max of 5 minute wait
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting forkedServiceWaitTime, using default", e);
+            logger.warn("Getting forkedServiceWaitTime, using default", e);
         }
     }
 
@@ -163,9 +163,9 @@ public class ServiceBeanExecManager {
                 if(shellTemplate!=null)
                     shell.setShellTemplate(shellTemplate);
             } catch (ConfigurationException e) {
-                logger.warning("Cannot get shell template from configuration, continue with default");
+                logger.warn("Cannot get shell template from configuration, continue with default");
             }
-            logger.info("Invoke PosixShell.exec for %s, working directory %s", CybernodeLogUtil.logName(sElem), exDesc.getWorkingDirectory());
+            logger.info("Invoke PosixShell.exec for {}, working directory {}", CybernodeLogUtil.logName(sElem), exDesc.getWorkingDirectory());
             manager = shell.exec(exDesc);
 
             forkedServiceListener.setName(serviceBindName);
@@ -184,7 +184,7 @@ public class ServiceBeanExecManager {
                         execHandler.applyPlatformCapabilities(installedpCaps);
                     instance = execHandler.instantiate(sElem, opStringMgr);
                     long activationTime = System.currentTimeMillis()-start;
-                    logger.info("Forked instance created for [%s], pid=[%d], activation time=%d ms",
+                    logger.info("Forked instance created for [{}], pid=[{}], activation time={} ms",
                                 serviceBindName, manager.getPid(), activationTime);
                     break;
                 } catch (NotBoundException e) {
@@ -192,24 +192,24 @@ public class ServiceBeanExecManager {
                         Thread.sleep(1000);
                         wait++;
                     } catch (InterruptedException e1) {
-                        logger.warning("Interrupted waiting for ServiceBean [%s] to register into Registry",
-                                       serviceBindName);
+                        logger.warn("Interrupted waiting for ServiceBean [{}] to register into Registry",
+                                    serviceBindName);
                     }
                 }
-            } while(wait<forkedServiceWaitTime);
+            } while (wait < forkedServiceWaitTime);
 
-            if(wait>=forkedServiceWaitTime) {
-                logger.warning("Timed out waiting for [%s]. Waited [%d] seconds, configured wait " +
-                               "time is [%d] seconds. Killing spawned process and unregistering from local " +
-                               "registry. Check the service's output log [%s] to determine root cause(s)",
-                               serviceBindName, wait, forkedServiceWaitTime, serviceLog);
+            if (wait >= forkedServiceWaitTime) {
+                logger.warn("Timed out waiting for [{}]. Waited [{}] seconds, configured wait " +
+                            "time is [{}] seconds. Killing spawned process and unregistering from local " +
+                            "registry. Check the service's output log [{}] to determine root cause(s)",
+                            serviceBindName, wait, forkedServiceWaitTime, serviceLog);
                 manager.destroy(true);
                 throw new ServiceBeanInstantiationException("Failed to fork");
             }
 
         } catch (Exception e) {
             unregister(regPort, serviceBindName);
-            logger.info("Terminate process for ServiceBean [%s]", serviceBindName);
+            logger.info("Terminate process for ServiceBean [{}]", serviceBindName);
             if(manager!=null)
                 manager.destroy(true);
             throw e;
@@ -265,7 +265,7 @@ public class ServiceBeanExecManager {
         StringBuilder argsBuilder = new StringBuilder();
         //String jvmInputArgs = JVMOptionChecker.getJVMInputArgs(declaredJVMOptions);
         String jvmInputArgs = JVMOptionChecker.getJVMInputArgs(extendedJVMOptions.toString());
-        logger.finest("Resulting JVM Options for service [%s]: %s", serviceBindName, jvmInputArgs);
+        logger.trace("Resulting JVM Options for service [{}]: {}", serviceBindName, jvmInputArgs);
         argsBuilder.append(jvmInputArgs);
         argsBuilder.append("-XX:OnOutOfMemoryError=\"kill -9 %p\"");
         argsBuilder.append(" ");
@@ -304,7 +304,7 @@ public class ServiceBeanExecManager {
         try {
             Registry registry = LocateRegistry.getRegistry(regPort);
             registry.unbind(name);
-            logger.info("Unbound failed ServiceBean fork for [%s]", name);
+            logger.info("Unbound failed ServiceBean fork for [{}]", name);
         } catch (Exception e1) {
             // ignore
         }
@@ -354,7 +354,7 @@ public class ServiceBeanExecManager {
             try {
                 fdh.monitor();
             } catch (Exception e) {
-                logger.log(Level.WARNING, e, "Enable to monitor forked service [%s]", name);
+                logger.warn("Enable to monitor forked service [{}]", name, e);
             }
         }
 
@@ -378,11 +378,11 @@ public class ServiceBeanExecManager {
             if(manager!=null) {
                 serviceRecord.setPid(manager.getPid());
             }
-            logger.fine("Instantiation notification for %s", CybernodeLogUtil.logName(sElem));
+            logger.debug("Instantiation notification for {}", CybernodeLogUtil.logName(sElem));
         }
 
         public void serviceDiscarded(final ServiceRecord record) {
-            logger.info("Discard notification for %s/%s", sElem.getOperationalStringName(), sElem.getName());
+            logger.info("Discard notification for {}/{}", sElem.getOperationalStringName(), sElem.getName());
             discardManager.discard();
         }
 
@@ -390,7 +390,7 @@ public class ServiceBeanExecManager {
             try {
                 Registry registry = LocateRegistry.getRegistry(registryPort);
                 registry.unbind(name);
-                logger.info("Terminated ServiceBean fork for [%s] unbound from local registry", name);
+                logger.info("Terminated ServiceBean fork for [{}] unbound from local registry", name);
             } catch (Exception e) {
                 // ignore
             }

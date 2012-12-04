@@ -16,11 +16,11 @@
 package org.rioproject.jmx;
 
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A generic handler that creates a {@link javax.management.MBeanServerConnection}
@@ -36,7 +36,7 @@ public class GenericMBeanInvoker {
     /* flag that indicates an unretryable exception has occured */
     private boolean failed = false;
     public static final String GETTER="value";
-    private static final Logger logger = Logger.getLogger("org.rioproject.jmx");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.jmx");
 
     public void setObjectName(ObjectName objectName) {
         this.objectName = objectName;
@@ -57,19 +57,19 @@ public class GenericMBeanInvoker {
         for(int i=0; i<3; i++) {
             try {
                 if(mbsc==null) {
-                    logger.warning("Cannot obtain value of MBean ["+objectName+"] " +
+                    logger.warn("Cannot obtain value of MBean ["+objectName+"] " +
                                    "without an MBeanServerConection.");
                     failed = true;
                     break;
                 }
                 if(objectName==null) {
-                    logger.warning("An ObjectName must be set, it is " +
+                    logger.warn("An ObjectName must be set, it is " +
                                    "currently null.");
                     failed = true;
                     break;
                 }
                 if(attribute==null) {
-                    logger.warning("An attribute must be set in order to get " +
+                    logger.warn("An attribute must be set in order to get " +
                                    "a value to observe from " +
                                    "MBean ["+objectName+"].");
                     failed = true;
@@ -79,7 +79,7 @@ public class GenericMBeanInvoker {
                 break;
             } catch (Throwable t) {
                 if(ThrowableUtil.isRetryable(t)) {
-                    logger.warning("Retry ["+i+"] connection to MBeanServer " +
+                    logger.warn("Retry ["+i+"] connection to MBeanServer " +
                                    "for MBean ["+objectName+"], " +
                                    "attribute ["+attribute+"]. " +
                                    "Exception: "+t.getClass().getName()+": "+
@@ -90,10 +90,9 @@ public class GenericMBeanInvoker {
                         //
                     }
                 } else {
-                    logger.log(Level.WARNING,
-                               "Unretryable exception to MBeanServer for " +
-                               "MBean ["+objectName+"], attribute ["+objectName+"]",
-                               t);
+                    logger.warn("Unretryable exception to MBeanServer for " +
+                                "MBean ["+objectName+"], attribute ["+objectName+"]",
+                                t);
                     failed = true;
                     break;
                 }

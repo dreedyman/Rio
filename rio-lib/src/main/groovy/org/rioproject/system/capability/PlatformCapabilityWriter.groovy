@@ -15,8 +15,6 @@
  */
 package org.rioproject.system.capability
 
-import org.rioproject.system.capability.PlatformCapability
-
 /**
  * Writes out a {@link org.rioproject.system.capability.PlatformCapability} to
  * an XML document.

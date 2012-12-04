@@ -22,12 +22,12 @@ import org.rioproject.associations.Association;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.net.UnknownHostException;
 
 /**
  * Returns the first service in the {@link org.rioproject.associations.Association}. If
@@ -45,7 +45,7 @@ import java.net.UnknownHostException;
 public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     private String hostAddress;
     private final List<ServiceItem> serviceList = new ArrayList<ServiceItem>();
-    static final Logger logger = Logger.getLogger(FailOver.class.getName());
+    static final Logger logger = LoggerFactory.getLogger(FailOver.class.getName());
 
     @SuppressWarnings("unchecked")
     public T getService() {
@@ -68,7 +68,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
                 add(item);
             }
         } catch (UnknownHostException e) {
-            logger.log(Level.WARNING, "Unable to obtain host address", ThrowableUtil.getRootCause(e));
+            logger.warn("Unable to obtain host address", ThrowableUtil.getRootCause(e));
         }
     }
 
@@ -78,7 +78,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
         if(item!=null) {
             add(item);
         } else {
-            logger.warning("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
+            logger.warn("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
             synchronized(serviceList) {
                 serviceList.clear();
                 for(ServiceItem serviceItem : association.getServiceItems())
@@ -92,7 +92,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
         if(service!=null) {
             remove(service);
         } else {
-            logger.warning("The service is null, cannot remove from "+FailOver.class.getName());
+            logger.warn("The service is null, cannot remove from "+FailOver.class.getName());
         }
     }
 

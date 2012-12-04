@@ -44,7 +44,6 @@ import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.LoggerConfig;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
@@ -55,6 +54,8 @@ import org.rioproject.rmi.ResolvingLoader;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -65,7 +66,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 /**
  * The ServiceBeanLoader will load and create a ServiceBean.
@@ -77,7 +77,7 @@ public class ServiceBeanLoader {
      * to service creation */
     private static final String CONFIG_COMPONENT = "service.load";
     /** A Logger */
-    private static WrappedLogger logger = WrappedLogger.getLogger(ServiceBeanLoader.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ServiceBeanLoader.class.getName());
     private final static AggregatePolicyProvider globalPolicy;
     private final static Policy initialGlobalPolicy;
     static {
@@ -215,7 +215,8 @@ public class ServiceBeanLoader {
             AtomicInteger count = counterTable.get(pr.getArtifact());
             if(count!=null) {
                 int using = count.decrementAndGet();
-                logger.finest("Number of [%s] artifacts still active=%d", pr.getArtifact(), using);
+                if(logger.isTraceEnabled())
+                    logger.trace("Number of [{}] artifacts still active={}", pr.getArtifact(), using);
                 if(using==0) {
                     provisionedResources.remove(pr);
                 } else {
@@ -320,7 +321,7 @@ public class ServiceBeanLoader {
                 new ServiceClassLoader(classpath, annotator, commonCL);
                 */
             currentThread.setContextClassLoader(jsbCL);
-            if(logger.isLoggable(Level.INFO)) {
+            if(logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 if(implJARs.length==0) {
                     buffer.append("<empty>");
@@ -331,22 +332,19 @@ public class ServiceBeanLoader {
                         buffer.append(implJARs[i].toExternalForm());
                     }
                 }
-                if(logger.isLoggable(Level.FINE)) {
-                    String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
-                    logger.fine("Create ServiceClassLoader for %s, classpath %s, codebase %s",
-                                className, buffer.toString(), jsbCL.getClassAnnotation());
-                }
+                String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
+                logger.debug("Create ServiceClassLoader for {}, classpath {}, codebase {}",
+                             className, buffer.toString(), jsbCL.getClassAnnotation());
             }
 
             /* Get the servicePolicyFile from the environment. If the
              * property has not been set use the policy set for the VM */
             String servicePolicyFile = System.getProperty("rio.service.security.policy",
                                                           System.getProperty("java.security.policy"));
-            logger.finest("%s Service security policy file %s",
+            logger.trace("{} Service security policy file {}",
                           CybernodeLogUtil.logName(sElem), servicePolicyFile);
             if(servicePolicyFile!=null) {
-                logger.finest("Set %s service security to LoaderSplitPolicyProvider",
-                              CybernodeLogUtil.logName(sElem));
+                logger.trace("Set {} service security to LoaderSplitPolicyProvider", CybernodeLogUtil.logName(sElem));
 
                 DynamicPolicyProvider service_policy =
                     new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
@@ -398,7 +396,7 @@ public class ServiceBeanLoader {
                     try {
                         loggerConfig.getLogger();
                     } catch (Throwable t) {
-                        logger.log(Level.WARNING, "Loading LoggerConfig", t);
+                        logger.warn("Loading LoggerConfig", t);
                     }
                 }
             }
@@ -410,12 +408,12 @@ public class ServiceBeanLoader {
                                                            "serviceBeanFactory",
                                                            ServiceBeanFactory.class,
                                                            new JSBLoader());
-            logger.finest("service = %s, serviceBeanFactory = %s",
+            logger.trace("service = {}, serviceBeanFactory = {}",
                           CybernodeLogUtil.logName(sElem), serviceBeanFactory);
             created = serviceBeanFactory.create(context);
-            logger.finest("Created ServiceBeanFactory.Created %s", created);
+            logger.trace("Created ServiceBeanFactory.Created {}", created);
             Object impl = created.getImpl();
-            logger.finest("Obtained implementation %s", impl);
+            logger.trace("Obtained implementation {}", impl);
             
             if(context.getServiceElement().getComponentBundle()==null) {
                 String compName = impl.getClass().getName();
@@ -427,24 +425,24 @@ public class ServiceBeanLoader {
             }
 
             /* Get the ProxyPreparer */
-            logger.finest("Get the ProxyPreparer for %s", CybernodeLogUtil.logName(sElem));
+            logger.trace("Get the ProxyPreparer for {}", CybernodeLogUtil.logName(sElem));
             
             ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(context.getConfiguration(),
                                                                                   CONFIG_COMPONENT,
                                                                                   "servicePreparer",
                                                                                   ProxyPreparer.class,
                                                                                   new BasicProxyPreparer());
-            logger.finest("Getting the proxy");
+            logger.trace("Getting the proxy");
             Object proxy = created.getProxy();
-            logger.finest("Obtained the proxy %s", proxy);
+            logger.trace("Obtained the proxy %s", proxy);
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            logger.finest("Proxy %s, prepared? %s", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
+            logger.trace("Proxy {}, prepared? {}", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
             /*
              * Set the MarshalledInstance into the ServiceBeanManager
              */
-            logger.finest("Set the MarshalledInstance into the ServiceBeanManager");
+            logger.trace("Set the MarshalledInstance into the ServiceBeanManager");
             marshalledProxy = new MarshalledInstance(proxy);
             ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(marshalledProxy);
             /*
@@ -452,8 +450,8 @@ public class ServiceBeanLoader {
              */
             if(proxy instanceof ReferentUuid) {
                 serviceIDToUse = ((ReferentUuid)proxy).getReferentUuid();
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Service has provided Uuid: "+serviceIDToUse);
+                if(logger.isDebugEnabled())
+                    logger.debug("Service has provided Uuid: {}", serviceIDToUse);
                 ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
             }
             
@@ -469,14 +467,14 @@ public class ServiceBeanLoader {
                 }                    
             }
 
-            logger.finest("Proxy =  %s", proxy);
+            logger.trace("Proxy =  {}", proxy);
             //TODO - factor in code integrity for MO
             //proxy = (new MarshalledObject(proxy)).get();
             //currentThread.setContextClassLoader(currentClassLoader);
             
         } catch(Throwable t) {
             ServiceBeanInstantiationException e;
-            logger.log(Level.FINEST, "Loading ServiceBean", t);
+            logger.trace("Loading ServiceBean", t);
             if(t instanceof ServiceBeanInstantiationException)
                 e = (ServiceBeanInstantiationException)t;
             else
@@ -519,7 +517,7 @@ public class ServiceBeanLoader {
                                 }
                                 builder.append(repository.getUrl());
                             }
-                            logger.info("Resolve %s using these repositories [%s]",
+                            logger.info("Resolve {} using these repositories [{}]",
                                         elem.getComponentBundle().getArtifact(), builder.toString());
                             jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
                                                           resolver,
@@ -615,7 +613,7 @@ public class ServiceBeanLoader {
             }
         }
 
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Service ").append(CybernodeLogUtil.logName(elem)).append(" ");
             if(implArtifact!=null)
@@ -627,7 +625,7 @@ public class ServiceBeanLoader {
                 sb.append("export artifact: [").append(dlPR.getArtifact()).append("] ");
             sb.append("export jars: ");
             sb.append(dlPR.getJarsAsString());
-            logger.fine(sb.toString());
+            logger.debug(sb.toString());
         }
 
         map.put("impl", implPR);
@@ -671,7 +669,7 @@ public class ServiceBeanLoader {
                 else
                     count.incrementAndGet();
                 counterTable.put(pr.getArtifact(), count);
-                logger.finest("Counter for [%s] is now %d", pr.getArtifact(), count.get());
+                logger.trace("Counter for [{}] is now {}", pr.getArtifact(), count.get());
             }
         }
     }

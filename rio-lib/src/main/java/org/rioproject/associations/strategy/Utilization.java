@@ -22,17 +22,19 @@ import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
+import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.DeploymentMap;
 import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.deploy.DeployedService;
-import org.rioproject.entry.OperationalStringEntry;
-import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -41,8 +43,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A round-robin selector that selects services running on compute resources
@@ -59,7 +59,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     private OperationalStringManager opMgr;
     /** Scheduler for Cybernode utilization gathering */
     private ScheduledExecutorService scheduler;
-    private static Logger logger = Logger.getLogger(Utilization.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(Utilization.class.getName());
 
     @Override
     public void setAssociation(final Association<T> association) {
@@ -67,6 +67,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         initialize(association.getOperationalStringName());
     }
 
+    @SuppressWarnings("unused")
     public void setSLA(final SLA sla) {
         this.sla = sla;
     }
@@ -96,21 +97,15 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                     break;
                 }
             }
-            if(logger.isLoggable(Level.FINEST)) {
+            if(logger.isTraceEnabled()) {
                 String name = association==null?"<unknown>":association.getName();
                 if(selected!=null) {
                     String address = selected.cru==null?"<unknown>":selected.cru.getAddress();
                     String util = selected.cru==null?"<unknown>":selected.cru.getUtilization().toString();
-                    logger.finest("Using associated service " +
-                                  "["+name+"] at "+
-                                  "Host address="+address+", "+
-                                  "Utilization="+
-                                  util+", " +
-                                  "values="+selected.getMeasuredResourcesAsList());
+                    logger.trace("Using associated service [{}] at Host address={}, Utilization={}, values={}", 
+                                 name, address, util, selected.getMeasuredResourcesAsList().toString());
                 } else {
-                    logger.finest("All services are either breached, or " +
-                                  "none are available for associated " +
-                                  "service ["+name+"]");
+                    logger.trace("All services are either breached, or none are available for associated service [{}]", name);
                 }
             }
         }
@@ -123,7 +118,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         if(item!=null) {
             addService(item);
         } else {
-            logger.warning("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
+            logger.warn("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
             synchronized(services) {
                 services.clear();
                 for(ServiceItem serviceItem : association.getServiceItems())
@@ -135,9 +130,8 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     @Override
     public void serviceRemoved(final T service) {
         if(removeService(service)){
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Service removed, " +
-                            "service collection size="+services.size());
+            if(logger.isDebugEnabled())
+                logger.debug("Service removed, service collection size={}", services.size());
         }
     }
 
@@ -174,14 +168,10 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                 scheduler = Executors.newSingleThreadScheduledExecutor();
                 scheduler.scheduleAtFixedRate(cruf, initialDelay, period, TimeUnit.MILLISECONDS);
             } catch (RemoteException e) {
-                logger.log(Level.WARNING,
-                           "Getting ServiceElement for ["+association.getName()+"]",
-                           e);
+                logger.warn("Getting ServiceElement for ["+association.getName()+"]", e);
             } catch (Exception e) {
-                logger.log(Level.WARNING,
-                           "Unable to create OpStringManagerProxy " +
-                           "for associated service ["+association.getName()+"]",
-                           e);
+                logger.warn("Unable to create OpStringManagerProxy for associated service ["+association.getName()+"]",
+                            e);
             }
         }
     }
@@ -265,15 +255,13 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         public void run() {
             list.clear();
             try {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("ComputeResourceUtilizationFetcher, " +
-                                  "obtaining DeploymentMap for " +
-                                  "["+opStringName+"]");
+                if(logger.isTraceEnabled())
+                    logger.trace("ComputeResourceUtilizationFetcher, obtaining DeploymentMap for [{}]", opStringName);
                 DeploymentMap dMap = opMgr.getDeploymentMap();
                 if(serviceElements.isEmpty()) {
                     serviceElements.addAll(getMatchingServiceElements(dMap));
                     if(serviceElements.isEmpty())
-                        logger.warning("Unable to obtain matching ServiceElement(s) " +
+                        logger.warn("Unable to obtain matching ServiceElement(s) " +
                                        "for associated service ["+association.getName()+"]");
                 }
                 if(dMap!=null) {
@@ -281,7 +269,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                         list.addAll(dMap.getDeployedServices(elem));
                 }
             } catch (RemoteException e) {
-                logger.log(Level.WARNING,
+                logger.warn(
                            "Getting utilization for service " +
                            "["+association.getAssociationDescriptor()+"], terminating",
                            e);
@@ -294,9 +282,8 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                         deployed.getComputeResourceUtilization();
                     for(ServiceCapability sc : services) {
                         if(sc.uuid.equals(sbi.getServiceBeanID())) {
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.finest("Obtained ComputeResourceUtilization for " +
-                                              "["+association.getName()+"]");
+                            if(logger.isTraceEnabled())
+                                logger.trace("Obtained ComputeResourceUtilization for [{}]", association.getName());
                             sc.setComputeResourceUtilization(cru);
                             break;
                         }
@@ -365,8 +352,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         boolean isInvokable() {
             boolean isInvokable;
             synchronized(updateLock) {
-                isInvokable =
-                    (cru == null || cru.measuredResourcesWithinRange());
+                isInvokable = (cru == null || cru.measuredResourcesWithinRange());
                 if(cru !=null) {
                     if(isInvokable) {
                         for(MeasuredResource mRes : cru.getMeasuredResources()) {
@@ -378,29 +364,24 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                         }
 
                     } else {
-                        if(logger.isLoggable(Level.FINE)) {
-                            List<MeasuredResource> breached =
-                                new ArrayList<MeasuredResource>();
+                        if(logger.isDebugEnabled()) {
+                            List<MeasuredResource> breached = new ArrayList<MeasuredResource>();
                             for(MeasuredResource mRes : cru.getMeasuredResources()) {
                                 if(mRes.thresholdCrossed()) {
                                     breached.add(mRes);
                                 }
                             }
-                            logger.fine("Associated service at "+
-                                        "Host address="+ cru.getAddress()+", "+
-                                        "Utilization="+ cru.getUtilization()+" " +
-                                        "has breached resources: "+breached);
+                            logger.debug("Associated service at Host address={}, Utilization={} has breached resources: {}",
+                                         cru.getAddress(), cru.getUtilization(), breached.toString());
+                        }
+                    }
+                    if(isInvokable && wasBreached) {
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("Associated service at Host address={}, Utilization={} was breached, now invokable",
+                                         cru.getAddress(), cru.getUtilization());
                         }
                     }
                 }
-            }
-            
-            if(isInvokable && wasBreached) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Associated service at "+
-                                "Host address="+ cru.getAddress()+", "+
-                                "Utilization="+ cru.getUtilization()+" " +
-                                "was breached, now invokable");
             }
             wasBreached = !isInvokable;
 

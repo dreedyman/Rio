@@ -20,13 +20,13 @@ import org.rioproject.system.OperatingSystemType;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.system.measurable.SigarHelper;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The <code>DiskSpaceMonitor</code> monitors disk space usage. This class
@@ -38,8 +38,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization> {
-    static Logger logger = Logger.getLogger(
-        "org.rioproject.system.measurable.disk");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.system.measurable.disk");
     private String id;
     private ThresholdValues tVals;
     private SigarHelper sigar;
@@ -98,9 +97,7 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
                                            sigar.getFileSystemUsedPercent(fileSystem),
                                            tVals);
         } catch (Exception e) {
-            logger.log(Level.WARNING,
-                       "SIGAR exception getting FileSystemUsage",
-                       e);
+            logger.warn("SIGAR exception getting FileSystemUsage", e);
             dsu = new DiskSpaceUtilization(id, -1, tVals);
         }
         return dsu;
@@ -121,13 +118,13 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
                         outputParser.start();
                         updateLock.wait();
                     } catch (InterruptedException e) {
-                        logger.log(Level.WARNING, "Waiting on updateLock", e);
+                        logger.warn("Waiting on updateLock", e);
                     }
                 }
                 used = outputParser.getUsed() * 1024;
                 available = outputParser.getAvailable() * 1024;
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Executing or spawning [df-k]", e);
+                logger.warn("Executing or spawning [df-k]", e);
             } finally {
                 if (outputParser != null)
                     outputParser.interrupt();
@@ -209,9 +206,7 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
                     list.clear();
                 }
             } catch (IOException e) {
-                Logger.getAnonymousLogger().log(Level.INFO,
-                                                "Grabbing output of df -k",
-                                                e);
+                logger.info("Grabbing output of df -k", e);
             } finally {
                 try {
                     if (br != null)

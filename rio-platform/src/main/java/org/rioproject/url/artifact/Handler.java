@@ -15,7 +15,12 @@
  */
 package org.rioproject.url.artifact;
 
-import org.rioproject.resolver.*;
+import org.rioproject.resolver.Artifact;
+import org.rioproject.resolver.Resolver;
+import org.rioproject.resolver.ResolverException;
+import org.rioproject.resolver.ResolverHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -26,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.logging.*;
 
 /**
  * <p>A stream handler for URLs with the <code>artifact</code> protocol. The <code>artifact</code> URL
@@ -57,13 +61,13 @@ import java.util.logging.*;
 /* We want to throw a RuntimeException if we cannot get a Resolver */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class Handler extends URLStreamHandler {
-    private static final Logger logger = Logger.getLogger(Handler.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Handler.class.getName());
     private static Resolver resolver;
     static {
         try {
             resolver = ResolverHelper.getResolver();
         } catch (ResolverException e) {
-            logger.log(Level.SEVERE, "Could not get a ResolverInstance", e);
+            logger.error("Could not get a ResolverInstance", e);
             throw new RuntimeException(e);
         }
     }
@@ -94,13 +98,13 @@ public class Handler extends URLStreamHandler {
         try {
             u = cache.get(a);
             if(u==null) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine(String.format("Get location of %s", a));
+                if(logger.isDebugEnabled())
+                    logger.debug(String.format("Get location of %s", a));
                 u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
                 cache.put(a, u);
             }
         } catch (ResolverException e) {
-            logger.log(Level.WARNING, String.format("Could not resolve %s", a), e);
+            logger.warn(String.format("Could not resolve %s", a), e);
             throw new IOException(e.getLocalizedMessage());
         }
 
@@ -126,8 +130,8 @@ public class Handler extends URLStreamHandler {
                 }
             }
             for(Artifact a : removals) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Removing "+a.toString()+" from cache");
+                if(logger.isDebugEnabled())
+                    logger.debug("Removing "+a.toString()+" from cache");
                 cache.remove(a);
             }
         }

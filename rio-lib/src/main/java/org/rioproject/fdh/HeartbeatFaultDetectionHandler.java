@@ -21,6 +21,8 @@ import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
 import net.jini.lookup.LookupCache;
 import org.rioproject.admin.MonitorableService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -31,8 +33,6 @@ import java.net.SocketException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The HeartbeatFaultDetectionHandler is used to monitor services that implement the
@@ -173,7 +173,7 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
     private static final String COMPONENT =
         "org.rioproject.fdh.HeartbeatFaultDetectionHandler";
     /** A Logger */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * @see FaultDetectionHandler#setConfiguration
@@ -218,16 +218,16 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                                           + hostAddress + ":" + port + "\"";
             monitorableConfig[configArgs.length] = ConfigUtil.concat(
                                                          new Object[]{configEntry});
-            if(logger.isLoggable(Level.FINEST)) {
+            if(logger.isTraceEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 buffer.append("HeartbeatFaultDetectionHandler Properties : ");
                 buffer.append("heartbeatPeriod=").append(heartbeatPeriod).append(", ");
                 buffer.append("heartbeatGracePeriod=").append(heartbeatGracePeriod).append(", ");
                 buffer.append("heartbeatServer=").append(hostAddress).append(":").append(port);
-                logger.finest(buffer.toString());
+                logger.trace(buffer.toString());
             }
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Setting Configuration", e);
+            logger.error("Setting Configuration", e);
         }
     }
     
@@ -257,13 +257,11 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                     throw e;
                 }
             } else {
-                logger.warning("No ServerSocket, unable to create HeartbeatManager");
+                logger.warn("No ServerSocket, unable to create HeartbeatManager");
             }
         } else {
-            logger.info("Service ["+proxy.getClass().getName()+"] not an "+
-                        "instanceof "+ MonitorableService.class.getName()+", "+
-                        "ServiceRegistrar.TRANSITION_MATCH_NOMATCH transitions will "+
-                        "only be monitored");
+            logger.info("Service [{}] not an instanceof {}, ServiceRegistrar.TRANSITION_MATCH_NOMATCH transitions will "+
+                        "only be monitored", proxy.getClass().getName(), MonitorableService.class.getName());
         }
         return(heartbeatManager);
     }
@@ -323,8 +321,7 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                     //service.ping();
                     verified = remoteAddress.isReachable(1000);
                 } catch(Exception e) {
-                    logger.warning("RemoteException reaching service, "
-                            + "service cannot be reached");
+                    logger.warn("RemoteException reaching service, service cannot be reached");
                 }
             }
             return (verified);
@@ -365,7 +362,7 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                     Socket socket = serverSocket.accept();
                     now = System.currentTimeMillis();
                     lastHeartbeat = now;
-                    if(logger.isLoggable(Level.FINEST)) {
+                    if(logger.isTraceEnabled()) {
                         BufferedInputStream bis = new BufferedInputStream(
                                 socket.getInputStream(), 256);
                         StringBuilder buf = new StringBuilder(80);
@@ -380,20 +377,18 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                         if(remoteAddress!=null)
                             hbTask.remoteAddress = remoteAddr;
 
-                        logger.finest("Received heartbeat from " +
-                                      "host="+remoteAddr+", " +
-                                      "ID="+buf.toString().trim());
+                        logger.trace("Received heartbeat from host={}, ID={}", remoteAddr, buf.toString().trim());
                     }
                     /* Close the client socket */
                     socket.close();
                 } catch(SocketException e) {
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("ServerSocket closed, leave thread");
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("ServerSocket closed, leave thread");
                     }
                     drop();
                     terminate();
                 } catch(IOException e) {
-                    logger.log(Level.SEVERE, "ServerSocket IOException", e);
+                    logger.error("ServerSocket IOException", e);
                 }
             }
         }
@@ -423,21 +418,19 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
             long period = now - heartbeatManager.lastHeartbeat;
             if(period > (heartbeatPeriod + heartbeatGracePeriod)) {
                 if(!retry) {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Heartbeat period exceeded, "
-                                    + "schedule follow-up task");
+                    if(logger.isDebugEnabled())
+                        logger.debug("Heartbeat period exceeded, schedule follow-up task");
                     HeartbeatTimeoutTask task = new HeartbeatTimeoutTask(true);
-                    if(logger.isLoggable(Level.FINE)) {
-                        logger.fine("HeartbeatTimeoutTask: schedule "
-                                    + "heartbeat timeout task in " + "["
-                                    + heartbeatPeriod + "] millis");
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("HeartbeatTimeoutTask: schedule heartbeat timeout task in [{}] millis",
+                                     heartbeatPeriod);
                     }
                     taskTimer.schedule(task, new Date(now + heartbeatPeriod));
                 } else {
-                    if(logger.isLoggable(Level.FINE)) {
+                    if(logger.isDebugEnabled()) {
                         String s =
                             (remoteAddress == null?"":" at "+remoteAddress);
-                        logger.fine("Service"+s+" is ambiguous, assume the worst");
+                        logger.debug("Service {} is ambiguous, assume the worst", s);
                     }
                     if(!terminating) {
                         heartbeatManager.drop();
@@ -447,9 +440,9 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
                     }
                 }
             } else {
-                if(logger.isLoggable(Level.FINEST)) {
+                if(logger.isTraceEnabled()) {
                     String s = (remoteAddress==null?"":"from "+remoteAddress);
-                    logger.finest("Heartbeat within period "+s);
+                    logger.trace("Heartbeat within period {}", s);
                 }
             }
         }

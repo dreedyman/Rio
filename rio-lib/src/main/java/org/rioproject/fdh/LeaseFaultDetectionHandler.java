@@ -26,8 +26,10 @@ import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.util.TimeUtil;
 
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The LeaseFaultDetectionHandler is used to monitor services that implement the
@@ -182,7 +184,7 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
     private static final String COMPONENT = 
         "org.rioproject.fdh.LeaseFaultDetectionHandler";
     /** A Logger */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public void setLeaseDuration(long leaseDuration) {
         this.leaseDuration = leaseDuration;
@@ -225,16 +227,16 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                                                             "leasePreparer",
                                                             ProxyPreparer.class,
                                                             new BasicProxyPreparer()));
-            if(logger.isLoggable(Level.FINEST)) {
+            if(logger.isTraceEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 buffer.append("LeaseFaultDetectionHandler Properties : ");
                 buffer.append("lease duration=").append(leaseDuration).append(", ");
                 buffer.append("retry count=").append(retryCount).append(", ");
                 buffer.append("retry timeout=").append(retryTimeout);
-                logger.finest(buffer.toString());
+                logger.trace(buffer.toString());
             }
         } catch(ConfigurationException e) {
-            logger.log(Level.SEVERE, "Setting Configuration", e);
+            logger.error("Setting Configuration", e);
         }
     }    
 
@@ -290,8 +292,8 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
         }
 
         public void interrupt() {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Terminating ServiceMonitor Thread");
+            if(logger.isTraceEnabled())
+                logger.trace("Terminating ServiceMonitor Thread");
             try {
                 lease.cancel();
             } catch(Exception ignore) {
@@ -317,8 +319,8 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 service.ping();
                 verified = true;
             } catch(RemoteException e) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("RemoteException reaching service, "+
+                if(logger.isTraceEnabled())
+                    logger.trace("RemoteException reaching service, "+
                                   "service cannot be reached");
                 keepAlive = false;
             }
@@ -331,8 +333,8 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                     return;
                 }
                 long leaseRenewalTime = TimeUtil.computeLeaseRenewalTime(leaseTime);
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("ServiceLeaseManager: Lease renewal wait for ["
+                if(logger.isTraceEnabled())
+                    logger.trace("ServiceLeaseManager: Lease renewal wait for ["
                                   + leaseRenewalTime
                                   + "] millis "
                                   + "for "
@@ -342,20 +344,20 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 } catch(InterruptedException ie) {
                     /* ignore */
                 } catch(IllegalArgumentException iae) {
-                    logger.warning("ServiceLeaseManager: sleep time is off : "
+                    logger.warn("ServiceLeaseManager: sleep time is off : "
                                    + leaseRenewalTime);
                 }
                 if(lease != null) {
                     try {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("Renew lease for : "
+                        if(logger.isTraceEnabled())
+                            logger.trace("Renew lease for : "
                                           + proxy.getClass().getName());
                         lease.renew(leaseTime);
                     } catch(Exception e) {
                         if(!ThrowableUtil.isRetryable(e)) {
                             keepAlive = false;
-                            if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
+                            if(logger.isDebugEnabled())
+                                logger.debug(
                                            "Unrecoverable Exception renewing"+
                                            "Lease",
                                            e);
@@ -366,8 +368,8 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                          * Lease
                          */
                         if(keepAlive) {
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.finest("Failed to renew lease to : "
+                            if(logger.isTraceEnabled())
+                                logger.trace("Failed to renew lease to : "
                                               + proxy.getClass().getName()
                                               + ", retry ["
                                               + retryCount
@@ -381,8 +383,8 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                                 long t0 = 0;
                                 long t1;
                                 try {
-                                    if(logger.isLoggable(Level.FINEST))
-                                        logger.finest("Attempt to re-establish "+
+                                    if(logger.isTraceEnabled())
+                                        logger.trace("Attempt to re-establish "+
                                                       "Lease to : "
                                                       + proxy.getClass().getName()
                                                       + ", attempt "
@@ -393,15 +395,15 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                                         (MonitorableService)proxy;
                                     t0 = System.currentTimeMillis();
                                     this.lease = service.monitor(leaseDuration);
-                                    if(logger.isLoggable(Level.FINEST))
-                                        logger.finest("Re-established Lease to : "
+                                    if(logger.isTraceEnabled())
+                                        logger.trace("Re-established Lease to : "
                                                       + proxy.getClass().getName());
                                     connected = true;
                                     break;
                                 } catch(Exception e1) {
                                     t1 = System.currentTimeMillis();
-                                    if(logger.isLoggable(Level.FINEST))
-                                        logger.finest("Invocation attempt ["
+                                    if(logger.isTraceEnabled())
+                                        logger.trace("Invocation attempt ["
                                                       + i
                                                       + "] took ["
                                                       + (t1 - t0)
@@ -418,14 +420,14 @@ public class LeaseFaultDetectionHandler extends AbstractFaultDetectionHandler {
                                 }
                             }
                             if(!connected) {
-                                if(logger.isLoggable(Level.FINEST)) {
+                                if(logger.isTraceEnabled()) {
                                     if(proxy != null)
-                                        logger.finest("Unable to recover Lease to ["
+                                        logger.trace("Unable to recover Lease to ["
                                                       + proxy.getClass().getName()
                                                       + "], notify "
                                                       + "listeners and exit");
                                     else
-                                        logger.finest("Unable to recover Lease to "+
+                                        logger.trace("Unable to recover Lease to "+
                                                       "[null proxy], "
                                                       + "notify listeners and exit");
                                 }

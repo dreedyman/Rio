@@ -15,15 +15,15 @@
  */
 package org.rioproject.monitor.managers;
 
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.monitor.ProvisionRequest;
 import org.rioproject.monitor.ServiceProvisionContext;
 import org.rioproject.monitor.selectors.Selector;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.servicecore.ServiceResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class is used to manage the provisioning of pending ServiceElement
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class PendingManager extends PendingServiceElementManager {
     private final ServiceProvisionContext context;
-    private final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
+    private final Logger logger = LoggerFactory.getLogger(PendingManager.class.getName());
 
     /**
      * Create a PendingManager
@@ -62,9 +62,7 @@ public class PendingManager extends PendingServiceElementManager {
      */
     public void process() {
         int pendingSize = getSize();
-        if (logger.isLoggable(Level.FINE) && pendingSize > 0) {
-            dumpCollection();
-        }
+        dumpCollection();
         if (pendingSize == 0)
             return;
         try {
@@ -93,15 +91,14 @@ public class PendingManager extends PendingServiceElementManager {
                 try {
                     context.getDispatcher().dispatch(request, resource, key.index);
                 } catch (Exception e) {
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, "Dispatching Pending Collection Element", e);
+                    logger.trace("Dispatching Pending Collection Element", e);
                 }
                 /* Slow the dispatching down, this will avoid pummeling
                  * a single InstantiatorResource */
                 Thread.sleep(500);
             }
         } catch (Throwable t) {
-            logger.log(Level.WARNING, "Processing Pending Collection", t);
+            logger.warn("Processing Pending Collection", t);
         }
     }
 } // End PendingManager

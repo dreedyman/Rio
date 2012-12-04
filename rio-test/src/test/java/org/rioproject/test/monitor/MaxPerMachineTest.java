@@ -21,10 +21,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.*;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.opstring.OpString;
+import org.rioproject.opstring.OpStringLoader;
+import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.ServiceMonitor;
@@ -33,21 +34,20 @@ import org.rioproject.test.TestManager;
 import org.rioproject.test.simple.Simple;
 import org.rioproject.test.utils.ArrayUtils;
 import org.rioproject.test.utils.CybernodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 
 /**
  * The class tests the <code>MaxPerMachine</code> capability.
  */
 @RunWith (RioTestRunner.class)
 public class MaxPerMachineTest  {
-    static Logger logger = Logger.getLogger("org.rioproject.test.monitor");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.test.monitor");
     @SetTestManager
     static TestManager testManager;
     static ServiceMonitor<Cybernode> cyberMon;
@@ -127,11 +127,9 @@ public class MaxPerMachineTest  {
         service.setProvisionType(fixed? ServiceElement.ProvisionType.FIXED: ServiceElement.ProvisionType.DYNAMIC);
 
         prevCounts = CybernodeUtils.calcServices(cyberMon.getServices(),Simple.class);
-        logger.log(Level.INFO, "**** Services found before deploying the OpString: {0}",
+        logger.info("**** Services found before deploying the OpString: {}",
                    Arrays.asList(ArrayUtils.asObjects(prevCounts)));
-
-        if(logger.isLoggable(Level.FINE))
-            logger.log(Level.INFO, "Service details: ["+service.getProvisionType()+"]");
+        logger.debug("Service details: ["+service.getProvisionType()+"]");
         if (maxPerMachine == -1) {
             maxPerMachine = Integer.MAX_VALUE;
         }
@@ -153,11 +151,10 @@ public class MaxPerMachineTest  {
                 try {
                     counts = CybernodeUtils.calcServices(cyberMon.getServices(), Simple.class);
                 } catch (RemoteException e) {
-                    logger.log(Level.SEVERE, "Error calculating services", e);
+                    logger.error("Error calculating services", e);
                     return false;
                 }
-                logger.log(Level.INFO, "Services found: {0}",
-                           Arrays.asList(ArrayUtils.asObjects(counts)));
+                logger.info("Services found: {}", Arrays.asList(ArrayUtils.asObjects(counts)));
 
                 if (!fixed) { // dynamic
                     long max = maxPerMachine * cyberMon.getServices().size();
@@ -271,9 +268,8 @@ public class MaxPerMachineTest  {
 
         prevCounts = CybernodeUtils.calcServices(cyberMon.getServices(),
                                                  Simple.class);
-        logger.log(Level.INFO,
-                   "**** Services found before deploying the OpString: {0}",
-                   Arrays.asList(ArrayUtils.asObjects(prevCounts)));
+        logger.info("**** Services found before deploying the OpString: {}",
+                   Arrays.asList(ArrayUtils.asObjects(prevCounts)).toString());
 
         testManager.deploy(opstring, monitor);
 
@@ -308,12 +304,10 @@ public class MaxPerMachineTest  {
                         counts = CybernodeUtils.calcServices(
                                 cyberMon.getServices(), Simple.class);
                     } catch (RemoteException e) {
-                        logger.log(Level.SEVERE, "Error calculating services",
-                                   e);
+                        logger.error("Error calculating services", e);
                         return false;
                     }
-                    logger.log(Level.INFO, "Services found: {0}",
-                               Arrays.asList(ArrayUtils.asObjects(counts)));
+                    logger.info("Services found: {}", Arrays.asList(ArrayUtils.asObjects(counts)).toString());
 
                     for (int i = 0; i < counts.length; i++) {
                         if (counts[i] != prevCounts[i]) {
@@ -338,12 +332,10 @@ public class MaxPerMachineTest  {
                         counts = CybernodeUtils.calcServices(
                                 cyberMon.getServices(), Simple.class);
                     } catch (RemoteException e) {
-                        logger.log(Level.SEVERE, "Error calculating services",
-                                   e);
+                        logger.error("Error calculating services", e);
                         return false;
                     }
-                    logger.log(Level.INFO, "Services found: {0}",
-                               Arrays.asList(ArrayUtils.asObjects(counts)));
+                    logger.info("Services found: {}", Arrays.asList(ArrayUtils.asObjects(counts)).toString());
 
                     if (!fixed) { // dynamic
                         long max = maxPerMachine * cyberMon.getServices().size();

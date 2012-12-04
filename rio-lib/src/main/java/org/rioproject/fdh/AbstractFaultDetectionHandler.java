@@ -23,11 +23,11 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.entry.Name;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The AbstractFaultDetectionHandler provides a base class which can be extended 
@@ -79,7 +79,7 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
     /** Class which provides service monitoring */
     protected ServiceMonitor serviceMonitor;
     /** A Logger */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     
     /**
      * @see FaultDetectionHandler#register
@@ -146,9 +146,7 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
             try {
                 lCache.removeListener(fdhListener);
             } catch (Throwable t) {
-                logger.log(Level.WARNING, 
-                           "Exception {0} removing Listener from LookupCache",
-                           new Object[] {t.getClass().getName()});
+                logger.warn("Exception {} removing Listener from LookupCache", t.getClass().getName());
             }
         }
         if(serviceMonitor != null) {
@@ -214,10 +212,8 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
             if(!item.serviceID.equals(serviceID)) {
                 return;
             }
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("FDH: service " +
-                              "["+getName(item.attributeSets)+"], "+
-                              "removed notification");
+            if(logger.isTraceEnabled())
+                logger.trace("FDH: service [{}], removed notification", getName(item.attributeSets));
 
             if(serviceMonitor != null) {
                 for(int i = 0; i < retryCount; i++) {                    
@@ -231,20 +227,16 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
                         } catch(InterruptedException ie) {
                             // Restore the interrupted status
                             Thread.currentThread().interrupt();
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.finest("FDH: service " +
-                                              "["+getName(item.attributeSets)+"], "+
-                                              "proxy " +
-                                              "["+proxy.getClass().getName()+"] "+
-                                              "interrupted during retry timeout");
+                            if(logger.isTraceEnabled())
+                                logger.trace("FDH: service [{}], proxy [{}] interrupted during retry timeout",
+                                             getName(item.attributeSets), proxy.getClass().getName());
                         }
                     }
                 }
             }
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("FDH: service ["+getName(item.attributeSets)+"], "+
-                              "proxy ["+proxy.getClass().getName()+"] "+
-                              "is reachable ["+reachable+"]");
+            if(logger.isTraceEnabled())
+                logger.trace("FDH: service [{}], proxy [{}] is reachable [{}]",
+                             getName(item.attributeSets), proxy.getClass().getName(), reachable);
             if(!reachable && !terminating) {
                 notifyListeners();
                 terminate();

@@ -35,15 +35,18 @@ import org.rioproject.system.measurable.memory.SystemMemory;
 import org.rioproject.util.StringUtil;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.ThresholdListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The <code>ComputeResource</code> represents an abstract notion of a compute 
@@ -55,7 +58,7 @@ import java.util.logging.Logger;
 public class ComputeResource {
     /** Name to use when getting Configuration values and to get the Logger */
     static final String COMPONENT = "org.rioproject.system";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     /**                                                              w
      * A description of the <code>ComputeResource</code> 
      */
@@ -168,8 +171,8 @@ public class ComputeResource {
             this.reportInterval = reportInterval;
             if(!resourceCapabilityChangeNotifierFuture.isDone())
                 resourceCapabilityChangeNotifierFuture.cancel(true);
-            if(logger.isLoggable(Level.CONFIG))
-                logger.config("Set ResourceCapability reportInterval to "+ TimeUtil.format(reportInterval));
+            if(logger.isDebugEnabled())
+                logger.debug("Set ResourceCapability reportInterval to {}", TimeUtil.format(reportInterval));
             scheduleResourceCapabilityReporting();
         }
     }
@@ -231,8 +234,8 @@ public class ComputeResource {
      */
     public void addPlatformCapability(PlatformCapability pCap) {
         if(!hasPlatformCapability(pCap)) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Have PlatformCapability : "+pCap.getClass().getName()+" load any system resources");
+            if(logger.isTraceEnabled())
+                logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
             pCap.loadResources();
 
             boolean stateChange;
@@ -301,11 +304,11 @@ public class ComputeResource {
                 DownloadManager slm = new DownloadManager(provisionRoot, stagedSoftware);
                 DownloadRecord record = null;
                 try {
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Provisioning StagedSoftware for PlatformCapability : "+pCap.getClass().getName());
+                    if(logger.isTraceEnabled())
+                        logger.trace("Provisioning StagedSoftware for PlatformCapability : {}", pCap.getClass().getName());
                     record = slm.download();
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest(record.toString());
+                    if(logger.isTraceEnabled())
+                        logger.trace(record.toString());
                     pCap.addStagedSoftware(stagedSoftware);
                     pCap.addDownloadRecord(record);
                     DownloadRecord postInstallRecord = slm.postInstall();
@@ -332,34 +335,27 @@ public class ComputeResource {
                         String configFileLocation =
                             systemCapabilitiesLoader.getPlatformConfigurationDirectory(config);
                         if(configFileLocation==null) {
-                            logger.warning("Unable to write PlatformConfiguration " +
-                                           "["+pCap.getName()+"] configuration, " +
-                                           "unknown platform configuration " +
-                                           "directory. The RIO_HOME environment " +
-                                           "variable must be set");
+                            logger.warn("Unable to write PlatformConfiguration [{}] configuration, " +
+                                        "unknown platform configuration directory. The RIO_HOME environment " +
+                                        "variable must be set", pCap.getName());
                         } else {
                             PlatformCapabilityWriter pCapWriter = new PlatformCapabilityWriter();
                             String fileName =
                                 pCapWriter.write(pCap, configFileLocation);
                             pCap.setConfigurationFile(fileName);
-                            logger.info("Wrote PlatformCapability ["+pCap.getName()+"] " +
-                                        "configuration to "+fileName);
+                            logger.info("Wrote PlatformCapability [{}] configuration to {}", pCap.getName(), fileName);
                         }
                     }
 
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Have PlatformCapability : "+
-                                      pCap.getClass().getName()+" "+
-                                      "load any system resources");
+                    if(logger.isTraceEnabled())
+                        logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
                     pCap.loadResources();
                     stateChange();
 
                 } catch(IOException e) {
                     if(record!=null)
                         slm.remove();
-                    logger.log(Level.WARNING,
-                               "Provisioning StagedSoftware for PlatformCapability : "+pCap.getClass().getName(),
-                               e);
+                    logger.warn("Provisioning StagedSoftware for PlatformCapability : "+pCap.getClass().getName(), e);
                 }
             }
         } finally {
@@ -407,25 +403,21 @@ public class ComputeResource {
             if(clean) {
                 DownloadRecord[] downloadRecords = pCap.getDownloadRecords();
                 StringBuilder buff = new StringBuilder();
-                if(downloadRecords.length > 0 && logger.isLoggable(Level.INFO))
-                    buff.append(
-                        "Removing StagedSoftware for PlatformCapability: [")
+                if(downloadRecords.length > 0 && logger.isInfoEnabled())
+                    buff.append("Removing StagedSoftware for PlatformCapability: [")
                         .append(pCap.getName())
                         .append("]");
                 for (DownloadRecord downloadRecord : downloadRecords) {
-                    buff.append("\n\tRemoved ")
-                        .append(DownloadManager.remove(downloadRecord));
+                    buff.append("\n\tRemoved ").append(DownloadManager.remove(downloadRecord));
                 }
-                if(logger.isLoggable(Level.INFO))
+                if(logger.isInfoEnabled())
                     logger.info(buff.toString());
                 if(pCap.getConfigurationFile()!=null) {
                     File configFile = new File(pCap.getConfigurationFile());
                     if(configFile.exists()) {
                         if(configFile.delete())
-                            logger.info("Removed PlatformCapability " +
-                                        "["+pCap.getName()+"] " +
-                                        "configuration file: "+
-                                        FileUtils.getFilePath(configFile));
+                            logger.info("Removed PlatformCapability [{}] configuration file: {}",
+                                        pCap.getName(), FileUtils.getFilePath(configFile));
                     }
                 }
             }
@@ -802,7 +794,7 @@ public class ComputeResource {
                 mCap.start();
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Booting ComputeResource", e);
+            logger.warn("Booting ComputeResource", e);
         } finally {
             initializing = false;
         }                            

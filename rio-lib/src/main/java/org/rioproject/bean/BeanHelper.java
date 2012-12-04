@@ -17,12 +17,12 @@ package org.rioproject.bean;
 
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A utility class that assists in invoking bean lifecycle events, either using
@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class BeanHelper {
-    private static final Logger logger = Logger.getLogger("org.rioproject.bean");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.bean");
 
     /**
      * Invoke a lifecycle method
@@ -60,26 +60,26 @@ public class BeanHelper {
         Throwable abort = null;
         try {
             Method method = bean.getClass().getMethod(methodNameToInvoke, (Class[]) null);
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest(String.format("Invoking method [%s] on [%s]", methodNameToInvoke, bean.getClass().getName()));
+            if (logger.isTraceEnabled())
+                logger.trace(String.format("Invoking method [%s] on [%s]", methodNameToInvoke, bean.getClass().getName()));
 
             method.invoke(bean, (Object[]) null);
         } catch (NoSuchMethodException e) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest(String.format("Bean [%s] does not have lifecycle method %s() defined",
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("Bean [%s] does not have lifecycle method %s() defined",
                                             bean.getClass().getName(), methodNameToInvoke));
             }
         } catch (IllegalAccessException e) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
+            if (logger.isTraceEnabled()) {
+                logger.trace(
                            String.format("Bean [%s] %s() method security access", bean.getClass().getName(), methodNameToInvoke),
                            e);
             }
             abort = e;
         } catch (InvocationTargetException e) {
             abort = ThrowableUtil.getRootCause(e);
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
+            if (logger.isTraceEnabled()) {
+                logger.trace(
                            String.format("Bean [%s] %s() method invocation", bean.getClass().getName(), methodNameToInvoke),
                            abort);
             }
@@ -123,23 +123,21 @@ public class BeanHelper {
             Method method = bean.getClass().getMethod(methodNameToInvoke, classArgs);
             result = method.invoke(bean, objectArgs);
         } catch (NoSuchMethodException e) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest(String.format("Bean [%s] does not have a %s() method defined",
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("Bean [%s] does not have a %s() method defined",
                                             bean.getClass().getName(), methodNameToInvoke));
             }
         } catch (IllegalAccessException e) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
-                           String.format("Bean [%s] %s() method security access", bean.getClass().getName(), methodNameToInvoke),
-                           e);
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("Bean [%s] %s() method security access", bean.getClass().getName(), methodNameToInvoke),
+                             e);
             }
             abort = e;
         } catch (InvocationTargetException e) {
             abort = ThrowableUtil.getRootCause(e);
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST,
-                           String.format("Bean [%s] %s() method invocation", bean.getClass().getName(), methodNameToInvoke),
-                           abort);
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("Bean [%s] %s() method invocation", bean.getClass().getName(), methodNameToInvoke),
+                             abort);
             }
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);

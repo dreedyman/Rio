@@ -20,7 +20,8 @@ import org.rioproject.watch.GaugeWatch;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
@@ -32,7 +33,7 @@ public class TestServiceImpl implements TestService {
     private AtomicInteger notificationCount = new AtomicInteger();
     private AtomicInteger rhsExecutedCount = new AtomicInteger();
     private GaugeWatch notification;
-    private Logger logger = Logger.getLogger(TestServiceImpl.class.getName());
+    private Logger logger = LoggerFactory.getLogger(TestServiceImpl.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) {
         loadWatch = new GaugeWatch("load");
@@ -53,7 +54,7 @@ public class TestServiceImpl implements TestService {
         loadWatch.addValue(load);
         boolean verified = loadWatch.getLastCalculableValue() == load;
         if (!verified)
-            logger.warning("---> ["+instanceID+"] was [" + loadWatch.getLastCalculableValue() +
+            logger.warn("---> ["+instanceID+"] was [" + loadWatch.getLastCalculableValue() +
                            "], SET FAILED [" + load + "] " +
                            "breached=" +
                            loadWatch.getThresholdManager().getThresholdCrossed());

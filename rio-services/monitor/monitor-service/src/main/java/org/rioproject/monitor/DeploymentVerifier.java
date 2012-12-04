@@ -16,12 +16,16 @@
 package org.rioproject.monitor;
 
 import org.rioproject.config.Constants;
-import org.rioproject.logging.WrappedLogger;
-import org.rioproject.opstring.*;
+import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.OpStringUtil;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +37,7 @@ import java.util.List;
  * OperationalString is configured to use artifacts, that required artifacts have been resolved
  */
 public class DeploymentVerifier {
-    static WrappedLogger logger = WrappedLogger.getLogger(DeploymentVerifier.class.getName());
+    static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
 
     public void verifyDeploymentRequest(DeployRequest request) throws ResolverException, IOException {
         for(OperationalString o : request.getOperationalStrings()) {
@@ -82,11 +86,11 @@ public class DeploymentVerifier {
         if(didResolve)
             service.setRemoteRepositories(resolver.getRemoteRepositories());
         sb.append(sb1.toString());
-        logger.fine("%s derived classpath for loading artifact %s", service.getName(), sb.toString());
+        logger.debug("{} derived classpath for loading artifact {}", service.getName(), sb.toString());
     }
 
     void resolve(ClassBundle bundle, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
-        logger.finest("Artifact: %s, resolver: %s", bundle.getArtifact(), resolver.getClass().getName());
+        logger.trace("Artifact: {}, resolver: {}", bundle.getArtifact(), resolver.getClass().getName());
         String artifact = bundle.getArtifact();
         if (artifact != null) {
             List<String> jars = new ArrayList<String>();

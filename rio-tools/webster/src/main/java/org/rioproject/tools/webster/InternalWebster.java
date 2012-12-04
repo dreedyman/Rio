@@ -16,13 +16,15 @@
  */
 package org.rioproject.tools.webster;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
 import java.security.CodeSource;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * Helper class for starting an Internal Webster
@@ -31,7 +33,7 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class InternalWebster {
-    private static Logger logger = Logger.getLogger("org.rioproject.tools.webster");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.tools.webster");
 
     /**
      * Start an internal webster, setting the webster root to the location
@@ -69,21 +71,21 @@ public class InternalWebster {
         try {
             port = Integer.parseInt(sPort);
         } catch(NumberFormatException e) {
-            logger.log(Level.WARNING, "Bad port Number ["+sPort+"], default to "+port, e);
+            logger.warn("Bad port Number ["+sPort+"], default to "+port, e);
         }
 
         port = new Webster(port, parentPath).getPort();
 
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Webster serving on port="+port);
+        if(logger.isDebugEnabled())
+            logger.debug("Webster serving on port="+port);
 
         String codebase = System.getProperty("java.rmi.server.codebase");
         
         if(codebase==null) {
             codebase = "http://"+localIPAddress+":"+port+"/"+exportJar;
             System.setProperty("java.rmi.server.codebase", codebase);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Setting java.rmi.server.codebase : " + codebase);
+            if(logger.isDebugEnabled())
+                logger.debug("Setting java.rmi.server.codebase : " + codebase);
         }
         return(port);
     }

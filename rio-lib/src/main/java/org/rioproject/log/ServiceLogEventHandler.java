@@ -15,12 +15,13 @@
  */
 package org.rioproject.log;
 
-import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;
+import org.rioproject.loader.ServiceClassLoader;
 
-import javax.management.*;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -79,8 +80,8 @@ public class ServiceLogEventHandler extends Handler implements ServiceLogEventHa
         } catch (Exception e) {
             logger.log(Level.WARNING, "Trying to create MBean for ServiceLogEventHandler", e);
         }
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Created and registered the ServiceLogEventHandler");
+        if(logger.isLoggable(Level.CONFIG))
+            logger.config("Created and registered the ServiceLogEventHandler");
     }
 
     public void setEventHandler(EventHandler eventHandler) {

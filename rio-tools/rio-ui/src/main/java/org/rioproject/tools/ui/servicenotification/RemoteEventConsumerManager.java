@@ -22,8 +22,10 @@ import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.discovery.DiscoveryManagement;
 import org.rioproject.event.DynamicEventConsumer;
+import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.eventcollector.api.EventCollector;
+import org.rioproject.eventcollector.api.EventCollectorAdmin;
 import org.rioproject.eventcollector.api.EventCollectorRegistration;
 import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.log.ServiceLogEvent;
@@ -35,6 +37,7 @@ import org.rioproject.tools.ui.ChainedRemoteEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,6 +101,8 @@ public class RemoteEventConsumerManager {
         return eventCollectors.size();
     }
 
+
+
     public void registerForAllServiceNotification(RemoteServiceEventListener remoteEventListener,
                                                   DiscoveryManagement dMgr) throws Exception {
         /* Create the event consumer for ProvisionFailureEvent utilities */
@@ -119,6 +124,19 @@ public class RemoteEventConsumerManager {
 
     public void setUseEventCollector(boolean useEventCollector) {
         this.useEventCollector.set(useEventCollector);
+    }
+
+    public void delete(Collection<RemoteServiceEvent> events) {
+        if(events!=null && !events.isEmpty() && useEventCollector.get()) {
+            for(EventCollector eventCollector : eventCollectors) {
+                try {
+                    EventCollectorAdmin admin = (EventCollectorAdmin)eventCollector.getAdmin();
+                    admin.delete(events);
+                } catch(IOException e) {
+
+                }
+            }
+        }
     }
 
     public void addEventCollector(EventCollector eventCollector) throws LeaseDeniedException,

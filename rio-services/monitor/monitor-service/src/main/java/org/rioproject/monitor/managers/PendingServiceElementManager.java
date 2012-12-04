@@ -15,15 +15,15 @@
  */
 package org.rioproject.monitor.managers;
 
-import org.rioproject.logging.WrappedLogger;
-import org.rioproject.monitor.util.LoggingUtil;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.monitor.ProvisionRequest;
+import org.rioproject.monitor.util.LoggingUtil;
+import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * Abstract class which will manage ProvisionRequest instances that are waiting
@@ -49,7 +49,7 @@ public abstract class PendingServiceElementManager {
     /** A descriptive String type */
     private final String type;
     /** A Logger */
-    private final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.monitor.provision");
+    private final Logger logger = LoggerFactory.getLogger(PendingServiceElementManager.class.getName());
 
     /**
      * A key for the sortable set
@@ -208,7 +208,7 @@ public abstract class PendingServiceElementManager {
                 removals = removals.subList((removals.size()-numToRemove), 
                                             removals.size());                                
             }
-            logger.info("%s: removing [%d] [%s] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
+            logger.info("{}: removing [{}] [{}] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
@@ -240,7 +240,7 @@ public abstract class PendingServiceElementManager {
             }
         }
         if(!removals.isEmpty()) {
-            logger.info("%s: removing [%d] [%s] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
+            logger.info("{}: removing [{}] [{}] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
@@ -248,7 +248,7 @@ public abstract class PendingServiceElementManager {
                 }
             }
         } else {
-            logger.warning("%s: There are no pending instances of [%s] to remove", type, LoggingUtil.getLoggingName(sElem));
+            logger.warn("{}: There are no pending instances of [{}] to remove", type, LoggingUtil.getLoggingName(sElem));
         }
         return (removed.toArray(new ProvisionRequest[removed.size()]));
     }
@@ -348,7 +348,7 @@ public abstract class PendingServiceElementManager {
      * Dumps the contents of the collection
      */
     public void dumpCollection() {
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             ProvisionRequest[] elements = getProvisionRequests(null);
             StringBuilder buffer = new StringBuilder();
             int x=1;
@@ -372,7 +372,7 @@ public abstract class PendingServiceElementManager {
                 buffer.append("\n");
             }
             buffer.append("--");
-            logger.finest(buffer.toString());
+            logger.trace(buffer.toString());
         }
     }
 }

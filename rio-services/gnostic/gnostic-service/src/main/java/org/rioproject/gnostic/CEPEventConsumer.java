@@ -19,9 +19,10 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handler for ProvisionMonitorEvent notifications
@@ -30,7 +31,7 @@ class CEPEventConsumer implements RemoteServiceEventListener {
     private StatefulKnowledgeSession session;
     private WorkingMemoryEntryPoint provisionEventsStream;
 
-    private static final WrappedLogger logger = WrappedLogger.getLogger(Gnostic.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Gnostic.class.getName());
 
     public CEPEventConsumer(StatefulKnowledgeSession session) {
         this.session = session;
@@ -42,12 +43,12 @@ class CEPEventConsumer implements RemoteServiceEventListener {
 
     public void notify(RemoteServiceEvent event) {
         if (!(event instanceof ProvisionMonitorEvent || event instanceof ProvisionFailureEvent)) {
-            logger.warning("Unrecognized event type %s", event.getClass().getName());
+            logger.warn("Unrecognized event type {}", event.getClass().getName());
             return;
         }
         
         provisionEventsStream.insert(event);
-        logger.info("Inserted into CEP engine event %s", event);
+        logger.info("Inserted into CEP engine event {}", event);
         session.fireAllRules();     // TODO: make sure this makes sense to fire each time we insert!!
     }
 }

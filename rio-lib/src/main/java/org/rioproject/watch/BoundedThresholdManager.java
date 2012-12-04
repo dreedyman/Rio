@@ -16,8 +16,8 @@
  */
 package org.rioproject.watch;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The BoundedThresholdManager provides support for threshold handling as
@@ -32,7 +32,7 @@ public class BoundedThresholdManager extends ThresholdManager {
     private static final int BREACHED_UPPER = 2;
     private int direction = 0;
     private final String id;
-    static Logger logger = Logger.getLogger("org.rioproject.watch");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.watch");
 
     public BoundedThresholdManager(String id) {
         this.id = id;
@@ -92,11 +92,9 @@ public class BoundedThresholdManager extends ThresholdManager {
             thresholdValues.incThresholdBreachedCount();
             notifyListeners(calculable, ThresholdType.BREACHED);
         }
-        if(logger.isLoggable(Level.FINEST) && calculable.getId().equals("load"))
-            logger.log(Level.FINEST,
-                       "["+calculable.getId()+"] Check High Threshold breach, "+ 
-                       "value="+ value+ ", "+ 
-                       "high threshold="+ thresholdValues.getCurrentHighThreshold());
+        if(logger.isTraceEnabled() && calculable.getId().equals("load"))
+            logger.trace("[{}] Check High Threshold breach, value={}, high threshold={}",
+                         calculable.getId(), value, thresholdValues.getCurrentHighThreshold());
     }
 
     /**
@@ -112,14 +110,8 @@ public class BoundedThresholdManager extends ThresholdManager {
             thresholdValues.incThresholdBreachedCount();
             notifyListeners(calculable, ThresholdType.BREACHED);
         }
-        if(logger.isLoggable(Level.FINEST) && calculable.getId().equals("load"))
-            logger.log(Level.FINEST, "["
-                                     + calculable.getId()
-                                     + "] Check Low Threshold breach, "
-                                     + "value="
-                                     + value
-                                     + ", "
-                                     + "low threshold="
-                                     + thresholdValues.getCurrentLowThreshold());
+        if(logger.isTraceEnabled() && calculable.getId().equals("load"))
+            logger.trace("[{}] Check Low Threshold breach, value={}, low threshold={}",
+                         calculable.getId(), value, thresholdValues.getCurrentLowThreshold());
     }
 }

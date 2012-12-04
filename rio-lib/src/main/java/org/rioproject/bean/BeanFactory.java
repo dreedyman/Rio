@@ -21,8 +21,10 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanFactory;
 
 import java.lang.reflect.Constructor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Instantiates a Plain Old Java Object (POJO), providing support for
@@ -38,7 +40,7 @@ public class BeanFactory implements ServiceBeanFactory {
     /** Component name for the logger */
     static String COMPONENT = "org.rioproject.bean";
     /** A Logger */
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Creates the bean and the {@link org.rioproject.bean.BeanAdapter}
@@ -77,13 +79,13 @@ public class BeanFactory implements ServiceBeanFactory {
         ClassBundle bundle = context.getServiceElement().getComponentBundle();
         ClassLoader beanCL = currentThread.getContextClassLoader();
         Class beanClass = beanCL.loadClass(bundle.getClassName());
-        if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST, "Load service class: {0}", beanClass);
-        if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST, "Activating as ServiceBean");
+        if(logger.isTraceEnabled())
+            logger.trace("Load service class: {0}", beanClass);
+        if(logger.isTraceEnabled())
+            logger.trace("Activating as ServiceBean");
         Constructor constructor = beanClass.getConstructor((Class[])null);
-        if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST, "Obtained implementation constructor: {0}", constructor);
+        if(logger.isTraceEnabled())
+            logger.trace("Obtained implementation constructor: {0}", constructor);
         return(constructor.newInstance((Object[])null));
     }
 

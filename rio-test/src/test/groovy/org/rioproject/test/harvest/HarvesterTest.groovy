@@ -15,17 +15,18 @@
  */
 package org.rioproject.test.harvest
 
-import org.junit.runner.RunWith
 import org.junit.Assert
 import org.junit.Test
-import org.rioproject.monitor.ProvisionMonitor
+import org.junit.runner.RunWith
+import org.rioproject.cybernode.Cybernode
 import org.rioproject.deploy.ServiceBeanInstantiator
+import org.rioproject.monitor.ProvisionMonitor
 import org.rioproject.test.RioTestRunner
+import org.rioproject.test.ServiceMonitor
 import org.rioproject.test.SetTestManager
 import org.rioproject.test.TestManager
-import org.rioproject.test.ServiceMonitor
-import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.harvest.Harvester
+import org.rioproject.tools.harvest.HarvesterBean
 
 /**
  * Test Harvester components
@@ -40,6 +41,15 @@ class HarvesterTest {
         Assert.assertNotNull(testManager)
         ProvisionMonitor[] monitors = testManager.getServices(ProvisionMonitor.class)
         Assert.assertTrue "Expected at least 1 ProvisionMonitor", monitors.length>0
+        Cybernode[] cybernodes = testManager.getServices(Cybernode.class)
+        int waited = 0
+        while(cybernodes.length < 2 && waited < 10) {
+            Thread.sleep(1000)
+            waited++
+            cybernodes = testManager.getServices(ServiceBeanInstantiator.class)
+            println "Waiting for 2 Cybernodes, have [${cybernodes.length} of 2] ..."
+        }
+        Assert.assertTrue "Expected 2 Cybernodes", cybernodes.length>1
         ProvisionMonitor monitor = monitors[0]
         List<String> hosts = new ArrayList<String>()
         for(ServiceBeanInstantiator sbi : monitor.getServiceBeanInstantiators()) {

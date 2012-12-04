@@ -49,9 +49,9 @@ public final class ServiceDescriptorUtil {
     static int getStartupPort() throws IOException {
         if(port==0) {
             if(System.getProperty(Constants.PORT_RANGE)!=null) {
-                port = BootUtil.getPortFromRange(System.getProperty(Constants.PORT_RANGE));
+                port = PortUtil.getPortFromRange(System.getProperty(Constants.PORT_RANGE));
             } else {
-                port = BootUtil.getAnonymousPort();
+                port = PortUtil.getAnonymousPort();
             }
         }
         return(port);

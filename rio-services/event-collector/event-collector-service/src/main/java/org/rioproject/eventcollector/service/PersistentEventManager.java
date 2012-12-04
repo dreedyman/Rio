@@ -17,6 +17,8 @@ package org.rioproject.eventcollector.service;
 
 import net.jini.core.event.RemoteEvent;
 import org.rioproject.event.RemoteServiceEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.rmi.server.RMIClassLoader;
@@ -28,8 +30,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An {@code EventManager} that keeps an in-memory collection of events, and writes them out to disk as well.
@@ -41,7 +41,7 @@ public class PersistentEventManager extends TransientEventManager {
     private File persistentEventDirectory;
     private static final BlockingQueue<RemoteServiceEvent> eventWriteQ = new LinkedBlockingQueue<RemoteServiceEvent>();
     private final DateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss.SSS");
-    private static final Logger logger = Logger.getLogger(PersistentEventManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(PersistentEventManager.class.getName());
     private final AtomicBoolean initializing = new AtomicBoolean();
 
     @Override
@@ -53,8 +53,8 @@ public class PersistentEventManager extends TransientEventManager {
         File defaultPersistentDirectoryRoot = new File(pathBuilder.toString());
         persistentEventDirectory = new File(context.getPersistentDirectoryRoot(), "collection");
         if(!persistentEventDirectory.exists()) {
-            if(persistentEventDirectory.mkdirs() && logger.isLoggable(Level.INFO)) {
-                logger.fine(String.format("Created %s", persistentEventDirectory.getPath()));
+            if(persistentEventDirectory.mkdirs() && logger.isInfoEnabled()) {
+                logger.debug(String.format("Created %s", persistentEventDirectory.getPath()));
             }
         }
         List<RemoteServiceEvent> persistedEvents = getPersistedEvents();
@@ -65,14 +65,14 @@ public class PersistentEventManager extends TransientEventManager {
         initializing.set(false);
         logger.info(String.format("Persistent event directory: %s, have %d persisted events",
                                   persistentEventDirectory.getPath(), getNumberOfCollectedEvents()));
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             StringBuilder builder = new StringBuilder();
             for(RemoteEvent event : getEvents()) {
                 if(builder.length()>0)
                     builder.append("\n");
                 builder.append(event.toString());
             }
-            logger.finest(builder.toString());
+            logger.trace(builder.toString());
         }
         getExecutorService().submit(new EventWriter());
 
@@ -91,13 +91,13 @@ public class PersistentEventManager extends TransientEventManager {
             File file = new File(persistentEventDirectory, createEventFileName(event));
             if(file.exists()) {
                 if(file.delete()) {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine(String.format("Deleted %s", file.getName()));
+                    if(logger.isDebugEnabled())
+                        logger.debug(String.format("Deleted %s", file.getName()));
                 } else {
-                    logger.warning(String.format("Could not delete %s", file.getName()));
+                    logger.warn(String.format("Could not delete %s", file.getName()));
                 }
             } else {
-                logger.warning(String.format("Could not delete %s, it does not exist", file.getName()));
+                logger.warn(String.format("Could not delete %s, it does not exist", file.getName()));
             }
         }
         return super.delete(events);
@@ -115,7 +115,7 @@ public class PersistentEventManager extends TransientEventManager {
         List<RemoteServiceEvent> events = new LinkedList<RemoteServiceEvent>();
         File[] files = persistentEventDirectory.listFiles();
         if(files==null) {
-            logger.warning(String.format("%s returned null file array", persistentEventDirectory.getPath()));
+            logger.warn(String.format("%s returned null file array", persistentEventDirectory.getPath()));
             return events;
         }
         for(File file : files) {
@@ -125,15 +125,13 @@ public class PersistentEventManager extends TransientEventManager {
                 RemoteServiceEventHolder remoteServiceEventHolder = (RemoteServiceEventHolder)inputStream.readObject();
                 events.add(remoteServiceEventHolder.getRemoteServiceEvent());
             } catch (Exception e) {
-                logger.log(Level.SEVERE,
-                           String.format("Could not read serialized event [%s] from disk", file.getPath()),
-                           e);
+                logger.error(String.format("Could not read serialized event [%s] from disk", file.getPath()), e);
             } finally {
                 if(inputStream!=null) {
                     try {
                         inputStream.close();
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Trying to close OIS", e);
+                        logger.warn("Trying to close OIS", e);
                     }
                 }
             }
@@ -156,27 +154,27 @@ public class PersistentEventManager extends TransientEventManager {
                 try {
                     event = eventWriteQ.take();
                 } catch (InterruptedException e) {
-                    logger.fine("EventWriter breaking out of main loop");
+                    logger.debug("EventWriter breaking out of main loop");
                     break;
                 }
                 File file = new File(persistentEventDirectory, createEventFileName(event));
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine(String.format("Writing %s to %s", event, file.getPath()));
+                if(logger.isDebugEnabled())
+                    logger.debug(String.format("Writing %s to %s", event, file.getPath()));
                 ObjectOutputStream outputStream = null;
                 try {
-                    logger.warning(RMIClassLoader.getClassAnnotation(event.getClass()));
+                    logger.debug(RMIClassLoader.getClassAnnotation(event.getClass()));
                     outputStream = new ObjectOutputStream(new FileOutputStream(file));
                     outputStream.writeObject(new RemoteServiceEventHolder(event));
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine(String.format("Wrote %d bytes to %s", file.length(), file.getPath()));
+                    if(logger.isDebugEnabled())
+                        logger.debug(String.format("Wrote %d bytes to %s", file.length(), file.getPath()));
                 } catch (IOException e) {
-                    logger.log(Level.SEVERE, "Could not write to disk", e);
+                    logger.error("Could not write to disk", e);
                 } finally {
                     if(outputStream!=null) {
                         try {
                             outputStream.close();
                         } catch (IOException e) {
-                            logger.log(Level.WARNING, "Trying to close OOS", e);
+                            logger.warn("Trying to close OOS", e);
                         }
                     }
                 }

@@ -18,7 +18,7 @@ package org.rioproject.boot;
 import java.lang.instrument.Instrumentation;
 
 /**
- * Allows the instrumentation class to be accessed
+ * Allows the instrumentation class to be accessed.
  *
  * @author Dennis Reedy
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,19 @@ package org.rioproject.jsb;
 
 import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventHandler;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jmx.MBeanServerFactory;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAPolicyHandler;
 import org.rioproject.sla.SLAPolicyHandlerFactory;
 import org.rioproject.sla.SLAThresholdEventAdapter;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.watch.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.ObjectName;
 import java.beans.IntrospectionException;
@@ -35,8 +37,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ServiceBeanSLAManager manages service-specific SLAs, and as needed uses
@@ -64,7 +64,7 @@ public class ServiceBeanSLAManager {
     private SLAThresholdEventAdapter slaAdapter;
     /* Monitors thread deadlocks in forked vms */
     static final String COMPONENT = ServiceBeanSLAManager.class.getName();
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public ServiceBeanSLAManager(final Object impl,
                                  final Object proxy,
@@ -127,8 +127,8 @@ public class ServiceBeanSLAManager {
             /* Check if the SLA matches a MeasurableCapability.  */
             MeasurableCapability mCap = getMeasurableCapability(identifier);
             if (mCap != null) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("["+elem.getName()+"] SLA [" + identifier + "] correlates to a MeasurableCapability");
+                if (logger.isTraceEnabled())
+                    logger.trace("["+elem.getName()+"] SLA [" + identifier + "] correlates to a MeasurableCapability");
                 try {
                     /* Load the SLA PolicyHandler and set attributes */
                     handler = createSLAPolicyHandler(sla, null);
@@ -138,8 +138,8 @@ public class ServiceBeanSLAManager {
                     handler.setThresholdManager(tMgr);
                     mCap.addSecondaryThresholdManager(tMgr);
                     thresholdManagerReg.put(tMgr, mCap);
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.finest("[" +elem.getName() +"] " +
+                    if (logger.isTraceEnabled())
+                        logger.trace("[" +elem.getName() +"] " +
                                       "SLA ID [" + identifier + "], " +
                                       "associated to " +
                                       "MeasurableCapability=" +
@@ -147,9 +147,7 @@ public class ServiceBeanSLAManager {
                                       "SLAPolicyHandler=" +
                                       handler.getClass().getName());
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "Creating SLAPolicyHandler for system SLA [" + sla.getIdentifier() + "]",
-                               e);
+                    logger.warn("Creating SLAPolicyHandler for system SLA [" + sla.getIdentifier() + "]", e);
                 }
 
             /* Check if the SLA matches the ThreadDeadlockMonitor. */
@@ -163,25 +161,20 @@ public class ServiceBeanSLAManager {
                  * monitoring. There is one Cybernode-based
                  * ThreadDeadlockMonitor that will send out notifications */
                 if(wDesc.getMBeanServerConnection()==null && !runningForked()) {
-                    logger.warning("Thread deadlock detection is " +
-                                   "provided at the process level, not " +
-                                   "enabled on a service-by-service approach " +
-                                   "within a Cybernode. The SLA declaration for " +
-                                   "the ["+elem.getName()+"] service will be " +
-                                   "ignored. Note that thread deadlock " +
-                                   "detection has been enabled by the Cybernode.");
+                    logger.warn("Thread deadlock detection is provided at the process level, not " +
+                                "enabled on a service-by-service approach within a Cybernode. The SLA declaration for " +
+                                "the [{}] service will be ignored. Note that thread deadlock " +
+                                "detection has been enabled by the Cybernode.", elem.getName());
                     return;
                 }
                 if(wDesc.getPeriod()<1000) {
                     logger.info("Thread deadlock monitoring has been disabled " +
-                                "for service ["+elem.getName()+"]. The " +
-                                "configured thread deadlock check time was " +
-                                "["+wDesc.getPeriod()+"]. To enable thread " +
-                                "deadlock monitoring, the thread deadlock " +
-                                "check time must be >= 1000 milliseconds.");
+                                "for service [{}]. The configured thread deadlock check time was " +
+                                "[{}]. To enable thread deadlock monitoring, the thread deadlock " +
+                                "check time must be >= 1000 milliseconds.", elem.getName(), wDesc.getPeriod());
                     return;
                 }
-                logger.info("Setting Thread deadlock detection: "+sla);
+                logger.info("Setting Thread deadlock detection: {}", sla);
                 try {
                     ClassLoader loader = impl.getClass().getClassLoader();
                     /* Load the SLA PolicyHandler and set attributes */
@@ -199,9 +192,7 @@ public class ServiceBeanSLAManager {
                     watchInjector.inject(wDesc, threadDeadlockMonitor, getThreadDeadlockCalculable);
 
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]",
-                               e);
+                    logger.warn("Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]", e);
                 }
             } else {
                 try {
@@ -211,22 +202,17 @@ public class ServiceBeanSLAManager {
                         try {
                             watchInjector.inject(wd);
                         } catch (ConfigurationException e) {
-                            logger.log(Level.WARNING,
-                                       "Injecting Watch [" + wd.getName() + "] for SLA [" + sla.getIdentifier() + "]",
-                                       e);
+                            logger.warn("Injecting Watch [" + wd.getName() + "] for SLA [" + sla.getIdentifier() + "]", e);
                         }
                     }
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]",
-                               e);
+                    logger.warn("Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]", e);
                 }
             }
 
-            if (logger.isLoggable(Level.FINEST))
-                logger.finest(
-                    "[" + context.getServiceElement().getName() + "] " +
-                    "Adding SLA [" + identifier + "] to the Watch Registry for subsequent association");
+            if (logger.isTraceEnabled())
+                logger.trace("[{}] Adding SLA [{}] to the Watch Registry for subsequent association",
+                             context.getServiceElement().getName(), identifier);
             if (handler != null) {
                 context.getWatchRegistry().addThresholdListener(identifier, handler);
             }
@@ -253,7 +239,7 @@ public class ServiceBeanSLAManager {
             } else {
                 toDiscardList.remove(slap);
                 if (SLAPolicyHandlerFactory.slaPolicyHandlerChanged(sla, slap)) {
-                    if(logger.isLoggable(Level.FINEST)) {
+                    if(logger.isTraceEnabled()) {
                         StringBuilder b = new StringBuilder();
                         b.append("The SLAPolicyHandler for [");
                         b.append(sla.getIdentifier());
@@ -262,18 +248,18 @@ public class ServiceBeanSLAManager {
                         b.append(sla.getSlaPolicyHandler());
                         b.append("], SLAPolicyHandler class=[");
                         b.append(slap.getClass().getName());
-                        logger.finest(b.toString());
+                        logger.trace(b.toString());
                     }
                     removeSLAPolicyHandler(slap);
                     toAddList.add(sla);
                 } else {
-                    if(logger.isLoggable(Level.FINEST)) {
+                    if(logger.isTraceEnabled()) {
                         StringBuilder b = new StringBuilder();
                         b.append("Updating the SLAPolicyHandler for [");
                         b.append(sla.getIdentifier());
                         b.append("] with new SLA values: ");
                         b.append(sla);                        
-                        logger.finest(b.toString());
+                        logger.trace(b.toString());
                     }
                     slap.setSLA(sla);
                     WatchDescriptor[] wds = sla.getWatchDescriptors();
@@ -281,9 +267,7 @@ public class ServiceBeanSLAManager {
                         try {
                             watchInjector.modify(wd);
                         } catch (ConfigurationException e) {
-                            logger.log(Level.WARNING,
-                                       "Modifying WatchDescriptor ["+wd.getName()+"] for SLA ["+sla.getIdentifier()+"]",
-                                       e);
+                            logger.warn("Modifying WatchDescriptor ["+wd.getName()+"] for SLA ["+sla.getIdentifier()+"]", e);
                         }
                     }
                 }
@@ -320,10 +304,8 @@ public class ServiceBeanSLAManager {
                                                      context.getServiceBeanManager().getNotificationBroadcasterSupport());
                 }
             } catch(Exception e) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE,
-                               "Registering SLAThresholdEventAdapter",
-                               e);
+                if(logger.isDebugEnabled())
+                    logger.debug("Registering SLAThresholdEventAdapter", e);
             }
         }
     }
@@ -341,11 +323,9 @@ public class ServiceBeanSLAManager {
     private SLAPolicyHandler createSLAPolicyHandler(final SLA sla, final ClassLoader loader)
         throws Exception {
         SLAPolicyHandler slappy = SLAPolicyHandlerFactory.create(sla, proxy, slaEventHandler, context, loader);
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("["+context.getServiceElement().getName()+"] "+
-                          "SLA ["+sla.getIdentifier()+"] "+
-                          "Created SLAPolicyHandler "+
-                          "["+slappy.getClass().getName()+"]");
+        if(logger.isTraceEnabled())
+            logger.trace("[{}] SLA [{}] Created SLAPolicyHandler [{}]",
+                         context.getServiceElement().getName(), sla.getIdentifier(), slappy.getClass().getName());
         slaPolicyHandlers.add(slappy);
         return (slappy);
     }

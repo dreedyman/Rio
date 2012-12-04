@@ -16,7 +16,6 @@
 package org.rioproject.boot;
 
 import org.rioproject.logging.FileHandler;
-import org.rioproject.logging.WrappedLogger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,11 +36,13 @@ import java.util.logging.*;
  * @author Dennis Reedy
  */
 public final class LogAgent {
-    private static final WrappedLogger logger = WrappedLogger.getLogger(AgentHook.class.getName());
+    private static final Logger logger = Logger.getLogger(AgentHook.class.getName());
     private LogAgent() {
     }
 
     public static void redirectIfNecessary() {
+        if(!usingJUL())
+            return;
         String lockFileName = null;
         if (System.console() == null) {
             for (Enumeration<String> e = LogManager.getLogManager().getLoggerNames(); e.hasMoreElements(); ) {
@@ -85,7 +86,25 @@ public final class LogAgent {
             }
         } catch (FileNotFoundException e) {
             String type = isOut?"standard output":"standard error";
-            logger.log(Level.WARNING, e, "Redirecting %s to %s", type, file.getPath());
+            logger.log(Level.WARNING, String.format("Redirecting %s to %s", type, file.getPath()), e);
         }
+    }
+
+    /**
+     * Determine if we are using Java Util Logging by trying to load the {@code org.slf4j.impl.JDK14LoggerAdapter}
+     * class. The {@code JDK14LoggerAdapter} class is used by SLF4J as a wrapper over the
+     * {@link java.util.logging.Logger} class and indicates that SLF4J support for Java Util Logging is in the classpath.
+     *
+     * @return {@code true} if SLF4J support for Java Util Logging is in the classpath.
+     */
+    public static boolean usingJUL() {
+        boolean usingJUL = false;
+        try {
+            Class.forName("org.slf4j.impl.JDK14LoggerAdapter");
+            usingJUL = true;
+        } catch (ClassNotFoundException e) {
+            /* We don't care to log anything here */
+        }
+        return usingJUL;
     }
 }

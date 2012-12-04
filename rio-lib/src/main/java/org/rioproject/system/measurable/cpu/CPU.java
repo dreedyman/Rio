@@ -25,10 +25,10 @@ import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The <code>CPU</code> object is a <code>MeasurableCapability</code> which
@@ -48,7 +48,7 @@ public class CPU extends MeasurableCapability {
     private double utilization;
     /** Component for Configuration and Logging */
     static final String COMPONENT = "org.rioproject.system.measurable.cpu";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Construct a new CPU object
@@ -73,8 +73,8 @@ public class CPU extends MeasurableCapability {
         if(!isEnabled())
             return;
         setView(VIEW);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Creating ["+id+"]");
+        if(logger.isDebugEnabled())
+            logger.debug("Creating [{}]", id);
         try {
             ThresholdValues defaultThresholdVals;
             int numCPUs = Runtime.getRuntime().availableProcessors();
@@ -128,9 +128,7 @@ public class CPU extends MeasurableCapability {
             setMeasurableMonitor(monitor);
 
         } catch (Throwable e) {
-            logger.log(Level.WARNING,
-                       "Getting CPU Configuration",
-                       e);
+            logger.warn("Getting CPU Configuration", e);
         }
     }
     
@@ -159,15 +157,13 @@ public class CPU extends MeasurableCapability {
             count = 0;
             tempUtilization = 0;            
         } 
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(getId()+": utilization="+utilization);
+        if(logger.isDebugEnabled())
+            logger.debug("{}: utilization={}", getId(), utilization);
 
         if(mRes instanceof CpuUtilization)
             addWatchRecord(new CalculableCPU(getId(), (CpuUtilization)mRes, now));
         else if (mRes instanceof ProcessCpuUtilization)
-            addWatchRecord(new CalculableProcessCPU(getId(),
-                                                    (ProcessCpuUtilization)mRes,
-                                                    now));
+            addWatchRecord(new CalculableProcessCPU(getId(), (ProcessCpuUtilization)mRes, now));
         else
             addWatchRecord(new CalculableProcessCPU(getId(), mRes.getValue(), now));
         

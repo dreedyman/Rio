@@ -17,9 +17,10 @@ package org.rioproject.cybernode;
 
 import net.jini.config.Configuration;
 import org.rioproject.deploy.ServiceStatement;
-import org.rioproject.logging.WrappedLogger;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.deploy.ServiceStatementManager;
+import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,7 @@ import java.util.Map;
 public class TransientServiceStatementManager implements ServiceStatementManager {
     /** Map of ServiceElement to ServiceStatement instances */
     private final Map<ServiceElement,ServiceStatement> statementMap = new HashMap<ServiceElement,ServiceStatement>();
-    private static final WrappedLogger logger = WrappedLogger.getLogger(TransientServiceStatementManager.class.getPackage().getName());
+    private static final Logger logger = LoggerFactory.getLogger(TransientServiceStatementManager.class.getPackage().getName());
 
     /**
      * Create a TransientServiceStatementManager
@@ -92,6 +93,6 @@ public class TransientServiceStatementManager implements ServiceStatementManager
 
     private void remove(ServiceElement key) {
         statementMap.remove(key);
-        logger.fine("%s is Inactive, Removed Records", key.getName());
+        logger.debug("%s is Inactive, Removed Records", key.getName());
     }
 }

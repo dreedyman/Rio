@@ -17,8 +17,8 @@ package org.rioproject.system;
 
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import org.rioproject.config.PlatformLoader;
 import org.rioproject.config.PlatformCapabilityConfig;
+import org.rioproject.config.PlatformLoader;
 import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.resources.util.FileUtils;
 import org.rioproject.system.capability.PlatformCapability;
@@ -36,13 +36,13 @@ import org.rioproject.system.measurable.cpu.CPU;
 import org.rioproject.system.measurable.disk.DiskSpace;
 import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.system.measurable.memory.SystemMemory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The SystemCapabilities represents the capabilities of the ComputeResource
@@ -64,7 +64,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     public static final String STORAGE = StorageCapability.class.getName();
     public static final String NATIVE_LIB_CLASS = NativeLibrarySupport.class.getName();
     public static final String RIO = RioSupport.class.getName();
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     private String platformConfigDir;
     
     /**
@@ -123,7 +123,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             if(pools!=null)
                 measurables.addAll(Arrays.asList(pools));
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading CPU MeasurableCapability", e);
+            logger.warn("Loading CPU MeasurableCapability", e);
         }
 
         /* Create the CPU MeasurableCapability */
@@ -163,7 +163,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 measurables.addAll(Arrays.asList(mCaps));
             }
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading MeasurableCapability array", e);
+            logger.warn("Loading MeasurableCapability array", e);
         }
         return(measurables.toArray(new MeasurableCapability[measurables.size()]));
     }        
@@ -235,8 +235,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 PlatformCapability[] caps = parsePlatformConfig(loader, platformDir);
                 platformCapabilityList.addAll(Arrays.asList(caps));
             } else {
-                logger.warning("Unable to establish the platform " +
-                               "configuration directory, most likely RIO_HOME is not set.");
+                logger.warn("Unable to establish the platform configuration directory, most likely RIO_HOME is not set.");
             }
 
             /*
@@ -283,11 +282,11 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                     File dir = new File(dirName);
                     if(dir.isDirectory() && dir.canRead()) {
                         dirList.add(dir);
-                        if(logger.isLoggable(Level.CONFIG))
-                            logger.config("Adding directory ["+dirName+"] to check for native libraries");
+                        if(logger.isDebugEnabled())
+                            logger.debug("Adding directory [{}] to check for native libraries", dirName);
                     } else {
-                        logger.warning("Invalid directory name or access "+
-                                       "permissions to check for native libraries ["+dirName+"]. Continuing ...");
+                        logger.warn("Invalid directory name or access permissions to check for native libraries [{}]. Continuing ...",
+                                    dirName);
                     }                       
                 }
                 final String[] libExtensions = getLibExtensions();
@@ -300,7 +299,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                     return false;
                                 }
                             } catch (IOException e) {
-                                logger.log(Level.WARNING, "Trying to determine whether the file is a symbolic link", e);
+                                logger.warn( "Trying to determine whether the file is a symbolic link", e);
                             }
                             boolean matches = false;
                             for(String libExtension : libExtensions) {
@@ -317,8 +316,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                         String fileName = file.getName();
                         int index = fileName.lastIndexOf(".");
                         if (index != -1) {
-                            if (logger.isLoggable(Level.CONFIG))
-                                logger.config("Create NativeLibrarySupport object for [" + fileName + "]");
+                            if (logger.isDebugEnabled())
+                                logger.debug("Create NativeLibrarySupport object for [{}]", fileName);
                             PlatformCapability nLib = getPlatformCapability(NATIVE_LIB_CLASS);
                             String name;
                             /*if (!OperatingSystemType.isWindows()) {
@@ -331,14 +330,14 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                             nLib.setPath(dir.getCanonicalPath());
                             platforms.add(nLib);
                         } else {
-                            logger.warning("Illegal Shared Library name="+fileName);
+                            logger.warn("Illegal Shared Library name="+fileName);
                         }
                     }
                 }
             } /* End creating NativeLibrarySupport objects */
 
         } catch(Throwable t) {
-            logger.log(Level.SEVERE, "Getting PlatformCapability objects", t);
+            logger.error("Getting PlatformCapability objects", t);
         }
 
         return(platforms.toArray(new PlatformCapability[platforms.size()]));
@@ -380,7 +379,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                                                 String.class,
                                                                 defaultDir);
                 } catch (ConfigurationException e) {
-                    logger.log(Level.WARNING,
+                    logger.warn(
                                "An exception occurred tying to read the "+
                                COMPONENT+".platformDirs property, continue on " +
                                "and use default value of "+
@@ -412,7 +411,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                                               new DiskSpace(config),
                                                               config);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Loading DiskSpace MeasurableCapability", e);
+            logger.warn( "Loading DiskSpace MeasurableCapability", e);
         }
         return diskSpace;
     }

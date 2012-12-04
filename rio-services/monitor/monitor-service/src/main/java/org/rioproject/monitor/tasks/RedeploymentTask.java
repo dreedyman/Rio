@@ -16,13 +16,13 @@
 package org.rioproject.monitor.tasks;
 
 import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.monitor.OpStringManager;
+import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class represents a scheduled redeployment request
@@ -34,7 +34,7 @@ public class RedeploymentTask extends TimerTask {
     boolean clean = false;
     boolean sticky = false;
     ServiceProvisionListener listener;
-    static Logger logger = Logger.getLogger(RedeploymentTask.class.getName());
+    static Logger logger = LoggerFactory.getLogger(RedeploymentTask.class.getName());
 
 
     /**
@@ -71,7 +71,7 @@ public class RedeploymentTask extends TimerTask {
 
     public void run() {
         if (!opMgr.isActive()) {
-            if (logger.isLoggable(Level.FINEST)) {
+            if (logger.isTraceEnabled()) {
                 String name = "unknown";
                 if (instance == null && sElem == null) {
                     name = opMgr.getName();
@@ -81,7 +81,7 @@ public class RedeploymentTask extends TimerTask {
                     if (instance != null)
                         name = instance.getServiceBeanConfig().getName();
                 }
-                logger.finest("Redeployment request for " + "[" + name + "] " +
+                logger.trace("Redeployment request for " + "[" + name + "] " +
                               "cancelled, OpStringManager is not primary");
             }
             cancel();
@@ -95,8 +95,7 @@ public class RedeploymentTask extends TimerTask {
                 opMgr.doRedeploy(sElem, instance, clean, sticky, listener);
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING,
-                       "Executing Scheduled Redeployment", e);
+            logger.warn("Executing Scheduled Redeployment", e);
         } finally {
             cancel();
         }

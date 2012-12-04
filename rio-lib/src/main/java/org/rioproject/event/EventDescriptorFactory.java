@@ -15,13 +15,17 @@
  */
 package org.rioproject.event;
 
+import org.rioproject.loader.ClassAnnotator;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.url.artifact.ArtifactURLConfiguration;
 import org.rioproject.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -52,19 +56,26 @@ public final class EventDescriptorFactory {
      * {@code Resolver} can not be created.
      * @throws ClassNotFoundException If the {@link RemoteServiceEvent} class can not be found.
      * @throws IllegalArgumentException if the {@code classNames} argument is {@code null}.
+     * @throws URISyntaxException if the classpath is an artifact and the {@code URls} cannot be transformed to {@code URI}s
      */
     public static List<EventDescriptor> createEventDescriptors(String classpath,
                                                                String... classNames) throws MalformedURLException,
                                                                                             ResolverException,
-                                                                                            ClassNotFoundException {
+                                                                                            ClassNotFoundException,
+                                                                                            URISyntaxException {
         if(classNames==null)
             throw new IllegalArgumentException("classNames must not be null");
         if(classNames.length==0)
             throw new IllegalArgumentException("classNames must not be empty");
         final List<EventDescriptor> eventDescriptors = new ArrayList<EventDescriptor>();
         if (classpath != null) {
+            ClassAnnotator annotator = null;
             String[] classPath;
             if (Artifact.isArtifact(classpath)) {
+                ArtifactURLConfiguration artifactURLConfiguration = new ArtifactURLConfiguration(classpath);
+                StringBuilder artifactBuilder = new StringBuilder();
+                artifactBuilder.append("artifact:").append(artifactURLConfiguration.getArtifact());
+                annotator = new ClassAnnotator(new URL[]{new URL(artifactBuilder.toString())});
                 String[] cp = ResolverHelper.getResolver().getClassPathFor(classpath);
                 classPath = new String[cp.length];
                 for (int i = 0; i < classPath.length; i++) {
@@ -79,8 +90,12 @@ public final class EventDescriptorFactory {
             for (int i = 0; i < classPath.length; i++) {
                 urls[i] = new URL(classPath[i]);
             }
-            URLClassLoader loader = new URLClassLoader(urls,
-                                                       Thread.currentThread().getContextClassLoader());
+            URLClassLoader loader;
+            if(annotator!=null) {
+                loader = new ServiceClassLoader(ServiceClassLoader.getURIs(urls), annotator, Thread.currentThread().getContextClassLoader());
+            } else {
+                loader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
+            }
             for (String className : classNames) {
                 Class<?> cl = loader.loadClass(className);
                 eventDescriptors.add(new EventDescriptor(cl, getID(cl)));

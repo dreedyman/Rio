@@ -23,18 +23,18 @@ import net.jini.core.entry.Entry;
 import net.jini.discovery.DiscoveryManagement;
 import org.rioproject.associations.AssociationManagement;
 import org.rioproject.associations.AssociationMgmt;
-import org.rioproject.loader.CommonClassLoader;
-import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.AggregateConfig;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
-import org.rioproject.opstring.ServiceBeanConfig;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.core.jsb.ComputeResourceManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanManager;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
+import org.rioproject.loader.CommonClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
+import org.rioproject.opstring.ServiceBeanConfig;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.sla.SLA;
@@ -44,14 +44,14 @@ import org.rioproject.system.capability.software.SoftwareSupport;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.watch.WatchDataSourceRegistry;
 import org.rioproject.watch.WatchRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * JSBContext implements the ServiceBeanContext interface
@@ -103,7 +103,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /** Component name for logging and configuration property retrieval */
     private static final String COMPONENT="org.rioproject.jsb";
     /** A Logger instance for this component */
-    private static Logger logger = Logger.getLogger(COMPONENT);    
+    private static Logger logger = LoggerFactory.getLogger(COMPONENT);    
 
     /**
      * Create a JSBContext
@@ -199,14 +199,14 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             } catch (IOException e) {
                 throw new ConfigurationException("Creating configuration", e);
             }
-            if(logger.isLoggable(Level.FINER)) {
+            if(logger.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder();
                 for(String s : args) {
                     if(sb.length()>0)
                         sb.append("\n");
                     sb.append("\t").append(s);
                 }
-                logger.finer("CONFIG ARGS: \n"+sb);
+                logger.debug("CONFIG ARGS: \n{}", sb);
             }
             if(sharedConfig!=null) {
                 serviceBeanConfig =  new AggregateConfig(sharedConfig, args, cCL);
@@ -224,17 +224,14 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                         new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
                     if(parent.equals(tmpDir) &&
                        file.getName().startsWith("tmp")) {
-                        if(file.delete() && logger.isLoggable(Level.FINEST))
-                            logger.finest("Deleted temporary configuration file "+
-                                          file.getName());
+                        if(file.delete() && logger.isTraceEnabled())
+                            logger.trace("Deleted temporary configuration file {}", file.getName());
 
                     }
                 }
             } catch(IOException e) {
-                logger.log(Level.WARNING,
-                           "Unable to get canonical file for the tmp " +
-                           "directory, cannot remove generated config file(s)",
-                           e);
+                logger.warn("Unable to get canonical file for the tmp directory, cannot remove generated config file(s)",
+                            e);
             }
         }
         return(serviceBeanConfig);
@@ -322,8 +319,8 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      */
     public DiscoveryManagement getDiscoveryManagement() throws IOException {
         if(serviceDiscoMgmt == null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Create DiscoveryManagement for "+sElem.getName());
+            if(logger.isTraceEnabled())
+                logger.trace("Create DiscoveryManagement for {}", sElem.getName());
             
             DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
 
@@ -365,11 +362,8 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                 try {
                     discoConfig = getConfiguration();
                 } catch(ConfigurationException e) {
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Getting Configuration while "+
-                                   "creating DiscoveryManagement",
-                                   e);
+                    if(logger.isTraceEnabled())
+                        logger.trace("Getting Configuration while creating DiscoveryManagement", e);
                 }
                 /*try {
                     serviceDiscoMgmt = new LookupDiscoveryManager(sElem.getServiceBeanConfig().getGroups(),
@@ -403,9 +397,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                                                         AssociationManagement.class, 
                                                         defaultAssocMgmt);
             } catch(ConfigurationException e) {
-                logger.log(Level.WARNING, 
-                           "Creating AssociationManagement, will use default", 
-                           e);
+                logger.warn("Creating AssociationManagement, will use default", e);
                 associationManagement = defaultAssocMgmt;
             }
         }            
@@ -427,9 +419,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                         new WatchDataSourceRegistry());
                 watchRegistry.setServiceBeanContext(this);
             } catch(Exception e) {
-                logger.log(Level.WARNING,
-                           "Getting watchRegistry",
-                           e);
+                logger.warn("Getting watchRegistry", e);
             }
         }
         return(watchRegistry);

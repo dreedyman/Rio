@@ -18,12 +18,12 @@ package org.rioproject.test;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.lookup.ServiceDiscoveryManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
-
 
 /**
  * The class represents a service monitor. Using this class, you
@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 public class ServiceMonitor<T> {
     public static long MAX_TIMEOUT = 180000;
     public static long STABILITY_TIMEOUT = 3000;
-    private static Logger logger = Logger.getLogger(ServiceMonitor.class.getPackage().getName());
+    private static Logger logger = LoggerFactory.getLogger(ServiceMonitor.class.getPackage().getName());
     private ServiceDiscoveryManager sdm;
     private Class<T> type;
     private long maxTimeout = MAX_TIMEOUT;

@@ -26,11 +26,11 @@ import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class manages interactions with {@link OpStringManager} classes.
@@ -48,7 +48,7 @@ public class OpStringMangerController {
     private StateManager stateManager;
     private ServiceProvisioner serviceProvisioner;
     private Uuid uuid;
-    private static Logger logger = Logger.getLogger(OpStringMangerController.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(OpStringMangerController.class.getName());
 
     void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {
         this.serviceProvisioner = serviceProvisioner;
@@ -97,8 +97,7 @@ public class OpStringMangerController {
             try {
                 os[i++] = opMgr.doGetOperationalString();
             } catch (Exception e) {
-                logger.log(Level.WARNING,
-                           "Getting all OperationalString instances", e);
+                logger.warn("Getting all OperationalString instances", e);
             }
         }
         return (os);
@@ -157,9 +156,7 @@ public class OpStringMangerController {
                     }
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING,
-                           "Getting the primary OperationalStringManager for [" + name + "]",
-                           e);
+                logger.warn("Getting the primary OperationalStringManager for [" + name + "]", e);
             }
         }
         return(mgr);
@@ -187,11 +184,10 @@ public class OpStringMangerController {
                     }
                 }
             } catch (RemoteException e) {
-                if (logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE,
-                               "Communicating to peer while searching for " +
-                               "primary testManager of [" + opStringName + "]",
-                               e);
+                if (logger.isDebugEnabled())
+                    logger.debug("Communicating to peer while searching for " +
+                                 "primary testManager of [" + opStringName + "]",
+                                 e);
             } catch (OperationalStringException e) {
                 /* ignore */
             }
@@ -239,8 +235,8 @@ public class OpStringMangerController {
         boolean active = dAdmin==null;
         try {
             if(!opStringExists(opString.getName())) {
-                if(logger.isLoggable(Level.FINEST))
-                    logger.finest("Adding OpString ["+opString.getName()+"] active ["+active+"]");
+                if(logger.isTraceEnabled())
+                    logger.trace("Adding OpString ["+opString.getName()+"] active ["+active+"]");
 
                 try {
                     opMgr = new DefaultOpStringManager(opString, parent, active, config, this);
@@ -248,7 +244,7 @@ public class OpStringMangerController {
                     opMgr.setEventProcessor(eventProcessor);
                     opMgr.setStateManager(stateManager);
                 } catch (RemoteException e) {
-                    logger.log(Level.WARNING, "Creating OpStringManager", e);
+                    logger.warn("Creating OpStringManager", e);
                     return(null);
                 }
                 synchronized(pendingManagers) {
@@ -272,12 +268,12 @@ public class OpStringMangerController {
                                 ServiceBeanInstance[] instances = activeMgr.getServiceBeanInstances(elem);
                                 elemInstanceMap.put(elem, instances);
                             } catch (Exception e) {
-                                logger.log(Level.WARNING, "Getting ServiceBeanInstances from active testManager", e);
+                                logger.warn("Getting ServiceBeanInstances from active testManager", e);
                             }
                         }
                         opMgr.startManager(listener, elemInstanceMap);
                     } catch(Exception e) {
-                        logger.log(Level.WARNING, "Getting active OperationalStringManager", e);
+                        logger.warn("Getting active OperationalStringManager", e);
                     }
                 } else {
                     opMgr.startManager(listener);
@@ -397,8 +393,8 @@ public class OpStringMangerController {
                 }
             }
             sb.append("\n+========================+");
-            if(logger.isLoggable(Level.FINE))
-                logger.log(Level.FINE, sb.toString());
+            if(logger.isDebugEnabled())
+                logger.debug(sb.toString());
         }
     }
 }

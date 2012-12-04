@@ -31,7 +31,8 @@ import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
 import java.io.File;
 import java.net.URL;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Dennis Reedy
@@ -40,7 +41,7 @@ import java.util.logging.Logger;
 public class EventCollectorITest {
     @SetTestManager
     static TestManager testManager;
-    private static Logger logger = Logger.getLogger(EventCollectorITest.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(EventCollectorITest.class.getName());
 
     @BeforeClass
     public static void clean() {

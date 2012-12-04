@@ -39,9 +39,7 @@ public class AssociationProxyUtil {
     public static <T> T getService(T proxy) {
         T narrowed = proxy;
         if(proxy instanceof AssociationProxy) {
-            narrowed =
-                ((AssociationProxy<T>)proxy).getServiceSelectionStrategy()
-                                            .getService();
+            narrowed = ((AssociationProxy<T>)proxy).getServiceSelectionStrategy().getService();
         }
         return narrowed;
     }

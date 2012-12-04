@@ -15,11 +15,12 @@
  */
 package org.rioproject.rmi;
 
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.url.artifact.ArtifactURLConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -29,7 +30,6 @@ import java.rmi.server.RMIClassLoaderSpi;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 
 /**
  * An <code>RMIClassLoader</code> provider that supports the resolving of artifacts based on the
@@ -58,7 +58,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
      */
     private final Map<String, String> classAnnotationMap = new ConcurrentHashMap<String, String>();
     private static final Resolver resolver;
-    private static final WrappedLogger logger = WrappedLogger.getLogger(ResolvingLoader.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ResolvingLoader.class.getName());
     static {
         try {
             resolver = ResolverHelper.getResolver();
@@ -75,12 +75,12 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         String resolvedCodebase = resolveCodebase(codebase);
         if(codebase!=null && codebase.startsWith("artifact:") && classAnnotationMap.get(name)==null) {
             classAnnotationMap.put(name, codebase);
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("class: %s, codebase: %s, size now %d", name, codebase, classAnnotationMap.size());
+            if(logger.isTraceEnabled()) {
+                logger.trace("class: %s, codebase: %s, size now %d", name, codebase, classAnnotationMap.size());
             }
         }
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Load class %s using codebase %s, resolved to %s", name, codebase, resolvedCodebase);
+        if(logger.isTraceEnabled())
+            logger.trace("Load class %s using codebase %s, resolved to %s", name, codebase, resolvedCodebase);
         return loader.loadClass(resolvedCodebase, name, defaultLoader);
     }
 
@@ -89,7 +89,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                                    final String[] interfaces,
                                    final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
         String resolvedCodebase = resolveCodebase(codebase);
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             StringBuilder builder = new StringBuilder();
             for(String s : interfaces) {
                 if(builder.length()>0) {
@@ -97,7 +97,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 }
                 builder.append(s);
             }
-            logger.finest("Load proxy classes %s using codebase %s, resolved to %s", builder.toString(), codebase, resolvedCodebase);
+            logger.trace("Load proxy classes %s using codebase %s, resolved to %s", builder.toString(), codebase, resolvedCodebase);
         }
         return loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
     }
@@ -123,9 +123,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             HashMap loaderTableMap = (HashMap)loaderTable.get(null);
             findAndRemove(serviceLoader, loaderTableMap);
         } catch (NoSuchFieldException e) {
-            logger.log(Level.WARNING, "Failure accessing the loaderTable field", e);
+            logger.warn("Failure accessing the loaderTable field", e);
         } catch (IllegalAccessException e) {
-            logger.log(Level.WARNING, "Failure accessing the loaderTable field", e);
+            logger.warn("Failure accessing the loaderTable field", e);
         }
     }
 
@@ -135,7 +135,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             adaptedCodebase = artifactToCodebase.get(codebase);
             if(adaptedCodebase==null) {
                 try {
-                    logger.fine("Resolve %s ", codebase);
+                    logger.debug("Resolve %s ", codebase);
                     StringBuilder builder = new StringBuilder();
                     String[] codebaseParts = codebase.split(" ");
                     for(String codebasePart : codebaseParts) {
@@ -152,9 +152,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     adaptedCodebase = builder.toString();
                     artifactToCodebase.put(codebase, adaptedCodebase);
                 } catch (ResolverException e) {
-                    logger.log(Level.WARNING, e, "Unable to resolve %s", codebase);
+                    logger.warn("Unable to resolve %s", codebase);
                 } catch (MalformedURLException e) {
-                    logger.log(Level.WARNING, e, "The codebase %s is malformed", codebase);
+                    logger.warn(String.format("The codebase %s is malformed", codebase), e);
                 }
             }
         } else {
@@ -176,9 +176,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     parentField.set(key, null);
                 }
             } catch (NoSuchFieldException e) {
-                logger.log(Level.WARNING, "Failure accessing the parent field", e);
+                logger.warn("Failure accessing the parent field", e);
             } catch (IllegalAccessException e) {
-                logger.log(Level.WARNING, "Failure accessing the parent field", e);
+                logger.warn("Failure accessing the parent field", e);
             }
         }
     }

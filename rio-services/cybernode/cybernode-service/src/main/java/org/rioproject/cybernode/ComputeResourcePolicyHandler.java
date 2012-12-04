@@ -21,13 +21,16 @@ import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.SystemWatchID;
-import org.rioproject.watch.*;
+import org.rioproject.watch.Calculable;
+import org.rioproject.watch.ThresholdListener;
+import org.rioproject.watch.ThresholdType;
+import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * If thresholds get crossed for memory related MeasurableCapability components, this class
@@ -43,7 +46,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
     private final ServiceConsumer serviceConsumer;
     private final ServiceBeanInstance instance;
     private final AtomicBoolean terminate= new AtomicBoolean(false);
-    private static final Logger logger = Logger.getLogger(ComputeResourcePolicyHandler.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ComputeResourcePolicyHandler.class.getName());
 
     public ComputeResourcePolicyHandler(final ServiceElement serviceElement,
                                         final EventHandler thresholdEventHandler,
@@ -65,8 +68,8 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
         if(terminate.get())
             return;
         String status = type.name().toLowerCase();
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Threshold=%s, Status=%s, Value=%f, Low=%f, High=%f",
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Threshold=%s, Status=%s, Value=%f, Low=%f, High=%f",
                                       calculable.getId(),
                                       status,
                                       calculable.getValue(),
@@ -114,8 +117,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                                                             type);
             thresholdTaskPool.execute(new SLAThresholdEventTask(event, thresholdEventHandler));
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       String.format("Could not send a SLA Threshold Notification as a " +
+            logger.warn(String.format("Could not send a SLA Threshold Notification as a " +
                                      "result of compute resource threshold " +
                                      "[%s] being crossed", calculable.getId()),
                        e);

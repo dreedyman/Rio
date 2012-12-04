@@ -25,6 +25,8 @@ import net.jini.discovery.DiscoveryManagement;
 import net.jini.discovery.LookupDiscovery;
 import net.jini.discovery.LookupDiscoveryManager;
 import org.rioproject.config.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -33,8 +35,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A strategy has been taken in an attempt to conserve resources in a multi-service 
@@ -68,13 +68,13 @@ import java.util.logging.Logger;
 public class DiscoveryManagementPool {
     private final List<DiscoveryControl> pool = new ArrayList<DiscoveryControl>();
     private final static String COMPONENT = DiscoveryManagementPool.class.getName();
-    private static Logger logger = Logger.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(COMPONENT);
     private Configuration defaultConfig;
     private static DiscoveryManagementPool singleton = new DiscoveryManagementPool();
 
     private DiscoveryManagementPool() {
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Create new DiscoveryManagementPool");
+        if(logger.isDebugEnabled())
+            logger.debug("Create new DiscoveryManagementPool");
     }
 
     /**
@@ -94,11 +94,11 @@ public class DiscoveryManagementPool {
      */
     public void setConfiguration(Configuration configuration) {
         defaultConfig = configuration;
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             if(defaultConfig==null)
-                logger.fine("Set null configuration for DiscoveryManagementPool");
+                logger.debug("Set null configuration for DiscoveryManagementPool");
             else
-                logger.log(Level.FINE, "Set configuration for DiscoveryManagementPool {0}", new Object[] {defaultConfig});
+                logger.debug("Set configuration for DiscoveryManagementPool {}", defaultConfig.toString());
         } 
     }
 
@@ -203,11 +203,11 @@ public class DiscoveryManagementPool {
             if(discoControl==null) {
                 discoControl = new DiscoveryControl(sharedName);
                 pool.add(discoControl);
-                if(logger.isLoggable(Level.FINE)) 
-                    logger.log(Level.FINE, "Create new DiscoveryControl for [{0}]", new Object[] {sharedName});
+                if(logger.isDebugEnabled()) 
+                    logger.debug("Create new DiscoveryControl for [{}]", sharedName);
             } else {
-                if(logger.isLoggable(Level.FINE)) 
-                    logger.log(Level.FINE, "DiscoveryControl obtained for [{0}]", new Object[] {sharedName});
+                if(logger.isDebugEnabled()) 
+                    logger.debug("DiscoveryControl obtained for [{}]", sharedName);
             }
             ldm = discoControl.getLookupDiscoveryManager(groups, locators);        
             if(ldm==null) {
@@ -300,7 +300,7 @@ public class DiscoveryManagementPool {
                                                             LookupLocator[] locators,
                                                             DiscoveryListener listener,
                                                             Configuration config) throws IOException {
-            if(logger.isLoggable(Level.FINE)) {
+            if(logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 if(groups==null) {
                     buffer.append("Create new SharedDiscoveryManager for ALL_GROUPS");
@@ -319,10 +319,10 @@ public class DiscoveryManagementPool {
                 buffer.append("shared name [").append(sharedName).append("], ");
                 if(config == null) {
                     buffer.append("using null config");
-                    logger.fine(buffer.toString());
+                    logger.debug(buffer.toString());
                 } else {
-                    buffer.append("using config {0}");
-                    logger.log(Level.FINE, buffer.toString(), new Object[] {config.toString()});
+                    buffer.append("using config {}");
+                    logger.warn(buffer.toString(), config.toString());
                 }
             }
 
@@ -335,19 +335,16 @@ public class DiscoveryManagementPool {
                                                     String.class,
                                                     SharedDiscoveryManager.class.getName());
             } catch (ConfigurationException e) {
-                logger.log(Level.WARNING,
-                           "Error obtaining the "+COMPONENT+".sharedDiscoveryManager property, " +
-                           "defaulting to "+className,
-                           e);
+                logger.warn("Error obtaining the "+COMPONENT+".sharedDiscoveryManager property, defaulting to "+className, e);
             }
 
             try {
                 ldm = createSharedDiscoveryManager(className, groups, locators, listener, configToUse);
             } catch (ConfigurationException e) {
-                logger.log(Level.WARNING, "Creating SharedDiscoveryManager with Configuration", e);
+                logger.warn("Creating SharedDiscoveryManager with Configuration", e);
                 ldm = createSharedDiscoveryManager(className, groups, locators, listener);
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Could not create SharedDiscoveryManager", e);
+                logger.warn("Could not create SharedDiscoveryManager", e);
                 throw e;
             }
             if(ldm!=null)
@@ -387,8 +384,7 @@ public class DiscoveryManagementPool {
                 thrown = e;
             }
             if(thrown!=null) {
-                logger.log(Level.WARNING, "Could not create "+classname+", defaulting to "+
-                                          SharedDiscoveryManager.class.getName(), thrown);
+                logger.warn("Could not create "+classname+", defaulting to "+SharedDiscoveryManager.class.getName(), thrown);
                 ldm = new SharedDiscoveryManager(this, groups, locators, listener);
             }
             return ldm;
@@ -424,9 +420,7 @@ public class DiscoveryManagementPool {
                 thrown = e;
             }
             if(thrown!=null) {
-                logger.log(Level.WARNING,
-                           "Could not create "+classname+", defaulting to "+
-                           SharedDiscoveryManager.class.getName(), thrown);
+                logger.warn("Could not create "+classname+", defaulting to "+SharedDiscoveryManager.class.getName(), thrown);
                 ldm = new SharedDiscoveryManager(this, groups, locators, listener, config);
             }
             return ldm;

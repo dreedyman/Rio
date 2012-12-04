@@ -15,14 +15,17 @@
  */
 package org.rioproject.bean.proxy;
 
+import org.rioproject.resources.servicecore.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An {@link java.lang.reflect.InvocationHandler} that delegates method
@@ -35,7 +38,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
     private Set<PackagedMethod> methodSet = new HashSet<PackagedMethod>();
     private Object service;
     private Object bean;
-    private static Logger logger = Logger.getLogger("org.rioproject.bean");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.bean");
 
     /*
      * Private constructor, instantiable only from the static factory
@@ -43,7 +46,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
     private BeanDelegator(Object service, Object bean, ClassLoader loader) throws ClassNotFoundException {
         this.service = service;
         this.bean = bean;
-        String interfaceName = "org.rioproject.resources.servicecore.Service";
+        String interfaceName = Service.class.getName();
         Class interfaceClass = Class.forName(interfaceName, false, loader);
         Method[] methods = interfaceClass.getMethods();
         for(Method method : methods) {
@@ -108,16 +111,16 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
         try {
             template = new PackagedMethod(method);
             if(methodSet.contains(template)) {
-                if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Method "+method.getName()+", " +
-                                  "invocation found in ServiceBean using template "+template);
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Method "+method.getName()+", " +
+                                 "invocation found in ServiceBean using template "+template);
                 }
                 return method.invoke(service, args);
             } else {
-                if(logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Method "+method.getName()+", invocation being performed on " +
-                                  bean.getClass().getName()+", no matching method found on service bean " +
-                                  "using template "+template);
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Method "+method.getName()+", invocation being performed on " +
+                                 bean.getClass().getName()+", no matching method found on service bean " +
+                                 "using template "+template);
                 }
                 Class beanClass = bean.getClass();
                 Method beanMethod =  beanClass.getMethod(method.getName(), method.getParameterTypes());

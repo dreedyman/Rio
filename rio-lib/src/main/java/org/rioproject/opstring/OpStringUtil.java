@@ -16,6 +16,8 @@
 package org.rioproject.opstring;
 
 import org.rioproject.util.PropertyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +26,6 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utilities for working with OpStrings.
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class OpStringUtil {
-    static Logger logger = Logger.getLogger(OpStringUtil.class.getPackage().getName());
+    static Logger logger = LoggerFactory.getLogger(OpStringUtil.class.getPackage().getName());
 
     /**
      * Check if the codebase is null or the codebase needs to be resolved
@@ -63,8 +63,8 @@ public class OpStringUtil {
      */
     public static void checkCodebase(ServiceElement elem, String codebase) throws IOException {
         if (codebase == null) {
-            if (logger.isLoggable(Level.WARNING))
-                logger.warning("Cannot fix null codebase for [" + elem.getName() + "], unknown codebase");
+            if (logger.isDebugEnabled())
+                logger.warn("Cannot fix null codebase for [{}], unknown codebase", elem.getName());
             return;
         }
         StringBuilder codebaseBuilder = new StringBuilder();
@@ -78,7 +78,7 @@ public class OpStringUtil {
             for(String jar : bundle.getJARNames())
                 canServe(jar, codebaseToUse);
             bundle.setCodebase(codebaseToUse);
-            logger.fine("Fixed ClassBundle "+bundle);
+            logger.debug("Fixed ClassBundle {}", bundle);
 
         }
 
@@ -91,13 +91,13 @@ public class OpStringUtil {
                     canServe(jar, codebaseToUse);
                 }
                 export.setCodebase(codebaseToUse);
-                logger.fine("Fixed export ClassBundle "+export);
+                logger.debug("Fixed export ClassBundle {}", export);
             } else if (export.getRawCodebase().startsWith("$[")) {
                 String resolved = PropertyHelper.expandProperties(export.getRawCodebase(), PropertyHelper.RUNTIME);
                 for(String jar : export.getJARNames())
                     canServe(jar, resolved);
                 export.setCodebase(resolved);
-                logger.fine("Fixed export ClassBundle "+export);
+                logger.debug("Fixed export ClassBundle {}", export);
             }
             for(String jar : export.getJARNames()) {
                 if(sb1.length()>0)
@@ -108,8 +108,8 @@ public class OpStringUtil {
             }
         }
         sb.append(sb1.toString());
-        if (logger.isLoggable(Level.INFO)) {
-            logger.info(elem.getName()+" derived classpath for loading artifact "+sb.toString());
+        if (logger.isInfoEnabled()) {
+            logger.info("{} derived classpath for loading artifact {}", elem.getName(), sb.toString());
         }
     }
 
@@ -136,8 +136,8 @@ public class OpStringUtil {
             } else {
                 conn = url.openConnection();
                 is = conn.getInputStream();
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer("Opened connection for "+url.toExternalForm());
+                if(logger.isTraceEnabled())
+                    logger.trace("Opened connection for {}", url.toExternalForm());
             }
 
         } finally {

@@ -20,17 +20,17 @@ import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceProvisionEvent;
-import org.rioproject.logging.WrappedLogger;
 import org.rioproject.monitor.*;
 import org.rioproject.monitor.managers.PendingManager;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RMIClassLoader;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.logging.Level;
 
 /**
  * The ProvisionTask is created to process and provision dispatch request
@@ -42,7 +42,7 @@ public class ProvisionTask implements Runnable {
     private String failureReason = null;
     private ServiceProvisionContext context;
     private PendingManager pendingManager;
-    private final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.monitor.provision");
+    private final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
 
     /**
      * Create a ProvisionTask
@@ -74,12 +74,12 @@ public class ProvisionTask implements Runnable {
             int result = doProvision(context.getProvisionRequest(), context.getServiceResource());
             if ((result & ServiceProvisioner.PROVISION_FAILURE) != 0) {
                 boolean resubmitted = true;
-                logger.fine("Provision attempt failed for [%s]", LoggingUtil.getLoggingName(context.getProvisionRequest()));
+                logger.debug("Provision attempt failed for [{}]", LoggingUtil.getLoggingName(context.getProvisionRequest()));
                 if ((result & ServiceProvisioner.UNINSTANTIABLE_JSB) != 0) {
                     /* Notify ServiceProvisionListener of failure */
                     context.getProvisionRequest().getListener().uninstantiable(context.getProvisionRequest());
                     resubmitted = false;
-                    logger.fine("Service [%s] is un-instantiable, do not resubmit",
+                    logger.debug("Service [{}] is un-instantiable, do not resubmit",
                                 LoggingUtil.getLoggingName(context.getProvisionRequest()));
                 } else if ((result & ServiceProvisioner.BAD_CYBERNODE) != 0) {
                     /* Provision request encountered a bad Cybernode,
@@ -92,7 +92,7 @@ public class ProvisionTask implements Runnable {
                     if (pendingManager != null) {
                         if (context.getProvisionRequest().getType() == ProvisionRequest.Type.PROVISION) {
                             pendingManager.addProvisionRequest(context.getProvisionRequest(), index);
-                            logger.fine("Re-submitted [%s] to %s",
+                            logger.debug("Re-submitted [{}] to {}",
                                         LoggingUtil.getLoggingName(context.getProvisionRequest()),
                                         pendingManager.getType());
                         }
@@ -106,10 +106,9 @@ public class ProvisionTask implements Runnable {
                                                                           failureReason,
                                                                           thrown));
                     } catch (RejectedExecutionException e) {
-                        logger.log(Level.WARNING, thrown,
-                                   "RejectedExecutionException: Unable to submit ProvisionFailureEvent for %s." +
-                                   "Provision Failure reason: %s.",
-                                   LoggingUtil.getLoggingName(context.getProvisionRequest()));
+                        logger.warn("RejectedExecutionException: Unable to submit ProvisionFailureEvent for {}." +
+                                    "Provision Failure reason: {}.",
+                                    LoggingUtil.getLoggingName(context.getProvisionRequest()), failureReason, thrown);
                     }
                 }
                 /* If we have a ServiceProvisionListener,
@@ -122,18 +121,18 @@ public class ProvisionTask implements Runnable {
                         Throwable t = e;
                         if (e.getCause() != null)
                             t = e.getCause();
-                        logger.finest("Error Notifying ServiceProvisionListeners on failure " +
-                                      "[%s:%s], this is usually a benign error and indicates " +
+                        logger.trace("Error Notifying ServiceProvisionListeners on failure " +
+                                      "[{}:{}], this is usually a benign error and indicates " +
                                       "that the ServiceProvisionListener gave up listening",
                                       t.getClass().getName(), t.getLocalizedMessage());
                     }
                 }
             } else {
                 if (jsbInstance == null) {
-                    if (logger.isLoggable(Level.FINER)) {
+                    if (logger.isDebugEnabled()) {
                         String addr = ((InstantiatorResource) context.getServiceResource().getResource()).getHostAddress();
                         String name = ((InstantiatorResource) context.getServiceResource().getResource()).getName();
-                        logger.finer("%s at [%s] did not allocate [%s], service limit assumed to have been met",
+                        logger.debug("{} at [{}] did not allocate [{}], service limit assumed to have been met",
                                      name, addr, LoggingUtil.getLoggingName(context.getProvisionRequest()));
                     }
                     return;
@@ -149,7 +148,7 @@ public class ProvisionTask implements Runnable {
                         context.getProvisionRequest().getServiceProvisionListener().succeeded(jsbInstance);
                     } catch (Exception e) {
                         Throwable cause = ThrowableUtil.getRootCause(e);
-                        logger.finest("Notifying ServiceProvisionListeners on success. [%s:%s]",
+                        logger.trace("Notifying ServiceProvisionListeners on success. [{}:{}]",
                                       cause.getClass().getName() , cause.getLocalizedMessage());
                     }
                 }
@@ -184,32 +183,32 @@ public class ProvisionTask implements Runnable {
                 */
                 int numProvisionRetries = 3;
                 for (int i = 0; i < numProvisionRetries; i++) {
-                    if (logger.isLoggable(Level.FINER)) {
+                    if (logger.isDebugEnabled()) {
                         String retry = (i == 0 ? "" : ", retry (" + i + ") ");
-                        logger.finer("Allocating %s [%s] ...", retry, LoggingUtil.getLoggingName(request));
+                        logger.debug("Allocating {} [{}] ...", retry, LoggingUtil.getLoggingName(request));
                     }
                     DeployedService deployedService = ir.getInstantiator().instantiate(event);
                     if (deployedService != null) {
                         jsbInstance = deployedService.getServiceBeanInstance();
                         ir.addDeployedService(deployedService);
-                        logger.info("Allocated [%s]", LoggingUtil.getLoggingName(request));
-                        if (logger.isLoggable(Level.FINEST)) {
+                        logger.info("Allocated [{}]", LoggingUtil.getLoggingName(request));
+                        if (logger.isTraceEnabled()) {
                             Object service = jsbInstance.getService();
                             Class serviceClass = service.getClass();
-                            logger.finest("%s ServiceBeanInstance %s, Annotation %s",
+                            logger.trace("{} ServiceBeanInstance {}, Annotation {}",
                                           LoggingUtil.getLoggingName(request),
                                           jsbInstance,
                                           RMIClassLoader.getClassAnnotation(serviceClass));
                         }
                         break;
                     } else {
-                        logger.finer("%s at [%s] did not allocate [%s], retry ...",
+                        logger.debug("{} at [{}] did not allocate [{}], retry ...",
                                      ir.getName(), ir.getHostAddress(), LoggingUtil.getLoggingName(request));
                         long retryWait = 1000;
                         try {
                             Thread.sleep(retryWait);
                         } catch (InterruptedException ie) {
-                            logger.finest("Interrupted while sleeping [%d] milliseconds for provision retry",
+                            logger.trace("Interrupted while sleeping [{}] milliseconds for provision retry",
                                           retryWait);
                         }
                     }
@@ -218,7 +217,7 @@ public class ProvisionTask implements Runnable {
             } catch (UnknownEventException e) {
                 result = ServiceProvisioner.PROVISION_FAILURE;
                 failureReason = e.getLocalizedMessage();
-                logger.severe(failureReason);
+                logger.error(failureReason);
                 thrown = e;
                 context.getSelector().dropServiceResource(serviceResource);
             } catch (RemoteException e) {
@@ -244,19 +243,19 @@ public class ProvisionTask implements Runnable {
         } finally {
             if (thrown != null) {
                 if (!ThrowableUtil.isRetryable(thrown)) {
-                    logger.info("Drop %s %s from collection, reason: %s", ir.getName(), ir.getInstantiator(), failureReason);
+                    logger.info("Drop {} {} from collection, reason: {}", ir.getName(), ir.getInstantiator(), failureReason);
                     context.getSelector().dropServiceResource(serviceResource);
                     result = ServiceProvisioner.PROVISION_FAILURE | ServiceProvisioner.BAD_CYBERNODE;
                 } else {
-                    if (logger.isLoggable(Level.FINEST))
-                        logger.log(Level.WARNING, thrown, "Provisioning [%s] to [%s]",
-                                   LoggingUtil.getLoggingName(request), ir.getHostAddress());
+                    if (logger.isTraceEnabled())
+                        logger.warn("Provisioning [{}] to [{}]",
+                                   LoggingUtil.getLoggingName(request), ir.getHostAddress(), thrown);
                     else
-                        logger.warning("Provisioning [%s] to [%s], %s: %s",
-                                       LoggingUtil.getLoggingName(request),
-                                       ir.getHostAddress(),
-                                       thrown.getClass().getName(),
-                                       thrown.getLocalizedMessage());
+                        logger.warn("Provisioning [{}] to [{}], {}: {}",
+                                    LoggingUtil.getLoggingName(request),
+                                    ir.getHostAddress(),
+                                    thrown.getClass().getName(),
+                                    thrown.getLocalizedMessage());
                 }
 
             }

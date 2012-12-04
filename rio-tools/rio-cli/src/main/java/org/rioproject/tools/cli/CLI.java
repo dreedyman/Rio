@@ -25,14 +25,16 @@ import net.jini.discovery.DiscoveryLocatorManagement;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.lookup.entry.jmx.JMXProperty;
 import net.jini.lookup.entry.jmx.JMXProtocolType;
-import org.rioproject.resources.servicecore.ServiceStopHandler;
-import org.rioproject.rmi.RegistryUtil;
+import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.jmx.JMXUtil;
-import org.rioproject.RioVersion;
-import org.rioproject.util.TimeUtil;
+import org.rioproject.resources.servicecore.ServiceStopHandler;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.tools.discovery.ReggieStat;
 import org.rioproject.tools.webster.Webster;
+import org.rioproject.util.TimeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
@@ -48,8 +50,6 @@ import java.rmi.registry.Registry;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The CLI class is a utility that provides a Command Line Interface (CLI) for
@@ -69,7 +69,7 @@ public class CLI {
     final static String LIST_LENGTH="list-length";
     public static final String COMPONENT = "org.rioproject.tools.cli";
     static final String CONFIG_COMPONENT = COMPONENT;
-    public static Logger logger = Logger.getLogger(COMPONENT);
+    public static Logger logger = LoggerFactory.getLogger(COMPONENT);
     protected String cliName;
     protected String prompt = "rio> ";
     static Configuration sysConfig;
@@ -79,8 +79,7 @@ public class CLI {
     String hostAddress;
     boolean commandLine = true;
     final Map<String, Object> settings = new HashMap<String, Object>();
-    protected final Map<String, OptionHandlerDesc> optionMap =
-        new HashMap<String, OptionHandlerDesc>();
+    protected final Map<String, OptionHandlerDesc> optionMap = new HashMap<String, OptionHandlerDesc>();
     String homeDir;
     File currentDir;
     File rioLog;
@@ -384,14 +383,14 @@ public class CLI {
                                                  OptionHandlerDesc[].class,
                                                  new OptionHandlerDesc[0]);
         if(addOptionHandlers.length > 0) {
-            if(logger.isLoggable(Level.CONFIG)) {
+            if(logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 for(int i = 0; i < addOptionHandlers.length; i++) {
                     if(i > 0)
                         buffer.append("\n");
                     buffer.append("    ").append(addOptionHandlers[i].toString());
                 }
-                logger.config("addOptionHandlers\n"+buffer.toString());
+                logger.debug("addOptionHandlers\n{}",buffer.toString());
             }
             List<OptionHandlerDesc> list = new ArrayList<OptionHandlerDesc>();
             list.addAll(Arrays.asList(optionHandlers));

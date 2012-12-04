@@ -26,12 +26,12 @@ import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.watch.StopWatch;
 import org.rioproject.watch.Watch;
 import org.rioproject.watch.WatchDataSourceRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The EventHandler is an abstract class that handles the basic event plumbing.
@@ -50,9 +50,8 @@ public abstract class EventHandler {
     protected WatchDataSourceRegistry watchRegistry = null;
     protected LeasedListManager resourceMgr;
     public static final String RESPONSE_WATCH = "Response Time - ";
-    protected int step = 0;
     protected long t0, t1, sendTime;
-    static final Logger logger = Logger.getLogger("org.rioproject.event");
+    static final Logger logger = LoggerFactory.getLogger("org.rioproject.event");
     /**
      * The sequence number is an increasing value that will act as a hint to the
      * number of occurrences of an event type. The sequence number should differ
@@ -111,24 +110,13 @@ public abstract class EventHandler {
     public EventRegistration register(Object eventSource,
                                       RemoteEventListener listener,
                                       MarshalledObject handback, 
-                                      long duration)
-    throws LeaseDeniedException {
-        EventRegistrationResource resource = new EventRegistrationResource(listener,
-                                                                           handback);
+                                      long duration) throws LeaseDeniedException {
+        EventRegistrationResource resource = new EventRegistrationResource(listener, handback);
         ServiceResource sr = new ServiceResource(resource);
         Lease lease = landlord.newLease(sr, duration);
-        EventRegistration registration = 
-            new EventRegistration(descriptor.eventID,
-                                  eventSource,
-                                  lease,
-                                  sequenceNumber);
-        if(logger.isLoggable(Level.FINEST))
-            logger.log(Level.FINEST,
-                       "Total registrations for {0} {1}",
-                       new Object[] {descriptor,
-                                     getRegistrantCount()
-                                     }
-                       );
+        EventRegistration registration = new EventRegistration(descriptor.eventID, eventSource, lease, sequenceNumber);
+        if(logger.isTraceEnabled())
+            logger.trace("Total registrations for {} {}", descriptor.toString(), getRegistrantCount());
         return (registration);
     }
 
@@ -171,7 +159,7 @@ public abstract class EventHandler {
                 responseWatch.getWatchDataSource().clear();
                 responseWatch.getWatchDataSource().close();
             } catch(RemoteException e) {
-                logger.log(Level.SEVERE, "Destroying Watches", e);
+                logger.error("Destroying Watches", e);
             }
         }
         responseWatch = null;
@@ -226,10 +214,8 @@ public abstract class EventHandler {
                 if(sr == null)
                     break;
                 if(!landlord.ensure(sr)) {
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Could not ensure resource lease for {0}",
-                                   sr);
+                    if(logger.isTraceEnabled())
+                        logger.trace("Could not ensure resource lease for {}", sr);
                     resourceMgr.removeResource(sr);
                     landlord.remove(sr);
                 } else {
@@ -237,8 +223,8 @@ public abstract class EventHandler {
                 }
             }
         } catch(NoSuchElementException e) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("No ServiceResource instances");
+            if(logger.isTraceEnabled())
+                logger.trace("No ServiceResource instances");
         }
         return (sr);
     }
@@ -249,7 +235,7 @@ public abstract class EventHandler {
      * <code>-Dorg.rioproject.debug</code> flag is set
      */
     protected void printStats() {
-        if(!logger.isLoggable(Level.FINEST))
+        if(!logger.isTraceEnabled())
             return;
         if(sent == 0)
             sktime = System.currentTimeMillis();
@@ -257,13 +243,7 @@ public abstract class EventHandler {
         if(m == 0 && sent > 0) {
             ektime = System.currentTimeMillis();
             tmp = (ektime - sktime) / 1000.f;
-            logger.finest("Sent ["
-                          + sent
-                          + "]\t[1000/"
-                          + tmp
-                          + "]\t["
-                          + (1000.f / tmp)
-                          + "/Second]");
+            logger.trace("Sent [{}]]\t[1000/{}]\t[{}/Second]", sent, tmp, (1000.f/tmp));
             sktime = System.currentTimeMillis();
         }
     }

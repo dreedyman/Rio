@@ -26,7 +26,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * The {@code OpStringLoader} utility is a helper class used to parse and return an {@link OperationalString}.<br/>
@@ -45,8 +44,6 @@ public class OpStringLoader {
     private String[] groups;
     /** Path location of an OperationalString loaded from the file system */
     private String loadPath;
-    /** A suitable Logger */
-    private static Logger logger = Logger.getLogger("org.rioproject.opstring");
     /** Default FaultDetectionHandler */
     public static final String DEFAULT_FDH =
         "org.rioproject.fdh.AdminFaultDetectionHandler";
@@ -146,7 +143,6 @@ public class OpStringLoader {
 
     @SuppressWarnings("unchecked")
     private OperationalString[] parse(Object source) throws Exception {
-        logger.fine("Parsing file " + source + "...");
 
         /* Search for a resource named
          * "/org/rioproject/opstring/OpStringParserSelectionStrategy" in the

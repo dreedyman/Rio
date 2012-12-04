@@ -38,14 +38,14 @@ import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.StopWatch;
 import org.rioproject.watch.Watch;
 import org.rioproject.watch.WatchDataSourceRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The BasicEventConsumer is a helper class that manages the
@@ -89,7 +89,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     public static final String RESPONSE_WATCH = "Response Time";
     static final String COMPONENT = "org.rioproject.event";
     /** The Logger */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     /** EventLeaseManager id token */
     static int token = 0;
     private Configuration config;
@@ -199,9 +199,9 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         eventConsumer = (EventConsumer)exporter.export(this);
         //refQueue = new ReferenceQueue();
         this.edTemplate = edTemplate;
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             if(edTemplate!=null)
-                logger.finest("Create BasicEventConsumer for EventDescriptor : "+edTemplate.toString());
+                logger.trace("Create BasicEventConsumer for EventDescriptor : {}", edTemplate.toString());
         }
         this.handback = handback;
         if(listener != null)
@@ -226,7 +226,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             try {
                 deregister(listener);
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Deregistering EventConsumer", e);
+                logger.warn("Deregistering EventConsumer", e);
             }
         }
         /* Destroy the watch */
@@ -236,7 +236,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             try {
                 exporter.unexport(true);
             } catch(IllegalStateException e) {
-                logger.log(Level.WARNING, "EventConsumer not unexported", e);
+                logger.warn("EventConsumer not unexported", e);
             }
         }
     }
@@ -317,9 +317,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                 responseWatch.getWatchDataSource().clear();
                 responseWatch.getWatchDataSource().close();
             } catch(RemoteException e) {
-                logger.log(Level.WARNING,
-                           "RemoteException Destroying Watch",
-                           e);
+                logger.warn("RemoteException Destroying Watch", e);
             }
         }
         responseWatch = null;
@@ -361,25 +359,20 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                                             "construct it with an EventDescriptor");
 
         if(!(item.service instanceof EventProducer)) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Service is not an EventProducer");
+            if(logger.isTraceEnabled())
+                logger.trace("Service is not an EventProducer");
             return (null);
         }
 
         EventDescriptor eDesc = getDescriptor(item.attributeSets, edTemplate);
         if(eDesc == null) {
-            if(logger.isLoggable(Level.FINER))
-                logger.finer("Cannot get EventDescriptor match");
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "ServiceItem.service ClassLoader {0}, "+
-                           "EventDescriptor {1}, "+
-                           "EventDescriptor ClassLoader {2}",
-                           new Object[] {
-                                 item.service.getClass().getClassLoader().toString(),
-                                 edTemplate.toString(),
-                                 edTemplate.getClass().getClassLoader().toString()
-                });
+            if(logger.isDebugEnabled())
+                logger.debug("Cannot get EventDescriptor match");
+            if(logger.isTraceEnabled())
+                logger.trace("ServiceItem.service ClassLoader {}, EventDescriptor {}, EventDescriptor ClassLoader {}",
+                             item.service.getClass().getClassLoader().toString(),
+                             edTemplate.toString(),
+                             edTemplate.getClass().getClassLoader().toString());
             return (null);
         }
 
@@ -410,8 +403,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             throw new IllegalArgumentException("serviceID is null");
 
         if(leaseTable.containsKey(serviceID)) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Already registered to EventProducer");
+            if(logger.isTraceEnabled())
+                logger.trace("Already registered to EventProducer");
             return eventRegistrationTable.get(eventDesc.eventID);
         }
 
@@ -441,18 +434,18 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                 lease = (Lease)eventLeasePreparer.prepareProxy(eReg.getLease());
                 long leaseTime = lease.getExpiration() - System.currentTimeMillis();
                 if(leaseTime>0) {
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Event Registration Lease acquired and prepared. " +
-                                      "Duration="+leaseTime+ " ("+ (leaseTime / 1000)+ " seconds)");
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("Event Registration Lease acquired and prepared. Duration={} ({} seconds)",
+                                     leaseTime, (leaseTime / 1000));
                     }
                     break;
                 } else {
-                    logger.warning("Invalid Lease time ["+leaseTime+"], retry count ["+i+"]");
+                    logger.warn("Invalid Lease time [{}], retry count [{}]", leaseTime, i);
                     try {
                         lease.cancel();
                     } catch(Exception e ) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.log(Level.FINEST, "Cancelling Lease with invalid lease time", e);
+                        if(logger.isTraceEnabled())
+                            logger.trace("Cancelling Lease with invalid lease time", e);
                     }
                     if(retryWait>0) {
                         try {
@@ -466,16 +459,10 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             } catch(Exception t) {
                 /* Determine if we should even try to reconnect */
                 if(!ThrowableUtil.isRetryable(t)) {
-                    logger.log(Level.WARNING,
-                               "EventLeaseManager ID={0}, Unrecoverable " +
-                               "Exception getting EventRegistration",
-                               new Object[]{eDesc});
+                    logger.warn("EventLeaseManager ID={}, Unrecoverable Exception getting EventRegistration", eDesc.toString());
 
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST,
-                                   "Unrecoverable Exception getting "+
-                                   "EventRegistration for "+eDesc.toString(),
-                                   t);
+                    if(logger.isTraceEnabled())
+                        logger.trace("Unrecoverable Exception getting EventRegistration for "+eDesc.toString(), t);
                     break;
                 } else {
                     if(retryWait>0) {
@@ -560,8 +547,6 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * that a given proxy to this event consumer can be trusted
      */
     public TrustVerifier getProxyVerifier() {
-        if(logger.isLoggable(Level.FINEST))
-            logger.entering(this.getClass().getName(), "getProxyVerifier");
         return (new BasicProxyTrustVerifier(eventConsumer));
     }
 
@@ -585,11 +570,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                 try {
                     ed.getClass().getMethod("matches", EventDescriptor.class);
                 } catch (NoSuchMethodException e) {
-                    logger.log(Level.WARNING,
-                               "Rio version mismatch, " +
-                               EventDescriptor.class.getName() + " " +
-                               "missing matches method",
-                               e);
+                    logger.warn("Rio version mismatch, " +EventDescriptor.class.getName() + " missing matches method", e);
                     return (null);
                 }
                 if (ed.matches(template)) {
@@ -598,8 +579,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                 }
             }
         }
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Matched ["+template.toString()+"] ? "+(matchedDescriptor==null?"NO":"YES"));
+        if(logger.isTraceEnabled())
+            logger.trace("Matched [{}] ? {}", template.toString(), (matchedDescriptor==null?"NO":"YES"));
         return (matchedDescriptor);
     }
 
@@ -609,7 +590,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * FINEST
      */
     protected void printStats() {
-        if(!logger.isLoggable(Level.FINEST))
+        if(!logger.isTraceEnabled())
             return;
         if(received == 0)
             sktime = System.currentTimeMillis();
@@ -617,7 +598,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         if(m == 0 && received > 0) {
             ektime = System.currentTimeMillis();
             float tmp = (ektime - sktime) / 1000.f;
-            logger.finest(String.format("Recvd [%d], \t[1000/%f]\t[%f/Second]", received, tmp, 1000.f/tmp));
+            logger.trace(String.format("Recvd [%d], \t[1000/%f]\t[%f/Second]", received, tmp, 1000.f/tmp));
             sktime = System.currentTimeMillis();
         }
     }
@@ -668,15 +649,15 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
 
         public void run() {
             long startTime = System.currentTimeMillis();
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("Received RemoteServiceEvent ["+ rsEvent.getClass().getName()+ "], " +
-                              "Number of subscribers : "+ eventSubscribers.size());
+            if(logger.isTraceEnabled()) {
+                logger.trace("Received RemoteServiceEvent [{}], Number of subscribers : {}",
+                             rsEvent.getClass().getName(), eventSubscribers.size());
             }
 
             RemoteServiceEventListener[] listeners = getListeners();
             for (RemoteServiceEventListener listener : listeners) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Notify subscriber ["+listener.getClass().getName() + "]");
+                if (logger.isTraceEnabled())
+                    logger.trace("Notify subscriber [{}]", listener.getClass().getName());
                 listener.notify(rsEvent);
                 received++;
                 printStats();
@@ -718,13 +699,9 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             this.eDesc = eDesc;
             setDaemon(true);
             start();
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "Created EventLeaseManager ID={0}, EventDescriptor={1}, "
-                           + "Lease Time={2} seconds",
-                           new Object[]{id,
-                                        eDesc.toString(),
-                                        (leaseTime / 1000)});
+            if(logger.isTraceEnabled())
+                logger.trace("Created EventLeaseManager ID={}, EventDescriptor={}, Lease Time={} seconds",
+                           id, eDesc.toString(), (leaseTime / 1000));
         }
 
         void drop(boolean disconnect) {
@@ -761,41 +738,25 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                         /* Determine if we should even try to reconnect */
                         if(!ThrowableUtil.isRetryable(e)) {
                             keepAlive = false;
-                            logger.log(Level.WARNING,
-                                       "EventLeaseManager ID={0}, Unrecoverable " +
-                                       "Exception "+
-                                       "renewing Lease, dropping Lease renewal "+
-                                       "for {1}",
-                                       new Object[]{id, eDesc.toString()});
+                            logger.warn("EventLeaseManager ID={}, Unrecoverable Exception renewing Lease, dropping Lease renewal for {}",
+                                       id, eDesc.toString());
 
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.log(Level.FINEST,
-                                           "Unrecoverable Exception renewing"+
-                                           "Lease for "+eDesc.toString(),
-                                           e);
+                            if(logger.isTraceEnabled())
+                                logger.trace("Unrecoverable Exception renewing Lease for "+eDesc.toString(), e);
                         }
                         if(keepAlive) {
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.log(Level.FINEST,
-                                           "Attempt to reconnect to producer {0} "+
-                                           "for event {1}",
-                                           new Object[] {producer,
-                                                         eDesc.toString()});
+                            if(logger.isTraceEnabled())
+                                logger.trace("Attempt to reconnect to producer {} for event {}",
+                                             producer.toString(), eDesc.toString());
                             lease = connect(producer, eDesc);
                             if(lease==null) {
-                                logger.log(Level.WARNING,
-                                           "EventLeaseManager ID={0}, Unable to "+
-                                           "obtain Lease, dropping Lease renewal "+
-                                           "for {1}",
-                                           new Object[]{id, eDesc.toString()});
+                                logger.warn("EventLeaseManager ID={}, Unable to obtain Lease, dropping Lease renewal for {}",
+                                           id, eDesc.toString());
                                 keepAlive = false;
                             } else {
-                                if(logger.isLoggable(Level.FINEST))
-                                    logger.log(Level.FINEST,
-                                               "Reconnect succeeded "+
-                                               "to producer {0} for event {1}",
-                                               new Object[] {producer,
-                                                             eDesc.toString()});
+                                if(logger.isTraceEnabled())
+                                    logger.trace("Reconnect succeeded to producer {} for event {}",
+                                                 producer.toString(), eDesc.toString());
                             }
                         }
                     }

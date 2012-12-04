@@ -15,31 +15,29 @@
  */
 package org.rioproject.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An {@link java.rmi.server.RMIClientSocketFactory} that uses a specific host
  * name (or address)
  */
-public class ClientSocketFactory implements RMIClientSocketFactory,
-                                            Serializable {
+public class ClientSocketFactory implements RMIClientSocketFactory, Serializable {
     private String host;
-    private static Logger logger =
-        Logger.getLogger(ClientSocketFactory.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ClientSocketFactory.class.getName());
 
     public ClientSocketFactory(String host) {
         this.host = host;
     }
 
     public Socket createSocket(String s, int port) throws IOException {
-        if (logger.isLoggable(Level.FINE))
-            logger.fine("Create Socket using host [" + host + "] " +
-                        "instead of [" + s + "]");
+        if (logger.isDebugEnabled())
+            logger.debug("Create Socket using host [{}] instead of [{}]", host, s);
         return new Socket(host, port);
     }
 }

@@ -28,6 +28,8 @@ import org.rioproject.config.PlatformLoader;
 import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,8 +47,6 @@ import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The RioServiceDescriptor class is a utility that conforms to the Jini&trade;
@@ -82,7 +82,7 @@ import java.util.logging.Logger;
  */
 public class RioServiceDescriptor implements ServiceDescriptor {
     static String COMPONENT = "org.rioproject.boot";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     /**
      * The parameter types for the "activation constructor".
      */
@@ -288,14 +288,14 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         if(commonJARs.length==0)
             throw new RuntimeException("No commonJARs have been defined");
         */
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             StringBuilder buffer = new StringBuilder();
             for(int i=0; i<commonJARs.length; i++) {
                 if(i>0)
                     buffer.append("\n");
                 buffer.append(commonJARs[i].toExternalForm());
             }
-            logger.finest("commonJARs=\n"+buffer.toString());
+            logger.trace("commonJARs=\n{}", buffer.toString());
         }
 
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
@@ -310,7 +310,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                    ClassLoaderUtil.getClasspathURLs(getClasspath())),
                                    annotator,
                                    commonCL);
-        if(logger.isLoggable(Level.FINE))
+        if(logger.isDebugEnabled())
             ClassLoaderUtil.displayClassLoaderTree(serviceCL);
         
         currentThread.setContextClassLoader(serviceCL);
@@ -327,10 +327,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 initialGlobalPolicy = Policy.getPolicy();
                 globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
                 Policy.setPolicy(globalPolicy);
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "Global policy set: {0}",
-                               globalPolicy);
+                if(logger.isTraceEnabled())
+                    logger.trace("Global policy set: {}", globalPolicy.toString());
             }                        
             DynamicPolicyProvider service_policy = 
                 new DynamicPolicyProvider(
@@ -355,20 +353,15 @@ public class RioServiceDescriptor implements ServiceDescriptor {
 
             Class implClass;
             implClass = Class.forName(getImplClassName(), false, serviceCL);
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Attempting to get implementation constructor");
+            if(logger.isTraceEnabled())
+                logger.trace("Attempting to get implementation constructor");
             Constructor constructor = implClass.getDeclaredConstructor(actTypes);
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "Obtained implementation constructor: {0}",
-                           constructor);
+            if(logger.isTraceEnabled())
+                logger.trace("Obtained implementation constructor: {}", constructor.toString());
             constructor.setAccessible(true);
-            impl = constructor.newInstance(getServerConfigArgs(),
-                                           lifeCycle);
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST,
-                           "Obtained implementation instance: {0}",
-                           impl);
+            impl = constructor.newInstance(getServerConfigArgs(), lifeCycle);
+            if(logger.isTraceEnabled())
+                logger.trace("Obtained implementation instance: {}", impl.toString());
             if(impl instanceof ServiceProxyAccessor) {
                 proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
             } else if(impl instanceof ProxyAccessor) {
@@ -379,8 +372,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "Proxy =  {0}", proxy);
+            if(logger.isTraceEnabled())
+                logger.trace("Proxy =  {}", proxy.toString());
             currentThread.setContextClassLoader(currentClassLoader);
             //TODO - factor in code integrity for MO
             proxy = (new MarshalledObject<Object>(proxy)).get();
@@ -406,8 +399,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 if(!jarPath.endsWith(File.separator)) {
                     jarPath = jarPath+File.separator;
                 }
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Creating jar file path from ["+f.getCanonicalPath()+"]");
+                if(logger.isDebugEnabled())
+                    logger.debug("Creating jar file path from [{}]", f.getCanonicalPath());
 
                 JarFile jar = new JarFile(f);
                 Manifest man = jar.getManifest();

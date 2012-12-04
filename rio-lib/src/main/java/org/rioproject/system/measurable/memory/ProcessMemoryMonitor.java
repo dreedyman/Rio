@@ -19,12 +19,12 @@ import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.MXBeanMonitor;
 import org.rioproject.system.measurable.SigarHelper;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The <code>ProcessMemoryMonitor</code> object provides feedback information to the
@@ -43,8 +43,7 @@ public class ProcessMemoryMonitor implements MXBeanMonitor<MemoryMXBean> {
     private ThresholdValues tVals;
     private SigarHelper sigar;
     private long pid;
-    static Logger logger =
-        Logger.getLogger(ProcessMemoryMonitor.class.getPackage().getName());
+    static Logger logger = LoggerFactory.getLogger(ProcessMemoryMonitor.class.getPackage().getName());
     private static double KB = 1024;
     private static double MB = Math.pow(KB, 2);
 
@@ -143,7 +142,7 @@ public class ProcessMemoryMonitor implements MXBeanMonitor<MemoryMXBean> {
                 }
 
             } catch (Exception e) {
-                logger.log(Level.WARNING, "SIGAR exception getting Process Memory", e);
+                logger.warn("SIGAR exception getting Process Memory", e);
                 memoryUtilization = getJvmMemoryUtilization(utilization, heapUsage, nonHeapUsage);
             }
 

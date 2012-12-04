@@ -18,8 +18,8 @@ package org.rioproject.system.capability.connectivity;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.logging.Level;
 
 /**
  * The <code>TCPConnectivity</code> object provides definition for TCP/IP
@@ -28,7 +28,7 @@ import java.util.logging.Level;
  * @author Dennis Reedy
  */
 public class TCPConnectivity extends ConnectivityCapability {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "TCP/IP Connectivity";
     /** Number of NetworkInterfaces */
     public static final String IPv6_NIC = "IPv6 NICs";
@@ -38,7 +38,7 @@ public class TCPConnectivity extends ConnectivityCapability {
     /** 
      * Create a TCPConnectivity 
      */
-    public TCPConnectivity() {
+    public TCPConnectivity() throws SocketException {
         this(DEFAULT_DESCRIPTION);
     }
 
@@ -47,36 +47,32 @@ public class TCPConnectivity extends ConnectivityCapability {
      *
      * @param description A description
      */
-    public TCPConnectivity(String description) {
+    public TCPConnectivity(String description) throws SocketException {
         super(description);
         int ipv4Nics = 0;
         int ipv6Nics = 0;
         StringBuilder ipv4buff = new StringBuilder();
         StringBuilder ipv6buff = new StringBuilder();
-        try {
-            for(Enumeration en = NetworkInterface.getNetworkInterfaces();
-                en.hasMoreElements();) {
-                NetworkInterface nic = (NetworkInterface)en.nextElement();
-                for(Enumeration en1=nic.getInetAddresses(); en1.hasMoreElements();) {
-                    InetAddress addr = (InetAddress)en1.nextElement();                    
-                    if(addr instanceof Inet6Address) {
-                        if(ipv6Nics>0)
-                            ipv6buff.append(", ");
-                        ipv6buff.append(nic.getName());
-                        ipv6Nics++;
-                    } else {
-                        if(ipv4Nics>0)
-                            ipv4buff.append(", ");
-                        ipv4buff.append(nic.getName());
-                        ipv4Nics++;
-                    }
+        for(Enumeration en = NetworkInterface.getNetworkInterfaces();
+            en.hasMoreElements();) {
+            NetworkInterface nic = (NetworkInterface)en.nextElement();
+            for(Enumeration en1=nic.getInetAddresses(); en1.hasMoreElements();) {
+                InetAddress addr = (InetAddress)en1.nextElement();
+                if(addr instanceof Inet6Address) {
+                    if(ipv6Nics>0)
+                        ipv6buff.append(", ");
+                    ipv6buff.append(nic.getName());
+                    ipv6Nics++;
+                } else {
+                    if(ipv4Nics>0)
+                        ipv4buff.append(", ");
+                    ipv4buff.append(nic.getName());
+                    ipv4Nics++;
                 }
             }
-            define(IPv4_NIC, ipv4buff.toString());
-            if(ipv6Nics>0)
-                define(IPv6_NIC, ipv6buff.toString());
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Getting NetworkInterfaces", e);
         }
+        define(IPv4_NIC, ipv4buff.toString());
+        if(ipv6Nics>0)
+            define(IPv6_NIC, ipv6buff.toString());
     }
 }

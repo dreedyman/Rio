@@ -23,14 +23,17 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.test.*;
+import org.rioproject.test.RioTestRunner;
+import org.rioproject.test.ServiceMonitor;
+import org.rioproject.test.SetTestManager;
+import org.rioproject.test.TestManager;
 import org.rioproject.test.simple.Simple;
 import org.rioproject.test.utils.CybernodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
-import java.util.logging.Logger;
-
 
 /**
  * The class tests backup behavior of Provision Monitors.
@@ -70,7 +73,7 @@ import java.util.logging.Logger;
 @RunWith (RioTestRunner.class)
 //@IfPropertySet(name = "org.rioproject.test", value = "backup")
 public class BackupTest  {
-    private static Logger logger = Logger.getLogger(BackupTest.class.getPackage().getName());
+    private static Logger logger = LoggerFactory.getLogger(BackupTest.class.getPackage().getName());
     @SetTestManager
     TestManager testManager;
     

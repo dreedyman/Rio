@@ -28,7 +28,8 @@ import org.rioproject.config.DynamicConfiguration;
 import java.rmi.*;
 import java.rmi.server.ExportException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
  * and fields declared in <code>WatchDataSourceImpl</code>.
  */
 public class WatchDataSourceImplTest {
-    static final Logger logger = Logger.getLogger("org.rioproject.watch");
+    static final Logger logger = LoggerFactory.getLogger("org.rioproject.watch");
     /**
      * The set of possible boolean values.
      */

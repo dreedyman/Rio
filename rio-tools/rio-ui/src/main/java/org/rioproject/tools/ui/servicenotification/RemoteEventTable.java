@@ -60,7 +60,6 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     private final JXTreeTable eventTable;
     private final RemoteEventTreeModel dataModel;
     private final ChainedRemoteEventListener remoteEventListener;
-
     private final RemoteEventConsumerManager eventConsumerManager;
     private DiscoveryManagement dMgr;
     private final Configuration config;
@@ -155,7 +154,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         dataModel.setTreeTable(eventTable);
         eventTable.setShowsRootHandles(false);
         eventTable.setAutoCreateColumnsFromModel(false);
-        eventTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        //eventTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         detailsTable = new RemoteServiceEventDetailsTable();
         JPanel detailsPanel = new JPanel(new BorderLayout(8, 8));

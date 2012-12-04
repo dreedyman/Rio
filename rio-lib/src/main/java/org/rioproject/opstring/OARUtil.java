@@ -19,12 +19,13 @@ import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.deploy.StagedData;
 import org.rioproject.resources.util.DownloadManager;
 import org.rioproject.resources.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.jar.JarFile;
-import java.util.logging.Logger;
 
 /**
  * Utilities for working with OperationalString Archives (OARs)
@@ -32,6 +33,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class OARUtil {
+    private static final Logger logger = LoggerFactory.getLogger(OARUtil.class.getName());
 
     /**
      * Install an OAR
@@ -100,21 +102,19 @@ public class OARUtil {
             File oarInstallDir = new File(installDir, dirName);
             if(!oarInstallDir.exists()) {
                 if(oarInstallDir.mkdirs()) {
-                    Logger.getAnonymousLogger().info("Created "+oarInstallDir.getPath());
+                    logger.info("Created {}", oarInstallDir.getPath());
                 }
             }
             File installed = new File(oarInstallDir, oarFile.getName());
             if(installed.exists()) {
                 if(installed.delete())
-                    Logger.getAnonymousLogger().info("Removed older OAR "+installed.getName());
+                   logger.info("Removed older OAR {}", installed.getName());
             }
             if(oarFile.renameTo(installed)) {
-                Logger.getAnonymousLogger().info("Installed OAR to "+installed.getPath());
+                logger.info("Installed OAR to {}", installed.getPath());
                 DownloadManager.extract(oarInstallDir, installed);                
             } else {
-                throw new IOException("Could not install OAR to "+
-                                      installed.getPath()+". This may be a " +
-                                      "permissions problem");
+                throw new IOException("Could not install OAR to "+installed.getPath()+". This may be a permissions problem");
             }
         } else {
             throw new IOException("Installation must be a .jar or an .oar");
@@ -135,11 +135,13 @@ public class OARUtil {
         OAR oar  = null;
         if(dir.isDirectory()) {
             File[] files = dir.listFiles();
-            for (File file : files) {
-                if (file.getName().endsWith("oar")) {
-                    oar = new OAR(file);
-                    oar.setDeployDir(FileUtils.getFilePath(file.getParentFile()));
-                    break;
+            if(files!=null) {
+                for (File file : files) {
+                    if (file.getName().endsWith("oar")) {
+                        oar = new OAR(file);
+                        oar.setDeployDir(FileUtils.getFilePath(file.getParentFile()));
+                        break;
+                    }
                 }
             }
         }
@@ -159,21 +161,23 @@ public class OARUtil {
     public static File find(String name, File dir) {
         File found = null;
         File[] files = dir.listFiles();
-        for(File file : files) {
-            if(file.isDirectory()) {
-                found = find(name, file);
-                if(found!=null)
-                    break;
-            }
-            if(name.startsWith("*")) {
-                if (file.getName().endsWith(name)) {
-                    found = file;
-                    break;
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    found = find(name, file);
+                    if (found != null)
+                        break;
                 }
-            } else {
-                if (file.getName().equals(name)) {
-                    found = file;
-                    break;
+                if (name.startsWith("*")) {
+                    if (file.getName().endsWith(name)) {
+                        found = file;
+                        break;
+                    }
+                } else {
+                    if (file.getName().equals(name)) {
+                        found = file;
+                        break;
+                    }
                 }
             }
         }

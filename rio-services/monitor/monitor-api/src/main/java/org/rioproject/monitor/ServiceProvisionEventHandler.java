@@ -30,8 +30,6 @@ import java.rmi.server.ExportException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class to handle ServiceProvisionEvent notifications
@@ -45,8 +43,6 @@ public class ServiceProvisionEventHandler implements ServiceProvisionListener,
     private final AtomicInteger provisionedSuccessfully = new AtomicInteger();
     private final AtomicInteger provisionFailures = new AtomicInteger();
     private CountDownLatch serviceCounter;
-    private static final Logger logger =
-        Logger.getLogger(ServiceProvisionEventHandler.class.getPackage().getName());
 
     /**
      * Create the ServiceProvisionEventHandler utility
@@ -115,7 +111,6 @@ public class ServiceProvisionEventHandler implements ServiceProvisionListener,
 
     public void failed(ServiceElement sElem, boolean resubmitted) {
         provisionFailures.incrementAndGet();
-        logger.log(Level.WARNING, "{0} failed to be instantiated.", sElem.getName());
         receivedNotify();
     }
 

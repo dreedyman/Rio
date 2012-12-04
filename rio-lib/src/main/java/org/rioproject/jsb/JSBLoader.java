@@ -19,18 +19,18 @@ import com.sun.jini.start.LifeCycle;
 import com.sun.jini.start.ServiceProxyAccessor;
 import net.jini.export.ProxyAccessor;
 import org.rioproject.bean.BeanFactory;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.opstring.ClassBundle;
+import org.rioproject.config.ConfigHelper;
 import org.rioproject.core.jsb.ServiceBean;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanFactory;
-import org.rioproject.config.ConfigHelper;
 import org.rioproject.cybernode.ServiceBeanLoader;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.opstring.ClassBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The JSBLoader will load and create a ServiceBean.
@@ -41,7 +41,7 @@ public class JSBLoader implements ServiceBeanFactory {
     /** Component name logging */
     static String COMPONENT = "org.rioproject.jsb";
     /** A Logger */
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     /** Constructor types for a JSK service */
     private static final Class[] activationTypes = {String[].class,
                                                     LifeCycle.class};
@@ -58,20 +58,20 @@ public class JSBLoader implements ServiceBeanFactory {
         Created created;
         try {
             ClassBundle jsbBundle = context.getServiceElement().getComponentBundle();
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("Loading class ["+jsbBundle.getClassName()+"], using ClassLoader: "+jsbCL.toString());
+            if(logger.isTraceEnabled())
+                logger.trace("Loading class [{}], using ClassLoader: {}", jsbBundle.getClassName(), jsbCL.toString());
             Class implClass = jsbCL.loadClass(jsbBundle.getClassName());
             if(useActivationConstructor(implClass) && !isServiceBean(implClass)) {
                 Constructor constructor = implClass.getDeclaredConstructor(activationTypes);
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Obtained implementation constructor: {0}", constructor);
+                if(logger.isTraceEnabled())
+                    logger.trace("Obtained implementation constructor: {}", constructor);
                 constructor.setAccessible(true);
                 LifeCycle lifeCycle = (LifeCycle)context.getServiceBeanManager().getDiscardManager();
                 String[] args = ConfigHelper.getConfigArgs(context.getServiceBeanConfig().getConfigArgs());
                 Object impl = constructor.newInstance(args, lifeCycle);
                 Object proxy;
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST, "Obtained implementation instance: {0}", impl);
+                if(logger.isTraceEnabled())
+                    logger.trace("Obtained implementation instance: {}", impl);
                 if(impl instanceof ServiceProxyAccessor) {
                     proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
                 } else if(impl instanceof ProxyAccessor) {
@@ -83,15 +83,15 @@ public class JSBLoader implements ServiceBeanFactory {
 
             } else {
                 if(isServiceBean(implClass)) {
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, "Activating as ServiceBean");
+                    if(logger.isTraceEnabled())
+                        logger.trace("Activating as ServiceBean");
                     Constructor constructor = implClass.getConstructor((Class[])null);
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, "Obtained implementation constructor: {0}", constructor);
+                    if(logger.isTraceEnabled())
+                        logger.trace("Obtained implementation constructor: {}", constructor);
                     Object impl = constructor.newInstance((Object[])null);
                     ServiceBean instance = (ServiceBean)impl;
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.log(Level.FINEST, "Obtained implementation instance: {0}", instance);
+                    if(logger.isTraceEnabled())
+                        logger.trace("Obtained implementation instance: {}", instance);
                     Object proxy = instance.start(context);
                     created = new Created(impl, proxy);
                 } else {

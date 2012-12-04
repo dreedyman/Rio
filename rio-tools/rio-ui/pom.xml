@@ -67,6 +67,12 @@
             <version>1.6.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -93,6 +99,8 @@
                                     <include>net.jini.lookup:serviceui</include>
                                     <include>org.prefuse:prefuse</include>
                                     <include>org.swinglabs:swingx</include>
+                                    <include>org.slf4j:slf4j-api</include>
+                                    <include>org.slf4j:slf4j-simple</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

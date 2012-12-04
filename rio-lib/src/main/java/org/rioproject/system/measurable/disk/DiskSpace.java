@@ -25,10 +25,10 @@ import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The <code>DiskSpace</code> object is a <code>MeasurableCapability</code> which 
@@ -47,7 +47,7 @@ public class DiskSpace extends MeasurableCapability implements DiskSpaceMBean {
     /** Component for Configuration and Logging */
     static final String COMPONENT = "org.rioproject.system.measurable.disk";
     /** A Logger for this class */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Construct a new DiskSpace object
@@ -106,9 +106,7 @@ public class DiskSpace extends MeasurableCapability implements DiskSpaceMBean {
             setMeasurableMonitor(monitor);
 
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING,
-                       "Getting DiskSpace Configuration",
-                       e);
+            logger.warn("Getting DiskSpace Configuration", e);
         }        
     }
     

@@ -16,11 +16,11 @@
 package org.rioproject.system.measurable;
 
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class is used to help in loading and using
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public final class SigarHelper {
     public static final String COMPONENT = SigarHelper.class.getPackage().getName();
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     private static final double NOT_AVAILABLE = -1;
     private Object sigarInstance;
     private final Object sigarLock = new Object();
@@ -93,8 +93,8 @@ public final class SigarHelper {
                 }
             }
         } catch (Throwable e) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Could not load SIGAR");
+            if(logger.isDebugEnabled())
+                logger.debug("Could not load SIGAR");
         }
     }
     
@@ -287,9 +287,8 @@ public final class SigarHelper {
                 loadAverage = (double[])getLoadAverageMethod.invoke(sigarInstance);
             }
         } catch (Exception e) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Failed invoking getLoadAverage method, " +
-                        "load average is not available");
+            if(logger.isDebugEnabled())
+                logger.debug("Failed invoking getLoadAverage method, load average is not available");
             loadAverage = new double[]{NOT_AVAILABLE};
         }
         return loadAverage;
@@ -982,9 +981,9 @@ public final class SigarHelper {
 
     private void log(final String s, final Throwable t) {
         Throwable cause = ThrowableUtil.getRootCause(t);
-        if(logger.isLoggable(Level.FINE))
-            logger.log(Level.FINE, s, t);
+        if(logger.isDebugEnabled())
+            logger.debug(s, t);
         else
-            logger.warning(s+". Caused by: "+cause.getClass().getName()+": "+cause.getMessage());
+            logger.warn("{}. Caused by: {}: {}", s, cause.getClass().getName(), cause.getMessage());
     }
 }

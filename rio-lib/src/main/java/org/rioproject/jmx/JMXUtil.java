@@ -21,25 +21,26 @@ import net.jini.id.Uuid;
 import net.jini.lookup.entry.jmx.JMXProperty;
 import net.jini.lookup.entry.jmx.JMXProtocolType;
 import org.rioproject.config.Constants;
+import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.MBeanServerConnection;
 import javax.management.openmbean.*;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.management.ManagementFactory;
-import java.util.*;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides utilities for using JMX.
@@ -48,7 +49,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class JMXUtil {
-    private static Logger logger = Logger.getLogger(JMXUtil.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(JMXUtil.class.getName());
 
     /**
      * Get a platform MXBean proxy
@@ -66,9 +67,9 @@ public class JMXUtil {
             ObjectName objName = new ObjectName(name);
             mxBean = ManagementFactory.newPlatformMXBeanProxy(mbsc, objName.toString(), mxBeanInterface);
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Could not create PlatformMXBeanProxy", e);
+            logger.warn("Could not create PlatformMXBeanProxy", e);
         } catch (MalformedObjectNameException e) {
-            logger.log(Level.WARNING, "Could not create PlatformMXBeanProxy", e);
+            logger.warn("Could not create PlatformMXBeanProxy", e);
         }
         return mxBean;
     }

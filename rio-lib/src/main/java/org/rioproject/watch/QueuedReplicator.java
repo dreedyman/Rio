@@ -16,10 +16,16 @@
  */
 package org.rioproject.watch;
 
-import java.util.*;
-import java.io.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.*;
-import java.util.logging.*;
 
 /**
  * Provides a queued approach to replicate a Watch record.
@@ -30,7 +36,7 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
     private final BlockingQueue<Calculable> replicatorQ = new LinkedBlockingQueue<Calculable>();
     private transient ExecutorService execService;
     private transient CountDownLatch shutdownLatch;
-    private static Logger logger = Logger.getLogger("org.rioproject.watch");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.watch");
 
     /**
      * Performs the actual write to the underlying resource
@@ -99,9 +105,9 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
                         replicate(calculable);
                     }
                 } catch(IOException e) {
-                    logger.log(Level.WARNING, "Replication communication failure: ", e);
+                    logger.warn("Replication communication failure: ", e);
                 } catch (InterruptedException e) {
-                    //logger.log(Level.WARNING, "ReplicatorTask interrupted", e);
+                    //logger.warn( "ReplicatorTask interrupted", e);
                     Thread.currentThread().interrupt();
                 }
             }
@@ -114,7 +120,7 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
                     try {
                         bulkReplicate(drain);
                     } catch(IOException e) {
-                        logger.log(Level.WARNING, "Cannot archive (draining): ", e);
+                        logger.warn("Cannot archive (draining): ", e);
                     }
                 }
             } finally {
@@ -124,9 +130,7 @@ public abstract class QueuedReplicator implements WatchDataReplicator, Serializa
         }
     }
 
-    private void readObject(ObjectInputStream oStream) throws
-                                                       ClassNotFoundException,
-                                                       IOException {
+    private void readObject(ObjectInputStream oStream) throws ClassNotFoundException, IOException {
         oStream.defaultReadObject();
         replicatorQ.clear();
         init();

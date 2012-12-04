@@ -27,12 +27,12 @@ import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
-import org.rioproject.logging.WrappedLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  The WatchDataSourceImpl provides support for the WatchDataSource
@@ -151,7 +151,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     /** Component for accessing configuration and getting a Logger */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A suitable Logger */
-    protected static WrappedLogger logger = WrappedLogger.getLogger(WatchDataSourceImpl.class.getName());
+    protected static Logger logger = LoggerFactory.getLogger(WatchDataSourceImpl.class.getName());
     private final List<WatchDataReplicator> replicators = new ArrayList<WatchDataReplicator>();
 
     /**
@@ -198,11 +198,11 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                                                 1,
                                                 MAX_COLLECTION_SIZE);
         } catch(ConfigurationException e) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, "Getting WatchDataSource collection size", e);
+            if(logger.isTraceEnabled())
+                logger.trace("Getting WatchDataSource collection size", e);
             collectionSize = DEFAULT_COLLECTION_SIZE;
         }
-        logger.finest("Watch [%s] history collection size=%d", id, collectionSize);
+        logger.trace("Watch [{}] history collection size={}", id, collectionSize);
         max = collectionSize;
         initialized = true;
     }
@@ -221,11 +221,9 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
 
         if(config != null) {
             try {
-                exporter = ExporterConfig.getExporter(config,
-                                                      COMPONENT,
-                                                      "watchDataSourceExporter");
+                exporter = ExporterConfig.getExporter(config, COMPONENT, "watchDataSourceExporter");
             } catch(Exception e) {
-                logger.log(Level.SEVERE, "Getting watchDataSourceExporter", e);
+                logger.error("Getting watchDataSourceExporter", e);
             }
         }
         if(exporter == null)
@@ -323,11 +321,11 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     private void trimHistory(int range) {
         if(range == 1) {
             history.remove(0);
-            logger.finest("Removed first entry to make room in history");
+            logger.trace("Removed first entry to make room in history");
         } else {
             List subList = history.subList(0, range);
             subList.clear();
-            logger.finest("Removed %d entries to make room in history", range);
+            logger.trace("Removed {} entries to make room in history", range);
         }
     }
 
@@ -359,7 +357,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
         if(!closed) {
             addToHistory(calculable);
             for(WatchDataReplicator replicator : getWatchDataReplicators()) {
-                logger.finest("Replicating [%s]", calculable);
+                logger.trace("Replicating [{}]", calculable.toString());
                 replicator.addCalculable(calculable);
             }
         }
@@ -371,7 +369,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                 trimHistory(1);
             if(history.size() > max)
                 trimHistory((history.size() - max) - 1);
-            logger.finest("Adding to history [%s]", calculable);
+            logger.trace("Adding to history [{}]", calculable.toString());
             history.add(calculable);
         }
     }

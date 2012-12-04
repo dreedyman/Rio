@@ -18,17 +18,19 @@ package org.rioproject.cybernode;
 import net.jini.config.Configuration;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import org.rioproject.deploy.*;
-import org.rioproject.logging.WrappedLogger;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.deploy.ServiceRecord;
+import org.rioproject.event.EventHandler;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.event.EventHandler;
 import org.rioproject.system.ComputeResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 /**
  * The JSBContainer implements support for a ServiceBeanContainer
@@ -57,7 +59,7 @@ public class JSBContainer implements ServiceBeanContainer {
     /** Configuration object, which is also used as the shared configuration */
     private Configuration config;
     /** Logger */
-    private static final WrappedLogger logger = WrappedLogger.getLogger("org.rioproject.cybernode");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.cybernode");
 
     /**
      * Create a new ServiceBeanContainer
@@ -198,7 +200,7 @@ public class JSBContainer implements ServiceBeanContainer {
                 discarded(identifier);
                 delegate.terminate();
             }
-            logger.log(Level.SEVERE, t, "Could not activate service %s", CybernodeLogUtil.logName(sElem));
+            logger.error("Could not activate service {}", CybernodeLogUtil.logName(sElem), t);
             throw new ServiceBeanInstantiationException(String.format("Service %s load failed", CybernodeLogUtil.logName(sElem)),
                                                         t, true);
         } finally {
@@ -225,8 +227,8 @@ public class JSBContainer implements ServiceBeanContainer {
                 if(delegate.isActive()) {
                     delegate.update(element, opStringMgr);
                 } else {
-                    logger.warning(String.format("Service %s has been discarded, do not update",
-                                                 CybernodeLogUtil.logName(element)));
+                    logger.warn(String.format("Service %s has been discarded, do not update",
+                                              CybernodeLogUtil.logName(element)));
                 }
             }
         }
@@ -285,7 +287,7 @@ public class JSBContainer implements ServiceBeanContainer {
         }
         ServiceRecord record = delegate.getServiceRecord();
         if(record==null) {
-            logger.warning("ServiceRecord for [%s] is null, no way to notify container of instantiation",
+            logger.warn("ServiceRecord for [{}] is null, no way to notify container of instantiation",
                            delegate.getServiceElement().getName());
             return;
         }

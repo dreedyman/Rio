@@ -25,7 +25,6 @@ import org.rioproject.deploy.SystemRequirements
 import org.rioproject.exec.ExecDescriptor
 import org.rioproject.exec.ServiceExecutor
 import org.rioproject.log.LoggerConfig
-import org.rioproject.logging.GroovyLogger
 import org.rioproject.resolver.Resolver
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.sla.RuleMap
@@ -38,6 +37,7 @@ import org.rioproject.system.capability.platform.StorageCapability
 import org.rioproject.system.capability.platform.SystemMemory
 import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
+import org.slf4j.LoggerFactory
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -55,14 +55,14 @@ import static org.rioproject.opstring.OpStringParserGlobals.*
  */
 class GroovyDSLOpStringParser implements OpStringParser {
     Map<String, List<OpString>> nestedTable = new HashMap<String, List<OpString>>()
-    def logger = new GroovyLogger(getClass().name);
+    def logger = LoggerFactory.getLogger(getClass().name);
 
     public List<OpString> parse(Object source,
                                 ClassLoader loader,
                                 String[] defaultExportJars,
                                 String[] defaultGroups,
                                 Object loadPath) {
-        logger.fine "Parsing source $source"
+        logger.debug "Parsing source $source"
         ExpandoMetaClass.enableGlobally()
 
         def parent
@@ -584,8 +584,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
                                                "Resolver ${r.getClass().name}, "+
                                                "user.dir=${System.getProperty("user.dir")}")
                     u = new URL("jar:"+u.toExternalForm()+"!/")
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine "OpStringRef resolved as ${u.toExternalForm()}"
+                    if(logger.isDebugEnabled())
+                        logger.debug "OpStringRef resolved as ${u.toExternalForm()}"
                     JarURLConnection jarConn = (JarURLConnection)u.openConnection();
                     Manifest manifest = jarConn.getManifest();
                     OAR oar = new OAR(manifest)
@@ -639,9 +639,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                     }
 
                 } catch (Throwable t) {
-                    logger.log(Level.SEVERE,
-                               "Failed to include OperationalString : "+opStringRef,
-                               t)
+                    logger.error("Failed to include OperationalString : "+opStringRef, t)
                 }
             }
             emc.logging = { Closure cl ->

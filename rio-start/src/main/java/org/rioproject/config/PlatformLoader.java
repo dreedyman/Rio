@@ -22,6 +22,8 @@ import org.rioproject.RioVersion;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.util.PropertyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,8 +34,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Parses platform configuration documents
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class PlatformLoader {
     static final String COMPONENT = "org.rioproject.boot";
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Parse the platform
@@ -65,16 +65,11 @@ public class PlatformLoader {
                 if(dir.canRead()) {
                     File[] files = dir.listFiles();
                     for (File file : files) {
-                        if (file.getName().endsWith("xml") ||
-                            file.getName().endsWith("XML")) {
+                        if (file.getName().endsWith("xml") || file.getName().endsWith("XML")) {
                             try {
-                                platformList.addAll(
-                                    parsePlatform(file.toURI().toURL()));
+                                platformList.addAll(parsePlatform(file.toURI().toURL()));
                             } catch (Exception e) {
-                                logger.log(Level.WARNING,
-                                           "Could not parse ["+file.getAbsolutePath()+"], " +
-                                           "continue building platform",
-                                           e);
+                                logger.warn("Could not parse ["+file.getAbsolutePath()+"], continue building platform", e);
                             }
                         } else if(file.getName().endsWith("groovy")) {
                             GroovyClassLoader gCL = new GroovyClassLoader(getClass().getClassLoader());
@@ -89,11 +84,8 @@ public class PlatformLoader {
                                 }
                             }
                             if(methodName==null) {
-                                logger.warning("The "+file.getName()+" class " +
-                                               "does not contain a " +
-                                               "getPlatformCapabilityConfig() " +
-                                               "or getPlatformCapabilityConfigs() " +
-                                               "method ");
+                                logger.warn("The {} class does not contain a getPlatformCapabilityConfig() " +
+                                            "or getPlatformCapabilityConfigs() method", file.getName());
                                 continue;
                             }
                             Object[] args = {};
@@ -104,12 +96,8 @@ public class PlatformLoader {
                                         Collection c = (Collection)result;
                                         for(Object o : c) {
                                             if(!(o instanceof PlatformCapabilityConfig)) {
-                                                logger.warning("The "+file.getName()+
-                                                               "."+methodName+"() " +
-                                                               "method returned a collection of " +
-                                                               "invalid type(s). " +
-                                                               "The "+o.getClass().getName()+" " +
-                                                               "type is not allowed");
+                                                logger.warn("The {}.{}() method returned a collection of invalid type(s). " +
+                                                            "The {} type is not allowed", file.getName(), methodName, o.getClass().getName());
                                                 break;
                                             }
                                         }
@@ -117,30 +105,24 @@ public class PlatformLoader {
                                     } else if(result instanceof PlatformCapabilityConfig) {
                                         platformList.add((PlatformCapabilityConfig)result);
                                     } else {
-                                        logger.warning("The "+file.getName()+
-                                                       "."+methodName+"() returned " +
-                                                       "an unsupported type: "+
-                                                       result.getClass().getName());
+                                        logger.warn("The {}.{}() returned an unsupported type: {}",
+                                                    file.getName(), methodName, result.getClass().getName());
                                     }
                                 }
                             } catch(Exception e) {
                                 Throwable t = e.getCause()==null?e:e.getCause();
-                                logger.warning("The "+file.getName()+" class " +
-                                               "is in error. " +
-                                               t.getClass()+": "+t.getMessage());
+                                logger.warn("The {} class is in error. {}:{}", file.getName(), t.getClass(), t.getMessage());
                             }
                         }
                     }
                 } else {
-                    logger.warning("No read permissions for platform " +
-                                   "directory ["+directory+"]");
+                    logger.warn("No read permissions for platform directory [{}]", directory);
                 }
             } else {
-                logger.warning("Platform directory ["+dir+"] " +
-                               "is not a directory");
+                logger.warn("Platform directory [{}] is not a directory", dir);
             }
         } else {
-            logger.warning("Platform directory ["+directory+"] not found");
+            logger.warn("Platform directory [{}] not found", directory);
         }
         return(platformList.toArray(new PlatformCapabilityConfig[platformList.size()]));
     }
@@ -170,8 +152,7 @@ public class PlatformLoader {
     /*
      * Scan through Element named platform.
      */
-    Collection<PlatformCapabilityConfig> visitElement_platform(Element element,
-                                                 String configFile) {
+    Collection<PlatformCapabilityConfig> visitElement_platform(Element element, String configFile) {
         List<PlatformCapabilityConfig> capabilities = new ArrayList<PlatformCapabilityConfig>();
         NodeList nodes = element.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -185,15 +166,10 @@ public class PlatformLoader {
                         if(file.exists())
                             capabilities.add(cap);
                         else
-                            logger.warning("Platform configuration " +
-                                           "for ["+cap+"] not loaded, " +
-                                           "the path ["+cap.getPath()+"] " +
-                                           "does not exist. Make sure the " +
-                                           "configuration file " +
-                                           "["+configFile+"] " +
-                                           "is correct, or delete the file " +
-                                           "if it no longer references a " +
-                                           "valid capability");
+                            logger.warn("Platform configuration for [{}] not loaded, the path [{}] " +
+                                        "does not exist. Make sure the configuration file [{}] " +
+                                        "is correct, or delete the file if it no longer references a " +
+                                        "valid capability", cap.toString(), cap.getPath(), configFile);
                     } else if(cap.getClasspath()!=null) {
                         String[] classpath = cap.getClasspath();
                         boolean okay = true;
@@ -215,17 +191,10 @@ public class PlatformLoader {
                                     sb.append(" ");
                                 sb.append(s);
                             }
-                            logger.warning("Platform configuration " +
-                                           "for ["+cap+"] not loaded, " +
-                                           "could not locate classpath " +
-                                           "entry ["+failedClassPathEntry+"]. The "+
-                                           "classpath ["+sb.toString()+"] " +
-                                           "is invalid. Make sure the " +
-                                           "configuration file " +
-                                           "["+configFile+"] is " +
-                                           "correct, or delete the file " +
-                                           "if it no longer references a " +
-                                           "valid capability");
+                            logger.warn("Platform configuration for [{}] not loaded, could not locate classpath " +
+                                        "entry [{}]. The classpath [{}] is invalid. Make sure the configuration file " +
+                                        "[{}] is correct, or delete the file if it no longer references a valid capability",
+                                        cap.toString(), failedClassPathEntry, sb.toString(), configFile);
                         }
                     } else {
                         capabilities.add(cap);
@@ -328,10 +297,8 @@ public class PlatformLoader {
         if(System.getProperty("StaticCybernode")!=null)
             return new PlatformCapabilityConfig[0];
         if(rioHome==null) {
-            throw new IllegalArgumentException("RIO_HOME cannot be null. You " +
-                                               "must set it as a system property " +
-                                               "or it must be set in your " +
-                                               "environment");
+            throw new IllegalArgumentException("RIO_HOME cannot be null. You must set it as a system property " +
+                                               "or it must be set in your environment");
         }
         File rioHomeDir = new File(rioHome);
         if(!rioHomeDir.exists())

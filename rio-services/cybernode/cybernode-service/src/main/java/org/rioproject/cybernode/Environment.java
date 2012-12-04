@@ -18,14 +18,14 @@ package org.rioproject.cybernode;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.deploy.ServiceStatementManager;
-import org.rioproject.logging.WrappedLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
 
 /**
  * The Environment class provides methods to query and setup the operational
@@ -35,7 +35,7 @@ import java.util.logging.Level;
  */
 public class Environment {
     /** Logger */
-    static WrappedLogger logger = WrappedLogger.getLogger(CybernodeImpl.getConfigComponent());
+    static Logger logger = LoggerFactory.getLogger(Environment.class.getName());
 
     /*
      * Setup the default environment
@@ -63,12 +63,12 @@ public class Environment {
                                                                                defaultServiceStatementManager,
                                                                                config);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Exception getting ServiceStatementManager", e);
+            logger.warn("Exception getting ServiceStatementManager", e);
             serviceStatementManager = defaultServiceStatementManager;
         }
 
-        if(logger.isLoggable(Level.FINE))
-            logger.config("Using ServiceStatementManager : %s", serviceStatementManager.getClass().getName());
+        if(logger.isDebugEnabled())
+            logger.debug("Using ServiceStatementManager : {}", serviceStatementManager.getClass().getName());
         return(serviceStatementManager);
     }
 
@@ -88,7 +88,7 @@ public class Environment {
                                                     String.class, 
                                                     provisionRoot);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Exception getting provisionRoot", e);
+            logger.warn("Exception getting provisionRoot", e);
         }
         if(provisionEnabled) {
             File provisionDir = new File(provisionRoot);
@@ -121,7 +121,7 @@ public class Environment {
                 }
             }
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Exception getting configured nativeLibDirectories", e);
+            logger.warn("Exception getting configured nativeLibDirectories", e);
         }
         String nativeLibDirs = null;
         if(!nativeDirs.isEmpty()) {
@@ -156,7 +156,7 @@ public class Environment {
                                                 String.class, 
                                                 recordDir);
         } catch(ConfigurationException e) {
-            logger.log(Level.WARNING, "Exception getting recordDirectory", e);
+            logger.warn("Exception getting recordDirectory", e);
         }
         File recordRoot = new File(recordDir);        
         checkAccess(recordRoot);
@@ -187,8 +187,8 @@ public class Environment {
         File rioPath = new File(rioHome);
         if(!rioPath.exists()) {
             if(rioPath.mkdir()) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Created home directory [%s]", rioHome);
+                if(logger.isDebugEnabled())
+                    logger.debug("Created home directory [{}]", rioHome);
             }
         }
         if(!rioHome.endsWith(File.separator))
@@ -218,8 +218,8 @@ public class Environment {
     static void checkAccess(File directory, boolean isWriteable) throws IOException {
         if(!directory.exists()) {
             if(directory.mkdirs()) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Created directory [%s]", directory.getCanonicalPath());
+                if(logger.isDebugEnabled())
+                    logger.debug("Created directory [{}]", directory.getCanonicalPath());
             } else {
                 throw new IOException("Could not create directory " +
                                       "["+directory.getCanonicalPath()+"], " +

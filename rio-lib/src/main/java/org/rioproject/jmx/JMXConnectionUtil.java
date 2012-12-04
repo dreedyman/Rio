@@ -17,9 +17,11 @@ package org.rioproject.jmx;
 
 import com.sun.tools.attach.*;
 import net.jini.config.Configuration;
+import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
 import org.rioproject.rmi.RegistryUtil;
-import org.rioproject.config.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
@@ -27,9 +29,9 @@ import javax.management.remote.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides JMX connection utilities.
@@ -38,7 +40,7 @@ import java.util.logging.Logger;
  */
 public class JMXConnectionUtil {
     static final String COMPONENT = "org.rioproject.jmx";
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a {@link javax.management.remote.JMXConnectorServer}, bound to
@@ -103,7 +105,7 @@ public class JMXConnectionUtil {
         int registryPort = Integer.parseInt(sPort);
 
         if(registryPort==0) {
-            logger.severe("RMI Registry property ["+Constants.REGISTRY_PORT+"] not found, unable to create MBeanServer");
+            logger.error("RMI Registry property ["+Constants.REGISTRY_PORT+"] not found, unable to create MBeanServer");
             throw new Exception("Unable to create the JMXConnectorServer");
         }
 
@@ -116,16 +118,16 @@ public class JMXConnectionUtil {
         JMXServiceURL jmxServiceURL = new JMXServiceURL("service:jmx:rmi://"+hostAddress+":"+registryPort+
                                                         "/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
 
-        if(logger.isLoggable(Level.INFO))
-            logger.info("JMXServiceURL="+jmxServiceURL);
+        if(logger.isInfoEnabled())
+            logger.info("JMXServiceURL={}", jmxServiceURL);
 
         Map env = System.getProperties();
         JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, env, mbs);
         if(jmxConn != null) {
             jmxConn.start();
             System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
-            if(logger.isLoggable(Level.CONFIG))
-                logger.config("JMX Platform MBeanServer exported with RMI Connector");
+            if(logger.isDebugEnabled())
+                logger.debug("JMX Platform MBeanServer exported with RMI Connector");
         } else {
             throw new Exception("Unable to create the JMXConnectorServer");
         }
@@ -172,8 +174,7 @@ public class JMXConnectionUtil {
                                                                        AgentLoadException {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {
-            logger.info("The JMX Attach APIs require Java 6 or above. " +
-                        "You are running Java "+jvmVersion);
+            logger.info("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
             return null;
         }
 
@@ -206,8 +207,7 @@ public class JMXConnectionUtil {
     public static String[] listIDs() {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {
-            logger.info("The JMX Attach APIs require Java 6 or above. " +
-                        "You are running Java "+jvmVersion);
+            logger.info("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
             return new String[0];
         }
         List<String> vmList = new ArrayList<String>();
@@ -217,7 +217,7 @@ public class JMXConnectionUtil {
                 vmList.add(vmDesc.id());
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Could not obtain list of VMs", e);
+            logger.warn("Could not obtain list of VMs", e);
         }
         return vmList.toArray(new String[vmList.size()]);
 	}
@@ -249,7 +249,7 @@ public class JMXConnectionUtil {
                 vmList.add(id.invoke(vmDesc)+" "+displayName.invoke(vmDesc));
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Could not obtain list of VMs", e);
+            logger.warn("Could not obtain list of VMs", e);
         }
         return vmList.toArray(new String[vmList.size()]);
 	}

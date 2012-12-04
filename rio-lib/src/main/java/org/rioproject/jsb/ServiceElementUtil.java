@@ -26,20 +26,25 @@ import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.deploy.SystemComponent;
-import org.rioproject.opstring.*;
-import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.log.LoggerConfig;
+import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.ServiceBeanConfig;
+import org.rioproject.opstring.ServiceElement;
+import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAPolicyHandler;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.watch.ThreadDeadlockMonitor;
 import org.rioproject.watch.WatchDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServerConnection;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The ServiceElementUtil class provides static methods to assist in working
@@ -48,7 +53,7 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public final class ServiceElementUtil {
-    private static Logger logger = Logger.getLogger("org.rioproject.jsb.ServiceElementUtil");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.jsb.ServiceElementUtil");
 
     private ServiceElementUtil() {}
 
@@ -191,10 +196,8 @@ public final class ServiceElementUtil {
                                                             codebase);            
             return(!LookupAttributes.equal(serviceUIs, serviceUIs1));
         } catch (ConfigurationException e) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.log(Level.FINEST, 
-                           "Getting ServiceUIs from ServiceElement",
-                           e);
+            if(logger.isTraceEnabled())
+                logger.trace("Getting ServiceUIs from ServiceElement", e);
         }
         return(false);
     }
@@ -232,12 +235,12 @@ public final class ServiceElementUtil {
                         break;
                     }
                 }
-                if (logger.isLoggable(Level.FINEST)) {
+                if (logger.isTraceEnabled()) {
                     StringBuilder builder = new StringBuilder();
                     builder.append("[");
                     builder.append(sElem1.getName()).append(":").append(sElem1.getServiceBeanConfig().getInstanceID());
                     builder.append("] groups [").append(aGroups1).append("] matched in groups2 ?").append(matched);
-                    logger.finest(builder.toString());
+                    logger.trace(builder.toString());
                 }
                 if (!matched) {
                     different = true;

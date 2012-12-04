@@ -25,10 +25,10 @@ import org.rioproject.test.ServiceMonitor;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.rioproject.test.utils.CybernodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.logging.Logger;
-
 
 /**
  * The Scaling Service test, verifies that, if an opstring defines a SLA that
@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  */
 @RunWith (RioTestRunner.class)
 public class ScalingServiceTest {
-    static Logger logger = Logger.getLogger("org.rioproject.test.scaling");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.test.scaling");
     @SetTestManager
     static TestManager testManager;
     ServiceMonitor<Cybernode> cyberMon;

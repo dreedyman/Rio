@@ -17,13 +17,13 @@ package org.rioproject.eventcollector.service;
 
 import net.jini.core.event.RemoteEvent;
 import org.rioproject.event.RemoteServiceEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An {@code EventManager} that keeps an in-memory collection of events.
@@ -32,18 +32,18 @@ import java.util.logging.Logger;
  */
 public class TransientEventManager extends AbstractEventManager {
     private final ConcurrentSkipListMap<EventKey, RemoteServiceEvent> eventLog = new ConcurrentSkipListMap<EventKey, RemoteServiceEvent>();
-    private static final Logger logger = Logger.getLogger(TransientEventManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TransientEventManager.class.getName());
 
     @Override
     public void postNotify(final RemoteServiceEvent event) {
         EventKey key = new EventKey(event);
         if(eventLog.containsKey(key)) {
-            logger.warning("Already have "+ key);
+            logger.warn("Already have {}", key);
             return;
         }
         eventLog.put(key, event);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Added key: %s, we have %d events", key, eventLog.size()));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Added key: %s, we have %d events", key, eventLog.size()));
     }
 
     @Override
@@ -64,9 +64,9 @@ public class TransientEventManager extends AbstractEventManager {
     public Collection<RemoteServiceEvent> getEvents(final Date from) {
         if(from==null)
             return getEvents();
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss,SSS");
-            logger.fine(String.format("Getting sublist from %s, to %s",
+            logger.debug(String.format("Getting sublist from %s, to %s",
                                       formatter.format(from), formatter.format(eventLog.lastKey())));
         }
         List<RemoteServiceEvent> events = new LinkedList<RemoteServiceEvent>();

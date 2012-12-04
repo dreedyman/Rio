@@ -27,10 +27,9 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
+import org.slf4j.Logger;
 
 import java.rmi.MarshalledObject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A DynamicEventConsumer extends {@link BasicEventConsumer} and provides the 
@@ -130,7 +129,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
             try {
                 sdm.terminate();
             } catch (IllegalStateException t) {
-                logger.log(Level.WARNING, "Terminating SDM", t);
+                logger.warn("Terminating SDM", t);
             }
         } 
         super.terminate();
@@ -152,7 +151,7 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                 }
             }
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Register RemoteServiceEventListener", e);
+            logger.error("Register RemoteServiceEventListener", e);
         }
         return (added);
     }
@@ -170,9 +169,9 @@ public class DynamicEventConsumer extends BasicEventConsumer {
             ServiceItem item = sdEvent.getPostEventServiceItem();
             try {
                 if(item != null && item.service != null) {
-                    if(logger.isLoggable(Level.FINEST)) {
+                    if(logger.isTraceEnabled()) {
                         String name = item.service.getClass().getName();
-                        logger.log(Level.FINEST, "EventProducer discovered {0}", name);
+                        logger.trace("EventProducer discovered {}", name);
                     }
                     if(!eventSubscribers.isEmpty()) {
                         register(item);
@@ -180,10 +179,10 @@ public class DynamicEventConsumer extends BasicEventConsumer {
                         lCache.addListener(faultListener);
                     }
                 } else {
-                    logger.log(Level.WARNING, "Unable to register EventProducer {0}", item);
+                    logger.warn("Unable to register EventProducer {}", item);
                 }
             } catch(Exception e) {
-                logger.log(Level.SEVERE, "Adding EventProducer", e);
+                logger.error("Adding EventProducer", e);
             }
         }              
     }
@@ -205,14 +204,14 @@ public class DynamicEventConsumer extends BasicEventConsumer {
             ServiceItem item = sdEvent.getPreEventServiceItem();
             if(item.service != null) {
                 if(item.serviceID.equals(serviceID)) {
-                    if(logger.isLoggable(Level.FINEST)) {
+                    if(logger.isTraceEnabled()) {
                         String name = item.service.getClass().getName();
-                        logger.log(Level.FINEST, "EventProducer removed {0}", name);
+                        logger.trace("EventProducer removed {}", name);
                     }
                     terminate();                    
                 }
             } else {
-                logger.log(Level.SEVERE, "Unable to deregister EventProducer {0}, unknown service", item);
+                logger.error("Unable to deregister EventProducer {}, unknown service", item);
             }
         }
         

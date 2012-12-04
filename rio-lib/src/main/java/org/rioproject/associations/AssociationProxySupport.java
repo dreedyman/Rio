@@ -17,6 +17,8 @@ package org.rioproject.associations;
 
 import net.jini.core.discovery.LookupLocator;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -26,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides support for an {@link AssociationProxy}
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 public class AssociationProxySupport<T> implements AssociationProxy<T> {
     private ServiceSelectionStrategy<T> strategy;
     private final List<String> proxyMethods = new ArrayList<String>();
-    Logger logger = Logger.getLogger(AssociationProxy.class.getName());
+    Logger logger = LoggerFactory.getLogger(AssociationProxy.class.getName());
     private AtomicLong invocationCount = new AtomicLong();
     private boolean terminated;
 
@@ -143,12 +143,12 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                                 aDesc.getServiceDiscoveryTimeUnits().toMillis(
                                     aDesc.getServiceDiscoveryTimeout()): stopTime);
                     if(System.currentTimeMillis()<stopTime) {
-                        if(logger.isLoggable(Level.FINEST)) {
-                            logger.finest("The association proxy for "+formatAssociationService(a)+" is " +
-                                          "not available. A service discovery timeout of " +
-                                          "["+aDesc.getServiceDiscoveryTimeout()+"], " +
-                                          "has been configured, and the computed stop time is: "+
-                                          new Date(stopTime)+", sleep for one second and re-evaluate");
+                        if(logger.isTraceEnabled()) {
+                            logger.trace("The association proxy for "+formatAssociationService(a)+" is " +
+                                         "not available. A service discovery timeout of " +
+                                         "["+aDesc.getServiceDiscoveryTimeout()+"], " +
+                                         "has been configured, and the computed stop time is: "+
+                                         new Date(stopTime)+", sleep for one second and re-evaluate");
                         }
                         Thread.sleep(1000);
                         continue;
@@ -191,15 +191,13 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                 break;
             } catch (Throwable t) {
                 if(!ThrowableUtil.isRetryable(t)) {
-                    logger.log(Level.WARNING,
-                               "Failed to invoke method ["+method.getName()+"], remove  service ["+service+"]",
-                               t);
+                    logger.warn("Failed to invoke method ["+method.getName()+"], remove  service ["+service+"]", t);
                     if (service != null) {
                         getServiceSelectionStrategy().serviceRemoved(service);
                         if(a.removeService(service)!=null) {
-                            logger.warning("Service ["+service+"] removed, have ["+a.getServiceCount()+"] services");
+                            logger.warn("Service ["+service+"] removed, have ["+a.getServiceCount()+"] services");
                         } else {
-                            logger.warning("Unable to remove service ["+service+"], have ["+a.getServiceCount()+"] services");
+                            logger.warn("Unable to remove service ["+service+"], have ["+a.getServiceCount()+"] services");
                             //terminated = true;
                         }
                     }
@@ -287,8 +285,8 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
             Object result;
 
             if (!isProxyMethod(method)) {
-                if (logger.isLoggable(Level.FINEST))
-                    logger.finest("Invoking local method [" + method.toString() + "]");
+                if (logger.isTraceEnabled())
+                    logger.trace("Invoking local method [{}]", method.toString());
                 result = method.invoke(localRef, args);
             } else {
                 result = doInvokeService(association, method, args);

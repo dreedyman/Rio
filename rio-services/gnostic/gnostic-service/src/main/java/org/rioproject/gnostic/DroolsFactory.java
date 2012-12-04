@@ -30,17 +30,17 @@ import org.drools.io.Resource;
 import org.drools.io.ResourceChangeScannerConfiguration;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utility for creating Drools {@link org.drools.agent.KnowledgeAgent}s,
  * {@link org.drools.KnowledgeBase}s, and {@link org.drools.runtime.StatefulKnowledgeSession}s
  */
 public class DroolsFactory {
-    private static final Logger logger = Logger.getLogger(DroolsFactory.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DroolsFactory.class.getName());
 
     /**
      * Create a new {@link org.drools.agent.KnowledgeAgent}
@@ -75,27 +75,27 @@ public class DroolsFactory {
                 logger.info(message);
             }
             public void info(String message, Object object) {
-                logger.log(Level.INFO, message, object);
+                logger.info(message, object.toString());
             }
             public void warning(String message) {
-                logger.warning(message);
+                logger.warn(message);
             }
             public void warning(String message, Object object) {
-                logger.log(Level.WARNING, message, object);
+                logger.warn(message, object.toString());
             }
             public void exception(String message, Throwable e) {
-                logger.log(Level.WARNING, message, e);
+                logger.warn(message, e);
             }
             public void exception(Throwable e) {
-                logger.log(Level.WARNING, "", e);
+                logger.warn("", e);
             }
             public void debug(String message) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine(message);
+                if(logger.isDebugEnabled())
+                    logger.debug(message);
             }
             public void debug(String message, Object object) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE, message, object);
+                if(logger.isDebugEnabled())
+                    logger.debug(message, object.toString());
             }
         });
         ResourceFactory.getResourceChangeScannerService().start();
@@ -136,9 +136,9 @@ public class DroolsFactory {
             builder.add(resource, resourceType);
 
             if (builder.hasErrors()) {
-                logger.severe(String.format("Could not create the KnowledgeBuilder using %s properly", resource));
+                logger.error(String.format("Could not create the KnowledgeBuilder using %s properly", resource));
                 for (KnowledgeBuilderError error : builder.getErrors()) {
-                    logger.severe(String.format("At lines %s, got error %s",
+                    logger.error(String.format("At lines %s, got error %s",
                                                 Arrays.toString(error.getLines()),
                                                 error.getMessage()));
                 }

@@ -15,15 +15,12 @@
  */
 package org.rioproject.config;
 
-import net.jini.config.Configuration
-import net.jini.config.ConfigurationException
-import net.jini.config.NoSuchEntryException
-import net.jini.config.ConfigurationNotFoundException
-import net.jini.config.ConfigurationFile
 
-import java.util.logging.Level
+import org.slf4j.LoggerFactory
+
 import java.lang.reflect.Constructor
-import org.rioproject.logging.GroovyLogger
+
+import net.jini.config.*
 
 /**
  * Provides support for Groovy based configuration.
@@ -34,7 +31,7 @@ class GroovyConfig implements Configuration {
     private Map<String, GroovyObject> groovyConfigs = new HashMap<String, GroovyObject>()
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
-    private def logger = new GroovyLogger(GroovyConfig.class.getPackage().name)
+    private def logger = LoggerFactory.getLogger(GroovyConfig.class.getPackage().name)
 
     GroovyConfig(String gFile) {
         File f = new File(gFile)
@@ -62,8 +59,7 @@ class GroovyConfig implements Configuration {
     def checkInputs(String[] args) {
         args.each { arg ->
             if(arg.endsWith(".groovy")) {
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine(arg)
+                logger.trace(arg)
             } else {
                 StringBuffer buffer = new StringBuffer()
                 args.each { a ->
@@ -108,8 +104,7 @@ class GroovyConfig implements Configuration {
                     } catch (IOException e) {
                     }
                 }
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine "Time to parse ${groovyFile} : ${(System.currentTimeMillis()-t0)} milliseconds"
+                logger.trace "Time to parse ${groovyFile} : ${(System.currentTimeMillis()-t0)} milliseconds"
             }
         }
         gcl = null
@@ -169,12 +164,11 @@ class GroovyConfig implements Configuration {
     def Object getEntry(String component, String name, Class type, Object defaultValue, Object data) {
         if(configFile!=null)
             return configFile.getEntry(component, name, type, defaultValue, data)
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("component=${component}, "+
-                          "name=${name}, "+
-                          "type=${type.getName()}, "+
-                          "defautValue=${defaultValue}, "+
-                          "data=${data}")
+        logger.trace("component=${component}, "+
+                     "name=${name}, "+
+                     "type=${type.getName()}, "+
+                     "defautValue=${defaultValue}, "+
+                     "data=${data}")
         if (component == null) {
             throw new NullPointerException("component cannot be null");
         } else if (name == null) {
@@ -209,24 +203,20 @@ class GroovyConfig implements Configuration {
         if(data==NO_DATA) {
             try {
                 value = groovyConfig.getProperty(name)
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer "Configuration entry [${component}.${name}] found in "+
-                                 "GroovyObject ${groovyConfig}, assign returned value: ${value}"
+                logger.trace "Configuration entry [${component}.${name}] found in "+
+                             "GroovyObject ${groovyConfig}, assign returned value: ${value}"
             } catch(MissingPropertyException e) {
                 if(!e.getProperty().equals(name))
                     throw new ConfigurationException(e.getMessage(), e)
-                
-                if(logger.isLoggable(Level.FINEST))
-                    logger.log(Level.FINEST,
-                               "${e.getClass().getName()}: looking for configuration entry "+
-                               "[${component}.${name}] in GroovyObject "+
-                               groovyConfig)
+
+                logger.trace("${e.getClass().getName()}: looking for configuration entry "+
+                             "[${component}.${name}] in GroovyObject "+
+                             groovyConfig)
                 if(defaultValue==NO_DEFAULT) {
                     throw new NoSuchEntryException("entry not found for component: $component, name: $name", e);
                 } else {
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer "Configuration entry [${component}.${name}] not found in "+
-                                     "GroovyObject ${groovyConfig}, assign provided default: ${defaultValue}"
+                    logger.trace "Configuration entry [${component}.${name}] not found in "+
+                                 "GroovyObject ${groovyConfig}, assign provided default: ${defaultValue}"
                     value = defaultValue;
                 }
             }
@@ -237,8 +227,7 @@ class GroovyConfig implements Configuration {
                 List<MetaMethod> methods = groovyConfig.metaClass.methods
                 for(MetaMethod m : methods) {
                     if(m.name==methodName) {
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest "Found matching method name [${methodName}], check for type match"
+                        logger.trace "Found matching method name [${methodName}], check for type match"
                         Class[] paramTypes = m.nativeParameterTypes
                         if(paramTypes.length==1 && paramTypes[0].isAssignableFrom(data.class)) {
                             mm = m;

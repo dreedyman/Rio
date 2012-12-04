@@ -25,14 +25,17 @@ import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import java.lang.management.MemoryNotificationInfo;
-import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The Memory object is a MeasurableCapability that measures the amount of
@@ -60,7 +63,7 @@ public class Memory extends MeasurableCapability {
     /** For handling JX event notifications */
     private final BlockingQueue<Notification> eventQ = new LinkedBlockingQueue<Notification>();
     /** A Logger for this class */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Construct a Memory object
@@ -98,8 +101,8 @@ public class Memory extends MeasurableCapability {
                                                                      "thresholdValues",
                                                                      ThresholdValues.class,
                                                                      new ThresholdValues(0.0, 1.0));
-            if(logger.isLoggable(Level.FINE)) {
-                logger.fine(String.format("%s threshold values: %s", getId(), tVals.toString()));
+            if(logger.isDebugEnabled()) {
+                logger.debug(String.format("%s threshold values: %s", getId(), tVals.toString()));
             }
             setThresholdValues(tVals);
             
@@ -129,7 +132,7 @@ public class Memory extends MeasurableCapability {
             totalArena = Runtime.getRuntime().maxMemory();
             
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting Memory Configuration", e);
+            logger.warn("Getting Memory Configuration", e);
         }
     }
 
@@ -196,8 +199,8 @@ public class Memory extends MeasurableCapability {
             count = 0;
             tempUtilization = 0;
         }
-        if(logger.isLoggable(Level.FINEST))
-            logger.finest("Memory : utilization="+utilization);
+        if(logger.isTraceEnabled())
+            logger.trace("Memory : utilization={}", utilization);
 
         return utilization;
     }
@@ -241,7 +244,7 @@ public class Memory extends MeasurableCapability {
                 try {
                     notification = eventQ.take();
                 } catch (InterruptedException e) {
-                    logger.fine("JMXNotificationHandler breaking out of main loop");
+                    logger.debug("JMXNotificationHandler breaking out of main loop");
                     break;
                 }
                 if (notification.getType().equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
@@ -249,10 +252,10 @@ public class Memory extends MeasurableCapability {
                     /* We may have a reading that lags behind the notification memory threshold notification.
                      * Force the value to be greater than the high threshold */
                     if(calculableMemory.getValue()<=getThresholdValues().getCurrentHighThreshold()) {
-                        logger.info("JMX MEMORY_THRESHOLD_EXCEEDED, adjusting " +
-                                    "CalculableMemory value from ["+calculableMemory.getValue()+"] to " +
-                                    "["+(getThresholdValues().getCurrentHighThreshold()+0.01)+"] to " +
-                                    "enforce SLA actions to occur.");
+                        logger.info("JMX MEMORY_THRESHOLD_EXCEEDED, adjusting CalculableMemory value " +
+                                    "from [{}] to [{}] to enforce SLA actions to occur.",
+                                    calculableMemory.getValue(),
+                                    (getThresholdValues().getCurrentHighThreshold()+0.01));
                         calculableMemory.setValue(getThresholdValues().getCurrentHighThreshold()+0.01);
                     }
                     addWatchRecord(createCalculableMemory());

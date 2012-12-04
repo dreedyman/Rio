@@ -19,6 +19,8 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.jmx.GenericMBeanInvoker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -30,8 +32,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The WatchInjector provides support for declarative Watch management, by
@@ -88,7 +88,7 @@ public class WatchInjector {
     private final List<Watch> createdWatches = new ArrayList<Watch>();
     private final List<Thread> mbeanCheckThreads = new ArrayList<Thread>();
     static final String COMPONENT = "org.rioproject.watch.WatchInjector";
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public WatchInjector(Object impl, ServiceBeanContext context)
         throws IntrospectionException {
@@ -142,22 +142,16 @@ public class WatchInjector {
                             createdWatches.add(watch);
                         }
                     } else {
-                        logger.warning("WatchDescriptor " +
-                                       "[" + wDesc.toString() + "], " +
-                                       "with declared propertyName " +
-                                       "[" + propertyName + "], " +
-                                       "matched, no readMethod found " +
-                                       "on target object " +
-                                       "[" + impl.getClass().getName() + "]");
+                        logger.warn("WatchDescriptor [{}], with declared propertyName [{}], " +
+                                    "matched, no readMethod found on target object [{}]",
+                                    wDesc.toString(), propertyName, impl.getClass().getName());
                     }
                 }
             }
 
             if(!propertyMatch) {
-                logger.warning("WatchDescriptor ["+wDesc.toString()+"], "+
-                               "with declared propertyName ["+propertyName+"] "+
-                               "not found on target object "+
-                               "["+impl.getClass().getName()+"]");
+                logger.warn("WatchDescriptor [{}], with declared propertyName [{}] not found on target object [{}]",
+                            wDesc.toString(), propertyName, impl.getClass().getName());
             }
         }
         if(watch!=null)
@@ -210,12 +204,9 @@ public class WatchInjector {
      */
     private Watch checkForExistingWatch(String watchName) {
         if(context.getWatchRegistry().findWatch(watchName)!=null) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("WatchDescriptor for Watch"+
-                            "["+watchName+"], "+
-                            "found "+
-                            "on target object's WatchRegistry "+
-                            "["+impl.getClass().getName()+"]");
+            if(logger.isDebugEnabled())
+                logger.debug("WatchDescriptor for Watch [{}], found on target object's WatchRegistry [{}]",
+                             watchName, impl.getClass().getName()+"]");
             /* return the first matching Watch, which in generally every
              * case is exactly what is required */
             return(context.getWatchRegistry().findWatch(watchName));
@@ -249,13 +240,14 @@ public class WatchInjector {
         SamplingWatch watch = null;
         if(wDesc.getObjectName()!=null) {
             if(wDesc.getMBeanServerConnection()==null) {
-                logger.warning("Cannot create Watch to monitor " +
-                               "MBean ["+wDesc.getObjectName()+"] without " +
-                               "an MBeanServerConnection. You are using Java " +
-                               "version ["+System.getProperty("java.version")+"], " +
-                               "that does either not support the JMX Attach API " +
-                               "or the MBeanServerConnection could not be " +
-                               "obtained for the external service.");
+                logger.warn("Cannot create Watch to monitor " +
+                            "MBean [{}] without " +
+                            "an MBeanServerConnection. You are using Java " +
+                            "version [{}], " +
+                            "that does either not support the JMX Attach API " +
+                            "or the MBeanServerConnection could not be " +
+                            "obtained for the external service.",
+                            wDesc.getObjectName(), System.getProperty("java.version"));
                 return null;
             }
             Thread t = new MBeanVerification(wDesc, config);
@@ -334,9 +326,8 @@ public class WatchInjector {
             throw new IllegalArgumentException("wDesc is null");
         Watch watch = getWatch(wDesc.getName());
         if(watch == null) {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Unable to modify Watch ["+wDesc.getName()+"], "+
-                            "not created by the WatchInjector");
+            if(logger.isDebugEnabled())
+                logger.debug("Unable to modify Watch [{}], not created by the WatchInjector", wDesc.getName());
             return;
         }
         SamplingWatch sWatch = (SamplingWatch)watch;
@@ -358,8 +349,7 @@ public class WatchInjector {
             throw new IllegalArgumentException("wDesc is null");
         Watch watch = getWatch(wDesc.getName());
         if(watch==null) {
-            logger.warning("Unable to remove Watch ["+wDesc.getName()+"], " +
-                           "not created by the WatchInjector");
+            logger.warn("Unable to remove Watch [{}], not created by the WatchInjector", wDesc.getName());
             return;
         }
         if(createdWatches.remove(watch))
@@ -376,8 +366,7 @@ public class WatchInjector {
             throw new IllegalArgumentException("name is null");
         Watch watch = getWatch(name);
         if(watch==null) {
-            logger.warning("Unable to remove Watch ["+name+"], " +
-                           "not created by the WatchInjector");
+            logger.warn("Unable to remove Watch [{}], not created by the WatchInjector", name);
             return;
         }
         if(createdWatches.remove(watch))
@@ -412,10 +401,8 @@ public class WatchInjector {
                     if(!proceed) {
                         try {
                             if(iterations++%5==0)
-                                logger.info("Waiting for MBean " +
-                                            "["+wDesc.getObjectName()+"] " +
-                                            "to become available before injecting " +
-                                            "watch and associated SLA monitoring");
+                                logger.info("Waiting for MBean [{}] to become available before injecting " +
+                                            "watch and associated SLA monitoring", wDesc.getObjectName());
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             break;
@@ -426,23 +413,19 @@ public class WatchInjector {
                 }
                 if(proceed) {
                     createAndRegisterWatch();
-                    logger.info("MBean ["+wDesc.getObjectName()+"] " +
-                                "is available, injecting watch " +
-                                "["+wDesc.getName()+"] and associated " +
-                                "SLA monitoring");
+                    logger.info("MBean [{}] is available, injecting watch [{}] and associated SLA monitoring",
+                                wDesc.getObjectName(), wDesc.getName());
                 }
             } catch (MalformedObjectNameException e) {
-                logger.log(Level.WARNING,
-                           "The value ["+wDesc.getObjectName()+"] cannot be " +
-                           "used to create an ObjectName. Please verify the " +
-                           "format of the value and retry. The service will " +
-                           "continue to execute, but the monitor you have " +
-                           "requested to be created to observe this MBean can " +
-                           "not be created",
-                           e);
+                logger.warn("The value ["+wDesc.getObjectName()+"] cannot be " +
+                            "used to create an ObjectName. Please verify the " +
+                            "format of the value and retry. The service will " +
+                            "continue to execute, but the monitor you have " +
+                            "requested to be created to observe this MBean can " +
+                            "not be created",
+                            e);
             } catch (IOException e) {
-                logger.log(Level.WARNING,
-                           "A connection exception has occured communicating " +
+                logger.warn("A connection exception has occurred communicating " +
                            "to the attached MBeanServer for the exec'd service. " +
                            "The service will continue to execute, " +
                            "but the monitor you have requested to be created to " +
@@ -451,7 +434,6 @@ public class WatchInjector {
             } finally {
                 mbeanCheckThreads.remove(Thread.currentThread());
             }
-
         }
 
         void createAndRegisterWatch() {

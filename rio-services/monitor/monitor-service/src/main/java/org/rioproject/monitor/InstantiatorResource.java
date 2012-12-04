@@ -19,24 +19,23 @@ import net.jini.id.Uuid;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.deploy.*;
+import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.deploy.SystemComponent;
-import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.platform.StorageCapability;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An InstantiatorResource is the object being leased and controlled by the
@@ -105,7 +104,7 @@ public class InstantiatorResource {
      */
     private Uuid instantiatorUuid;
     /** The Logger */
-    static final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
+    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
 
     /**
      * Create an InstantiatorResource
@@ -236,13 +235,13 @@ public class InstantiatorResource {
                 records = getInstantiator().getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD);
                 break;
             } catch(RemoteException e) {
-                logger.warning("Exception ["+e.getClass().getName()+"] occurred, retry ["+i+"] ....");
+                logger.warn("Exception ["+e.getClass().getName()+"] occurred, retry ["+i+"] ....");
                 toThrow = e;
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignore) {
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Timeout Interrupted, handled");
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("Timeout Interrupted, handled");
                     }
                 }
             }
@@ -280,13 +279,13 @@ public class InstantiatorResource {
                 statement = getInstantiator().getServiceStatement(elem);
                 break;
             } catch(RemoteException e) {
-                logger.warning("Exception ["+e.getClass().getName()+"] occurred, retry ["+i+"] ....");
+                logger.warn("Exception ["+e.getClass().getName()+"] occurred, retry ["+i+"] ....");
                 toThrow = e;
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignore) {
-                    if(logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Timeout Interrupted, handled");
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("Timeout Interrupted, handled");
                     }
                 }
             }
@@ -388,8 +387,8 @@ public class InstantiatorResource {
                 List<DeployedService> list = serviceElementMap.get(sElem);
                 numInstances = list.size();
             }
-            if(logger.isLoggable(Level.FINEST)) {
-                logger.finest("Get service element count for " +
+            if(logger.isTraceEnabled()) {
+                logger.trace("Get service element count for " +
                               "["+LoggingUtil.getLoggingName(sElem)+"], " +
                               getName()+" at ["+getHostAddress()+"], has "+numInstances+" instances");
             }
@@ -658,13 +657,12 @@ public class InstantiatorResource {
         * Check if the serviceLimit has been reached
         */
         if(getServiceElementCount() == serviceLimit) {
-            if(logger.isLoggable(Level.FINER) &&
+            if(logger.isDebugEnabled() &&
                !provType.equals(ServiceElement.ProvisionType.FIXED.toString()))
-                logger.log(Level.FINER,
-                           "Do not allocate "+provType+" service "+
-                           "["+LoggingUtil.getLoggingName(sElem)+"] to "+
-                           getName()+" at ["+getHostAddress()+"], "+
-                           "service limit of ["+serviceLimit+"] has been met");
+                logger.debug("Do not allocate "+provType+" service "+
+                             "["+LoggingUtil.getLoggingName(sElem)+"] to "+
+                             getName()+" at ["+getHostAddress()+"], "+
+                             "service limit of ["+serviceLimit+"] has been met");
             return(false);
         }
 
@@ -676,14 +674,13 @@ public class InstantiatorResource {
             int inProcessCount = getInProcessCounter(sElem);
             int numInstances = serviceCount+inProcessCount;
             if(numInstances >= sElem.getMaxPerMachine()) {
-                if(logger.isLoggable(Level.FINER))
-                    logger.log(Level.FINER,
-                               "Do not allocate "+provType+" service "+
-                               "["+LoggingUtil.getLoggingName(sElem)+"] to "+
-                               getName()+" at ["+getHostAddress()+"], "+
-                               "maximum number of services "+
-                               "["+sElem.getMaxPerMachine()+"] "+
-                               "per machine has been met");
+                if(logger.isDebugEnabled())
+                    logger.debug("Do not allocate "+provType+" service "+
+                                 "["+LoggingUtil.getLoggingName(sElem)+"] to "+
+                                 getName()+" at ["+getHostAddress()+"], "+
+                                 "maximum number of services "+
+                                 "["+sElem.getMaxPerMachine()+"] "+
+                                 "per machine has been met");
                 return(false);
             }
         }
@@ -697,27 +694,25 @@ public class InstantiatorResource {
             int actual = getServiceElementCount(sElem);
             int numAllowed = planned-actual;
             if(numAllowed <=0) {
-                if(logger.isLoggable(Level.FINER))
-                    logger.log(Level.FINER,
-                               "Do not allocate "+provType+" service "+
-                               "["+LoggingUtil.getLoggingName(sElem)+"] to "+
-                               getName()+" at ["+getHostAddress()+"] has "+
-                               "["+actual+"] "+
-                               "instance(s), planned ["+planned+"]");
+                if(logger.isDebugEnabled())
+                    logger.debug("Do not allocate "+provType+" service "+
+                                 "["+LoggingUtil.getLoggingName(sElem)+"] to "+
+                                 getName()+" at ["+getHostAddress()+"] has "+
+                                 "["+actual+"] "+
+                                 "instance(s), planned ["+planned+"]");
                 return(false);
             } else {
-                if(logger.isLoggable(Level.FINER))
-                    logger.log(Level.FINER,
-                               getName()+" at ["+getHostAddress()+"] has "+
-                               "["+actual+"]"+
-                               " instance(s), planned ["+planned+"] of "+
-                               provType+" "+
-                               "service ["+LoggingUtil.getLoggingName(sElem)+"]");
+                if(logger.isDebugEnabled())
+                    logger.debug(getName()+" at ["+getHostAddress()+"] has "+
+                                 "["+actual+"]"+
+                                 " instance(s), planned ["+planned+"] of "+
+                                 provType+" "+
+                                 "service ["+LoggingUtil.getLoggingName(sElem)+"]");
             }
         }
 
         if(!AssociationMatcher.meetsColocationRequirements(sElem, this)) {
-            if(logger.isLoggable(Level.FINER)) {
+            if(logger.isDebugEnabled()) {
                 StringBuilder b = new StringBuilder();
                 b.append("Do not allocate ")
                     .append(provType)
@@ -737,7 +732,7 @@ public class InstantiatorResource {
                     found++;
                     b.append(anADesc.getName());
                 }
-                logger.finer("{"+b.toString()+"}");
+                logger.debug("{"+b.toString()+"}");
             }
             return (false);
         }
@@ -747,7 +742,7 @@ public class InstantiatorResource {
         }
 
         if(!resourceCapability.measuredResourcesWithinRange()) {
-            if(logger.isLoggable(Level.WARNING)) {
+            if(logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 MeasuredResource[] m =
                     resourceCapability.getMeasuredResources(ResourceCapability.MEASURED_RESOURCES_BREACHED);
@@ -762,7 +757,7 @@ public class InstantiatorResource {
                         .append(aM.getValue())
                         .append("]");
 
-                logger.warning(getName()+" at ["+ getHostAddress()+"] " +
+                logger.warn(getName()+" at ["+ getHostAddress()+"] " +
                                "not eligible for "+
                                provType+" service ["+LoggingUtil.getLoggingName(sElem)+"], "+
                                "MeasuredResources have exceeded threshold " +
@@ -775,8 +770,8 @@ public class InstantiatorResource {
             Collection<SystemComponent> unsupportedReqs =
                 meetsQualitativeRequirements(sElem.getServiceLevelAgreements());
             if(unsupportedReqs.isEmpty()) {
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer(getName()+" at ["+getHostAddress()+"] meets "+
+                if(logger.isDebugEnabled())
+                    logger.debug(getName()+" at ["+getHostAddress()+"] meets "+
                                  "qualitative requirements for "+
                                  "["+LoggingUtil.getLoggingName(sElem)+"]");
                 return (true);
@@ -793,16 +788,16 @@ public class InstantiatorResource {
                     x++;
                 }
                 String unsupportedReqsString = buffer.toString();
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer(getName()+" at ["+getHostAddress()+"] " +
+                if(logger.isDebugEnabled())
+                    logger.debug(getName()+" at ["+getHostAddress()+"] " +
                                  "does not meet qualitative requirements for "+
                                  provType+" service ["+LoggingUtil.getLoggingName(sElem)+"], "+
                                  "determine if SystemRequirement objects can " +
                                  "be downloaded : "+ unsupportedReqsString);
                 /* Determine if the resource supports persistent provisioning */
                 if(!resourceCapability.supportsPersistentProvisioning()) {
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer("Cannot allocate "+provType+" service "+
+                    if(logger.isDebugEnabled())
+                        logger.debug("Cannot allocate "+provType+" service "+
                                      "["+LoggingUtil.getLoggingName(sElem)+"] to "+
                                      getName()+" at ["+getHostAddress()+"], "
                                      + "required SystemComponents "
@@ -829,8 +824,8 @@ public class InstantiatorResource {
                     }
                 }
                 if(!provisionableCaps) {
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer(getName()+" at ["+getHostAddress()+"] "
+                    if(logger.isDebugEnabled())
+                        logger.debug(getName()+" at ["+getHostAddress()+"] "
                                      + "does not meet qualitative " +
                                      "requirements "+
                                      "for "+provType+" service " +
@@ -850,7 +845,7 @@ public class InstantiatorResource {
                         if(download!=null) {
                             int size = download.getDownloadSize();
                             if(size < 0) {
-                                logger.warning("Unable to obtain download size for "+
+                                logger.warn("Unable to obtain download size for "+
                                                download.getLocation()+", abort provision request");
                                 requiredSize = size;
                                 break;
@@ -863,7 +858,7 @@ public class InstantiatorResource {
                                     download.getPostInstallAttributes().getStagedData();
                                 size = postInstall.getDownloadSize();
                                 if(size < 0) {
-                                    logger.warning("Unable to obtain download size for PostInstall "+
+                                    logger.warn("Unable to obtain download size for PostInstall "+
                                                    postInstall.getLocation()+", abort provision request");
                                     requiredSize = size;
                                     break;
@@ -884,15 +879,15 @@ public class InstantiatorResource {
                                                  true);
                 /* Find out if the resource has the necessary disk-space */
                 if(supportsStorageRequirement(requiredSize, resourceCapability.getPlatformCapabilities())) {
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer(getName()+" at ["+getHostAddress()+"] "+
+                    if(logger.isDebugEnabled())
+                        logger.debug(getName()+" at ["+getHostAddress()+"] "+
                                      "supports provisioning requirements for "+
                                      provType+" service ["+LoggingUtil.getLoggingName(sElem)+"]");
 
                     sElem.setProvisionablePlatformCapabilities(unsupportedReqs);
                     return (true);
                 }
-                if(logger.isLoggable(Level.FINER)) {
+                if(logger.isDebugEnabled()) {
                     double avail = getAvailableStorage(resourceCapability.getPlatformCapabilities());
                     StringBuilder sb = new StringBuilder();
                     sb.append(getName()).append(" at [").append(getHostAddress()).append("] ");
@@ -922,13 +917,13 @@ public class InstantiatorResource {
                             .append("configuration.");
                     }
 
-                    logger.finer(sb.toString());
+                    logger.debug(sb.toString());
                 }
                 return (false);
             }
         } else {
-            if(logger.isLoggable(Level.FINER))
-                logger.finer(getName()+" at ["+getHostAddress()+"] does "
+            if(logger.isDebugEnabled())
+                logger.debug(getName()+" at ["+getHostAddress()+"] does "
                              + "not meet general or quantitative requirements "
                              + "for "+provType+" service ["+LoggingUtil.getLoggingName(sElem)+"]");
             return (false);
@@ -1011,8 +1006,8 @@ public class InstantiatorResource {
         String[] machineCluster = sElem.getCluster();
         if(machineCluster != null) {
             if(machineCluster.length > 0) {
-                if(logger.isLoggable(Level.FINER))
-                    logger.finer("ServiceBean ["+LoggingUtil.getLoggingName(sElem)+"] has a "+
+                if(logger.isDebugEnabled())
+                    logger.debug("ServiceBean ["+LoggingUtil.getLoggingName(sElem)+"] has a "+
                                  "cluster requirement");
                 boolean found = false;
                 for (String aMachineCluster : machineCluster) {
@@ -1021,8 +1016,8 @@ public class InstantiatorResource {
                         found = true;
                 }
                 if(!found) {
-                    if(logger.isLoggable(Level.FINER))
-                        logger.finer(getName()+" at ["+getHostAddress()+"] " +
+                    if(logger.isDebugEnabled())
+                        logger.debug(getName()+" at ["+getHostAddress()+"] " +
                                      "not found in cluster requirement for "+
                                      "["+LoggingUtil.getLoggingName(sElem)+"]");
                     return (false);
@@ -1094,16 +1089,16 @@ public class InstantiatorResource {
          * for there is no reason to continue
          */
         if(measured == null || measured.length < systemThresholdIDs.length) {
-            if(logger.isLoggable(Level.FINER)) {
+            if(logger.isDebugEnabled()) {
                 if(measured==null)
-                    logger.finer(getName()+" at ["+getHostAddress()+"] "+
+                    logger.debug(getName()+" at ["+getHostAddress()+"] "+
                                  "has a [null] "+
                                  "MeasuredCapability instance, "+
                                  "ServiceBean ["+LoggingUtil.getLoggingName(sElem)+"] "+
                                  "has a requirement to test "+
                                  "["+systemThresholdIDs.length+"]");
                 else
-                    logger.finer(getName()+" at ["+getHostAddress()+"] "+
+                    logger.debug(getName()+" at ["+getHostAddress()+"] "+
                                  "only has ["+measured.length+"] "+
                                  "MeasuredCapability instances, "+
                                  "ServiceBean ["+LoggingUtil.getLoggingName(sElem)+"] "+
@@ -1116,7 +1111,7 @@ public class InstantiatorResource {
          * Check each of the MeasuredResource objects
          */
         StringBuilder buffer = new StringBuilder();
-        if(logger.isLoggable(Level.FINER))
+        if(logger.isDebugEnabled())
             buffer.append("Evaluate [")
                 .append(systemThresholdIDs.length)
                 .append("] " + "System Threshold Requirements for " + "[")
@@ -1133,19 +1128,19 @@ public class InstantiatorResource {
             if (systemThresholdID.equals(SystemRequirements.SYSTEM)) {
                 double systemUtilization = systemThreshold.getHighThreshold();
                 if (systemUtilization < resourceCapability.getUtilization()) {
-                    if (logger.isLoggable(Level.FINER)) {
+                    if (logger.isDebugEnabled()) {
                         buffer.append("\n")
                             .append("Cannot meet system utilization requirement. Desired [")
                             .append(systemUtilization)
                             .append("], Actual [")
                             .append(resourceCapability.getUtilization())
                             .append("]");
-                        logger.finest(buffer.toString());
+                        logger.trace(buffer.toString());
                     }
                     return (false);
                 } else {
                     supported = true;
-                    if (logger.isLoggable(Level.FINER))
+                    if (logger.isDebugEnabled())
                         buffer.append("\n")
                             .append("[System] utilization requirement met. Desired [")
                             .append(systemUtilization)
@@ -1161,7 +1156,7 @@ public class InstantiatorResource {
                 if (mRes.getIdentifier().equals(systemThresholdID)) {
                     if (mRes.evaluate(systemThreshold)) {
                         supported = true;
-                        if (logger.isLoggable(Level.FINER))
+                        if (logger.isDebugEnabled())
                             buffer.append("\n[")
                                 .append(systemThresholdID)
                                 .append("] utilization requirement met. Desired " + "Low=[")
@@ -1170,7 +1165,7 @@ public class InstantiatorResource {
                                 .append("], Actual=[").append(mRes.getValue()).append("]");
                         break;
                     } else {
-                        if (logger.isLoggable(Level.FINER))
+                        if (logger.isDebugEnabled())
                             buffer.append("\n")
                                 .append("Cannot meet [")
                                 .append(systemThresholdID)
@@ -1188,8 +1183,8 @@ public class InstantiatorResource {
             }
         }
 
-        if(logger.isLoggable(Level.FINER))
-            logger.finer(buffer.toString());
+        if(logger.isDebugEnabled())
+            logger.debug(buffer.toString());
 
         return (provisionable);
     }

@@ -17,17 +17,17 @@ package org.rioproject.monitor.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
 import net.jini.id.Uuid;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.monitor.AssociationMatcher;
 import org.rioproject.monitor.InstantiatorResource;
 import org.rioproject.monitor.ProvisionException;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.servicecore.LandlordLessor;
 import org.rioproject.resources.servicecore.LeaseListener;
 import org.rioproject.resources.servicecore.ServiceResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This abstract class defines the semantics for selecting a
@@ -63,7 +63,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     protected Collection<LeasedResource> collection;
     /* Semaphore for access to modifying the collection */
     protected final Object collectionLock = new Object();
-    static final Logger logger = Logger.getLogger("org.rioproject.monitor.provision");
+    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
     /**
      * The LandlordLessor which will be registered to, and will provide Lease
      * notification events
@@ -149,13 +149,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             int serviceLimit = ir.getServiceLimit();
             int total = ir.getServiceElementCount() + ir.getInProcessCounter();
             if (total >= serviceLimit) {
-                if (logger.isLoggable(Level.FINER))
-                    logger.log(Level.FINER,
-                               ir.getName() + " at " +
-                               "[" + ir.getHostAddress() +"] " +
-                               "has reached service limit of " +
-                               "[" + serviceLimit + "], cannot be used to " +
-                               "instantiate [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
+                if (logger.isDebugEnabled())
+                    logger.debug(ir.getName() + " at " +
+                                 "[" + ir.getHostAddress() +"] " +
+                                 "has reached service limit of " +
+                                 "[" + serviceLimit + "], cannot be used to " +
+                                 "instantiate [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
                 continue;
             }
             /*
@@ -165,20 +164,19 @@ public abstract class ServiceResourceSelector implements LeaseListener {
              */
             int planned = sElem.getPlanned();
             int actual = ir.getServiceElementCount(sElem);
-            if (logger.isLoggable(Level.FINER))
-                logger.log(Level.FINER,
-                           ir.getName() + " at [" + ir.getHostAddress() + "] " +
-                           "has [" + actual + "] instance(s), " +
-                           "planned [" + planned + "] " +
-                           "of [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
+            if (logger.isDebugEnabled())
+                logger.debug(ir.getName() + " at [" + ir.getHostAddress() + "] " +
+                             "has [" + actual + "] instance(s), " +
+                             "planned [" + planned + "] " +
+                             "of [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
             if (actual >= planned)
                 continue;
             if (ir.getDynamicEnabled()) {
                 try {
                     if (ir.canProvision(sElem)) {
                         serviceResourceSelected(svcResource);
-                        if(logger.isLoggable(Level.FINER)) {
-                            logger.finer("["+ir.getHostAddress()+", " +
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("["+ir.getHostAddress()+", " +
                                          "service count:"+ir.getServiceCount()+"] " +
                                          "has been selected for service " +
                                          "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]");
@@ -186,20 +184,18 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                         return (svcResource);
                     }
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "[" + ir.getName() + "] at " +
-                               "[" + ir.getHostAddress() + "] " +
-                               "during canProvision check for [" +
-                               sElem.getOperationalStringName()+"/"+sElem.getName() + "]",
-                               e);
+                    logger.warn("[" + ir.getName() + "] at " +
+                                "[" + ir.getHostAddress() + "] " +
+                                "during canProvision check for [" +
+                                sElem.getOperationalStringName()+"/"+sElem.getName() + "]",
+                                e);
                     if(e instanceof ProvisionException)
                         throw (ProvisionException)e;
                 }
             } else {
-                if (logger.isLoggable(Level.FINER))
-                    logger.finer(
-                        ir.getName() + " [" + ir.getHostAddress() + "], " +
-                        "dynamic enabled : " + ir.getDynamicEnabled());
+                if (logger.isDebugEnabled())
+                    logger.debug(ir.getName() + " [" + ir.getHostAddress() + "], " +
+                                 "dynamic enabled : " + ir.getDynamicEnabled());
             }
         }
         return (null);
@@ -226,13 +222,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                 candidateList.remove(candidate1);
             }
         }
-        if(logger.isLoggable(Level.FINER) && candidateList.isEmpty()) {
-            logger.log(Level.FINER,
-                       "Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a virtual machine " +
-                       "boundary constraint and an instance of the service has " +
-                       "been found on all Cybernodes executing on each machine. " +
-                       "There are no available Cybernodes to allocate service " +
-                       "instances");
+        if(logger.isDebugEnabled() && candidateList.isEmpty()) {
+            logger.debug("Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a virtual machine " +
+                         "boundary constraint and an instance of the service has " +
+                         "been found on all Cybernodes executing on each machine. " +
+                         "There are no available Cybernodes to allocate service " +
+                         "instances");
         }
         return(candidateList.toArray(new ServiceResource[candidateList.size()]));
     }
@@ -297,13 +292,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             }
         }
 
-        if(logger.isLoggable(Level.FINER) &&
+        if(logger.isDebugEnabled() &&
            candidateList.isEmpty() &&
            elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
-            logger.log(Level.FINER,
-                       "Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a physical machine " +
-                       "boundary constraint and an instance of the service has " +
-                       "been found on all known machines.");
+            logger.debug("Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a physical machine " +
+                         "boundary constraint and an instance of the service has " +
+                         "been found on all known machines.");
         }
         return(candidateList.toArray(new ServiceResource[candidateList.size()]));
     }
@@ -340,12 +334,11 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                     list.add(svcResource);
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING,
-                           "["+ir.getName()+"] at " +
-                           "["+ir.getHostAddress()+"] " +
-                           "during canProvision check for " +
-                           "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]",
-                           e);
+                logger.warn("["+ir.getName()+"] at " +
+                            "["+ir.getHostAddress()+"] " +
+                            "during canProvision check for " +
+                            "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]",
+                            e);
                 if(e instanceof ProvisionException)
                     throw (ProvisionException)e;
             }
@@ -437,8 +430,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         try {
             landlord.cancel(resource.getCookie());
         } catch(Exception ignore) {
-            logger.warning("Landlord Lease cancellation failure, " +
-                           "Force removal from collection of InstantiatorResource");
+            logger.warn("Landlord Lease cancellation failure, Force removal from collection of InstantiatorResource");
             remove(resource);
         }
     }
@@ -511,7 +503,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                 collection.add(resource);
             }
         } catch(UnsupportedOperationException e) {
-            logger.log(Level.WARNING, "Adding LeasedResource Failed", e);
+            logger.warn("Adding LeasedResource Failed", e);
         }
     }
 
@@ -530,7 +522,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                 }
             }
         } catch(UnsupportedOperationException e) {
-            logger.log(Level.WARNING, "Removing LeasedResource Failed", e);
+            logger.warn("Removing LeasedResource Failed", e);
         }
     }
 
@@ -547,7 +539,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                 collection.add(resource);
             }
         } catch(UnsupportedOperationException e) {
-            logger.log(Level.WARNING, "Updating LeasedResource Failed", e);
+            logger.warn("Updating LeasedResource Failed", e);
         }
     }
 

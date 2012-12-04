@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
 
 /**
  * The MpstatOutputParser parses the output of the mpstat command on Solaris
@@ -40,7 +39,7 @@ public class MpstatOutputParser extends CPUExecHandler {
                 getExecutorService().execute(new Runner());
                 updateLock.wait();
             } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Waiting on updateLock", e);
+                logger.warn( "Waiting on updateLock", e);
             }
         }
     }
@@ -67,26 +66,24 @@ public class MpstatOutputParser extends CPUExecHandler {
                 double currentUtilization = 0.0;
                 java.util.List<String> elements = new java.util.ArrayList<String>();
                 while((line = br.readLine()) != null) {
-                    if(logger.isLoggable(Level.FINEST))
-                        logger.finest("Parsing outpt from mpstat\n"+
-                                      "["+line+"]");
+                    if(logger.isTraceEnabled())
+                        logger.trace("Parsing output from mpstat\n[{}]", line);
                     if(i > 0) {
                         elements.clear();
                         StringTokenizer st = new StringTokenizer(line, " ");
                         while(st.hasMoreTokens())
                             elements.add(st.nextToken());
                         double cpuIdle = Double.parseDouble(elements.get(15));
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("CPU idle value="+cpuIdle);
+                        if(logger.isTraceEnabled())
+                            logger.trace("CPU idle value={}", cpuIdle);
                         double utilPercent = 1.0 - (cpuIdle / 100);
                         if(utilPercent < 0) {
-                            if(logger.isLoggable(Level.FINEST))
-                                logger.finest("CPU utilization="+utilPercent+
-                                              ", adjust to 0");
+                            if(logger.isTraceEnabled())
+                                logger.trace("CPU utilization={}, adjust to 0", utilPercent);
                             utilPercent=0;
                         }
-                        if(logger.isLoggable(Level.FINEST))
-                            logger.finest("CPU utilization percent="+utilPercent);
+                        if(logger.isTraceEnabled())
+                            logger.trace("CPU utilization percent={}", utilPercent);
                         currentUtilization = 
                             (currentUtilization + utilPercent) / i;
                     }
@@ -94,13 +91,13 @@ public class MpstatOutputParser extends CPUExecHandler {
                 }
                 utilization = currentUtilization;
             } catch(IOException e) {
-                logger.log(Level.WARNING, "Parsing stream from mpstat", e);
+                logger.warn("Parsing stream from mpstat", e);
             } finally {
                 try {
                     if(br != null)
                         br.close();
                 } catch(IOException e) {
-                    logger.log(Level.WARNING, "Closing BufferedReader", e);
+                    logger.warn("Closing BufferedReader", e);
                 }
                 synchronized(updateLock) {
                     updateLock.notifyAll();

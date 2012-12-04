@@ -16,11 +16,11 @@
 package org.rioproject.resources.servicecore;
 
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.rmi.activation.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A Service Destroyer
@@ -28,41 +28,18 @@ import java.util.logging.Logger;
  * @author Dennis Reedy
  */
 public class Destroyer extends Thread {
-    private ActivationID activationID;
-    private ServiceBeanContext context;
+    private final ActivationID activationID;
+    private final ServiceBeanContext context;
     private final static long DEFAULT_KILL_WAIT = 1000*2;
     private long killWait;
     private boolean force = false;
-    private Logger logger =
-        Logger.getLogger("org.rioproject.resources.servicecore");
+    private Logger logger = LoggerFactory.getLogger("org.rioproject.resources.servicecore");
 
     public Destroyer(ActivationID activationID, ServiceBeanContext context) {
-        this(activationID,
-             context,
-             DEFAULT_KILL_WAIT,
-             false);
+        this(activationID, context, DEFAULT_KILL_WAIT, false);
     }
 
-    public Destroyer(ActivationID activationID,
-                     ServiceBeanContext context,
-                     boolean force) {
-        this(activationID,
-             context,
-             DEFAULT_KILL_WAIT,
-             force);
-    }
-
-    public Destroyer(ActivationID activationID,
-                     ServiceBeanContext context,
-                     long killWait) {
-        this(activationID,
-             context,
-             killWait,
-             false);
-    }
-
-    public Destroyer(ActivationID activationID, ServiceBeanContext context,
-                     long killWait, boolean force) {
+    public Destroyer(ActivationID activationID, ServiceBeanContext context, long killWait, boolean force) {
         super("Destroyer");
         this.activationID = activationID;
         this.context = context;
@@ -79,37 +56,29 @@ public class Destroyer extends Thread {
                 Activatable.inactive(activationID);
                 Activatable.unregister(activationID);
             } catch(RemoteException e) {
-                logger.log(Level.SEVERE,
-                           "Communicating to Activation System",
-                           e);
+                logger.error("Communicating to Activation System", e);
             } catch(ActivationException e) {
-                logger.log(Level.SEVERE,
-                           "Communicating to Activation System",
-                           e);
+                logger.error("Communicating to Activation System", e);
             }
             if(!force && context == null) {
-                logger.severe("Cannot determine Activatable object's context. "+
-                              "Unable to unregister the ActivationGroup or "+
-                              "terminate the JVM");
+                logger.error("Cannot determine Activatable object's context. "+
+                              "Unable to unregister the ActivationGroup or terminate the JVM");
                 return;
             }
             if(force) {
                 try {
-                    if(logger.isLoggable(Level.FINE))
-                        logger.fine("Unregister ActivationGroup");
+                    if(logger.isDebugEnabled())
+                        logger.debug("Unregister ActivationGroup");
                     if(gid != null)
                         ActivationGroup.getSystem().unregisterGroup(gid);
                     else {
-                        if(logger.isLoggable(Level.FINE))
-                            logger.fine("Unable to unregister ActivationGroup: "+
-                                        "groupID is null");
+                        if(logger.isDebugEnabled())
+                            logger.debug("Unable to unregister ActivationGroup: groupID is null");
                     }
                 } catch(RemoteException e) {
-                    logger.warning("RemoteException unregistering Activation group");
+                    logger.warn("RemoteException unregistering Activation group");
                 } catch(ActivationException e) {
-                    logger.warning(
-                        "ActivationException unregistering Activation "+
-                        "group");
+                    logger.warn("ActivationException unregistering Activation group");
                 }
                 killVM(killWait);
             }
@@ -120,16 +89,14 @@ public class Destroyer extends Thread {
 
     private void killVM(long wait) {
         try {
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Shutting down the JVM in "
-                            +(wait/1000)
-                            +" seconds ...");
+            if(logger.isDebugEnabled())
+                logger.debug("Shutting down the JVM in {} seconds ...", (wait/1000));
             Thread.sleep(wait);
         } catch(InterruptedException e) {
-            logger.warning("Interrupted while waiting");
+            logger.warn("Interrupted while waiting");
         }
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("JVM Shutting down");
+        if(logger.isDebugEnabled())
+            logger.debug("JVM Shutting down");
         System.exit(0);
     }
 }

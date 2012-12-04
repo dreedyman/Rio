@@ -21,12 +21,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.opstring.OpString;
 import org.rioproject.opstring.OpStringLoader;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.ServiceMonitor;
 import org.rioproject.test.SetTestManager;
@@ -34,13 +34,13 @@ import org.rioproject.test.TestManager;
 import org.rioproject.test.simple.Simple;
 import org.rioproject.test.utils.ArrayUtils;
 import org.rioproject.test.utils.CybernodeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The class tests OpString undeployment. The test is incomplete;
@@ -53,7 +53,7 @@ public class UndeployTest  {
     static TestManager testManager;
     static ServiceMonitor<Cybernode> cyberMon;
     static ServiceMonitor<ProvisionMonitor> pmMon;
-    private static Logger logger = Logger.getLogger("org.rioproject.test.monitor");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.test.monitor");
 
     @Before
     public  void setup() throws java.util.concurrent.TimeoutException {
@@ -93,11 +93,10 @@ public class UndeployTest  {
     private void deployOpString(ServiceElement.ProvisionType provisionType,
                                 int maintain,
                                 ProvisionMonitor monitor) throws Exception {
-        logger.log(Level.INFO,
-                   "Deployment parameters:\n"
-                           + "provisionType: {0}\n"
-                           + "maintain:      {1}",
-                   new Object[] {provisionType,maintain});
+        logger.info("Deployment parameters:\n"
+                    + "provisionType: {}\n"
+                    + "maintain:      {}",
+                    provisionType,maintain);
 
         OpStringLoader loader = new OpStringLoader();
         OperationalString[] opstrings =
@@ -112,9 +111,8 @@ public class UndeployTest  {
 
         int[] counts = CybernodeUtils.calcServices(cyberMon.getServices(),
                                                    Simple.class);
-        logger.log(Level.INFO,
-                   "Services found before deploying the OpString: {0}",
-                   Arrays.asList(ArrayUtils.asObjects(counts)));
+        logger.info("Services found before deploying the OpString: {}",
+                   Arrays.asList(ArrayUtils.asObjects(counts)).toString());
 
         testManager.deploy(opstring, monitor);
     }
@@ -136,11 +134,10 @@ public class UndeployTest  {
                     counts = CybernodeUtils.calcServices(cyberMon.getServices(),
                                                          Simple.class);
                 } catch (RemoteException e) {
-                    logger.log(Level.SEVERE, "Error calculating services", e);
+                    logger.error("Error calculating services", e);
                     return false;
                 }
-                logger.log(Level.INFO, "Services found: {0}",
-                           Arrays.asList(ArrayUtils.asObjects(counts)));
+                logger.info("Services found: {}",Arrays.asList(ArrayUtils.asObjects(counts)).toString());
 
                 if (dynamic) {
                     int sum = ArrayUtils.sum(counts);

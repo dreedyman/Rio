@@ -21,17 +21,17 @@ import net.jini.core.discovery.LookupLocator;
 import net.jini.discovery.DiscoveryGroupManagement;
 import net.jini.discovery.DiscoveryLocatorManagement;
 import net.jini.discovery.DiscoveryManagement;
+import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.persistence.SnapshotHandler;
 import org.rioproject.resources.persistence.StoreException;
 import org.rioproject.resources.persistence.SubStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manages a persistent {@link org.rioproject.core.jsb.ServiceBeanContext}
@@ -51,7 +51,7 @@ public class ServiceBeanContextManager {
     private ContextAttributeLogHandler attributeLogHandler = 
         new ContextAttributeLogHandler();
     /** the Logger for this component */
-    private static final Logger logger = Logger.getLogger("org.rioproject.jsb");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.jsb");
 
     /**
      * Create a ServiceBeanContextManager
@@ -139,7 +139,7 @@ public class ServiceBeanContextManager {
                 log = new ReliableLog(dir.getCanonicalPath(), this);
                 log.recover();
             } catch(IOException e) {
-                logger.log(Level.SEVERE, "Problem recovering/creating log", e);
+                logger.error("Problem recovering/creating log", e);
                 throw new IOException("ServiceBeanContextManager: log ["
                                       + dir.getCanonicalPath()
                                       + "] is corrupted:"
@@ -191,7 +191,7 @@ public class ServiceBeanContextManager {
                 sAttr.setGroups(groups);
                 sAttr.setLocators(locators);
             } catch(Throwable t) {
-                logger.log(Level.SEVERE, "Couldnt get groups or locators", t);
+                logger.error("Couldnt get groups or locators", t);
             }
             sElem.setServiceBeanConfig(sAttr);
             jsbContext.setServiceElement(sElem);
@@ -233,10 +233,7 @@ public class ServiceBeanContextManager {
                 if(log != null)
                     log.close();
             } catch(IOException e) {
-                logger.log(Level.WARNING,
-                           "Problem closing log during destroy",
-                           e);
-                logger.warning("Ignoring and going on");
+                logger.warn("Problem closing log during destroy, Ignoring and going on", e);
             }
         }
     }

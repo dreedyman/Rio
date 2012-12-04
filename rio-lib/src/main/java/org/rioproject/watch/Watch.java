@@ -20,13 +20,13 @@ import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.openmbean.*;
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The Watch provides a mechanism to collect information and associate it to a
@@ -42,7 +42,7 @@ public class Watch implements WatchMBean {
     /** Use for configuration and logger */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A Logger */
-    protected static final Logger logger = Logger.getLogger(COMPONENT);
+    protected static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     /** Default View class */
     public static final String DEFAULT_VIEW = COMPONENT+".DefaultCalculableView";
     /** The view */
@@ -87,9 +87,7 @@ public class Watch implements WatchMBean {
             doSetWatchDataSource(wds);
 
         } catch(Throwable t) {
-            logger.log(Level.WARNING,
-                       "Creating WatchDataSourceImpl for Watch [" + id + "]",
-                       t);
+            logger.warn("Creating WatchDataSourceImpl for Watch [" + id + "]", t);
         }
     }
 
@@ -127,8 +125,8 @@ public class Watch implements WatchMBean {
      */
     public void setWatchDataSource(WatchDataSource wds) {
         if(wds == null) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("WatchDataSource is null for Watch=" + id);
+            if(logger.isTraceEnabled())
+                logger.trace("WatchDataSource is null for Watch={}", id);
             return;
         }
         doSetWatchDataSource(wds);
@@ -158,7 +156,7 @@ public class Watch implements WatchMBean {
                 watchDataSource = localRef.getProxy();
             }
         } catch(RemoteException e) {
-            logger.log(Level.WARNING, "Setting WatchDataSource properties", e);
+            logger.warn("Setting WatchDataSource properties", e);
             watchDataSource=null;
             localRef = null;
         }
@@ -191,12 +189,10 @@ public class Watch implements WatchMBean {
                 try {
                     watchDataSource.setView(viewClass);
                 } catch(RemoteException e) {
-                    logger.log(Level.WARNING,
-                               "Setting View class for Watch ["+getId()+"]",
-                               e);
+                    logger.warn("Setting View class for Watch ["+getId()+"]", e);
                 }
             } else {
-                logger.warning("WatchDataSource is null for Watch " + getId());
+                logger.warn("WatchDataSource is null for Watch {}", getId());
             }
         }
     }
@@ -223,9 +219,7 @@ public class Watch implements WatchMBean {
                 value = lastCalculable.getValue();
             }
         } catch(Exception e) {
-            logger.log(Level.WARNING,
-                       "Getting last calculable",
-                       e);
+            logger.warn("Getting last calculable", e);
         }
         return(value);
     }
@@ -251,15 +245,15 @@ public class Watch implements WatchMBean {
             }
             return tabularDataSupport;
         } catch (OpenDataException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (IntrospectionException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (IllegalAccessException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (InvocationTargetException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         } catch (RemoteException e) {
-            logger.log(Level.WARNING, e.toString(), e);
+            logger.warn(e.toString(), e);
         }
         return null;
     }
@@ -274,7 +268,7 @@ public class Watch implements WatchMBean {
             try {
                 watchDataSource.clear();
             } catch (RemoteException e) {
-                logger.log(Level.WARNING, e.toString(), e);
+                logger.warn(e.toString(), e);
             }
         }
     }
@@ -292,19 +286,18 @@ public class Watch implements WatchMBean {
         }
         /* Use proxy */
         if(watchDataSource == null) {
-            logger.warning("WatchDataSource is null for Watch " + getId());
+            logger.warn("WatchDataSource is null for Watch {}", getId());
             return;
         }
         try {
             watchDataSource.addCalculable(calc);
         } catch(RemoteException e) {
-            //logger.log(Level.WARNING,
+            //logger.warn(
             //           "WatchDataSource not available for Watch "+ getId(),
             //           e);
             Throwable cause = ThrowableUtil.getRootCause(e);
-            logger.warning("WatchDataSource not available for Watch="+
-                           getId()+", "+
-                           cause.getClass().getName()+": "+cause.getMessage());
+            logger.warn("WatchDataSource not available for Watch={}, {}:{}",
+                           getId(), cause.getClass().getName(), cause.getMessage());
         }
     }
 

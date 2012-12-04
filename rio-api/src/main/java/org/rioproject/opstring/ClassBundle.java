@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * ClassBundle provides a mechanism to define the resources needed to load and 
@@ -51,7 +49,6 @@ public class ClassBundle implements Serializable {
      * An artifact ID.
      */
     private String artifact;
-    private static Logger logger = Logger.getLogger(ClassBundle.class.getName());
 
     /**
      * Create a new ClassBundle
@@ -263,15 +260,8 @@ public class ClassBundle implements Serializable {
      */
     private URL[] urlsFromJARs(final String[] jarNames) throws MalformedURLException {
         URL[] urls = new URL[jarNames.length];
-        StringBuilder sb = new StringBuilder();
         for(int i = 0; i < urls.length; i++) {
-            if(i>0)
-                sb.append(", ");
-            sb.append(translateCodebase()).append(jarNames[i]);
             urls[i] = new URL(translateCodebase()+jarNames[i]);
-        }
-        if(logger.isLoggable(Level.FINE)) {
-            logger.fine("Translated JARs=["+sb.toString()+"]");
         }
         return (urls);
     }

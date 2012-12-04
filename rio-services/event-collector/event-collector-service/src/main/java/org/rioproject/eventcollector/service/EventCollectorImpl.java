@@ -49,6 +49,8 @@ import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.util.BannerProvider;
 import org.rioproject.util.BannerProviderImpl;
 import org.rioproject.util.TimeConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,8 +60,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Service implementation of the {@code EventCollector}.
@@ -80,7 +80,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
     private ScheduledExecutorService leaseReaperScheduler;
     private final BlockingQueue<RemoteEvent> eventQ = new LinkedBlockingQueue<RemoteEvent>();
     private static final String CONFIG_COMPONENT = EventCollectorImpl.class.getPackage().getName();
-    private static final Logger logger = Logger.getLogger(EventCollectorImpl.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EventCollectorImpl.class.getName());
 
     /**
      * Simple constructor used if the {@code EventCollectorImpl} is created as a dynamic service.
@@ -121,7 +121,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                 (ServiceBeanActivation.LifeCycleManager)context.getServiceBeanManager().getDiscardManager();
             lMgr.register(getServiceProxy(), context);
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Register to LifeCycleManager", e);
+            logger.error("Register to LifeCycleManager", e);
             throw e;
         }
     }
@@ -153,12 +153,12 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                                                   Long.MAX_VALUE);
 
         } catch (ConfigurationException e) {
-            logger.log(Level.WARNING, "Getting reapingInterval", e);
+            logger.warn("Getting reapingInterval", e);
             reapingInterval = TimeConstants.ONE_SECOND*10;
         }
 
-        if(logger.isLoggable(Level.CONFIG))
-            logger.config(String.format("Reaping interval set to %d", reapingInterval));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Reaping interval set to %d", reapingInterval));
         leaseReaperScheduler = Executors.newSingleThreadScheduledExecutor();
         leaseReaperScheduler.scheduleAtFixedRate(new RegistrationLeaseReaper(), 0, reapingInterval, TimeUnit.MILLISECONDS);
 
@@ -224,7 +224,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                 groups.append(", ");
             groups.append(group);
         }
-        logger.info(getServiceBeanContext().getServiceElement().getName()+": started ["+groups.toString()+"]");
+        logger.info("{}: started [{}]", getServiceBeanContext().getServiceElement().getName(), groups.toString());
     }
 
     /**
@@ -242,7 +242,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             admin.setServiceBeanContext(getServiceBeanContext());
             adminProxy = admin.getServiceAdmin();
         } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Getting EventCollectorAdminImpl", t);
+            logger.error("Getting EventCollectorAdminImpl", t);
         }
         return adminProxy;
     }
@@ -259,7 +259,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
 
     @Override
     public void destroy() {
-        logger.info(getServiceBeanContext().getServiceElement().getName()+": destroy() notification");
+        logger.info("{}: destroy() notification", getServiceBeanContext().getServiceElement().getName());
         for(Map.Entry<Uuid, RegisteredNotification> entry : registrations.entrySet()) {
             RegisteredNotification registeredNotification = entry.getValue();
             if(registeredNotification.getEventListener()!=null) {
@@ -289,11 +289,11 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
         Lease lease = leaseFactory.newLease(registeredNotification.getCookie(), leasePeriod.expiration);
         registeredNotification.setExpiration(leasePeriod.expiration);
 
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss,SSS");
             long t1 = System.currentTimeMillis();
             long actual = lease.getExpiration()-t1;
-            logger.fine(String.format("Lease duration requested: %d, granted, expires %s, actual: %d",
+            logger.debug(String.format("Lease duration requested: %d, granted, expires %s, actual: %d",
                                       duration, formatter.format(new Date(lease.getExpiration())), actual));
         }
         registrations.put(registrationID, registeredNotification);
@@ -307,15 +307,15 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             disableDelivery(uuid);
         } else {
             RemoteEventListener preparedListener = (RemoteEventListener) listenerPreparer.prepareProxy(remoteEventListener);
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST, "prepared listener: {0}", preparedListener);
+            if (logger.isTraceEnabled()) {
+                logger.trace("prepared listener: {}", preparedListener);
             }
             RegisteredNotification registeredNotification = registrations.get(uuid);
             if(registeredNotification!=null) {
                 registeredNotification.setRemoteEventListener(preparedListener);
                 eventManager.historyNotification(registeredNotification);
             } else {
-                logger.warning("Unable to enable delivery for unknown registration ID");
+                logger.warn("Unable to enable delivery for unknown registration ID");
                 throw new UnknownEventCollectorRegistration("Unable to enable delivery for unknown registration ID");
             }
         }
@@ -327,7 +327,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             registeredNotification.setRemoteEventListener(null);
             registeredNotification.setEventIndex(eventManager.getLastRecordedDate());
         } else {
-            logger.warning("Unable to disable delivery for unknown registration ID");
+            logger.warn("Unable to disable delivery for unknown registration ID");
             throw new UnknownEventCollectorRegistration("Unable to disable delivery for unknown registration ID");
         }
     }
@@ -403,7 +403,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                     logger.info("EventNotifier waiting for an event");
                     event = eventQ.take();
                 } catch (InterruptedException e) {
-                    logger.warning("EventNotifier breaking out of main loop");
+                    logger.warn("EventNotifier breaking out of main loop");
                     break;
                 }
                 List<Uuid> removals = new ArrayList<Uuid>();
@@ -415,15 +415,14 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                                 try {
                                     registeredNotification.getEventListener().notify(event);
                                 } catch (UnknownEventException e) {
-                                    logger.log(Level.WARNING, "UnknownEventException return from listener", e);
+                                    logger.warn("UnknownEventException return from listener", e);
                                 } catch (RemoteException e) {
                                     if(!ThrowableUtil.isRetryable(e)) {
-                                        if(logger.isLoggable(Level.FINEST)) {
-                                            logger.log(Level.WARNING,
-                                                       "Unrecoverable RemoteException returned from listener", e);
+                                        if(logger.isTraceEnabled()) {
+                                            logger.warn("Unrecoverable RemoteException returned from listener", e);
                                         } else {
-                                            logger.warning(String.format("Unrecoverable RemoteException returned from listener: %s",
-                                                                         e.getMessage()));
+                                            logger.warn(String.format("Unrecoverable RemoteException returned from listener: %s",
+                                                                      e.getMessage()));
                                         }
                                         removals.add(entry.getKey());
                                     }
@@ -505,10 +504,8 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
             for (Map.Entry<Uuid, RegisteredNotification> entry : mapEntries) {
                 RegisteredNotification registeredNotification = entry.getValue();
                 if (!ensure(registeredNotification)) {
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.FINE,
-                                   "Lease expired for resource, cookie {0}",
-                                   new Object[]{registeredNotification.getCookie()});
+                    if (logger.isDebugEnabled()) {
+                        logger.warn("Lease expired for resource, cookie {}", registeredNotification.getCookie());
                     }
                     registrations.remove(entry.getKey());
                     leaseListener.removed(registeredNotification);

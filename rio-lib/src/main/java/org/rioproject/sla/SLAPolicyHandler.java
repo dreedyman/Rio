@@ -21,6 +21,8 @@ import net.jini.config.EmptyConfiguration;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventHandler;
 import org.rioproject.watch.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -30,8 +32,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A SLAPolicyHandler handles thresholds for a ThresholdWatch, registering to a
@@ -69,7 +69,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
         new LinkedBlockingQueue<SLAThresholdEvent>();
     private ExecutorService executor;
     /** A Logger for this component */
-    static Logger logger = Logger.getLogger("org.rioproject.sla");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.sla");
 
     /**
      * Construct a SLAPolicyHandler
@@ -81,7 +81,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
         try {
             hostAddress = InetAddress.getLocalHost().getHostAddress();
         } catch(UnknownHostException e) {
-            logger.log(Level.SEVERE, "Getting Host Address", e);
+            logger.error("Getting Host Address", e);
             hostAddress="unknown";
         }
     }
@@ -100,9 +100,8 @@ public class SLAPolicyHandler implements SettableThresholdListener {
                            final EventHandler eventHandler,
                            final ServiceBeanContext context) {
         if(initialized) {
-            if(logger.isLoggable(Level.FINEST))
-                logger.finest("["+getName()+"] "+getClass().getName()+
-                              " ["+getID()+"] already initialized");
+            if(logger.isTraceEnabled())
+                logger.trace("[{}] {} [{}] already initialized", getName(), getClass().getName(), getID());
             return;
         }
         if(eventSource==null)
@@ -214,10 +213,9 @@ public class SLAPolicyHandler implements SettableThresholdListener {
         this.thresholdManager = thresholdManager;
         this.thresholdManager.setThresholdValues(getSLA());
         this.thresholdManager.addThresholdListener(this);
-        if(logger.isLoggable(Level.FINER)) {
-            logger.finer("["+getName()+"] "+ getClass().getName()+" "+
-                        "["+getID()+"]: setThresholdManager() "+
-                        mySLA.toString());
+        if(logger.isDebugEnabled()) {
+            logger.debug("[{}] {} [{}]: setThresholdManager() {}",
+                         getName(), getClass().getName(), getID(), mySLA.toString());
         }
     }
 
@@ -243,18 +241,19 @@ public class SLAPolicyHandler implements SettableThresholdListener {
      * @see org.rioproject.watch.ThresholdListener#notify
      */
     public void notify(final Calculable calculable, final ThresholdValues thresholdValues, final ThresholdType type) {
-        if(logger.isLoggable(Level.FINE)) {            
+        if(logger.isDebugEnabled()) {            
             String status = type.name().toLowerCase();
-            logger.fine("SLAPolicyHandler.notify() : "+calculable.getId()+", "+
-                        "type="+status+" "+
-                        "Value="+calculable.getValue()+", "+
-                        "High="+mySLA.getCurrentHighThreshold()+", "+
-                        "Low="+mySLA.getCurrentLowThreshold());
+            logger.debug("SLAPolicyHandler.notify() : {}, type={} Value={}, High={}, Low={}",
+                         calculable.getId(),
+                         status,
+                         calculable.getValue(),
+                         mySLA.getCurrentHighThreshold(),
+                         mySLA.getCurrentLowThreshold());
         }
         if(eventHandler!=null)
             sendSLAThresholdEvent(calculable, thresholdValues, type);
         else
-            logger.warning("Unable to send SLAThresholdEvent, eventHandler is null");
+            logger.warn("Unable to send SLAThresholdEvent, eventHandler is null");
     }
 
     /**
@@ -324,11 +323,11 @@ public class SLAPolicyHandler implements SettableThresholdListener {
             notifyListeners(localEvent);
             
             /* Enqueue the remote notification */
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Enqueue SLAThresholdEvent notification for "+sla);
+            if(logger.isDebugEnabled())
+                logger.debug("Enqueue SLAThresholdEvent notification for {}", sla);
             eventQ.add(event);
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Creating a SLAThresholdEvent", e);
+            logger.error("Creating a SLAThresholdEvent", e);
         }
     }
 
@@ -346,7 +345,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
                     /* */
                     break;
                 } catch(Exception e) {
-                    logger.log(Level.WARNING, "Notifying SLAThresholdEvent consumers", e);
+                    logger.warn("Notifying SLAThresholdEvent consumers", e);
                 }
             }
         }

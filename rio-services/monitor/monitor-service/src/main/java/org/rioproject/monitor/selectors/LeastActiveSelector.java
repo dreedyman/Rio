@@ -18,10 +18,10 @@ package org.rioproject.monitor.selectors;
 import com.sun.jini.landlord.LeasedResource;
 import org.rioproject.monitor.InstantiatorResource;
 import org.rioproject.resources.servicecore.ServiceResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * LeastActiveSelector is used to select a target Cybernode for provisioning.
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class LeastActiveSelector extends ServiceResourceSelector {
     private final List<Bucket> resourceList = new LinkedList<Bucket>();
-    static Logger logger = Logger.getLogger("org.rioproject.monitor.selector");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.selector");
     private LeastActiveComparator comparator = new LeastActiveComparator();
 
     public LeastActiveSelector() {
@@ -120,7 +120,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
         }
         Collections.sort(s, comparator);
         ServiceResource[] resources = s.toArray(new ServiceResource[s.size()]);
-        if(logger.isLoggable(Level.FINEST)) {
+        if(logger.isTraceEnabled()) {
             StringBuilder b = new StringBuilder();
             if(resources.length>0) {
                 int i=0;
@@ -142,7 +142,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
             } else {
                 b.append("[No registered Cybernodes]");
             }
-            logger.finest(b.toString());
+            logger.trace(b.toString());
         }
         return resources;
     }
@@ -184,7 +184,7 @@ public class LeastActiveSelector extends ServiceResourceSelector {
                 count1 = ((InstantiatorResource)sr1.getResource()).getServiceCount();
                 count2 = ((InstantiatorResource)sr2.getResource()).getServiceCount();
             } catch (Throwable throwable) {
-                logger.log(Level.WARNING, throwable.toString(), throwable);
+                logger.warn(throwable.toString(), throwable);
             }
             return(count1 - count2);
         }

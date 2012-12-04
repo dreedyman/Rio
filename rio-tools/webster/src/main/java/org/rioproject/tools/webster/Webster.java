@@ -18,6 +18,8 @@ package org.rioproject.tools.webster;
 
 import org.rioproject.config.Constants;
 import org.rioproject.net.PortRangeServerSocketFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ServerSocketFactory;
 import java.io.*;
@@ -25,8 +27,6 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Webster is a HTTP server which can serve code from multiple codebases.
@@ -64,7 +64,7 @@ public class Webster implements Runnable {
     private ThreadPoolExecutor pool;
     private int maxThreads = DEFAULT_MAX_THREADS;
     private int soTimeout = 0;
-    private static Logger logger = Logger.getLogger("org.rioproject.tools.webster");
+    private static Logger logger = LoggerFactory.getLogger("org.rioproject.tools.webster");
     private com.sun.jini.start.LifeCycle lifeCycle;
     private boolean debug = false;
     private ServerSocketFactory socketFactory;
@@ -267,8 +267,8 @@ public class Webster implements Runnable {
             if(debug)
                 System.out.println("Webster serving on : "+
                                    ss.getInetAddress().getHostAddress()+":"+port);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Webster serving on : "+
+            if(logger.isDebugEnabled())
+                logger.debug("Webster serving on : "+
                             ss.getInetAddress().getHostAddress()+":"+port);
 
             port = ss.getLocalPort();
@@ -277,24 +277,24 @@ public class Webster implements Runnable {
         }
         if(debug)
             System.out.println("Webster listening on port : " + port);
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Webster listening on port : " + port);
+        if(logger.isDebugEnabled())
+            logger.debug("Webster listening on port : " + port);
         try {
             pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
             //new ThreadPool("Webster", minThreads, maxThreads);
             if(debug)
                 System.out.println("Webster maxThreads ["+maxThreads+"]");
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Webster maxThreads ["+maxThreads+"]");
+            if(logger.isDebugEnabled())
+                logger.debug("Webster maxThreads ["+maxThreads+"]");
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "Could not create ThreadPool", e);
+            logger.error("Could not create ThreadPool", e);
             throw new RuntimeException("Could not create Thread Pool");
         }
         if(soTimeout>0) {
             if(debug)
                 System.out.println("Webster Socket SO_TIMEOUT set to ["+soTimeout+"] millis");
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Webster Socket SO_TIMEOUT set to ["+soTimeout+"] millis");
+            if(logger.isDebugEnabled())
+                logger.debug("Webster Socket SO_TIMEOUT set to ["+soTimeout+"] millis");
         }
 
         /* Set system property */        
@@ -346,15 +346,15 @@ public class Webster implements Runnable {
                 websterRoot[j] = tok.nextToken();
                 if(debug)
                     System.out.println("Root " + j + " = " + websterRoot[j]);
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Root " + j + " = " + websterRoot[j]);
+                if(logger.isDebugEnabled())
+                    logger.debug("Root " + j + " = " + websterRoot[j]);
             }
         } else {
             websterRoot[0] = roots;
             if(debug)
                 System.out.println("Root  = " + websterRoot[0]);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("Root  = " + websterRoot[0]);
+            if(logger.isDebugEnabled())
+                logger.debug("Root  = " + websterRoot[0]);
         }
     }
 
@@ -367,7 +367,7 @@ public class Webster implements Runnable {
             try {
                 ss.close();
             } catch(IOException e) {
-                logger.warning("Exception closing Webster ServerSocket");
+                logger.warn("Exception closing Webster ServerSocket");
             }
         }
         if(lifeCycle != null)
@@ -450,13 +450,13 @@ public class Webster implements Runnable {
                         buff.append("Request: ").append(line);
                         System.out.println(buff.toString());
                     }
-                    if(logger.isLoggable(Level.FINE)) {
+                    if(logger.isDebugEnabled()) {
                         StringBuilder buff = new StringBuilder();
                         buff.append("From: ").append(from).append(", ");
                         if(soTimeout > 0)
                             buff.append("SO_TIMEOUT: ").append(soTimeout).append(", ");
                         buff.append("Request: ").append(line);
-                        logger.fine(buff.toString());
+                        logger.debug(buff.toString());
                     }
                     if(line != null) {
                         StringTokenizer tokenizer =
@@ -494,9 +494,8 @@ public class Webster implements Runnable {
                         } else {
                             if(debug)
                                 System.out.println("bad request ["+line+"] from "+from);
-                            if(logger.isLoggable(Level.FINE))
-                                logger.log(Level.FINE,
-                                           "bad request ["+line+"] from "+from);
+                            if(logger.isDebugEnabled())
+                                logger.debug("bad request ["+line+"] from "+from);
                             DataOutputStream clientStream =
                                 new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
                             clientStream.writeBytes("HTTP/1.1 400 Bad Request\r\n\r\n");
@@ -514,13 +513,12 @@ public class Webster implements Runnable {
                                             +e);
                     clientStream.flush();
                     clientStream.close();
-                    logger.log(Level.WARNING, "Getting Request", e);
+                    logger.warn("Getting Request", e);
                 }
             }
         } catch(Exception e) {
             if(run) {
-                e.printStackTrace();
-                logger.log(Level.WARNING, "Processing HTTP Request", e);
+                logger.warn("Processing HTTP Request", e);
             }
         }
     }
@@ -529,8 +527,8 @@ public class Webster implements Runnable {
     void loadMimes() throws IOException {
         if(debug)
             System.out.println("Loading mimetypes ... ");
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Loading mimetypes ... ");
+        if(logger.isDebugEnabled())
+            logger.debug("Loading mimetypes ... ");
         ClassLoader ccl = Thread.currentThread().getContextClassLoader();
         URL fileURL =
             ccl.getResource("org/rioproject/tools/webster/mimetypes.properties");
@@ -541,17 +539,16 @@ public class Webster implements Runnable {
                 close(is);
                 if(debug)
                     System.out.println("Mimetypes loaded");
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine("Mimetypes loaded");
+                if(logger.isDebugEnabled())
+                    logger.debug("Mimetypes loaded");
             } catch(IOException ioe) {
-                logger.log(Level.SEVERE, "Loading Mimetypes", ioe);
+                logger.error("Loading Mimetypes", ioe);
             }
         } else {
             if(debug)
-                System.out.println("mimetypes.properties not found, "+
-                                   "loading defaults");
-            if(logger.isLoggable(Level.FINE))
-                logger.fine("mimetypes.properties not found, loading defaults");
+                System.out.println("mimetypes.properties not found, loading defaults");
+            if(logger.isDebugEnabled())
+                logger.debug("mimetypes.properties not found, loading defaults");
             MimeTypes.put("jpg", "image/jpg");
             MimeTypes.put("jpeg", "image/jpg");
             MimeTypes.put("jpe", "image/jpg");
@@ -646,7 +643,7 @@ public class Webster implements Runnable {
             try {
                 c.close();
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Closing Closeable", e);
+                logger.warn("Closing Closeable", e);
             }
         }
     }
@@ -667,7 +664,7 @@ public class Webster implements Runnable {
                 File getFile = parseFileName(fileName);
                 logData.append("Do HEAD: input=")
                     .append(fileName)
-                    .append(", " + "parsed=")
+                    .append(", parsed=")
                     .append(getFile)
                     .append(", ");
                 int fileLength;
@@ -725,8 +722,8 @@ public class Webster implements Runnable {
 
                 if(debug)
                     System.out.println(logData.toString());
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine(logData.toString());
+                if(logger.isDebugEnabled())
+                    logger.debug(logData.toString());
 
                 DataOutputStream clientStream =
                     new DataOutputStream(
@@ -735,14 +732,12 @@ public class Webster implements Runnable {
                 clientStream.flush();
                 close(clientStream);
             } catch(Exception e) {
-                logger.log(Level.WARNING, "Error closing Socket", e);
+                logger.warn("Error closing Socket", e);
             } finally {
                 try {
                     client.close();
                 } catch(IOException e2) {
-                    logger.log(Level.WARNING,
-                               "Closing incoming socket",
-                               e2);
+                    logger.warn("Closing incoming socket", e2);
                 }
             }
         } // end of Head
@@ -843,8 +838,8 @@ public class Webster implements Runnable {
                                    "["+
                                    client.getInetAddress().getHostAddress()+
                                    "]";
-                        if(logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE, s, e);
+                        if(logger.isDebugEnabled())
+                            logger.debug(s, e);
                         if(debug) {
                             System.out.println(s);
                             e.printStackTrace();
@@ -855,20 +850,18 @@ public class Webster implements Runnable {
                 }
                 if(debug)
                     System.out.println(logData.toString());
-                if(logger.isLoggable(Level.FINE))
-                    logger.fine(logData.toString());
+                if(logger.isDebugEnabled())
+                    logger.debug(logData.toString());
                 clientStream.flush();
                 clientStream.close();
             } catch(Exception e) {
-                logger.log(Level.WARNING, "Closing Socket", e);
+                logger.warn("Closing Socket", e);
             } finally {
                 try {
                     close(requestedFile);
                     client.close();
                 } catch(IOException e2) {
-                    logger.log(Level.WARNING,
-                               "Closing incoming socket",
-                               e2);
+                    logger.warn("Closing incoming socket", e2);
                 }
             }
         } // end of GetFile
@@ -927,14 +920,12 @@ public class Webster implements Runnable {
                 close(requestedFile);
                 close(clientStream);
             } catch(Exception e) {
-                logger.log(Level.WARNING, "Closing Socket", e);
+                logger.warn("Closing Socket", e);
             } finally {
                 try {
                     client.close();
                 } catch(IOException e2) {
-                    logger.log(Level.WARNING,
-                               "Closing incoming socket",
-                               e2);
+                    logger.warn("Closing incoming socket", e2);
                 }
             }
         }
@@ -991,14 +982,12 @@ public class Webster implements Runnable {
                 clientStream.flush();
                 close(clientStream);
             } catch(Exception e) {
-                logger.log(Level.WARNING, "Closing Socket", e);
+                logger.warn("Closing Socket", e);
             } finally {
                 try {
                     client.close();
                 } catch(IOException e2) {
-                    logger.log(Level.WARNING,
-                               "Closing incoming socket",
-                               e2);
+                    logger.warn("Closing incoming socket", e2);
                 }
             }
         }

@@ -17,7 +17,10 @@ package org.rioproject.opstring
 
 /**
  * Thrown when a DSL parsing error occurs
+ *
+ * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 class DSLException extends RuntimeException {
     static final long serialVersionUID = 1L;
 

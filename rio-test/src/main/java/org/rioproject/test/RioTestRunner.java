@@ -25,6 +25,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +37,7 @@ import java.lang.reflect.Modifier;
 import java.rmi.RMISecurityManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.*;
+import java.util.logging.LogManager;
 
 /**
  * RioTestRunner is a custom extension of {@link BlockJUnit4ClassRunner}
@@ -44,7 +46,7 @@ import java.util.logging.*;
  * <em>NOTE</em>: RioTestRunner requires JUnit 4.5. or later
  */
 public class RioTestRunner extends BlockJUnit4ClassRunner {
-    static final Logger logger = Logger.getLogger(RioTestRunner.class.getName());
+    static final Logger logger = LoggerFactory.getLogger(RioTestRunner.class.getName());
     static {
         Utils.checkSecurityPolicy();
         if (System.getSecurityManager() == null) {
@@ -72,8 +74,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
      */
     public RioTestRunner(Class<?> clazz) throws InitializationError {
         super(clazz);
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("TestRunner constructor called with [" + clazz + "].");
+        if (logger.isDebugEnabled()) {
+            logger.debug("TestRunner constructor called with [" + clazz + "].");
         }
     }
 
@@ -114,11 +116,10 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     method.invoke(null, getManager());
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "Invoking static method ["+method.getName()+"] " +
-                               "with declared annotation "+
-                               SetTestManager.class.getName(),
-                               e);
+                    logger.warn("Invoking static method ["+method.getName()+"] " +
+                                "with declared annotation "+
+                                SetTestManager.class.getName(),
+                                e);
                 }
                 //break;
             }
@@ -130,11 +131,10 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     field.set(null, getManager());
                 } catch (IllegalAccessException e) {
-                    logger.log(Level.WARNING,
-                               "Invoking static field ["+field.getName()+"] " +
-                               "with declared annotation "+
-                               SetTestManager.class.getName(),
-                               e);
+                    logger.warn("Invoking static field ["+field.getName()+"] " +
+                                "with declared annotation "+
+                                SetTestManager.class.getName(),
+                                e);
                 }
                 //break;
             }
@@ -157,11 +157,10 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     method.invoke(null, getManager());
                 } catch (Exception e) {
-                    logger.log(Level.WARNING,
-                               "Invoking method ["+method.getName()+"] " +
-                               "with declared annotation "+
-                               SetTestManager.class.getName(),
-                               e);
+                    logger.warn("Invoking method ["+method.getName()+"] " +
+                                "with declared annotation "+
+                                SetTestManager.class.getName(),
+                                e);
                 }
                 break;
             }
@@ -173,11 +172,10 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     field.set(testInstance, getManager());
                 } catch (IllegalAccessException e) {
-                    logger.log(Level.WARNING,
-                               "Invoking field ["+field.getName()+"] " +
-                               "with declared annotation "+
-                               SetTestManager.class.getName(),
-                               e);
+                    logger.warn("Invoking field ["+field.getName()+"] " +
+                                "with declared annotation "+
+                                SetTestManager.class.getName(),
+                                e);
                 }
                 break;
             }
@@ -317,12 +315,11 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
      */
     @Override
     protected void runChild(FrameworkMethod method, RunNotifier notifier) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Invoking test method [" + method.getMethod().toGenericString() + "]");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Invoking test method [" + method.getMethod().toGenericString() + "]");
         }
         if (!isTestMethodEnabled(method.getMethod())) {
-            logger.info("Test method "+method.getMethod().toGenericString()+
-                        " is not enabled, skipping");
+            logger.info("Test method "+method.getMethod().toGenericString()+" is not enabled, skipping");
             notifier.fireTestIgnored(getDescription());
             return;
         }

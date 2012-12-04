@@ -19,7 +19,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.io.Serializable;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,7 +34,7 @@ public class ThresholdEventTest  {
      * The logger used by this class.
      */
     private static Logger logger =
-            Logger.getLogger("org.rioproject.test.watch");
+            LoggerFactory.getLogger("org.rioproject.test.watch");
 
     /**
      * Tests the <code>ID</code> field.

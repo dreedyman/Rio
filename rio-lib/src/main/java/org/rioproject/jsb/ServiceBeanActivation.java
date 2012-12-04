@@ -27,25 +27,27 @@ import net.jini.id.UuidFactory;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.ServiceBeanControlException;
-import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.boot.MulticastStatus;
-import org.rioproject.cybernode.ServiceAdvertiser;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.ServiceBeanConfig;
-import org.rioproject.opstring.ServiceElement;
-import org.rioproject.rmi.RegistryUtil;
-import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.cybernode.ServiceAdvertiser;
 import org.rioproject.deploy.SystemRequirements;
+import org.rioproject.loader.CommonClassLoader;
+import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.LoggerConfig;
+import org.rioproject.opstring.ClassBundle;
+import org.rioproject.opstring.ServiceBeanConfig;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.servicecore.Destroyer;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import java.io.IOException;
@@ -56,8 +58,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The ServiceBeanActivation class is a utility that provides bootstrap support
@@ -72,7 +72,7 @@ public class ServiceBeanActivation {
     public static final String BOOT_COMPONENT = Constants.BASE_COMPONENT+".boot";
     public static final String BOOT_CONFIG_COMPONENT = BOOT_COMPONENT+".configComponent";
     static LifeCycleManager sbLifeCycleManager;
-    static final Logger logger = Logger.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     static final String BOOT_COOKIE = "boot-cookie";
 
     /**
@@ -315,19 +315,19 @@ public class ServiceBeanActivation {
             throw new IllegalArgumentException("configArgs are null");
 
         Boolean multiCheck = (Boolean)config.getEntry(BOOT_COMPONENT, "verifyMulticast", Boolean.class, false);
-        if(logger.isLoggable(Level.CONFIG))
-            logger.config("Verify multicast [" + multiCheck + "]");
+        if(logger.isDebugEnabled())
+            logger.debug("Verify multicast [{}]", multiCheck);
         if(multiCheck) {
-            if(logger.isLoggable(Level.INFO))
+            if(logger.isInfoEnabled())
                 logger.info("Verifying multicast, wait up to 10 seconds ... ");
             MulticastStatus.checkMulticast(1000 * 10);
-            if(logger.isLoggable(Level.INFO))
+            if(logger.isInfoEnabled())
                 logger.info("Multicast responds okay");
         }
         /* Check for the creation of a ShutdownHook */
         Boolean createShutdownHook = (Boolean)config.getEntry(BOOT_COMPONENT, "createShutdownHook", Boolean.class, true);
-        if(logger.isLoggable(Level.CONFIG))
-            logger.config("Create ShutdownHook ["+createShutdownHook+"]");
+        if(logger.isDebugEnabled())
+            logger.debug("Create ShutdownHook [{}]", createShutdownHook);
         if(createShutdownHook) {
             boolean okay = false;
             if(sbLifeCycleManager != null) {
@@ -483,7 +483,7 @@ public class ServiceBeanActivation {
                     sbLifeCycleManager.terminate();
                 }
             } catch(Throwable t) {
-                logger.log(Level.SEVERE, "Terminating ServiceBean", t);
+                logger.error("Terminating ServiceBean", t);
             }
         }
     }

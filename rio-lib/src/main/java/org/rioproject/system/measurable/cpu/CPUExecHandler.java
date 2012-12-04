@@ -19,13 +19,13 @@ package org.rioproject.system.measurable.cpu;
 import org.rioproject.exec.Util;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The CPUExecHandler provides the basis for concrete implementations to execute
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public abstract class CPUExecHandler implements MeasurableMonitor<CpuUtilization> {
     static final String COMPONENT = "org.rioproject.system.measurable.cpu";
-    static Logger logger = Logger.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(COMPONENT);
     /**
      * Utilization property
      */
@@ -93,7 +93,7 @@ public abstract class CPUExecHandler implements MeasurableMonitor<CpuUtilization
             parse(process.getInputStream());
             utilization = getUtilization();
         } catch (IOException e) {
-            logger.log(Level.WARNING, "ExecHandler thread", e);
+            logger.warn("ExecHandler thread", e);
         } finally {
             if (process != null) {
                 Util.close(process.getOutputStream());

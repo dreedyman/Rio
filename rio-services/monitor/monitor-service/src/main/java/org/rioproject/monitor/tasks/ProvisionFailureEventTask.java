@@ -17,9 +17,8 @@ package org.rioproject.monitor.tasks;
 
 import org.rioproject.event.EventHandler;
 import org.rioproject.monitor.ProvisionFailureEvent;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to notify registered event consumers of a ProvisionFailureEvent
@@ -27,7 +26,7 @@ import java.util.logging.Logger;
 public class ProvisionFailureEventTask implements Runnable {
     private ProvisionFailureEvent event;
     private EventHandler failureHandler;
-    private final Logger logger = Logger.getLogger(ProvisionFailureEventTask.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(ProvisionFailureEventTask.class.getName());
 
     public ProvisionFailureEventTask(ProvisionFailureEvent event, EventHandler failureHandler) {
         this.event = event;
@@ -40,7 +39,7 @@ public class ProvisionFailureEventTask implements Runnable {
         try {
             failureHandler.fire(event);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Exception notifying ProvisionFailureEvent consumers", e);
+            logger.warn("Exception notifying ProvisionFailureEvent consumers", e);
         }
 
     }
