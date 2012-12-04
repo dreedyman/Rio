@@ -15,6 +15,9 @@
  */
 package org.rioproject.resolver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,8 +26,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+
 
 /**
  * <p>A helper that provides utilities for obtaining and working with a
@@ -47,7 +49,7 @@ import java.util.logging.Level;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class ResolverHelper {
     private static URLClassLoader resolverLoader;
-    static final Logger logger = Logger.getLogger(ResolverHelper.class.getName());
+    static final Logger logger = LoggerFactory.getLogger(ResolverHelper.class.getName());
     public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
     static {
         File resolverJar = new File(getResolverJarFile());
@@ -55,7 +57,7 @@ public final class ResolverHelper {
             resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
                                                 Thread.currentThread().getContextClassLoader());
         } catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, String.format("Creating ClassLoader to load %s", resolverJar.getPath()), e);
+            logger.error(String.format("Creating ClassLoader to load %s", resolverJar.getPath()), e);
         }
     }
 
@@ -79,8 +81,8 @@ public final class ResolverHelper {
     public static String[] resolve(final String artifact, final Resolver resolver, final RemoteRepository[] repositories)
         throws ResolverException {
 
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Using Resolver %s", resolver.getClass().getName()));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Using Resolver %s", resolver.getClass().getName()));
         List<String> jars = new ArrayList<String>();
         if (artifact != null) {
             String[] artifactParts = artifact.split(" ");
@@ -92,7 +94,7 @@ public final class ResolverHelper {
                     if(jarFile.exists()) {
                         s = jarFile.toURI().toString();
                     } else {
-                        logger.warning(String.format("%s NOT FOUND", jarFile.getPath()));
+                        logger.warn(String.format("%s NOT FOUND", jarFile.getPath()));
                     }
                     if(s!=null) {
                         s = handleWindows(s);
@@ -102,8 +104,8 @@ public final class ResolverHelper {
                 }
             }
         }
-        if(logger.isLoggable(Level.FINE))
-            logger.fine(String.format("Artifact: %s, resolved jars %s", artifact, jars));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Artifact: %s, resolved jars %s", artifact, jars));
         return jars.toArray(new String[jars.size()]);
     }
 
@@ -134,8 +136,8 @@ public final class ResolverHelper {
             String resolverLibDir = rioHome+File.separator+"lib"+File.separator+"resolver";
             resolverJarFile = resolverLibDir+File.separator+resolverJarName;
         }
-        if(logger.isLoggable(Level.CONFIG))
-            logger.config(String.format("Resolver JAR file: %s", resolverJarFile));
+        if(logger.isDebugEnabled())
+            logger.debug(String.format("Resolver JAR file: %s", resolverJarFile));
         return resolverJarFile;
     }
 
@@ -159,8 +161,8 @@ public final class ResolverHelper {
         ClassLoader resourceLoader = (cl != null) ? cl : Thread.currentThread().getContextClassLoader();
         try {
             r = doGetResolver(resourceLoader);
-            if(logger.isLoggable(Level.FINE))
-                logger.fine(String.format("Selected Resolver: %s", (r==null?"No Resolver configuration found":r.getClass().getName())));
+            if(logger.isDebugEnabled())
+                logger.debug(String.format("Selected Resolver: %s", (r==null?"No Resolver configuration found":r.getClass().getName())));
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
             }
@@ -178,7 +180,7 @@ public final class ResolverHelper {
     private static Resolver doGetResolver(final ClassLoader cl) throws IOException, ResolverException {
         Resolver resolver = null;
         ServiceLoader<Resolver> loader =  ServiceLoader.load(Resolver.class, cl);
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             int num = 0;
             for(Resolver r : loader) {
@@ -187,7 +189,7 @@ public final class ResolverHelper {
                 sb.append(r.getClass().getName());
                 num++;
             }            
-            logger.fine(String.format("Found %s Resolvers: [%s]", num, sb.toString()));
+            logger.debug(String.format("Found %s Resolvers: [%s]", num, sb.toString()));
         }
         for(Resolver r : loader) {
             if(r!=null) {

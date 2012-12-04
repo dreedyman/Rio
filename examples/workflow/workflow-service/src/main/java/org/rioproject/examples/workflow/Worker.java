@@ -28,11 +28,12 @@ import org.rioproject.watch.Calculable;
 import org.rioproject.watch.CounterWatch;
 import org.rioproject.watch.PeriodicWatch;
 import org.rioproject.watch.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 /**
  * A basic JavaSpace worker
@@ -44,7 +45,7 @@ public class Worker {
     private ExecutorService service;
     public static final String COMPONENT = "workflow";
     private long timeout;
-    private Logger logger = Logger.getLogger(COMPONENT);
+    private Logger logger = LoggerFactory.getLogger(COMPONENT);
     String name;
     private boolean shutdown = false;
     private CounterWatch rate;
@@ -104,18 +105,14 @@ public class Worker {
                 try {
                     Transaction tx = null;
                     if (tranMgr != null) {
-                        tx = TransactionFactory.create(tranMgr,
-                                                       Lease.FOREVER).transaction;
+                        tx = TransactionFactory.create(tranMgr, Lease.FOREVER).transaction;
                     }
-                    WorkflowEntry entry =
-                        (WorkflowEntry)space.takeIfExists(template,
-                                                          tx,
-                                                          timeout);
+                    WorkflowEntry entry = (WorkflowEntry)space.takeIfExists(template, tx, timeout);
                     if (entry == null && tx != null) {
                         tx.abort();
                     } else {
                         if(entry!=null) {
-                            logger.info("Worker ["+name+"] processing task: " + entry);
+                            logger.info("Worker [{}] processing task: {}", name, entry);
                             meanTime.startTiming();
                             Entry result = entry.execute();
                             meanTime.stopTiming();
@@ -127,8 +124,7 @@ public class Worker {
                         }
                     }
                 } catch (InterruptedException e) {
-                    logger.info("SpaceProcessor " +
-                                       "InterruptedException, exiting");
+                    logger.info("SpaceProcessor InterruptedException, exiting");
                     break;
 
                 } catch (Exception e) {

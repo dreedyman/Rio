@@ -1,4 +1,4 @@
-import java.util.logging.Level
+
 import org.rioproject.config.Constants
 
 deployment(name:'Events Example') {
@@ -13,13 +13,6 @@ deployment(name:'Events Example') {
      * be done once and referenced using the identifier 'client'. Note the
      * classifier of 'dl' */
     artifact id: 'client', 'org.rioproject.examples.events:events-proxy:2.0.2'
-
-    /*
-     * The following declaration sets the logger level for the example
-     */
-    logging {
-        logger 'org.rioproject.examples.events', Level.FINE
-    }
 
     /* The event producer */
     service(name: 'Hello') {

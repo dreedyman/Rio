@@ -4,11 +4,12 @@ rem This script provides the command and control utility for starting
 rem Rio services and the Rio command line interface
 
 rem Use local variables
-setlocal
+setLocal EnableDelayedExpansion
 
 rem Set local variables
 if "%RIO_HOME%" == "" set RIO_HOME=%~dp0..
 
+set SLF4J_CLASSPATH="%RIO_HOME%\lib\logging\*";"%RIO_HOME%\config\logging"
 set RIO_LIB=%RIO_HOME%\lib
 
 if "%JAVA_HOME%" == "" goto noJavaHome
@@ -32,7 +33,7 @@ rem set cliExt="%RIO_HOME%"\config\rio_cli.groovy
 rem set cliExt=""
 set command_line=%*
 set launchTarget=org.rioproject.tools.cli.CLI
-set classpath=-cp "%RIO_HOME%\lib\rio-cli.jar";"%RIO_HOME%\lib-dl\rio-api.jar";"%RIO_HOME%\lib-dl\jmx-lookup.jar";"%RIO_LIB%\jsk-lib.jar";"%RIO_LIB%\jsk-platform.jar";"%RIO_HOME%\lib\groovy-all.jar";
+set classpath=-cp "%RIO_HOME%\lib\rio-cli.jar";"%RIO_HOME%\lib-dl\rio-api.jar";"%RIO_HOME%\lib-dl\jmx-lookup.jar";"%RIO_LIB%\jsk-lib.jar";"%RIO_LIB%\jsk-platform.jar";"%RIO_HOME%\lib\groovy-all.jar";"%SLF4J_CLASSPATH%";
 set props="-DRIO_HOME=%RIO_HOME%"
 "%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -DRIO_HOME="%RIO_HOME%" -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
 goto end
@@ -60,7 +61,7 @@ set RIO_LOG_DIR="%RIO_HOME%"\logs\
 if "%RIO_NATIVE_DIR%" == "" set RIO_NATIVE_DIR="%RIO_HOME%"\lib\native
 set PATH=%PATH%;"%RIO_NATIVE_DIR%"
 
-set classpath=-cp "%RIO_HOME%\lib\rio-start.jar";"%RIO_HOME%\lib\start.jar";"%JAVA_HOME%\lib\tools.jar";"%RIO_HOME%\lib\groovy-all.jar";
+set classpath=-cp "%RIO_HOME%\lib\rio-start.jar";"%RIO_HOME%\lib\start.jar";"%JAVA_HOME%\lib\tools.jar";"%RIO_HOME%\lib\groovy-all.jar";"%SLF4J_CLASSPATH%";
 set agentpath=-javaagent:"%RIO_HOME%\lib\rio-start.jar"
 
 set launchTarget=com.sun.jini.start.ServiceStarter

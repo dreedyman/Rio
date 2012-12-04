@@ -20,6 +20,8 @@ import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.aether.RepositoryException;
 import org.sonatype.aether.repository.ArtifactRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
@@ -33,8 +35,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Uses Maven 3's native dependency resolution interface, Aether.
@@ -44,7 +44,7 @@ public class AetherResolver implements Resolver {
     private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<ResolutionRequest, Future<String[]>>();
     private final ExecutorService resolverExecutor = Executors.newCachedThreadPool();
     private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
-    private static final Logger logger = Logger.getLogger(AetherResolver.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AetherResolver.class.getName());
 
     public AetherResolver() {
         service = AetherService.getDefaultInstance();
@@ -63,8 +63,8 @@ public class AetherResolver implements Resolver {
             if(future==null) {
                 future = resolverExecutor.submit(new ResolvingRequestTask(request));
                 resolvingMap.put(request, future);
-                if(logger.isLoggable(Level.FINE)) {
-                    logger.fine(String.format("Created and set new ResolvingTask for %s", artifact));
+                if(logger.isDebugEnabled()) {
+                    logger.debug(String.format("Created and set new ResolvingTask for %s", artifact));
                 }
             } else {
                 request = getResolutionRequest(request);
@@ -103,14 +103,14 @@ public class AetherResolver implements Resolver {
             if(future==null) {
                 future = resolverExecutor.submit(new ResolvingRequestTask(request));
                 resolvingMap.put(request, future);
-                if(logger.isLoggable(Level.FINE)) {
+                if(logger.isDebugEnabled()) {
                     StringBuilder builder = new StringBuilder();
                     for(RemoteRepository repository : repositories) {
                         if(builder.length()>0)
                             builder.append(", ");
                         builder.append(repository.getUrl());
                     }
-                    logger.fine(String.format("Created and set new ResolvingRequestTask for %s with repositories %s",
+                    logger.debug(String.format("Created and set new ResolvingRequestTask for %s with repositories %s",
                                               artifact, builder));
                 }
             } else {
@@ -226,7 +226,7 @@ public class AetherResolver implements Resolver {
             }
 
         }
-        if(logger.isLoggable(Level.FINE))
+        if(logger.isDebugEnabled())
             logResolutionResult(result);
         return classPath.toArray(new String[classPath.size()]);
     }
@@ -245,8 +245,7 @@ public class AetherResolver implements Resolver {
             resolvedList.append("  <No artifacts resolved>");
         else
             newLine = "\n";
-        logger.log(Level.FINE, "Artifact resolution for {0}:{1}",
-                   new Object[]{result.getArtifact(), (newLine+resolvedList)});
+        logger.debug(String.format("Artifact resolution for %s:%s", result.getArtifact(), newLine+resolvedList.toString()));
     }
 
     protected RemoteRepository transformAetherRemoteRepository(org.sonatype.aether.repository.RemoteRepository r) {
@@ -364,7 +363,6 @@ public class AetherResolver implements Resolver {
                 return false;
             ResolutionRequest that = (ResolutionRequest) o;
             return artifact.equals(that.artifact) && Arrays.equals(repositories, that.repositories);
-
         }
 
         @Override

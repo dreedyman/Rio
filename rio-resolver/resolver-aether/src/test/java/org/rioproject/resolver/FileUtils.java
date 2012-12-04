@@ -15,15 +15,16 @@
  */
 package org.rioproject.resolver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utilities for working with files for this test suite
  */
 public class FileUtils {
-    private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(FileUtils.class.getName());
 
     /**
      * Get the path from a File object
@@ -38,8 +39,7 @@ public class FileUtils {
             path = f.getCanonicalPath();
         } catch (IOException e) {
             path = f.getAbsolutePath();
-            logger.warning("Unable to obtain canonical path for file " +
-                           "[" + f.getName() + "], returning absolute path: " + path);
+            logger.warn("Unable to obtain canonical path for file [{}], returning absolute path: {}", f.getName(), path);
         }
         return path;
     }
@@ -91,35 +91,35 @@ public class FileUtils {
     public static void remove(File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
-            for (File f : files) {
-                if (f.isDirectory())
-                    remove(f);
-                else {
-                    if (f.delete()) {
-                        if (logger.isLoggable(Level.FINE))
-                            logger.log(Level.FINE,
-                                       "Removed " + getFilePath(f));
-                    } else {
-                        if (f.exists())
-                            logger.warning("Unable to remove " + getFilePath(f));
+            if(files!=null) {
+                for (File f : files) {
+                    if (f.isDirectory())
+                        remove(f);
+                    else {
+                        if (f.delete()) {
+                            if (logger.isDebugEnabled())
+                                logger.debug("Removed {}", getFilePath(f));
+                        } else {
+                            if (f.exists())
+                                logger.warn("Unable to remove {}", getFilePath(f));
+                        }
                     }
                 }
-            }
-            if (file.delete()) {
-                if (logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE,
-                               "Removed " + getFilePath(file));
-            } else {
-                if (file.exists())
-                    logger.warning("Unable to remove " + getFilePath(file));
+                if (file.delete()) {
+                    if (logger.isDebugEnabled())
+                        logger.debug("Removed {}", getFilePath(file));
+                } else {
+                    if (file.exists())
+                        logger.warn("Unable to remove " + getFilePath(file));
+                }
             }
         } else {
             if (file.delete()) {
-                if (logger.isLoggable(Level.FINE))
-                    logger.log(Level.FINE, "Removed " + getFilePath(file));
+                if (logger.isDebugEnabled())
+                    logger.debug("Removed {}", getFilePath(file));
             } else {
                 if (file.exists())
-                    logger.warning("Unable to remove " + getFilePath(file));
+                    logger.warn("Unable to remove {}", getFilePath(file));
             }
         }
     }

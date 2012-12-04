@@ -48,10 +48,6 @@ getStarterConfig() {
     service="$1"
     if [ -f "$RIO_HOME/config/start-$service.groovy" ] ; then
 	    starterConfig="$RIO_HOME/config/start-$service.groovy"
-	    case $starterConfig in
-	    *activatable*)
-	        starterConfig="$RIO_HOME/config/activatable.groovy $starterConfig"
-	    esac
     else
 	    echo "Cannot locate expected service starter file [start-$service.groovy] in [$RIO_HOME/config], exiting"
 	    exit 1
@@ -90,6 +86,13 @@ installRioToLocalRepository() {
         exit 1
     fi
 }
+
+# Build the classpath for SLAF4J Logging
+for file in $RIO_HOME/lib/logging/*.jar; do
+    SLF4J_CLASSPATH="$SLF4J_CLASSPATH:$file"
+done
+SLF4J_CLASSPATH=`echo $SLF4J_CLASSPATH | cut -c2-`
+SLF4J_CLASSPATH="$SLF4J_CLASSPATH:$RIO_HOME/config/logging/"
 
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1
@@ -141,7 +144,7 @@ if [ "$start" = "1" ]; then
         fi
         USER_OPTS="-DRIO_NATIVE_DIR=$RIO_NATIVE_DIR $USER_OPTS"
     fi
-    classpath="-cp `toNative $RIO_LIB/rio-start.jar:$RIO_LIB/resolver-api.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar`"
+    classpath="-cp `toNative $RIO_LIB/rio-start.jar:$RIO_LIB/resolver-api.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar:$SLF4J_CLASSPATH`"
     agentpath="-javaagent:`toNative $RIO_LIB/rio-start.jar`"
     launchTarget=com.sun.jini.start.ServiceStarter
     if [ -z "$1" ] ; then
@@ -196,7 +199,7 @@ else
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
     cliExt="$RIO_HOME/config/tools.groovy"
     launchTarget=org.rioproject.tools.cli.CLI
-    classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB_DL/rio-api.jar:$RIO_LIB_DL/jmx-lookup.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar`"
+    classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB_DL/rio-api.jar:$RIO_LIB_DL/jmx-lookup.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar:$SLF4J_CLASSPATH`"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \

@@ -1,13 +1,9 @@
-import java.util.logging.Level
+
 import org.rioproject.config.Constants
 
 deployment(name: 'Hospital') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
-
-    /*logging {
-        logger 'org.rioproject.gnostic.drools', Level.FINEST
-    }*/
 
     artifact id: 'service', 'org.rioproject.examples.hospital:hospital-service:2.0.2'
     artifact id: 'service-dl', 'org.rioproject.examples.hospital:hospital-api:2.0.2'

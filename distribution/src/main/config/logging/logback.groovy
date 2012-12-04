@@ -7,7 +7,8 @@ import static ch.qos.logback.classic.Level.WARN
 import static ch.qos.logback.classic.Level.OFF
 
 appender("STDOUT", ConsoleAppender) {
-    withJansi = true 
+    if(!System.getProperty("os.name").startsWith("Windows"))
+        withJansi = true
     encoder(PatternLayoutEncoder) {
         pattern = "%highlight(%-5level) | %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
     }

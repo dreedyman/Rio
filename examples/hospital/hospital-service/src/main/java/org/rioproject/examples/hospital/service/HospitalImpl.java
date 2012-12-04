@@ -22,14 +22,14 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.examples.hospital.*;
 import org.rioproject.examples.hospital.Doctor.Status;
 import org.rioproject.watch.CounterWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of a {@link Hospital}
@@ -40,7 +40,7 @@ public class HospitalImpl implements Hospital {
     private CounterWatch availableBeds;
     private ServiceBeanContext context;
     private final List<Patient> waitingRoom = new ArrayList<Patient>();
-    private final static Logger logger = Logger.getLogger(HospitalImpl.class.getName());
+    private final static Logger logger = LoggerFactory.getLogger(HospitalImpl.class.getName());
 
     @SuppressWarnings("unused") /* Injection point for Rio */
     public void setServiceBeanContext(final ServiceBeanContext context) {
@@ -65,14 +65,10 @@ public class HospitalImpl implements Hospital {
                         try {
                             doAdmitWithBed(p, b);
                             waitingRoom.remove(p);
-                            if(logger.isLoggable(Level.INFO)) {
-                                logger.info(String.format("Removed %s from the waiting room, waiting room size is now: %d",
-                                                          p.getPatientInfo().getName(), waitingRoom.size()));
-                            }
+                            logger.info("Removed {} from the waiting room, waiting room size is now: {}",
+                                        p.getPatientInfo().getName(), waitingRoom.size());
                         } catch (AdmissionException e) {
-                            if(logger.isLoggable(Level.FINE)) {
-                                logger.fine(String.format("Unable to assign patient %s", p.getPatientInfo().getName()));
-                            }
+                            logger.debug("Unable to assign patient {}", p.getPatientInfo().getName());
                         }
                     }
                 }
@@ -213,7 +209,7 @@ public class HospitalImpl implements Hospital {
                 if(p!=null)
                     l.add(p);
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Could not get Patient from Bed", e);
+                logger.warn("Could not get Patient from Bed", e);
             }
         }
         return Collections.unmodifiableList(l);
@@ -238,7 +234,7 @@ public class HospitalImpl implements Hospital {
                         list.add(d);
                     }
                 } catch (IOException e) {
-                    logger.log(Level.WARNING, "Could not get Doctor's Status", e);
+                    logger.warn("Could not get Doctor's Status", e);
                 }
             }
         }
@@ -261,7 +257,7 @@ public class HospitalImpl implements Hospital {
                 List<Patient> l = d.getPatients();
                 count = l.size();
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Getting patient count from a Doctor", e);
+                logger.warn("Getting patient count from a Doctor", e);
                 /* */
             }
             return count;

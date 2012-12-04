@@ -26,9 +26,10 @@ import org.rioproject.examples.events.Hello;
 import org.rioproject.examples.events.HelloEvent;
 import org.rioproject.watch.GaugeWatch;
 import org.rioproject.watch.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 /**
  * An implementation of the Hello service basic event handling, an the use of
@@ -48,8 +49,7 @@ public class HelloImpl implements Hello {
     /** Watch used for notification counting */
     private GaugeWatch notification;
     /** The Logger for this example */
-    static Logger logger = Logger.getLogger("org.rioproject.examples.events");
-
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.examples.events");
 
     /*
      * Create a custom proxy
@@ -65,12 +65,10 @@ public class HelloImpl implements Hello {
      * The ServiceBeanContext will be injected, allowing the bean to create
      * and add necessary event handling classes
      */
-    public void setServiceBeanContext(ServiceBeanContext context) throws
-                                                                  Exception {
+    public void setServiceBeanContext(ServiceBeanContext context) throws Exception {
         /* Create and register the event producer */
         eventHandler = new DispatchEventHandler(HelloEvent.getEventDescriptor());
-        context.registerEventHandler(HelloEvent.getEventDescriptor(),
-                                     eventHandler);
+        context.registerEventHandler(HelloEvent.getEventDescriptor(), eventHandler);
 
         notification = new GaugeWatch("notification");
 
@@ -79,7 +77,7 @@ public class HelloImpl implements Hello {
         watch = new StopWatch("HelloWatch");
         context.getWatchRegistry().register(watch, notification);
 
-        logger.fine("Initialized HelloImpl");
+        logger.debug("Initialized HelloImpl");
     }
 
     public void sayHello(String message) {
@@ -91,7 +89,7 @@ public class HelloImpl implements Hello {
             eventHandler.fire(new HelloEvent(proxy, reply));
             notificationCount.incrementAndGet();
         } catch (NoEventConsumerException e) {
-            logger.warning("No Event Consumers currently registered");
+            logger.warn("No Event Consumers currently registered");
         } finally {
             watch.stopTiming();
             notification.addValue(getNotificationCount());

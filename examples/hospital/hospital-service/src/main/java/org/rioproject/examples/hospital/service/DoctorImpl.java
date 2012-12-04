@@ -20,12 +20,12 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.examples.hospital.Doctor;
 import org.rioproject.examples.hospital.Patient;
 import org.rioproject.watch.GaugeWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of a {@link Doctor}
@@ -37,7 +37,7 @@ public class DoctorImpl implements Doctor {
     private final List<Patient> patients = new ArrayList<Patient>();
     private static final String COMPONENT = DoctorImpl.class.getName();
     private GaugeWatch numPatients;
-    private static Logger logger = Logger.getLogger(DoctorImpl.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(DoctorImpl.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) throws
                                                                   ConfigurationException {
@@ -52,8 +52,8 @@ public class DoctorImpl implements Doctor {
                                                                      String.class,
                                                                      null,
                                                                      name);
-        if(logger.isLoggable(Level.CONFIG)) {
-            logger.log(Level.CONFIG, "Status for {0} is {1}", new Object[]{name, sStatus});
+        if(logger.isDebugEnabled()) {
+            logger.debug("Status for {} is {}", name, sStatus);
         }
         this.status = Status.valueOf(sStatus);
         numPatients = new GaugeWatch("numPatients");
@@ -84,7 +84,7 @@ public class DoctorImpl implements Doctor {
     }
 
     private void logStatusChange() {
-        logger.log(Level.INFO, "Set {0} to {1}", new Object[]{name, status.name()});
+        logger.info("Set {} to {}", name, status.name());
     }
 
     public String getName() {
@@ -95,8 +95,7 @@ public class DoctorImpl implements Doctor {
         synchronized(patients) {
             if(patients.add(p)) {
                 numPatients.addValue(patients.size());
-                logger.log(Level.INFO, "{0}, total patients: {1}, added {2} ",
-                           new Object[]{name, patients.size(), p.getPatientInfo().getName()});
+                logger.info("{}, total patients: {}, added {} ", name, patients.size(), p.getPatientInfo().getName());
             }
         }        
     }

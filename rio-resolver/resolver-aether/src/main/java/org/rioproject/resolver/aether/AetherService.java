@@ -26,6 +26,8 @@ import org.rioproject.resolver.aether.filters.ExcludePlatformFilter;
 import org.rioproject.resolver.aether.util.ConsoleRepositoryListener;
 import org.rioproject.resolver.aether.util.ConsoleTransferListener;
 import org.rioproject.resolver.aether.util.SettingsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
@@ -37,7 +39,9 @@ import org.sonatype.aether.deployment.DeployRequest;
 import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyFilter;
-import org.sonatype.aether.impl.*;
+import org.sonatype.aether.impl.ArtifactDescriptorReader;
+import org.sonatype.aether.impl.VersionRangeResolver;
+import org.sonatype.aether.impl.VersionResolver;
 import org.sonatype.aether.installation.InstallRequest;
 import org.sonatype.aether.installation.InstallationException;
 import org.sonatype.aether.repository.*;
@@ -49,15 +53,13 @@ import org.sonatype.aether.util.artifact.SubArtifact;
 import org.sonatype.aether.util.filter.DependencyFilterUtils;
 import org.sonatype.aether.util.repository.DefaultMirrorSelector;
 
-import java.io.*;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Use Maven 3's Aether API for Maven dependency resolution.
@@ -71,7 +73,7 @@ public final class AetherService {
     private String dependencyFilterScope;
     private final Collection<DependencyFilter> dependencyFilters =
         Collections.synchronizedCollection(new ArrayList<DependencyFilter>());
-    private static final Logger logger = Logger.getLogger(AetherService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AetherService.class.getName());
 
     private AetherService(final RepositorySystem repositorySystem, final WorkspaceReader workspaceReader) throws SettingsBuildingException {
         this.repositorySystem = repositorySystem;
@@ -228,9 +230,7 @@ public final class AetherService {
             return new ResolutionResult(artifact, artifactResults);
         } catch(NullPointerException e) {
             /* catch, log and rethrow */
-            logger.log(Level.SEVERE,
-                       String.format("Trying to resolve %s, make sure that all parent poms are resolveable", artifact),
-                       e);
+            logger.error("Trying to resolve {}, make sure that all parent poms are resolveable", artifact, e);
             throw e;
         }
 
@@ -361,7 +361,7 @@ public final class AetherService {
         else
             myRepositories = repositories;
 
-        if(logger.isLoggable(Level.FINE)) {
+        if(logger.isDebugEnabled()) {
             StringBuilder builder = new StringBuilder();
             if(myRepositories!=null && myRepositories.size()>0) {
                 for(RemoteRepository r : myRepositories) {
@@ -372,7 +372,7 @@ public final class AetherService {
             } else {
                 builder.append("<no provided repositories>");
             }
-            logger.fine(String.format("Get location of %s using repositories %s", artifactCoordinates, builder.toString()));
+            logger.debug("Get location of {} using repositories {}", artifactCoordinates, builder.toString());
         }
         setMirrorSelector(myRepositories);
         applyAuthentication(myRepositories);

@@ -20,14 +20,14 @@ import org.rioproject.examples.hospital.Bed;
 import org.rioproject.examples.hospital.CalculablePatient;
 import org.rioproject.examples.hospital.Patient;
 import org.rioproject.watch.GaugeWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of a {@link Bed}
@@ -38,11 +38,11 @@ public class BedImpl implements Bed {
     private GaugeWatch pulse;
     private ScheduledExecutorService scheduler;
     private String roomNumber;
-    private static final Logger logger = Logger.getLogger(BedImpl.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(BedImpl.class.getName());
 
     public void setServiceBeanContext(ServiceBeanContext context) {
-        if(logger.isLoggable(Level.FINE)) {
-            logger.config(String.format("Creating Bed:%d...", context.getServiceBeanConfig().getInstanceID()));
+        if(logger.isDebugEnabled()) {
+            logger.debug("Creating Bed:{}...", context.getServiceBeanConfig().getInstanceID());
         }
 
         int numRooms = 40;
@@ -51,7 +51,7 @@ public class BedImpl implements Bed {
             try {
                 numRooms = Integer.parseInt(sNumRooms);
             } catch(NumberFormatException e) {
-                logger.warning(String.format("Bad roomNumber [%s], default to 40 rooms", sNumRooms));
+                logger.warn("Bad roomNumber [{}], default to 40 rooms", sNumRooms);
             }
         }
         Random random = new Random();
@@ -60,9 +60,8 @@ public class BedImpl implements Bed {
         temperature = new GaugeWatch("temperature");
         pulse = new GaugeWatch("pulse");
         context.getWatchRegistry().register(temperature, pulse);
-        if(logger.isLoggable(Level.CONFIG)) {
-            logger.config(String.format("Created Bed:%d in room #%s",
-                                        context.getServiceBeanConfig().getInstanceID(),roomNumber));
+        if(logger.isDebugEnabled()) {
+            logger.debug("Created Bed:%{} in room #{}", context.getServiceBeanConfig().getInstanceID(),roomNumber);
         }
     }
 

@@ -15,15 +15,16 @@
  */
 package org.rioproject.examples.hospital;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Helper class for the right hand side execution
  */
 public class RuleServiceHelper {
-    private static final Logger logger = Logger.getLogger(RuleServiceHelper.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RuleServiceHelper.class.getName());
 
     public static void patientNotify(Patient p) {
 
@@ -34,18 +35,16 @@ public class RuleServiceHelper {
             for(Doctor d : doctors) {
                 try {
                     if(d.getStatus().equals(Doctor.Status.ON_CALL)) {
-                        if(logger.isLoggable(Level.FINE)) {
-                            logger.log(Level.FINE, "Setting {0} to be ON_DUTY", d.getName());
-                        }
+                            logger.debug("Setting {} to be ON_DUTY", d.getName());
                         d.onDuty();
                         break;
                     }
                 } catch(Exception e) {
-                    logger.log(Level.WARNING, "Trying to set a Doctor to be ON_CALL", e);
+                    logger.warn("Trying to set a Doctor to be ON_CALL", e);
                 }
             }
         } catch(java.lang.ClassCastException e) {
-            logger.log(Level.WARNING, "Type cast issue trying to access List of Doctors", e);
+            logger.warn("Type cast issue trying to access List of Doctors", e);
         }
     }
 }

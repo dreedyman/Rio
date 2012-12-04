@@ -2,6 +2,7 @@ import org.rioproject.config.Component
 import org.rioproject.log.LoggerConfig
 import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler
+import org.rioproject.boot.LogAgent
 /*
  * Configure the invocation delay duration for the JMXFaultDetectionHandler.
  * This is used (by default) for a forked service to monitor the presence of the
@@ -34,7 +35,9 @@ class JMXFaultDetectionHandlerConfig {
 @Component('org.rioproject.cybernode')
 class ForkedCybernodeConfig {
     LoggerConfig[] getLoggerConfigs() {
-        Logger.getLogger("").addHandler new ServiceLogEventHandler()
+        if(LogAgent.usingJUL()) {
+            Logger.getLogger("").addHandler new ServiceLogEventHandler()
+        }
         def loggers = []
         return loggers as LoggerConfig[]
     }

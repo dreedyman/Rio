@@ -15,18 +15,19 @@
  */
 package org.rioproject.resolver.aether.util;
 
-import java.io.PrintStream;
-import java.util.logging.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.aether.AbstractRepositoryListener;
 import org.sonatype.aether.RepositoryEvent;
+
+import java.io.PrintStream;
 
 /**
  * A simplistic repository listener that logs events to the console.
  */
 public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     private PrintStream out;
-    private final static Logger logger = Logger.getLogger(ConsoleRepositoryListener.class.getName());
+    private final static Logger logger = LoggerFactory.getLogger(ConsoleRepositoryListener.class.getName());
 
     public ConsoleRepositoryListener() {
         this(null);
@@ -37,7 +38,7 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactDeployed(RepositoryEvent event) {
-        out.println("Deployed " + event.getArtifact() + " to " + event.getRepository());
+        logger.info("Deployed " + event.getArtifact() + " to " + event.getRepository());
     }
 
     public void artifactDeploying(RepositoryEvent event) {
@@ -45,16 +46,16 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactDescriptorInvalid(RepositoryEvent event) {
-        out.println("Invalid artifact descriptor for " + event.getArtifact() + ": "
+        logger.info("Invalid artifact descriptor for " + event.getArtifact() + ": "
                     + event.getException().getMessage());
     }
 
     public void artifactDescriptorMissing(RepositoryEvent event) {
-        out.println("Missing artifact descriptor for " + event.getArtifact());
+        logger.info("Missing artifact descriptor for " + event.getArtifact());
     }
 
     public void artifactInstalled(RepositoryEvent event) {
-        out.println("Installed " + event.getArtifact() + " to " + event.getFile());
+        logger.info("Installed " + event.getArtifact() + " to " + event.getFile());
     }
 
     public void artifactInstalling(RepositoryEvent event) {
@@ -62,27 +63,27 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactResolved(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINER))
-            out.println("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
+        if(logger.isDebugEnabled())
+            logger.debug("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloading(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINEST))
-            out.println("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
+        if(logger.isTraceEnabled())
+            logger.trace("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactDownloaded(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINEST))
-            out.println("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
+        if(logger.isTraceEnabled())
+            logger.trace("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
     }
 
     public void artifactResolving(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINEST))
-            out.println("Resolving artifact " + event.getArtifact());
+        if(logger.isTraceEnabled())
+            logger.trace("Resolving artifact " + event.getArtifact());
     }
 
     public void metadataDeployed(RepositoryEvent event) {
-        out.println("Deployed " + event.getMetadata() + " to " + event.getRepository());
+        logger.info("Deployed " + event.getMetadata() + " to " + event.getRepository());
     }
 
     public void metadataDeploying(RepositoryEvent event) {
@@ -90,7 +91,7 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void metadataInstalled(RepositoryEvent event) {
-        out.println("Installed " + event.getMetadata() + " to " + event.getFile());
+        logger.info("Installed " + event.getMetadata() + " to " + event.getFile());
     }
 
     public void metadataInstalling(RepositoryEvent event) {
@@ -98,18 +99,18 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void metadataInvalid(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINE))
-        out.println("Invalid metadata " + event.getMetadata());
+        if(logger.isDebugEnabled())
+            logger.debug("Invalid metadata " + event.getMetadata());
     }
 
     public void metadataResolved(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINER))
-            out.println("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
+        if(logger.isDebugEnabled())
+            logger.debug("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 
     public void metadataResolving(RepositoryEvent event) {
-        if(logger.isLoggable(Level.FINEST))
-            out.println("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
+        if(logger.isTraceEnabled())
+            logger.trace("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
     }
 
 }

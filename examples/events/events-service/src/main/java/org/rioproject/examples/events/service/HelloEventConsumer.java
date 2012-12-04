@@ -24,8 +24,8 @@ import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.examples.events.Hello;
 import org.rioproject.examples.events.HelloEvent;
 import org.rioproject.watch.StopWatch;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The HelloEventConsumer example
@@ -51,14 +51,13 @@ public class HelloEventConsumer {
     private int notificationCount;
 
     /** The Logger for this example */
-    static Logger logger = Logger.getLogger("org.rioproject.examples.events");
+    static Logger logger = LoggerFactory.getLogger("org.rioproject.examples.events");
 
     /*
     * The ServiceBeanContext will be injected, allowing the bean to create
     * and add necessary event handling classes
     */
-    public void setServiceBeanContext(ServiceBeanContext context) throws
-                                                                  Exception {
+    public void setServiceBeanContext(ServiceBeanContext context) throws Exception {
         /**
          * Create the stop watch, and register the stop watch with the
          * WatchDataRegistry
@@ -106,11 +105,10 @@ public class HelloEventConsumer {
                 */
                 watch.setStartTime(((HelloEvent) event).getWhen());
                 watch.stopTiming();
-                logger.info("Received HelloEvent " +
-                            "seqno=" + event.getSequenceNumber() + ", " +
-                            "message=[" + helloEvent.getMessage() + "]");
+                logger.info("Received HelloEvent seqno={}, message=[{}]",
+                            event.getSequenceNumber(), helloEvent.getMessage());
             } else {
-                logger.warning("Unwanted event received: " + event);
+                logger.warn("Unwanted event received: {}", event);
             }
         }
     }

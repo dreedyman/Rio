@@ -20,7 +20,7 @@ import net.jini.core.constraint.ConnectionRelativeTime
 import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
 import net.jini.core.entry.Entry
-import org.rioproject.boot.BootUtil
+import org.rioproject.boot.PortUtil
 import org.rioproject.entry.UIDescriptorFactory
 import org.rioproject.RioVersion
 import net.jini.lookup.ui.MainUI
@@ -69,7 +69,7 @@ class MonitorConfig {
         int port = 0
         String portRange = System.getProperty(Constants.PORT_RANGE)
         if(portRange!=null)
-            port = BootUtil.getPortFromRange(portRange)
+            port = PortUtil.getPortFromRange(portRange)
         return new JrmpExporter(port)
     }
     

@@ -11,6 +11,7 @@ import org.rioproject.opstring.ClassBundle
 import org.rioproject.config.Constants
 import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler
+import org.rioproject.boot.LogAgent
 
 /*
  * Declare Cybernode properties
@@ -56,7 +57,9 @@ class CybernodeConfig {
     }
 
     LoggerConfig[] getLoggerConfigs() {
-        Logger.getLogger("").addHandler new ServiceLogEventHandler()
+        if(LogAgent.usingJUL()) {
+            Logger.getLogger("").addHandler new ServiceLogEventHandler()
+        }
         def loggers = []
         return loggers as LoggerConfig[]
     }
