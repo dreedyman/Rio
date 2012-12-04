@@ -21,17 +21,15 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 /**
- * Provides static convenience methods for use in configuration files. This class cannot
- * be instantiated.
+ * Provides static convenience methods for getting ports.
  *
  * @author Dennis Reedy
  */
-public final class BootUtil {
+public final class PortUtil {
     
     /** This class cannot be instantiated. */
-    private BootUtil() {
-        throw new AssertionError(
-                "org.rioproject.boot.BootUtil cannot be instantiated");
+    private PortUtil() {
+        throw new AssertionError("org.rioproject.boot.PortUtil cannot be instantiated");
     }
     
     /**
