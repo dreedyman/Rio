@@ -40,6 +40,12 @@
 
         <dependency>
             <groupId>${project.groupId}.cybernode</groupId>
+            <artifactId>cybernode-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}.cybernode</groupId>
             <artifactId>cybernode-service</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -51,22 +57,26 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.2</version>
         </dependency>
 
         <dependency>
             <groupId>com.sun.jini</groupId>
             <artifactId>outrigger-dl</artifactId>
-            <version>2.1.1</version>
+            <version>${river.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.sun.jini</groupId>
             <artifactId>outrigger</artifactId>
-            <version>2.1.1</version>
+            <version>${river.version}</version>
             <scope>test</scope>
         </dependency>
 

@@ -215,43 +215,43 @@
             <dependency>
                 <groupId>net.jini</groupId>
                 <artifactId>start</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
             
             <dependency>
                 <groupId>net.jini</groupId>
                 <artifactId>jsk-lib</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>net.jini</groupId>
                 <artifactId>jsk-dl</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>net.jini</groupId>
                 <artifactId>jsk-platform</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.sun.jini</groupId>
                 <artifactId>reggie</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.sun.jini</groupId>
                 <artifactId>reggie-dl</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>net.jini.lookup</groupId>
                 <artifactId>serviceui</artifactId>
-                <version>2.1.1</version>
+                <version>${river.version}</version>
             </dependency>
             
             <dependency>
@@ -301,6 +301,12 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.8.2</version>
             </dependency>
 
         </dependencies>
@@ -423,6 +429,8 @@
         <groovy.version>1.8.0</groovy.version>
         <rio.version>5.0-SNAPSHOT</rio.version>
         <rio.plugin.version>5.0-SNAPSHOT</rio.plugin.version>
+        <river.version>2.1.1</river.version>
+        <junit.version>4.8.2</junit.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>
