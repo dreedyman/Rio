@@ -21,11 +21,9 @@ import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
-import org.rioproject.resolver.Resolver;
-import org.rioproject.resolver.ResolverException;
-import org.rioproject.resolver.ResolverHelper;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,8 +208,6 @@ public final class ServiceDescriptorUtil {
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
-        classPath.append(File.pathSeparator);
-        classPath.append(getProxyClassPath("org.rioproject.cybernode:cybernode-proxy:"+RioVersion.VERSION));
         return classPath.toString();
     }
 
@@ -254,23 +250,10 @@ public final class ServiceDescriptorUtil {
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
-        classPath.append(File.pathSeparator);
-        classPath.append(getProxyClassPath("org.rioproject.monitor:monitor-proxy:" +RioVersion.VERSION));
         String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
         String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
 
         return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
-    }
-
-    private static String getProxyClassPath(final String proxy) throws IOException {
-        String[] proxyClassPath;
-        try {
-            Resolver resolver = ResolverHelper.getResolver();
-            proxyClassPath = resolver.getClassPathFor(proxy);
-        } catch (ResolverException e) {
-            throw new IOException("Unable to resolve "+proxy, e);
-        }
-        return makePath(proxyClassPath);
     }
 
     /**
@@ -307,13 +290,4 @@ public final class ServiceDescriptorUtil {
         return sb.toString();
     }
 
-    protected static String makePath(final String... jars) {
-        StringBuilder sb = new StringBuilder();
-        for(String jar : jars) {
-            if(sb.length()>0)
-                sb.append(File.pathSeparator);
-            sb.append(jar);
-        }
-        return sb.toString();
-    }
 }

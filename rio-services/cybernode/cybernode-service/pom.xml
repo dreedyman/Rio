@@ -50,6 +50,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.hyperic</groupId>
             <artifactId>sigar-dist</artifactId>
             <type>zip</type>
@@ -60,7 +65,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
     
@@ -68,19 +72,37 @@
 
     <build>
 	    <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Implementation-Title>Rio Project</Implementation-Title>
-                            <Implementation-Version>${project.version}</Implementation-Version>
-                            <Rio-Version>${project.version}</Rio-Version>
-                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.rioproject.cybernode:cybernode-api</include>
+                                    <include>org.rioproject.cybernode:cybernode-proxy</include>
+                                </includes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Implementation-Title>Rio Project</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Rio-Version>${project.version}</Rio-Version>
+                                        <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Unzip Hyperic distribution if needed-->
