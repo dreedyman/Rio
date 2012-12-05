@@ -58,6 +58,12 @@ for(File f: resolverLibs.listFiles()) {
     classPath.append(f.path)
 }
 
+File loggingLibDir = new File(rioHome, "lib/logging")
+loggingLibDir.eachFile() { file ->
+    classPath.append(File.pathSeparator).append(loggingLibDir.path+'/'+file.name)
+}
+classPath.append(File.pathSeparator).append(new File(rioHome, "config/logging/"))
+
 StringBuffer out = new StringBuffer()
 long installDate = System.currentTimeMillis()
 String install = "${java.toString()} -Djava.security.policy=${rioHome}/policy/policy.all -DRIO_HOME=$rioHome -classpath ${classPath.toString()} org.rioproject.install.Installer"
