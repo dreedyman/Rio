@@ -38,6 +38,7 @@ public class ExcludePlatformFilter implements DependencyFilter {
             excludes.add("org.rioproject:rio-platform");
             excludes.add("org.codehaus.groovy:groovy-all");
             excludes.add("net.jini:jsk-platform");
+            excludes.add("org.slf4j:slf4j-api");
         }
     }
 
