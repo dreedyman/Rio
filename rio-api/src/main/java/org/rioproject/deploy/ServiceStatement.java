@@ -17,8 +17,6 @@ package org.rioproject.deploy;
 
 import net.jini.id.Uuid;
 import org.rioproject.opstring.ServiceElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
@@ -39,8 +37,6 @@ public class ServiceStatement implements Serializable {
      * A Map of ServiceRecord instances
      */
     private final Map<Uuid, List<ServiceRecord>> serviceRecords = new HashMap<Uuid, List<ServiceRecord>>();
-
-    private final static Logger logger = LoggerFactory.getLogger(ServiceStatement.class.getName());
 
     /**
      * Create a ServiceStatement
@@ -206,30 +202,19 @@ public class ServiceStatement implements Serializable {
             return (records);
         }
         ArrayList<ServiceRecord> list = new ArrayList<ServiceRecord>();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Filtering ").append(records.length).append(" ServiceRecords");
+
         for (ServiceRecord record : records) {
-            sb.append("\n");
-            String sType = null;
             if ((type & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) {
                 if ((record.getType() & ServiceRecord.ACTIVE_SERVICE_RECORD) != 0) {
                     list.add(record);
-                    sType = "ACTIVE_SERVICE_RECORD";
                 }
             }
             if ((type & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0) {
                 if ((record.getType() & ServiceRecord.INACTIVE_SERVICE_RECORD) != 0) {
                     list.add(record);
-                    sType = sType==null?"INACTIVE_SERVICE_RECORD": sType+" | INACTIVE_SERVICE_RECORD";
                 }
             }
-            sb.append("\tAdding ").append(sType).append(" ServiceRecord for ");
-            sb.append(record.getServiceElement().getOperationalStringName());
-            sb.append("/").append(record.getServiceElement().getName());
-            sb.append(":").append(record.getServiceElement().getServiceBeanConfig().getInstanceID());
-            sb.append(" ").append(record.getServiceID().toString());
         }
-        logger.trace(sb.toString());
         return (list.toArray(new ServiceRecord[list.size()]));
     }
 

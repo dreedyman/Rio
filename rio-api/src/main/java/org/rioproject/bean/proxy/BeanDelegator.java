@@ -16,8 +16,6 @@
 package org.rioproject.bean.proxy;
 
 import org.rioproject.resources.servicecore.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
@@ -38,7 +36,6 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
     private Set<PackagedMethod> methodSet = new HashSet<PackagedMethod>();
     private Object service;
     private Object bean;
-    private static Logger logger = LoggerFactory.getLogger("org.rioproject.bean");
 
     /*
      * Private constructor, instantiable only from the static factory
@@ -111,17 +108,8 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
         try {
             template = new PackagedMethod(method);
             if(methodSet.contains(template)) {
-                if(logger.isTraceEnabled()) {
-                    logger.trace("Method "+method.getName()+", " +
-                                 "invocation found in ServiceBean using template "+template);
-                }
                 return method.invoke(service, args);
             } else {
-                if(logger.isTraceEnabled()) {
-                    logger.trace("Method "+method.getName()+", invocation being performed on " +
-                                 bean.getClass().getName()+", no matching method found on service bean " +
-                                 "using template "+template);
-                }
                 Class beanClass = bean.getClass();
                 Method beanMethod =  beanClass.getMethod(method.getName(), method.getParameterTypes());
                 return(beanMethod.invoke(bean, args));

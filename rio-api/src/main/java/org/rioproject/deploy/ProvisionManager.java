@@ -20,6 +20,7 @@ import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.lease.UnknownLeaseException;
 import org.rioproject.system.ResourceCapability;
 
+import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -38,8 +39,7 @@ import java.util.List;
  */
 public interface ProvisionManager {
     /**
-     * Register for notifications of
-     * {@link ServiceProvisionEvent} objects. The returned
+     * Register for notifications of {@link ServiceProvisionEvent}s. The returned
      * {@link net.jini.core.event.EventRegistration} is leased; the lease must be
      * managed by the caller. The event ID in the returned EventRegistration
      * corresponds to the event ID of the ServiceProvisionEvent.
@@ -69,20 +69,16 @@ public interface ProvisionManager {
                                ResourceCapability resourceCapability,
                                List<DeployedService> deployedServices,
                                int serviceLimit,
-                               long duration)
-    throws LeaseDeniedException, RemoteException;
+                               long duration) throws LeaseDeniedException, RemoteException;
 
     /**
-     * Provides a feedback mechanism for a
-     * {@link ServiceBeanInstantiator}
-          * to update it's operational capabilities as described by the
-     * {@link org.rioproject.system.ResourceCapability} object, and any changes in the
-     * maximum number of services the ServiceBeanInstantiator will accept for
-     * service provisioning
+     * Provides a feedback mechanism for a {@link ServiceBeanInstantiator} to update it's operational
+     * capabilities as described by the {@link org.rioproject.system.ResourceCapability} object, and
+     * any changes in the maximum number of services the ServiceBeanInstantiator will accept for
+     * service provisioning.
      * <p>
-     * The ServiceBeanInstantiator must have an active
-     * {@link net.jini.core.lease.Lease} with the
-     * ProvisionManager for this method to be successful
+     * The ServiceBeanInstantiator must have an active {@link net.jini.core.lease.Lease} with the
+     * ProvisionManager for this method to be successful.
      *
      * @param instantiator The Listener to send events to
      * @param resourceCapability The capabilities of the compute resource
@@ -99,8 +95,7 @@ public interface ProvisionManager {
     void update(ServiceBeanInstantiator instantiator,
                 ResourceCapability resourceCapability,
                 List<DeployedService> deployedServices,
-                int serviceLimit)
-    throws UnknownLeaseException, RemoteException;
+                int serviceLimit) throws UnknownLeaseException, RemoteException;
 
     /**
      * Get all registered
@@ -111,7 +106,8 @@ public interface ProvisionManager {
      * If there are no registered <tt>ServiceBeanInstantiator</tt>s, return
      * a zero-length array. A new array is allocated each time
      *
-     * @throws RemoteException If communication errors happen
+     * @throws IOException If communication errors occur if there are problems deserializing
+     * {@code ServiceBeanInstantiator} instances.
      */
-    ServiceBeanInstantiator[] getServiceBeanInstantiators() throws RemoteException;
+    ServiceBeanInstantiator[] getServiceBeanInstantiators() throws IOException;
 }

@@ -22,8 +22,6 @@ import org.rioproject.costmodel.ZeroCostModel;
 import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.deploy.StagedSoftware;
 import org.rioproject.deploy.SystemComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
@@ -149,8 +147,6 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     private static final String[] META_CHARS = {"*", "(", "[", "\\", "^",
                                                 "$", "|", ")", "?", "+"};
     private String configurationFile;
-    /** A suitable Logger */
-    protected static final Logger logger = LoggerFactory.getLogger("org.rioproject.system.capability");
 
     /**
      * Set the path of the PlatformCapability
@@ -630,33 +626,33 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
         this.type = type;
     }
 
-    public void incrementUsage() {
+    public int incrementUsage() {
+        int count;
         synchronized(usageMap) {
-            AtomicInteger count = usageMap.get(hashCode());
-            if(count==null) {
-                count = new AtomicInteger();
+            AtomicInteger counter = usageMap.get(hashCode());
+            if(counter==null) {
+                counter = new AtomicInteger();
             }
-            int val = count.incrementAndGet();
-            logger.info("PlatformCapability ["+getName()+"], count="+val);
-            usageMap.put(hashCode(), count);
+            count = counter.incrementAndGet();
+            usageMap.put(hashCode(), counter);
         }
+        return count;
     }
 
-    public void decrementUsage() {
+    public int decrementUsage() {
+        int count;
         synchronized(usageMap) {
-            AtomicInteger count = usageMap.get(hashCode());
-            if(count==null) {
-                logger.info("PlatformCapability ["+getName()+"], unknown count, returning");
-                return;
+            AtomicInteger counter = usageMap.get(hashCode());
+            if(counter==null) {
+                count = -1;
+            } else  if(counter.intValue()==0) {
+                count = 0;
+            } else {
+                count  = counter.decrementAndGet();
+                usageMap.put(hashCode(), counter);
             }
-            if(count.intValue()==0) {
-                logger.info("PlatformCapability ["+getName()+"], count already at 0, returning");
-                return;
-            }
-            int val = count.decrementAndGet();
-            logger.info("PlatformCapability ["+getName()+"], count="+val);
-            usageMap.put(hashCode(), count);
         }
+        return count;
     }
 
     public int getUsageCount() {
