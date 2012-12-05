@@ -30,8 +30,6 @@ import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.resources.servicecore.AbstractProxy;
 import org.rioproject.system.ResourceCapability;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -52,7 +50,6 @@ import java.util.List;
  */
 class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, Serializable {
     private static final long serialVersionUID = 2L;
-    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor");
     final ProvisionMonitor monitorProxy;
 
     /**
@@ -120,20 +117,18 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
                                       duration));
     }
 
-    public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws IOException {
+    public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws RemoteException {
         return monitorProxy.getWrappedServiceBeanInstantiators();
     }
 
-    public ServiceBeanInstantiator[] getServiceBeanInstantiators() throws RemoteException {
+    public ServiceBeanInstantiator[] getServiceBeanInstantiators() throws IOException {
         Collection<ServiceBeanInstantiator> serviceBeanInstantiators = new ArrayList<ServiceBeanInstantiator>();
         try {
             for(MarshalledObject<ServiceBeanInstantiator> marshalledObject : getWrappedServiceBeanInstantiators()) {
                 serviceBeanInstantiators.add(marshalledObject.get());
             }
-        } catch (IOException e) {
-            logger.warn("Unwrapping a Cybernode", e);
         } catch (ClassNotFoundException e) {
-            logger.warn("Unwrapping a Cybernode", e);
+            throw new IOException("Unwrapping a Cybernode", e);
         }
         return serviceBeanInstantiators.toArray(new ServiceBeanInstantiator[serviceBeanInstantiators.size()]);
     }
@@ -189,6 +184,7 @@ class ProvisionMonitorProxy extends AbstractProxy implements ProvisionMonitor, S
          * <code>ProxyTrustVerifier</code> to retrieve this object's trust
          * verifier.
          */
+        @SuppressWarnings("unused")
         private ProxyTrustIterator getProxyTrustIterator() {
             return (new SingletonProxyTrustIterator(monitorProxy));
         }

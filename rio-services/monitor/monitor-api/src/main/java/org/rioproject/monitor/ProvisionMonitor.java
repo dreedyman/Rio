@@ -19,7 +19,6 @@ import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.resources.servicecore.Service;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
@@ -89,9 +88,9 @@ public interface ProvisionMonitor extends ProvisionManager, Service {
      * If there are no registered <tt>ServiceBeanInstantiator</tt>s, return
      * a zero-length array. A new array is allocated each time
      *
-     * @throws IOException If communication errors happen
+     * @throws RemoteException If communication errors happen
      */
-    Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws IOException;
+    Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws RemoteException;
     
     /**
      * Contains information about ProvisionMonitor peers involved in providing 

@@ -19,13 +19,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.cybernode.Cybernode;
+import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 
 /**
@@ -100,7 +101,7 @@ public class EnlistReleaseTest {
         thrown = null;
         try {
             sbis = monitor.getServiceBeanInstantiators();
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             thrown = e;
         }
@@ -130,7 +131,7 @@ public class EnlistReleaseTest {
         thrown = null;
         try {
             sbis = monitor.getServiceBeanInstantiators();
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             thrown = e;
         }
@@ -149,7 +150,7 @@ public class EnlistReleaseTest {
         thrown = null;
         try {
             sbis = monitor.getServiceBeanInstantiators();
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             thrown = e;
         }

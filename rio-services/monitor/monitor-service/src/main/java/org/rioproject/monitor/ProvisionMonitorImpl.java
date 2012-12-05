@@ -734,7 +734,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         provisioner.handleFeedback(instantiator, resourceCapability, deployedServices, serviceLimit);
     }
 
-    public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() throws IOException {
+    public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() {
         Collection<MarshalledObject<ServiceBeanInstantiator>> marshalledWrappers =
             new ArrayList<MarshalledObject<ServiceBeanInstantiator>>();
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
