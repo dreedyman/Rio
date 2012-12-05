@@ -27,6 +27,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-test</artifactId>
             <scope>test</scope>
@@ -35,14 +40,19 @@
         <dependency>
             <groupId>com.sun.jini</groupId>
             <artifactId>outrigger</artifactId>
-            <version>2.1.1</version>
+            <version>${river.version}</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
         </dependency>
 
