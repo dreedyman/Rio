@@ -23,6 +23,7 @@ import net.jini.config.ConfigurationException;
 import net.jini.core.entry.Entry;
 import net.jini.core.event.UnknownEventException;
 import net.jini.core.lookup.ServiceID;
+import net.jini.discovery.LookupDiscovery;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
 import net.jini.io.MarshalledInstance;
@@ -791,6 +792,19 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         if(serviceID==null) {
             logger.debug("Creating new ServiceID from UUID={}", getUuid().toString());
             serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
+        }
+
+        if(logger.isInfoEnabled()) {
+            String[] g = context.getServiceBeanConfig().getGroups();
+            StringBuilder buff = new StringBuilder();
+            if(g!= LookupDiscovery.ALL_GROUPS) {
+                for(int i=0; i<g.length; i++) {
+                    if(i>0)
+                        buff.append(", ");
+                    buff.append(g[i]);
+                }
+            }
+            logger.info("Started Cybernode [{}]", buff.toString());
         }
 
         loadInitialServices(context.getConfiguration());
