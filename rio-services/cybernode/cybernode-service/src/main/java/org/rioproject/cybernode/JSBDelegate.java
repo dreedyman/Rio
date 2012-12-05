@@ -401,7 +401,12 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
             /* Decrement platform capability counter */
             for(PlatformCapability pCap : installedPlatformCapabilities) {
-                pCap.decrementUsage();
+                int count = pCap.decrementUsage();
+                if(count==-1) {
+                    logger.info("PlatformCapability ["+pCap.getName()+"], unknown count");
+                } else {
+                    logger.info("PlatformCapability ["+pCap.getName()+"], count="+count);
+                }
             }
 
             /* Unprovision any installed platform capability components */
@@ -459,7 +464,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
                         installedPlatformCapabilities.addAll(stagedDataManager.getInstalledPlatformCapabilities());
                         for(PlatformCapability pCap : installedPlatformCapabilities) {
-                            pCap.incrementUsage();
+                            int count = pCap.incrementUsage();
+                            logger.info("PlatformCapability ["+getName()+"], count="+count);
                         }
                     }
 
