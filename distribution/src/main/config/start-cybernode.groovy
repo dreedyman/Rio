@@ -10,6 +10,7 @@ import org.rioproject.resolver.maven2.Repository
 class StartCybernodeConfig {
 
     String[] getConfigArgs(String rioHome) {
+        ServiceDescriptorUtil.checkForLoopback()
         def configArgs = [rioHome+'/config/common.groovy',
                           rioHome+'/config/cybernode.groovy',
                           rioHome+'/config/compute_resource.groovy']

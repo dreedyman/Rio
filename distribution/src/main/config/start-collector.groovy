@@ -19,6 +19,7 @@ class StartCollectorConfig {
     }
 
     ServiceDescriptor[] getServiceDescriptors() {
+        ServiceDescriptorUtil.checkForLoopback()
         String rioHome = System.getProperty('RIO_HOME')
 
         String policyFile = rioHome+'/policy/policy.all'
@@ -27,7 +28,7 @@ class StartCollectorConfig {
         pathBuilder.append(rioHome).append(File.separator).append("lib").append(File.separator).append("event-collector-service.jar")
 
         def serviceDescriptors = [
-                new RioServiceDescriptor("artifact:org.rioproject.event-collector/event-collector-proxy/5.0-SNAPSHOT",
+                new RioServiceDescriptor("artifact:org.rioproject.event-collector/event-collector-proxy/5.0-M1",
                                          policyFile,
                                          pathBuilder.toString(),
                                          "org.rioproject.eventcollector.service.EventCollectorImpl",

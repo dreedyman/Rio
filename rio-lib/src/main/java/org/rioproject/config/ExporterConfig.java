@@ -97,26 +97,6 @@ public class ExporterConfig {
 
     public static ServerEndpoint getServerEndpoint() throws UnknownHostException {
         InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        if(address.isLoopbackAddress()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("\n");
-            builder.append("*******************************************************************************\n");
-            builder.append("* The TcpServerEndpoint is being created with a loopback address of ");
-            builder.append(address.getHostAddress()).append(".\n");
-            builder.append("* You may encounter issues communicating to services outside of your machine.\n");
-            builder.append("*******************************************************************************\n");
-            StackTraceElement[] trace = new Throwable().getStackTrace();
-            for (StackTraceElement aTrace : trace) {
-                /* Skip groovy stacktrace elements for readability */
-                if(!(aTrace.getClassName().startsWith("groovy") ||
-                     aTrace.getClassName().startsWith("org.codehaus.groovy") ||
-                     aTrace.getClassName().startsWith("sun.") ||
-                     aTrace.getClassName().startsWith("java."))) {
-                    builder.append("    at ").append(aTrace).append("\n");
-                }
-            }
-            logger.warn(builder.toString());
-        }
         String range = System.getProperty(Constants.PORT_RANGE);
         ServerSocketFactory factory = null;
         if(range!=null) {

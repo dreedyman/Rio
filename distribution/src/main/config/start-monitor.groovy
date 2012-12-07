@@ -23,6 +23,7 @@ class StartMonitorConfig {
     }
 
     ServiceDescriptor[] getServiceDescriptors() {
+        ServiceDescriptorUtil.checkForLoopback()
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('RIO_HOME')
 

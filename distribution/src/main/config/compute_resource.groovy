@@ -9,17 +9,12 @@ import net.jini.config.Configuration
 import java.lang.management.MemoryPoolMXBean
 import java.lang.management.ManagementFactory
 import java.lang.management.MemoryType
-import org.rioproject.net.HostUtil
 
 /*
  * Declare ComputeResource properties
  */
 @Component('org.rioproject.system')
 class ComputeResourceConfig {
-    InetAddress getAddress() {
-        String host = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
-        return InetAddress.getByName(host)
-    }
 
     /* The reportInterval property controls how often the compute resource
      * will inform registered ResourceCapabilityChangeListeners with an update to

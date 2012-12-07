@@ -10,6 +10,7 @@ import org.rioproject.resolver.maven2.Repository
 @Component('com.sun.jini.start')
 class StartAllConfig {
     ServiceDescriptor[] getServiceDescriptors() {
+        ServiceDescriptorUtil.checkForLoopback()
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('RIO_HOME')
 

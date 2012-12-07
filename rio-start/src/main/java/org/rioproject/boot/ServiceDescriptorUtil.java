@@ -21,9 +21,12 @@ import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -278,6 +281,25 @@ public final class ServiceDescriptorUtil {
         String reggieCodebase = "artifact:com.sun.jini/reggie-dl/2.1.1";
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
+    }
+
+    /**
+     * Check if the default InetAddress to use is a loopback address
+     *
+     * @throws UnknownHostException If the host cannot be resolved
+     */
+    public static void checkForLoopback() throws UnknownHostException {
+            InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        if(address.isLoopbackAddress()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("\n");
+            builder.append("*******************************************************************************\n");
+            builder.append("* The network interface to be used has a loopback address of ");
+            builder.append(address.getHostAddress()).append(".\n");
+            builder.append("* You may encounter issues communicating to services outside of your machine.\n");
+            builder.append("*******************************************************************************\n");
+            LoggerFactory.getLogger("org.rioproject").warn(builder.toString());
+        }
     }
     
     protected static String makePath(final String dir, final String... jars) {

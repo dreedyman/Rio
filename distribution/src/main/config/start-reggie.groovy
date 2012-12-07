@@ -11,6 +11,7 @@ import com.sun.jini.start.ServiceDescriptor;
 class StartReggieConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
+        ServiceDescriptorUtil.checkForLoopback()
         String rioHome = System.getProperty('RIO_HOME')
         def websterRoots = [rioHome+'/lib-dl', ';', rioHome+'/lib']
 
