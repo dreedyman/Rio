@@ -186,6 +186,8 @@ public class ColumnValueHelper {
         MeasuredResource mRes = null;
         if(columnName.equals(Constants.UTIL_PERCENT_CPU)) {
             mRes = cru.getCpuUtilization();
+        } else if(columnName.equals(Constants.UTIL_PERCENT_MEMORY)) {
+            mRes = cru.getSystemMemoryUtilization();
         } else if(columnName.equals(Constants.UTIL_PERCENT_DISK)) {
             mRes = cru.getDiskSpaceUtilization();
         } else if(columnName.equals(Constants.UTIL_PERCENT_CPU_PROC)) {
