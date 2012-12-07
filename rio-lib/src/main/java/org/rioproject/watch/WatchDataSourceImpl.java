@@ -21,9 +21,6 @@ import com.sun.jini.proxy.BasicProxyTrustVerifier;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.export.Exporter;
-import net.jini.jeri.BasicILFactory;
-import net.jini.jeri.BasicJeriExporter;
-import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
@@ -123,9 +120,9 @@ import java.util.List;
  */
 public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     /** Defines the default history size */
-    public final static int DEFAULT_COLLECTION_SIZE = 1000;
+    public final static int DEFAULT_COLLECTION_SIZE = 50;
     /** Defines the default history max size */
-    public final static int MAX_COLLECTION_SIZE = 10000;
+    public final static int MAX_COLLECTION_SIZE = 1000;
     /** The current history maximum size */
     private int max = DEFAULT_COLLECTION_SIZE;
     /** The history */
@@ -226,11 +223,6 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                 logger.error("Getting watchDataSourceExporter", e);
             }
         }
-        if(exporter == null)
-            exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
-                                             new BasicILFactory(),
-                                             false,
-                                             true);
         proxy = (WatchDataSource)exporter.export(this);
         exported = true;        
         return (proxy);
@@ -301,6 +293,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
             } else
                 history.ensureCapacity(size);
             this.max = size;
+            logger.trace("Watch [{}] history collection size={}", id, size);
         }
     }
 
@@ -321,11 +314,13 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     private void trimHistory(int range) {
         if(range == 1) {
             history.remove(0);
-            logger.trace("Removed first entry to make room in history");
+            logger.trace("Removed first entry to make room in {} history, size now {}", id, history.size());
         } else {
             List subList = history.subList(0, range);
+            history.removeAll(subList);
+            history.trimToSize();
             subList.clear();
-            logger.trace("Removed {} entries to make room in history", range);
+            logger.trace("Removed {} entries to make room in {} history, size now {}", id, range, history.size());
         }
     }
 
@@ -357,7 +352,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
         if(!closed) {
             addToHistory(calculable);
             for(WatchDataReplicator replicator : getWatchDataReplicators()) {
-                logger.trace("Replicating [{}]", calculable.toString());
+                logger.trace("Replicating [{}] to {} {}", calculable.toString(), replicator, replicator.getClass().getName());
                 replicator.addCalculable(calculable);
             }
         }
@@ -369,8 +364,8 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                 trimHistory(1);
             if(history.size() > max)
                 trimHistory((history.size() - max) - 1);
-            logger.trace("Adding to history [{}]", calculable.toString());
             history.add(calculable);
+            logger.debug("[{}] Adding [{}] to history", id, calculable.toString());
         }
     }
     

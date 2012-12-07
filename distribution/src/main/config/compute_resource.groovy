@@ -55,6 +55,11 @@ class BasicMeasurable {
         return 1
     }
 
+    /* Maintain a collection size of 50 calculables */
+    int getCollectionSize() {
+        return 50
+    }
+
     /*
      * Low threshold of 0, high threshold of 1 (100%)
      */

@@ -16,6 +16,7 @@
  */
 package org.rioproject.system.measurable;
 
+import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.costmodel.ResourceCost;
@@ -67,6 +68,11 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
     /** The {@link MeasurableMonitor} to use */
     protected MeasurableMonitor monitor;
     protected MeasuredResource lastMeasured;
+    /** Defines the default history size */
+    public final static int DEFAULT_COLLECTION_SIZE = 10;
+    /** Defines the default history max size */
+    public final static int MAX_COLLECTION_SIZE = 100;
+    private int collectionSize;
 
     protected MeasurableCapability(String id, String componentName, Configuration config) {
         super(id, config);
@@ -79,6 +85,18 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
         if(!isEnabled.get())
             return;
 
+
+        try {
+            collectionSize = Config.getIntEntry(config, componentName,
+                                                "collectionSize",
+                                                DEFAULT_COLLECTION_SIZE,
+                                                1,
+                                                MAX_COLLECTION_SIZE);
+        } catch(ConfigurationException e) {
+            if(logger.isTraceEnabled())
+                logger.trace("Getting WatchDataSource collection size", e);
+            collectionSize = DEFAULT_COLLECTION_SIZE;
+        }
         try {
             WatchDataSource wds = (WatchDataSource)config.getEntry(componentName,
                                                                    "watchDataSource",
@@ -91,7 +109,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
             logger.error("Getting WatchDataSource Size", e); 
         }
         if(localRef!=null) 
-            localRef.setMaxSize(100);
+            localRef.setMaxSize(collectionSize);
     }
 
     public void addWatchDataReplicator(WatchDataReplicator replicator) {
@@ -147,7 +165,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
         super.setWatchDataSource(watchDataSource);
         if(watchDataSource!=null) {
             try {
-                watchDataSource.setMaxSize(100);
+                watchDataSource.setMaxSize(collectionSize);
             } catch(Exception e) {
                 logger.error("Setting WatchDataSource Size", e);
             }
