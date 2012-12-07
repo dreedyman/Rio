@@ -200,7 +200,7 @@ public class Memory extends MeasurableCapability {
             tempUtilization = 0;
         }
         if(logger.isTraceEnabled())
-            logger.trace("Memory : utilization={}", utilization);
+            logger.trace("Memory : {} utilization={}", getComponentName(), utilization);
 
         return utilization;
     }

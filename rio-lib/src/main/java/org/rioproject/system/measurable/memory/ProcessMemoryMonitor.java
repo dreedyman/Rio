@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.text.NumberFormat;
 
 /**
  * The <code>ProcessMemoryMonitor</code> object provides feedback information to the
@@ -43,7 +44,7 @@ public class ProcessMemoryMonitor implements MXBeanMonitor<MemoryMXBean> {
     private ThresholdValues tVals;
     private SigarHelper sigar;
     private long pid;
-    static Logger logger = LoggerFactory.getLogger(ProcessMemoryMonitor.class.getPackage().getName());
+    static Logger logger = LoggerFactory.getLogger(ProcessMemoryMonitor.class);
     private static double KB = 1024;
     private static double MB = Math.pow(KB, 2);
 
@@ -106,22 +107,24 @@ public class ProcessMemoryMonitor implements MXBeanMonitor<MemoryMXBean> {
                 vSize = (vSize>0?vSize/MB:vSize);
                 resident = (resident>0?resident/MB:resident);
                 shared = (shared>0?shared/MB:shared);
-                /*
-                private NumberFormat nf = NumberFormat.getInstance();
-                nf.setMaximumFractionDigits(2);
-                System.out.println("VSize              = "+nf.format(vSize)+" MB");
-                System.out.println("Resident           = "+nf.format(resident)+" MB");
-                System.out.println("Shared             = "+shared);
-                System.out.println("Heap Init          = "+nf.format(heapUsage.getInit()/MB)+" MB");
-                System.out.println("Heap Used          = "+nf.format(heapUsage.getUsed()/MB)+" MB");
-                System.out.println("Heap Max           = "+nf.format(heapUsage.getMax()/MB)+" MB");
-                System.out.println("Heap Committed     = "+nf.format(heapUsage.getMax()/MB)+" MB");
-                System.out.println("Non Heap Init      = "+nf.format(nonHeapUsage.getInit()/MB)+" MB");
-                System.out.println("Non Heap Used      = "+nf.format(nonHeapUsage.getUsed()/MB)+" MB");
-                System.out.println("Non Heap Max       = "+nf.format(nonHeapUsage.getMax()/MB)+" MB");
-                System.out.println("Non Heap Committed = "+nf.format(nonHeapUsage.getMax()/MB)+" MB");
-                System.out.println("**************");
-                */
+                if(logger.isTraceEnabled()) {
+                    NumberFormat nf = NumberFormat.getInstance();
+                    StringBuilder builder = new StringBuilder();
+                    nf.setMaximumFractionDigits(2);
+                    builder.append("\n");
+                    builder.append("VSize              = ").append(nf.format(vSize)).append(" MB\n");
+                    builder.append("Resident           = ").append(nf.format(resident)).append(" MB\n");
+                    builder.append("Shared             = ").append(shared).append("\n");
+                    builder.append("Heap Init          = ").append(nf.format(heapUsage.getInit()/MB)).append(" MB\n");
+                    builder.append("Heap Used          = ").append(nf.format(heapUsage.getUsed()/MB)).append(" MB\n");
+                    builder.append("Heap Max           = ").append(nf.format(heapUsage.getMax()/MB)).append(" MB\n");
+                    builder.append("Heap Committed     = ").append(nf.format(heapUsage.getMax()/MB)).append(" MB\n");
+                    builder.append("Non Heap Init      = ").append(nf.format(nonHeapUsage.getInit()/MB)).append(" MB\n");
+                    builder.append("Non Heap Used      = ").append(nf.format(nonHeapUsage.getUsed()/MB)).append(" MB\n");
+                    builder.append("Non Heap Max       = ").append(nf.format(nonHeapUsage.getMax()/MB)).append(" MB\n");
+                    builder.append("Non Heap Committed = ").append(nf.format(nonHeapUsage.getMax()/MB)).append(" MB");
+                    logger.trace(builder.toString());
+                }
                 if(heapUsage!=null) {
                     memoryUtilization = new ProcessMemoryUtilization(id,
                                                                      utilization,

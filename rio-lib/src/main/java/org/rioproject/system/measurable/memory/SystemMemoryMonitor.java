@@ -18,6 +18,10 @@ package org.rioproject.system.measurable.memory;
 import org.rioproject.system.measurable.MeasurableMonitor;
 import org.rioproject.system.measurable.SigarHelper;
 import org.rioproject.watch.ThresholdValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.NumberFormat;
 
 /**
  * The <code>SystemMemoryMonitor</code> object provides feedback information to
@@ -40,6 +44,7 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
     private SigarHelper sigar;
     private static double KB = 1024;
     private static double MB = Math.pow(KB, 2);
+    static Logger logger = LoggerFactory.getLogger(SystemMemoryMonitor.class);
 
     public SystemMemoryMonitor() {
         sigar = SigarHelper.getInstance();
@@ -66,24 +71,24 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
             long used = sigar.getUsedSystemMemory();
 
             double utilization = (double)used/(double)total;
-            /*
-            NumberFormat nf = NumberFormat.getInstance();
-            nf.setMaximumFractionDigits(2);
-
-            long ram = sigar.getRam();
-            double d = ((double)total)/MB;
-            double e = ((double)used)/MB;
-            double f = ((double)ram)/KB;
-            double g = ((double)free)/MB;
-            String usedPerc = nf.format(sigar.getUsedSystemMemoryPercent());
-            String freePerc = nf.format(sigar.getFreeSystemMemoryPercent());
-            System.out.println("    Total:       "+nf.format(d)+" MB");
-            System.out.println("    Used:        "+nf.format(e)+" MB, "+usedPerc+" %");
-            System.out.println("    Free:        "+nf.format(g)+" MB, "+freePerc+" %");
-            System.out.println("    RAM:         "+nf.format(f)+" GB");
-            System.out.println("    Utilization: "+utilization+" %");
-            System.out.println("--------------------");
-            */
+            if(logger.isTraceEnabled()) {
+                StringBuilder builder = new StringBuilder();
+                NumberFormat nf = NumberFormat.getInstance();
+                nf.setMaximumFractionDigits(2);
+                long ram = sigar.getRam();
+                double d = ((double)total)/MB;
+                double e = ((double)used)/MB;
+                double f = ((double)ram)/KB;
+                double g = ((double)free)/MB;
+                String usedPerc = nf.format(sigar.getUsedSystemMemoryPercent());
+                String freePerc = nf.format(sigar.getFreeSystemMemoryPercent());
+                builder.append("\nTotal:       ").append(nf.format(d)).append(" MB\n");
+                builder.append("Used:        ").append(nf.format(e)).append(" MB, ").append(usedPerc).append(" %\n");
+                builder.append("Free:        ").append(nf.format(g)).append(" MB, ").append(freePerc).append(" %\n");
+                builder.append("RAM:         ").append(nf.format(f)).append(" GB\n");
+                builder.append("Utilization: ").append(utilization).append(" %");
+                logger.trace(builder.toString());
+            }
 
             smu = new SystemMemoryUtilization(id,
                                               utilization,
