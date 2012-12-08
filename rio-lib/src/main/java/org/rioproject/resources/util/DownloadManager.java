@@ -84,8 +84,7 @@ public class DownloadManager {
      * permissions are required to the directory
      * @param stagedData The Download
      */
-    public DownloadManager(String installPath,
-                           StagedData stagedData) {
+    public DownloadManager(String installPath, StagedData stagedData) {
         if(installPath == null)
             throw new IllegalArgumentException("installPath is null");
         if(stagedData == null)
@@ -128,8 +127,7 @@ public class DownloadManager {
      *
      * @throws IOException if there are errors accessing the file system
      */
-    private DownloadRecord doDownload(StagedData dAttrs, boolean postInstall)
-    throws IOException {
+    private DownloadRecord doDownload(StagedData dAttrs, boolean postInstall) throws IOException {
         String installRoot  ;
         int extractedSize = 0;
         long extractTime = 0;
@@ -149,11 +147,10 @@ public class DownloadManager {
         File targetPath = new File(FileUtils.makeFileName(installPath, installRoot));
         if(!targetPath.exists()) {
             if(targetPath.mkdirs()) {
-                if(logger.isTraceEnabled())
-                    logger.trace("Created "+targetPath.getPath());
+                logger.trace("Created {}", targetPath.getPath());
             }
             if(!targetPath.exists())
-                throw new IOException("Failed to create : " + installPath);
+                throw new IOException("Failed to create: " + installPath);
             createdTargetPath = true;
         }
         if(!targetPath.canWrite())
@@ -161,17 +158,14 @@ public class DownloadManager {
         String source = location.toExternalForm();
         int index = source.lastIndexOf("/");
         if(index == -1)
-            throw new IllegalArgumentException("Dont know how to install : "
-                    + source);
+            throw new IllegalArgumentException("Don't know how to install : "+ source);
         String software = source.substring(index + 1);
         String target = FileUtils.getFilePath(targetPath);
         File targetFile = new File(FileUtils.makeFileName(target, software));
         if (targetFile.exists()) {
             if(!dAttrs.overwrite()) {
-                logger.warn(
-                           "{0} exists, stagedData attributes indicate to "+
-                           "not overwrite file",
-                           FileUtils.getFilePath(targetFile));
+                logger.warn("{} exists, stagedData attributes indicate to "+
+                           "not overwrite file", FileUtils.getFilePath(targetFile));
                 return null;
             } else {
                 if(showDownloadTo)
@@ -193,7 +187,7 @@ public class DownloadManager {
         long downloadSecs = downloadTime/1000;
         Date downloadDate = new Date();
         ExtractResults results;
-        logger.info("Wrote "+(downloadedSize/1024)+"K in "+(downloadSecs<1?"< 1":downloadSecs)+" seconds");
+        logger.info("Wrote {}K in {} seconds", (downloadedSize/1024), (downloadSecs<1?"< 1":downloadSecs));
         String extractedToPath = null;
         if(unarchive) {
             t0 = System.currentTimeMillis();
@@ -260,15 +254,13 @@ public class DownloadManager {
         } catch(FileNotFoundException e) {
             // catch so we can delete the file
             if(file.delete()) {
-                if(logger.isTraceEnabled())
-                    logger.trace("Deleted "+file.getName());
+                logger.trace("Deleted {}", file.getName());
             }
             throw e;
         } catch(IOException e) {
             // catch so we can delete the file
             if(file.delete()) {
-                if(logger.isTraceEnabled())
-                    logger.trace("Deleted "+file.getName());
+                logger.trace("Deleted {}", file.getName());
             }
             throw e;
         } finally {
@@ -331,8 +323,7 @@ public class DownloadManager {
                 if(zipEntry.isDirectory()) {
                     File file = makeChildFile(directory, zipEntry.getName());
                     if(file.mkdirs()) {
-                        if(logger.isTraceEnabled())
-                            logger.trace("Created "+file.getPath());
+                        logger.trace("Created {}", file.getPath());
                     }
                     if(extractedToPath==null) {
                         extractedToPath = getExtractedToPath(file, directory);
@@ -347,16 +338,13 @@ public class DownloadManager {
                     File targetPath = new File(installPath);
                     if(!targetPath.exists()) {
                         if(targetPath.mkdirs()) {
-                            if(logger.isTraceEnabled())
-                                logger.trace("Created "+file.getPath());
+                            logger.trace("Created {}", file.getPath());
                         }
                         if(!targetPath.exists())
-                            throw new IOException("Failed to create : "
-                                    + installPath);
+                            throw new IOException("Failed to create : "+ installPath);
                     }
                     if(!targetPath.canWrite())
-                        throw new IOException("Can not write to : "
-                                + installPath);
+                        throw new IOException("Can not write to : "+ installPath);
                     InputStream in = zipFile.getInputStream(zipEntry);
                     extractSize += writeFileFromInputStream(in, file, archive.length(), false);
                 }
@@ -374,8 +362,7 @@ public class DownloadManager {
         do {
             parent = path.getParentFile();
             if(parent==null) {
-                logger.warn("No parent for "+
-                               FileUtils.getFilePath(path));
+                logger.warn("No parent for {}", FileUtils.getFilePath(path));
                 break;
             }
             if(!parent.equals(rootDir))
@@ -394,18 +381,14 @@ public class DownloadManager {
         File output = new File(gzip.getParentFile().getPath(),
                                gzip.getName().substring(0, ndx));
         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(gzip));
-        logger.info("Writing {0} ...", FileUtils.getFilePath(output));
+        logger.info("Writing {} ...", FileUtils.getFilePath(output));
         long t0 = System.currentTimeMillis();
 
-        int downloadedSize = writeFileFromInputStream(gzipInputStream,
-                                                      output,
-                                                      gzip.length(),
-                                                      true);
+        int downloadedSize = writeFileFromInputStream(gzipInputStream, output, gzip.length(), true);
         long t1 = System.currentTimeMillis();
         long downloadTime = t1 - t0;
         long downloadSecs = downloadTime/1000;
-        logger.info("Wrote "+(downloadedSize/1024)+"K " +
-                           "in "+(downloadSecs<1?"< 1":downloadSecs)+" millis");
+        logger.info("Wrote {}K in {} millis", (downloadedSize/1024), (downloadSecs<1?"< 1":downloadSecs));
 
         return output;
     }
@@ -426,19 +409,16 @@ public class DownloadManager {
                 File f = new File(target, entry.getName());
                 if(entry.isDirectory()) {
                     if(f.mkdirs()) {
-                        if(logger.isTraceEnabled())
-                            logger.trace("Created directory "+f.getPath());
+                        logger.trace("Created directory {}", f.getPath());
                     }
                 } else {
                     if(!f.getParentFile().exists()) {
                         if(f.getParentFile().mkdirs()) {
-                            if(logger.isTraceEnabled())
-                                logger.trace("Created "+f.getParentFile().getPath());
+                            logger.trace("Created {}", f.getParentFile().getPath());
                         }
                     }
                     if(f.createNewFile()) {
-                        if(logger.isTraceEnabled())
-                            logger.trace("Created "+f.getName());
+                        logger.trace("Created {}", f.getName());
                     }
                     OutputStream out = new FileOutputStream(f);
                     IOUtils.copy(in, out);
@@ -635,25 +615,20 @@ public class DownloadManager {
         File software = new File(FileUtils.makeFileName(record.getPath(),
                                                         record.getName()));
         if(!software.exists()) {
-            if(logger.isDebugEnabled())
-                logger.debug("Software recorded at "+
-                            "["+ FileUtils.getFilePath(software)+"] " +
-                            "does not exist or has already been removed "+
-                            "from the file system, removal aborted");
+            logger.debug("Software recorded at [{}] does not exist or has already been removed "+
+                            "from the file system, removal aborted", FileUtils.getFilePath(software));
             return null;
         }
         String removed;
         if(record.unarchived()) {
-            if(software.getName().endsWith(".gz") ||
-               software.getName().endsWith(".gzip")) {
+            if(software.getName().endsWith(".gz") || software.getName().endsWith(".gzip")) {
                 FileUtils.remove(software);
                 /* Strip off the extension and see if we still have
                  * something to remove */
                 int ndx = software.getName().lastIndexOf(".");
                 if(ndx!=-1) {
                     String newName = software.getName().substring(0, ndx);
-                    software = new File(FileUtils.makeFileName(record.getPath(),
-                                                               newName));
+                    software = new File(FileUtils.makeFileName(record.getPath(), newName));
                 }
             }
             if(software.getName().endsWith("tar")) {
@@ -675,7 +650,7 @@ public class DownloadManager {
                         FileUtils.remove(file);
                     }
                 } catch (ZipException e) {
-                    logger.error("Error in opening zip file " +FileUtils.getFilePath(software), e);
+                    logger.error("Error in opening zip file {}", FileUtils.getFilePath(software), e);
                 } catch(Exception e) {
                     e.printStackTrace();
                 } finally {

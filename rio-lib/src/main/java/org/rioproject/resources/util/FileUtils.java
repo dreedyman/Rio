@@ -16,12 +16,10 @@
 package org.rioproject.resources.util;
 
 import org.rioproject.util.PropertyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for working with Files.
@@ -45,8 +43,7 @@ public final class FileUtils {
             path = f.getCanonicalPath();
         } catch (IOException e) {
             path = f.getAbsolutePath();
-            logger.warn("Unable to obtain canonical path for file " +
-                           "["+f.getName()+"], returning absolute path: "+path);
+            logger.warn("Unable to obtain canonical path for file [{}], returning absolute path: {}", f.getName(), path);
         }
         return path;
     }
@@ -94,32 +91,27 @@ public final class FileUtils {
                     remove(f);
                 else {
                     if(f.delete()) {
-                        if(logger.isDebugEnabled())
-                            logger.debug(
-                                       "Removed "+ getFilePath(f));
+                        logger.debug("Removed {}", getFilePath(f));
                     } else {
                         if(f.exists())
-                            logger.warn("Unable to remove "+ getFilePath(f));
+                            logger.warn("Unable to remove {}", getFilePath(f));
                     }
                 }
             }
             removed = file.delete();
             if(removed) {
-                if(logger.isDebugEnabled())
-                    logger.debug(
-                               "Removed "+ getFilePath(file));
+                logger.debug("Removed {}", getFilePath(file));
             } else {
                 if(file.exists())
-                    logger.warn("Unable to remove "+ getFilePath(file));
+                    logger.warn("Unable to remove {}", getFilePath(file));
             }
         } else {
             removed = file.delete();
             if(removed) {
-                if(logger.isDebugEnabled())
-                    logger.debug( "Removed "+ getFilePath(file));
+                logger.debug("Removed {}", getFilePath(file));
             } else {
                 if(file.exists())
-                    logger.warn("Unable to remove "+ getFilePath(file));
+                    logger.warn("Unable to remove {}", getFilePath(file));
             }
         }
         return removed;
@@ -151,8 +143,7 @@ public final class FileUtils {
                                       "Aborting service creation");
         } else {
             if(dir.mkdirs())
-                logger.info("Created "+descriptionToUse+" directory " +
-                            "["+dir.getAbsolutePath()+"]");
+                logger.info("Created {} directory [{}]",descriptionToUse, dir.getAbsolutePath());
         }
         if(!dir.canWrite())
             throw new IOException("We do not have write access to the " +
