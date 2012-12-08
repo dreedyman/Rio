@@ -16,6 +16,7 @@
 package org.rioproject.boot;
 
 import org.rioproject.logging.FileHandler;
+import org.slf4j.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,28 +24,58 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
- * Check that the Java logging configuration has a console available. If a console is not available, remove
- * any {@link java.util.logging.ConsoleHandler}s, and set the system out and system error to the name
- * of the service log file.
+ * Check that the Java logging configuration has a console available. If there is no console available, set the
+ * system out and system error to the name of the service log file. If Java Util Logging being used, and a console is
+ * not available, remove any {@link java.util.logging.ConsoleHandler}s.
  * <p/>
- * <p>The resulting {@code service}.out and {@code service}.err wil be stored in the location declared by the
+ * <p>The resulting {@code service}.out and {@code service}.err will be stored in the location declared by the
  * {@code RIO_LOG_DIR} system property.
  * </p>
  *
  * @author Dennis Reedy
  */
 public final class LogAgent {
-    private static final Logger logger = Logger.getLogger(AgentHook.class.getName());
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(LogAgent.class);
     private LogAgent() {
     }
 
     public static void redirectIfNecessary() {
-        if(!usingJUL())
-            return;
-        String lockFileName = null;
-        if (System.console() == null) {
+        if(System.console()==null) {
+            String fileName = getFileName();
+            StringBuilder builder = new StringBuilder();
+            builder.append("\nThere is no console support\n");
+            String logDir = System.getProperty("RIO_LOG_DIR");
+            File rioLogDir = new File(logDir);
+            File serviceOutput = new File(rioLogDir, fileName + ".out");
+            File serviceError = new File(rioLogDir, fileName + ".err");
+            redirect(serviceOutput, true);
+            redirect(serviceError, false);
+            builder.append("System out has been redirected to ").append(serviceOutput.getPath()).append("\n");
+            builder.append("System err has been redirected to ").append(serviceError.getPath()).append("\n");
+            LoggerFactory.getLogger(LogAgent.class).info(builder.toString());
+
+        }
+    }
+
+    private static String getFileName() {
+        String logDir = System.getProperty("RIO_LOG_DIR");
+        String fileName = null;
+        if(!usingJUL()) {
+            String service = System.getProperty("org.rioproject.service");
+            File dir = new File(logDir);
+            for(String name : dir.list()) {
+                if(name.startsWith(service)) {
+                    int ndx = name.indexOf(".log");
+                    fileName = name.substring(0, ndx);
+                    break;
+                }
+            }
+        } else {
+            String lockFileName = null;
+
             for (Enumeration<String> e = LogManager.getLogManager().getLoggerNames(); e.hasMoreElements(); ) {
                 Logger l = Logger.getLogger(e.nextElement());
                 for (Handler h : l.getHandlers()) {
@@ -57,24 +88,14 @@ public final class LogAgent {
                     }
                 }
             }
-            StringBuilder builder = new StringBuilder();
-            builder.append("\nThere is no console support, removed ConsoleHandler\n");
 
-            String logDir = System.getProperty("RIO_LOG_DIR");
             if (logDir != null && lockFileName!=null) {
                 File lockFile = new File(lockFileName);
                 int ndx = lockFile.getName().indexOf(".lck");
-                String fileName = lockFile.getName().substring(0, ndx);
-                File rioLogDir = new File(logDir);
-                File serviceOutput = new File(rioLogDir, fileName + ".out");
-                File serviceError = new File(rioLogDir, fileName + ".err");
-                redirect(serviceOutput, true);
-                redirect(serviceError, false);
-                builder.append("System out has been redirected to ").append(serviceOutput.getPath()).append("\n");
-                builder.append("System err has been redirected to ").append(serviceError.getPath()).append("\n");
+                fileName = lockFile.getName().substring(0, ndx);
             }
-            logger.info(builder.toString());
         }
+        return fileName;
     }
 
     private static void redirect(final File file, boolean isOut) {
@@ -86,7 +107,7 @@ public final class LogAgent {
             }
         } catch (FileNotFoundException e) {
             String type = isOut?"standard output":"standard error";
-            logger.log(Level.WARNING, String.format("Redirecting %s to %s", type, file.getPath()), e);
+            logger.warn("Redirecting {} to {}", type, file.getPath(), e);
         }
     }
 
