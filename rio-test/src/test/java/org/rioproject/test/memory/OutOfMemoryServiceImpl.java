@@ -1,5 +1,8 @@
 package org.rioproject.test.memory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 
@@ -9,6 +12,7 @@ import java.lang.management.MemoryMXBean;
 public class OutOfMemoryServiceImpl implements OutOfMemory {
     public static final int MB = 1048576;
     public final Object[] holder = new Object[MB];
+    static Logger logger = LoggerFactory.getLogger(OutOfMemoryServiceImpl.class);
    
     public void createOOME() {
         try {
@@ -22,10 +26,10 @@ public class OutOfMemoryServiceImpl implements OutOfMemory {
                             float used = memoryBean.getHeapMemoryUsage().getUsed();
                             float max = memoryBean.getHeapMemoryUsage().getMax();
                             float pctUsed = (used / max)*100;
-                            System.err.print("Percent Heap Memory Used: " + pctUsed+"\r");
+                            logger.info("Percent Heap Memory Used: {}", pctUsed);
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            logger.error("Oops", e);
                         }
                     }
                 }
@@ -33,6 +37,6 @@ public class OutOfMemoryServiceImpl implements OutOfMemory {
         } catch(Throwable t) {
             t.printStackTrace();
         }
-        System.err.println("Started memory creation thread.");
+        logger.info("Started memory creation thread.");
     }
 }

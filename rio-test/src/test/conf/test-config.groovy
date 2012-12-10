@@ -1,3 +1,4 @@
+import org.rioproject.test.TestConfig
 
 /*
 * Configuration file for Rio test cases
@@ -102,6 +103,7 @@ ServiceEventLogTest {
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
+    loggingSystem = TestConfig.LoggingSystem.JUL
 }
 
 PermGenTest {

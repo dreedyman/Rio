@@ -28,6 +28,7 @@ import java.util.Map;
  * Configuration for a test case.
  */
 public class TestConfig {
+    public enum LoggingSystem { JUL, LOGBACK }
     private String groups;
     private String locators;
     private Integer numCybernodes;
@@ -40,6 +41,7 @@ public class TestConfig {
     private String component;
     private boolean runHarvester;
     private long timeout;
+    private LoggingSystem loggingSystem;
 
     TestConfig(String testClassName) {
         this.testClassName = testClassName;
@@ -98,6 +100,10 @@ public class TestConfig {
             runHarvester = b != null && b;
             String sTimeout = getString(configMap.get(component + ".timeout"));
             timeout = sTimeout==null?0:Long.parseLong(sTimeout);
+            loggingSystem = (LoggingSystem) configMap.get(component + ".loggingSystem");
+            if(loggingSystem==null) {
+                loggingSystem = LoggingSystem.LOGBACK;
+            }
         }
     }
 
@@ -147,8 +153,11 @@ public class TestConfig {
         return timeout;
     }
 
-    private boolean hasConfigurationFor(String component,
-                                        Map<String, Object> map) {
+    public LoggingSystem getLoggingSystem() {
+        return loggingSystem;
+    }
+
+    private boolean hasConfigurationFor(final String component, final Map<String, Object> map) {
         boolean hasConfig = false;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String key = entry.getKey();

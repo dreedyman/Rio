@@ -291,6 +291,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         sb.append("\n");
         sb.append("harvest:       ").append(testConfig.runHarvester());
         sb.append("\n");
+        sb.append("loggingSystem: ").append(testConfig.getLoggingSystem().name().toLowerCase());
+        sb.append("\n");
         sb.append("timeout:       ").append((testConfig.getTimeout()==0?
                                      "<not declared>":testConfig.getTimeout()));
         sb.append("\n");
