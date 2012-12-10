@@ -39,23 +39,28 @@ import java.util.logging.Logger;
  */
 public final class LogAgent {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(LogAgent.class);
+    private static final org.slf4j.Logger stdOutLogger = LoggerFactory.getLogger("std.out");
+    private static final org.slf4j.Logger stdErrLogger = LoggerFactory.getLogger("std.err");
+
     private LogAgent() {
     }
 
     public static void redirectIfNecessary() {
         if(System.console()==null) {
             String fileName = getFileName();
-            StringBuilder builder = new StringBuilder();
-            builder.append("\nThere is no console support\n");
-            String logDir = System.getProperty("RIO_LOG_DIR");
-            File rioLogDir = new File(logDir);
-            File serviceOutput = new File(rioLogDir, fileName + ".out");
-            File serviceError = new File(rioLogDir, fileName + ".err");
-            redirect(serviceOutput, true);
-            redirect(serviceError, false);
-            builder.append("System out has been redirected to ").append(serviceOutput.getPath()).append("\n");
-            builder.append("System err has been redirected to ").append(serviceError.getPath()).append("\n");
-            LoggerFactory.getLogger(LogAgent.class).info(builder.toString());
+            if(fileName!=null) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("\nThere is no console support\n");
+                String logDir = System.getProperty("RIO_LOG_DIR");
+                File rioLogDir = new File(logDir);
+                File serviceOutput = new File(rioLogDir, fileName + ".out");
+                File serviceError = new File(rioLogDir, fileName + ".err");
+                redirectToFile(serviceOutput, true);
+                redirectToFile(serviceError, false);
+                builder.append("System out has been redirected to ").append(serviceOutput.getPath()).append("\n");
+                builder.append("System err has been redirected to ").append(serviceError.getPath()).append("\n");
+                LoggerFactory.getLogger(LogAgent.class).info(builder.toString());
+            }
 
         }
     }
@@ -64,15 +69,7 @@ public final class LogAgent {
         String logDir = System.getProperty("RIO_LOG_DIR");
         String fileName = null;
         if(!usingJUL()) {
-            String service = System.getProperty("org.rioproject.service");
-            File dir = new File(logDir);
-            for(String name : dir.list()) {
-                if(name.startsWith(service)) {
-                    int ndx = name.indexOf(".log");
-                    fileName = name.substring(0, ndx);
-                    break;
-                }
-            }
+            redirectToLogger();
         } else {
             String lockFileName = null;
 
@@ -98,7 +95,20 @@ public final class LogAgent {
         return fileName;
     }
 
-    private static void redirect(final File file, boolean isOut) {
+    public static void redirectToLogger(){
+        System.setOut(new PrintStream(System.out){
+            public void print(String s){
+                stdOutLogger.info(s);
+            }
+        });
+        System.setErr(new PrintStream(System.err){
+            public void print(String s){
+                stdErrLogger.error(s);
+            }
+        });
+    }
+
+    private static void redirectToFile(final File file, boolean isOut) {
         try {
             if(isOut) {
                 System.setOut(new PrintStream(new FileOutputStream(file)));
