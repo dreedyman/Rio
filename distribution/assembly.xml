@@ -210,13 +210,14 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
-        <!-- Put the SLF4J jars into lib/logging, defaulting to JUL -->
+        <!-- Put the SLF4J jars into lib/logging, defaulting to logback -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>org.slf4j:slf4j-api</include>
-                <include>org.slf4j:slf4j-jdk14</include>
+                <include>ch.qos.logback:logback-core</include>
+                <include>ch.qos.logback:logback-classic</include>
             </includes>
             <outputDirectory>lib/logging</outputDirectory>
         </dependencySet>
@@ -230,6 +231,16 @@
                 <include>ch.qos.logback:logback-classic</include>
             </includes>
             <outputDirectory>lib/logging/logback</outputDirectory>
+        </dependencySet>
+
+        <!-- Put the JUL jars into lib/logging/jul -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useStrictFiltering>true</useStrictFiltering>
+            <includes>
+                <include>org.slf4j:slf4j-jdk14</include>
+            </includes>
+            <outputDirectory>lib/logging/jul</outputDirectory>
         </dependencySet>
 
     </dependencySets>

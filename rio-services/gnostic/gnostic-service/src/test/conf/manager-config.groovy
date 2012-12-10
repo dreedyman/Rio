@@ -20,8 +20,16 @@ import org.rioproject.config.Constants
 * Configuration properties for the Gnostic
 */
 manager {
-    execClassPath =
-        '${RIO_HOME}${/}lib${/}rio-start.jar${:}${RIO_HOME}${/}lib${/}resolver-api.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+    String rioHome = System.getProperty("RIO_HOME")
+    StringBuilder classPath = new StringBuilder()
+    ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
+        if(classPath.length()>0)
+            classPath.append(File.pathSeparator)
+        classPath.append(rioHome+'/lib/'+jar)
+    }
+
+    classPath.append(File.pathSeparator).append(System.getProperty("JAVA_HOME")).append("/lib/tools.jar")
+    execClassPath = classPath.toString()
 
     inheritOptions = true
 
@@ -36,7 +44,6 @@ manager {
     jvmOptions='''
         -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
-        -Djava.util.logging.config.file=${RIO_HOME}${/}config${/}logging${/}rio-logging.properties
         -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -DRIO_HOME=${RIO_HOME} -DRIO_TEST_ATTACH

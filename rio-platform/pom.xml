@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-SNAPSHOT</version>
+        <version>5.0-M1</version>
     </parent>
     <artifactId>rio-platform</artifactId>
     <name>Module :: Rio Platform</name>
@@ -45,6 +45,12 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

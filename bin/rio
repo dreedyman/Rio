@@ -66,7 +66,7 @@ toNative() {
     case $OS in
         Windows*)
            toWindows "$@";;
-           *) echo $* ;;
+        *) echo $* ;;
     esac
 }
 
@@ -89,10 +89,21 @@ installRioToLocalRepository() {
 
 # Build the classpath for SLAF4J Logging
 for file in $RIO_HOME/lib/logging/*.jar; do
+    case $file in
+        *logback*)
+            logger="logback";;
+        *slf4j-jdk14*)
+            logger="jul";;
+    esac
     SLF4J_CLASSPATH="$SLF4J_CLASSPATH:$file"
 done
 SLF4J_CLASSPATH=`echo $SLF4J_CLASSPATH | cut -c2-`
-SLF4J_CLASSPATH="$SLF4J_CLASSPATH:$RIO_HOME/config/logging/"
+
+if [ "$logger" = "logback" ]; then
+    loggingConfig="-Dlogback.configurationFile=`toNative $RIO_HOME/config/logging/logback.groovy`"
+else
+    loggingConfig="-Djava.util.logging.config.file=`toNative $RIO_HOME/config/logging/rio-logging.properties`"
+fi
 
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1
@@ -101,7 +112,6 @@ if [ -z "$NET_ADDR" ] ; then
 else
     NETWORK="-Djava.rmi.server.hostname="$NET_ADDR
 fi
-#echo $NETWORK
 
 if [ -z "$JAVA_MEM_OPTIONS" ] ; then
     JAVA_MEM_OPTIONS="-Xms8m -Xmx256m"
@@ -159,8 +169,6 @@ if [ "$start" = "1" ]; then
     fi
     ARGS="$starter_arg $command_line"
 
-    loggingConfig="`toNative $RIO_HOME/config/logging/rio-logging.properties`"
-
     # -------------------
     # System properties that change how Rio operates
     #
@@ -178,7 +186,7 @@ if [ "$start" = "1" ]; then
         $classpath $agentpath $libpath $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
-        -Djava.util.logging.config.file=$loggingConfig \
+        $loggingConfig \
         -Dcom.sun.jini.jeri.tcp.useNIO=true \
         -Dorg.rioproject.service=$service \
         -DRIO_HOME=$RIO_HOME \
@@ -203,6 +211,7 @@ else
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
+        $loggingConfig \
         $PROPS \
         $NETWORK \
         $DEBUG \

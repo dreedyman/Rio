@@ -114,11 +114,9 @@ public class MeasuredResource implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof MeasuredResource) {
-            if(getIdentifier() == null
-               && ((MeasuredResource)obj).getIdentifier() == null)
+            if(getIdentifier() == null && ((MeasuredResource)obj).getIdentifier() == null)
                 return (true);
-            else if(getIdentifier() == null
-                    || ((MeasuredResource)obj).getIdentifier() == null)
+            else if(getIdentifier() == null || ((MeasuredResource)obj).getIdentifier() == null)
                 return (false);
             else
                 return (getIdentifier().equals(((MeasuredResource)obj).getIdentifier()));

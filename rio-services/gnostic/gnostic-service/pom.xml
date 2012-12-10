@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.rioproject</groupId>
         <artifactId>gnostic</artifactId>
-        <version>5.0-SNAPSHOT</version>
+        <version>5.0-M1</version>
     </parent>
 
     <groupId>org.rioproject.gnostic</groupId>
@@ -44,6 +44,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Drools dependencies -->
+        <dependency>
             <groupId>org.drools</groupId>
             <artifactId>knowledge-api</artifactId>
             <version>${drools.version}</version>
@@ -61,11 +67,6 @@
             <version>2.5.16</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.rioproject</groupId>
@@ -74,10 +75,15 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
         </dependency>
 

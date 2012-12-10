@@ -332,4 +332,4 @@ public class PlatformLoader {
         c.add(jiniCap);
         return(c.toArray(new PlatformCapabilityConfig[c.size()]));
     }
-    }
+}

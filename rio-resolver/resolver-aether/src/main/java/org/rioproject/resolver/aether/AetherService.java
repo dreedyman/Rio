@@ -15,7 +15,8 @@
  */
 package org.rioproject.resolver.aether;
 
-import org.apache.maven.repository.internal.*;
+import org.apache.maven.repository.internal.DefaultServiceLocator;
+import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Server;
@@ -39,14 +40,13 @@ import org.sonatype.aether.deployment.DeployRequest;
 import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyFilter;
-import org.sonatype.aether.impl.ArtifactDescriptorReader;
-import org.sonatype.aether.impl.VersionRangeResolver;
-import org.sonatype.aether.impl.VersionResolver;
+import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManagerFactory;
 import org.sonatype.aether.installation.InstallRequest;
 import org.sonatype.aether.installation.InstallationException;
 import org.sonatype.aether.repository.*;
 import org.sonatype.aether.resolution.*;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
+import org.sonatype.aether.spi.localrepo.LocalRepositoryManagerFactory;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.artifact.JavaScopes;
 import org.sonatype.aether.util.artifact.SubArtifact;
@@ -73,7 +73,7 @@ public final class AetherService {
     private String dependencyFilterScope;
     private final Collection<DependencyFilter> dependencyFilters =
         Collections.synchronizedCollection(new ArrayList<DependencyFilter>());
-    private static final Logger logger = LoggerFactory.getLogger(AetherService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AetherService.class);
 
     private AetherService(final RepositorySystem repositorySystem, final WorkspaceReader workspaceReader) throws SettingsBuildingException {
         this.repositorySystem = repositorySystem;
@@ -117,9 +117,12 @@ public final class AetherService {
         DefaultServiceLocator locator = new DefaultServiceLocator();
         locator.setServices(WagonProvider.class, new ManualWagonProvider());
         locator.addService(RepositoryConnectorFactory.class, WagonRepositoryConnectorFactory.class);
-        locator.addService(VersionResolver.class, DefaultVersionResolver.class);
+
+        /*locator.addService(VersionResolver.class, DefaultVersionResolver.class);
         locator.addService(VersionRangeResolver.class, DefaultVersionRangeResolver.class);
-        locator.addService(ArtifactDescriptorReader.class, DefaultArtifactDescriptorReader.class);
+        locator.addService(ArtifactDescriptorReader.class, DefaultArtifactDescriptorReader.class);*/
+
+        locator.setService(LocalRepositoryManagerFactory.class, SimpleLocalRepositoryManagerFactory.class);
         return locator.getService(RepositorySystem.class);
     }
 

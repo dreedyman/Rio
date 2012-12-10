@@ -35,8 +35,7 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-public class ComputeResourceUtilization implements Comparable,
-                                                   Serializable {
+public class ComputeResourceUtilization implements Comparable, Serializable {
     static final long serialVersionUID = 1L;
     /**
      * Description of the ComputeResource

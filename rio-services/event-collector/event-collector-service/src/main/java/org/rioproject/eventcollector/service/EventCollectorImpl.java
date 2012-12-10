@@ -192,7 +192,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
 
 
         final List<EventDescriptor> descList = new ArrayList<EventDescriptor>();
-        descList.addAll(EventDescriptorFactory.createEventDescriptors("org.rioproject.monitor:monitor-api:5.0-SNAPSHOT",
+        descList.addAll(EventDescriptorFactory.createEventDescriptors("org.rioproject.monitor:monitor-api:5.0-M1",
                                                                       "org.rioproject.monitor.ProvisionFailureEvent",
                                                                       "org.rioproject.monitor.ProvisionMonitorEvent"));
         descList.add(SLAThresholdEvent.getEventDescriptor());

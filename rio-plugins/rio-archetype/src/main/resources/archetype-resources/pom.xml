@@ -13,7 +13,7 @@
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-platform</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>5.0-M1</version>
         </dependency>        
     </dependencies>
 
@@ -23,7 +23,7 @@
     </modules>
 
     <properties>
-        <rio.version>5.0-SNAPSHOT</rio.version>
+        <rio.version>5.0-M1</rio.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -63,7 +63,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rio-plugin</artifactId>
-                <version>5.0-SNAPSHOT</version>
+                <version>5.0-M1</version>
                 <extensions>true</extensions>
 
                 <executions>
