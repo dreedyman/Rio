@@ -37,7 +37,8 @@ public class Selector {
      * @return A ServiceResource that contains an InstantiatorResource that meets the operational criteria of the
      * ServiceElement
      */
-    public static ServiceResource acquireServiceResource(ProvisionRequest request, ServiceResourceSelector selector) {
+    public static ServiceResource acquireServiceResource(final ProvisionRequest request,
+                                                         final ServiceResourceSelector selector) {
         ServiceResource resource = null;
         try {
             if (request.getRequestedUuid() != null) {
