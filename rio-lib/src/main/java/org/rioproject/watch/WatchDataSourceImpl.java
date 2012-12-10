@@ -319,7 +319,6 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
             List subList = history.subList(0, range);
             history.removeAll(subList);
             history.trimToSize();
-            subList.clear();
             logger.trace("Removed {} entries to make room in {} history, size now {}", id, range, history.size());
         }
     }
