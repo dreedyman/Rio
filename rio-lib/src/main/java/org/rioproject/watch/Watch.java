@@ -42,7 +42,7 @@ public class Watch implements WatchMBean {
     /** Use for configuration and logger */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A Logger */
-    protected static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(Watch.class);
     /** Default View class */
     public static final String DEFAULT_VIEW = COMPONENT+".DefaultCalculableView";
     /** The view */

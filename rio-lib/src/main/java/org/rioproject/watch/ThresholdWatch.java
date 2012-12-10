@@ -17,6 +17,8 @@
 package org.rioproject.watch;
 
 import net.jini.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 
@@ -28,6 +30,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     static final String VIEW = "org.rioproject.watch.ThresholdCalculableView";
     /** The ThresholdManager */
     private final ThresholdManager thresholdManager;
+    private static final Logger logger = LoggerFactory.getLogger(ThresholdWatch.class);
 
     /**
      * Create a new ThresholdWatch

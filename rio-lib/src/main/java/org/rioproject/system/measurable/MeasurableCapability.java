@@ -26,6 +26,8 @@ import org.rioproject.costmodel.ZeroCostModel;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.watch.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -73,6 +75,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
     /** Defines the default history max size */
     public final static int MAX_COLLECTION_SIZE = 100;
     private int collectionSize;
+    private static final Logger logger = LoggerFactory.getLogger(MeasurableCapability.class);
 
     protected MeasurableCapability(String id, String componentName, Configuration config) {
         super(id, config);

@@ -16,6 +16,8 @@
 package org.rioproject.watch;
 
 import net.jini.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -32,6 +34,7 @@ public class SamplingWatch extends PeriodicWatch {
     private Object bean;
     private Method accessor;
     private final AtomicInteger nullReturnCount = new AtomicInteger();
+    private static final Logger logger = LoggerFactory.getLogger(SamplingWatch.class);
 
     public SamplingWatch(String id) {
         super(id);
