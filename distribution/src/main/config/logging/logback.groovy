@@ -63,7 +63,7 @@ if (System.console() != null) {
         if(!System.getProperty("os.name").startsWith("Windows"))
             withJansi = true
         encoder(PatternLayoutEncoder) {
-            pattern = "%highlight(%-5level) | %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
+            pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
         }
     }
     appenders << "CONSOLE"
@@ -92,7 +92,7 @@ if (System.getProperty("org.rioproject.service")!=null) {
 
         }
         encoder(PatternLayoutEncoder) {
-            pattern = "%-5level | %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
+            pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
         }
     }
     appenders << "ROLLING"
