@@ -143,7 +143,7 @@ public class ITNotificationUsingArtifactTest {
         try {
             int rhsExecutedCount = test.getRHSExecutedCount();
             int notificationCount = test.getNotificationCount();
-            Assert.assertEquals("Expected RHS to be executed "+rhs+" times", rhs, rhsExecutedCount);
+            Assert.assertTrue("Expected RHS to be executed <="+rhs+" times", rhsExecutedCount<=rhs);
             Assert.assertEquals("Expected to be notified "+notifies+" times", notifies, notificationCount);
         } catch (IOException e) {
             thrown = e;
