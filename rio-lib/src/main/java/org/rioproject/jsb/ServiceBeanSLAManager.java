@@ -127,8 +127,7 @@ public class ServiceBeanSLAManager {
             /* Check if the SLA matches a MeasurableCapability.  */
             MeasurableCapability mCap = getMeasurableCapability(identifier);
             if (mCap != null) {
-                if (logger.isTraceEnabled())
-                    logger.trace("["+elem.getName()+"] SLA [" + identifier + "] correlates to a MeasurableCapability");
+                logger.trace("[{}] SLA [{}] correlates to a MeasurableCapability", elem.getName(), identifier);
                 try {
                     /* Load the SLA PolicyHandler and set attributes */
                     handler = createSLAPolicyHandler(sla, null);
@@ -138,16 +137,10 @@ public class ServiceBeanSLAManager {
                     handler.setThresholdManager(tMgr);
                     mCap.addSecondaryThresholdManager(tMgr);
                     thresholdManagerReg.put(tMgr, mCap);
-                    if (logger.isTraceEnabled())
-                        logger.trace("[" +elem.getName() +"] " +
-                                      "SLA ID [" + identifier + "], " +
-                                      "associated to " +
-                                      "MeasurableCapability=" +
-                                      mCap.getClass().getName() + ", " +
-                                      "SLAPolicyHandler=" +
-                                      handler.getClass().getName());
+                    logger.trace("[{}] SLA ID [{}], associated to MeasurableCapability={}, SLAPolicyHandler={}",
+                                 elem.getName(), identifier, mCap.getClass().getName(), handler.getClass().getName());
                 } catch (Exception e) {
-                    logger.warn("Creating SLAPolicyHandler for system SLA [" + sla.getIdentifier() + "]", e);
+                    logger.warn("Creating SLAPolicyHandler for system SLA [{}]", sla.getIdentifier(), e);
                 }
 
             /* Check if the SLA matches the ThreadDeadlockMonitor. */
@@ -192,7 +185,7 @@ public class ServiceBeanSLAManager {
                     watchInjector.inject(wDesc, threadDeadlockMonitor, getThreadDeadlockCalculable);
 
                 } catch (Exception e) {
-                    logger.warn("Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]", e);
+                    logger.warn("Creating SLAPolicyHandler for SLA [{}]", sla.getIdentifier(), e);
                 }
             } else {
                 try {
@@ -202,17 +195,16 @@ public class ServiceBeanSLAManager {
                         try {
                             watchInjector.inject(wd);
                         } catch (ConfigurationException e) {
-                            logger.warn("Injecting Watch [" + wd.getName() + "] for SLA [" + sla.getIdentifier() + "]", e);
+                            logger.warn("Injecting Watch [{}] for SLA [{}]",  wd.getName(), sla.getIdentifier(), e);
                         }
                     }
                 } catch (Exception e) {
-                    logger.warn("Creating SLAPolicyHandler for SLA [" + sla.getIdentifier() + "]", e);
+                    logger.warn("Creating SLAPolicyHandler for SLA [{}]", sla.getIdentifier(), e);
                 }
             }
 
-            if (logger.isTraceEnabled())
-                logger.trace("[{}] Adding SLA [{}] to the Watch Registry for subsequent association",
-                             context.getServiceElement().getName(), identifier);
+            logger.trace("[{}] Adding SLA [{}] to the Watch Registry for subsequent association",
+                         context.getServiceElement().getName(), identifier);
             if (handler != null) {
                 context.getWatchRegistry().addThresholdListener(identifier, handler);
             }
@@ -267,7 +259,7 @@ public class ServiceBeanSLAManager {
                         try {
                             watchInjector.modify(wd);
                         } catch (ConfigurationException e) {
-                            logger.warn("Modifying WatchDescriptor ["+wd.getName()+"] for SLA ["+sla.getIdentifier()+"]", e);
+                            logger.warn("Modifying WatchDescriptor [{}] for SLA [{}]", wd.getName(), sla.getIdentifier(),e);
                         }
                     }
                 }
@@ -304,8 +296,7 @@ public class ServiceBeanSLAManager {
                                                      context.getServiceBeanManager().getNotificationBroadcasterSupport());
                 }
             } catch(Exception e) {
-                if(logger.isDebugEnabled())
-                    logger.debug("Registering SLAThresholdEventAdapter", e);
+                logger.debug("Registering SLAThresholdEventAdapter", e);
             }
         }
     }
@@ -323,9 +314,8 @@ public class ServiceBeanSLAManager {
     private SLAPolicyHandler createSLAPolicyHandler(final SLA sla, final ClassLoader loader)
         throws Exception {
         SLAPolicyHandler slappy = SLAPolicyHandlerFactory.create(sla, proxy, slaEventHandler, context, loader);
-        if(logger.isTraceEnabled())
-            logger.trace("[{}] SLA [{}] Created SLAPolicyHandler [{}]",
-                         context.getServiceElement().getName(), sla.getIdentifier(), slappy.getClass().getName());
+        logger.trace("[{}] SLA [{}] Created SLAPolicyHandler [{}]",
+                     context.getServiceElement().getName(), sla.getIdentifier(), slappy.getClass().getName());
         slaPolicyHandlers.add(slappy);
         return (slappy);
     }

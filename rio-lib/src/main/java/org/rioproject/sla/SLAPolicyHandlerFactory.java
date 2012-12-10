@@ -18,12 +18,10 @@ package org.rioproject.sla;
 
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A utility to create a SLAPolicyHandler based on a Configuration
@@ -53,18 +51,16 @@ public class SLAPolicyHandlerFactory {
                                           Object eventSource,
                                           EventHandler eventHandler,
                                           ServiceBeanContext context,
-                                          ClassLoader loader) 
-    throws Exception {
+                                          ClassLoader loader) throws Exception {
         if(sla==null)
             throw new IllegalArgumentException("sla is null");
+        logger.trace("Creating SLAPolicyHandler for {}", sla);
         Class slaPolicyHandlerClass = loader.loadClass(sla.getSlaPolicyHandler());
         Constructor cons = slaPolicyHandlerClass.getConstructor(SLA.class);
         SLAPolicyHandler slaPolicyHandler = (SLAPolicyHandler)cons.newInstance(sla);
         /* Initialize the policy handler for processing */
         slaPolicyHandler.initialize(eventSource, eventHandler, context);
-        if(logger.isDebugEnabled())
-            logger.debug("SLAPolicyHandler "+
-                        "["+slaPolicyHandler.getClass().getName()+"] created");
+        logger.debug("SLAPolicyHandler [{}] created", slaPolicyHandler.getClass().getName());
         return(slaPolicyHandler);
     }  
     
@@ -79,8 +75,7 @@ public class SLAPolicyHandlerFactory {
      * SLAPolicyHandler class configured as part of the SLA
      * 
      */
-    public static boolean slaPolicyHandlerChanged(SLA sla, 
-                                                  SLAPolicyHandler handler) {
+    public static boolean slaPolicyHandlerChanged(SLA sla, SLAPolicyHandler handler) {
         return !sla.getSlaPolicyHandler().equals(handler.getClass().getName());        
     }
 }
