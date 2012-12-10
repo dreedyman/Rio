@@ -298,15 +298,16 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         }
         if(logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
+            int i=1;
             for(ServiceRecord record : recordSet) {
                 if(sb.length()>0) {
                     sb.append("\n");
                 }
-                sb.append("\t");
-                sb.append(record.getServiceElement().getOperationalStringName()).append("/");
-                sb.append(record.getServiceElement().getName());
-                sb.append(", instance:").append(record.getServiceElement().getServiceBeanConfig().getInstanceID());
-                sb.append(", ").append(record.getServiceID().toString());
+                sb.append(String.format("%2d. %-40s instance:%-3d  %s",
+                                        i++,
+                                        CybernodeLogUtil.simpleLogName(record.getServiceElement()),
+                                        record.getServiceElement().getServiceBeanConfig().getInstanceID(),
+                                        record.getServiceID().toString()));
             }
             String newLine = recordSet.isEmpty()?"":"\n";
 

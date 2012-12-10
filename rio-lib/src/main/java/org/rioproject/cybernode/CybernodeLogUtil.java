@@ -30,6 +30,13 @@ public final class CybernodeLogUtil {
         return logName(event.getServiceElement());
     }
 
+    public static String simpleLogName(final ServiceElement element) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(element.getOperationalStringName()).append("/");
+        builder.append(element.getName());
+        return builder.toString();
+    }
+
     public static String logName(final ServiceElement element) {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
