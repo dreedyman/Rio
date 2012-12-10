@@ -25,13 +25,9 @@ manager {
     ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
         if(classPath.length()>0)
             classPath.append(File.pathSeparator)
-        classPath.append("$rioHome/lib/$jar")
+        classPath.append(rioHome+'/lib/'+jar)
     }
 
-    File loggingLibDir = new File("$rioHome/lib/logging")
-    loggingLibDir.eachFile() { file ->
-        classPath.append(File.pathSeparator).append("${loggingLibDir.path}/${file.name}")
-    }
     classPath.append(File.pathSeparator).append(System.getProperty("JAVA_HOME")).append("/lib/tools.jar")
     execClassPath = classPath.toString()
 
@@ -48,7 +44,6 @@ manager {
     jvmOptions='''
         -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
-        -Djava.util.logging.config.file=${RIO_HOME}${/}config${/}logging${/}rio-logging.properties
         -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME} -DRIO_TEST_ATTACH

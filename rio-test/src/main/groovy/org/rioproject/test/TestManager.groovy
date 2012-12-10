@@ -614,6 +614,23 @@ class TestManager {
     def getHarvester(DiscoveryManagement dMgr) {
         return new HarvesterBean(dMgr)
     }
+
+    private String buildClassPath(File dir, String match) {
+        StringBuilder classpathBuilder = new StringBuilder()
+        for(File file : dir.listFiles()) {
+            if(file.name.startsWith(match))
+                classpathBuilder.append(File.pathSeparator).append(file.path)
+        }
+        return classpathBuilder.toString()
+    }
+
+    private String buildClassPath(File dir) {
+        StringBuilder classpathBuilder = new StringBuilder()
+        for(File file : dir.listFiles()) {
+            classpathBuilder.append(File.pathSeparator).append(file.path)
+        }
+        return classpathBuilder.toString()
+    }
     
     private void exec(String starter) {
         String classpath = "${PropertyHelper.expandProperties(config.manager.execClassPath)}"
@@ -624,6 +641,23 @@ class TestManager {
         if(config.manager.inheritOptions)
             jvmOptions = JVMOptionChecker.getJVMInputArgs(jvmOptions)
         jvmOptions = jvmOptions+' -D'+Constants.RIO_TEST_EXEC_DIR+'='+System.getProperty("user.dir")
+
+        StringBuilder classpathBuilder = new StringBuilder()
+        classpathBuilder.append(classpath)
+        File loggingLibDir = new File("$rioHome/lib/logging")
+        classpathBuilder.append(buildClassPath(loggingLibDir, "slf4j-api"))
+
+        /* Check if logback is being used, if so set logback configuration */
+        if(testConfig.getLoggingSystem()==TestConfig.LoggingSystem.LOGBACK) {
+            jvmOptions = jvmOptions+" -Dlogback.configurationFile=${rioHome}/config/logging/logback.groovy"
+            File logbackDir = new File(loggingLibDir, "logback");
+            classpathBuilder.append(buildClassPath(logbackDir))
+        } else {
+            jvmOptions = jvmOptions+" -Djava.util.logging.config.file=${rioHome}/config/logging/rio-logging.properties"
+            File julDir = new File(loggingLibDir, "jul");
+            classpathBuilder.append(buildClassPath(julDir))
+        }
+
         String logDir = null        
         String mainClass = "${config.manager.mainClass}"
         if(config.manager.log.size()>0) {
@@ -637,7 +671,7 @@ class TestManager {
         }
 
         jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir
-        String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpath+' '+mainClass+' '+starter
+        String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpathBuilder.toString()+' '+mainClass+' '+starter
         logger.info "Logging for $service will be sent to ${logDir}"
         logger.info "Starting ${service}, using starter config [${starter}]"
         if(logger.isDebugEnabled()) {
