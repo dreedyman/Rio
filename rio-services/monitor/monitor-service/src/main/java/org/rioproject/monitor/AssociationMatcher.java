@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public class AssociationMatcher {
     /** The Logger */
     static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
+    private static String errorMessage;
 
     /**
      * This method verifies whether the InstantiatorResource can support any
@@ -196,11 +197,16 @@ public class AssociationMatcher {
             if(inKnownSet(ir, known))
                 provisionable = false;
         }
-        
+        errorMessage = errorLog.toString();
+
         if (!provisionable && logger.isDebugEnabled())
             logger.debug(errorLog.toString());
 
         return (provisionable);
+    }
+
+    static String getLastErrorMessage() {
+        return errorMessage;
     }
 
     /**

@@ -721,7 +721,7 @@ public class InstantiatorResource {
         }
 
         if(!AssociationMatcher.meetsOpposedRequirements(sElem, this)) {
-            failureReason = AssociationMatcher.getErrorMessage();
+            failureReason = AssociationMatcher.getLastErrorMessage();
             logger.debug(failureReason);
             return (false);
         }
