@@ -23,10 +23,14 @@ import org.junit.runner.RunWith;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * Testing the hospital example using the Rio test framework
@@ -37,7 +41,7 @@ public class ITHospitalDeployTest {
     static TestManager testManager;
     private Hospital hospital;
     private List<Doctor> docs;
-    private static final Logger logger = Logger.getLogger(ITHospitalDeployTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ITHospitalDeployTest.class.getName());
 
     @Before
     public void setup() throws Exception {
@@ -119,7 +123,7 @@ public class ITHospitalDeployTest {
                 } catch(AdmissionException e) {
                     List<Patient> patientsInWaitingRoom = hospital.getWaitingRoom();
                     int wSize = patientsInWaitingRoom.size();
-                    logger.info("AdmissionException: "+e.getLocalizedMessage()+", waiting room size="+wSize);
+                    logger.info("AdmissionException: {}, waiting room size={}", e.getLocalizedMessage(), wSize);
                 }
             }
             found = waitForBeds(16);
@@ -148,7 +152,7 @@ public class ITHospitalDeployTest {
     private int getAssignedDocs() throws IOException {
         int numAssigned = 0;
         for(Doctor d : hospital.getDoctors()) {
-            logger.info(d.getName()+", "+d.getStatus()+", num patients: "+d.getPatients().size());
+            logger.info("{}, {}, num patients: {}", d.getName(), d.getStatus(), d.getPatients().size());
             if(d.getPatients().size()>0) {
                 numAssigned++;
             }
@@ -163,7 +167,7 @@ public class ITHospitalDeployTest {
 
         for(int i=0; i<iterations; i++) {
             for(Doctor d :  hospital.getDoctors()) {
-                logger.info(d.getName()+" has "+d.getPatients().size()+" patients");
+                logger.info("{}  has {} patients", d.getName(), d.getPatients().size());
                 if(d.getPatients().size()>0) {
                     found++;
                 }
@@ -176,7 +180,7 @@ public class ITHospitalDeployTest {
             }
         }
         long t1 = System.currentTimeMillis();
-        logger.info("Waited ("+(double)(t1-t0)+") millis for "+num+" Doctors with assigned patients, found "+found);
+        logger.info("Waited ({}) millis for {} Doctors with assigned patients, found {}", (double)(t1-t0), num, found);
         return found;
     }
 
@@ -194,7 +198,7 @@ public class ITHospitalDeployTest {
             }
         }
         long t1 = System.currentTimeMillis();
-        logger.info("Waited ("+(double)(t1-t0)+") millis for "+num+" Beds, found "+found);
+        logger.info("Waited ({}) millis for {} Beds, found {}", (double)(t1-t0), num, found);
         return found;
     }
 
@@ -206,7 +210,7 @@ public class ITHospitalDeployTest {
             }
         }
         String dr = count==1?"Doctor":"Doctors";
-        logger.info("Found "+count+" "+dr+" "+status.name());
+        logger.info("Found {} {} {}", count, dr, status.name());
         return count;
     }
 

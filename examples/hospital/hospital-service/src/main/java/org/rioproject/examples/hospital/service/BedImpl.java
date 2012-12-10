@@ -40,11 +40,10 @@ public class BedImpl implements Bed {
     private String roomNumber;
     private static final Logger logger = LoggerFactory.getLogger(BedImpl.class.getName());
 
+    /* Injected by Rio */
+    @SuppressWarnings("unused")
     public void setServiceBeanContext(ServiceBeanContext context) {
-        if(logger.isDebugEnabled()) {
-            logger.debug("Creating Bed:{}...", context.getServiceBeanConfig().getInstanceID());
-        }
-
+        logger.debug("Creating Bed:{}...", context.getServiceBeanConfig().getInstanceID());
         int numRooms = 40;
         String sNumRooms = (String)context.getInitParameter("numRooms");
         if(sNumRooms!=null) {
@@ -60,9 +59,7 @@ public class BedImpl implements Bed {
         temperature = new GaugeWatch("temperature");
         pulse = new GaugeWatch("pulse");
         context.getWatchRegistry().register(temperature, pulse);
-        if(logger.isDebugEnabled()) {
-            logger.debug("Created Bed:%{} in room #{}", context.getServiceBeanConfig().getInstanceID(),roomNumber);
-        }
+        logger.debug("Created Bed:%{} in room #{}", context.getServiceBeanConfig().getInstanceID(),roomNumber);
     }
 
     public String getRoomNumber() throws IOException {

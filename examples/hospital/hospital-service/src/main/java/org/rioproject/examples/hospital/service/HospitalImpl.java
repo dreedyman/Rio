@@ -192,11 +192,10 @@ public class HospitalImpl implements Hospital {
     private void addToWaitingRoom(final Patient p) {
         synchronized(waitingRoom) {
             if(waitingRoom.add(p)) {
-                logger.info(String.format("Added %s to the waiting room, waiting room size is now: %d",
-                                          p.getPatientInfo().getName(), waitingRoom.size()));
+                logger.info("Added {} to the waiting room, waiting room size is now: {}",
+                            p.getPatientInfo().getName(), waitingRoom.size());
             } else {
-                logger.info(String.format("Did not add %s to the waiting room, must already be waiting",
-                                          p.getPatientInfo().getName()));
+                logger.info("Did not add {} to the waiting room, must already be waiting", p.getPatientInfo().getName());
             }
         }
     }
