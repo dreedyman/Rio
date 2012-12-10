@@ -92,7 +92,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     /** Component name we use to find items in the configuration */
     private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    private static Logger logger = LoggerFactory.getLogger("org.rioproject.monitor");
+    private static Logger logger = LoggerFactory.getLogger(ProvisionMonitorImpl.class);
     /** The provisioner to use for provisioning */
     private ServiceProvisioner provisioner;
     /** OpStringLoader for loading XML OperationalStrings */
@@ -253,7 +253,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 Registry registry = LocateRegistry.getRegistry(registryPort);
                 try {
                     registry.bind(name, (Remote)proxy);
-                    logger.debug("Bound to RMI Registry on port=%d", registryPort);
+                    logger.debug("Bound to RMI Registry on port={}", registryPort);
                 } catch(AlreadyBoundException e) {
                     /*ignore */
                 }
