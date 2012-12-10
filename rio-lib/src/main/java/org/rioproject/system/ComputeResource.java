@@ -494,7 +494,7 @@ public class ComputeResource {
     public void stateChange() {
         if(initializing)
             return;
-        System.out.println("STATE CHANGE!!!");
+        logger.debug("Notify listeners of a state change");
         notifyResourceCapabilityChangeListeners();
     }
 
