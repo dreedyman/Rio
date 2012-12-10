@@ -64,7 +64,9 @@ public class GaugeWatchTest extends ThresholdWatchTest {
 
         // Go through the checkpoints
         for (int checkpoint : checkpoints) {
-
+            if(watch.getWatchDataSource().getMaxSize()<checkpoint) {
+                watch.getWatchDataSource().setMaxSize(1000);
+            }
             // Generate samples to reach the checkpoint
             while (added.size() < checkpoint) {
                 double d = Math.random();
@@ -115,6 +117,9 @@ public class GaugeWatchTest extends ThresholdWatchTest {
 
         // Go through the checkpoints
         for (int checkpoint : checkpoints) {
+            if(watch.getWatchDataSource().getMaxSize()<checkpoint) {
+                watch.getWatchDataSource().setMaxSize(1000);
+            }
 
             // Generate samples to reach the checkpoint
             while (added.size() < checkpoint) {

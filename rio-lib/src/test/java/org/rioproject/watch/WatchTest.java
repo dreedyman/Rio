@@ -409,6 +409,7 @@ public class WatchTest {
                                            boolean tryNulls)
         throws RemoteException {
 
+        watch.getWatchDataSource().setMaxSize(collectionSize);
         final int checkpoints[] = new int[]{0, 1, collectionSize / 2,
                                             collectionSize,
                                             collectionSize + 1,
