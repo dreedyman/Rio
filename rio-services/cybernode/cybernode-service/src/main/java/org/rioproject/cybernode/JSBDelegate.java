@@ -451,7 +451,10 @@ public class JSBDelegate implements ServiceBeanDelegate {
 
         Thread jsbThread = new Thread(threadGroup, "JSBDelegate") {
         */
-        Thread jsbThread = new Thread("JSBDelegate") {
+        StringBuilder threadName = new StringBuilder();
+        threadName.append(sElem.getName()).append("-");
+        threadName.append(sElem.getServiceBeanConfig().getInstanceID()).append("-delegate");
+        Thread jsbThread = new Thread(threadName.toString()) {
             public void run() {
                 starting.set(true);
                 ComputeResource computeResource = container.getComputeResource();
