@@ -145,11 +145,8 @@ public class ComputeResource {
                         System.getProperty("os.arch")+", "+
                         System.getProperty("os.version");
         this.config = config;
-        String host = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        address = (InetAddress)config.getEntry(COMPONENT,
-                                               "address",
-                                               InetAddress.class,
-                                               InetAddress.getByName(host));
+        address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+
         String defaultDescription = address.getHostName()+" "+system;
         description = (String)config.getEntry(COMPONENT, "description", String.class, defaultDescription);
         reportInterval = (Long)config.getEntry(COMPONENT, "reportInterval", Long.class, DEFAULT_REPORT_INTERVAL);
@@ -171,8 +168,7 @@ public class ComputeResource {
             this.reportInterval = reportInterval;
             if(!resourceCapabilityChangeNotifierFuture.isDone())
                 resourceCapabilityChangeNotifierFuture.cancel(true);
-            if(logger.isDebugEnabled())
-                logger.debug("Set ResourceCapability reportInterval to {}", TimeUtil.format(reportInterval));
+            logger.debug("Set ResourceCapability reportInterval to {}", TimeUtil.format(reportInterval));
             scheduleResourceCapabilityReporting();
         }
     }
@@ -234,8 +230,7 @@ public class ComputeResource {
      */
     public void addPlatformCapability(PlatformCapability pCap) {
         if(!hasPlatformCapability(pCap)) {
-            if(logger.isTraceEnabled())
-                logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
+            logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
             pCap.loadResources();
 
             boolean stateChange;
@@ -301,26 +296,25 @@ public class ComputeResource {
 
         try {
             if(stagedSoftware !=null) {
-                DownloadManager slm = new DownloadManager(provisionRoot, stagedSoftware);
+                DownloadManager downloadMgr = new DownloadManager(provisionRoot, stagedSoftware);
                 DownloadRecord record = null;
                 try {
-                    if(logger.isTraceEnabled())
-                        logger.trace("Provisioning StagedSoftware for PlatformCapability : {}", pCap.getClass().getName());
-                    record = slm.download();
-                    if(logger.isTraceEnabled())
+                    logger.trace("Provisioning StagedSoftware for PlatformCapability : {}", pCap.getClass().getName());
+                    record = downloadMgr.download();
+                    if(record!=null) {
                         logger.trace(record.toString());
+                        pCap.addDownloadRecord(record);
+                        pCap.setPath(record.unarchived()?
+                                     record.getExtractedPath():record.getPath());
+                    }
                     pCap.addStagedSoftware(stagedSoftware);
-                    pCap.addDownloadRecord(record);
-                    DownloadRecord postInstallRecord = slm.postInstall();
+                    DownloadRecord postInstallRecord = downloadMgr.postInstall();
                     if(postInstallRecord!=null)
                         pCap.addDownloadRecord(postInstallRecord);
 
-                    pCap.setPath(record.unarchived()?
-                                 record.getExtractedPath():record.getPath());
                     if(stagedSoftware.getUseAsClasspathResource()) {
                         String[] classpath;
-                        if(pCap.getPath().endsWith(".jar") ||
-                           pCap.getPath().endsWith(".zip")) {
+                        if(pCap.getPath().endsWith(".jar") || pCap.getPath().endsWith(".zip")) {
                             classpath = StringUtil.toArray(pCap.getPath());
                         } else {
                             String cp = pCap.getPath();
@@ -332,30 +326,26 @@ public class ComputeResource {
                         pCap.setClassPath(classpath);
                     }
                     if(!stagedSoftware.removeOnDestroy()) {
-                        String configFileLocation =
-                            systemCapabilitiesLoader.getPlatformConfigurationDirectory(config);
+                        String configFileLocation = systemCapabilitiesLoader.getPlatformConfigurationDirectory(config);
                         if(configFileLocation==null) {
                             logger.warn("Unable to write PlatformConfiguration [{}] configuration, " +
                                         "unknown platform configuration directory. The RIO_HOME environment " +
                                         "variable must be set", pCap.getName());
                         } else {
                             PlatformCapabilityWriter pCapWriter = new PlatformCapabilityWriter();
-                            String fileName =
-                                pCapWriter.write(pCap, configFileLocation);
+                            String fileName = pCapWriter.write(pCap, configFileLocation);
                             pCap.setConfigurationFile(fileName);
                             logger.info("Wrote PlatformCapability [{}] configuration to {}", pCap.getName(), fileName);
                         }
                     }
-
-                    if(logger.isTraceEnabled())
-                        logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
+                    logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
                     pCap.loadResources();
                     stateChange();
 
                 } catch(IOException e) {
                     if(record!=null)
-                        slm.remove();
-                    logger.warn("Provisioning StagedSoftware for PlatformCapability : "+pCap.getClass().getName(), e);
+                        downloadMgr.remove();
+                    logger.warn("Provisioning StagedSoftware for PlatformCapability : {}", pCap.getClass().getName(), e);
                 }
             }
         } finally {
@@ -403,15 +393,13 @@ public class ComputeResource {
             if(clean) {
                 DownloadRecord[] downloadRecords = pCap.getDownloadRecords();
                 StringBuilder buff = new StringBuilder();
-                if(downloadRecords.length > 0 && logger.isInfoEnabled())
-                    buff.append("Removing StagedSoftware for PlatformCapability: [")
-                        .append(pCap.getName())
-                        .append("]");
+                buff.append("Removing StagedSoftware for PlatformCapability: [")
+                    .append(pCap.getName())
+                    .append("]");
                 for (DownloadRecord downloadRecord : downloadRecords) {
                     buff.append("\n\tRemoved ").append(DownloadManager.remove(downloadRecord));
                 }
-                if(logger.isInfoEnabled())
-                    logger.info(buff.toString());
+                logger.info(buff.toString());
                 if(pCap.getConfigurationFile()!=null) {
                     File configFile = new File(pCap.getConfigurationFile());
                     if(configFile.exists()) {
