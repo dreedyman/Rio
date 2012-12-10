@@ -19,6 +19,7 @@ import org.rioproject.config.Constants;
 import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;
 import org.rioproject.loader.ServiceClassLoader;
+import org.rioproject.net.HostUtil;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -65,11 +66,7 @@ public class ServiceLogEventHandler extends Handler implements ServiceLogEventHa
 
     public ServiceLogEventHandler() {
         try {
-            String a = System.getProperty(Constants.RMI_HOST_ADDRESS);
-            if(a==null)
-                address = InetAddress.getLocalHost();
-            else
-                address = InetAddress.getByName(a);
+            address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         } catch (UnknownHostException e) {
             throw new RuntimeException("Trying to initialize ServiceLogEventHandler", e);
         }
