@@ -93,6 +93,6 @@ public class TransientServiceStatementManager implements ServiceStatementManager
 
     private void remove(ServiceElement key) {
         statementMap.remove(key);
-        logger.debug("%s is Inactive, Removed Records", key.getName());
+        logger.debug("{} is Inactive, Removed Records", key.getName());
     }
 }

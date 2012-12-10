@@ -502,7 +502,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                 Registry registry = LocateRegistry.getRegistry(address, registryPort);
                 try {
                     registry.bind(name, (Remote)proxy);
-                    logger.debug("Bound to RMI Registry on port=%d", registryPort);
+                    logger.debug("Bound to RMI Registry on port={}", registryPort);
                 } catch(AlreadyBoundException e) {
                     /*ignore */
                 }

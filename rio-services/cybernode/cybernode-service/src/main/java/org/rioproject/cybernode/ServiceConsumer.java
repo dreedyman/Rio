@@ -349,8 +349,6 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             Collection<ProvisionLeaseManager> c = leaseTable.values();
             mgrs = c.toArray(new ProvisionLeaseManager[c.size()]);
         }
-        if(mgrs == null)
-            return;
         if(mgrs.length == 0)
             return;
         StringBuilder sb = new StringBuilder();
@@ -368,8 +366,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             logger.warn(sb.toString());
         } else{
             sb.append(", All Measured Resources within range");
-            if(logger.isDebugEnabled())
-                logger.debug(sb.toString());
+            logger.debug(sb.toString());
         }
 
         for (ProvisionLeaseManager mgr : mgrs) {
@@ -386,6 +383,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 if (category == ThrowableConstants.INDEFINITE ||
                     category == ThrowableConstants.UNCATEGORIZED) {
                     connected = mgr.reconnect();
+                    logger.warn("Attempted reconnect after failure. Are we connected? {}", connected);
                 }
 
                 if (!connected) {
@@ -427,8 +425,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                     try {
                         lease.cancel();
                     } catch(Exception e ) {
-                        if(logger.isTraceEnabled())
-                            logger.trace("Cancelling Lease with invalid lease time", e);
+                        logger.trace("Cancelling Lease with invalid lease time", e);
                     }
                     try {
                         Thread.sleep(provisionerRetryDelay);
@@ -550,8 +547,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                         /* Determine if we should even try to reconnect */
                         if(!ThrowableUtil.isRetryable(e)) {
                             keepAlive = false;
-                            logger.trace("Unrecoverable Exception renewing ProvisionManager Lease", e);
-                            logger.debug("Unrecoverable Exception renewing ProvisionManager Lease");
+                            logger.warn("Unrecoverable Exception renewing ProvisionManager Lease", e);
                         }
                         if(keepAlive) {
                             /*
@@ -559,12 +555,14 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                              * re-establish communications to the ProvisionManager and get
                              * another Lease
                              */
-                            logger.debug("Could not renew, attempt to reconnect");
+                            logger.warn("Could not renew, attempt to reconnect");
                             boolean connected = reconnect();
                             if(!connected) {
                                 logger.warn("Unable to recover ProvisionManager registration, exiting");
                                 break;
-                            } 
+                            } else {
+                                logger.info("Recovered ProvisionManager registration");
+                            }
                             
                         } else {
                             logger.debug("No retry attempted, ProvisionMonitor determined unreachable");
