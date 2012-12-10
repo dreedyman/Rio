@@ -92,6 +92,10 @@ deployment(name:'Muves') {
             resources ref:"impl.jars"
         }
 
+        sla(id: 'waitq', high: 30000) {
+            policy handler: 'net.kahona.dispatcher.SimScalingHandler', max: 2
+        }
+
         maintain 1
 
         association type: "uses",

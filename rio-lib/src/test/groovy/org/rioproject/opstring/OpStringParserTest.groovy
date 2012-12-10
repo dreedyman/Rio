@@ -856,6 +856,12 @@ class OpStringParserTest extends GroovyTestCase {
         assertTrue lurch.associationDescriptors[3].interfaceNames.any { it == 'org.rioproject.watch.Watchable' }
         assertEquals 'watchables', lurch.associationDescriptors[3].propertyName
 
+        assertEquals(1, lurch.serviceLevelAgreements.serviceSLAs.length)
+        SLA sla = lurch.serviceLevelAgreements.serviceSLAs[0]
+        assertEquals("waitq", sla.identifier)
+        assertEquals("net.kahona.dispatcher.SimScalingHandler", sla.slaPolicyHandler)
+        assertEquals(2, sla.maxServices)
+
         def fester = opstring.services[3]
         assertEquals 'Fester', fester.name
         assertEquals 'net.gomez.fester.Fester', fester.exportBundles[0].className

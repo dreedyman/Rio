@@ -65,7 +65,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
         logger.debug "Parsing source $source"
         ExpandoMetaClass.enableGlobally()
 
-        def parent
+        def parent = null
 
         URL sourceLocation = null
         if(source instanceof URL) {
@@ -95,15 +95,15 @@ class GroovyDSLOpStringParser implements OpStringParser {
         globalSettings[GROUPS] = defaultGroups
 
         /* The 5 properties below represent in-flight objects that are referenced as the dsl gets parsed */
-        ServiceElement currentService
-        AssociationDescriptor currentAssociationDescriptor
-        SystemComponent currentSoftwareSystemComponent
-        SLA currentSLA
+        ServiceElement currentService = null
+        AssociationDescriptor currentAssociationDescriptor = null
+        SystemComponent currentSoftwareSystemComponent = null
+        SLA currentSLA = null
 
         dslScript.metaClass = createEMC(dslScript.class, {
                                         ExpandoMetaClass emc ->
-            def opStringName
-            OpString opString
+            def opStringName = null
+            OpString opString = null
 
             emc.deployment = { Map attributes, Closure cl ->
                 opStringName = attributes.name
@@ -539,7 +539,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
             }
 
             emc.policy = { Map attributes ->
-                currentSLA.slaPolicyHandler = helper.getSLAPolicyHandler(attributes.type)
+                currentSLA.slaPolicyHandler =
+                    helper.getSLAPolicyHandler(attributes.type==null?attributes.handler:attributes.type)
                 if(attributes.lowerDampener)
                     currentSLA.lowerThresholdDampeningTime = attributes.lowerDampener
                 if(attributes.upperDampener)
