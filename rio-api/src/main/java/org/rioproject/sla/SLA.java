@@ -202,14 +202,15 @@ public class SLA extends ThresholdValues implements Serializable {
     }    
 
     public String toString() {
-        return "SLA {" +
-               "ID=" + identifier +
-               ", Low: "+getLowThreshold() +
-               ", High: "+getHighThreshold() +
-               ", upperThresholdDampeningTime=" + upperThresholdDampeningTime +
-               ", lowerThresholdDampeningTime=" + lowerThresholdDampeningTime +
-               ", maxServices=" + maxServices +
-               ", slaPolicyHandler='" + slaPolicyHandler +
-               "}";
+        StringBuilder toString = new StringBuilder();
+        toString.append("SLA [");
+        toString.append("ID: ").append(identifier).append(", ");
+        toString.append("Low: ").append(getLowThreshold()).append(", ");
+        toString.append("High: ").append(getHighThreshold()).append(", ");
+        toString.append("upperThresholdDampeningTime: ").append(upperThresholdDampeningTime).append(", ");
+        toString.append("lowerThresholdDampeningTime: ").append(lowerThresholdDampeningTime).append(", ");
+        toString.append("maxServices: ").append(maxServices).append(", ");
+        toString.append("slaPolicyHandler: ").append(slaPolicyHandler).append("]");
+        return toString.toString();
     }
 }
