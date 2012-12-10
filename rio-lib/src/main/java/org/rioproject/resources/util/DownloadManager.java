@@ -164,8 +164,8 @@ public class DownloadManager {
         File targetFile = new File(FileUtils.makeFileName(target, software));
         if (targetFile.exists()) {
             if(!dAttrs.overwrite()) {
-                logger.warn("{} exists, stagedData attributes indicate to "+
-                           "not overwrite file", FileUtils.getFilePath(targetFile));
+                logger.warn("{} exists, stagedData attributes indicate to not overwrite file",
+                            FileUtils.getFilePath(targetFile));
                 return null;
             } else {
                 if(showDownloadTo)
@@ -176,12 +176,11 @@ public class DownloadManager {
                 logger.info("Downloading {} to {}", location, FileUtils.getFilePath(targetFile));
         }
         long t0 = System.currentTimeMillis();
-
         URLConnection con = location.openConnection();
         int downloadedSize = writeFileFromInputStream(con.getInputStream(),
                                                       targetFile,
                                                       con.getContentLength(),
-                                                      true);
+                                                      System.console()!=null);
         long t1 = System.currentTimeMillis();
         long downloadTime = t1 - t0;
         long downloadSecs = downloadTime/1000;
@@ -230,11 +229,7 @@ public class DownloadManager {
      *
      * @throws IOException if there are errors accessing the file system
      */
-    private static int writeFileFromInputStream(InputStream in,
-                                                File file,
-                                                long total,
-                                                boolean show)
-            throws IOException {
+    private static int writeFileFromInputStream(InputStream in, File file, long total, boolean show) throws IOException {
         int totalWrote = 0;
         OutputStream out = null;
         try {
@@ -249,7 +244,7 @@ public class DownloadManager {
             }
             if(show) {
                 String l = total >= 1024 ? ( total / 1024 ) + "K" : total + "b";
-                System.out.println( l + " downloaded ("+file.getName()+")");
+                logger.info( l + " downloaded ("+file.getName()+")");
             }
         } catch(FileNotFoundException e) {
             // catch so we can delete the file
@@ -384,7 +379,7 @@ public class DownloadManager {
         logger.info("Writing {} ...", FileUtils.getFilePath(output));
         long t0 = System.currentTimeMillis();
 
-        int downloadedSize = writeFileFromInputStream(gzipInputStream, output, gzip.length(), true);
+        int downloadedSize = writeFileFromInputStream(gzipInputStream, output, gzip.length(), System.console()!=null);
         long t1 = System.currentTimeMillis();
         long downloadTime = t1 - t0;
         long downloadSecs = downloadTime/1000;
