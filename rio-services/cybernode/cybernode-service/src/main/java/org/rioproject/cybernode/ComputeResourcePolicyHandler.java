@@ -45,7 +45,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
     private final Executor thresholdTaskPool = Executors.newCachedThreadPool();
     private final ServiceConsumer serviceConsumer;
     private final ServiceBeanInstance instance;
-    private final AtomicBoolean terminate= new AtomicBoolean(false);
+    private final AtomicBoolean terminate = new AtomicBoolean(false);
     private static final Logger logger = LoggerFactory.getLogger(ComputeResourcePolicyHandler.class.getName());
 
     public ComputeResourcePolicyHandler(final ServiceElement serviceElement,
@@ -63,18 +63,16 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
         terminate.set(true);
     }
 
-
     public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
         if(terminate.get())
             return;
         String status = type.name().toLowerCase();
-        if(logger.isDebugEnabled())
-            logger.debug(String.format("Threshold=%s, Status=%s, Value=%f, Low=%f, High=%f",
-                                      calculable.getId(),
-                                      status,
-                                      calculable.getValue(),
-                                      thresholdValues.getLowThreshold(),
-                                      thresholdValues.getHighThreshold()));
+        logger.debug("Threshold={}, Status={}, Value={}, Low={}, High={}",
+                     calculable.getId(),
+                     status,
+                     calculable.getValue(),
+                     thresholdValues.getLowThreshold(),
+                     thresholdValues.getHighThreshold());
 
         if(type==ThresholdType.BREACHED)  {
             double tValue = calculable.getValue();
@@ -83,13 +81,12 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                     serviceConsumer.updateMonitors();
                 }
                 if(calculable.getId().equals(SystemWatchID.JVM_MEMORY)) {
-                    logger.info(String.format("Memory utilization is %f, threshold set at %f, request immediate garbage collection",
-                                              calculable.getValue(), thresholdValues.getCurrentHighThreshold()));
+                    logger.warn("Memory utilization is {}, threshold set at {}, request immediate garbage collection",
+                                calculable.getValue(), thresholdValues.getCurrentHighThreshold());
                     System.gc();
                 }
                 if(calculable.getId().contains(SystemWatchID.JVM_PERM_GEN)) {
-                    logger.info(String.format("Perm Gen has breached with utilization > %f",
-                                thresholdValues.getCurrentHighThreshold()));
+                    logger.warn("Perm Gen has breached with utilization > {}", thresholdValues.getCurrentHighThreshold());
                     //if(isEnlisted())
                     //release(false);
                     //svcConsumer.cancelRegistrations();
@@ -100,7 +97,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
             if(serviceConsumer!=null) {
                 serviceConsumer.updateMonitors();
             }
-        }
+                }
 
         try {
             double[] range = new double[]{thresholdValues.getCurrentLowThreshold(),
@@ -117,10 +114,9 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                                                             type);
             thresholdTaskPool.execute(new SLAThresholdEventTask(event, thresholdEventHandler));
         } catch(Exception e) {
-            logger.warn(String.format("Could not send a SLA Threshold Notification as a " +
-                                     "result of compute resource threshold " +
-                                     "[%s] being crossed", calculable.getId()),
-                       e);
+            logger.warn("Could not send a SLAThresholdEvent as a result of compute resource threshold [{}] being crossed",
+                        calculable.getId(),
+                        e);
         }
     }
 }
