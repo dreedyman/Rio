@@ -155,6 +155,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     private boolean enlisted=false;
     private ServiceRecordUpdateTask serviceRecordUpdateTask;
     private int registryPort;
+    private String instantiatorID;
 
     /**
      * Create a Cybernode
@@ -351,7 +352,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @see org.rioproject.deploy.ServiceBeanInstantiator#getName()
      */
     public String getName() {
-        return(context.getServiceElement().getName());
+        return instantiatorID;
     }
 
     /**
@@ -558,6 +559,22 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @see org.rioproject.core.jsb.ServiceBean#initialize
      */
     public void initialize(ServiceBeanContext context) throws Exception {
+        /*
+         * Create the instantiatorID. This will be used as the name set in the proxy, and used to track
+         * registrations and updates in the ProvisionMonitor
+         */
+        StringBuilder instantiatorIDBuilder = new StringBuilder();
+        instantiatorIDBuilder.append(context.getServiceElement().getName()).append("-");
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        String pid = name;
+        int ndx = name.indexOf("@");
+        if(ndx>=1) {
+            pid = name.substring(0, ndx);
+        }
+        instantiatorIDBuilder.append(pid).append("@");
+        instantiatorIDBuilder.append(HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS));
+        instantiatorID = instantiatorIDBuilder.toString();
+
         /*
          * Determine if a log directory has been provided. If so, create a
          * PersistentStore
@@ -791,8 +808,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
 
         /* Ensure we have a serviceID */
         if(serviceID==null) {
-            logger.debug("Creating new ServiceID from UUID={}", getUuid().toString());
             serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
+            logger.debug("Created new ServiceID:", serviceID.toString());
         }
 
         if(logger.isInfoEnabled()) {
@@ -977,7 +994,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             logger.debug("Already enlisted");
             return;
         }
-        logger.info("Enlist with ProvisionManagers as an instantiation resource");
+        logger.info("Enlist with ProvisionManagers as an instantiation resource using: {}", instantiatorID);
         try {
             svcConsumer.initializeProvisionDiscovery(context.getDiscoveryManagement());
         } catch(Exception e) {
