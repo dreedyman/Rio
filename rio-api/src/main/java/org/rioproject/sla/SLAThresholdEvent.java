@@ -43,30 +43,6 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
     private final String hostAddress;
     /** The ServiceBeanInstance */
     private ServiceBeanInstance instance;
-
-    /**
-     * Creates new SLAThresholdEvent 
-     *
-     * @param source The event source
-     * @param sElem The ServiceElement for the service
-     * @param calculable New value of property calculable
-     * @param sla The sla
-     * @param slaPolicyHandlerDescription = Description of the SLAPolicyHandler
-     * @param hostAddress The TCP/IP address of the ComputeResource
-     * @param type The type of event, breached or cleared
-     */
-    public SLAThresholdEvent(Object source, 
-                             ServiceElement sElem,
-                             Calculable calculable, 
-                             SLA sla, 
-                             String slaPolicyHandlerDescription,
-                             String hostAddress, 
-                             ThresholdType type) {
-        super(source, calculable, sla, type);
-        this.sElem = sElem;
-        this.slaPolicyHandlerDescription = slaPolicyHandlerDescription;
-        this.hostAddress = hostAddress;
-    }
     
     /**
      * Creates new SLAThresholdEvent 
@@ -88,7 +64,10 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
                              String slaPolicyHandlerDescription,
                              String hostAddress,
                              ThresholdType type) {
-        this(source, sElem, calculable, sla, slaPolicyHandlerDescription, hostAddress, type);
+        super(source, calculable, sla, type);
+        this.sElem = sElem;
+        this.slaPolicyHandlerDescription = slaPolicyHandlerDescription;
+        this.hostAddress = hostAddress;
         this.instance = instance;
     }
 
@@ -115,9 +94,9 @@ public class SLAThresholdEvent extends ThresholdEvent implements Serializable {
      *
      * @param sla New value of property sla
      */
-    public void setSLA(final SLA sla) {
+    /*public void setSLA(final SLA sla) {
         setThresholdValues(sla);
-    }
+    }*/
 
     /** 
      * Getter for property slaPolicyHandlerDescription
