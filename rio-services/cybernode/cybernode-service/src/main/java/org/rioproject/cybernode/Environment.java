@@ -67,8 +67,7 @@ public class Environment {
             serviceStatementManager = defaultServiceStatementManager;
         }
 
-        if(logger.isDebugEnabled())
-            logger.debug("Using ServiceStatementManager : {}", serviceStatementManager.getClass().getName());
+        logger.debug("Using ServiceStatementManager: {}", serviceStatementManager.getClass().getName());
         return(serviceStatementManager);
     }
 
@@ -187,8 +186,7 @@ public class Environment {
         File rioPath = new File(rioHome);
         if(!rioPath.exists()) {
             if(rioPath.mkdir()) {
-                if(logger.isDebugEnabled())
-                    logger.debug("Created home directory [{}]", rioHome);
+                logger.debug("Created home directory [{}]", rioHome);
             }
         }
         if(!rioHome.endsWith(File.separator))
@@ -218,8 +216,7 @@ public class Environment {
     static void checkAccess(File directory, boolean isWriteable) throws IOException {
         if(!directory.exists()) {
             if(directory.mkdirs()) {
-                if(logger.isDebugEnabled())
-                    logger.debug("Created directory [{}]", directory.getCanonicalPath());
+                logger.debug("Created directory [{}]", directory.getCanonicalPath());
             } else {
                 throw new IOException("Could not create directory " +
                                       "["+directory.getCanonicalPath()+"], " +
