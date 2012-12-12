@@ -70,11 +70,8 @@ public abstract class ThresholdManager {
      */
     public void setThresholdValues(ThresholdValues thresholdValues) {
         this.thresholdValues = thresholdValues;
-        if(logger.isTraceEnabled())
-            logger.trace(String.format("%s Set ThresholdValues, low=%f, high=%s",
-                                        getID(),
-                                        thresholdValues.getLowThreshold(),
-                                        thresholdValues.getHighThreshold()));
+        logger.trace("{} Set ThresholdValues, low={}, high={}",
+                     getID(), thresholdValues.getLowThreshold(), thresholdValues.getHighThreshold());
     }
 
     /**
@@ -85,10 +82,7 @@ public abstract class ThresholdManager {
      */
     protected void notifyListeners(Calculable calculable, ThresholdType type) {
         ThresholdListener[] tListeners = getThresholdListeners();
-        if(logger.isTraceEnabled())
-            logger.trace(String.format("%s Notify ThresholdListeners, number to notify: %d",
-                                        getID(),
-                                        tListeners.length));
+        logger.trace("{} Notify ThresholdListeners, number to notify: {}", getID(), tListeners.length);
         ThresholdValues thresholds = null;
         try {
             thresholds = (ThresholdValues)thresholdValues.clone();
@@ -110,10 +104,7 @@ public abstract class ThresholdManager {
         synchronized(thresholdListeners) {
             if(!thresholdListeners.contains(listener))
                 thresholdListeners.add(listener);
-            if(logger.isTraceEnabled())
-                logger.trace(String.format("%s Added a ThresholdListener, number now: %d",
-                                            getID(),
-                                            thresholdListeners.size()));
+            logger.trace("{} Added a ThresholdListener, number now: {}", getID(), thresholdListeners.size());
         }
     }
 
@@ -125,10 +116,7 @@ public abstract class ThresholdManager {
     public void removeThresholdListener(ThresholdListener listener) {
         synchronized(thresholdListeners) {
             thresholdListeners.remove(listener);
-            if(logger.isTraceEnabled())
-                logger.trace(String.format("%s Removed a ThresholdListener, number now: %d",
-                                            getID(),
-                                            thresholdListeners.size()));
+            logger.trace("{} Removed a ThresholdListener, number now: {}", getID(), thresholdListeners.size());
         }
     }
 
