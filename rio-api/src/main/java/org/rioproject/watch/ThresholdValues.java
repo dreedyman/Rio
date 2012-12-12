@@ -36,6 +36,7 @@ public class ThresholdValues implements Serializable, Cloneable {
     private long breachedCount = 0;
     /** How many times a Threshold has been cleared */
     private long clearedCount = 0;
+    private double step = 0;
 
     /**
      * Create a new ThresholdValues
@@ -47,11 +48,12 @@ public class ThresholdValues implements Serializable, Cloneable {
      * Create a new ThresholdValues
      * 
      * @param range Array of double values indicating the range of acceptable
-     * lower and upper thresholds
+     * lower and upper thresholds. If a third value is provided that value is used as the step to determine once a
+     * threshold is breached, whether to send notifications
      */
     public ThresholdValues(double... range) {
-        if(range.length != 2)
-            throw new IllegalArgumentException("range must be 2 elements");
+        if(range.length < 2 || range.length>3)
+            throw new IllegalArgumentException("range must be at least 2 elements");
         if(range[0] >= range[1])
             throw new IllegalArgumentException("range is not valid");
 
@@ -60,6 +62,8 @@ public class ThresholdValues implements Serializable, Cloneable {
 
         this.highThreshold = range[1];
         this.currentHighThreshold = range[1];
+        if(range.length==3)
+            step = range[2];
     }
 
 
@@ -154,6 +158,10 @@ public class ThresholdValues implements Serializable, Cloneable {
         clearedCount++;
     }
 
+    public double getStep() {
+        return step;
+    }
+
     /**
      * Gets the count of cleared thresholds
      *
@@ -164,7 +172,7 @@ public class ThresholdValues implements Serializable, Cloneable {
     }
 
     public String toString() {
-        return ("low: "+lowThreshold+", high: " + highThreshold);
+        return ("low: "+lowThreshold+", high: " + highThreshold+", step: "+step);
     }
 
     public Object clone() throws CloneNotSupportedException {
