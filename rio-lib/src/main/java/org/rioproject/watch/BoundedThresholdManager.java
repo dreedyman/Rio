@@ -52,7 +52,7 @@ public class BoundedThresholdManager extends ThresholdManager {
         double value = calculable.getValue();
         if(thresholdCrossed) {
             if(direction == BREACHED_UPPER) {
-                if(value < thresholdValues.getCurrentHighThreshold()) {
+                if(value < thresholdValues.getHighThreshold()) {
                     thresholdCrossed = false;
                     direction = CLEARED;
                     /* the next 2 lines produce a cleared event*/
@@ -63,7 +63,7 @@ public class BoundedThresholdManager extends ThresholdManager {
                     checkHighThresholdBreach(calculable);
                 }
             } else if(direction == BREACHED_LOWER) {
-                if(value > thresholdValues.getCurrentLowThreshold()) {
+                if(value > thresholdValues.getLowThreshold()) {
                     thresholdCrossed = false;
                     direction = CLEARED;
                     thresholdValues.incThresholdClearedCount();
@@ -81,37 +81,51 @@ public class BoundedThresholdManager extends ThresholdManager {
 
     /**
      * Check if the Calculable has crossed the high threshold
-     * 
+     *
      * @param calculable The Calculable value to check
      */
     private void checkHighThresholdBreach(Calculable calculable) {
         double value = calculable.getValue();
-        if(value > thresholdValues.getCurrentHighThreshold()) {
-            thresholdCrossed = true;
-            direction = BREACHED_UPPER;
-            thresholdValues.incThresholdBreachedCount();
-            notifyListeners(calculable, ThresholdType.BREACHED);
+        if(value > thresholdValues.getHighThreshold()) {
+            boolean notify;
+            if(thresholdValues.getStep()>0 && thresholdCrossed) {
+                double diff = value - thresholdValues.getCurrentHighThreshold();
+                notify = diff >= thresholdValues.getStep();
+            } else {
+                notify = true;
+            }
+            if(notify) {
+                thresholdCrossed = true;
+                direction = BREACHED_UPPER;
+                thresholdValues.incThresholdBreachedCount();
+                thresholdValues.setCurrentHighThreshold(value);
+                notifyListeners(calculable, ThresholdType.BREACHED);
+            }
         }
-        if(logger.isTraceEnabled() && calculable.getId().equals("load"))
-            logger.trace("[{}] Check High Threshold breach, value={}, high threshold={}",
-                         calculable.getId(), value, thresholdValues.getCurrentHighThreshold());
     }
 
     /**
      * Check if the Calculable has crossed the low threshold
-     * 
+     *
      * @param calculable The Calculable value to check
      */
     private void checkLowThresholdBreach(Calculable calculable) {
         double value = calculable.getValue();
-        if(value < thresholdValues.getCurrentLowThreshold()) {
-            thresholdCrossed = true;
-            direction = BREACHED_LOWER;
-            thresholdValues.incThresholdBreachedCount();
-            notifyListeners(calculable, ThresholdType.BREACHED);
+        if(value < thresholdValues.getLowThreshold()) {
+            boolean notify;
+            if(thresholdValues.getStep()>0 && thresholdCrossed) {
+                double diff = Math.abs(thresholdValues.getCurrentLowThreshold()-value);
+                notify = diff >= thresholdValues.getStep();
+            } else {
+                notify = true;
+            }
+            if(notify) {
+                thresholdCrossed = true;
+                direction = BREACHED_LOWER;
+                thresholdValues.incThresholdBreachedCount();
+                thresholdValues.setCurrentLowThreshold(value);
+                notifyListeners(calculable, ThresholdType.BREACHED);
+            }
         }
-        if(logger.isTraceEnabled() && calculable.getId().equals("load"))
-            logger.trace("[{}] Check Low Threshold breach, value={}, low threshold={}",
-                         calculable.getId(), value, thresholdValues.getCurrentLowThreshold());
     }
 }
