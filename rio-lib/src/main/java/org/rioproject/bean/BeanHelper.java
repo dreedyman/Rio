@@ -60,29 +60,20 @@ public class BeanHelper {
         Throwable abort = null;
         try {
             Method method = bean.getClass().getMethod(methodNameToInvoke, (Class[]) null);
-            if (logger.isTraceEnabled())
-                logger.trace(String.format("Invoking method [%s] on [%s]", methodNameToInvoke, bean.getClass().getName()));
+            logger.trace("Invoking method [{}] on [{}]", methodNameToInvoke, bean.getClass().getName());
 
             method.invoke(bean, (Object[]) null);
         } catch (NoSuchMethodException e) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Bean [%s] does not have lifecycle method %s() defined",
-                                            bean.getClass().getName(), methodNameToInvoke));
-            }
+            logger.trace("Bean [{}] does not have lifecycle method {}() defined",
+                         bean.getClass().getName(), methodNameToInvoke);
         } catch (IllegalAccessException e) {
             if (logger.isTraceEnabled()) {
-                logger.trace(
-                           String.format("Bean [%s] %s() method security access", bean.getClass().getName(), methodNameToInvoke),
-                           e);
+                logger.trace("Bean [{}] {}() method security access", bean.getClass().getName(), methodNameToInvoke, e);
             }
             abort = e;
         } catch (InvocationTargetException e) {
             abort = ThrowableUtil.getRootCause(e);
-            if (logger.isTraceEnabled()) {
-                logger.trace(
-                           String.format("Bean [%s] %s() method invocation", bean.getClass().getName(), methodNameToInvoke),
-                           abort);
-            }
+            logger.trace("Bean [{}] {}() method invocation", bean.getClass().getName(), methodNameToInvoke, abort);
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
@@ -123,30 +114,19 @@ public class BeanHelper {
             Method method = bean.getClass().getMethod(methodNameToInvoke, classArgs);
             result = method.invoke(bean, objectArgs);
         } catch (NoSuchMethodException e) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Bean [%s] does not have a %s() method defined",
-                                            bean.getClass().getName(), methodNameToInvoke));
-            }
+            logger.trace("Bean [{}] does not have a {}() method defined", bean.getClass().getName(), methodNameToInvoke);
         } catch (IllegalAccessException e) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Bean [%s] %s() method security access", bean.getClass().getName(), methodNameToInvoke),
-                             e);
-            }
+            logger.trace("Bean [{}] {}() method security access", bean.getClass().getName(), methodNameToInvoke, e);
             abort = e;
         } catch (InvocationTargetException e) {
             abort = ThrowableUtil.getRootCause(e);
-            if (logger.isTraceEnabled()) {
-                logger.trace(String.format("Bean [%s] %s() method invocation", bean.getClass().getName(), methodNameToInvoke),
-                             abort);
-            }
+            logger.trace("Bean [{}] {}() method invocation", bean.getClass().getName(), methodNameToInvoke, abort);
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
         if(abort!=null) {
             String message = String.format("Invoking Bean [%s] %s() method", bean.getClass().getName(), methodNameToInvoke);
-            throw new ServiceBeanInstantiationException(message,
-                                                        ThrowableUtil.getRootCause(abort),
-                                                        true);
+            throw new ServiceBeanInstantiationException(message, ThrowableUtil.getRootCause(abort), true);
         }
         return (result);
     }

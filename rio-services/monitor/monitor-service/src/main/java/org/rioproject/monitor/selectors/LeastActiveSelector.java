@@ -32,7 +32,7 @@ import java.util.*;
  */
 public class LeastActiveSelector extends ServiceResourceSelector {
     private final List<Bucket> resourceList = new LinkedList<Bucket>();
-    static Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.selector");
+    static Logger logger = LoggerFactory.getLogger(LeastActiveSelector.class);
     private LeastActiveComparator comparator = new LeastActiveComparator();
 
     public LeastActiveSelector() {

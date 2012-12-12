@@ -215,8 +215,7 @@ public class ServiceBeanLoader {
             AtomicInteger count = counterTable.get(pr.getArtifact());
             if(count!=null) {
                 int using = count.decrementAndGet();
-                if(logger.isTraceEnabled())
-                    logger.trace("Number of [{}] artifacts still active={}", pr.getArtifact(), using);
+                logger.trace("Number of [{}] artifacts still active={}", pr.getArtifact(), using);
                 if(using==0) {
                     provisionedResources.remove(pr);
                 } else {
@@ -450,8 +449,7 @@ public class ServiceBeanLoader {
              */
             if(proxy instanceof ReferentUuid) {
                 serviceIDToUse = ((ReferentUuid)proxy).getReferentUuid();
-                if(logger.isDebugEnabled())
-                    logger.debug("Service has provided Uuid: {}", serviceIDToUse);
+                logger.debug("Service has provided Uuid: {}", serviceIDToUse);
                 ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
             }
             

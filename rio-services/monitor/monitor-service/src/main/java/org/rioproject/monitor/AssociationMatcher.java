@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AssociationMatcher {
     /** The Logger */
-    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
+    static final Logger logger = LoggerFactory.getLogger(AssociationMatcher.class);
     private static String errorMessage;
 
     /**

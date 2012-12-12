@@ -98,36 +98,30 @@ public class ServiceAdvertiser {
                                                                            context.getExportCodebase());
                     JoinAdmin joinAdmin = (JoinAdmin) adminObject;
                     ArrayList<Entry> addList = new ArrayList<Entry>();
-                    if(logger.isTraceEnabled()) {
-                        logger.trace(String.format("OperationalString %s", opStringName));
-                    }
+                    logger.trace("OperationalString {}", opStringName);
                     /* Try and add an OperationalStringEntry */
                     if (opStringName != null && opStringName.length() > 0) {
                         Entry opStringEntry = loadEntry("org.rioproject.entry.OperationalStringEntry",
                                                         joinAdmin, opStringName, proxyCL);
                         if (opStringEntry != null) {
                             addList.add(opStringEntry);
-                            if (logger.isTraceEnabled()) {
-                                logger.warn(String.format("Added OperationalStringEntry [%s] for %s",
-                                                          ((OperationalStringEntry)opStringEntry).name, serviceName));
-                            }
+                            logger.warn("Added OperationalStringEntry [{}] for {}",
+                                        ((OperationalStringEntry)opStringEntry).name, serviceName);
                         } else {
-                            logger.warn(String.format("Unable to obtain the OperationalStringEntry for %s", serviceName));
+                            logger.warn("Unable to obtain the OperationalStringEntry for {}", serviceName);
                         }
 
                         Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, proxyCL);
                         if (hostEntry != null) {
                             addList.add(hostEntry);
-                            if (logger.isTraceEnabled()) {
-                                logger.warn(String.format("Added Host [%s] for %s", ((Host)hostEntry).hostName, serviceName));
-                            }
+                            logger.trace("Added Host [{}] for {}", ((Host)hostEntry).hostName, serviceName);
                         } else {
-                            logger.warn(String.format("Unable to obtain the Host entry for %s", serviceName));
+                            logger.warn("Unable to obtain the Host entry for {}", serviceName);
                         }
                     } else {
                         if (logger.isTraceEnabled()) {
                             String s = (opStringName == null ? "[null]" : "[empty string]");
-                            logger.trace(String.format("OperationalString name is %s", s));
+                            logger.trace("OperationalString name is {}", s);
                         }
                     }
                     /* Process the net.jini.lookup.entry.Name attribute */
@@ -154,10 +148,7 @@ public class ServiceAdvertiser {
                             addList.add(name);
 
                     } catch (Exception e) {
-                        if (logger.isTraceEnabled())
-                            logger.trace("Name not found, cannot add a Name Entry", e);
-                        else
-                            logger.warn("Name not found, cannot add a Name Entry");
+                        logger.warn("Name not found, cannot add a Name Entry", e);
                     }
 
                     /* If any additional attributes (including the
@@ -194,7 +185,7 @@ public class ServiceAdvertiser {
                                 buff.append(groups[i]);
                             }
                         }
-                        logger.trace(String.format("Setting groups [%s] using JoinAdmin.setLookupGroups", buff.toString()));
+                        logger.trace("Setting groups [{}] using JoinAdmin.setLookupGroups", buff.toString());
                     }
                     joinAdmin.setLookupGroups(groups);
                     if ((locators != null) && (locators.length > 0)) {
@@ -205,8 +196,7 @@ public class ServiceAdvertiser {
                                     buff.append(",");
                                 buff.append(locators[i].toString());
                             }
-                            logger.trace(String.format("Setting locators [%s] using JoinAdmin.setLookupLocators",
-                                                        buff.toString()));
+                            logger.trace("Setting locators [{}] using JoinAdmin.setLookupLocators", buff.toString());
                         }
                         joinAdmin.setLookupLocators(locators);
                     }
@@ -221,7 +211,7 @@ public class ServiceAdvertiser {
             /* If we throw a ServiceBeanControlException above, just rethrow it */
             throw e;
         } catch (Throwable t) {
-            logger.warn(String.format("Advertising ServiceBean, [%s: %s]", t.getClass().getName(), t.getLocalizedMessage()));
+            logger.warn("Advertising ServiceBean, [{}: {}]", t.getClass().getName(), t.getLocalizedMessage());
             throw new ServiceBeanControlException("advertise", t);
         } finally {
             currentThread.setContextClassLoader(currentClassLoader);
@@ -267,8 +257,7 @@ public class ServiceAdvertiser {
         try {
             config = context.getConfiguration();
         } catch (ConfigurationException e) {
-            logger.warn(String.format("Unable to obtain configuration for service [%s]", context.getServiceElement().getName()),
-                        e);
+            logger.warn("Unable to obtain configuration for service [{}]", context.getServiceElement().getName(), e);
             return new Entry[0];
         }
         ArrayList<Entry> attrList = new ArrayList<Entry>();
@@ -306,27 +295,24 @@ public class ServiceAdvertiser {
                                                               new Entry[0],
                                                               exportCodebase == null ?
                                                               Configuration.NO_DATA : exportCodebase);
-                if(logger.isTraceEnabled())
-                    logger.trace(String.format("Obtained [%d] serviceUI declarations for [%s] using component [%s]",
-                                                serviceUIs.length, serviceName, serviceBeanComponent));
+                logger.trace("Obtained [{}] serviceUI declarations for [{}] using component [{}]",
+                             serviceUIs.length, serviceName, serviceBeanComponent);
                 attrList.addAll(Arrays.asList(serviceUIs));
             } catch (ConfigurationException e) {
-                logger.warn(String.format("Getting ServiceUIs for [%s]", serviceName), e);
+                logger.warn("Getting ServiceUIs for [{}]", serviceName, e);
             }
             /* 2. Get any additional attributes */
             try {
-                if(logger.isTraceEnabled())
-                    logger.trace(String.format("Getting %s.initialAttributes", serviceBeanComponent));
+                logger.trace("Getting {}.initialAttributes", serviceBeanComponent);
                 Entry[] initialAttributes = (Entry[])config.getEntry(serviceBeanComponent,
                                                                      "initialAttributes",
                                                                      Entry[].class,
                                                                      new Entry[0]);
-                if(logger.isTraceEnabled())
-                    logger.trace(String.format("Obtained [%d] initialAttribute declarations for [%s] using component [%s]",
-                                                initialAttributes.length, serviceName, serviceBeanComponent));
+                logger.trace("Obtained [{}] initialAttribute declarations for [{}] using component [{}]",
+                             initialAttributes.length, serviceName, serviceBeanComponent);
                 attrList.addAll(Arrays.asList(initialAttributes));
             } catch (ConfigurationException e) {
-                logger.warn(String.format("Getting initialAttributes for [%s]", serviceName), e);
+                logger.warn("Getting initialAttributes for [{}]", serviceName, e);
             }
         }
         return(attrList.toArray(new Entry[attrList.size()]));
@@ -356,10 +342,7 @@ public class ServiceAdvertiser {
                 entry = newEntry;
 
         } catch(Exception e) {
-            if(logger.isTraceEnabled())
-                logger.trace(String.format("%s not found, cannot add an %s", entryClassName, entryClassName), e);
-            else
-                logger.warn(String.format("%s not found, cannot add %s"+entryClassName, entryClassName));
+            logger.warn("{} not found, cannot add {}"+entryClassName, entryClassName.toLowerCase(), e);
         }
         return(entry);
     }
@@ -372,10 +355,8 @@ public class ServiceAdvertiser {
         try {
             joinAdmin.addLookupAttributes(attrs);
         } catch (Exception e) {
-            if(logger.isTraceEnabled())
-                logger.trace("Unable to add Entry attributes", e);
-            else
-                logger.warn("Unable to add Entry attributes");
+            logger.warn("Unable to add Entry attributes", e);
+
         }
     }
 }

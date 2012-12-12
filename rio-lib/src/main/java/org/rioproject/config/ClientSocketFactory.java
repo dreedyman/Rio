@@ -36,8 +36,7 @@ public class ClientSocketFactory implements RMIClientSocketFactory, Serializable
     }
 
     public Socket createSocket(String s, int port) throws IOException {
-        if (logger.isDebugEnabled())
-            logger.debug("Create Socket using host [{}] instead of [{}]", host, s);
+        logger.debug("Create Socket using host [{}] instead of [{}]", host, s);
         return new Socket(host, port);
     }
 }

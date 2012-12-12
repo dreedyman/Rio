@@ -52,9 +52,7 @@ public class DoctorImpl implements Doctor {
                                                                      String.class,
                                                                      null,
                                                                      name);
-        if(logger.isDebugEnabled()) {
-            logger.debug("Status for {} is {}", name, sStatus);
-        }
+        logger.debug("Status for {} is {}", name, sStatus);
         this.status = Status.valueOf(sStatus);
         numPatients = new GaugeWatch("numPatients");
         context.getWatchRegistry().register(numPatients);

@@ -258,9 +258,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
         if(mgr!=null)
             return(mgr.getAttributes());
         else {
-            if(logger.isDebugEnabled()) {
-                logger.debug("JoinManager is null");
-            }
+            logger.debug("JoinManager is null");
         }
         return(new Entry[0]);
     }

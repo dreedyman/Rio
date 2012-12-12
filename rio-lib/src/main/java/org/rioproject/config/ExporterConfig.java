@@ -90,8 +90,7 @@ public class ExporterConfig {
                 }
             }
         }
-        if(logger.isDebugEnabled())
-            logger.debug(String.format("Created %s for %s.%s", exporter, component, entry));
+        logger.debug(String.format("Created %s for %s.%s", exporter, component, entry));
         return exporter;
     }
 

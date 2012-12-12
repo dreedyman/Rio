@@ -15,16 +15,14 @@
  */
 package org.rioproject.bean;
 
-import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.opstring.ClassBundle;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanFactory;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.opstring.ClassBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Instantiates a Plain Old Java Object (POJO), providing support for
@@ -79,13 +77,10 @@ public class BeanFactory implements ServiceBeanFactory {
         ClassBundle bundle = context.getServiceElement().getComponentBundle();
         ClassLoader beanCL = currentThread.getContextClassLoader();
         Class beanClass = beanCL.loadClass(bundle.getClassName());
-        if(logger.isTraceEnabled())
-            logger.trace("Load service class: {0}", beanClass);
-        if(logger.isTraceEnabled())
-            logger.trace("Activating as ServiceBean");
+        logger.trace("Load service class: {}", beanClass);
+        logger.trace("Activating as ServiceBean");
         Constructor constructor = beanClass.getConstructor((Class[])null);
-        if(logger.isTraceEnabled())
-            logger.trace("Obtained implementation constructor: {0}", constructor);
+        logger.trace("Obtained implementation constructor: {}", constructor);
         return(constructor.newInstance((Object[])null));
     }
 

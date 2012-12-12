@@ -23,13 +23,14 @@ import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
-
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -111,12 +112,11 @@ public class OpStringManagerProxy {
         LookupCache lCache;
         boolean terminated = false;
         final List<ProvisionManager> monitors = new ArrayList<ProvisionManager>();
+        final Logger logger = LoggerFactory.getLogger(OpStringManagerDispatcher.class);
 
         public OpStringManagerDispatcher(String name,
                                          OperationalStringManager manager,
-                                         DiscoveryManagement dMgr) throws
-                                                                   ConfigurationException,
-                                                                   IOException {
+                                         DiscoveryManagement dMgr) throws ConfigurationException, IOException {
             this.name = name;
             this.manager = manager;
             this.dMgr = dMgr;
@@ -243,6 +243,7 @@ public class OpStringManagerProxy {
                 lCache.removeListener(this);
                 monitors.clear();
                 terminated = true;
+                logger.debug("Terminated OpStringManagerDispatcher");
                 return null;
             }
             while(!terminated) {

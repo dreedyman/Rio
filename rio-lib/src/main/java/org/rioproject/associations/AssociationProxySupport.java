@@ -140,49 +140,32 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                 if(aDesc.getServiceDiscoveryTimeout()>0) {
                     stopTime = (stopTime==0?
                                 System.currentTimeMillis()+
-                                aDesc.getServiceDiscoveryTimeUnits().toMillis(
-                                    aDesc.getServiceDiscoveryTimeout()): stopTime);
+                                aDesc.getServiceDiscoveryTimeUnits().toMillis(aDesc.getServiceDiscoveryTimeout()): stopTime);
                     if(System.currentTimeMillis()<stopTime) {
-                        if(logger.isTraceEnabled()) {
-                            logger.trace("The association proxy for "+formatAssociationService(a)+" is " +
-                                         "not available. A service discovery timeout of " +
-                                         "["+aDesc.getServiceDiscoveryTimeout()+"], " +
-                                         "has been configured, and the computed stop time is: "+
-                                         new Date(stopTime)+", sleep for one second and re-evaluate");
-                        }
+                        logger.trace("The association proxy for {} is not available. A service discovery timeout of " +
+                                     "[{}], has been configured, and the computed stop time is: {}, sleep for one " +
+                                     "second and re-evaluate",
+                                     formatAssociationService(a),
+                                     aDesc.getServiceDiscoveryTimeout(), new Date(stopTime));
                         Thread.sleep(1000);
                         continue;
                     } else {
                         String s = formatAssociationService(a);
-                        throw new RemoteException("No services available for " +
-                                                  "associated service " +
-                                                  s+", "+
-                                                  formatDiscoveryAttributes(a)+". "+
-                                                  "A timeout of "+
-                                                  aDesc.getServiceDiscoveryTimeout()+
-                                                  " "+
-                                                  aDesc.getServiceDiscoveryTimeUnits()+
-                                                  " expired. Check network " +
-                                                  "connections and ensure that " +
-                                                  "the "+s+" service is deployed");
+                        throw new RemoteException("No services available for associated service " +
+                                                  s+", "+formatDiscoveryAttributes(a)+". "+
+                                                  "A timeout of "+aDesc.getServiceDiscoveryTimeout()+" "+
+                                                  aDesc.getServiceDiscoveryTimeUnits()+" expired. Check network " +
+                                                  "connections and ensure that the "+s+" service is deployed");
                     }
                 } else {
                     String s = formatAssociationService(a);
-                    throw new RemoteException("No services available for " +
-                                              "service association " +
-                                              s+", "+
-                                              formatDiscoveryAttributes(a)+". " +
-                                              "Check network " +
-                                              "connections and ensure that "+
-                                              "the ["+s+"] service is deployed. " +
-                                              "You may also want to check the " +
-                                              "service discovery timeout property, " +
-                                              "it is set to " +
-                                              "["+aDesc.getServiceDiscoveryTimeout()+"]. " +
-                                              "Changing this value will allow " +
-                                              "Rio to wait the specified " +
-                                              "amount of time for a service to " +
-                                              "become available.");                
+                    throw new RemoteException("No services available for service association " +
+                                              s+", "+formatDiscoveryAttributes(a)+". Check network " +
+                                              "connections and ensure that the ["+s+"] service is deployed. " +
+                                              "You may also want to check the service discovery timeout property, " +
+                                              "it is set to ["+aDesc.getServiceDiscoveryTimeout()+"]. Changing this " +
+                                              "value will allow Rio to wait the specified amount of time for a service " +
+                                              "to become available.");
                 }
             }
             try {
@@ -191,15 +174,13 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                 break;
             } catch (Throwable t) {
                 if(!ThrowableUtil.isRetryable(t)) {
-                    logger.warn("Failed to invoke method ["+method.getName()+"], remove  service ["+service+"]", t);
-                    if (service != null) {
-                        getServiceSelectionStrategy().serviceRemoved(service);
-                        if(a.removeService(service)!=null) {
-                            logger.warn("Service ["+service+"] removed, have ["+a.getServiceCount()+"] services");
-                        } else {
-                            logger.warn("Unable to remove service ["+service+"], have ["+a.getServiceCount()+"] services");
-                            //terminated = true;
-                        }
+                    logger.warn("Failed to invoke method [{}], remove  service [{}]", method.getName(), service.toString(), t);
+                    getServiceSelectionStrategy().serviceRemoved(service);
+                    if(a.removeService(service)!=null) {
+                        logger.warn("Service [{}] removed, have [{}] services", service.toString(), a.getServiceCount());
+                    } else {
+                        logger.warn("Unable to remove service [{}], have [{}] services", service.toString(), a.getServiceCount());
+                        //terminated = true;
                     }
                 } else {
                     if(t instanceof InvocationTargetException && t.getCause()!=null)
@@ -285,8 +266,7 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
             Object result;
 
             if (!isProxyMethod(method)) {
-                if (logger.isTraceEnabled())
-                    logger.trace("Invoking local method [{}]", method.toString());
+                logger.trace("Invoking local method [{}]", method.toString());
                 result = method.invoke(localRef, args);
             } else {
                 result = doInvokeService(association, method, args);

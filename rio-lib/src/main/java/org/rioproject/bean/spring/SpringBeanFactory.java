@@ -67,16 +67,13 @@ public class SpringBeanFactory extends BeanFactory {
             if(configs[i].contains(CODEBASE_TOK + "/")) {
                 configs[i] = replace(configs[i], CODEBASE_TOK+"/", codebase);
                 useCodebase = true;
-                if(logger.isDebugEnabled())
-                    logger.debug("Loading application context [{}]", configs[i]);
+                logger.debug("Loading application context [{}]", configs[i]);
             } else if (configs[i].contains(CLASSPATH_TOK + "/")) {
                 configs[i] = replace(configs[i], CLASSPATH_TOK+"/", codebase);
-                if(logger.isDebugEnabled())
-                    logger.debug("Loading application context [{}]", configs[i]);
+                logger.debug("Loading application context [{}]", configs[i]);
             } else {
                 configs[i] = replace(configs[i], CODEBASE_TOK, codebase);
-                if(logger.isDebugEnabled())
-                    logger.debug("Loading application context [{}]", configs[i]);
+                logger.debug("Loading application context [{}]", configs[i]);
             }
         }
         final Thread currentThread = Thread.currentThread();

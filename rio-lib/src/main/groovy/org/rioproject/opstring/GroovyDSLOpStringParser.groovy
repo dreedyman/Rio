@@ -585,8 +585,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                                                "Resolver ${r.getClass().name}, "+
                                                "user.dir=${System.getProperty("user.dir")}")
                     u = new URL("jar:"+u.toExternalForm()+"!/")
-                    if(logger.isDebugEnabled())
-                        logger.debug "OpStringRef resolved as ${u.toExternalForm()}"
+                    logger.debug "OpStringRef resolved as ${u.toExternalForm()}"
                     JarURLConnection jarConn = (JarURLConnection)u.openConnection();
                     Manifest manifest = jarConn.getManifest();
                     OAR oar = new OAR(manifest)

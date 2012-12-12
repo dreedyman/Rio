@@ -169,11 +169,9 @@ public class BeanAdapter extends ServiceBeanAdapter {
         /* If defined, invoke postStart lifecycle method, Check if we are
          * being started up first. If so, then the Cybernode will invoke
          * the lifecycle method (RIO-141) */
-        Boolean rioStarting =
-            (Boolean)context.getServiceBeanConfig().getConfigurationParameters().get(Constants.STARTING);
-        if(logger.isTraceEnabled())
-            logger.trace(String.format("The bean [%s], is in the process of being instantiated: %s",
-                                        bean.getClass().getName(), (rioStarting==null?"false":rioStarting)));
+        Boolean rioStarting = (Boolean)context.getServiceBeanConfig().getConfigurationParameters().get(Constants.STARTING);
+        logger.trace("The bean [{}], is in the process of being instantiated: {}",
+                     bean.getClass().getName(), (rioStarting==null?"false":rioStarting));
         if(!(rioStarting!=null && rioStarting)) {
             BeanHelper.invokeLifeCycle(Started.class, "postStart", bean);
         }
@@ -321,7 +319,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
             BeanHelper.invokeLifeCycle(PreDestroy.class, "preDestroy", bean);
         } catch(Exception e) {
             String s = bean==null?"<unknown:null>":bean.getClass().getName();
-            logger.warn("Invoking Bean ["+s+"] preDestroy()", e);
+            logger.warn("Invoking Bean [{}] preDestroy()", s, e);
         }
         try {
             super.destroy();
@@ -392,8 +390,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                              false,
                                              true);
         }
-        if(logger.isDebugEnabled())
-            logger.debug("[{}] using exporter {}", bean.getClass().getName(), exporter.toString());
+        logger.debug("[{}] using exporter {}", bean.getClass().getName(), exporter.toString());
         return exporter;
     }
 
