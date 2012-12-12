@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class JMXConnectionUtil {
     static final String COMPONENT = "org.rioproject.jmx";
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(JMXConnectionUtil.class);
 
     /**
      * Create a {@link javax.management.remote.JMXConnectorServer}, bound to
