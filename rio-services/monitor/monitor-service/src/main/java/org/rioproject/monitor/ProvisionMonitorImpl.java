@@ -948,8 +948,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             * Activation), then create one
             */
             if(serviceID == null) {
-                logger.debug("Creating new ServiceID from UUID={}", getUuid().toString());
                 serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
+                logger.debug("Created new ServiceID: {}", serviceID.toString());
             }
             /*
              * Force a snapshot so the persistent store reflects the current
