@@ -70,7 +70,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
         new LinkedBlockingQueue<SLAThresholdEvent>();
     private ExecutorService executor;
     /** A Logger for this component */
-    static Logger logger = LoggerFactory.getLogger("org.rioproject.sla");
+    static Logger logger = LoggerFactory.getLogger(SLAPolicyHandler.class);
 
     /**
      * Construct a SLAPolicyHandler
@@ -300,23 +300,21 @@ public class SLAPolicyHandler implements SettableThresholdListener {
                                          final ThresholdValues tValues,
                                          final ThresholdType type) {
         try {
-            double range[] = new double[]{tValues.getCurrentLowThreshold(), tValues.getCurrentHighThreshold()};
-            SLA sla = new SLA(mySLA.getIdentifier(), range);
             SLAThresholdEvent event = new SLAThresholdEvent(eventSource,
                                                             context.getServiceElement(),
                                                             context.getServiceBeanManager().getServiceBeanInstance(),
                                                             calculable,
-                                                            sla,
+                                                            mySLA,
                                                             getDescription(),
                                                             hostAddress,
                                                             type);
             String sType = type.name();
-            SLAPolicyEvent localEvent = new SLAPolicyEvent(this, sla, "THRESHOLD_"+sType);
+            SLAPolicyEvent localEvent = new SLAPolicyEvent(this, mySLA, "THRESHOLD_"+sType);
             localEvent.setSLAThresholdEvent(event);
             notifyListeners(localEvent);
             
             /* Enqueue the remote notification */
-            logger.debug("Enqueue SLAThresholdEvent notification for {}", sla);
+            logger.debug("Enqueue SLAThresholdEvent notification for {}", mySLA);
             eventQ.add(event);
         } catch(Exception e) {
             logger.error("Creating a SLAThresholdEvent", e);
