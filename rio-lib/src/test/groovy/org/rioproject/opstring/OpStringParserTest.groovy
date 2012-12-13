@@ -41,6 +41,23 @@ import org.rioproject.system.SystemWatchID
 class OpStringParserTest extends GroovyTestCase {
     def OpStringParser dslParser = new GroovyDSLOpStringParser()
 
+    void testSlaExample() {
+        File file = new File("src/test/resources/opstrings/slaexample.groovy")
+        def opstrings = dslParser.parse(file, null, null, null, null)
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = opstrings[0]
+
+        def service = opstring.services[0]
+        assertEquals 1, service.serviceLevelAgreements.serviceSLAs.size()
+        def messageCount = service.serviceLevelAgreements.serviceSLAs[0]
+        assertEquals 'messageCount', messageCount.identifier
+        assertEquals 1, messageCount.lowThreshold
+        assertEquals 3, messageCount.highThreshold
+        assertEquals 'org.rioproject.sla.SLAPolicyHandler', messageCount.slaPolicyHandler
+        assertEquals 10, messageCount.lowerThresholdDampeningTime
+        assertEquals 10, messageCount.upperThresholdDampeningTime
+    }
+
     void testAssociationInjectProperty() {
         File file = new File("src/test/resources/opstrings/association_lazy.groovy")
         def opstrings = dslParser.parse(file, null, null, null, null)
