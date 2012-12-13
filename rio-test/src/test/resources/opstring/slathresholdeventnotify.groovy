@@ -20,7 +20,7 @@ deployment(name:'SLA Threshold Event Notification') {
         }
 
         sla (id:'messageCount', high:3, low:1){
-            policy type: 'notify', lowerDampening: 10, upperDampening: 10
+            policy type: 'notify', lowerDampener: 10, upperDampener: 10
             monitor(name: 'count', property: 'count', period: 1000)
         }
 
