@@ -18,13 +18,14 @@ package org.rioproject.sla;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
+import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.EventHandler;
+import org.rioproject.net.HostUtil;
 import org.rioproject.watch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
     public SLAPolicyHandler(final SLA sla) {
         mySLA = sla;
         try {
-            hostAddress = InetAddress.getLocalHost().getHostAddress();
+            hostAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         } catch(UnknownHostException e) {
             logger.error("Getting Host Address", e);
             hostAddress="unknown";
@@ -96,12 +97,9 @@ public class SLAPolicyHandler implements SettableThresholdListener {
      * 
      * @throws IllegalArgumentException if any of the parameters are null
      */    
-    public void initialize(final Object eventSource,
-                           final EventHandler eventHandler,
-                           final ServiceBeanContext context) {
+    public void initialize(final Object eventSource, final EventHandler eventHandler, final ServiceBeanContext context) {
         if(initialized) {
-            if(logger.isTraceEnabled())
-                logger.trace("[{}] {} [{}] already initialized", getName(), getClass().getName(), getID());
+            logger.trace("[{}] {} [{}] already initialized", getName(), getClass().getName(), getID());
             return;
         }
         if(eventSource==null)
@@ -213,10 +211,8 @@ public class SLAPolicyHandler implements SettableThresholdListener {
         this.thresholdManager = thresholdManager;
         this.thresholdManager.setThresholdValues(getSLA());
         this.thresholdManager.addThresholdListener(this);
-        if(logger.isDebugEnabled()) {
-            logger.debug("[{}] {} [{}]: setThresholdManager() {}",
-                         getName(), getClass().getName(), getID(), mySLA.toString());
-        }
+        logger.debug("[{}] {} [{}]: setThresholdManager() {}",
+                     getName(), getClass().getName(), getID(), mySLA.toString());
     }
 
     /**
@@ -241,15 +237,12 @@ public class SLAPolicyHandler implements SettableThresholdListener {
      * @see org.rioproject.watch.ThresholdListener#notify
      */
     public void notify(final Calculable calculable, final ThresholdValues thresholdValues, final ThresholdType type) {
-        if(logger.isDebugEnabled()) {            
-            String status = type.name().toLowerCase();
-            logger.debug("SLAPolicyHandler.notify() : {}, type={} Value={}, High={}, Low={}",
-                         calculable.getId(),
-                         status,
-                         calculable.getValue(),
-                         mySLA.getCurrentHighThreshold(),
-                         mySLA.getCurrentLowThreshold());
-        }
+        logger.debug("SLAPolicyHandler.notify() : {}, type={} Value={}, High={}, Low={}",
+                     calculable.getId(),
+                     type.name().toLowerCase(),
+                     calculable.getValue(),
+                     mySLA.getCurrentHighThreshold(),
+                     mySLA.getCurrentLowThreshold());
         if(eventHandler!=null)
             sendSLAThresholdEvent(calculable, thresholdValues, type);
         else
@@ -323,8 +316,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
             notifyListeners(localEvent);
             
             /* Enqueue the remote notification */
-            if(logger.isDebugEnabled())
-                logger.debug("Enqueue SLAThresholdEvent notification for {}", sla);
+            logger.debug("Enqueue SLAThresholdEvent notification for {}", sla);
             eventQ.add(event);
         } catch(Exception e) {
             logger.error("Creating a SLAThresholdEvent", e);
