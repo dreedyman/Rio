@@ -809,7 +809,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Ensure we have a serviceID */
         if(serviceID==null) {
             serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
-            logger.debug("Created new ServiceID:", serviceID.toString());
+            logger.debug("Created new ServiceID: {}", serviceID.toString());
         }
 
         if(logger.isInfoEnabled()) {
