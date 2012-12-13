@@ -22,13 +22,11 @@ import org.rioproject.sla.SLA;
  * Data structure for use when using template for built-in rules.
  */
 public class RuleParameters {
-    private SLA sla;
-    private String watchID;
-    private ServiceElement serviceElement;
+    private final SLA sla;
+    private final String watchID;
+    private final ServiceElement serviceElement;
 
-    public RuleParameters(SLA sla,
-                          String watchID,
-                          ServiceElement serviceElement) {
+    public RuleParameters(final SLA sla, final String watchID,final  ServiceElement serviceElement) {
         this.sla = sla;
         this.watchID = watchID;
         this.serviceElement = serviceElement;
@@ -39,11 +37,11 @@ public class RuleParameters {
     }
 
     public Double getLowThreshold() {
-        return sla.getCurrentLowThreshold();
+        return sla.getLowThreshold();
     }
 
     public Double getHighThreshold() {
-        return sla.getCurrentHighThreshold();
+        return sla.getHighThreshold();
     }
 
     public Integer getMaxServices() {
