@@ -88,10 +88,7 @@ import java.util.TimerTask;
  *
  * @author Dennis Reedy
  */
-public class ScalingPolicyHandler extends SLAPolicyHandler
-        implements
-            ServiceProvisionListener,
-            ServerProxyTrust {
+public class ScalingPolicyHandler extends SLAPolicyHandler implements ServiceProvisionListener, ServerProxyTrust {
     /** The description of the SLA Handler */
     private static final String description = "Scaling Policy Handler";
     /** Action that indicates an increment request is pending */
@@ -111,13 +108,11 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     /** Flag that indicates we have requested to decrement (and destroy) ourself */
     private boolean haveDecremented = false;
     /**
-     * The maximum number of services to increment. If the value is -1, then no
-     * limit has been set
+     * The maximum number of services to increment. If the value is -1, then no limit has been set
      */
     protected int maxServices;
     /**
-     * The minimum number of services that are to exist on the network, defaults
-     * to 1
+     * The minimum number of services that are to exist on the network, defaults to 1
      */
     private int minServices = 1;
     /** The ServiceElement */
@@ -150,7 +145,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     /** Component name */
     private static final String CONFIG_COMPONENT = "scalingPolicyHandler";
     /** A Logger for this component */
-    static Logger logger = LoggerFactory.getLogger("org.rioproject.sla");
+    static Logger logger = LoggerFactory.getLogger(ScalingPolicyHandler.class);
 
     /**
      * Construct a ScalingPolicyHandler
@@ -193,8 +188,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
         try {
             exporter.unexport(true);
         } catch(IllegalStateException e) {
-            if(logger.isTraceEnabled())
-                logger.trace("ScalingPolicyHandler unexport failed", e);
+            logger.trace("ScalingPolicyHandler unexport failed", e);
         }
         if(taskTimer != null)
             taskTimer.cancel();
@@ -217,9 +211,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
      * Override parent's initialize method to initialize operational attributes
      */
     @Override
-    public void initialize(Object eventSource,
-                           EventHandler eventHandler,
-                           ServiceBeanContext context) {
+    public void initialize(Object eventSource, EventHandler eventHandler, ServiceBeanContext context) {
 
         if(context==null)
             throw new IllegalArgumentException("context is null");
@@ -229,11 +221,10 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                 exporter = ExporterConfig.getExporter(getConfiguration(),
                                                       CONFIG_COMPONENT,
                                                       "provisionListenerExporter");
-
             } catch(Exception e) {
                 logger.warn("Getting provisionListenerExporter, use default", e);
             }
-            /* If we still dont have an exporter create a default one */
+            /* If we still don't have an exporter create a default one */
             if(exporter==null) {
                 exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
                                                  new BasicILFactory(),
@@ -253,7 +244,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
         try {
             totalServices = getTotalKnownServices();
         } catch(Throwable t) {
-            logger.warn("["+getName()+"] ScalingPolicyHandler ["+getID()+"]: Discovering peer environment", t);
+            logger.warn("[{}] ScalingPolicyHandler [{}]: Discovering peer environment", getName(), getID(), t);
         }
     }      
     
@@ -268,8 +259,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                 try {
                     totalServices = getTotalKnownServices();
                 } catch(Exception e) {
-                    logger.warn("["+getName()+"] ScalingPolicyHandler ["+getID()+"]: Discovering peer environment",
-                               e);
+                    logger.warn("[{}] ScalingPolicyHandler [{}]: Discovering peer environment", getName(), getID(),e);
                 }
                 logger.trace("[{}] ScalingPolicyHandler [{}]: planned [{}], totalServices [{}], minServices [{}], maxServices [{}]",
                              getName(), getID(), sElem.getPlanned(), totalServices, minServices, maxServices);
@@ -297,21 +287,16 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
 
             if(!update) {
                 minServices = context.getServiceElement().getPlanned();
-                Integer ips =
-                    (Integer)context.getServiceBeanConfig().
-                            getConfigurationParameters().
-                        get(ServiceBeanConfig.INITIAL_PLANNED_SERVICES);
+                Integer ips = (Integer)context.getServiceBeanConfig().getConfigurationParameters().get(ServiceBeanConfig.INITIAL_PLANNED_SERVICES);
                 if(ips != null)
                     minServices = ips;
             }
 
             upperThresholdDampeningTime =
-                (getSLA().getUpperThresholdDampeningTime()==0?1000:
-                    getSLA().getUpperThresholdDampeningTime());
+                (getSLA().getUpperThresholdDampeningTime()==0?1000: getSLA().getUpperThresholdDampeningTime());
 
             lowerThresholdDampeningTime =
-                (getSLA().getLowerThresholdDampeningTime()==0?1000:
-                    getSLA().getLowerThresholdDampeningTime());
+                (getSLA().getLowerThresholdDampeningTime()==0?1000:getSLA().getLowerThresholdDampeningTime());
 
             if(logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
@@ -337,17 +322,15 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     @Override
     public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
         if(!connected) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: has been disconnected", getName(), getID());
+            logger.debug("[{}] ScalingPolicyHandler [{}]: has been disconnected", getName(), getID());
             return;
         }
         lastCalculable = calculable;
         lastThresholdValues = thresholdValues;
         String status = type.name().toLowerCase();
-        if(logger.isInfoEnabled())
-            logger.info("[{}] ScalingPolicyHandler [{}]: Threshold [{}] {} value [{}] low [{}] high [{}]",
-                        getName(), getID(), calculable.getId(), status, calculable.getValue(),
-                        thresholdValues.getCurrentLowThreshold(), thresholdValues.getCurrentHighThreshold());
+        logger.info("[{}] ScalingPolicyHandler [{}]: Threshold [{}] {} value [{}] low [{}] high [{}]",
+                    getName(), getID(), calculable.getId(), status, calculable.getValue(),
+                    thresholdValues.getLowThreshold(), thresholdValues.getHighThreshold());
 
         if(context.getServiceBeanManager().getOperationalStringManager()==null) {
             logger.warn("[{}] [{}]: OperationalStringManager, unable to process event", getName(), getID());
@@ -358,14 +341,13 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
             try {
                 totalServices = getTotalKnownServices();
             } catch(Exception e) {
-                logger.warn("["+getName()+"] ScalingPolicyHandler ["+getID()+"]: Getting instance count", e);
+                logger.warn("[{}] ScalingPolicyHandler [{}]: Getting instance count", getName(), getID(), e);
             }
-            if(tValue > thresholdValues.getCurrentHighThreshold()) {
+            if(tValue > thresholdValues.getHighThreshold()) {
                 boolean increment = false;
                 if(maxServices == SLA.UNDEFINED) {
-                    if(logger.isDebugEnabled())
-                        logger.debug("[{}] ScalingPolicyHandler [{}]: Unknown MaxServices number, choose to increment", 
-                                     getName(), getID());
+                    logger.debug("[{}] ScalingPolicyHandler [{}]: Unknown MaxServices number, choose to increment",
+                                 getName(), getID());
                     increment = true;
                 } else {
                     /*
@@ -373,18 +355,15 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                      * get the latest value for comparision
                      */
                     int planned = getServiceElement().getPlanned();
-                    if(logger.isDebugEnabled()) {                        
-                        logger.debug("[{}] ScalingPolicyHandler [{}]: planned [{}], totalServices [{}], maxServices [{}]", 
-                                     getName(), getID(), planned, totalServices, maxServices);
-                    }
+                    logger.debug("[{}] ScalingPolicyHandler [{}]: planned [{}], totalServices [{}], maxServices [{}]",
+                                 getName(), getID(), planned, totalServices, maxServices);
                                                             
                     if(maxServices > totalServices && 
                        totalServices <= planned && maxServices > planned)
                         increment = true;
                     else {
-                        if(logger.isDebugEnabled())
-                            logger.debug("[{}] ScalingPolicyHandler [{}]: MaxServices [{}] reached, do not increment",
-                                         getName(), getID(), maxServices);
+                        logger.debug("[{}] ScalingPolicyHandler [{}]: MaxServices [{}] reached, do not increment",
+                                     getName(), getID(), maxServices);
                     }
                 }
                 if(increment) {
@@ -400,9 +379,8 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                     if(upperThresholdDampeningTime > 0) {
                         incrementTask = new ScalingTask(true);
                         long now = System.currentTimeMillis();
-                        if(logger.isDebugEnabled())
-                            logger.debug("[{}] ScalingPolicyHandler [{}]: Schedule increment task in [{}] millis", 
-                                         getName(), getID(), upperThresholdDampeningTime);                        
+                        logger.debug("[{}] ScalingPolicyHandler [{}]: Schedule increment task in [{}] millis",
+                                     getName(), getID(), upperThresholdDampeningTime);
                         try {
                             taskTimer.schedule(incrementTask, new Date(now+upperThresholdDampeningTime));
                         } catch (IllegalStateException e) {
@@ -411,8 +389,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                             disconnect();    
                         }
                     } else {
-                        if(logger.isDebugEnabled())
-                            logger.debug("[{}] ScalingPolicyHandler [{}]: no upper dampener, perform increment", getName(), getID());
+                        logger.debug("[{}] ScalingPolicyHandler [{}]: no upper dampener, perform increment", getName(), getID());
                         doIncrement();
                     }
                 }
@@ -429,9 +406,8 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                     if(lowerThresholdDampeningTime > 0) {
                         scheduleDecrement();                        
                     } else {
-                        if(logger.isDebugEnabled())
-                            logger.debug("[{}] ScalingPolicyHandler [{}]: no lower dampener, perform decrement", 
-                                         getName(), getID());
+                        logger.debug("[{}] ScalingPolicyHandler [{}]: no lower dampener, perform decrement",
+                                     getName(), getID());
                         doDecrement();
                     }
                 } else {
@@ -451,21 +427,19 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
             OperationalStringManager opMgr = context.getServiceBeanManager().
                                                      getOperationalStringManager();            
             int pendingCount = getPendingRequestCount(opMgr);
-            if(logger.isTraceEnabled())
-                logger.trace("[{}] ScalingPolicyHandler [{}] totalServices={}, pendingCount={}, pendingRequests={}, planned={}",
-                              getName(), getID(), totalServices, pendingCount, pendingRequests, getServiceElement().getPlanned());
+            logger.trace("[{}] ScalingPolicyHandler [{}] totalServices={}, pendingCount={}, pendingRequests={}, planned={}",
+                         getName(), getID(), totalServices, pendingCount, pendingRequests, getServiceElement().getPlanned());
             if(((totalServices+pendingCount)+pendingRequests) >
                getServiceElement().getPlanned()) {
                 try {
                     int numTrimmed = opMgr.trim(getServiceElement(), pendingRequests);
-                    if(logger.isTraceEnabled())
-                        logger.trace("[{}] numTrimmed={}", getID(), numTrimmed);
+                    logger.trace("[{}] numTrimmed={}", getID(), numTrimmed);
                 } catch(NoSuchObjectException e) {
                     logger.warn("Remote manager decomissioned for [{}] ScalingPolicyHandler [{}], force disconnect", 
                                 getName(), getID());
                     disconnect();
                 } catch(Exception e) {
-                    logger.warn("["+getID()+"] Trimming Pending Requests", e);
+                    logger.warn("[{}] Trimming Pending Requests", getID(), e);
                 }
             }
             
@@ -475,8 +449,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
 
     private void cancelIncrementTask() {
         if(incrementTask != null) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: cancel increment task", getName(), getID());
+            logger.debug("[{}] ScalingPolicyHandler [{}]: cancel increment task", getName(), getID());
             incrementTask.cancel();
             incrementTask = null;
         }
@@ -484,8 +457,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
 
     private void cancelDecrementTask() {
         if(decrementTask != null) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: cancel decrement task", getName(), getID());
+            logger.debug("[{}] ScalingPolicyHandler [{}]: cancel decrement task", getName(), getID());
             decrementTask.cancel();
             decrementTask = null;
         }
@@ -494,7 +466,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     /**
      * @see org.rioproject.deploy.ServiceProvisionListener#succeeded
      */
-    public void succeeded(ServiceBeanInstance jsbInstance) throws RemoteException {
+    public void succeeded(ServiceBeanInstance jsbInstance) {
         try {
             pendingRequests--;
             notifyListeners(new SLAPolicyEvent(this, getSLA(), INCREMENT_SUCCEEDED, jsbInstance.getService()));
@@ -506,8 +478,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     /**
      * @see org.rioproject.deploy.ServiceProvisionListener#failed
      */
-    public void failed(ServiceElement sElem, boolean resubmitted) 
-    throws RemoteException {
+    public void failed(ServiceElement sElem, boolean resubmitted) {
         if(!resubmitted)
             pendingRequests--;
         notifyListeners(new SLAPolicyEvent(this, getSLA(), INCREMENT_FAILURE));
@@ -529,8 +500,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     protected int getPendingRequestCount(OperationalStringManager opMgr) {
         int pendingCount = 0;
         try {            
-            opMgr.getClass().getMethod("getPendingCount",
-                                       ServiceElement.class);
+            opMgr.getClass().getMethod("getPendingCount", ServiceElement.class);
             ServiceElement elem = getServiceElement();
             pendingCount = opMgr.getPendingCount(elem);
         } catch (NoSuchObjectException e) {           
@@ -544,12 +514,10 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
     }
 
     protected int getTotalKnownServices() throws Exception {
-        OperationalStringManager opMgr = context.getServiceBeanManager().
-            getOperationalStringManager();
+        OperationalStringManager opMgr = context.getServiceBeanManager().getOperationalStringManager();
         if(opMgr == null)
             throw new Exception("OperationalStringManager is null");
-        ServiceBeanInstance[] instances =
-            opMgr.getServiceBeanInstances(getServiceElement());
+        ServiceBeanInstance[] instances =opMgr.getServiceBeanInstances(getServiceElement());
         return (instances.length);
     }
 
@@ -558,21 +526,15 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
      */
     protected void doIncrement() {
         if(!(//lastType == ThresholdEvent.BREACHED &&
-             (lastCalculable.getValue() >
-              lastThresholdValues.getCurrentHighThreshold()))) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: INCREMENT CANCELLED, operating below " +
-                             "High Threshold, value [{}] high [{}]", 
-                             getName(), getID(), lastCalculable.getValue(),
-                             lastThresholdValues.getCurrentHighThreshold());
+             (lastCalculable.getValue() > lastThresholdValues.getHighThreshold()))) {
+            logger.debug("[{}] ScalingPolicyHandler [{}]: INCREMENT CANCELLED, operating below High Threshold, value [{}] high [{}]",
+                         getName(), getID(), lastCalculable.getValue(), lastThresholdValues.getHighThreshold());
             return;
         }
         try {
-            OperationalStringManager opMgr =
-                context.getServiceBeanManager().getOperationalStringManager();
+            OperationalStringManager opMgr = context.getServiceBeanManager().getOperationalStringManager();
             if(opMgr==null) {
-                if(logger.isDebugEnabled())
-                    logger.debug("[{}] No OperationalStringManager, increment aborted", getName());
+                logger.debug("[{}] No OperationalStringManager, increment aborted", getName());
                 return;
             }
             ServiceElement elem = getServiceElement();
@@ -591,28 +553,24 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                 increment = true;
             }
             
-            if(increment) {                            
-                if(logger.isDebugEnabled()) {
-                    String sMax = (maxServices==SLA.UNDEFINED? "undefined": Integer.toString(maxServices));
-                    logger.debug("[{}] Current instance count=[{}], Current pending count=[{}], "+
-                                "Planned=[{}], MaxServices=[{}], ScalingPolicyHandler [{}]: INCREMENT_PENDING",
-                                 getName(), instances.length, pendingCount, getServiceElement().getPlanned(), sMax, getID());
-                }
+            if(increment) {
+                logger.debug("[{}] Current instance count=[{}], Current pending count=[{}], "+
+                             "Planned=[{}], MaxServices=[{}], ScalingPolicyHandler [{}]: INCREMENT_PENDING",
+                             getName(), instances.length, pendingCount, getServiceElement().getPlanned(),
+                             (maxServices==SLA.UNDEFINED? "undefined": Integer.toString(maxServices)),
+                             getID());
                 notifyListeners(new SLAPolicyEvent(this, getSLA(), INCREMENT_PENDING));
                 if(ourRemoteRef==null)
                     exportDo();
                 
                 context.getServiceBeanManager().increment((ServiceProvisionListener)ourRemoteRef);
-                if(logger.isTraceEnabled())
-                    logger.trace("[{}] Requested increment through ServiceBeanManager", getName());
+                logger.trace("[{}] Requested increment through ServiceBeanManager", getName());
                 pendingRequests++;
             } else {
-                if(logger.isDebugEnabled()) {
-                    String sMax = (maxServices==SLA.UNDEFINED? "Undefined": Integer.toString(maxServices));
-                    logger.debug("[{}] ScalingPolicyHandler [{}]: Current instance count=[{}], "+
-                                 "Current pending count=[{}], Planned=[{}], MaxServices=[{}], INCREMENT CANCELLED",
-                                 getName(), getID(), instances.length, pendingCount, getServiceElement().getPlanned(), sMax);
-                }
+                logger.debug("[{}] ScalingPolicyHandler [{}]: Current instance count=[{}], "+
+                             "Current pending count=[{}], Planned=[{}], MaxServices=[{}], INCREMENT CANCELLED",
+                             getName(), getID(), instances.length, pendingCount, getServiceElement().getPlanned(),
+                             (maxServices==SLA.UNDEFINED? "Undefined": Integer.toString(maxServices)));
             }
         } catch(java.rmi.NoSuchObjectException e) {
             logger.warn("Remote manager decomissioned for [{}] ScalingPolicyHandler [{}], force disconnect",
@@ -633,10 +591,9 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
         logger.debug("[{}] ScalingPolicyHandler [{}]: schedule decrement task in [{}] millis",
                      getName(), getID(), lowerThresholdDampeningTime);
         try {
-            taskTimer.schedule(decrementTask,
-                               new Date(now+lowerThresholdDampeningTime));
+            taskTimer.schedule(decrementTask, new Date(now+lowerThresholdDampeningTime));
         } catch (IllegalStateException e) {
-            logger.warn("Force disconnect of ["+getName()+"] ScalingPolicyHandler", e);
+            logger.warn("Force disconnect of [{}] ScalingPolicyHandler", getName(), e);
             disconnect();    
         }
     }
@@ -648,27 +605,22 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
      */
     protected boolean doDecrement() {
         if(!(//lastType == ThresholdEvent.BREACHED &&
-                (lastCalculable.getValue() <
-                 lastThresholdValues.getCurrentLowThreshold()))) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: DECREMENT CANCELLED, operating above Low Threshold, value [{}] low [{}]",
-                             getName(), getID(), lastCalculable.getValue(), lastThresholdValues.getCurrentLowThreshold());
+                (lastCalculable.getValue() < lastThresholdValues.getLowThreshold()))) {
+            logger.debug("[{}] ScalingPolicyHandler [{}]: DECREMENT CANCELLED, operating above Low Threshold, value [{}] low [{}]",
+                         getName(), getID(), lastCalculable.getValue(), lastThresholdValues.getLowThreshold());
             return false;
         }
-        OperationalStringManager opMgr =
-            context.getServiceBeanManager().getOperationalStringManager();
+        OperationalStringManager opMgr = context.getServiceBeanManager().getOperationalStringManager();
         if(opMgr==null) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: unable to process decrement, " +
-                             "null OperationalStringManager, abort decrement request",
-                             getName(), getID());
+            logger.debug("[{}] ScalingPolicyHandler [{}]: unable to process decrement, " +
+                         "null OperationalStringManager, abort decrement request",
+                         getName(), getID());
             //scheduleDecrement();
             return false;
         }
         boolean reschedule = true;
         try {
-            ServiceBeanInstance[] instances =
-                opMgr.getServiceBeanInstances(getServiceElement());
+            ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(getServiceElement());
             totalServices = instances.length;
             for (ServiceBeanInstance instance : instances) {
                 if (instance.getServiceBeanID().equals(
@@ -678,13 +630,12 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
                 }
             }
         } catch(Exception e) {
-            logger.warn("["+getName()+"]ScalingPolicyHandler ["+getID()+"] getting instance count", e);
+            logger.warn("[{}] ScalingPolicyHandler [{}] getting instance count", getName(), getID(), e);
         }
         
         if(reschedule) {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: instance not in OperationalStringManager, reschedule "+
-                            "decrement request", getName(), getID());
+            logger.debug("[{}] ScalingPolicyHandler [{}]: instance not in OperationalStringManager, reschedule "+
+                         "decrement request", getName(), getID());
             //scheduleDecrement();
             return true;
         }
@@ -692,22 +643,18 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
             try {
                 haveDecremented = true;
                 context.getServiceBeanManager().decrement(true);
-                notifyListeners(new SLAPolicyEvent(this,
-                                                   getSLA(),
-                                                   DECREMENT_DESTROY_SENT));
-                if(logger.isDebugEnabled())
-                    logger.debug("[{}] ScalingPolicyHandler [{}]: DECREMENT_DESTROY_SENT. totalServices=[{}], "+
-                                "minServices=[{}], lastCalculable=[{}], currentLowThreshold=[{}]",
-                                 getName(), getID(), totalServices, minServices, lastCalculable.getValue(),
-                                 lastThresholdValues.getCurrentLowThreshold());
+                notifyListeners(new SLAPolicyEvent(this, getSLA(), DECREMENT_DESTROY_SENT));
+                logger.debug("[{}] ScalingPolicyHandler [{}]: DECREMENT_DESTROY_SENT. totalServices=[{}], "+
+                             "minServices=[{}], lastCalculable=[{}], currentLowThreshold=[{}]",
+                             getName(), getID(), totalServices, minServices, lastCalculable.getValue(),
+                             lastThresholdValues.getLowThreshold());
             } catch(Exception e) {
                 logger.warn("DECREMENT FAILED", e);
                 notifyListeners(new SLAPolicyEvent(this, getSLA(), DECREMENT_FAILED));
             }
         } else {
-            if(logger.isDebugEnabled())
-                logger.debug("[{}] ScalingPolicyHandler [{}]: INCREMENT CANCELLED, totalServices=[{}], minServices=[{}]",
-                             getName(), getID(), totalServices, minServices);
+            logger.debug("[{}] ScalingPolicyHandler [{}]: INCREMENT CANCELLED, totalServices=[{}], minServices=[{}]",
+                         getName(), getID(), totalServices, minServices);
         }
         return false;
     }
@@ -733,8 +680,7 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
          * @see org.rioproject.core.jsb.ServiceElementChangeListener#changed
          */
         public void changed(ServiceElement preElem, ServiceElement postElem) {
-            if(logger.isTraceEnabled())
-                logger.trace("[{}] ScalingPolicyHandler[{}]: ServiceElement change notification", getName(), getID());
+            logger.trace("[{}] ScalingPolicyHandler[{}]: ServiceElement change notification", getName(), getID());
             setServiceElement(postElem);                
         }
     }
@@ -763,16 +709,14 @@ public class ScalingPolicyHandler extends SLAPolicyHandler
          */
         public void run() {
             if(increment) {
-                if(logger.isDebugEnabled())
-                    logger.debug("[{}] ScalingPolicyHandler [{}]: running increment task", getName(), getID());
+                logger.debug("[{}] ScalingPolicyHandler [{}]: running increment task", getName(), getID());
                 try {
                     doIncrement();
                 } finally {
                     incrementTask = null;
                 }
             } else {
-                if(logger.isDebugEnabled())
-                    logger.debug("[{}] ScalingPolicyHandler [{}]: running decrement task", getName(), getID());
+                logger.debug("[{}] ScalingPolicyHandler [{}]: running decrement task", getName(), getID());
                 boolean reschedule = false;
                 try {
                     if(!haveDecremented)
