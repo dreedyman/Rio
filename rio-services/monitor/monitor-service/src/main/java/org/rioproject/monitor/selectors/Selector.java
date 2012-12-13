@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * Select a {@link org.rioproject.resources.servicecore.ServiceResource} based on a {@link org.rioproject.opstring.ServiceElement}
  */
 public class Selector {
-    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.selector");
+    private static final Logger logger = LoggerFactory.getLogger(Selector.class);
 
     /**
      * Get a ServiceBeanInstantiator that meets the operational requirements of a
@@ -42,21 +42,16 @@ public class Selector {
         ServiceResource resource = null;
         try {
             if (request.getRequestedUuid() != null) {
-                resource = selector.getServiceResource(request.getServiceElement(),
-                                                       request.getRequestedUuid(),
-                                                       true);
-                /* If the returned resource is null, then try to get
-                 * any resource */
+                resource = selector.getServiceResource(request, request.getRequestedUuid(), true);
+                /* If the returned resource is null, then try to get any resource */
                 if (resource == null) {
-                    resource = selector.getServiceResource(request.getServiceElement());
+                    resource = selector.getServiceResource(request);
                 }
 
             } else if (request.getExcludeUuid() != null) {
-                resource = selector.getServiceResource(request.getServiceElement(),
-                                                       request.getExcludeUuid(),
-                                                       false);
+                resource = selector.getServiceResource(request, request.getExcludeUuid(), false);
             } else {
-                resource = selector.getServiceResource(request.getServiceElement());
+                resource = selector.getServiceResource(request);
             }
 
             if (resource != null) {

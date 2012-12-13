@@ -390,7 +390,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     statement.putServiceRecord(ir.getInstantiatorUuid(), record);
             } catch (RemoteException e) {
                 Throwable cause = ThrowableUtil.getRootCause(e);
-                mgrLogger.warn("Could not obtain ServiceRecords from {}", ir.getHostAddress(), cause);
+                mgrLogger.warn("Could not obtain ServiceRecords from {}", ir.getName(), cause);
             }
         }
         return statement;
@@ -476,7 +476,7 @@ public class ServiceElementManager implements InstanceIDManager {
                         ProvisionRequest[] removed = provisioner.getPendingManager().removeServiceElement(svcElement,
                                                                                                           toRemove);
                         for (ProvisionRequest aRemoved : removed)
-                            removeInstanceID(aRemoved.sElem.getServiceBeanConfig().getInstanceID(),
+                            removeInstanceID(aRemoved.getServiceElement().getServiceBeanConfig().getInstanceID(),
                                              "removal from pending testManager");
                     } else {
                         provisioner.getPendingManager().updateProvisionRequests(svcElement, provListener);
@@ -939,7 +939,7 @@ public class ServiceElementManager implements InstanceIDManager {
                                                     svcProvisionListener,
                                                     sbi);
         if(sticky)
-            req.requestedUuid = instance.getServiceBeanInstantiatorID();
+            req.setRequestedUuid(instance.getServiceBeanInstantiatorID());
 
         redeployRequestList.add(req);
         Object proxy = null;
@@ -1092,7 +1092,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 }
             }
             for (ProvisionRequest aRemoved : removed)
-                removeInstanceID(aRemoved.sElem.getServiceBeanConfig().getInstanceID(), "trim");
+                removeInstanceID(aRemoved.getServiceElement().getServiceBeanConfig().getInstanceID(), "trim");
             mgrLogger.debug("Removed {} [{}] pending requests from PendingServiceManager",
                             removed.length, LoggingUtil.getLoggingName(svcElement));
         }
@@ -1482,7 +1482,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     instance = sbi;
                 }
                 mgrLogger.debug("Removed [{}] instance from {}",
-                                LoggingUtil.getLoggingName(svcElement), ir.getHostAddress());
+                                LoggingUtil.getLoggingName(svcElement), ir.getName());
                 break;
             }
         }
@@ -1691,10 +1691,10 @@ public class ServiceElementManager implements InstanceIDManager {
          */
         public void uninstantiable(final ProvisionRequest request) {
             ServiceBeanConfig sbc;
-            if(request.instance!=null)
-                sbc = request.instance.getServiceBeanConfig();
+            if(request.getInstance()!=null)
+                sbc = request.getInstance().getServiceBeanConfig();
             else
-                sbc = request.sElem.getServiceBeanConfig();
+                sbc = request.getServiceElement().getServiceBeanConfig();
             if(sbc!=null) {
                 removeInstanceID(sbc.getInstanceID(), "uninstantiable");
             } else {
@@ -1972,10 +1972,10 @@ public class ServiceElementManager implements InstanceIDManager {
                 /* Add the host address to the list of hosts the service has visited */
                 ServiceBeanConfig sbConfig = addHost(instance, hostAddress);
                 if(sbConfig!=null) {
-                    provRequest.sElem.setServiceBeanConfig(sbConfig);
+                    provRequest.getServiceElement().setServiceBeanConfig(sbConfig);
                 }
 
-                provRequest.sElem.setPlanned(maintain);
+                provRequest.getServiceElement().setPlanned(maintain);
                 if(svcElement.getProvisionType()==ProvisionType.DYNAMIC) {
                     int pending = provisioner.getPendingManager().getCount(svcElement);
                     //int actual = getActual()+pending;
@@ -2042,7 +2042,7 @@ public class ServiceElementManager implements InstanceIDManager {
             ProvisionRequest[] prs = redeployRequestList.toArray(new ProvisionRequest[redeployRequestList.size()]);
             for (ProvisionRequest pr1 : prs) {
                 try {
-                    if (pr1.instance != null && pr1.instance.getService().equals(service)) {
+                    if (pr1.getInstance() != null && pr1.getInstance().getService().equals(service)) {
                         pr = pr1;
                         redeployRequestList.remove(pr);
                         break;

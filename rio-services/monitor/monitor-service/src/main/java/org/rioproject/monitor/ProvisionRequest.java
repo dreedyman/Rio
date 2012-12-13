@@ -15,11 +15,14 @@
  */
 package org.rioproject.monitor;
 
+import net.jini.id.Uuid;
+import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.opstring.ServiceElement;
-import net.jini.id.Uuid;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The ProvisionRequest class provides a container object holding information  
@@ -30,26 +33,27 @@ import net.jini.id.Uuid;
 public class ProvisionRequest {
     public enum Type {PROVISION, RELOCATE, UNINSTANTIABLE}
     /** The ServiceElement */
-    ServiceElement sElem;
+    private ServiceElement sElem;
     /** The ServiceProvisionListener */
-    ProvisionListener listener;
+    private final ProvisionListener listener;
     /** The OperationalStringManager */
-    OperationalStringManager opStringMgr;
+    private final OperationalStringManager opStringMgr;
     /** Optional remote ServiceProvisionListener */
-    ServiceProvisionListener svcProvisionListener;
+    private ServiceProvisionListener svcProvisionListener;
     /** Optional ServiceBeanInstance */
-    ServiceBeanInstance instance;
+    private ServiceBeanInstance instance;
     /** Optional Uuid of the ServiceBeanInstantiator to exclude */
-    Uuid excludeUuid;
+    private Uuid excludeUuid;
     /** Optional Uuid of the ServiceBeanInstantiator to use */
-    Uuid requestedUuid;
+    private Uuid requestedUuid;
     /** Type of provision request */
-    Type type;
+    private Type type;
     /** Needed for creating instance identifiers */
-    InstanceIDManager instanceIDMgr;
+    private final InstanceIDManager instanceIDMgr;
     //long priority = 0;
     /** The time the ProvisionRequest was created */
-    long timestamp;
+    private final long timestamp;
+    private final List<String> failureReasons = new ArrayList<String>();
 
     /**
      * Create a ProvisionRequest 
@@ -133,7 +137,6 @@ public class ProvisionRequest {
              type.equals(Type.UNINSTANTIABLE)))
             throw new IllegalArgumentException("invalid type");
         this.type = type;
-        timestamp = System.currentTimeMillis();
     }
 
     public Uuid getRequestedUuid() {
@@ -182,6 +185,23 @@ public class ProvisionRequest {
 
     public OperationalStringManager getOpStringManager() {
         return opStringMgr;
+    }
+
+    public void addFailureReason(String failureReason) {
+        if(failureReason!=null)
+            failureReasons.add(failureReason);
+    }
+
+    public void setRequestedUuid(Uuid requestedUuid) {
+        this.requestedUuid = requestedUuid;
+    }
+
+    public ServiceBeanInstance getInstance() {
+        return instance;
+    }
+
+    public List<String> getFailureReasons() {
+        return failureReasons;
     }
 
     /**

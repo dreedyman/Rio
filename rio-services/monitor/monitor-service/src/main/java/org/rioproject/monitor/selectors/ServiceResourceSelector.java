@@ -20,6 +20,7 @@ import net.jini.id.Uuid;
 import org.rioproject.monitor.AssociationMatcher;
 import org.rioproject.monitor.InstantiatorResource;
 import org.rioproject.monitor.ProvisionException;
+import org.rioproject.monitor.ProvisionRequest;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.servicecore.LandlordLessor;
 import org.rioproject.resources.servicecore.LeaseListener;
@@ -63,7 +64,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     protected Collection<LeasedResource> collection;
     /* Semaphore for access to modifying the collection */
     protected final Object collectionLock = new Object();
-    static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
+    static final Logger logger = LoggerFactory.getLogger(ServiceResourceSelector.class);
     /**
      * The LandlordLessor which will be registered to, and will provide Lease
      * notification events
@@ -86,16 +87,16 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * <code>ServiceResource</code> based on the operational criteria
      * specified by a ServiceBean
      * 
-     * @param sElem The ServiceElement
+     * @param provisionRequest The ProvisionRequest
      * @return If a <code>ServiceResource</code> object can
      * be identified, return the <code>ServiceResource</code>, otherwise 
      * return <code>null</code>
      *
      * @throws Exception If there are errors getting a ServiceResource
      */
-    public ServiceResource getServiceResource(ServiceElement sElem) throws Exception {
+    public ServiceResource getServiceResource(ProvisionRequest provisionRequest) throws Exception {
         ServiceResource[] svcResources = getServiceResources();
-        return (selectServiceResource(sElem, svcResources));
+        return (selectServiceResource(provisionRequest, svcResources));
     }
 
     /**
@@ -103,7 +104,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * <code>ServiceResource</code> based on the operational criteria
      * specified by a ServiceBean
      * 
-     * @param sElem The ServiceElement
+     * @param provisionRequest The ProvisionRequest
      * @param uuid The Uuid of the InstantiatorResource to either include or
      * not include
      * @param inclusive Either include or exclude the uuid from the selection.
@@ -113,17 +114,17 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @throws ProvisionException if any errors occur selecting a resource
      */
-    public ServiceResource getServiceResource(ServiceElement sElem,
+    public ServiceResource getServiceResource(ProvisionRequest provisionRequest,
                                               Uuid uuid,
                                               boolean inclusive) throws ProvisionException {
-        return (selectServiceResource(sElem, getServiceResources(uuid, inclusive)));
+        return (selectServiceResource(provisionRequest, getServiceResources(uuid, inclusive)));
     }
 
     /**
      * Select a ServiceResource for dynamic ServiceBean provisioning based on
      * the operational criteria of a ServiceBean
-     * 
-     * @param sElem The ServiceElement
+     *
+     * @param provisionRequest The ProvisionRequest
      * @param svcResources Array ServiceResource candidates
      * @return If a <code>ServiceResource</code> object can
      * be identified, otherwise return <code>null</code>
@@ -131,14 +132,14 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @throws org.rioproject.monitor.ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
-    protected ServiceResource selectServiceResource(final ServiceElement sElem,
+    protected ServiceResource selectServiceResource(ProvisionRequest provisionRequest,
                                                     final ServiceResource[] svcResources) throws ProvisionException {
 
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
-        ServiceResource[] filteredResources = filterMachineBoundaries(sElem, svcResources);
+        ServiceResource[] filteredResources = filterMachineBoundaries(provisionRequest, svcResources);
         if(filteredResources.length>0)
-            filteredResources = filterIsolated(sElem, filteredResources);
+            filteredResources = filterIsolated(provisionRequest, filteredResources);
 
         for (ServiceResource svcResource : filteredResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
@@ -146,56 +147,51 @@ public abstract class ServiceResourceSelector implements LeaseListener {
              * Make sure the InstantiatorResource has not reached it's
              * serviceLimit
              */
+            ServiceElement sElem = provisionRequest.getServiceElement();
             int serviceLimit = ir.getServiceLimit();
             int total = ir.getServiceElementCount() + ir.getInProcessCounter();
             if (total >= serviceLimit) {
-                if (logger.isDebugEnabled())
-                    logger.debug(ir.getName() + " at " +
-                                 "[" + ir.getHostAddress() +"] " +
-                                 "has reached service limit of " +
-                                 "[" + serviceLimit + "], cannot be used to " +
-                                 "instantiate [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
+                String reason =
+                    String.format("%s reached service limit of [%d], cannot be used to instantiate [%s/%s]",
+                              ir.getName(), serviceLimit, sElem.getOperationalStringName(),
+                              sElem.getName());
+                provisionRequest.addFailureReason(reason);
+                logger.debug(reason);
                 continue;
             }
             /*
-             * Check if the InstantiatorResource doesnt already have the
+             * Check if the InstantiatorResource doesn't already have the
              * maximum amount of services allocated. this is different then
              * MaxPerNode
              */
             int planned = sElem.getPlanned();
             int actual = ir.getServiceElementCount(sElem);
-            if (logger.isDebugEnabled())
-                logger.debug(ir.getName() + " at [" + ir.getHostAddress() + "] " +
-                             "has [" + actual + "] instance(s), " +
-                             "planned [" + planned + "] " +
-                             "of [" + sElem.getOperationalStringName()+"/"+sElem.getName() + "]");
-            if (actual >= planned)
+            logger.debug("{} has [{}] instance(s), planned [{}] of [{}/{}]",
+                         ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
+            if (actual >= planned) {
+                String message = String.format("%s has reached service limit of [%s], cannot be used to instantiate [%s/%s]",
+                                               ir.getName(), serviceLimit, sElem.getOperationalStringName(), sElem.getName());
+                provisionRequest.addFailureReason(message);
                 continue;
+            }
             if (ir.getDynamicEnabled()) {
                 try {
-                    if (ir.canProvision(sElem)) {
+                    if (ir.canProvision(provisionRequest)) {
                         serviceResourceSelected(svcResource);
-                        if(logger.isDebugEnabled()) {
-                            logger.debug("["+ir.getHostAddress()+", " +
-                                         "service count:"+ir.getServiceCount()+"] " +
-                                         "has been selected for service " +
-                                         "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]");
-                        }
+                        logger.debug("[{}, service count: {}] has been selected for service [{}/{}]",
+                                     ir.getName(), ir.getServiceCount(), sElem.getOperationalStringName(),
+                                     sElem.getName());
                         return (svcResource);
                     }
                 } catch (Exception e) {
-                    logger.warn("[" + ir.getName() + "] at " +
-                                "[" + ir.getHostAddress() + "] " +
-                                "during canProvision check for [" +
-                                sElem.getOperationalStringName()+"/"+sElem.getName() + "]",
+                    logger.warn("[{}] during canProvision check for [{}]",
+                                ir.getName(), sElem.getOperationalStringName(), sElem.getName(),
                                 e);
                     if(e instanceof ProvisionException)
                         throw (ProvisionException)e;
                 }
             } else {
-                if (logger.isDebugEnabled())
-                    logger.debug(ir.getName() + " [" + ir.getHostAddress() + "], " +
-                                 "dynamic enabled : " + ir.getDynamicEnabled());
+                logger.debug("{}, dynamic enabled: {}", ir.getName(), ir.getDynamicEnabled());
             }
         }
         return (null);
@@ -204,30 +200,30 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     /**
      * Filter ServiceResource instances for isolated requirements
      *
-     * @param elem The ServiceElement to verify
+     * @param provisionRequest The ProvisionRequest to verify
      * @param candidates The candidate ServiceResource instances
      *
      * @return An array of suitable ServiceResource instances
      */
-    public ServiceResource[] filterIsolated(ServiceElement elem, ServiceResource... candidates) {
+    public ServiceResource[] filterIsolated(ProvisionRequest provisionRequest, ServiceResource... candidates) {
         /* For the set of candidate instantiator resources, remove the
          * candidate instantiator resources that have the same host name */
-        InstantiatorResource[] known = getInstantiatorResources(elem, true);
+        InstantiatorResource[] known = getInstantiatorResources(provisionRequest.getServiceElement(), true);
         
         List<ServiceResource> candidateList = new ArrayList<ServiceResource>();
         candidateList.addAll(Arrays.asList(candidates));
         for (ServiceResource candidate1 : candidates) {
             InstantiatorResource candidate = (InstantiatorResource) candidate1.getResource();
-            if (!AssociationMatcher.meetsIsolatedRequirements(elem, candidate, known)) {
+            if (!AssociationMatcher.meetsIsolatedRequirements(provisionRequest.getServiceElement(), candidate, known)) {
                 candidateList.remove(candidate1);
             }
         }
         if(logger.isDebugEnabled() && candidateList.isEmpty()) {
-            logger.debug("Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a virtual machine " +
-                         "boundary constraint and an instance of the service has " +
-                         "been found on all Cybernodes executing on each machine. " +
-                         "There are no available Cybernodes to allocate service " +
-                         "instances");
+            logger.debug("Service [{}/{}] has a virtual machine boundary constraint and an instance of the service has " +
+                         "been found on all Cybernodes executing on each machine. There are no available Cybernodes to " +
+                         "allocate service instances",
+                         provisionRequest.getServiceElement().getOperationalStringName(),
+                         provisionRequest.getServiceElement().getName());
         }
         return(candidateList.toArray(new ServiceResource[candidateList.size()]));
     }
@@ -235,11 +231,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     /*
      * Filter on machine boundaries
      *
-     * @param elem
+     * @param provisionRequest
      * @param candidates
      * @return
      */
-    public ServiceResource[] filterMachineBoundaries(ServiceElement elem, ServiceResource... candidates) {
+    public ServiceResource[] filterMachineBoundaries(ProvisionRequest provisionRequest, ServiceResource... candidates) {
+        ServiceElement elem = provisionRequest.getServiceElement();
         int maxPerMachine = elem.getMaxPerMachine();
         if(!(maxPerMachine!=-1 &&
              elem.getMachineBoundary()==ServiceElement.MachineBoundary.PHYSICAL)) {
@@ -248,7 +245,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
 
         /*
          * 1. Create a table composed of keys that are the host address and
-         *    values a list of cybernodes
+         *    values a list of Cybernodes
          * 2. Count the number services each cybernode has on each host
          * 3. Remove table entries that exceed the count per host
          */
@@ -292,12 +289,10 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             }
         }
 
-        if(logger.isDebugEnabled() &&
-           candidateList.isEmpty() &&
-           elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
-            logger.debug("Service ["+elem.getOperationalStringName()+"/"+elem.getName()+"] has a physical machine " +
-                         "boundary constraint and an instance of the service has " +
-                         "been found on all known machines.");
+        if(logger.isDebugEnabled() && candidateList.isEmpty() && elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
+            logger.debug("Service [{}/{}] has a physical machine boundary constraint and an " +
+                         "instance of the service has been found on all known machines.",
+                         elem.getOperationalStringName(), elem.getName());
         }
         return(candidateList.toArray(new ServiceResource[candidateList.size()]));
     }
@@ -317,27 +312,27 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * the <code>ServiceElement</code> object's contained requirement
      * specifications
      * 
-     * @param sElem The ServiceElement
+     * @param provisionRequest The ProvisionRequest
      * @return Array of ServiceResource instances that
      * support the requirements
      *
      * @throws ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
-    public ServiceResource[] getServiceResources(ServiceElement sElem) throws ProvisionException {
+    public ServiceResource[] getServiceResources(ProvisionRequest provisionRequest) throws ProvisionException {
         ServiceResource[] svcResources = getServiceResources();
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             try {
-                if (ir.canProvision(sElem)) {
+                if (ir.canProvision(provisionRequest)) {
                     list.add(svcResource);
                 }
             } catch (Exception e) {
-                logger.warn("["+ir.getName()+"] at " +
-                            "["+ir.getHostAddress()+"] " +
-                            "during canProvision check for " +
-                            "["+sElem.getOperationalStringName()+"/"+sElem.getName()+"]",
+                logger.warn("[{}] during canProvision check for [{}/{}]",
+                            ir.getName(),
+                            provisionRequest.getServiceElement().getOperationalStringName(),
+                            provisionRequest.getServiceElement().getName(),
                             e);
                 if(e instanceof ProvisionException)
                     throw (ProvisionException)e;
@@ -400,9 +395,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return Array of ServiceResource instances that match the host address
      */
-    ServiceResource[] getServiceResources(ServiceResource[] svcResources,
-                                          String hostAddress,
-                                          boolean inclusive) {
+    ServiceResource[] getServiceResources(ServiceResource[] svcResources, String hostAddress, boolean inclusive) {
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
@@ -579,31 +572,5 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             }
         }            
         return list.toArray(new InstantiatorResource[list.size()]);
-    }
-
-    /**
-     * Get all <code>ServiceResource</code> instances that have
-     * instantiated instances of the ServiceElement
-     *
-     * @param sElem The ServiceElement
-     * @param includeInProcess Whether to include in process elements
-     * @return Array of ServiceResource instances that have instantiated
-     * the ServiceElement
-     */
-    ServiceResource[] getServiceResources(ServiceElement sElem, boolean includeInProcess) {
-        ServiceResource[] svcResources = getServiceResources();
-        ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
-        for (ServiceResource svcResource : svcResources) {
-            InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
-            if (includeInProcess) {
-                if (ir.getServiceElementCount(sElem) > 0 ||
-                    ir.getInProcessCounter(sElem) > 0)
-                    list.add(svcResource);
-            } else {
-                if (ir.getServiceElementCount(sElem) > 0)
-                    list.add(svcResource);
-            }
-        }
-        return list.toArray(new ServiceResource[list.size()]);
     }
 }

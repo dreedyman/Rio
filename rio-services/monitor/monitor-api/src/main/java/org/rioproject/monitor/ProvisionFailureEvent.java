@@ -20,6 +20,8 @@ import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.opstring.ServiceElement;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is used to communicate to interested registrants that a provision
@@ -36,8 +38,7 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
     private Throwable exception;
     /** The ServiceElement that could not be provisioned */
     private ServiceElement sElem;
-    /** A plausible reason why the provision failed */
-    private String reason;
+    private final List<String> failureReasons = new ArrayList<String>();
 
     /**
      * Create a ProvisionFailureEvent with attributes
@@ -47,13 +48,25 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
      * @param reason Reason for the failure
      * @param exception An associated Exception (if any)
      */
-    public ProvisionFailureEvent(Object source,
-                                 ServiceElement sElem,
-                                 String reason,
-                                 Throwable exception) {
+    public ProvisionFailureEvent(Object source, ServiceElement sElem, String reason, Throwable exception) {
         super(source);
         this.sElem = sElem;
-        this.reason = reason;
+        failureReasons.add(reason);
+        this.exception = exception;
+    }
+
+    /**
+     * Create a ProvisionFailureEvent with attributes
+     *
+     * @param source The originator of the event
+     * @param sElem The ServiceElement
+     * @param reasons Reasons for the failure
+     * @param exception An associated Exception (if any)
+     */
+    public ProvisionFailureEvent(Object source, ServiceElement sElem, List<String> reasons, Throwable exception) {
+        super(source);
+        this.sElem = sElem;
+        failureReasons.addAll(reasons);
         this.exception = exception;
     }
 
@@ -71,8 +84,21 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
      *
      * @return Reason for the failure
      */
+    @Deprecated
     public String getReason() {
-        return (reason);
+        return (failureReasons.toString());
+    }
+
+    /**
+     * Get the failure reasons.
+     *
+     * @return A {@code List} of failure reasons. A new {@code List} is created each time. If there are no failure reasons
+     * an empty {@code List} is returned.
+     */
+    public List<String> getFailureReasons() {
+        List<String> list = new ArrayList<String>();
+        list.addAll(failureReasons);
+        return list;
     }
 
     /**
@@ -94,7 +120,7 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
         sb.append("ProvisionFailureEvent: ");
         sb.append("opStringName=").append(sElem.getOperationalStringName());
         sb.append(", service=").append(sElem.getName());
-        sb.append(", reason='").append(reason);
+        sb.append(", reasons='").append(failureReasons.toString());
         return sb.toString();
     }
 }

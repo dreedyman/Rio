@@ -71,13 +71,13 @@ public class FixedServiceManager extends PendingServiceElementManager {
     public void deploy(final ProvisionRequest request) {
         try {
             logger.debug("Deploy [{}]", LoggingUtil.getLoggingName(request) );
-            ServiceResource[] resources = context.getSelector().getServiceResources(request.getServiceElement());
+            ServiceResource[] resources = context.getSelector().getServiceResources(request);
             logger.debug("{} processing {} resources", getType(), resources.length);
             /* Filter out isolated associations and max per machine levels
              * set at the physical level */
-            resources = context.getSelector().filterMachineBoundaries(request.getServiceElement(), resources);
+            resources = context.getSelector().filterMachineBoundaries(request, resources);
             if (resources.length > 0)
-                resources = context.getSelector().filterIsolated(request.getServiceElement(), resources);
+                resources = context.getSelector().filterIsolated(request, resources);
 
             if (resources.length > 0) {
                 for (ServiceResource resource : resources) {
@@ -103,7 +103,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
             return;
         inProcessResource.add(resource);
         InstantiatorResource ir = (InstantiatorResource) resource.getResource();
-        logger.debug("{} processing {}", getType(), ir.getHostAddress());
+        logger.trace("{} processing {}", getType(), ir.getHostAddress());
         try {
             if(getSize() == 0)
                 return;
@@ -118,12 +118,12 @@ public class FixedServiceManager extends PendingServiceElementManager {
                     ProvisionRequest request = collection.get(requestKey);
                     try {
                         if (clearedMaxPerMachineAndIsolated(request, ir.getHostAddress()) &&
-                            ir.canProvision(request.getServiceElement()))
+                            ir.canProvision(request))
                             doDeploy(resource, request);
                     } catch (ProvisionException e) {
                         request.setType(ProvisionRequest.Type.UNINSTANTIABLE);
-                        logger.debug("Service [{}] is un-instantiable, do not resubmit",
-                                     LoggingUtil.getLoggingName(request));
+                        logger.warn("Service [{}] is un-instantiable, do not resubmit",
+                                    LoggingUtil.getLoggingName(request));
                     }
                 }
             }
@@ -174,7 +174,6 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 request.setServiceElement(ServiceElementUtil.prepareInstanceID(request.getServiceElement(),
                                                                                true,
                                                                                nextID));
-
                 logger.trace("[{}] instanceID : {}",
                              LoggingUtil.getLoggingName(request),
                              request.getServiceElement().getServiceBeanConfig().getInstanceID());
@@ -189,9 +188,9 @@ public class FixedServiceManager extends PendingServiceElementManager {
     }
 
     /*
-    * Determine how many services can be allocated based on how many
-    * are already on the resource minus the number planned
-    */
+     * Determine how many services can be allocated based on how many
+     * are already on the resource minus the number planned
+     */
     private int getNumAllowed(final ServiceResource resource, final ProvisionRequest request) {
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
@@ -205,25 +204,23 @@ public class FixedServiceManager extends PendingServiceElementManager {
         if (request.getServiceElement().getMaxPerMachine() != -1 &&
             request.getServiceElement().getMaxPerMachine() < numAllowed)
             numAllowed = request.getServiceElement().getMaxPerMachine();
-        if(logger.isDebugEnabled())
-            logger.debug(String.format("Cybernode at %s has %d, can accommodate %d",
-                                       ir.getHostAddress(), actual, numAllowed));
+        logger.trace("Cybernode at {} has {}, can accommodate {}", ir.getHostAddress(), actual, numAllowed);
         return (numAllowed);
     }
 
     /*
-    * Filter out isolated associations and max per machine levels set
-    * at the physical level
-    */
+     * Filter out isolated associations and max per machine levels set
+     * at the physical level
+     */
     private boolean clearedMaxPerMachineAndIsolated(final ProvisionRequest request, final String hostAddress) {
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
         ServiceResource[] sr =
-            context.getSelector().filterMachineBoundaries(request.getServiceElement(),
+            context.getSelector().filterMachineBoundaries(request,
                                                           context.getSelector().getServiceResources(hostAddress, true));
         if (sr.length == 0)
             return false;
-        sr = context.getSelector().filterIsolated(request.getServiceElement(), sr);
+        sr = context.getSelector().filterIsolated(request, sr);
         return sr.length != 0;
     }
 

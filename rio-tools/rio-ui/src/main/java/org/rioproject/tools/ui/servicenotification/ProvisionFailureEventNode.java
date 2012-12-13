@@ -36,7 +36,13 @@ public class ProvisionFailureEventNode extends RemoteServiceEventNode<ProvisionF
 
     @Override
     public String getDescription() {
-        return getEvent().getReason();
+        StringBuilder builder = new StringBuilder();
+        for(String reason : getEvent().getFailureReasons()) {
+            if(builder.length()>0)
+                builder.append("\n    ");
+            builder.append(reason);
+        }
+        return builder.toString();
     }
 
     @Override

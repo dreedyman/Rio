@@ -26,18 +26,14 @@ import javax.management.ObjectName;
 import java.rmi.RemoteException;
 
 /**
- * Provides the support to transform ProvisionFailureEvent notifications
- * to JMX notifications
+ * Provides the support to transform ProvisionFailureEvent notifications to JMX notifications
  *
  * @author Dennis Reedy
  */
 public class ProvisionFailureEventAdapter extends EventNotificationAdapter {
-    private static final String EVENT_TYPE =
-        "ProvisonerFailureEvent";
+    private static final String EVENT_TYPE = "ProvisionFailureEvent";
     private static final MBeanNotificationInfo NOTIFICATION_INFO =
-        new MBeanNotificationInfo(new String[]{EVENT_TYPE},
-                                  Notification.class.getName(),
-                                  "ProvisonerFailureEvent");
+        new MBeanNotificationInfo(new String[]{EVENT_TYPE}, Notification.class.getName(), "ProvisionFailureEvent");
 
     /**
      * Create a ProvisionFailureEventAdapter
@@ -46,9 +42,8 @@ public class ProvisionFailureEventAdapter extends EventNotificationAdapter {
      * @param notificationBroadcasterSupport The MBean that is sending the
      * notification
      */
-    public ProvisionFailureEventAdapter(
-        ObjectName objectName,
-        NotificationBroadcasterSupport notificationBroadcasterSupport) {
+    public ProvisionFailureEventAdapter(final ObjectName objectName,
+                                        final NotificationBroadcasterSupport notificationBroadcasterSupport) {
         super(objectName, notificationBroadcasterSupport);
     }
 
@@ -58,24 +53,24 @@ public class ProvisionFailureEventAdapter extends EventNotificationAdapter {
      *
      * @see org.rioproject.event.EventNotificationAdapter#notify(net.jini.core.event.RemoteEvent)
      */
-    public void notify(RemoteEvent theEvent)
-        throws UnknownEventException, RemoteException {
+    public void notify(final RemoteEvent theEvent) throws UnknownEventException, RemoteException {
         if(theEvent==null)
             throw new IllegalArgumentException("event is null");
         if(!(theEvent instanceof ProvisionFailureEvent)) {
-            throw new UnknownEventException("Not a ProvisionFailureEvent " +
-                                            "["+
-                                            theEvent.getClass().getName()+
-                                            "]");
+            throw new UnknownEventException("Not a ProvisionFailureEvent ["+theEvent.getClass().getName()+"]");
         }
         ProvisionFailureEvent event = (ProvisionFailureEvent)theEvent;
-        Notification notification =
-            new Notification(
-                EVENT_TYPE,
-                objectName,
-                event.getSequenceNumber(),
-                event.getDate().getTime(),
-                event.getReason());
+        StringBuilder builder = new StringBuilder();
+        for(String reason : event.getFailureReasons()) {
+            if(builder.length()>0)
+                builder.append("\n    ");
+            builder.append(reason);
+        }
+        Notification notification = new Notification(EVENT_TYPE,
+                                                     objectName,
+                                                     event.getSequenceNumber(),
+                                                     event.getDate().getTime(),
+                                                     builder.toString());
         notificationBroadcasterSupport.sendNotification(notification);
     }
 

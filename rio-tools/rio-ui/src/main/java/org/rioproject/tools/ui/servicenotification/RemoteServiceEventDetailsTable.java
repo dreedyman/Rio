@@ -95,7 +95,13 @@ public class RemoteServiceEventDetailsTable extends JPanel {
                 tableData.put("Deployment", elem.getOperationalStringName());
                 tableData.put("Service", elem.getName());
                 tableData.put("Class", impl);
-                tableData.put("Reason", pfe.getReason());
+                StringBuilder builder = new StringBuilder();
+                for(String reason : pfe.getFailureReasons()) {
+                    if(builder.length()>0)
+                        builder.append("\n    ");
+                    builder.append(reason);
+                }
+                tableData.put("Reason", builder.toString());
                 if(exception!=null) {
                     tableData.put("Exception", exception);
                     table.setRowHeight(tableData.size(), table.getRowHeight() * 20);

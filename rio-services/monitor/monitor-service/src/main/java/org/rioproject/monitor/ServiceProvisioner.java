@@ -106,7 +106,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     private ProxyPreparer instantiatorPreparer;
     private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** Logger instance */
-    private static final Logger logger = LoggerFactory.getLogger(ServiceProvisioner.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProvisioner.class);
     private boolean terminating = false;
     private boolean terminated = false;
 
@@ -289,12 +289,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                                eventSource,
                                                                lease,
                                                                eventRegistrationSequenceNumber.incrementAndGet());
-
-        if(logger.isDebugEnabled()) {
-            int instantiatorCount = landlord.total();
-            logger.debug("Registered new {}, @ {}, count [{}]",
-                        name, resourceCapability.getAddress(), instantiatorCount);
-        }
+        logger.debug("Registered new {}, count [{}]", name, landlord.total());
         /* Process all provision types of Fixed first */
         fixedServiceManager.process(serviceResource);
         /* See if any dynamic provision types are pending */
@@ -332,16 +327,15 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             throw new UnknownLeaseException("Empty Collection, no leases");
         }
         boolean updated = false;
+
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
-            logger.debug("Update from [{}:{}], current serviceCount {}, serviceLimit {}",
-                         ir.getHostAddress(),
-                         preparedResource.toString(),
-                         deployedServices.size(),
-                         serviceLimit);
-
             logger.trace("Checking for InstantiatorResource match");
             if(ir.getInstantiator().equals(preparedResource)) {
+                logger.debug("Update from {}, current serviceCount {}, serviceLimit {}",
+                             ir.getName(),
+                             deployedServices.size(),
+                             serviceLimit);
                 logger.trace("Matched InstantiatorResource");
                 if(!landlord.ensure(svcResource))
                     throw new UnknownLeaseException("No matching Lease found");
@@ -355,7 +349,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                   ir.getServiceCount(), deployedServices.size());
                     ir.setDeployedServices(deployedServices);
                 } catch (Throwable t) {
-                    logger.warn("Getting ServiceRecords from {}", ir.getHostAddress(), t);
+                    logger.warn("Getting ServiceRecords from {}", ir.getName(), t);
                 }
                 /* Process all provision types of Fixed first */
                 fixedServiceManager.process(svcResource);
@@ -368,7 +362,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         }
 
         if(!updated) {
+            logger.warn("No matching registration found for {}", resource.getName());
             throw new UnknownLeaseException("No matching registration found for Cybernode");
+        } else {
+
         }
     }
 
@@ -401,47 +398,54 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         }
         try {
             if(resource != null) {
-                inProcess.add(request.sElem);
+                inProcess.add(request.getServiceElement());
                 provisioningPool.execute(new ProvisionTask(getServiceProvisionContext(request, resource),
                                                            pendingMgr,
                                                            index));
             } else {
                 int total = selector.getServiceResources().length;
-                String action = (request.type==ProvisionRequest.Type.PROVISION? "provision":"relocate");
+                String action = (request.getType()==ProvisionRequest.Type.PROVISION? "provision":"relocate");
+                StringBuilder failureReasonBuilder = new StringBuilder();
                 String failureReason =
                     String.format("A compute resource could not be obtained to %s [%s], total registered=%d",
                                   action, LoggingUtil.getLoggingName(request), total);
-                logger.debug(failureReason);
+                failureReasonBuilder.append(failureReason);
+                if(!request.getFailureReasons().isEmpty()) {
+                    for(String reason : request.getFailureReasons())
+                        failureReasonBuilder.append("\n    ").append(reason);
+                }
+                logger.debug(failureReasonBuilder.toString());
 
                 /* If we have a ServiceProvisionListener, notify the
                  * listener */
-                if(request.svcProvisionListener!=null) {
+                if(request.getServiceProvisionListener()!=null) {
                     try {
-                        request.svcProvisionListener.failed(request.sElem, true);
+                        request.getServiceProvisionListener().failed(request.getServiceElement(), true);
                     } catch(NoSuchObjectException e) {
                         logger.warn("ServiceBeanInstantiatorListener failure notification did not succeed, "+
                                        "[java.rmi.NoSuchObjectException: {}], remove ServiceBeanInstantiatorListener [{}]",
-                                       e.getLocalizedMessage(), request.svcProvisionListener);
-                        request.svcProvisionListener = null;
+                                       e.getLocalizedMessage(), request.getServiceProvisionListener());
+                        request.setServiceProvisionListener(null);
                     } catch(Exception e) {
                         logger.warn("ServiceBeanInstantiatorListener notification", e);
                     }
                 }
                 /* If this is not the result of a relocation request, add to the 
                  * pending testManager */
-                if(request.type==ProvisionRequest.Type.PROVISION) {
+                if(request.getType()==ProvisionRequest.Type.PROVISION) {
                     pendingMgr.addProvisionRequest(request, index);
-                    if(logger.isDebugEnabled())
-                        logger.debug("Wrote [{}] to {}", LoggingUtil.getLoggingName(request), pendingMgr.getType());
-                    if(logger.isTraceEnabled())
-                        pendingMgr.dumpCollection();
+                    logger.debug("Wrote [{}] to {}", LoggingUtil.getLoggingName(request), pendingMgr.getType());
+                    pendingMgr.dumpCollection();
                 }
-                processProvisionFailure(new ProvisionFailureEvent(eventSource, request.sElem, failureReason, null));
+                processProvisionFailure(new ProvisionFailureEvent(eventSource,
+                                                                  request.getServiceElement(),
+                                                                  request.getFailureReasons(),
+                                                                  null));
             }
         } catch(Throwable t) {
             logger.warn("Dispatching ProvisionRequest", t);
             processProvisionFailure(new ProvisionFailureEvent(eventSource,
-                                                              request.sElem,
+                                                              request.getServiceElement(),
                                                               t.getClass().getName()+":"+t.getLocalizedMessage(),
                                                               t));
         }
