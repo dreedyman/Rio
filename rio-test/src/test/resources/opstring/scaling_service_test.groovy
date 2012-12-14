@@ -1,7 +1,9 @@
 import java.util.logging.Level
+import org.rioproject.config.Constants
+import org.rioproject.net.HostUtil
 
 def String getCodebase() {
-    return 'http://'+InetAddress.getLocalHost().getHostAddress()+":9010"
+    return 'http://'+HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)+":9010"
 }
 
 deployment(name:'Scaling Service Test') {
