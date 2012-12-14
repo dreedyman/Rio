@@ -1,4 +1,4 @@
-
+### Overview
 Rio is an open source technology that provides a dynamic architecture for developing, deploying and
 managing distributed systems composed of services.
 
@@ -11,8 +11,13 @@ surrounding service development and deployment.
 
 Learn more about Rio [here](http://www.rio-project.org).
 
-### Getting Help
+### Documentation
+See the [Wiki](https://github.com/dreedyman/Rio/wiki) for documentation, examples, operational guidelines and other information.
 
+### Issue Tracking
+Issues, bugs, and feature requests should be submitted to the [issue tracking system](https://github.com/dreedyman/Rio/issues) for this project.
+
+### Getting Help
 Feel free to ask questions on Rio's [mailing list](http://groups.google.com/group/rio-users).
 
 ### License
