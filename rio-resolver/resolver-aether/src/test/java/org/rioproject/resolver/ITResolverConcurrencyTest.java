@@ -32,13 +32,13 @@ public class ITResolverConcurrencyTest {
     public void testConcurrentAccess() throws ExecutionException, InterruptedException {
         Resolver r = new AetherResolver();
         ExecutorService resolverExecutor = Executors.newCachedThreadPool();
-        System.out.println("Create 1000 threads");
+        System.out.println("Create 100 threads");
         long t0 = System.currentTimeMillis();
         List<Future<String[]>> futures = new ArrayList<Future<String[]>>();
-        for(int i=0; i<1000; i++) {
+        for(int i=0; i<100; i++) {
             futures.add(resolverExecutor.submit(new Request(r)));
         }
-        Assert.assertTrue(futures.size() == 1000);
+        Assert.assertTrue(futures.size() == 100);
         for(Future<String[]> future : futures) {
             String[] classPath = future.get();
             Assert.assertTrue("Expected 7 jars, got " + classPath.length, classPath.length == 7);
@@ -51,16 +51,16 @@ public class ITResolverConcurrencyTest {
     public void testConcurrentAccess2() throws ExecutionException, InterruptedException {
         Resolver r = new AetherResolver();
         ExecutorService resolverExecutor = Executors.newCachedThreadPool();
-        System.out.println("Create 1000 threads");
+        System.out.println("Create 100 threads");
         long t0 = System.currentTimeMillis();
         List<Future<String[]>> futures = new ArrayList<Future<String[]>>();
         RemoteRepository repository = new RemoteRepository();
         repository.setUrl("http://repo1.maven.org/maven2/");
         repository.setId("central");
-        for(int i=0; i<1000; i++) {
+        for(int i=0; i<100; i++) {
             futures.add(resolverExecutor.submit(new Request(r, new RemoteRepository[]{repository})));
         }
-        Assert.assertTrue(futures.size() == 1000);
+        Assert.assertTrue(futures.size() == 100);
         for(Future<String[]> future : futures) {
             String[] classPath = future.get();
             Assert.assertTrue("Expected 7 jars, got "+classPath.length, classPath.length==7);
