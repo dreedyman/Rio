@@ -25,8 +25,8 @@
     </organization>
 
     <issueManagement>
-        <system>JIRA</system>
-        <url>http://jira.rio-project.org</url>
+        <system>GitHub</system>
+        <url>https://github.com/dreedyman/Rio/issues</url>
     </issueManagement>
 
     <scm>
@@ -428,7 +428,7 @@
     <properties>
         <groovy.version>1.8.0</groovy.version>
         <rio.version>5.0-M1</rio.version>
-        <rio.plugin.version>5.0-SNAPSHOT</rio.plugin.version>
+        <rio.plugin.version>5.0</rio.plugin.version>
         <river.version>2.1.1</river.version>
         <junit.version>4.8.2</junit.version>
         <hyperic.version>1.6.3.82</hyperic.version>
