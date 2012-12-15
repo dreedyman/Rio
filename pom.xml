@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
@@ -9,7 +9,7 @@
     <name>Rio Project</name>
     <description>Rio Project</description>
     <inceptionYear>2006</inceptionYear>
-    <url>http://rio-project.org</url>
+    <url>http://www.rio-project.org</url>
 
     <licenses>
         <license>
@@ -48,19 +48,14 @@
                 <reportSets>
                     <reportSet>
                         <reports>
-                            <!--<report>dependencies</report>
-                            <report>dependency-convergence</report>-->
                             <report>dependency-management</report>
                             <report>plugin-management</report>
-                            <!--<report>modules</report>-->
-                            <!--<report>cim</report>-->
                             <report>issue-tracking</report>
                             <report>mailing-list</report>
                             <report>license</report>
                             <report>project-team</report>
                             <report>scm</report>
                             <report>index</report>
-                            <!--<report>findbugs</report>-->
                         </reports>
                         <configuration>
                             <aggregate>true</aggregate>
@@ -175,9 +170,11 @@
         </contributor>
         <contributor>
             <name>Larry Mitchell</name>
+            <timezone>-5</timezone>
         </contributor>
         <contributor>
             <name>Kevin Hartig</name>
+            <timezone>-7</timezone>
         </contributor>
     </contributors>
 
@@ -201,7 +198,6 @@
         </repository>
     </repositories>
 
-    <!-- Needed if you are building Rio for the first time -->
     <pluginRepositories>
         <pluginRepository>
             <id>rio</id>
@@ -437,25 +433,5 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-
-    <!--<profiles>
-        <profile>
-		    <id>default-tools.jar</id>
-		    <activation>
-               <file>
-                   <exists>${java.home}/../lib/tools.jar</exists>
-               </file>
-		    </activation>
-		    <dependencies>
-			    <dependency>
-				    <groupId>com.sun</groupId>
-				    <artifactId>tools</artifactId>
-				    <version>1.6.0</version>
-				    <scope>provided</scope>
-				    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-			    </dependency>
-		    </dependencies>
-	    </profile>
-    </profiles>-->
 
 </project>
