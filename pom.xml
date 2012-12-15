@@ -396,7 +396,6 @@
     </build>
 
     <modules>
-        <module>rio-plugins/maven-rio-plugin</module>
         <module>rio-plugins/rio-archetype</module>
         <module>rio-start</module>
         <module>rio-api</module>
