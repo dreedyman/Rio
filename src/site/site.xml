@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="Rio">
-	<bannerLeft>
+
+    <bannerLeft>
 		<name>Rio</name>
 		<href>http://www.rio-project.org/</href>
         <src>images/rio.png</src>
@@ -32,7 +33,7 @@
             <item name="Getting Started" href="./getting-started.html"/>
 			<item name="FAQ" href="./faq.html"/>
             <item name="Contributions" href="./contributions.html"/>
-            <item name="Wiki" href="http://wiki.rio-project.org"/>
+            <item name="Wiki" href="https://github.com/dreedyman/Rio/wiki"/>
             <item name="Getting Help" href="./getting-help.html"/>
             <item name="Issue Tracking" href="./issue-tracking.html"/>
             <item name="Source Repository" href="./source-repository.html"/>
