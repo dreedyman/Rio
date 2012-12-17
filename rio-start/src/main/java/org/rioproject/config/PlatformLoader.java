@@ -19,8 +19,6 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import org.rioproject.RioVersion;
-import org.rioproject.resolver.Resolver;
-import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -306,18 +304,20 @@ public class PlatformLoader {
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig();
         File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio-lib.jar");
-        Resolver resolver = ResolverHelper.getResolver();
-        String[] rioAPIClassPath = resolver.getClassPathFor("org.rioproject:rio-api:"+RioVersion.VERSION);
+        //File rioApiJar = new File(rioHomeDir, "lib-dl"+File.separator+"rio-api.jar");
+        //Resolver resolver = ResolverHelper.getResolver();
+        //String[] rioAPIClassPath = resolver.getClassPathFor("org.rioproject:rio-api:"+RioVersion.VERSION);
+
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");
         rioCap.setName("Rio");
         rioCap.setVersion(RioVersion.VERSION);
         StringBuilder rioClassPath = new StringBuilder();
         rioClassPath.append(rioJar.getAbsolutePath());
-        for(String s : rioAPIClassPath) {
+        /*for(String s : rioAPIClassPath) {
             rioClassPath.append(File.pathSeparator);
             rioClassPath.append(s);
-        }
+        }*/
         rioCap.setClasspath(rioClassPath.toString());
 
         PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig();
