@@ -454,7 +454,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             LifeCycleManager lMgr = (LifeCycleManager)context. getServiceBeanManager().getDiscardManager();
             lMgr.register(getServiceProxy(), context);
         } catch(Exception e) {
-            logger.error("Register to LifeCycleManager", e);
+            logger.error("Could not create Cybernode", e);
             throw e;
         }
     }
