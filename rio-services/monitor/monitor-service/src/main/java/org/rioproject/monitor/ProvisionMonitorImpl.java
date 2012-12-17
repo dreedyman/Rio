@@ -158,7 +158,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             LifeCycleManager lMgr = (LifeCycleManager)context.getServiceBeanManager().getDiscardManager();
             lMgr.register(getServiceProxy(), context);
         } catch(Exception e) {
-            logger.error("Register to LifeCycleManager", e);
+            logger.error("Could not create Provision Monitor", e);
             throw e;
         }
     }
