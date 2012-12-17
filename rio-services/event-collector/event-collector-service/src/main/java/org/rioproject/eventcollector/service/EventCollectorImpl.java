@@ -42,6 +42,7 @@ import org.rioproject.eventcollector.proxy.Registration;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanAdapter;
 import org.rioproject.log.ServiceLogEvent;
+import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.servicecore.LeaseListener;
 import org.rioproject.resources.servicecore.LeaseListenerAdapter;
 import org.rioproject.resources.util.ThrowableUtil;
@@ -224,7 +225,8 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
                 groups.append(", ");
             groups.append(group);
         }
-        logger.info("{}: started [{}]", getServiceBeanContext().getServiceElement().getName(), groups.toString());
+        logger.info("{}: started [{}]", getServiceBeanContext().getServiceElement().getName(),
+                    JiniClient.getDiscoveryAttributes(getServiceBeanContext()));
     }
 
     /**

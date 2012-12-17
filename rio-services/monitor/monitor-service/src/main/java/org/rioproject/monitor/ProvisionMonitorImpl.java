@@ -23,7 +23,6 @@ import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.lease.UnknownLeaseException;
 import net.jini.core.lookup.ServiceID;
-import net.jini.discovery.LookupDiscovery;
 import net.jini.export.Exporter;
 import net.jini.lookup.entry.ServiceInfo;
 import net.jini.security.TrustVerifier;
@@ -53,6 +52,7 @@ import org.rioproject.monitor.tasks.InitialOpStringLoadTask;
 import org.rioproject.monitor.tasks.TaskTimer;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.*;
+import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.util.BannerProvider;
@@ -153,14 +153,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                                                 BannerProvider.class,
                                                                 new BannerProviderImpl());
         logger.info(bannerProvider.getBanner(context.getServiceElement().getName()));
-        try {
-            start(context);
-            LifeCycleManager lMgr = (LifeCycleManager)context.getServiceBeanManager().getDiscardManager();
-            lMgr.register(getServiceProxy(), context);
-        } catch(Exception e) {
-            logger.error("Could not create Provision Monitor", e);
-            throw e;
-        }
+        start(context);
+        LifeCycleManager lMgr = (LifeCycleManager)context.getServiceBeanManager().getDiscardManager();
+        lMgr.register(getServiceProxy(), context);
     }
 
     /**
@@ -973,18 +968,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             context.getWatchRegistry().register(p);
             p.start();
 
-            if(logger.isInfoEnabled()) {
-                String[] g = context.getServiceBeanConfig().getGroups();
-                StringBuilder buff = new StringBuilder();
-                if(g!= LookupDiscovery.ALL_GROUPS) {
-                    for(int i=0; i<g.length; i++) {
-                        if(i>0)
-                            buff.append(", ");
-                        buff.append(g[i]);
-                    }
-                }
-                logger.info("Started Provision Monitor [{}]", buff.toString());
-            }
+            logger.info("Started Provision Monitor [{}]", JiniClient.getDiscoveryAttributes(context));
         } catch(Exception e) {
             logger.error("Unrecoverable initialization exception", e);
             destroy();

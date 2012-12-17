@@ -46,15 +46,13 @@ import java.util.*;
  * @author Dennis Reedy
  */
 public class JiniClient {
-    public static final String GROUPS_PROPERTY_NAME =
-        org.rioproject.config.Constants.GROUPS_PROPERTY_NAME;
-    public static final String LOCATOR_PROPERTY_NAME =
-        org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME;
+    public static final String GROUPS_PROPERTY_NAME = org.rioproject.config.Constants.GROUPS_PROPERTY_NAME;
+    public static final String LOCATOR_PROPERTY_NAME = org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME;
     private DiscoveryManagement discoverer = null;
     public Listener listener = null;
     private List<ServiceRegistrar> regArray;
     private boolean createdDiscoverer = false;
-    private static Logger logger = LoggerFactory.getLogger("org.rioproject.resources.client");
+    private static Logger logger = LoggerFactory.getLogger(JiniClient.class);
 
     /**
      * Create an instance of a JiniClient <br>
@@ -145,6 +143,31 @@ public class JiniClient {
             }
         }
         return groups;
+    }
+
+    /**
+     * Utility to return a formatted string of discovery attributes
+     */
+    public static String getDiscoveryAttributes(ServiceBeanContext context) {
+        String[] g = context.getServiceBeanConfig().getGroups();
+        StringBuilder buff = new StringBuilder();
+        if(g!= LookupDiscovery.ALL_GROUPS) {
+            for(int i=0; i<g.length; i++) {
+                if(i>0)
+                    buff.append(", ");
+                buff.append(g[i]);
+            }
+        } else {
+            buff.append("ALL_GROUPS");
+        }
+        if(context.getServiceBeanConfig().getLocators()!=null) {
+            for(LookupLocator locator : context.getServiceBeanConfig().getLocators()) {
+                if(buff.length()>0)
+                    buff.append(", ");
+                buff.append(locator.toString());
+            }
+        }
+        return buff.toString();
     }
 
     /**

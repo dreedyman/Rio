@@ -27,11 +27,13 @@ import org.rioproject.associations.AssociationMgmt;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.bean.Initialized;
 import org.rioproject.bean.PreDestroy;
+import org.rioproject.bean.Started;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.resources.client.JiniClient;
 import org.rioproject.sla.RuleMap;
 import org.rioproject.util.StringUtil;
 import org.slf4j.Logger;
@@ -129,6 +131,12 @@ public class GnosticImpl implements Gnostic {
             }
         }
 
+    }
+
+    @Started
+    public void started() {
+        logger.info("{}: started [{}]",
+                    context.getServiceBeanConfig().getName(), JiniClient.getDiscoveryAttributes(context));
     }
 
     private void checkDroolsHasInitialized() {
