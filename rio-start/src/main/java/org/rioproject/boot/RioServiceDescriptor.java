@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RMISecurityManager;
@@ -377,6 +378,12 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             currentThread.setContextClassLoader(currentClassLoader);
             //TODO - factor in code integrity for MO
             proxy = (new MarshalledObject<Object>(proxy)).get();
+        } catch(InvocationTargetException e) {
+            Throwable t = e.getCause()==null? e.getTargetException(): e.getCause();
+            if(t!=null && t instanceof Exception)
+                throw (Exception)t;
+            throw e;
+
         } finally {
             currentThread.setContextClassLoader(currentClassLoader);
         }

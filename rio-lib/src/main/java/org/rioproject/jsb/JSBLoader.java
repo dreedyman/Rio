@@ -107,7 +107,7 @@ public class JSBLoader implements ServiceBeanFactory {
             /* Get the cause if we have an InvocationTargetException, it will allow the thrown exception
              * to have a more meaningful cause. */
              if(t instanceof InvocationTargetException) {
-                t = t.getCause();
+                 t = t.getCause()==null? ((InvocationTargetException)t).getTargetException(): t.getCause();
             }
             throw new ServiceBeanInstantiationException("Service Instantiation Exception", t, true);
         }

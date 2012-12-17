@@ -268,9 +268,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             if(cause instanceof ServiceBeanInstantiationException) {
                 throw (ServiceBeanInstantiationException)cause;
             } else {
-                String message = String.format("ServiceBean [%s] instantiation failed",
+                String message = String.format("ServiceBean %s instantiation failed",
                                                CybernodeLogUtil.logName(context.getServiceElement()));
-                throw new ServiceBeanInstantiationException(message, cause, true);
+                throw new ServiceBeanInstantiationException(message, t, true);
             }
         }
         return (proxy);

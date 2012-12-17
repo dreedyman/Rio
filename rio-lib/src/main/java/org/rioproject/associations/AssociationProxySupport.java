@@ -183,8 +183,9 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                         //terminated = true;
                     }
                 } else {
-                    if(t instanceof InvocationTargetException && t.getCause()!=null)
-                        t = t.getCause();
+                    if(t instanceof InvocationTargetException) {
+                        t = t.getCause()==null? ((InvocationTargetException)t).getTargetException(): t.getCause();
+                    }
                     throw t;
                 }
             }
