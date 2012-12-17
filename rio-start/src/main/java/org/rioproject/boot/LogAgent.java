@@ -15,16 +15,9 @@
  */
 package org.rioproject.boot;
 
-import org.rioproject.logging.FileHandler;
-import org.slf4j.*;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Enumeration;
-import java.util.logging.*;
-import java.util.logging.Logger;
 
 /**
  * Check that the Java logging configuration has a console available. If there is no console available, set the
@@ -47,52 +40,8 @@ public final class LogAgent {
 
     public static void redirectIfNecessary() {
         if(System.console()==null) {
-            String fileName = getFileName();
-            if(fileName!=null) {
-                StringBuilder builder = new StringBuilder();
-                builder.append("\nThere is no console support\n");
-                String logDir = System.getProperty("RIO_LOG_DIR");
-                File rioLogDir = new File(logDir);
-                File serviceOutput = new File(rioLogDir, fileName + ".out");
-                File serviceError = new File(rioLogDir, fileName + ".err");
-                redirectToFile(serviceOutput, true);
-                redirectToFile(serviceError, false);
-                builder.append("System out has been redirected to ").append(serviceOutput.getPath()).append("\n");
-                builder.append("System err has been redirected to ").append(serviceError.getPath()).append("\n");
-                LoggerFactory.getLogger(LogAgent.class).info(builder.toString());
-            }
-
-        }
-    }
-
-    private static String getFileName() {
-        String logDir = System.getProperty("RIO_LOG_DIR");
-        String fileName = null;
-        if(!usingJUL()) {
             redirectToLogger();
-        } else {
-            String lockFileName = null;
-
-            for (Enumeration<String> e = LogManager.getLogManager().getLoggerNames(); e.hasMoreElements(); ) {
-                Logger l = Logger.getLogger(e.nextElement());
-                for (Handler h : l.getHandlers()) {
-                    if (h instanceof ConsoleHandler) {
-                        h.close();
-                        l.removeHandler(h);
-                    }
-                    if(h instanceof org.rioproject.logging.FileHandler) {
-                        lockFileName = ((FileHandler)h).getLockFileName();
-                    }
-                }
-            }
-
-            if (logDir != null && lockFileName!=null) {
-                File lockFile = new File(lockFileName);
-                int ndx = lockFile.getName().indexOf(".lck");
-                fileName = lockFile.getName().substring(0, ndx);
-            }
         }
-        return fileName;
     }
 
     public static void redirectToLogger(){
@@ -106,19 +55,6 @@ public final class LogAgent {
                 stdErrLogger.error(s);
             }
         });
-    }
-
-    private static void redirectToFile(final File file, boolean isOut) {
-        try {
-            if(isOut) {
-                System.setOut(new PrintStream(new FileOutputStream(file)));
-            } else {
-                System.setErr(new PrintStream(new FileOutputStream(file)));
-            }
-        } catch (FileNotFoundException e) {
-            String type = isOut?"standard output":"standard error";
-            logger.warn("Redirecting {} to {}", type, file.getPath(), e);
-        }
     }
 
     /**
