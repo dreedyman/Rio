@@ -75,12 +75,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         String resolvedCodebase = resolveCodebase(codebase);
         if(codebase!=null && codebase.startsWith("artifact:") && classAnnotationMap.get(name)==null) {
             classAnnotationMap.put(name, codebase);
-            if(logger.isTraceEnabled()) {
-                logger.trace("class: %s, codebase: %s, size now %d", name, codebase, classAnnotationMap.size());
-            }
+            logger.trace("class: {}, codebase: {}, size now {}", name, codebase, classAnnotationMap.size());
         }
-        if(logger.isTraceEnabled())
-            logger.trace("Load class %s using codebase %s, resolved to %s", name, codebase, resolvedCodebase);
+        logger.trace("Load class {} using codebase {}, resolved to {}", name, codebase, resolvedCodebase);
         return loader.loadClass(resolvedCodebase, name, defaultLoader);
     }
 
@@ -97,7 +94,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 }
                 builder.append(s);
             }
-            logger.trace("Load proxy classes %s using codebase %s, resolved to %s", builder.toString(), codebase, resolvedCodebase);
+            logger.trace("Load proxy classes {} using codebase {}, resolved to {}", builder.toString(), codebase, resolvedCodebase);
         }
         return loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
     }
@@ -135,7 +132,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             adaptedCodebase = artifactToCodebase.get(codebase);
             if(adaptedCodebase==null) {
                 try {
-                    logger.debug("Resolve %s ", codebase);
+                    logger.debug("Resolve {} ", codebase);
                     StringBuilder builder = new StringBuilder();
                     String[] codebaseParts = codebase.split(" ");
                     for(String codebasePart : codebaseParts) {
@@ -152,9 +149,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     adaptedCodebase = builder.toString();
                     artifactToCodebase.put(codebase, adaptedCodebase);
                 } catch (ResolverException e) {
-                    logger.warn("Unable to resolve %s", codebase);
+                    logger.warn("Unable to resolve {}", codebase);
                 } catch (MalformedURLException e) {
-                    logger.warn(String.format("The codebase %s is malformed", codebase), e);
+                    logger.warn("The codebase {} is malformed", codebase, e);
                 }
             }
         } else {
