@@ -96,6 +96,11 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     public ServiceResource getServiceResource(ProvisionRequest provisionRequest) throws Exception {
         ServiceResource[] svcResources = getServiceResources();
+        if(svcResources.length==0) {
+            provisionRequest.addFailureReason(String.format("There are no registered Cybernodes, unable to provision %s",
+                                                            provisionRequest.getServiceElement().getName()));
+            return null;
+        }
         return (selectServiceResource(provisionRequest, svcResources));
     }
 
@@ -134,12 +139,22 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     protected ServiceResource selectServiceResource(ProvisionRequest provisionRequest,
                                                     final ServiceResource[] svcResources) throws ProvisionException {
+        if(svcResources.length==0) {
+            provisionRequest.addFailureReason(String.format("There are no available Cybernodes, unable to provision %s",
+                                                            provisionRequest.getServiceElement().getName()));
+            return null;
+        }
 
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
         ServiceResource[] filteredResources = filterMachineBoundaries(provisionRequest, svcResources);
-        if(filteredResources.length>0)
+        if(filteredResources.length>0) {
             filteredResources = filterIsolated(provisionRequest, filteredResources);
+        } else {
+            provisionRequest.addFailureReason(String.format("There are no available Cybernodes, unable to provision %s",
+                                                            provisionRequest.getServiceElement().getName()));
+            return null;
+        }
 
         for (ServiceResource svcResource : filteredResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
