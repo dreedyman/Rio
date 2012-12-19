@@ -31,7 +31,6 @@ import java.io.PrintStream;
  * @author Dennis Reedy
  */
 public final class LogAgent {
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(LogAgent.class);
     private static final org.slf4j.Logger stdOutLogger = LoggerFactory.getLogger("std.out");
     private static final org.slf4j.Logger stdErrLogger = LoggerFactory.getLogger("std.err");
 
