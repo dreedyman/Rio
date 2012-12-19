@@ -263,11 +263,6 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         filterPanel.setUseEventCollectorCheckBoxText();
     }
 
-    private void removeEvent(final int row) {
-        dataModel.removeItem(row);
-        notifyListeners();
-    }
-
     public void terminate() {
         remoteEventListener.terminate();
         if(eventConsumerManager!=null)
@@ -316,13 +311,16 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
         void maybeShowPopup(final MouseEvent e) {
             if(e.isPopupTrigger()) {
-                final int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
+                //final int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
                 JPopupMenu popup = new JPopupMenu();
                 JMenuItem delete = new JMenuItem("Delete");
                 delete.addActionListener(
                     new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
-                            removeEvent(row);
+                            int[] rows = eventTable.getSelectedRows();
+                            for(int i=0;i<rows.length;i++){
+                                dataModel.removeItem(rows[i]-i);
+                            }
                             notifyListeners();
                         }
                     });

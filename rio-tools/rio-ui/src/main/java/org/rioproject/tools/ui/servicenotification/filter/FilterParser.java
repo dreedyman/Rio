@@ -23,37 +23,40 @@ import java.util.*;
  * @author Dennis Reedy
  */
 public class FilterParser {
-    private final List<String> keywords = new ArrayList<String>();
-    private final Map<String, Map<String, String>> operands = new HashMap<String, Map<String, String>>();
+    private final List<String> operands = new ArrayList<String>();
+    private final Map<String, Map<String, String>> keywords = new HashMap<String, Map<String, String>>();
 
     public FilterParser() {
-        keywords.add("=");
-        keywords.add("is");
-        keywords.add("contains");
-        keywords.add("~");
+        operands.add("=");
+        operands.add("is");
+        operands.add("contains");
+        operands.add("~");
 
-        operands.put("type", new HashMap<String, String>());
-        operands.put("desc", new HashMap<String, String>());
+        keywords.put("type", new HashMap<String, String>());
+        keywords.put("desc", new HashMap<String, String>());
     }
 
     public FilterCriteria parse(String s) {
         FilterCriteria filterCriteria = null;
         if (s != null && s.length() > 0) {
             filterCriteria = new FilterCriteria();
-            System.out.println(s);
             String[] statements = getStatements(s);
             String[] parsed = s.split(" ");
+            if(parsed.length<3) {
+                System.out.println("The filter ["+s+"] is not a valid filter, you must declare at least <keyword> <operand> <value>");
+                return null;
+            }
             Map<String, String> map = null;
             for(int i=0; i<parsed.length; i++) {
                 if(map==null) {
-                    for(Map.Entry<String, Map<String, String>> entry : operands.entrySet()) {
+                    for(Map.Entry<String, Map<String, String>> entry : keywords.entrySet()) {
                         if(entry.getKey().equals(parsed[i])) {
                             map = entry.getValue();
                             break;
                         }
                     }
                 }
-                if(keywords.contains(parsed[i]) && map!=null){
+                if(operands.contains(parsed[i]) && map!=null){
                     String key = parsed[i];
                     if(i<parsed.length){
                         String value = parsed[i+1];
@@ -62,19 +65,21 @@ public class FilterParser {
                     map = null;
                 }
             }
-            for(Map.Entry<String, Map<String, String>> entry : operands.entrySet()) {
+
+            for(Map.Entry<String, Map<String, String>> entry : keywords.entrySet()) {
                 processMap(entry.getValue(), entry.getKey(), filterCriteria);
             }
-            operands.get("type").clear();
-            operands.get("desc").clear();
+
+            keywords.get("type").clear();
+            keywords.get("desc").clear();
         }
         return filterCriteria;
     }
 
-    private void processMap(Map<String, String> map, String operand, FilterCriteria filterCriteria) {
+    private void processMap(Map<String, String> map, String keyword, FilterCriteria filterCriteria) {
         for(Map.Entry<String, String> entry : map.entrySet()) {
             if(entry.getKey().equals("=") || entry.getKey().equals("is")) {
-                if(operand.equals("type")) {
+                if(keyword.equals("type")) {
                     filterCriteria.addEventType(entry.getValue());
                 } else {
                     filterCriteria.addDescription(entry.getValue());
@@ -85,7 +90,7 @@ public class FilterParser {
                     value = entry.getValue();
                 else
                     value = entry.getValue()+"*";
-                if(operand.equals("type")) {
+                if(keyword.equals("type")) {
                     filterCriteria.addEventType(value);
                 } else {
                     filterCriteria.addDescription(value);

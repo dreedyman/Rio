@@ -23,7 +23,6 @@ import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.servicenotification.filter.FilterCriteria;
 import org.rioproject.tools.ui.servicenotification.filter.FilterHandler;
@@ -161,9 +160,44 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         if(node!=null) {
             AbstractMutableTreeTableNode parent = (AbstractMutableTreeTableNode)node.getParent();
             removeNodeFromParent(node);
-            if(parent.getChildCount()==0 && parent.getParent()!=null)
+            this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(parent)));
+            if(parent.getChildCount()==0 && parent.getParent()!=null) {
                 removeNodeFromParent(parent);
+                this.modelSupport.fireNewRoot();
+            }
+            if(node instanceof DeploymentNode) {
+                if(filterCriteria!=null) {
+                    filteredModel.remove(node);
+                    removeFromCompleteModel(((DeploymentNode)node).getName());
+                } else {
+                    removeFromCompleteModel(((DeploymentNode)node).getName());
+                }
+            }
         }
+    }
+
+    private void removeFromCompleteModel(String name) {
+        DeploymentNode node = getDeploymentNode(name, completeModel);
+        if(node!=null) {
+            completeModel.remove(node);
+        }
+    }
+
+    @Override
+    public TreeTableNode[] getPathToRoot(TreeTableNode aNode) {
+        List<TreeTableNode> path = new ArrayList<TreeTableNode>();
+        TreeTableNode node = aNode;
+
+        while (node != root && node!=null) {
+            path.add(0, node);
+            node = node.getParent();
+        }
+
+        if (node == root) {
+            path.add(0, node);
+        }
+
+        return path.toArray(new TreeTableNode[path.size()]);
     }
 
     public RemoteServiceEventNode getRemoteServiceEventNode(int row) {
@@ -173,27 +207,6 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
             eventNode = (RemoteServiceEventNode)node;
         }
         return eventNode;
-    }
-
-    public List<RemoteServiceEventNode> getRemoteServiceEventNodes(ServiceElement elem) {
-        List<RemoteServiceEventNode> eNodes = new ArrayList<RemoteServiceEventNode>();
-        for (int i = 0; i < getRoot().getChildCount(); i++) {
-            AbstractMutableTreeTableNode dn =(AbstractMutableTreeTableNode) getRoot().getChildAt(i);
-            if(dn==null)
-                continue;
-            if(dn instanceof DeploymentNode) {
-                DeploymentNode dNode = (DeploymentNode)dn;
-                if(dNode.getName().equals(elem.getOperationalStringName())) {
-                    for (int j = 0; j < dn.getChildCount(); j++) {
-                        RemoteServiceEventNode en = (RemoteServiceEventNode)dn.getChildAt(j);
-                        if(en.getServiceName()!=null && en.getServiceName().equals(elem.getName())) {
-                            eNodes.add(en);
-                        }
-                    }
-                }
-            }
-        }
-        return eNodes;
     }
 
     private Map<String, DeploymentNode> getDeploymentNodes(String name) {
@@ -220,21 +233,6 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         }
 
         return nodeMap;
-    }
-
-    public DeploymentNode getDeploymentNode(String name) {
-        DeploymentNode dNode = null;
-        for (int i = 0; i < getRoot().getChildCount(); i++) {
-            AbstractMutableTreeTableNode node = (AbstractMutableTreeTableNode) getRoot().getChildAt(i);
-            if(node instanceof DeploymentNode) {
-                DeploymentNode dn = (DeploymentNode)node;
-                if(dn.getName().equals(name)) {
-                    dNode = dn;
-                    break;
-                }
-            }
-        }
-        return dNode;
     }
 
     public DeploymentNode getDeploymentNode(String name, List<DeploymentNode> nodes) {
