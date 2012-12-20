@@ -102,7 +102,6 @@ public class RemoteEventConsumerManager {
     }
 
 
-
     public void registerForAllServiceNotification(RemoteServiceEventListener remoteEventListener,
                                                   DiscoveryManagement dMgr) throws Exception {
         /* Create the event consumer for ProvisionFailureEvent utilities */

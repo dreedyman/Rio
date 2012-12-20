@@ -161,25 +161,26 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
             AbstractMutableTreeTableNode parent = (AbstractMutableTreeTableNode)node.getParent();
             removeNodeFromParent(node);
             this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(parent)));
+            DeploymentNode deploymentNode = null;
+            if(node instanceof DeploymentNode) {
+                deploymentNode = (DeploymentNode)node;
+            }
             if(parent.getChildCount()==0 && parent.getParent()!=null) {
                 removeNodeFromParent(parent);
                 this.modelSupport.fireNewRoot();
+                deploymentNode = (DeploymentNode)parent;
             }
-            if(node instanceof DeploymentNode) {
+            if(deploymentNode!=null) {
                 if(filterCriteria!=null) {
-                    filteredModel.remove(node);
-                    removeFromCompleteModel(((DeploymentNode)node).getName());
+                    filteredModel.remove(deploymentNode);
+                    DeploymentNode dNode = getDeploymentNode(deploymentNode.getName(), completeModel);
+                    if(dNode!=null) {
+                        completeModel.remove(dNode);
+                    }
                 } else {
-                    removeFromCompleteModel(((DeploymentNode)node).getName());
+                    completeModel.remove(deploymentNode);
                 }
             }
-        }
-    }
-
-    private void removeFromCompleteModel(String name) {
-        DeploymentNode node = getDeploymentNode(name, completeModel);
-        if(node!=null) {
-            completeModel.remove(node);
         }
     }
 

@@ -318,7 +318,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                     new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
                             int[] rows = eventTable.getSelectedRows();
-                            for(int i=0;i<rows.length;i++){
+                            for(int i=rows.length-1;i>=0;i--){
                                 dataModel.removeItem(rows[i]-i);
                             }
                             notifyListeners();
