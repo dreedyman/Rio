@@ -90,10 +90,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     static final String COMPONENT = "org.rioproject.event";
     /** The Logger */
     static Logger logger = LoggerFactory.getLogger(COMPONENT);
-    /** EventLeaseManager id token */
-    static int token = 0;
     private Configuration config;
-    private ExecutorService service;
+    private final ExecutorService service;
 
     /**
      * Create a BasicEventConsumer with an EventDescriptor
@@ -405,7 +403,9 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         EventRegistration eReg = null;
         Lease lease = connect(eventProducer, eventDesc);
         if(lease!=null) {
-            leaseTable.put(serviceID, new EventLeaseManager(eventProducer, lease, eventDesc));
+            EventLeaseManager eventLeaseManager = new EventLeaseManager(eventProducer, lease, eventDesc);
+            leaseTable.put(serviceID, eventLeaseManager);
+            service.submit(eventLeaseManager);
             eReg = eventRegistrationTable.get(eventDesc.eventID);
         }
         return (eReg);
@@ -447,11 +447,12 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                     }
                 }
 
-            } catch(Exception t) {
+            } catch(Exception e) {
                 /* Determine if we should even try to reconnect */
-                if(!ThrowableUtil.isRetryable(t)) {
-                    logger.warn("EventLeaseManager ID={}, Unrecoverable Exception getting EventRegistration", eDesc.toString());
-                    logger.trace("Unrecoverable Exception getting EventRegistration for "+eDesc.toString(), t);
+                if(!ThrowableUtil.isRetryable(e)) {
+                    logger.warn("Unrecoverable Exception getting EventRegistration for {}, {}: {}",
+                                eDesc.toString(), e.getClass().getName(), e.getMessage());
+                    logger.trace("Unrecoverable Exception getting EventRegistration for {}", eDesc.toString(), e);
                     break;
                 } else {
                     if(retryWait>0) {
@@ -663,33 +664,24 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * and the leases are shorter then 5 minutes, then after 5 minutes the lease
      * is allowed to expire.
      */
-    class EventLeaseManager extends Thread {
-        final long leaseTime;
-        boolean keepAlive = true;
-        final EventProducer producer;
-        Lease lease;
-        final EventDescriptor eDesc;
-        private Integer id;
+    class EventLeaseManager implements Runnable {
+        private final long leaseTime;
+        private boolean keepAlive = true;
+        private final EventProducer producer;
+        private Lease lease;
+        private final EventDescriptor eDesc;
 
-        EventLeaseManager(final EventProducer producer,
-                          final Lease lease,
-                          final EventDescriptor eDesc) {
-            super("EventLeaseManager");
-            synchronized(EventLeaseManager.class) {
-                id = token++;
-            }
+        EventLeaseManager(final EventProducer producer, final Lease lease, final EventDescriptor eDesc) {
             this.producer = producer;
             this.lease = lease;
             this.leaseTime = lease.getExpiration() - System.currentTimeMillis();
             this.eDesc = eDesc;
-            setDaemon(true);
-            start();
-            logger.trace("Created EventLeaseManager ID={}, EventDescriptor={}, Lease Time={} seconds",
-                         id, eDesc.toString(), (leaseTime / 1000));
+            logger.trace("Created EventLeaseManager, EventDescriptor={}, Lease Time={} seconds",
+                         eDesc.toString(), (leaseTime / 1000));
         }
 
         void drop(boolean disconnect) {
-            interrupt();
+            keepAlive = false;
             if(disconnect) {
                 try {
                     lease.cancel();
@@ -699,40 +691,34 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
             }
         }
 
-        public void interrupt() {
-            keepAlive = false;
-            super.interrupt();
-        }
-
         public void run() {
-            while (!isInterrupted()) {
-                if(!keepAlive) {
-                    break;
-                }
+            while (keepAlive) {
                 try {
-                    long waitTillRenew = TimeUtil.computeLeaseRenewalTime(leaseTime);
-                    sleep(waitTillRenew);
+                     long waitTillRenew = TimeUtil.computeLeaseRenewalTime(leaseTime);
+                    logger.trace("Wait to renew {} lease for {}", eDesc.toString(), TimeUtil.format(waitTillRenew));
+                    Thread.sleep(waitTillRenew);
                 } catch(InterruptedException ignore) {
                     /* ignore */
                 }
                 if(lease != null) {
                     try {
+                        logger.trace("Renew lease for {}", eDesc.toString());
                         lease.renew(leaseTime);
                     } catch(Exception e) {
                         /* Determine if we should even try to reconnect */
                         if(!ThrowableUtil.isRetryable(e)) {
                             keepAlive = false;
-                            logger.warn("EventLeaseManager ID={}, Unrecoverable Exception renewing Lease, dropping Lease renewal for {}",
-                                        id, eDesc.toString());
-                            logger.trace("Unrecoverable Exception renewing Lease for "+eDesc.toString(), e);
+                            logger.warn("EventLeaseManager, Unrecoverable Exception renewing Lease, dropping Lease renewal for {}",
+                                        eDesc.toString());
+                            logger.trace("Unrecoverable Exception renewing Lease for {}", eDesc.toString(), e);
                         }
                         if(keepAlive) {
                             logger.trace("Attempt to reconnect to producer {} for event {}",
                                          producer.toString(), eDesc.toString());
                             lease = connect(producer, eDesc);
                             if(lease==null) {
-                                logger.warn("EventLeaseManager ID={}, Unable to obtain Lease, dropping Lease renewal for {}",
-                                           id, eDesc.toString());
+                                logger.warn("EventLeaseManager, Unable to obtain Lease, dropping Lease renewal for {}",
+                                           eDesc.toString());
                                 keepAlive = false;
                             } else {
                                 logger.trace("Reconnect succeeded to producer {} for event {}",
@@ -742,6 +728,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                     }
                 }
             }
+            logger.trace("EventLeaseManager {} leaving", eDesc.toString());
         }
     }
 }
