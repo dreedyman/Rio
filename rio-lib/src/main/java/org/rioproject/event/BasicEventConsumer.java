@@ -89,7 +89,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     public static final String RESPONSE_WATCH = "Response Time";
     static final String COMPONENT = "org.rioproject.event";
     /** The Logger */
-    static Logger logger = LoggerFactory.getLogger(COMPONENT);
+    static Logger logger = LoggerFactory.getLogger(BasicEventConsumer.class);
     private Configuration config;
     private final ExecutorService service;
 
