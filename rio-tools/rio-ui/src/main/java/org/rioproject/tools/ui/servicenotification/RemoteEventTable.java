@@ -205,7 +205,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         String s = props.getProperty(Constants.EVENTS_DIVIDER);
         int dividerLocation;
         if(s==null) {
-            dividerLocation = splitPane.getHeight()/2;
+            dividerLocation = splitPane.getHeight()-splitPane.getHeight()/6;
         } else {
             dividerLocation = Integer.parseInt(s);
         }
@@ -311,7 +311,6 @@ public class RemoteEventTable extends AbstractNotificationUtility {
 
         void maybeShowPopup(final MouseEvent e) {
             if(e.isPopupTrigger()) {
-                //final int row = eventTable.rowAtPoint(new Point(e.getX(), e.getY()));
                 JPopupMenu popup = new JPopupMenu();
                 JMenuItem delete = new JMenuItem("Delete");
                 delete.addActionListener(
@@ -324,7 +323,6 @@ public class RemoteEventTable extends AbstractNotificationUtility {
                             notifyListeners();
                         }
                     });
-
                 popup.add(delete);
                 popup.pack();
                 popup.show(e.getComponent(), e.getX(), e.getY());

@@ -15,160 +15,22 @@
  */
 package org.rioproject.tools.ui;
 
-import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import net.jini.core.lease.LeaseDeniedException;
-import net.jini.discovery.DiscoveryManagement;
-import org.rioproject.eventcollector.api.EventCollector;
-import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
-import org.rioproject.tools.ui.servicenotification.RemoteEventTable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
-import java.io.IOException;
 import java.rmi.server.ExportException;
-import java.util.Properties;
 
 /**
  * Container for utilities
  */
 public class UtilitiesPanel extends JPanel {
-    private final RemoteEventTable remoteEventTable;
 
-    public UtilitiesPanel(final CybernodeUtilizationPanel cup,
-                          final Configuration config,
-                          final Properties props) throws ExportException, ConfigurationException {
+    public UtilitiesPanel(final CybernodeUtilizationPanel cup) throws ExportException, ConfigurationException {
         super(new BorderLayout());
-        remoteEventTable = new RemoteEventTable(config, props);
-
         JTabbedPane tabs = new JTabbedPane();
         tabs.add("Utilization", cup);
-        JLabel label = makeTabLabel("Service Event Notifications", remoteEventTable);
-        tabs.addTab(null, remoteEventTable);
-        tabs.setTabComponentAt(1, label);
         add(tabs, BorderLayout.CENTER);
-    }
-
-    public void init(final Properties props) {
-        remoteEventTable.init(props);
-    }
-
-    Properties getOptions() {
-        Properties props = new Properties();
-        props.put(Constants.USE_EVENT_COLLECTOR, Boolean.toString(remoteEventTable.getUseEventCollector()));
-        props.put(Constants.EVENTS_DIVIDER, Integer.toString(remoteEventTable.getDividerLocation()));
-        return props;
-    }
-
-    void setDiscoveryManagement(final DiscoveryManagement dMgr) throws Exception {
-        remoteEventTable.setDiscoveryManagement(dMgr);
-    }
-
-    private JLabel makeTabLabel(final String name, final NotificationUtility... comps) {
-        NotificationNode nn = new NotificationNode(comps);
-        for(NotificationUtility nu : comps)
-            nu.subscribe(nn);
-        JLabel l = new TabLabel(name, nn);
-        nn.setLabel(l);
-        return l;
-    }
-
-    void addEventCollector(final EventCollector eventCollector) throws IOException, LeaseDeniedException, UnknownEventCollectorRegistration {
-        remoteEventTable.addEventCollector(eventCollector);
-    }
-
-    void removeEventCollector(final EventCollector eventCollector) {
-        remoteEventTable.removeEventCollector(eventCollector);
-    }
-
-    void stopNotifications() {
-        remoteEventTable.terminate();
-    }
-
-    class TabLabel extends JLabel {
-        private NotificationNode node;
-        Dimension originalSize;
-
-        TabLabel(final String s, final NotificationNode node) {
-            super(s);
-            this.node = node;
-        }
-
-        @Override
-        protected void paintComponent(final Graphics g) {
-            super.paintComponent(g);
-            if(node.getCount()>0) {
-                String countString = Integer.toString(node.getCount());
-                g.setColor(new Color(227, 6, 19));
-
-                int y = g.getFontMetrics().getAscent();
-                int startX = g.getFontMetrics().stringWidth(getText());
-                int countW = g.getFontMetrics().stringWidth(countString)+8;
-
-                Shape shape = new RoundRectangle2D.Double(startX+4,
-                                                          2,
-                                                          countW,
-                                                          (MacUIHelper.isMacOS()?getHeight()-4:getHeight()-2),
-                                                          16,
-                                                          16);
-                Graphics2D g2d = (Graphics2D)g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                     RenderingHints.VALUE_ANTIALIAS_ON );
-                g2d.fill(shape);
-                g.setColor(Color.white);
-                Font currentFont = g.getFont();
-                g.setFont(Constants.NOTIFY_COUNT_FONT);
-                g.drawString(countString, startX+8, y+1);
-                g.setFont(currentFont);
-            }
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            if(node.getCount()>0) {
-                FontMetrics fm = getGraphics().getFontMetrics(getFont());
-                String countString = Integer.toString(node.getCount());
-                int countLength = fm.stringWidth(countString)+12;
-                int textLength = fm.stringWidth(getText())+countLength;
-                if(originalSize==null)
-                    originalSize = super.getPreferredSize();
-                Dimension d = super.getPreferredSize();
-                d.width = textLength;
-                return d;
-            } else {
-                if(originalSize==null)
-                    originalSize = super.getPreferredSize();
-                return originalSize;
-            }
-        }
-    }
-
-    class NotificationNode implements NotificationUtilityListener {
-        JLabel label;
-        NotificationUtility[] utility;
-
-        NotificationNode(final NotificationUtility... utility) {
-            this.utility = utility;
-        }
-
-        void setLabel(final JLabel label) {
-            this.label = label;
-        }
-
-        int getCount() {
-            int count = 0;
-            for(NotificationUtility nu : utility) {
-                count += nu.getTotalItemCount();
-            }
-            return count;
-        }
-
-        public void notify(final NotificationUtility nu) {
-            //getCount();            
-            if(label!=null)
-                label.repaint();
-        }
     }
 }
