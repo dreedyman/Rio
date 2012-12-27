@@ -46,8 +46,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.rmi.server.ExportException;
-import java.util.ArrayList;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Utility to display {@link org.rioproject.event.RemoteServiceEvent}s using either an {@link EventCollector} or
@@ -371,8 +370,22 @@ public class RemoteEventTable extends AbstractNotificationUtility {
         @Override
         public void refresh() {
             try {
+                Map<DeploymentNode, Boolean> nodes = new LinkedHashMap<DeploymentNode, Boolean>();
+                for(DeploymentNode dNode : dataModel.getDeploymentNodes()) {
+                    int row = dataModel.getDeploymentNodeRow(dNode);
+                    boolean expanded = row != -1 && eventTable.isExpanded(dataModel.getDeploymentNodeRow(dNode));
+                    nodes.put(dNode, expanded);
+                }
                 dataModel.reset();
                 eventConsumerManager.refresh();
+                for(Map.Entry<DeploymentNode, Boolean> entry : nodes.entrySet()) {
+                    if(entry.getValue()) {
+                        int row = dataModel.getDeploymentNodeRow(entry.getKey());
+                        eventTable.expandRow(dataModel.getDeploymentNodeRow(entry.getKey()));
+                        dataModel.updated(eventTable.getPathForRow(row));
+                    }
+                }
+
             } catch (UnknownEventCollectorRegistration e) {
                 e.printStackTrace();
             } catch (IOException e) {

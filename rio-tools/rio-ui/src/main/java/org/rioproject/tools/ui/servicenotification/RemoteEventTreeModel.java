@@ -153,7 +153,18 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
     }
 
     public void removeItem(int row) {
-        removeItem(getNode(row));
+        AbstractMutableTreeTableNode node = getNode(row);
+        TreePath treePath = null;
+        if(node instanceof DeploymentNode) {
+
+        } else {
+            treePath = treeTable.getPathForRow(getDeploymentNodeRow((DeploymentNode)node.getParent()));
+
+        }
+        removeItem(node);
+        if(treePath!=null) {
+            this.modelSupport.fireChildrenRemoved(treePath, new int[]{row}, new Object[]{node});
+        }
     }
 
     public void removeItem(AbstractMutableTreeTableNode node) {
@@ -247,6 +258,16 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         return dNode;
     }
 
+    Collection<DeploymentNode> getDeploymentNodes() {
+        Collection<DeploymentNode> dNodes = new ArrayList<DeploymentNode>();
+        if(filterCriteria!=null) {
+            dNodes.addAll(filteredModel);
+        } else {
+            dNodes.addAll(completeModel);
+        }
+        return dNodes;
+    }
+
     public void setFilterCriteria(FilterCriteria filterCriteria) {
         if(this.filterCriteria!=null && this.filterCriteria.equals(filterCriteria)) {
             return;
@@ -302,22 +323,43 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
                 node = tn;
                 break;
             }
-            rowCounter++;
-            for (int j = 0; j < tn.getChildCount(); j++) {
-                AbstractMutableTreeTableNode t = (AbstractMutableTreeTableNode) tn.getChildAt(j);
-                if (treeTable.isVisible(treeTable.getPathForRow(rowCounter))) {
+            if(treeTable.isExpanded(rowCounter)) {
+                for (int j = 0; j < tn.getChildCount(); j++) {
+                    rowCounter++;
                     if (rowCounter == row) {
-                        node = t;
+                        node = (AbstractMutableTreeTableNode) tn.getChildAt(j);
                         break;
                     }
+                }
+            }
+            if (node != null)
+                break;
+            rowCounter++;
+        }
+        return node;
+    }
+
+    int getDeploymentNodeRow(DeploymentNode deploymentNode) {
+        int row = -1;
+        int rowCounter = 0;
+        for (int i = 0; i < getRoot().getChildCount(); i++) {
+            AbstractMutableTreeTableNode tn = (AbstractMutableTreeTableNode) getRoot().getChildAt(i);
+            if(tn instanceof DeploymentNode && deploymentNode.equals(tn)) {
+                row = rowCounter;
+                break;
+            }
+            if (treeTable.isExpanded(rowCounter)) {
+                for (int j = 0; j < tn.getChildCount(); j++) {
                     rowCounter++;
                 }
             }
-
-            if (node != null)
-                break;
+            rowCounter++;
         }
-        return node;
+        return row;
+    }
+
+    void updated(TreePath treePath) {
+        this.modelSupport.firePathChanged(treePath);
     }
 
     @Override
