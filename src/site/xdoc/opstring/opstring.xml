@@ -6,9 +6,8 @@
                 The OperationalString is the unit of deployment in Rio. It
                 contains definitions that provide context on how to provision,
                 manage, monitor and instantiate services through the network. An
-                OperationalString is created by using either XML or through the use 
-                of a Groovy DSL.  This section will walk you through the details of the
-                OperationalString.
+                OperationalString is created through the use of a Groovy DSL. This
+                section will walk you through the details of the OperationalString.
             </p>
             <div id="infobox">
                 <img src="../images/information.gif"/>

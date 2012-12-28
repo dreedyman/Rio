@@ -6,15 +6,17 @@
 		<href>http://www.rio-project.org/</href>
         <src>images/rio.png</src>
 	</bannerLeft>
-    <!--
+
     <bannerRight>
-        <src>images/graph.png</src>
+        <name>GitHub</name>
+        <src>images/forkme_right_gray.png</src>
+        <href>https://github.com/dreedyman/Rio</href>
     </bannerRight>
-    -->
+
     <skin>
 		<groupId>org.rioproject</groupId>
 		<artifactId>maven-rio-skin</artifactId>
-		<version>1.0</version>
+		<version>1.1</version>
 	</skin>
 
 	<body>        
@@ -24,7 +26,6 @@
 		
         <menu name="Get Rio">
             <item name="Download" href="./download.html"/>
-            <item name="Release Notes" href="./release-notes.html"/>
 			<item name="License" href="./license.html"/>
         </menu>
 
