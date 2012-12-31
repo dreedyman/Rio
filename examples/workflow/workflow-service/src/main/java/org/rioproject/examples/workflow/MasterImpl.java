@@ -17,8 +17,12 @@ package org.rioproject.examples.workflow;
 
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
+import org.rioproject.bean.PreAdvertise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The Master provides submission management, writing/taking WorkflowEntry
@@ -27,11 +31,27 @@ import java.util.UUID;
 public class MasterImpl implements Master {
     private static UUID id = UUID.randomUUID();
     private JavaSpace space;
+    private Logger logger = LoggerFactory.getLogger(MasterImpl.class);
+    private AtomicBoolean hasBeenAdvertised = new AtomicBoolean(false);
 
+    /* Injected by Rio */
+    @SuppressWarnings("unused")
     public void setJavaSpace(JavaSpace space) {
         this.space = space;
     }
-    
+
+    /* Invoked by Rio */
+    @SuppressWarnings("unused")
+    @PreAdvertise
+    public void startup() {
+        logger.info("PRE_ADVERTISE Master");
+        hasBeenAdvertised.set(true);
+    }
+
+    boolean hasBeenAdvertised() {
+        return hasBeenAdvertised.get();
+    }
+
     public WorkflowEntry process() throws WorkflowException {
         if (space == null)
             throw new IllegalArgumentException("space is null");
@@ -42,21 +62,17 @@ public class MasterImpl implements Master {
             space.write(order, null, Lease.FOREVER);
         } catch (Exception e) {
             Throwable cause = (e.getCause() == null ? e : e.getCause());
-                throw new WorkflowException("Writing to the space",
-                                            cause);
+            throw new WorkflowException("Writing to the space", cause);
         }
 
         WorkflowEntry template = new WorkflowEntry(id, State.CLOSED);
-        System.out.println("Waiting for result ...");
+        logger.info("Waiting for result ...");
         WorkflowEntry result;
         try {
-            result = (WorkflowEntry) space.take(template,
-                                                null,
-                                                Long.MAX_VALUE);
+            result = (WorkflowEntry) space.take(template, null, Long.MAX_VALUE);
         } catch (Exception e) {
             Throwable cause = (e.getCause() == null ? e : e.getCause());
-            throw new WorkflowException("Taking WorkflowEntry entries",
-                                        cause);
+            throw new WorkflowException("Taking WorkflowEntry entries", cause);
         }
         return (result);
     }

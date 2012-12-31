@@ -51,8 +51,14 @@ public class ITWorkflowTest {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String beanName = entry.getKey();
             Object beanImpl = entry.getValue();
-            if (beanName.equals("Master"))
+            if (beanName.equals("Master")) {
                 master = (Master) beanImpl;
+                System.out.println("Check if Master has been advertised...");
+                while(!((MasterImpl)beanImpl).hasBeenAdvertised()) {
+                    System.out.println("Wait for Master to be advertised...");
+                    Thread.sleep(1000l);
+                }
+            }
         }
     }
 

@@ -43,6 +43,13 @@
             <version>${river.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.sun.jini</groupId>
+            <artifactId>mahalo</artifactId>
+            <version>${river.version}</version>
+            <scope>test</scope>
+        </dependency>
         
         <dependency>
             <groupId>junit</groupId>
@@ -57,6 +64,19 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
@@ -75,14 +95,13 @@
                             <forkMode>once</forkMode>
                             <systemProperties>
                                 <property>
-                                    <name>opstring</name>
-                                    <value>../src/main/opstring/workflow.groovy</value>
-                                </property>
-                                <property>
                                     <name>RIO_HOME</name>
                                     <value>${basedir}/../../../distribution/target/rio-${rio.version}</value>
                                 </property>
                             </systemProperties>
+                            <excludes>
+                                <exclude>**/*ITWorkflowTest.java</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>
@@ -93,24 +112,26 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>opstring</name>
+                                    <value>../src/main/opstring/workflow.groovy</value>
+                                </property>
+                            </systemProperties>
+                            <excludes>
+                                <exclude>**/*ITWorkflowDeployTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
                 </plugins>
+
+
             </build>
         </profile>
     </profiles>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*IT*.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-
-        </plugins>
-    </build>
 
 </project>

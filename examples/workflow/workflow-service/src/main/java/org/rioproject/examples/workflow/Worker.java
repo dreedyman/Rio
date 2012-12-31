@@ -21,8 +21,9 @@ import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionFactory;
 import net.jini.core.transaction.server.TransactionManager;
 import net.jini.space.JavaSpace;
+import org.rioproject.associations.AssociationProxyUtil;
+import org.rioproject.bean.PreAdvertise;
 import org.rioproject.bean.PreDestroy;
-import org.rioproject.bean.Started;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.CounterWatch;
@@ -38,6 +39,7 @@ import java.util.concurrent.Executors;
 /**
  * A basic JavaSpace worker
  */
+@SuppressWarnings("unused")
 public class Worker {
     private JavaSpace space;
     private TransactionManager tranMgr;
@@ -63,7 +65,7 @@ public class Worker {
     }
 
     public void setTransactionManager(TransactionManager tranMgr) {
-        this.tranMgr = tranMgr;
+        this.tranMgr = AssociationProxyUtil.getService(tranMgr);
     }
 
     public void setParameters(Map<String, Object> parms) {
@@ -72,8 +74,11 @@ public class Worker {
         template = new WorkflowEntry(state);
     }
 
-    @Started
+    @PreAdvertise
     public void startup() {
+        if(space==null)
+            throw new IllegalStateException("The JavaSpace should have been injected prior to this method being called");
+        logger.info("PRE_ADVERTISE {}", context.getServiceElement().getName());
         rate = new CounterWatch("rate");
         throughput = new ThroughputWatch("throughput");
         meanTime = new StopWatch("meanTime");
@@ -97,15 +102,11 @@ public class Worker {
     class SpaceProcessor implements Runnable {
         public void run() {
             while (!shutdown) {
-                /* wait for space to be injected */
-                if(space==null)
-                    waitForSpace();
-                if(space==null)
-                    break;
                 try {
                     Transaction tx = null;
                     if (tranMgr != null) {
                         tx = TransactionFactory.create(tranMgr, Lease.FOREVER).transaction;
+
                     }
                     WorkflowEntry entry = (WorkflowEntry)space.takeIfExists(template, tx, timeout);
                     if (entry == null && tx != null) {
@@ -128,18 +129,8 @@ public class Worker {
                     break;
 
                 } catch (Exception e) {
-                    //e.printStackTrace();
-                }
-            }
-        }
-
-        void waitForSpace() {
-            while (space == null) {
-                try {
-                    Thread.sleep(500);
-                } catch(InterruptedException e) {
-                    System.err.println("Interrupted during sleep, exiting...");
-                    return;
+                    logger.warn("Worker [{}] processing task", name, e);
+                    break;
                 }
             }
         }

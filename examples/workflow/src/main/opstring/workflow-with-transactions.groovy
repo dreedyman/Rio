@@ -10,6 +10,8 @@ deployment(name: 'Workflow Example') {
     artifact id: 'service-dl',     'org.rioproject.examples.workflow:workflow-api:2.0.2'
     artifact id: 'outrigger-dl',   'com.sun.jini:outrigger-dl:2.1.1'
     artifact id: 'outrigger-impl', 'com.sun.jini:outrigger:2.1.1'
+    artifact id: 'mahalo-dl',      'com.sun.jini:mahalo-dl:2.1.1'
+    artifact id: 'mahalo-impl',    'com.sun.jini:mahalo:2.1.1'
 
     ['New Worker'    : 'NEW',
      'Pending Worker': 'PENDING',
@@ -28,6 +30,10 @@ deployment(name: 'Workflow Example') {
             association(type: "requires",
                         serviceType: "net.jini.space.JavaSpace05",
                         property: "javaSpace", name: "Workflow Space")
+
+            association(type: "requires",
+                        serviceType: "net.jini.core.transaction.server.TransactionManager",
+                        property: "transactionManager", name: "Mahalo")
 
             maintain 1
         }
@@ -62,6 +68,18 @@ deployment(name: 'Workflow Example') {
 
         maintain 1
 
+    }
+
+    service(name:'Mahalo') {
+        interfaces {
+            classes 'net.jini.core.transaction.server.TransactionManager'
+            artifact ref: 'mahalo-dl'
+        }
+        implementation(class: 'com.sun.jini.mahalo.TransientMahaloImpl') {
+            artifact ref: 'mahalo-impl'
+        }
+        maintain 1
+        maxPerMachine 1
     }
 
 }
