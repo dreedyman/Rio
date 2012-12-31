@@ -114,7 +114,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     /** Cybernode logger. */
     private static final Logger logger = LoggerFactory.getLogger(LOGGER);
     /** Cybernode logger. */
-    private static final Logger loaderLogger = LoggerFactory.getLogger(LOGGER+".loader");
+    private static final Logger loaderLogger = LoggerFactory.getLogger(CybernodeImpl.class.getPackage().getName()+".loader");
     /**The component name for accessing the service's configuration */
     private static String configComponent = CONFIG_COMPONENT;
     /** Instance of a ServiceBeanContainer */

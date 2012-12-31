@@ -235,15 +235,19 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                 mName = mName.substring(3);
                 mName = Character.toLowerCase(mName.charAt(0))+mName.substring(1);
                 String mods = Modifier.toString(m.getModifiers());
-                sb.append("\tproperty=").append(mName).append(" modifiers: [").append(mods).append("], ").append(m).append("\n");
+                sb.append("property=").append(mName).append(" modifiers: [").append(mods).append("], ").append(m).append("\n");
                 if(mName.equals(propertyName) && mods.contains("public")) {
                     method = m;
                     break;
                 }
             }
         }
-        sb.append("Selected method: ").append(method);
-        logger.debug(sb.toString());
+        if(method!=null) {
+            sb.append("Selected method: ").append(method);
+        } else {
+            sb.append("No method selected, unable to match property name: ").append(propertyName);
+        }
+        logger.trace(sb.toString());
         return(method);
     }
 

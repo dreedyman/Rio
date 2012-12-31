@@ -105,8 +105,8 @@ public class ServiceAdvertiser {
                                                         joinAdmin, opStringName, proxyCL);
                         if (opStringEntry != null) {
                             addList.add(opStringEntry);
-                            logger.warn("Added OperationalStringEntry [{}] for {}",
-                                        ((OperationalStringEntry)opStringEntry).name, serviceName);
+                            logger.debug("Added OperationalStringEntry [{}] for {}",
+                                         ((OperationalStringEntry)opStringEntry).name, serviceName);
                         } else {
                             logger.warn("Unable to obtain the OperationalStringEntry for {}", serviceName);
                         }
@@ -114,15 +114,12 @@ public class ServiceAdvertiser {
                         Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, proxyCL);
                         if (hostEntry != null) {
                             addList.add(hostEntry);
-                            logger.trace("Added Host [{}] for {}", ((Host)hostEntry).hostName, serviceName);
+                            logger.debug("Added Host [{}] for {}", ((Host)hostEntry).hostName, serviceName);
                         } else {
                             logger.warn("Unable to obtain the Host entry for {}", serviceName);
                         }
                     } else {
-                        if (logger.isTraceEnabled()) {
-                            String s = (opStringName == null ? "[null]" : "[empty string]");
-                            logger.trace("OperationalString name is {}", s);
-                        }
+                        logger.trace("OperationalString name is {}", (opStringName == null ? "[null]" : "[empty string]"));
                     }
                     /* Process the net.jini.lookup.entry.Name attribute */
                     try {
@@ -135,8 +132,7 @@ public class ServiceAdvertiser {
                          * utility is prepared to add */
                         Entry[] attributes = joinAdmin.getLookupAttributes();
                         for (Entry attribute : attributes) {
-                            if (attribute.getClass().getName().equals(
-                                                                         nameClass.getName())) {
+                            if (attribute.getClass().getName().equals(nameClass.getName())) {
                                 Field n = attribute.getClass().getDeclaredField("name");
                                 String value = (String) n.get(attribute);
                                 if (value.equals(serviceName))
@@ -356,7 +352,6 @@ public class ServiceAdvertiser {
             joinAdmin.addLookupAttributes(attrs);
         } catch (Exception e) {
             logger.warn("Unable to add Entry attributes", e);
-
         }
     }
 }

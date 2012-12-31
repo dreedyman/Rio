@@ -380,7 +380,7 @@ public class AssociationMgmt implements AssociationManagement {
                     for(int i=0; i<newDesc.length; i++) {
                         if(i>0)
                             sb.append("\n");
-                        sb.append("    ").append(newDesc[i].toString());
+                        sb.append(i+1).append(". ").append(newDesc[i].toString());
                     }
                     logger.trace(sb.toString());
                 }
