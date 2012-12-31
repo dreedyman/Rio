@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>5.0-M1</version>
+    <version>5.0-M2</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -421,7 +421,7 @@
 
     <properties>
         <groovy.version>1.8.0</groovy.version>
-        <rio.version>5.0-M1</rio.version>
+        <rio.version>5.0-M2</rio.version>
         <rio.plugin.version>5.0</rio.plugin.version>
         <river.version>2.1.1</river.version>
         <junit.version>4.8.2</junit.version>

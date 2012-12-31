@@ -50,7 +50,7 @@
     </build>
 
     <properties>
-        <rio.version>5.0-M1</rio.version>
+        <rio.version>5.0-M2</rio.version>
         <rio.plugin.version>5.0</rio.plugin.version>
         <slf4j.version>1.7.2</slf4j.version>
         <river.version>2.1.1</river.version>
