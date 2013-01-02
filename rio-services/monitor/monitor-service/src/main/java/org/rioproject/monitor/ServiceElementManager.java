@@ -1913,8 +1913,7 @@ public class ServiceElementManager implements InstanceIDManager {
             if(shutdown.get())
                 return;
             ServiceBeanInstance instance;
-            Uuid uuid = UuidFactory.create(sID.getMostSignificantBits(),
-                                           sID.getLeastSignificantBits());
+            Uuid uuid = UuidFactory.create(sID.getMostSignificantBits(), sID.getLeastSignificantBits());
             try {
                 /* Clean up instances of the service and decrease the number
                  * of services if the service's proxy was removed from the
@@ -1923,13 +1922,13 @@ public class ServiceElementManager implements InstanceIDManager {
                  */
                 instance = cleanService(proxy, uuid, (svcElement.getProvisionType() == ProvisionType.FIXED));
                 if(instance!=null) {
-                    mgrLogger.debug("[{}] service failure, instance=[{}], type=[{}], proxy=[{}]",
+                    mgrLogger.debug("[{}] service failure, instance: {}, host address: {}, type: {}",
                                    LoggingUtil.getLoggingName(svcElement),
                                    instance.getServiceBeanConfig().getInstanceID(),
-                                   svcElement.getProvisionType(),
-                                   proxy.getClass().getName());
+                                   instance.getHostAddress(),
+                                   svcElement.getProvisionType());
                 } else {
-                    mgrLogger.debug("[{}] service failure, type=[{}], proxy=[{}], COULD NOT OBTAIN INSTANCE, active monitor? {}",
+                    mgrLogger.debug("[{}] service failure, type: {}, proxy: {}, COULD NOT OBTAIN INSTANCE, active monitor? {}",
                                    LoggingUtil.getLoggingName(svcElement),
                                    svcElement.getProvisionType(),
                                    proxy.getClass().getName(),
