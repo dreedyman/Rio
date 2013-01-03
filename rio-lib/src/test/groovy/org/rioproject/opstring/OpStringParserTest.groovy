@@ -41,6 +41,14 @@ import org.rioproject.system.SystemWatchID
 class OpStringParserTest extends GroovyTestCase {
     def OpStringParser dslParser = new GroovyDSLOpStringParser()
 
+    void testRangeParsing() {
+        File file = new File("src/test/resources/opstrings/servicebeanRange.groovy")
+        def opstrings = dslParser.parse(file, null, null, null, null)
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = opstrings[0]
+        assertEquals 50, opstring.services.length
+    }
+
     void testSlaExample() {
         File file = new File("src/test/resources/opstrings/slaexample.groovy")
         def opstrings = dslParser.parse(file, null, null, null, null)
