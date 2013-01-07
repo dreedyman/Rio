@@ -21,8 +21,8 @@ import org.rioproject.system.measurable.MeasurableCapability;
 import org.rioproject.system.ComputeResource;
 
 /**
- * The ComputeResourceManager provides the capabilities to access, set and
- * obtain information on {@link ComputeResource} mechanisms
+ * The ComputeResourceManager provides the capabilities to access, set and obtain information on
+ * the {@link ComputeResource}.
  *
  * @author Dennis Reedy
  */
@@ -30,38 +30,36 @@ public interface ComputeResourceManager {
     /**
      * Get the ComputeResource object
      * 
-     * @return The Object representing the platform
-     * and measurable capabilities of the compute resource upon which the
-     * service has been instantiated
+     * @return The {@code ComputeResource}, never {@code null}.
      */
     ComputeResource getComputeResource();
 
     /**
-     * Get a PlatformCapability instance from a name
+     * Get a PlatformCapability instance from a name.
      * 
      * @param description The name of the PlatformCapability
-     * @return The first PlatformCapability that matches
-     * the name. If no PlatformCapability matches the name, return
-     * null
+     *
+     * @return The first PlatformCapability that matches the name. If no PlatformCapability
+     * matches the name, return {@code null}.
+     *
+     * @throws IllegalArgumentException if the {@code description} is {@code null}.
      */
     PlatformCapability getPlatformCapability(String description);
 
     /**
-     * Get the PlatformCapability instances that match declared system
-     * requirements
+     * Get the PlatformCapability instances that match declared system requirements.
      * 
-     * @return  An array of PlatformCapability instances
-     * that match declared operational requirements. If there are no declared
-     * PlatformCapability requirements, then return a zero-length array
+     * @return  An array of PlatformCapability instances that match declared operational
+     * requirements. If there are no declared PlatformCapability requirements, then return
+     * a zero-length array.
      */
     PlatformCapability[] getMatchedPlatformCapabilities();
 
     /**
      * Get the MeasurableCapability instances that match declared SLAs.
      * 
-     * @return An array of MeasurableCapability
-     * instances that match declared operational requirements. If there are no
-     * declared SLAs which match MeasurableCapability identifiers, then return a 
+     * @return An array of MeasurableCapability instances that match declared operational requirements.
+     * If there are no declared SLAs which match MeasurableCapability identifiers, then return a
      * zero-length array
      */
     MeasurableCapability[] getMatchedMeasurableCapabilities();
