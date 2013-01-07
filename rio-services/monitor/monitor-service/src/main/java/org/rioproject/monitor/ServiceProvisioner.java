@@ -332,7 +332,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             logger.trace("Checking for InstantiatorResource match");
             if(ir.getInstantiator().equals(preparedResource)) {
-                logger.debug("Update from {}, current serviceCount {}, serviceLimit {}",
+                logger.trace("Update from {}, current serviceCount {}, serviceLimit {}",
                              ir.getName(),
                              deployedServices.size(),
                              serviceLimit);
