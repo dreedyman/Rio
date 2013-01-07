@@ -371,7 +371,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
         for (ProvisionLeaseManager mgr : mgrs) {
             try {
-                logger.debug("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: {}",
+                logger.trace("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: {}",
                              deployedServices.size());
                 mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Throwable t) {
