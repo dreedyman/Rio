@@ -187,7 +187,7 @@ public class CybernodeUI extends JPanel implements Runnable {
             }
         }
         currentSvcCount.setText(getCybernodeCount().toString());
-        Double utilization = cybernodeAdmin.getUtilization();
+        Double utilization = cybernodeAdmin.getResourceCapability().getUtilization();
         utilizationTF.setText(utilization.toString());
     }
 

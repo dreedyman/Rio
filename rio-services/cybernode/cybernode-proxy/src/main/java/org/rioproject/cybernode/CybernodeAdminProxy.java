@@ -19,16 +19,13 @@ import com.sun.jini.proxy.ConstrainableProxyUtil;
 import net.jini.core.constraint.MethodConstraints;
 import net.jini.core.constraint.RemoteMethodControl;
 import net.jini.id.Uuid;
+import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ProxyTrustIterator;
 import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
-import net.jini.security.TrustVerifier;
-import org.rioproject.system.MeasuredResource;
-import org.rioproject.sla.SLA;
-import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.admin.ServiceAdminProxy;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.ResourceCapability;
-import org.rioproject.admin.ServiceAdminProxy;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -42,9 +39,8 @@ import java.rmi.RemoteException;
  *
  * @author Dennis Reedy
  */
-public class CybernodeAdminProxy extends ServiceAdminProxy
-    implements CybernodeAdmin, Serializable {
-    private static final long serialVersionUID = 2L;
+public class CybernodeAdminProxy extends ServiceAdminProxy implements CybernodeAdmin, Serializable {
+    private static final long serialVersionUID = 3L;
     final CybernodeAdmin cybernodeAdminProxy;
 
 
@@ -75,37 +71,27 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
     /**
      * A subclass of CybernodeAdminProxy that implements RemoteMethodControl.
      */
-    final static class ConstrainableCybernodeAdminProxy
-        extends CybernodeAdminProxy implements RemoteMethodControl {
+    final static class ConstrainableCybernodeAdminProxy extends CybernodeAdminProxy implements RemoteMethodControl {
         private static final long serialVersionUID = 2L;
-        /** Client constraints for this proxy, or null */
-        private final MethodConstraints constraints;
 
         /* Creates an instance of this class. */
         private ConstrainableCybernodeAdminProxy(CybernodeAdmin serviceAdmin,
                                                  Uuid id, 
                                                  MethodConstraints constraints) {
             super(constrainServer(serviceAdmin, constraints), id);
-            this.constraints = constraints;
         }
 
         /*
          * Returns a copy of the server proxy with the specified client
          * constraints and methods mapping.
          */
-        private static CybernodeAdmin constrainServer(
-                                              CybernodeAdmin serviceAdmin,
-                                              MethodConstraints constraints) {
+        private static CybernodeAdmin constrainServer(CybernodeAdmin serviceAdmin, MethodConstraints constraints) {
             java.lang.reflect.Method[] methods = CybernodeAdmin.class.getMethods();
-            java.lang.reflect.Method[] methodMapping = 
-                new java.lang.reflect.Method[methods.length * 2];
+            java.lang.reflect.Method[] methodMapping = new java.lang.reflect.Method[methods.length * 2];
             for(int i = 0; i < methodMapping.length; i++)
                 methodMapping[i] = methods[i / 2];
-            return ((CybernodeAdmin)((RemoteMethodControl)serviceAdmin).
-                                     setConstraints(
-                                       ConstrainableProxyUtil.translateConstraints(
-                                                                 constraints,
-                                                                 methodMapping)));
+            MethodConstraints methodConstraints = ConstrainableProxyUtil.translateConstraints(constraints, methodMapping);
+            return (CybernodeAdmin)((RemoteMethodControl)serviceAdmin).setConstraints(methodConstraints);
         }
 
         /* @see net.jini.core.constraint.RemoteMethodControl#setConstraints  */
@@ -127,6 +113,7 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
          * <code>ProxyTrustVerifier</code> to retrieve this object's trust
          * verifier.
          */
+        @SuppressWarnings("unused")
         private ProxyTrustIterator getProxyTrustIterator() {
             return (new SingletonProxyTrustIterator(serviceAdmin));
         }
@@ -140,8 +127,7 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
          * requirements for trust verification (as detailed in the class
          * description) are not satisfied.
          */
-        private void readObject(ObjectInputStream s) throws IOException,
-            ClassNotFoundException {
+        private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
             /*
              * Note that basic validation of the fields of this class was
              * already performed in the readObject() method of this class' super
@@ -150,10 +136,9 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
             s.defaultReadObject();
             // Verify that the server implements RemoteMethodControl
             if(!(serviceAdmin instanceof RemoteMethodControl)) {
-                throw new InvalidObjectException(
-                                   "ConstrainableCybernodeAdminProxy.readObject "+
-                                   "failure : serviceAdmin does not implement " +
-                                   "constrainable functionality");
+                throw new InvalidObjectException("ConstrainableCybernodeAdminProxy.readObject "+
+                                                 "failure : serviceAdmin does not implement " +
+                                                 "constrainable functionality");
             }
         }
     }
@@ -204,54 +189,8 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
      * 
      * @see org.rioproject.cybernode.CybernodeAdmin#setPersistentProvisioning(boolean)
      */
-    public void setPersistentProvisioning(boolean support) 
-    throws IOException {
+    public void setPersistentProvisioning(boolean support) throws IOException {
         ((CybernodeAdmin)serviceAdmin).setPersistentProvisioning(support);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.rioproject.system.ComputeResourceAdmin#setSLA(org.rioproject.sla.SLA)
-     */
-    public boolean setSLA(SLA serviceLevelAgreement) throws RemoteException {
-        return (((CybernodeAdmin)serviceAdmin).setSLA(serviceLevelAgreement));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.rioproject.system.ComputeResourceAdmin#getSLAs()
-     */
-    public SLA[] getSLAs() throws RemoteException {
-        return (((CybernodeAdmin)serviceAdmin).getSLAs());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.rioproject.system.ComputeResourceAdmin#getPlatformCapabilties()
-     */
-    public PlatformCapability[] getPlatformCapabilties() throws RemoteException {
-        return (((CybernodeAdmin)serviceAdmin).getPlatformCapabilties());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.rioproject.system.ComputeResourceAdmin#getMeasuredResources()
-     */
-    public MeasuredResource[] getMeasuredResources() throws RemoteException {
-        return (((CybernodeAdmin)serviceAdmin).getMeasuredResources());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.rioproject.system.ComputeResourceAdmin#getUtilization()
-     */
-    public double getUtilization() throws RemoteException {
-        return (((CybernodeAdmin)serviceAdmin).getUtilization());
     }
 
     public ResourceCapability getResourceCapability() throws RemoteException {
@@ -263,32 +202,18 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
      *
      * @see org.rioproject.system.ComputeResourceAdmin#getComputeResourceUtilization()
      */
-    public ComputeResourceUtilization getComputeResourceUtilization()
-        throws RemoteException {
+    public ComputeResourceUtilization getComputeResourceUtilization() throws RemoteException {
         return (((CybernodeAdmin)serviceAdmin).getComputeResourceUtilization());
     }
 
-    public ComputeResourceUtilization getComputeResourceUtilization(Uuid serviceUuid) throws
-                                                                                      RemoteException {
+    public ComputeResourceUtilization getComputeResourceUtilization(Uuid serviceUuid) throws RemoteException {
         return (((CybernodeAdmin)serviceAdmin).getComputeResourceUtilization(serviceUuid));
-    }
-
-    public long getReportInterval() throws RemoteException {
-        return ((CybernodeAdmin)serviceAdmin).getReportInterval();
-    }
-
-    public void setReportInterval(long reportInterval) throws RemoteException {
-        if(reportInterval<0)
-            throw new IllegalArgumentException("the reportInterval must be " +
-                                               "greater than 0");
-        ((CybernodeAdmin)serviceAdmin).setReportInterval(reportInterval);
     }
 
     /**
      * A trust verifier for secure smart proxies.
      */
-    final static class Verifier implements TrustVerifier,
-                                           Serializable {
+    final static class Verifier implements TrustVerifier, Serializable {
         private static final long serialVersionUID = 1L;
         private final RemoteMethodControl serverProxy;
 
@@ -298,8 +223,7 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
          * TrustEquivalence.
          */
         Verifier(Object serverProxy) {
-            if (serverProxy instanceof RemoteMethodControl &&
-                serverProxy instanceof TrustEquivalence) {
+            if (serverProxy instanceof RemoteMethodControl && serverProxy instanceof TrustEquivalence) {
                 this.serverProxy = (RemoteMethodControl) serverProxy;
             } else {
                 throw new UnsupportedOperationException();
@@ -309,19 +233,16 @@ public class CybernodeAdminProxy extends ServiceAdminProxy
         /**
          * Implement TrustVerifier
          */
-        public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx)
-        throws RemoteException {
+        public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx) throws RemoteException {
             if (obj == null || ctx == null) {
                 throw new IllegalArgumentException();
             } else if (!(obj instanceof ConstrainableCybernodeAdminProxy)) {
                 return false;
             }
             RemoteMethodControl otherServerProxy =
-                (RemoteMethodControl)((ConstrainableCybernodeAdminProxy)obj).
-                    cybernodeAdminProxy;
+                (RemoteMethodControl)((ConstrainableCybernodeAdminProxy)obj).cybernodeAdminProxy;
             MethodConstraints mc = otherServerProxy.getConstraints();
-            TrustEquivalence trusted =
-                (TrustEquivalence) serverProxy.setConstraints(mc);
+            TrustEquivalence trusted = (TrustEquivalence) serverProxy.setConstraints(mc);
             return(trusted.checkTrustEquivalence(otherServerProxy));
         }
     }

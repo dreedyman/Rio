@@ -18,12 +18,11 @@ package org.rioproject.test.monitor;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.cybernode.Cybernode;
+import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.DeploymentMap;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.deploy.DeployedService;
-import org.rioproject.cybernode.Cybernode;
-import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -46,9 +45,6 @@ public class DeployMapTest {
         Assert.assertNotNull(cybernode);
         OperationalStringManager mgr = testManager.getOperationalStringManager();
         testManager.waitForDeployment(mgr);
-        ComputeResourceAdmin admin = (ComputeResourceAdmin)cybernode.getAdmin();
-        admin.setReportInterval(10000);
-        Assert.assertEquals(10000, admin.getReportInterval());
 
         DeploymentMap dMap = mgr.getDeploymentMap();
         Assert.assertEquals(1, dMap.getServiceElements().length);

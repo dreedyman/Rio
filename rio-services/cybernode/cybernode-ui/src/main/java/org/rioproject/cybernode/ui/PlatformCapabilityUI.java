@@ -143,7 +143,7 @@ public class PlatformCapabilityUI extends JPanel {
             try {
                 getComponent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 supportsProvisioning.setSelected(cybernodeAdmin.getPersistentProvisioning());
-                PlatformCapability[] pCaps = cybernodeAdmin.getPlatformCapabilties();
+                PlatformCapability[] pCaps = cybernodeAdmin.getResourceCapability().getPlatformCapabilities();
                 for (PlatformCapability pCap : pCaps) {
                     addPlatformCapability(pCap);
                 }

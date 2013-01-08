@@ -36,6 +36,7 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class ComputeResourceUtilization implements Comparable, Serializable {
+    @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * Description of the ComputeResource
@@ -116,15 +117,6 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
     }
 
     /**
-     * Set the description
-     *
-     * @param description The description
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
      * Get the hostname
      *
      * @return The hostname
@@ -149,15 +141,6 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
      */
     public String getAddress() {
         return address;
-    }
-
-    /**
-     * Set the address the compute resource is bound to
-     *
-     * @param address The address the compute resource is bound to
-     */
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     /**
@@ -306,12 +289,11 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
 
 
     public String toString() {
-        return "ComputeResourceUtilization: " +
-               "description='" + description + '\'' +
-               ", hostName='" + hostName + '\'' +
-               ", address='" + address + '\'' +
-               ", utilization=" + utilization +
-               ", measured resources=" + mRes +
-               '}';
+        StringBuilder builder = new StringBuilder();
+        builder.append("ComputeResourceUtilization: description: ");
+        builder.append(description).append(", hostName: ").append(hostName).append(", ");
+        builder.append("address: ").append(address).append(", utilization: ").append(utilization).append(", ");
+        builder.append("measured resources: ").append(mRes);
+        return  builder.toString();
     }
 }

@@ -16,19 +16,15 @@
 package org.rioproject.cybernode;
 
 import net.jini.export.Exporter;
-import net.jini.id.UuidFactory;
 import net.jini.id.Uuid;
+import net.jini.id.UuidFactory;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import org.rioproject.admin.ServiceAdminImpl;
-import org.rioproject.system.MeasuredResource;
-import org.rioproject.sla.SLA;
-import org.rioproject.resources.persistence.SnapshotHandler;
 import org.rioproject.admin.ServiceAdmin;
-import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.admin.ServiceAdminImpl;
+import org.rioproject.resources.persistence.SnapshotHandler;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.ResourceCapability;
-import org.rioproject.system.measurable.MeasurableCapability;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -39,8 +35,7 @@ import java.rmi.RemoteException;
  *
  * @author Dennis Reedy
  */
-public class CybernodeAdminImpl extends ServiceAdminImpl
-    implements CybernodeAdmin, ServerProxyTrust {
+public class CybernodeAdminImpl extends ServiceAdminImpl implements CybernodeAdmin, ServerProxyTrust {
     /** Reference to the backend */
     CybernodeImpl backend;
     CybernodeAdmin remoteRef;
@@ -121,60 +116,8 @@ public class CybernodeAdminImpl extends ServiceAdminImpl
     /* (non-Javadoc)
      * @see org.rioproject.cybernode.CybernodeAdmin#setPersistentProvisioning(boolean)
      */
-    public void setPersistentProvisioning(boolean support) 
-    throws IOException {
+    public void setPersistentProvisioning(boolean support) throws IOException {
         backend.setPersistentProvisioning(support);
-    }
-
-    /* (non-Javadoc)
-     * @see org.rioproject.system.ComputeResourceAdmin#setSLA(org.rioproject.sla.SLA)
-     */
-    public boolean setSLA(SLA serviceLevelAgreement) {
-        if(serviceLevelAgreement==null)
-            throw new IllegalArgumentException("serviceLevelAgreement is null");
-        String identifier = serviceLevelAgreement.getIdentifier();
-        if(identifier==null)
-            throw new IllegalArgumentException("SLA.identifier is null");
-        MeasurableCapability mCap = getMeasurableCapability(identifier);
-        if(mCap==null)
-            return(false);
-        mCap.setSLA(serviceLevelAgreement);
-        return(true);
-        //return(backend.setSLA(serviceLevelAgreement));
-    }
-
-    /* (non-Javadoc)
-     * @see org.rioproject.system.ComputeResourceAdmin#getSLAs()
-     */
-    public SLA[] getSLAs() {
-        MeasurableCapability[] mCaps =
-            backend.getComputeResource().getMeasurableCapabilities();
-        SLA[] serviceLevelAgreement = new SLA[mCaps.length];
-        for(int i=0; i<mCaps.length; i++) {
-            serviceLevelAgreement[i] = mCaps[i].getSLA();
-        }
-        return(serviceLevelAgreement);
-    }
-
-    /* (non-Javadoc)
-     * @see org.rioproject.system.ComputeResourceAdmin#getPlatformCapabilties()
-     */
-    public PlatformCapability[] getPlatformCapabilties() {
-        return(backend.getComputeResource().getPlatformCapabilities());
-    }
-
-    /* (non-Javadoc)
-     * @see org.rioproject.system.ComputeResourceAdmin#getMeasuredResources()
-     */
-    public MeasuredResource[] getMeasuredResources() {
-        return(backend.getComputeResource().getMeasuredResources());
-    }
-
-    /* (non-Javadoc)
-     * @see org.rioproject.system.ComputeResourceAdmin#getUtilization()
-     */
-    public double getUtilization() {
-        return(backend.getUtilization());
     }
 
     /* (non-Javadoc)
@@ -202,33 +145,8 @@ public class CybernodeAdminImpl extends ServiceAdminImpl
         return cru;  
     }
 
-    public long getReportInterval() {
-        return backend.getComputeResource().getReportInterval();
-    }
-
-    public void setReportInterval(long reportInterval) {
-        backend.getComputeResource().setReportInterval(reportInterval);
-    }
-
     public TrustVerifier getProxyVerifier() throws RemoteException {
         return(new CybernodeAdminProxy.Verifier(remoteRef));
     }
 
-    /*
-     * Get a MeasurableCapability from an identifier
-     *
-     * @param identifier The identifier of a MeasurableCapability to get
-     */
-    private MeasurableCapability getMeasurableCapability(String identifier) {
-        if(identifier==null)
-            throw new IllegalArgumentException("identifier is null");
-        MeasurableCapability[] mCaps =
-            backend.getComputeResource().getMeasurableCapabilities();
-        for (MeasurableCapability mCap : mCaps) {
-            if (mCap.getId().equals(identifier)) {
-                return (mCap);
-            }
-        }
-        return(null);
-    }
 }

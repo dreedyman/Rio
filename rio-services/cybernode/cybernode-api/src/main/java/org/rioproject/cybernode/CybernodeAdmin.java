@@ -15,8 +15,10 @@
  */
 package org.rioproject.cybernode;
 
+import net.jini.id.Uuid;
 import org.rioproject.admin.ServiceAdmin;
 import org.rioproject.system.ComputeResourceAdmin;
+import org.rioproject.system.ComputeResourceUtilization;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -85,4 +87,23 @@ public interface CybernodeAdmin extends ServiceAdmin, ComputeResourceAdmin {
      * @throws RemoteException If communication errors happen
      */
     int getRegistryPort() throws RemoteException;
+
+    /**
+     * Get the {@link org.rioproject.system.ComputeResourceUtilization} for an
+     * instantiated service
+     *
+     * @param serviceUuid The {@link net.jini.id.Uuid} of an instantiated service
+     *
+     * @return The ComputeResourceUtilization for the service identified by
+     * the <tt>serviceUuid</tt>. If the identified service is contained within
+     * the Cybernode, the returned ComputeResourceUtilization will be the same
+     * as the value returned from
+     * {@link org.rioproject.system.ComputeResourceAdmin#getComputeResourceUtilization()}.
+     * <p>If the identified service has been executed in it's own process, the returned
+     * value will represent the ComputeResourceUtilization for that process.
+     * <p>If no instantiated service can be found, a null is returned.
+     *
+     * @throws RemoteException If communication errors occur
+     */
+    ComputeResourceUtilization getComputeResourceUtilization(Uuid serviceUuid) throws RemoteException;
 }

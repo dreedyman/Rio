@@ -57,11 +57,11 @@ class GroovyDSLOpStringParser implements OpStringParser {
     Map<String, List<OpString>> nestedTable = new HashMap<String, List<OpString>>()
     def logger = LoggerFactory.getLogger(getClass().name);
 
-    public List<OpString> parse(Object source,
-                                ClassLoader loader,
-                                String[] defaultExportJars,
-                                String[] defaultGroups,
-                                Object loadPath) {
+    public List<OpString> parse(final Object source,
+                                final ClassLoader loader,
+                                final String[] defaultExportJars,
+                                final String[] defaultGroups,
+                                final Object loadPath) {
         logger.debug "Parsing source $source"
         ExpandoMetaClass.enableGlobally()
 
@@ -70,9 +70,9 @@ class GroovyDSLOpStringParser implements OpStringParser {
         URL sourceLocation = null
         if(source instanceof URL) {
             sourceLocation = (URL)source
-            source = ((URL)source).openStream()
+            source = ((URL)source).newReader()
         } else if(source instanceof File) {
-            sourceLocation = ((File)source).toURL()
+            sourceLocation = ((File)source).toURI().toURL()
         }
 
         Script dslScript
@@ -100,9 +100,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
         SystemComponent currentSoftwareSystemComponent = null
         SLA currentSLA = null
 
-        dslScript.metaClass = createEMC(dslScript.class, {
-                                        ExpandoMetaClass emc ->
-            def opStringName = null
+        dslScript.metaClass = createEMC(dslScript.class, { ExpandoMetaClass emc ->
+            String opStringName = null
             OpString opString = null
 
             emc.deployment = { Map attributes, Closure cl ->
@@ -376,20 +375,18 @@ class GroovyDSLOpStringParser implements OpStringParser {
             emc.association = { Map attributes, Closure cl ->
                 currentAssociationDescriptor = helper.createAssociationDescriptor(attributes, opStringName)
                 cl()
+                helper.addAssociationDescriptor(currentAssociationDescriptor,
+                                                currentService,
+                                                globalSettings[ASSOCIATIONS])
+
             }
 
             emc.management = { Map attributes ->
-                helper.addAssociationDescriptor(helper.createAssociationManagement(attributes,
-                                                                                   currentAssociationDescriptor),
-                                                currentService,
-                                                globalSettings[ASSOCIATIONS])
+                currentAssociationDescriptor = helper.createAssociationManagement(attributes, currentAssociationDescriptor)
             }
 
             emc.management = { Map attributes, Closure cl ->
-                helper.addAssociationDescriptor(helper.createAssociationManagement(attributes,
-                                                                                   currentAssociationDescriptor),
-                                                currentService,
-                                                globalSettings[ASSOCIATIONS])
+                currentAssociationDescriptor = helper.createAssociationManagement(attributes, currentAssociationDescriptor)
                 cl()
             }
 
