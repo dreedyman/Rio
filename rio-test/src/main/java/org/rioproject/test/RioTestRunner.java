@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -63,12 +62,14 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                     e.printStackTrace();
                 }
             }
-        } else {
+        } /*else {
+            System.out.println("===> logback.configurationFile: "+System.getProperty("logback.configurationFile"));
             if(System.getProperty("logback.configurationFile")==null) {
-                InputStream inputStream = Thread.currentThread().getClass().getResourceAsStream("/default-logback.groovy");
-                loadLogBackConfigurationUsingReflection(inputStream);
+                InputStream inputStream = Thread.currentThread().getClass().getResourceAsStream("/logback-test.groovy");
+                System.out.println("===> logback-test.groovy: "+inputStream);
+                //loadLogBackConfigurationUsingReflection(inputStream);
             }
-        }
+        }*/
     }
     TestManager testManager;
     TestConfig testConfig;
@@ -86,7 +87,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         logger.debug("TestRunner constructor called with [{}].", clazz);
     }
 
-    private static void loadLogBackConfigurationUsingReflection(InputStream config) {
+    /*private static void loadLogBackConfigurationUsingReflection(InputStream config) {
         try {
             Object joranConfigurator = Class.forName("ch.qos.logback.classic.joran.JoranConfigurator").newInstance();
             Object context = LoggerFactory.getILoggerFactory();
@@ -105,7 +106,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     protected Statement withAfterClasses(Statement statement) {
