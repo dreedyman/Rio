@@ -23,18 +23,20 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ProxyTrustIterator;
 import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
-import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.admin.ServiceAdminProxy;
 import org.rioproject.deploy.ServiceProvisionListener;
+import org.rioproject.monitor.ProvisionMonitor.PeerInfo;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.monitor.ProvisionMonitor.PeerInfo;
-import org.rioproject.admin.ServiceAdminProxy;
+import org.rioproject.system.ComputeResourceUtilization;
+import org.rioproject.system.ResourceCapability;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Map;
@@ -46,8 +48,7 @@ import java.util.Map;
  *
  * @author Dennis Reedy
  */
-public class ProvisionMonitorAdminProxy extends ServiceAdminProxy 
-                               implements ProvisionMonitorAdmin, Serializable {
+public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements ProvisionMonitorAdmin, Serializable {
     private static final long serialVersionUID = 2L;
     final ProvisionMonitorAdmin monitorAdminProxy;
 
@@ -58,13 +59,10 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
      * @param serviceAdmin The ProvisionMonitorAdmin server
      * @param id The Uuid of the ProvisionMonitorAdmin
      */
-    static ProvisionMonitorAdminProxy getInstance(ProvisionMonitorAdmin serviceAdmin, 
-                                                  Uuid id) {
+    static ProvisionMonitorAdminProxy getInstance(ProvisionMonitorAdmin serviceAdmin, Uuid id) {
         
         if(serviceAdmin instanceof RemoteMethodControl) {
-            return new ConstrainableProvisionMonitorAdminProxy(serviceAdmin, 
-                                                               id, 
-                                                               null);
+            return new ConstrainableProvisionMonitorAdminProxy(serviceAdmin, id, null);
         } else {
             return(new ProvisionMonitorAdminProxy(serviceAdmin, id));
         }
@@ -73,8 +71,7 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
     /*
      * Private constructor
      */
-    private ProvisionMonitorAdminProxy(ProvisionMonitorAdmin serviceAdmin, 
-                                       Uuid uuid) {
+    private ProvisionMonitorAdminProxy(ProvisionMonitorAdmin serviceAdmin, Uuid uuid) {
         super(serviceAdmin, uuid);
         this.monitorAdminProxy = serviceAdmin;
     }
@@ -82,16 +79,14 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
     /** 
      * A subclass of ProvisionMonitorAdminProxy that implements RemoteMethodControl. 
      */
-    final static class ConstrainableProvisionMonitorAdminProxy 
+    final static class ConstrainableProvisionMonitorAdminProxy
         extends ProvisionMonitorAdminProxy implements RemoteMethodControl {
-
         private static final long serialVersionUID = 2L;        
         
         /* Creates an instance of this class. */
-        private ConstrainableProvisionMonitorAdminProxy(
-                                               ProvisionMonitorAdmin serviceAdmin, 
-                                               Uuid id,
-                                               MethodConstraints constraints) {
+        private ConstrainableProvisionMonitorAdminProxy(ProvisionMonitorAdmin serviceAdmin,
+                                                        Uuid id,
+                                                        MethodConstraints constraints) {
             super(constrainServer(serviceAdmin, constraints), id);
         }
 
@@ -99,34 +94,25 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
           * Returns a copy of the server proxy with the specified client
           * constraints and methods mapping.
           */
-        private static ProvisionMonitorAdmin constrainServer(
-                                             ProvisionMonitorAdmin serviceAdmin,
-                                             MethodConstraints constraints) {
-            java.lang.reflect.Method[] methods = 
-                ProvisionMonitorAdmin.class.getMethods();
-            java.lang.reflect.Method[] methodMapping = 
-                new java.lang.reflect.Method[methods.length*2];            
+        private static ProvisionMonitorAdmin constrainServer(ProvisionMonitorAdmin serviceAdmin,
+                                                             MethodConstraints constraints) {
+            Method[] methods = ProvisionMonitorAdmin.class.getMethods();
+            Method[] methodMapping = new java.lang.reflect.Method[methods.length*2];
             for(int i=0; i<methodMapping.length; i++)
-                methodMapping[i] = methods[i/2];                 
-            return((ProvisionMonitorAdmin)((RemoteMethodControl)serviceAdmin).
-                setConstraints(
-                     ConstrainableProxyUtil.translateConstraints(constraints, 
-                                                                 methodMapping)));
+                methodMapping[i] = methods[i/2];
+            MethodConstraints methodConstraints = ConstrainableProxyUtil.translateConstraints(constraints, methodMapping);
+            return (ProvisionMonitorAdmin)((RemoteMethodControl)serviceAdmin).setConstraints(methodConstraints);
         }
 
         /** @see net.jini.core.constraint.RemoteMethodControl#setConstraints  */
         public RemoteMethodControl setConstraints(MethodConstraints constraints) {
-            return(new ConstrainableProvisionMonitorAdminProxy(
-                                 (ProvisionMonitorAdmin)serviceAdmin, 
-                                 uuid, 
-                                 constraints));
+            return(new ConstrainableProvisionMonitorAdminProxy((ProvisionMonitorAdmin)serviceAdmin, uuid, constraints));
         }
         
         /** @see RemoteMethodControl#getConstraints */
         public MethodConstraints getConstraints() {
             return ((RemoteMethodControl)monitorAdminProxy).getConstraints();
         }
-        
 
         /* Note that the superclass's hashCode method is OK as is. */
         /* Note that the superclass's equals method is OK as is. */
@@ -136,6 +122,7 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
          * <code>ProxyTrustVerifier</code> to retrieve this object's
          * trust verifier.
          */
+        @SuppressWarnings("unused")
         private ProxyTrustIterator getProxyTrustIterator() {
             return(new SingletonProxyTrustIterator(monitorAdminProxy));
         }
@@ -143,8 +130,7 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
         /*
          * Verify that the server implements RemoteMethodControl 
          */
-        private void readObject(ObjectInputStream s)
-        throws IOException, ClassNotFoundException {
+        private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
             /* Note that basic validation of the fields of this class was
              * already performed in the readObject() method of this class'
              * super class.
@@ -152,10 +138,8 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
             s.defaultReadObject();
             // Verify that the server implements RemoteMethodControl
             if(!(serviceAdmin instanceof RemoteMethodControl)) {
-                throw new InvalidObjectException(
-                       "ConstrainableProvisionMonitorAdminProxy.readObject "+
-                       "failure : serviceAdmin does not implement constrainable "+
-                       "functionality");
+                throw new InvalidObjectException("ConstrainableProvisionMonitorAdminProxy.readObject "+
+                                                 "failure : serviceAdmin does not implement constrainable functionality");
             }
         }
     }
@@ -166,97 +150,98 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(URL opStringURL)
+    public Map<String, Throwable> deploy(URL opStringURL) throws OperationalStringException, RemoteException {
+        return monitorAdminProxy.deploy(opStringURL);
+    }
+
+    /**
+     * @see org.rioproject.deploy.DeployAdmin#deploy
+     */
+    public Map<String, Throwable> deploy(URL opStringURL, ServiceProvisionListener listener)
     throws OperationalStringException, RemoteException {
-        return(((DeployAdmin)serviceAdmin).deploy(opStringURL));
+        return monitorAdminProxy.deploy(opStringURL, listener);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(URL opStringURL,
-                                         ServiceProvisionListener listener)
-    throws OperationalStringException,RemoteException {
-        return(((DeployAdmin)serviceAdmin).deploy(opStringURL, listener));
+    public Map<String, Throwable> deploy(String location) throws OperationalStringException,RemoteException {
+        return monitorAdminProxy.deploy(location, null);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(String location)
-    throws OperationalStringException,RemoteException {
-        return(((DeployAdmin)serviceAdmin).deploy(location, null));
-    }
-
-    /**
-     * @see org.rioproject.deploy.DeployAdmin#deploy
-     */
-    public Map<String, Throwable> deploy(String location,
-                                         ServiceProvisionListener listener)
-    throws OperationalStringException,RemoteException {
-        return(((DeployAdmin)serviceAdmin).deploy(location, listener));
+    public Map<String, Throwable> deploy(String location, ServiceProvisionListener listener)
+    throws OperationalStringException, RemoteException {
+        return monitorAdminProxy.deploy(location, listener);
     }
     
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(OperationalString opString)
-    throws OperationalStringException, RemoteException {
-        return(((DeployAdmin)serviceAdmin).deploy(opString));
+    public Map<String, Throwable> deploy(OperationalString opString) throws OperationalStringException, RemoteException {
+        return monitorAdminProxy.deploy(opString);
     }
     
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(OperationalString opString,
-                                         ServiceProvisionListener listener)
+    public Map<String, Throwable> deploy(OperationalString opString, ServiceProvisionListener listener)
     throws OperationalStringException, RemoteException {
-        return(((DeployAdmin)serviceAdmin).deploy(opString, listener));
+        return monitorAdminProxy.deploy(opString, listener);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#undeploy
      */
-    public boolean undeploy(String opStringName) throws 
-    OperationalStringException, RemoteException {
-        return(((DeployAdmin)serviceAdmin).undeploy(opStringName));
+    public boolean undeploy(String opStringName) throws OperationalStringException, RemoteException {
+        return monitorAdminProxy.undeploy(opStringName);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#hasDeployed
      */
     public boolean hasDeployed(String opStringName) throws RemoteException {
-        return(((DeployAdmin)serviceAdmin).hasDeployed(opStringName));
+        return monitorAdminProxy.hasDeployed(opStringName);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#getOperationalStringManagers
      */
-    public OperationalStringManager[] getOperationalStringManagers() throws 
-                                                                     RemoteException {
-        return(((DeployAdmin)serviceAdmin).getOperationalStringManagers());
+    public OperationalStringManager[] getOperationalStringManagers() throws RemoteException {
+        return monitorAdminProxy.getOperationalStringManagers();
     }
     
     /* (non-Javadoc)
      * @see org.rioproject.deploy.DeployAdmin#getOperationalStringManager
      */
-    public OperationalStringManager getOperationalStringManager(String name) 
-    throws OperationalStringException, RemoteException {
-        return(((DeployAdmin)serviceAdmin).getOperationalStringManager(name));
+    public OperationalStringManager getOperationalStringManager(String name) throws OperationalStringException,
+                                                                                    RemoteException {
+        return monitorAdminProxy.getOperationalStringManager(name);
     }
 
     /* (non-Javadoc)
      * @see org.rioproject.monitor.ProvisionMonitorAdmin#getBackupInfo
      */
     public PeerInfo[] getBackupInfo() throws RemoteException {        
-        return(((ProvisionMonitorAdmin)serviceAdmin).getBackupInfo());
+        return monitorAdminProxy.getBackupInfo();
+    }
+
+    @Override
+    public ResourceCapability getResourceCapability() throws RemoteException {
+        return monitorAdminProxy.getResourceCapability();
+    }
+
+    @Override
+    public ComputeResourceUtilization getComputeResourceUtilization() throws RemoteException {
+        return monitorAdminProxy.getComputeResourceUtilization();
     }
 
     /**
      * A trust verifier for secure smart proxies.
      */
-    final static class Verifier implements TrustVerifier,
-                                           Serializable {
+    final static class Verifier implements TrustVerifier, Serializable {
         private static final long serialVersionUID = 1L;
         private final RemoteMethodControl serverProxy;
 
@@ -266,8 +251,7 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
          * TrustEquivalence.
          */
         Verifier(Object serverProxy) {
-            if (serverProxy instanceof RemoteMethodControl &&
-                serverProxy instanceof TrustEquivalence) {
+            if (serverProxy instanceof RemoteMethodControl && serverProxy instanceof TrustEquivalence) {
                 this.serverProxy = (RemoteMethodControl) serverProxy;
             } else {
                 throw new UnsupportedOperationException();
@@ -277,19 +261,16 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy
         /**
          * Implement TrustVerifier
          */
-        public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx)
-        throws RemoteException {
+        public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx) throws RemoteException {
             if (obj == null || ctx == null) {
                 throw new IllegalArgumentException();
             } else if (!(obj instanceof ConstrainableProvisionMonitorAdminProxy)) {
                 return false;
             }
             RemoteMethodControl otherServerProxy =
-                (RemoteMethodControl)((ConstrainableProvisionMonitorAdminProxy)obj).
-                    monitorAdminProxy;
+                (RemoteMethodControl)((ConstrainableProvisionMonitorAdminProxy)obj).monitorAdminProxy;
             MethodConstraints mc = otherServerProxy.getConstraints();
-            TrustEquivalence trusted =
-                (TrustEquivalence) serverProxy.setConstraints(mc);
+            TrustEquivalence trusted = (TrustEquivalence) serverProxy.setConstraints(mc);
             return(trusted.checkTrustEquivalence(otherServerProxy));
         }
     }

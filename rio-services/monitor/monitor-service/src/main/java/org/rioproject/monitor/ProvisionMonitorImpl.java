@@ -54,6 +54,7 @@ import org.rioproject.opstring.*;
 import org.rioproject.resolver.*;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.util.BannerProvider;
 import org.rioproject.util.BannerProviderImpl;
@@ -220,6 +221,16 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         }
         return (adminProxy);
     }
+
+    /**
+     * Get the ComputeResource associated with this ProvisionMonitor
+     *
+     * @return The ComputeResource associated with this ProvisionMonitor
+     */
+    public ComputeResource getComputeResource() {
+        return(computeResource);
+    }
+
 
     /**
      * Override parent's method to return <code>TrustVerifier</code> which can

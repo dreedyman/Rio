@@ -17,6 +17,7 @@ package org.rioproject.monitor;
 
 import org.rioproject.admin.ServiceAdmin;
 import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.system.ComputeResourceAdmin;
 
 import java.rmi.RemoteException;
 
@@ -25,7 +26,7 @@ import java.rmi.RemoteException;
  *
  * @author Dennis Reedy
  */
-public interface ProvisionMonitorAdmin extends ServiceAdmin, DeployAdmin {
+public interface ProvisionMonitorAdmin extends ServiceAdmin, DeployAdmin, ComputeResourceAdmin {
     
     /**
      * Get the ProvisionMonitor instances that are being backed up

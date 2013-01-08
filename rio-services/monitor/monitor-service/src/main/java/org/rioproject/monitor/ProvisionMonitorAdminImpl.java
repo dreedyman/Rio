@@ -27,6 +27,8 @@ import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.resources.persistence.SnapshotHandler;
+import org.rioproject.system.ComputeResourceUtilization;
+import org.rioproject.system.ResourceCapability;
 
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -63,7 +65,6 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
     public ProvisionMonitorAdminImpl(ProvisionMonitorImpl service, 
                                      Exporter exporter, 
                                      SnapshotHandler snapshotHandler) {
-        
         super(service, exporter, snapshotHandler);
         backend = service;
     }
@@ -137,7 +138,7 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
     /* (non-Javadoc)
      * @see org.rioproject.monitor.DeployAdmin#undeploy(java.lang.String, boolean)
      */
-    public boolean undeploy(String opStringName)  throws OperationalStringException {
+    public boolean undeploy(String opStringName) throws OperationalStringException {
         return(backend.undeploy(opStringName, true));
     }
 
@@ -158,8 +159,7 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
     /* (non-Javadoc)
      * @see org.rioproject.monitor.DeployAdmin#getOperationalStringManager(java.lang.String)
      */
-    public OperationalStringManager getOperationalStringManager(String name) 
-        throws OperationalStringException {
+    public OperationalStringManager getOperationalStringManager(String name) throws OperationalStringException {
         return(backend.getOperationalStringManager(name));
     }
 
@@ -169,5 +169,14 @@ public class ProvisionMonitorAdminImpl extends ServiceAdminImpl implements Provi
     public PeerInfo[] getBackupInfo() {
         return(backend.getBackupInfo());
     }
-    
+
+    @Override
+    public ResourceCapability getResourceCapability() {
+        return null;
+    }
+
+    @Override
+    public ComputeResourceUtilization getComputeResourceUtilization() {
+        return backend.getComputeResource().getComputeResourceUtilization();
+    }
 }
