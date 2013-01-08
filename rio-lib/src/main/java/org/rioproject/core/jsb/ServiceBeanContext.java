@@ -50,7 +50,7 @@ public interface ServiceBeanContext {
     /**
      * The ServiceBeanManager provides a mechanism for the ServiceBean to obtain
      * a DiscardManager, request it's ServiceElement be updated to
-     * OperationalStringManager instance(s) and obtain system resources
+     * OperationalStringManager instance(s) and obtain system resources.
      * 
      * @return The {@link org.rioproject.core.jsb.ServiceBeanManager} for the 
      * ServiceBean
@@ -60,7 +60,7 @@ public interface ServiceBeanContext {
     /**
      * The ComputeResourceManager provides a mechanism for the ServiceBean to
      * obtain the ComputeResource object and acquire information about the
-     * environment and attributes of the ComputeResource
+     * environment and attributes of the ComputeResource.
      * 
      * @return The {@link org.rioproject.core.jsb.ComputeResourceManager} for the 
      * ServiceBean

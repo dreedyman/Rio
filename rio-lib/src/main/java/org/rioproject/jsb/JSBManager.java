@@ -15,13 +15,17 @@
  */
 package org.rioproject.jsb;
 
+import net.jini.admin.Administrable;
 import net.jini.id.Uuid;
 import net.jini.io.MarshalledInstance;
+import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanManager;
+import org.rioproject.core.jsb.ServiceBeanManagerException;
 import org.rioproject.core.jsb.ServiceElementChangeListener;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
+import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
@@ -29,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.NotificationBroadcasterSupport;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,14 +60,12 @@ public class JSBManager implements ServiceBeanManager {
     /** The host address the service bean was instantiated on */
     private String hostAddress;
     /** List of listeners */
-    private final List<ServiceElementChangeListener> listenerList =
-        new ArrayList<ServiceElementChangeListener>();
+    private final List<ServiceElementChangeListener> listenerList = new ArrayList<ServiceElementChangeListener>();
     /** Flag to indicate we are in the process of updating the 
-     * ServiceElement. This will avoid unecessary ServiceBeanConfig updates
+     * ServiceElement. This will avoid unnecessary ServiceBeanConfig updates
      * if DiscoveryManagement attributes have changed */
     boolean updating = false;
-    protected final NotificationBroadcasterSupport
-        notificationBroadcasterSupport = new NotificationBroadcasterSupport();
+    private final NotificationBroadcasterSupport notificationBroadcasterSupport = new NotificationBroadcasterSupport();
 
     /**
      * Create a JSBManager
@@ -74,9 +77,7 @@ public class JSBManager implements ServiceBeanManager {
      * @throws IllegalArgumentException if the sElem or hostAddress parameters
      * are null
      */
-    public JSBManager(ServiceElement sElem,
-                      String hostAddress,
-                      Uuid cybernodeUuid) {
+    public JSBManager(final ServiceElement sElem, final String hostAddress, final Uuid cybernodeUuid) {
        this(sElem, null, hostAddress, cybernodeUuid);
     }
 
@@ -88,13 +89,12 @@ public class JSBManager implements ServiceBeanManager {
      * @param hostAddress The host address the service bean was instantiated on
      * @param cybernodeUuid The Uuuid of the Cybernode
      *
-     * @throws IllegalArgumentException if the sElem or hostAddress parameters
-     * are null
+     * @throws IllegalArgumentException if the sElem or hostAddress parameters are null
      */
-    public JSBManager(ServiceElement sElem,
-                      OperationalStringManager opStringManager,
-                      String hostAddress,
-                      Uuid cybernodeUuid) {
+    public JSBManager(final ServiceElement sElem,
+                      final OperationalStringManager opStringManager,
+                      final String hostAddress,
+                      final Uuid cybernodeUuid) {
         super();
         if(sElem==null)
             throw new IllegalArgumentException("sElem is null");
@@ -113,7 +113,7 @@ public class JSBManager implements ServiceBeanManager {
      * 
      * @param newElem The ServiceElement for the ServiceBean
      */
-    public void setServiceElement(ServiceElement newElem) {
+    public void setServiceElement(final ServiceElement newElem) {
         if(newElem==null)
             throw new IllegalArgumentException("sElem is null");                
         ServiceElement preElem = sElem;
@@ -131,7 +131,7 @@ public class JSBManager implements ServiceBeanManager {
      * 
      * @param serviceID The Service Identifier for the ServiceBean
      */
-    public void setServiceID(Uuid serviceID) {
+    public void setServiceID(final Uuid serviceID) {
         if(serviceID==null)
             throw new IllegalArgumentException("serviceID is null");
         this.serviceID = serviceID;
@@ -150,7 +150,7 @@ public class JSBManager implements ServiceBeanManager {
      * @param mi The MarshalledInstance containing the proxy that can be used
      * to communicate to the ServiceBean
      */
-    public void setMarshalledInstance(MarshalledInstance mi) {        
+    public void setMarshalledInstance(final MarshalledInstance mi) {
         this.marshalledInstance = mi;
     }
 
@@ -159,7 +159,7 @@ public class JSBManager implements ServiceBeanManager {
      *
      * @param discardManager The DiscardManager for the ServiceBean
      */
-    public void setDiscardManager(DiscardManager discardManager) {
+    public void setDiscardManager(final DiscardManager discardManager) {
         this.discardManager = discardManager;
     }
 
@@ -175,8 +175,7 @@ public class JSBManager implements ServiceBeanManager {
      * 
      * @param opStringManager The OperationalStringManager
      */
-    public void setOperationalStringManager(
-        OperationalStringManager opStringManager) {
+    public void setOperationalStringManager(final OperationalStringManager opStringManager) {
         this.opStringManager = opStringManager;
     }
 
@@ -190,7 +189,7 @@ public class JSBManager implements ServiceBeanManager {
     /**
      * @see org.rioproject.core.jsb.ServiceBeanManager#update
      */
-    public void update(ServiceBeanConfig sbConfig) throws Exception {
+    public void update(final ServiceBeanConfig sbConfig) throws ServiceBeanManagerException {
         if(sbConfig==null)
             throw new IllegalArgumentException("ServiceBeanConfig is null");
         if(sElem==null) {
@@ -206,9 +205,7 @@ public class JSBManager implements ServiceBeanManager {
         Long instanceID = sElem.getServiceBeanConfig().getInstanceID();
         sElem.setServiceBeanConfig(sbConfig);
         if(instanceID!=null)
-            sElem = ServiceElementUtil.prepareInstanceID(sElem, 
-                                                         false,
-                                                         instanceID);
+            sElem = ServiceElementUtil.prepareInstanceID(sElem, false, instanceID);
         else
             logger.warn("No instanceID for [{}] to update", sElem.getName());
         
@@ -216,54 +213,75 @@ public class JSBManager implements ServiceBeanManager {
             logger.warn("No OperationalStringManager to update ServiceBeanConfig");
             return;
         }
-        
-        opStringManager.update(getServiceBeanInstance());
+
+        try {
+            opStringManager.update(getServiceBeanInstance());
+        } catch (OperationalStringException e) {
+            throw new ServiceBeanManagerException("Unable to update ServiceBeanConfig", e);
+        } catch (RemoteException e) {
+            throw new ServiceBeanManagerException("Problem communicating to OperationalStringManager, " +
+                                                  "unable to update ServiceBeanConfig", e);
+        }
         stateChange(preElem, sElem);
     }
     
     /**
      * @see org.rioproject.core.jsb.ServiceBeanManager#increment
      *
-     * @throws Exception if the increment fails for any reason
+     * @throws ServiceBeanManagerException if the increment fails for any reason
      */
-    public void increment() throws Exception {
+    public void increment() throws ServiceBeanManagerException {
         increment(null);
     }
 
     /**
      * @see org.rioproject.core.jsb.ServiceBeanManager#increment
      */
-    public void increment(ServiceProvisionListener listener) throws Exception {
+    public void increment(final ServiceProvisionListener listener) throws ServiceBeanManagerException {
         if(opStringManager==null) {
-            logger.warn("No OperationalStringManager to increment service");
-            return;
+            throw new ServiceBeanManagerException("No OperationalStringManager to increment service");
         }
-        opStringManager.increment(sElem, false, listener);
+        try {
+            opStringManager.increment(sElem, false, listener);
+        } catch (OperationalStringException e) {
+            throw new ServiceBeanManagerException("Unable to increment", e);
+        } catch (RemoteException e) {
+            throw new ServiceBeanManagerException("Problem communicating to OperationalStringManager, unable to increment", e);
+        }
     }
 
     /**
      * @see org.rioproject.core.jsb.ServiceBeanManager#decrement
      */
-    public void decrement(boolean destroy) throws Exception {
+    public void decrement(final boolean destroy) throws ServiceBeanManagerException {
         if(opStringManager==null) {
-            logger.warn("No OperationalStringManager to decrement service");
-            return;
+            throw new ServiceBeanManagerException("No OperationalStringManager to decrement service");
         }
-        opStringManager.decrement(getServiceBeanInstance(), false, destroy);
+        try {
+            opStringManager.decrement(getServiceBeanInstance(), false, destroy);
+        } catch (OperationalStringException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            throw new ServiceBeanManagerException("Problem communicating to OperationalStringManager, unable to decrement", e);
+        }
     }    
 
     /**
      * @see org.rioproject.core.jsb.ServiceBeanManager#relocate
      */
-    public void relocate(ServiceProvisionListener listener, 
-                         Uuid uuid) throws Exception {
+    public void relocate(final ServiceProvisionListener listener, final Uuid uuid) throws ServiceBeanManagerException {
         if(opStringManager==null) {
-            logger.warn("No OperationalStringManager to relocate service");
-            return;
+            throw new ServiceBeanManagerException("No OperationalStringManager to relocate service");
         }
         if(sElem.getProvisionType()!= ServiceElement.ProvisionType.DYNAMIC)
-            throw new Exception("Relocation only available for DYNAMIC services");
-        opStringManager.relocate(getServiceBeanInstance(), listener, uuid);
+            throw new ServiceBeanManagerException("Relocation only available for DYNAMIC services");
+        try {
+            opStringManager.relocate(getServiceBeanInstance(), listener, uuid);
+        } catch (OperationalStringException e) {
+            throw new ServiceBeanManagerException("Unable to relocate ServiceBeanConfig", e);
+        } catch (RemoteException e) {
+            throw new ServiceBeanManagerException("Problem communicating to OperationalStringManager, unable to relocate", e);
+        }
     }
 
     /**
@@ -278,19 +296,48 @@ public class JSBManager implements ServiceBeanManager {
     }
 
     /**
+     * @see org.rioproject.core.jsb.ServiceBeanManager#getServiceBeanControl()
+     */
+    public ServiceBeanControl getServiceBeanControl() throws ServiceBeanManagerException {
+        if(marshalledInstance==null)
+            throw new ServiceBeanManagerException("Unable to obtain ServiceBeanControl, there is no marshalled proxy instance");
+        ServiceBeanControl serviceBeanControl;
+        try {
+            Object proxy = marshalledInstance.get(false);
+            if(proxy instanceof Administrable) {
+                Object adminObject = ((Administrable)proxy).getAdmin();
+                if(adminObject instanceof ServiceBeanControl) {
+                    serviceBeanControl = (ServiceBeanControl)proxy;
+                } else {
+                    throw new ServiceBeanManagerException(String.format("Service is not an instanceof %s",
+                                                          ServiceBeanControl.class.getName()));
+                }
+            } else {
+                throw new ServiceBeanManagerException(String.format("%s is derivable from %s, however, the service proxy does not implement %s",
+                                                                    ServiceBeanControl.class.getName(),
+                                                                    Administrable.class.getName(),
+                                                                    Administrable.class.getName()));
+            }
+        } catch (Exception e) {
+            throw new ServiceBeanManagerException("Unable to obtain ServiceBeanControl", e);
+        }
+        return serviceBeanControl;
+    }
+
+    /**
      * Notify all registered ServiceElementChangeListener instances. 
      * 
      * @param preElem The old ServiceElement
      * @param postElem An updated ServiceElement
      */
-    void stateChange(ServiceElement preElem, ServiceElement postElem) {
+    void stateChange(final ServiceElement preElem, final ServiceElement postElem) {
         notifyListeners(preElem, postElem);
     }
 
     /**
      * @see org.rioproject.core.jsb.ServiceBeanManager#addListener
      */
-    public void addListener(ServiceElementChangeListener l) {
+    public void addListener(final ServiceElementChangeListener l) {
         if(l == null) {
             throw new IllegalArgumentException("can't add null listener");
         }
@@ -322,12 +369,10 @@ public class JSBManager implements ServiceBeanManager {
     /*
      * Notify all registered listeners of the ServiceElement change
      */
-    private synchronized void notifyListeners(ServiceElement preElem, 
-                                              ServiceElement postElem) {
+    private synchronized void notifyListeners(final ServiceElement preElem, final ServiceElement postElem) {
         ServiceElementChangeListener[] listeners;
         synchronized(listenerList) {
-            listeners = listenerList.toArray(
-                          new ServiceElementChangeListener[listenerList.size()]);
+            listeners = listenerList.toArray(new ServiceElementChangeListener[listenerList.size()]);
         }
         for (ServiceElementChangeListener listener : listeners)
             listener.changed(preElem, postElem);

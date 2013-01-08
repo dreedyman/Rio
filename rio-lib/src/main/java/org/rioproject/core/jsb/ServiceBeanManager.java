@@ -17,10 +17,11 @@
 package org.rioproject.core.jsb;
 
 import net.jini.id.Uuid;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceBeanConfig;
+import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceBeanConfig;
 
 import javax.management.NotificationBroadcasterSupport;
 
@@ -40,11 +41,11 @@ public interface ServiceBeanManager {
      *
      * @param sbConfig The updated ServiceBeanConfig instance
      *
-     * @throws Exception if any errors occur communicating with the
+     * @throws ServiceBeanManagerException if any errors occur communicating with the
      * OperationalStringManager, or with the OperationalStringManager's
      * processing of the request
      */
-    void update(ServiceBeanConfig sbConfig) throws Exception;
+    void update(ServiceBeanConfig sbConfig) throws ServiceBeanManagerException;
 
     /**
      * Increment (increase the number of) instances of the ServiceBean by one.
@@ -55,11 +56,11 @@ public interface ServiceBeanManager {
      * @param listener A ServiceProvisionListener that will be notified of
      * the result of the increment request
      *
-     * @throws Exception if any errors occur communicating with the
+     * @throws ServiceBeanManagerException if any errors occur communicating with the
      * OperationalStringManager, or with the OperationalStringManager's
      * processing of the request
      */
-    void increment(ServiceProvisionListener listener) throws Exception;
+    void increment(ServiceProvisionListener listener) throws ServiceBeanManagerException;
 
     /**
      * Decrement (decrease the number of) and remove this ServiceBean instance
@@ -68,11 +69,11 @@ public interface ServiceBeanManager {
      * @param destroy If true, destroy the ServiceBean upon removal,
      * otherwise just remove
      *
-     * @throws Exception if any errors occur communicating with the
+     * @throws ServiceBeanManagerException if any errors occur communicating with the
      * OperationalStringManager, or with the OperationalStringManager's
      * processing of the request
      */
-    void decrement(boolean destroy) throws Exception;
+    void decrement(boolean destroy) throws ServiceBeanManagerException;
 
     /**
      * Relocate (move) a ServiceBean instance to another compute resource
@@ -84,12 +85,11 @@ public interface ServiceBeanManager {
      * to. If null, the OperationalStringManager will determine a suitable
      * resource
      *
-     * @throws Exception if any errors occur communicating with the
+     * @throws ServiceBeanManagerException if any errors occur communicating with the
      * OperationalStringManager, or with the OperationalStringManager's
      * processing of the request
      */
-    void relocate(ServiceProvisionListener listener,
-                  Uuid uuid) throws Exception;
+    void relocate(ServiceProvisionListener listener, Uuid uuid) throws ServiceBeanManagerException;
 
     /**
      * Get the DiscardManager for the ServiceBean. A ServiceBean must obtain
@@ -108,6 +108,16 @@ public interface ServiceBeanManager {
      * which is managing the OperationalString the ServiceBean is a part of
      */
     OperationalStringManager getOperationalStringManager();
+
+    /**
+     * Get the {@link org.rioproject.admin.ServiceBeanControl}.
+     *
+     * @return the {@link org.rioproject.admin.ServiceBeanControl}
+     *
+     * @throws ServiceBeanManagerException if the proxy cannot be obtained, or if the proxy is not
+     * {@link net.jini.admin.Administrable} or if the proxy does not implement {@link ServiceBeanControl}.
+     */
+    ServiceBeanControl getServiceBeanControl() throws ServiceBeanManagerException;
 
     /**
      * Get the universally unique identifier for the ServiceBean
