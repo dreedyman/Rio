@@ -420,7 +420,7 @@
   </modules>
 
     <properties>
-        <groovy.version>1.8.0</groovy.version>
+        <groovy.version>2.0.6</groovy.version>
         <rio.version>5.0-M2</rio.version>
         <rio.plugin.version>5.0</rio.plugin.version>
         <river.version>2.1.1</river.version>

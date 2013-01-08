@@ -13,30 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.config;
+package org.rioproject.config
 
-
-import org.slf4j.LoggerFactory
-
-import java.lang.reflect.Constructor
-
+import groovy.util.logging.Slf4j
 import net.jini.config.*
 
+import java.lang.reflect.Constructor
 /**
  * Provides support for Groovy based configuration.
  *
  * @author Dennis Reedy
  */
+@Slf4j
 class GroovyConfig implements Configuration {
     private Map<String, GroovyObject> groovyConfigs = new HashMap<String, GroovyObject>()
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
-    private def logger = LoggerFactory.getLogger(GroovyConfig.class.getPackage().name)
+    //private def log = LoggerFactory.getLogger(GroovyConfig.class.getPackage().name)
 
     GroovyConfig(String gFile) {
         File f = new File(gFile)
         GroovyClassLoader gcl = new GroovyClassLoader(getClass().getClassLoader())
-        parseAndLoad(f.newInputStream(), gcl)
+        parseAndLoad(new GroovyCodeSource(f), gcl)
     }
 
     /**
@@ -59,7 +57,7 @@ class GroovyConfig implements Configuration {
     def checkInputs(String[] args) {
         args.each { arg ->
             if(arg.endsWith(".groovy")) {
-                logger.trace(arg)
+                log.trace(arg)
             } else {
                 StringBuffer buffer = new StringBuffer()
                 args.each { a ->
@@ -77,34 +75,37 @@ class GroovyConfig implements Configuration {
         GroovyClassLoader gcl = new GroovyClassLoader(loader)
         args.each { arg ->
             String groovyFile = arg
-            InputStream is = null
+            //Reader is = null
             long t0 = System.currentTimeMillis()
+            GroovyCodeSource groovyCodeSource = null
             try {
                 if(groovyFile.startsWith("jar:")) {
                     String resource = groovyFile
                     int ndx = groovyFile.indexOf("!")
                     if(ndx!=-1)
                         resource = groovyFile.substring(ndx+2)
-                    is = loader.getResourceAsStream(resource)
+                    groovyCodeSource = new GroovyCodeSource(loader.getResource(resource))
+                    //is = loader.getResourceAsStream(resource)
                 } else {
-                    if(groovyFile.startsWith("file:"))
-                        is = new URL(groovyFile).openStream()
-                    else
-                        is = new FileInputStream(groovyFile);
+                    if(groovyFile.startsWith("file:")) {
+                        groovyCodeSource = new GroovyCodeSource(new URL(groovyFile))
+                    } else {
+                        groovyCodeSource = new GroovyCodeSource(new File(groovyFile))
+                    }
                 }
-                parseAndLoad(is, gcl)
+                parseAndLoad(groovyCodeSource, gcl)
             } catch (FileNotFoundException e) {
                 throw new ConfigurationNotFoundException("The configuration file [${groovyFile}] does not exist", e)
             } catch(Throwable t) {
                 throw new ConfigurationException("The configuration file [${groovyFile}] could not be parsed", t)
             } finally {
-                if (is != null) {
+                /*if (is != null) {
                     try {
                         is.close();
                     } catch (IOException e) {
                     }
-                }
-                logger.trace "Time to parse ${groovyFile} : ${(System.currentTimeMillis()-t0)} milliseconds"
+                }*/
+                log.trace "Time to parse ${groovyFile} : ${(System.currentTimeMillis()-t0)} milliseconds"
             }
         }
         gcl = null
@@ -121,8 +122,8 @@ class GroovyConfig implements Configuration {
         }
     }
 
-    def parseAndLoad(InputStream is, GroovyClassLoader gcl) {
-        gcl.parseClass(is)
+    def parseAndLoad(GroovyCodeSource groovyCodeSource, GroovyClassLoader gcl) {
+        gcl.parseClass(groovyCodeSource)
         for(Class groovyClass : gcl.loadedClasses) {
             if(visited.contains(groovyClass.name))
                 continue
@@ -164,11 +165,7 @@ class GroovyConfig implements Configuration {
     def Object getEntry(String component, String name, Class type, Object defaultValue, Object data) {
         if(configFile!=null)
             return configFile.getEntry(component, name, type, defaultValue, data)
-        logger.trace("component=${component}, "+
-                     "name=${name}, "+
-                     "type=${type.getName()}, "+
-                     "defautValue=${defaultValue}, "+
-                     "data=${data}")
+        log.trace("component=${component}, name=${name}, type=${type.getName()}, defautValue=${defaultValue}, data=${data}")
         if (component == null) {
             throw new NullPointerException("component cannot be null");
         } else if (name == null) {
@@ -203,20 +200,20 @@ class GroovyConfig implements Configuration {
         if(data==NO_DATA) {
             try {
                 value = groovyConfig.getProperty(name)
-                logger.trace "Configuration entry [${component}.${name}] found in "+
-                             "GroovyObject ${groovyConfig}, assign returned value: ${value}"
+                log.trace "Configuration entry [${component}.${name}] found in "+
+                          "GroovyObject ${groovyConfig}, assign returned value: ${value}"
             } catch(MissingPropertyException e) {
                 if(!e.getProperty().equals(name))
                     throw new ConfigurationException(e.getMessage(), e)
 
-                logger.trace("${e.getClass().getName()}: looking for configuration entry "+
+                log.trace("${e.getClass().getName()}: looking for configuration entry "+
                              "[${component}.${name}] in GroovyObject "+
                              groovyConfig)
                 if(defaultValue==NO_DEFAULT) {
                     throw new NoSuchEntryException("entry not found for component: $component, name: $name", e);
                 } else {
-                    logger.trace "Configuration entry [${component}.${name}] not found in "+
-                                 "GroovyObject ${groovyConfig}, assign provided default: ${defaultValue}"
+                    log.trace "Configuration entry [${component}.${name}] not found in "+
+                              "GroovyObject ${groovyConfig}, assign provided default: ${defaultValue}"
                     value = defaultValue;
                 }
             }
@@ -227,7 +224,7 @@ class GroovyConfig implements Configuration {
                 List<MetaMethod> methods = groovyConfig.metaClass.methods
                 for(MetaMethod m : methods) {
                     if(m.name==methodName) {
-                        logger.trace "Found matching method name [${methodName}], check for type match"
+                        log.trace "Found matching method name [${methodName}], check for type match"
                         Class[] paramTypes = m.nativeParameterTypes
                         if(paramTypes.length==1 && paramTypes[0].isAssignableFrom(data.class)) {
                             mm = m;
