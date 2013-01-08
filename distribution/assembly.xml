@@ -20,19 +20,6 @@
             <outputDirectory>/config/poms</outputDirectory>
             <destName>rio-gnostic.pom</destName>
         </file>
-        <!-- Copy the Java Util Logging configuration file -->
-        <!--<file>
-            <source>${basedir}/src/main/config/logging/rio-logging.properties</source>
-            <outputDirectory>/config/logging</outputDirectory>
-            <destName>rio-logging.properties</destName>
-        </file>
-        &lt;!&ndash; Copy the Logback configuration file &ndash;&gt;
-        <file>
-            <source>${basedir}/src/main/config/logging/logback.groovy</source>
-            <outputDirectory>/lib/logging/config</outputDirectory>
-            <destName>logback.groovy</destName>
-        </file>-->
-
     </files>
     <fileSets>
 
