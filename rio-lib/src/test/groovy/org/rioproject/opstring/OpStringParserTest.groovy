@@ -66,6 +66,24 @@ class OpStringParserTest extends GroovyTestCase {
         assertEquals 10, messageCount.upperThresholdDampeningTime
     }
 
+    void testAssociationEmpty() {
+        File file = new File("src/test/resources/opstrings/association_empty.groovy")
+        def opstrings = dslParser.parse(file, null, null, null, null)
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = opstrings[0]
+
+        def calculator = opstring.services[0]
+        assertEquals "Calculator", calculator.name
+        assertEquals "calculator.Calculator", calculator.exportBundles[0].className
+        checkCalculatorClassBundles calculator.exportBundles, calculator.componentBundle
+        assertEquals "calculator.service.CalculatorImpl", calculator.componentBundle.className
+        assertEquals 1, calculator.associationDescriptors.length
+
+        assertEquals "Add", calculator.associationDescriptors[0].name
+        assertEquals AssociationType.REQUIRES, calculator.associationDescriptors[0].associationType
+        assertEquals "add", calculator.associationDescriptors[0].propertyName
+    }
+
     void testAssociationInjectProperty() {
         File file = new File("src/test/resources/opstrings/association_lazy.groovy")
         def opstrings = dslParser.parse(file, null, null, null, null)
@@ -85,6 +103,7 @@ class OpStringParserTest extends GroovyTestCase {
         assertEquals "add", calculator.associationDescriptors[0].propertyName
         assertEquals false, calculator.associationDescriptors[0].lazyInject
     }
+
     void testExternal() {
         File file = new File("src/test/resources/opstrings/external.groovy")
         def opstrings = dslParser.parse(file,     // opstring
