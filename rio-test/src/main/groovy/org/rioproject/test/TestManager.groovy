@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package org.rioproject.test
-
+import groovy.util.logging.Slf4j
 import net.jini.config.Configuration
 import net.jini.core.entry.Entry
 import net.jini.core.lookup.ServiceItem
@@ -33,6 +33,7 @@ import org.rioproject.deploy.ServiceBeanInstantiator
 import org.rioproject.exec.JVMOptionChecker
 import org.rioproject.exec.Util
 import org.rioproject.monitor.ProvisionMonitor
+import org.rioproject.opstring.*
 import org.rioproject.resolver.Artifact
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resources.client.DiscoveryManagementPool
@@ -43,17 +44,14 @@ import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
 import org.rioproject.util.PropertyHelper
-import org.slf4j.LoggerFactory
-import org.rioproject.opstring.*
-
 /**
  * Simplifies the running of core Rio services
  * 
  * @author Dennis Reedy
  */
+@Slf4j
 class TestManager {
     static final String TEST_HOSTS = 'org.rioproject.test.hosts'
-    def logger = LoggerFactory.getLogger(TestManager.class.getPackage().name);
     List<Webster> websters = new ArrayList<Webster>()
     List<Process> processes = new ArrayList<Process>()
     JiniClient client
@@ -103,11 +101,9 @@ class TestManager {
                     File f = new File((String)line)
                     if(f.exists()) {
                         if(FileUtils.remove(f)) {
-                            if(logger.isDebugEnabled())
-                                logger.debug "Removed ${f.name}"
+                            log.debug "Removed ${f.name}"
                         } else {
-                            if(logger.isDebugEnabled())
-                                logger.debug "Could not remove ${f.name}, check permissions"
+                            log.debug "Could not remove ${f.name}, check permissions"
                         }
                     }
                 }
@@ -121,7 +117,7 @@ class TestManager {
         if(groups==null)
             throw new IllegalStateException("The ${Constants.GROUPS_PROPERTY_NAME} system "+
                                             "property must be set")
-        logger.info "Using [${groups}] group for discovery"
+        log.info "Using [${groups}] group for discovery"
 
         DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
         if(config.manager.config) {
@@ -137,10 +133,10 @@ class TestManager {
 
         if(createShutdownHook) {
             Runtime rt = Runtime.getRuntime();
-            logger.info "Adding shutdown hook"
+            log.info "Adding shutdown hook"
 
             Closure cl = {
-                logger.info "Running shutdown hook, stop Rio services..."
+                log.info "Running shutdown hook, stop Rio services..."
                 shutdown()
             }
             Thread shutdownHook = new Thread(cl, "RunPostShutdownHook")
@@ -217,8 +213,8 @@ class TestManager {
             exec(cybernodeStarter)
             cybernode =  (Cybernode)waitForService(Cybernode.class)
         } else {
-            logger.warn "A Cybernode has been declared to start in the test configuration "+
-                        "but there is no cybernodeStarter declared in the test-config"
+            log.warn "A Cybernode has been declared to start in the test configuration "+
+                     "but there is no cybernodeStarter declared in the test-config"
         }
         return cybernode
     }
@@ -238,8 +234,8 @@ class TestManager {
             exec(cybernodeStarter)
             cybernode =  (Cybernode)waitForService(Cybernode.class)
         } else {
-            logger.warn "A Cybernode has been declared to start in the test configuration "+
-                        "but there is no cybernodeStarter declared in the test-config"
+            log.warn "A Cybernode has been declared to start in the test configuration "+
+                     "but there is no cybernodeStarter declared in the test-config"
         }
         return cybernode
     }
@@ -257,8 +253,8 @@ class TestManager {
             exec(monitorStarter)
             monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         } else {
-            logger.warn "A Monitor has been declared to start in the test configuration "+
-                        "but there is no monitorStarter declared in the test-config"
+            log.warn "A Monitor has been declared to start in the test configuration "+
+                     "but there is no monitorStarter declared in the test-config"
         }
         return monitor
     }
@@ -278,8 +274,8 @@ class TestManager {
             exec(monitorStarter)
             monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
         } else {
-            logger.warn "A Monitor has been declared to start in the test configuration "+
-                        "but there is no monitorStarter declared in the test-config"
+            log.warn "A Monitor has been declared to start in the test configuration "+
+                     "but there is no monitorStarter declared in the test-config"
         }
         return monitor
     }
@@ -311,8 +307,8 @@ class TestManager {
             exec(reggieStarter)
             reggie = (ServiceRegistrar)waitForService(ServiceRegistrar.class)
         } else {
-            logger.warn "A Lookup service has been declared to start in the test configuration "+
-                        "but there is no reggieStarter declared in the test-config"
+            log.warn "A Lookup service has been declared to start in the test configuration "+
+                     "but there is no reggieStarter declared in the test-config"
         }
         return reggie
     }
@@ -356,7 +352,7 @@ class TestManager {
             ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
             return deploy(oar.loadOperationalStrings()[0], monitor)
         } else {
-            logger.warn "The [${opstring}] is not an artifact"
+            log.warn "The [${opstring}] is not an artifact"
         }
         return null
     }
@@ -433,7 +429,7 @@ class TestManager {
     boolean undeploy(String name) {
         ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
         if(items.length==0) {
-            logger.warn "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
+            log.warn "No ProvisionMonitor instances discovered, cannot undeploy ${name}"
             return false
         }
         return undeploy(name, (ProvisionMonitor)items[0].service)
@@ -450,7 +446,7 @@ class TestManager {
             DeployAdmin dAdmin = (DeployAdmin)monitor.admin
             return dAdmin.undeploy(name)
         } else {
-            logger.warn "Cannot undeploy ${name}, ProvisionMonitor provided is null"
+            log.warn "Cannot undeploy ${name}, ProvisionMonitor provided is null"
             return false
         }
     }
@@ -465,11 +461,11 @@ class TestManager {
         OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers();
         for (OperationalStringManager mgr : opStringMgrs) {
             String opStringName = mgr.getOperationalString().name
-            logger.debug "Undeploying ${opStringName} ..."
+            log.debug "Undeploying ${opStringName} ..."
             deployAdmin.undeploy(opStringName);
-            logger.debug "Undeployed ${opStringName}"
-            }
+            log.debug "Undeployed ${opStringName}"
         }
+    }
 
     /**
      * Get the OperationalStringManager for an OperationalString that was configured to be autoDeployed
@@ -556,7 +552,7 @@ class TestManager {
             ProvisionMonitor monitor
             ServiceItem[] items = getServiceItems(ProvisionMonitor.class)
             if(items.length==0) {
-                logger.warn "No discovered ProvisionMonitor instances, cannot deploy HarvesterAgents"
+                log.warn "No discovered ProvisionMonitor instances, cannot deploy HarvesterAgents"
                 return
             }
             monitor = (ProvisionMonitor)items[0].service
@@ -571,7 +567,7 @@ class TestManager {
             } catch (MalformedURLException e) {
                 File opstringFile = new File(opstring)
                 if(!opstringFile.exists())
-                    logger.warn "Cannot load [${opstringFile}], Unable to deploy Harvester support."
+                    log.warn "Cannot load [${opstringFile}], Unable to deploy Harvester support."
                 opStringUrl = opstringFile.toURI().toURL()
             }
             OpStringLoader loader = new OpStringLoader(getClass().classLoader)
@@ -590,7 +586,7 @@ class TestManager {
             }
             def h = getHarvester(serviceDiscoveryManager.discoveryManager)
             h.harvestDir = "${PropertyHelper.expandProperties(config.manager.harvestDir)}"
-            logger.info "Harvester:: Number of physical machines = ${hosts.size()}"
+            log.info "Harvester:: Number of physical machines = ${hosts.size()}"
             long timeout = 1000*60
             long duration = 0
             while(h.agentsHandledCount<hosts.size()) {
@@ -599,7 +595,7 @@ class TestManager {
                 if(duration >= timeout)
                     break
             }
-            logger.info "Number of HarvesterAgents handled = ${h.agentsHandledCount}"
+            log.info "Number of HarvesterAgents handled = ${h.agentsHandledCount}"
             h.unadvertise()
         }
     }
@@ -672,11 +668,9 @@ class TestManager {
 
         jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir
         String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpathBuilder.toString()+' '+mainClass+' '+starter
-        logger.info "Logging for $service will be sent to ${logDir}"
-        logger.info "Starting ${service}, using starter config [${starter}]"
-        if(logger.isDebugEnabled()) {
-            logger.debug "Exec command line: ${cmdLine}"
-        }
+        log.info "Logging for $service will be sent to ${logDir}"
+        log.info "Starting ${service}, using starter config [${starter}]"
+        log.debug "Exec command line: ${cmdLine}"
         Process process = Runtime.runtime.exec(cmdLine)
         processes.add(process)
     }
@@ -707,14 +701,14 @@ class TestManager {
                 int numDeployed = entry.value
                 ServiceElement elem = entry.key
                 if (numDeployed < elem.planned) {
-                    logger.info "Waiting for service ${elem.operationalStringName}/${elem.name} to be deployed. " +
-                                "Planned [${elem.planned}], deployed [${numDeployed}]"
+                    log.info "Waiting for service ${elem.operationalStringName}/${elem.name} to be deployed. " +
+                             "Planned [${elem.planned}], deployed [${numDeployed}]"
                     numDeployed = mgr.getServiceBeanInstances(elem).length
                     deploy.put(elem, numDeployed)
                 } else {
                     deployed += elem.planned
-                    logger.info "Service ${elem.operationalStringName}/${elem.name} is deployed. " +
-                                "Planned [${elem.planned}], deployed [${numDeployed}]"
+                    log.info "Service ${elem.operationalStringName}/${elem.name} is deployed. " +
+                             "Planned [${elem.planned}], deployed [${numDeployed}]"
                 }
             }
             if(sleptFor==ServiceMonitor.MAX_TIMEOUT)
@@ -744,8 +738,8 @@ class TestManager {
     private int countServices(Class serviceInterface) {
         long t0 = System.currentTimeMillis()
         ServiceItem[] items = getServiceItems(serviceInterface)
-        logger.info "Discovered $items.length instances of ${serviceInterface.name}, "+
-                    "elapsed time: ${(System.currentTimeMillis()-t0)} millis"
+        log.info "Discovered $items.length instances of ${serviceInterface.name}, "+
+                 "elapsed time: ${(System.currentTimeMillis()-t0)} millis"
         return items.length
     }
 
@@ -852,7 +846,7 @@ class TestManager {
                 sb.append(", ")
             sb.append("name: ").append(name)
         }
-        logger.info "Waiting for ${sb.toString()} to be discovered"
+        log.info "Waiting for ${sb.toString()} to be discovered"
         long t0 = System.currentTimeMillis()
         ServiceItem serviceItem = serviceDiscoveryManager.lookup(template, null, 60000)
         if (serviceItem == null) {
@@ -860,8 +854,7 @@ class TestManager {
             throw new TimeoutException("Unable to discover service $info")
         }
         service = serviceItem.service
-        logger.info "${sb.toString()} has been discovered, elapsed time: "+
-                    "${(System.currentTimeMillis()-t0)} millis"
+        log.info "${sb.toString()} has been discovered, elapsed time: ${(System.currentTimeMillis()-t0)} millis"
         return service
     }
 
@@ -881,7 +874,7 @@ class TestManager {
             "jar:file:${Utils.getRioHome()}/lib/rio-test.jar!/default-manager-config.groovy"
         String mgrConfig = System.getProperty('org.rioproject.test.manager.config',
                                               defaultManagerConfig)
-        logger.info "Using TestManager configuration ${mgrConfig}"
+        log.info "Using TestManager configuration ${mgrConfig}"
         URL url
         try {
             url = new URL(mgrConfig)

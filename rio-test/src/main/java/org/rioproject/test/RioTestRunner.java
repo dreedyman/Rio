@@ -25,11 +25,13 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
+import org.rioproject.boot.LogAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -52,12 +54,19 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new RMISecurityManager());
         }
-        if(System.getProperty("java.util.logging.config.file")==null) {
-            LogManager logManager = LogManager.getLogManager();
-            try {
-                logManager.readConfiguration(Thread.currentThread().getClass().getResourceAsStream("/default-logging.properties"));
-            } catch (IOException e) {
-                e.printStackTrace();
+        if(LogAgent.usingJUL()) {
+            if(System.getProperty("java.util.logging.config.file")==null) {
+                LogManager logManager = LogManager.getLogManager();
+                try {
+                    logManager.readConfiguration(Thread.currentThread().getClass().getResourceAsStream("/default-logging.properties"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            if(System.getProperty("logback.configurationFile")==null) {
+                InputStream inputStream = Thread.currentThread().getClass().getResourceAsStream("/default-logback.groovy");
+                loadLogBackConfigurationUsingReflection(inputStream);
             }
         }
     }
@@ -74,8 +83,27 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
      */
     public RioTestRunner(Class<?> clazz) throws InitializationError {
         super(clazz);
-        if (logger.isDebugEnabled()) {
-            logger.debug("TestRunner constructor called with [" + clazz + "].");
+        logger.debug("TestRunner constructor called with [{}].", clazz);
+    }
+
+    private static void loadLogBackConfigurationUsingReflection(InputStream config) {
+        try {
+            Object joranConfigurator = Class.forName("ch.qos.logback.classic.joran.JoranConfigurator").newInstance();
+            Object context = LoggerFactory.getILoggerFactory();
+            Method setContext = null;
+            Method doConfigure = joranConfigurator.getClass().getMethod("doConfigure", InputStream.class);
+            for(Method method : joranConfigurator.getClass().getDeclaredMethods()) {
+                System.out.println(method);
+                if(method.getName().equals("setContext")) {
+                    setContext = method;
+                }
+            }
+            if(setContext!=null) {
+                setContext.invoke(joranConfigurator, context);
+                doConfigure.invoke(joranConfigurator, config);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -98,8 +126,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
     @Override
     public void run(RunNotifier notifier) {
         if (!isTestClassEnabled(getTestClass().getJavaClass())) {
-            logger.info("Test class "+getTestClass().getJavaClass().getName()+
-                        " is not enabled, skipping");
+            logger.info("Test class {}  is not enabled, skipping", getTestClass().getJavaClass().getName());
             notifier.fireTestIgnored(getDescription());
             return;
         }
@@ -116,9 +143,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     method.invoke(null, getManager());
                 } catch (Exception e) {
-                    logger.warn("Invoking static method ["+method.getName()+"] " +
-                                "with declared annotation "+
-                                SetTestManager.class.getName(),
+                    logger.warn("Invoking static method [{}] with declared annotation {}",
+                                method.getName(), SetTestManager.class.getName(),
                                 e);
                 }
                 //break;
@@ -131,9 +157,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     field.set(null, getManager());
                 } catch (IllegalAccessException e) {
-                    logger.warn("Invoking static field ["+field.getName()+"] " +
-                                "with declared annotation "+
-                                SetTestManager.class.getName(),
+                    logger.warn("Invoking static field [{}] with declared annotation {}",
+                                field.getName(), SetTestManager.class.getName(),
                                 e);
                 }
                 //break;
@@ -157,9 +182,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     method.invoke(null, getManager());
                 } catch (Exception e) {
-                    logger.warn("Invoking method ["+method.getName()+"] " +
-                                "with declared annotation "+
-                                SetTestManager.class.getName(),
+                    logger.warn("Invoking method [{}] with declared annotation {}",
+                                method.getName(), SetTestManager.class.getName(),
                                 e);
                 }
                 break;
@@ -172,9 +196,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                 try {
                     field.set(testInstance, getManager());
                 } catch (IllegalAccessException e) {
-                    logger.warn("Invoking field ["+field.getName()+"] " +
-                                "with declared annotation "+
-                                SetTestManager.class.getName(),
+                    logger.warn("Invoking field [{}] with declared annotation {}",
+                                field.getName(), SetTestManager.class.getName(),
                                 e);
                 }
                 break;
@@ -195,12 +218,9 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         long testTimeout = testManager.getTestConfig().getTimeout();
         if (junitTimeout > 0) {
             if(testTimeout > 0) {
-                String msg = "Test method ["+method.getMethod()+"] has a default " +
-                             "test configuration timeout value of " + testTimeout+" "+
-                             "and JUnit's @Test(timeout=" + junitTimeout+ ") " +
-                             "annotation. The JUnit declaration takes precedence " +
-                             "over the configured default timeout.";
-                logger.info(msg);
+                logger.info("Test method [{}] has a default test configuration timeout value of {} "+
+                            "and JUnit's @Test(timeout={}) annotation. The JUnit declaration takes precedence " +
+                            "over the configured default timeout.", method.getMethod(), testTimeout, junitTimeout);
             }
 			return super.withPotentialTimeout(method, target, next);
 		}
@@ -317,11 +337,9 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
      */
     @Override
     protected void runChild(FrameworkMethod method, RunNotifier notifier) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Invoking test method [" + method.getMethod().toGenericString() + "]");
-        }
+        logger.debug("Invoking test method [{}]", method.getMethod().toGenericString());
         if (!isTestMethodEnabled(method.getMethod())) {
-            logger.info("Test method "+method.getMethod().toGenericString()+" is not enabled, skipping");
+            logger.info("Test method {} is not enabled, skipping", method.getMethod().toGenericString());
             notifier.fireTestIgnored(getDescription());
             return;
         }

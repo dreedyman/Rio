@@ -66,7 +66,6 @@ public class Utils {
     public static void checkSecurityPolicy() {
         if(System.getProperty("java.security.policy")==null) {
             StringBuilder b = new StringBuilder();
-            b.delete(0, b.length());
             b.append(getRioHome());
             b.append("policy");
             b.append(File.separator);

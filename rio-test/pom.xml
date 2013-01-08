@@ -68,8 +68,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -213,6 +213,10 @@
                                 <property>
                                     <name>org.rioproject.test.config</name>
                                     <value>${basedir}/src/test/conf/test-config.groovy</value>
+                                </property>
+                                <property>
+                                    <name>java.security.policy</name>
+                                    <value>${basedir}/../distribution/target/rio-${project.version}/policy/policy.all</value>
                                 </property>
                             </systemProperties>
 
