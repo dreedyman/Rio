@@ -66,7 +66,7 @@ public class ServiceBeanInstance implements Serializable {
      * Create a ServiceBeanInstance
      * 
      * @param identifier Unique identifier for the service
-     * @param mi MarslledInstance of the service's proxy
+     * @param mi MarshalledInstance of the service's proxy
      * @param sbConfig ServiceBeanConfig object for the service
      * @param hostAddress The hostAddress the service is executing on
      * @param instantiatorID The Unique identifier of the
@@ -205,8 +205,7 @@ public class ServiceBeanInstance implements Serializable {
     }
 
     /* Set transient fields. */
-    private void readObject(ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         verifyCodebaseIntegrity = MarshalledWrapper.integrityEnforced(in);
     }
