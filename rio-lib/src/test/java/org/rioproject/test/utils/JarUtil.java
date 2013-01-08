@@ -36,8 +36,8 @@ public class JarUtil {
         JarOutputStream jarOutput = null;
         File jar = new File(target, jarName);
         String strip = replaceSeparators(source.getPath());
-        if(!strip.endsWith("/"))
-            strip = strip+"/";
+        if(!strip.endsWith(File.separator))
+            strip = strip+File.separator;
         try {
             jarOutput = new JarOutputStream(new FileOutputStream(jar), manifest);
             if(toAdd!=null)
@@ -94,6 +94,8 @@ public class JarUtil {
     }
 
     private static String replaceSeparators(String s) {
+        if(System.getProperty("os.name").startsWith("Windows"))
+            return s;
         return s.replace("\\", "/");
     }
 }
