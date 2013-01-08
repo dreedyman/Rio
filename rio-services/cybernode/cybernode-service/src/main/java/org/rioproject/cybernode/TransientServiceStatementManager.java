@@ -36,7 +36,7 @@ import java.util.Map;
 public class TransientServiceStatementManager implements ServiceStatementManager {
     /** Map of ServiceElement to ServiceStatement instances */
     private final Map<ServiceElement,ServiceStatement> statementMap = new HashMap<ServiceElement,ServiceStatement>();
-    private static final Logger logger = LoggerFactory.getLogger(TransientServiceStatementManager.class.getPackage().getName());
+    private static final Logger logger = LoggerFactory.getLogger(TransientServiceStatementManager.class);
 
     /**
      * Create a TransientServiceStatementManager
