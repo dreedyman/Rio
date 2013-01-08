@@ -88,7 +88,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, "test.groovy")
         manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.AUTOMATIC)
-        File oarFile = createOAR(manifest)
+        File oarFile = createOAR(manifest, "from-url.oar")
         OAR oar = null
         try {
             oar = new OAR(oarFile.toURI().toURL())
@@ -113,7 +113,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, "test.groovy")
         manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.AUTOMATIC)
-        File oarFile = createOAR(manifest)
+        File oarFile = createOAR(manifest, "from-jar-url.oar")
         OAR oar = null
         try {
             oar = new OAR(new URL("jar:${oarFile.toURI().toURL()}!/"))
@@ -134,7 +134,7 @@ class OARCheckTest extends GroovyTestCase {
         File target =  getOpString("rules.groovy")
         assertTrue target.exists()
 
-        String oarOpString = 'opstrings/'+target.name
+        String oarOpString = 'opstrings'+File.separator+target.name
         Throwable t = null
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0")
@@ -166,7 +166,7 @@ class OARCheckTest extends GroovyTestCase {
         File target =  getOpString("rules.groovy")
         assertTrue target.exists()
 
-        String oarOpString = 'opstrings/'+target.name
+        String oarOpString = 'opstrings'+File.separator+target.name
         Throwable t = null
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0")
@@ -195,13 +195,17 @@ class OARCheckTest extends GroovyTestCase {
     }
 
     def createOAR(Manifest manifest) {
+        return createOAR(manifest, "test.oar")
+    }
+
+    def createOAR(Manifest manifest, String name) {
         String sep = File.separator
         File target = new File("${System.getProperty('user.dir')}${sep}target")
-        File jar = new File(target, "test.oar")
+        File jar = new File(target, name)
         if(jar.exists())
             jar.delete()
         File repositories = new File("${System.getProperty('user.dir')}${sep}src${sep}test${sep}resources${sep}repositories.xml")
-        return JarUtil.createJar(new File('target/test-classes'), target, "test.oar", manifest, repositories)
+        return JarUtil.createJar(new File('target/test-classes'), target, name, manifest, repositories)
     }
 
     private File getOpString(String name) {
