@@ -3,15 +3,13 @@
  */
 import org.rioproject.config.Component
 import org.rioproject.log.LoggerConfig
-import org.rioproject.fdh.FaultDetectionHandlerFactory
 import org.rioproject.resources.client.JiniClient
 
 import net.jini.core.discovery.LookupLocator
-import org.rioproject.opstring.ClassBundle
 import org.rioproject.config.Constants
 import java.util.logging.Logger
 import org.rioproject.log.ServiceLogEventHandler
-import org.rioproject.boot.LogAgent
+import org.rioproject.start.LogAgent
 
 /*
  * Declare Cybernode properties

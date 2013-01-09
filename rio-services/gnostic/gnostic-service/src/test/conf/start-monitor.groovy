@@ -5,10 +5,10 @@
 
 import org.rioproject.config.Component
 
-import org.rioproject.boot.ServiceDescriptorUtil;
+import org.rioproject.util.ServiceDescriptorUtil;
 import com.sun.jini.start.ServiceDescriptor;
 
-@Component('com.sun.jini.start')
+@Component('org.rioproject.start')
 class StartMonitorConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.boot;
+package org.rioproject.util;
 
 import com.sun.jini.config.ConfigUtil;
 import com.sun.jini.start.NonActivatableServiceDescriptor;
@@ -21,6 +21,7 @@ import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
+import org.rioproject.start.RioServiceDescriptor;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;

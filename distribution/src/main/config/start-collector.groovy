@@ -5,12 +5,12 @@
 
 import org.rioproject.config.Component
 
-import org.rioproject.boot.ServiceDescriptorUtil;
+import org.rioproject.util.ServiceDescriptorUtil;
 import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.resolver.maven2.Repository
-import org.rioproject.boot.RioServiceDescriptor
+import org.rioproject.start.RioServiceDescriptor
 
-@Component('com.sun.jini.start')
+@Component('org.rioproject.start')
 class StartCollectorConfig {
 
     String[] getMusterConfigArgs(String rioHome) {

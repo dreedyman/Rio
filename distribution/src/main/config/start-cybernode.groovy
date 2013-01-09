@@ -1,14 +1,14 @@
 /*
  * This configuration is used to start a Cybernode, including an embedded Webster
  */
-import org.rioproject.boot.ServiceDescriptorUtil
-import org.rioproject.config.Component
+
 import com.sun.jini.start.ServiceDescriptor
+import org.rioproject.util.ServiceDescriptorUtil
+import org.rioproject.config.Component
 import org.rioproject.resolver.maven2.Repository
 
-@Component('com.sun.jini.start')
+@Component('org.rioproject.start')
 class StartCybernodeConfig {
-
     String[] getConfigArgs(String rioHome) {
         ServiceDescriptorUtil.checkForLoopback()
         def configArgs = [rioHome+'/config/common.groovy',
@@ -30,7 +30,6 @@ class StartCybernodeConfig {
             ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
             ServiceDescriptorUtil.getCybernode(policyFile, getConfigArgs(rioHome))
         ]
-        
         return (ServiceDescriptor[])serviceDescriptors
     }
 

@@ -51,7 +51,7 @@ manager {
         -Dorg.rioproject.service=${service}'''
 
 
-    mainClass = 'com.sun.jini.start.ServiceStarter'
+    mainClass = 'org.rioproject.start.ServiceStarter'
 
     /*
     * Remove any previously created service log files

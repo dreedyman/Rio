@@ -25,7 +25,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
-import org.rioproject.boot.LogAgent;
+import org.rioproject.start.LogAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

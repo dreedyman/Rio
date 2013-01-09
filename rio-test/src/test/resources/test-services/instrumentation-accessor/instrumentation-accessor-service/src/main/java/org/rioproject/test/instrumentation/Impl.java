@@ -16,7 +16,7 @@
 package org.rioproject.test.instrumentation;
 
 import org.rioproject.bean.Started;
-import org.rioproject.boot.AgentHook;
+import org.rioproject.start.AgentHook;
 
 import java.lang.instrument.Instrumentation;
 

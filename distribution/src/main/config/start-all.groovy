@@ -2,12 +2,12 @@
  * This configuration is used to start a ProvisionMonitor, Cybernode, Webster and a Lookup Service
  */
 
-import org.rioproject.boot.ServiceDescriptorUtil
+import org.rioproject.util.ServiceDescriptorUtil
 import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.resolver.maven2.Repository
 
-@Component('com.sun.jini.start')
+@Component('org.rioproject.start')
 class StartAllConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         ServiceDescriptorUtil.checkForLoopback()

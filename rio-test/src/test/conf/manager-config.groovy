@@ -55,7 +55,7 @@ manager {
      */
     cleanLogs = true
 
-    mainClass='com.sun.jini.start.ServiceStarter'
+    mainClass='org.rioproject.start.ServiceStarter'
 
     reggieStarter = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-reggie.groovy'
 

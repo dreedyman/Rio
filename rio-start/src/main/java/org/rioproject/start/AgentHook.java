@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.boot;
+package org.rioproject.start;
 
 import java.lang.instrument.Instrumentation;
 
 /**
- * Allows the instrumentation class to be accessed.
+ * Allows the instrumentation class to be accessed and checks for log redirection if running without a console.
  *
  * @author Dennis Reedy
  */

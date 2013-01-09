@@ -2,12 +2,12 @@
  * This configuration is used to start a service that will exec a single service bean
  */
 
-import org.rioproject.boot.RioServiceDescriptor
+import org.rioproject.start.RioServiceDescriptor
 import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
-import org.rioproject.boot.ServiceDescriptorUtil
+import org.rioproject.util.ServiceDescriptorUtil
 
-@Component('com.sun.jini.start')
+@Component('org.rioproject.start')
 class StartServiceBeanExecConfig {
 
     String[] getConfigArgs(String rioHome) {

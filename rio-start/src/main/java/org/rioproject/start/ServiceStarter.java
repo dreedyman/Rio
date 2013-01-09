@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.boot;
+package org.rioproject.start;
 
 import com.sun.jini.start.NonActivatableServiceDescriptor;
 import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
+import org.rioproject.start.RioServiceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ import java.util.List;
  * <a name="configEntries"> <h3>Configuring ServiceStarter</h3> </a>
  * <p/>
  * This implementation of <code>ServiceStarter</code> supports the following
- * configuration entries, with component <code>org.rioporject.boot</code>:
+ * configuration entries, with component <code>org.rioproject.start</code>:
  * <p/>
  * <table summary="Describes the loginContext configuration entry" border="0"
  * cellpadding="2"> <tr valign="top"> <th scope="col" summary="layout"> <font
@@ -77,24 +78,9 @@ import java.util.List;
  * logged.
  * <p/>
  * <p/>
- * <table border="1" cellpadding="5" summary="Describes logging performed by
- * service.starter at different logging levels">
- * <p/>
- * <caption halign="center" valign="top"><b><code> org.rioproject.boot.service.starter</code></b></caption>
- * <p/>
- * <tr> <th scope="col"> Level <th scope="col"> Description
- * <p/>
- * <tr> <td> {@link java.util.logging.Level#SEVERE SEVERE} <td> for problems
- * that prevent service creation from proceeding <tr> <td> {@link
- * java.util.logging.Level#WARNING WARNING} <td> for problems with service
- * creation that don't prevent further processing <tr> <td> {@link
- * java.util.logging.Level#FINER FINER} <td> for high level service creation
- * operation tracing <tr> <td> {@link java.util.logging.Level#FINEST FINEST}
- * <td> for low level service creation operation tracing
- * <p/>
- * </table> <p>
  *
  * @author Sun Microsystems, Inc.
+ * @author Dennis Reedy
  */
 public class ServiceStarter {
     /**
@@ -104,7 +90,7 @@ public class ServiceStarter {
     /**
      * Configure logger
      */
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT + ".service.starter");
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT + ".starter");
     /**
      * Array of strong references to transient services
      */
@@ -161,15 +147,17 @@ public class ServiceStarter {
          * @param o The service proxy object, if any.
          * @param e The service creation exception, if any.
          */
-        Result(ServiceDescriptor d, Object o, Exception e) {
+        Result(final ServiceDescriptor d, final Object o, final Exception e) {
             descriptor = d;
             result = o;
             exception = e;
         }
 
         public String toString() {
-            return this.getClass() + ":[descriptor=" + descriptor + ", "
-                   + "result=" + result + ", exception=" + exception + "]";
+            StringBuilder builder = new StringBuilder();
+            builder.append(this.getClass()).append(":[descriptor=").append(descriptor).append(", ");
+            builder.append("result=").append(result).append(", exception=").append(exception).append("]");
+            return builder.toString();
         }
     }
 
@@ -198,16 +186,13 @@ public class ServiceStarter {
 
     private static Result[] createWithLogin(final ServiceDescriptor[] descs,
                                             final Configuration config,
-                                            final LoginContext loginContext)
-        throws Exception {
+                                            final LoginContext loginContext) throws Exception {
         loginContext.login();
         Result[] results = null;
         try {
-            results = Subject.doAsPrivileged(
-                loginContext.getSubject(),
+            results = Subject.doAsPrivileged(loginContext.getSubject(),
                 new PrivilegedExceptionAction<Result[]>() {
-                    public Result[] run()
-                        throws Exception {
+                    public Result[] run() throws Exception {
                         return create(descs, config);
                     }
                 },
@@ -241,10 +226,9 @@ public class ServiceStarter {
      * @see ServiceDescriptor
      * @see net.jini.config.Configuration
      */
-    private static Result[] create(final ServiceDescriptor[] descs,
-                                   final Configuration config)
-        throws Exception {
+    private static Result[] create(final ServiceDescriptor[] descs, final Configuration config) throws Exception {
         List<Result> proxies = new ArrayList<Result>();
+        logger.debug("Starting {} service(s)", descs.length);
         for (ServiceDescriptor desc : descs) {
             Object result = null;
             Exception problem = null;
@@ -258,7 +242,6 @@ public class ServiceStarter {
                 proxies.add(new Result(desc, result, problem));
             }
         }
-
         return proxies.toArray(new Result[proxies.size()]);
     }
 
@@ -327,18 +310,15 @@ public class ServiceStarter {
      */
     private static Result[] doStart(String... args) throws Exception {
         Configuration config = ConfigurationProvider.getInstance(args);
-        ServiceDescriptor[] descs = (ServiceDescriptor[])
-            config.getEntry(COMPONENT, "serviceDescriptors",
-                            ServiceDescriptor[].class, null);
+        logger.debug("Getting service descriptors to start");
+        ServiceDescriptor[] descs =
+            (ServiceDescriptor[])config.getEntry(COMPONENT, "serviceDescriptors", ServiceDescriptor[].class, null);
         if (descs == null || descs.length == 0) {
             logger.warn("service.config.empty");
             return new Result[0];
         }
-        LoginContext loginContext =
-            (LoginContext)config.getEntry(COMPONENT,
-                                          "loginContext",
-                                          LoginContext.class,
-                                          null);
+        logger.debug("Obtained {} service descriptors to start", descs.length);
+        LoginContext loginContext = (LoginContext)config.getEntry(COMPONENT, "loginContext", LoginContext.class, null);
         Result[] results;
         if (loginContext != null)
             results = createWithLogin(descs, config, loginContext);
@@ -385,11 +365,9 @@ public class ServiceStarter {
         if (results.length == 0)
             return;
         for (Result result : results) {
-            if (result != null &&
-                result.result != null &&
-                NonActivatableServiceDescriptor.class.equals(
-                    result.descriptor.getClass())) {
-                logger.trace("Storing ref to: "+result.result);
+            if (result != null && result.result != null &&
+                NonActivatableServiceDescriptor.class.equals(result.descriptor.getClass())) {
+                logger.trace("Storing ref to: {}", result.result);
                 transientServiceRefs.add(result.result);
             }
         }
@@ -404,12 +382,10 @@ public class ServiceStarter {
             return;
         for (int i = 0; i < results.length; i++) {
             if (results[i].exception != null) {
-                logger.warn("service.creation.unknown",
-                           results[i].exception);
-                logger.warn("service.creation.unknown.detail",
-                           new Object[]{i, results[i].descriptor});
+                logger.warn("service.creation.unknown", results[i].exception);
+                logger.warn("service.creation.unknown.detail {} {}", i, results[i].descriptor);
             } else if (results[i].descriptor == null) {
-                logger.warn("service.creation.null", i);
+                logger.warn("service.creation.null {}", i);
             }
         }
     }
@@ -436,6 +412,7 @@ public class ServiceStarter {
      * @see net.jini.config.ConfigurationProvider
      */
     public static void main(String[] args) {
+        logger.debug("Entering {}", ServiceStarter.class.getName());
         ensureSecurityManager();
         try {
             Result[] results = doStart(args);

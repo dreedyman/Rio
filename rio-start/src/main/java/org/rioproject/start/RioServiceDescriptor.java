@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.boot;
+package org.rioproject.start;
 
 import com.sun.jini.config.Config;
 import com.sun.jini.start.*;
@@ -205,6 +205,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * @return The <code>LifeCycle</code> object associated with 
      * this service descriptor.
      */
+    @SuppressWarnings("unused")
     public LifeCycle getLifeCycle() {
         return lifeCycle;
     }
@@ -311,7 +312,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                    ClassLoaderUtil.getClasspathURLs(getClasspath())),
                                    annotator,
                                    commonCL);
-        if(logger.isDebugEnabled())
+        if(logger.isTraceEnabled())
             ClassLoaderUtil.displayClassLoaderTree(serviceCL);
         
         currentThread.setContextClassLoader(serviceCL);
@@ -331,14 +332,9 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 if(logger.isTraceEnabled())
                     logger.trace("Global policy set: {}", globalPolicy.toString());
             }                        
-            DynamicPolicyProvider service_policy = 
-                new DynamicPolicyProvider(
-                                          new PolicyFileProvider(getPolicy()));
-            LoaderSplitPolicyProvider splitServicePolicy = 
-                new LoaderSplitPolicyProvider(serviceCL,
-                                              service_policy,
-                                              new DynamicPolicyProvider(
-                                                             initialGlobalPolicy));
+            DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(getPolicy()));
+            LoaderSplitPolicyProvider splitServicePolicy =
+                new LoaderSplitPolicyProvider(serviceCL, service_policy, new DynamicPolicyProvider(initialGlobalPolicy));
             /*
              * Grant "this" code enough permission to do its work under the
              * service policy, which takes effect (below) after the context
@@ -352,17 +348,14 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         Object impl;
         try {
 
-            Class implClass;
+            Class<?> implClass;
             implClass = Class.forName(getImplClassName(), false, serviceCL);
-            if(logger.isTraceEnabled())
-                logger.trace("Attempting to get implementation constructor");
+            logger.trace("Attempting to get implementation constructor");
             Constructor constructor = implClass.getDeclaredConstructor(actTypes);
-            if(logger.isTraceEnabled())
-                logger.trace("Obtained implementation constructor: {}", constructor.toString());
+            logger.trace("Obtained implementation constructor: {}", constructor.toString());
             constructor.setAccessible(true);
             impl = constructor.newInstance(getServerConfigArgs(), lifeCycle);
-            if(logger.isTraceEnabled())
-                logger.trace("Obtained implementation instance: {}", impl.toString());
+            logger.trace("Obtained implementation instance: {}", impl.toString());
             if(impl instanceof ServiceProxyAccessor) {
                 proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
             } else if(impl instanceof ProxyAccessor) {
@@ -373,8 +366,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            if(logger.isTraceEnabled())
-                logger.trace("Proxy =  {}", proxy.toString());
+            logger.trace("Proxy:  {}", proxy==null?"<NULL>":proxy.toString());
             currentThread.setContextClassLoader(currentClassLoader);
             //TODO - factor in code integrity for MO
             proxy = (new MarshalledObject<Object>(proxy)).get();
@@ -395,6 +387,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * manifest setting. If there is, append the settings to the classpath
      */
     private String setClasspath(String cp) {
+        logger.debug("Create classpath from [{}]", cp);
         StringBuilder buff = new StringBuilder();
         for(String s : toArray(cp, "," + File.pathSeparator)) {
             if(buff.length()>0 && !buff.toString().endsWith(File.pathSeparator))
@@ -406,9 +399,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 if(!jarPath.endsWith(File.separator)) {
                     jarPath = jarPath+File.separator;
                 }
-                if(logger.isDebugEnabled())
-                    logger.debug("Creating jar file path from [{}]", f.getCanonicalPath());
-
+                logger.debug("Creating jar file path from [{}]", f.getCanonicalPath());
                 JarFile jar = new JarFile(f);
                 Manifest man = jar.getManifest();
                 if (man == null) {
@@ -432,9 +423,10 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                     buff.append(File.pathSeparator);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.warn("While trying to create classpath", e);
             }
         }
+        logger.debug("Classpath created [{}]", buff.toString());
         return buff.toString();
     }
 
@@ -450,13 +442,13 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     }
 
     public String toString() {
-        return "RioServiceDescriptor " +
-               "codebase='" + codebase + '\'' +
-               ", policy='" + policy + '\'' +
-               ", classpath='" + classpath + '\'' +
-               ", implClassName='" + implClassName + '\'' +
-               ", serverConfigArgs=" +
-               (serverConfigArgs == null ? null :
-                Arrays.asList(serverConfigArgs)) +", lifeCycle=" + lifeCycle;
+        StringBuilder toStringBuilder = new StringBuilder();
+        toStringBuilder.append("RioServiceDescriptor codebase: ").append(codebase).append(", ");
+        toStringBuilder.append("policy: ").append(policy).append(", ");
+        toStringBuilder.append("classpath: ").append(classpath).append(", ");
+        toStringBuilder.append("implClassName: ").append(implClassName).append(", ");
+        toStringBuilder.append("serverConfigArgs: ").append((serverConfigArgs == null ? null :Arrays.asList(serverConfigArgs))).append(", ");
+        toStringBuilder.append("lifeCycle: ").append(lifeCycle);
+        return toStringBuilder.toString();
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.boot;
+package org.rioproject.util;
 
 import org.rioproject.net.PortRangeServerSocketFactory;
 
@@ -29,7 +29,7 @@ public final class PortUtil {
     
     /** This class cannot be instantiated. */
     private PortUtil() {
-        throw new AssertionError("org.rioproject.boot.PortUtil cannot be instantiated");
+        throw new AssertionError(PortUtil.class.getName()+ " cannot be instantiated");
     }
     
     /**

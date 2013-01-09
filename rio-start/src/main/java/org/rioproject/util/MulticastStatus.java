@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.boot;
+package org.rioproject.util;
 
 import java.io.InterruptedIOException;
 import java.io.IOException;
