@@ -42,7 +42,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <opstring>${basedir}/src/main/opstring/instrumentation-accessor.groovy</opstring>
+                    <opstring>${basedir}/src/main/opstring/InstrumentationAccessor.groovy</opstring>
                 </configuration>
             </plugin>
 
