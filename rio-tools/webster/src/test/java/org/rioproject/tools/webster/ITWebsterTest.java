@@ -20,7 +20,7 @@ import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
-import org.rioproject.boot.ServiceDescriptorUtil;
+import org.rioproject.util.ServiceDescriptorUtil;
 
 import java.io.*;
 
