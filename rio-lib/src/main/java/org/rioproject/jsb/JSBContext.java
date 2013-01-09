@@ -77,7 +77,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      */
     private String exportCodebase;
     /** List of PlatformCapability instances that were created */
-    private List<PlatformCapability> platformList = new ArrayList<PlatformCapability>();
+    private final List<PlatformCapability> platformList = new ArrayList<PlatformCapability>();
     /** AssociationManagement for the ServiceBean */
     private AssociationManagement associationManagement;
     /** Shared Configuration for the ServiceBean to use*/
@@ -90,8 +90,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * ServiceProvider has advertised will consult the eventTable to determine
      * the correct EventHandler to use in order to return an event registration
      */
-    private final Map<Long, EventHandler> eventTable =
-        new HashMap<Long, EventHandler>();
+    private final Map<Long, EventHandler> eventTable = new HashMap<Long, EventHandler>();
     /** Collection of attributes */
     private final List<Entry> attrs = new ArrayList<Entry>();
     /** The service's configuration, created lazily */
@@ -103,7 +102,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /** Component name for logging and configuration property retrieval */
     private static final String COMPONENT="org.rioproject.jsb";
     /** A Logger instance for this component */
-    private static Logger logger = LoggerFactory.getLogger(COMPONENT);    
+    private static Logger logger = LoggerFactory.getLogger(JSBContext.class.getName());
 
     /**
      * Create a JSBContext
@@ -115,11 +114,11 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * @param sharedConfig Configuration from the "platform" which will be used
      * as the shared configuration with an AggregateConfig
      */
-    public JSBContext(ServiceElement sElem,
-                      ServiceBeanManager serviceBeanManager, 
-                      ComputeResource computeResource,
+    public JSBContext(final ServiceElement sElem,
+                      final ServiceBeanManager serviceBeanManager,
+                      final ComputeResource computeResource,
                       /* Optional */
-                      Configuration sharedConfig) {
+                      final Configuration sharedConfig) {
         if(sElem == null)
             throw new IllegalArgumentException("sElem is null");
         if(serviceBeanManager == null)
@@ -148,7 +147,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      *
      * @param subject The Subject 
      */
-    public void setSubject(Subject subject) {
+    public void setSubject(final Subject subject) {
         this.subject = subject;
     }
 
@@ -166,7 +165,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * 
      * @param newElem The ServiceElement
      */
-    public void setServiceElement(ServiceElement newElem) {
+    public void setServiceElement(final ServiceElement newElem) {
         if(newElem == null)
             throw new IllegalArgumentException("sElem is null");
         boolean update = (sElem != null);
@@ -190,6 +189,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      */
     public Configuration getConfiguration() throws ConfigurationException {
         if(serviceBeanConfig==null) {
+            logger.debug("Getting configuration for {}/{}", sElem.getOperationalStringName(), sElem.getName());
             ClassLoader cCL = Thread.currentThread().getContextClassLoader();
             String[] args;
             try {
@@ -206,7 +206,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                         sb.append("\n");
                     sb.append("\t").append(s);
                 }
-                logger.debug("CONFIG ARGS: \n{}", sb);
+                logger.debug("{}/{} CONFIG ARGS: \n{}", sElem.getOperationalStringName(), sElem.getName(), sb);
             }
             if(sharedConfig!=null) {
                 serviceBeanConfig =  new AggregateConfig(sharedConfig, args, cCL);
@@ -220,8 +220,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                    (args[0].endsWith(".config") || args[0].endsWith(".groovy"))) {
                     File file = new File(args[0]);
                     File parent = file.getParentFile().getCanonicalFile();
-                    File tmpDir =
-                        new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
+                    File tmpDir = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
                     if(parent.equals(tmpDir) &&
                        file.getName().startsWith("tmp")) {
                         if(file.delete() && logger.isTraceEnabled())
@@ -229,6 +228,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
 
                     }
                 }
+                logger.debug("Configuration for {}/{} created", sElem.getOperationalStringName(), sElem.getName());
             } catch(IOException e) {
                 logger.warn("Unable to get canonical file for the tmp directory, cannot remove generated config file(s)",
                             e);
@@ -237,11 +237,11 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
         return(serviceBeanConfig);
     }
 
-    public void setConfiguration(Configuration serviceBeanConfig) {
+    public void setConfiguration(final Configuration serviceBeanConfig) {
         this.serviceBeanConfig = serviceBeanConfig;
     }
 
-    void setConfigurationFiles(String... configFiles) {
+    void setConfigurationFiles(final String... configFiles) {
         configurationFiles = new String[configFiles.length];
         System.arraycopy(configFiles, 0, configurationFiles, 0, configFiles.length);
     }
@@ -269,7 +269,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * 
      * @param serviceBeanManager The ServiceBeanManager
      */
-     public void setServiceBeanManager(ServiceBeanManager serviceBeanManager) {
+     public void setServiceBeanManager(final ServiceBeanManager serviceBeanManager) {
         if(serviceBeanManager==null)
             throw new IllegalArgumentException("serviceBeanManager us null");
         this.serviceBeanManager = serviceBeanManager;
@@ -292,7 +292,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /**
      * @see org.rioproject.core.jsb.ServiceBeanContext#getInitParameter
      */
-    public Object getInitParameter(String name) {
+    public Object getInitParameter(final String name) {
         if(name==null)
             throw new IllegalArgumentException("name is null");
         return(sElem.getServiceBeanConfig().getInitParameters().get(name));
@@ -319,9 +319,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      */
     public DiscoveryManagement getDiscoveryManagement() throws IOException {
         if(serviceDiscoMgmt == null) {
-            if(logger.isTraceEnabled())
-                logger.trace("Create DiscoveryManagement for {}", sElem.getName());
-            
+            logger.trace("Create DiscoveryManagement for {}/{}", sElem.getOperationalStringName(), sElem.getName());
             DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
 
             String locatorString = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
@@ -362,23 +360,15 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
                 try {
                     discoConfig = getConfiguration();
                 } catch(ConfigurationException e) {
-                    if(logger.isTraceEnabled())
-                        logger.trace("Getting Configuration while creating DiscoveryManagement", e);
+                    logger.trace("Getting Configuration while creating DiscoveryManagement", e);
                 }
-                /*try {
-                    serviceDiscoMgmt = new LookupDiscoveryManager(sElem.getServiceBeanConfig().getGroups(),
-                                                                     locatorsToUse,
-                                                                     null,
-                                                                     discoConfig);
-                } catch (ConfigurationException e) {
-                    e.printStackTrace();
-                }*/
                 serviceDiscoMgmt = discoPool.getDiscoveryManager(serviceBeanManager.getServiceID().toString(),
                                                                  sElem.getServiceBeanConfig().getGroups(),
                                                                  locatorsToUse,
                                                                  null,
                                                                  discoConfig);
             }
+            logger.trace("Created DiscoveryManagement for {}/{}", sElem.getOperationalStringName(), sElem.getName());
         }
         return (serviceDiscoMgmt);
     }
@@ -388,17 +378,15 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      */
     public AssociationManagement getAssociationManagement() {  
         if(associationManagement==null) {
-            AssociationManagement defaultAssocMgmt = new AssociationMgmt();
+            AssociationManagement defaultAssociationManagement = new AssociationMgmt();
             try {
-                associationManagement = 
-                    (AssociationManagement)getConfiguration().getEntry(
-                                                        COMPONENT, 
-                                                        "associationManagement", 
-                                                        AssociationManagement.class, 
-                                                        defaultAssocMgmt);
+                associationManagement = (AssociationManagement)getConfiguration().getEntry(COMPONENT,
+                                                                                           "associationManagement",
+                                                                                           AssociationManagement.class,
+                                                                                           defaultAssociationManagement);
             } catch(ConfigurationException e) {
                 logger.warn("Creating AssociationManagement, will use default", e);
-                associationManagement = defaultAssocMgmt;
+                associationManagement = defaultAssociationManagement;
             }
         }            
         return (associationManagement);
@@ -411,12 +399,10 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
         if(watchRegistry==null) {
             try {
                 Configuration config = getConfiguration();
-                watchRegistry =
-                    (WatchRegistry)config.getEntry(
-                        COMPONENT,
-                        "watchRegistry",
-                        WatchRegistry.class,
-                        new WatchDataSourceRegistry());
+                watchRegistry = (WatchRegistry)config.getEntry(COMPONENT,
+                                                               "watchRegistry",
+                                                               WatchRegistry.class,
+                                                               new WatchDataSourceRegistry());
                 watchRegistry.setServiceBeanContext(this);
             } catch(Exception e) {
                 logger.warn("Getting watchRegistry", e);
@@ -440,8 +426,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /**
      * @see org.rioproject.core.jsb.ServiceBeanContext#registerEventHandler
      */
-    public void registerEventHandler(EventDescriptor descriptor,
-                                     EventHandler handler) {
+    public void registerEventHandler(final EventDescriptor descriptor, final EventHandler handler) {
         eventTable.put(descriptor.eventID, handler);
         addAttribute(descriptor);
     }
@@ -449,7 +434,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /**
      * @see org.rioproject.core.jsb.ServiceBeanContext#addAttribute
      */
-    public void addAttribute(Entry attribute) {
+    public void addAttribute(final Entry attribute) {
         if(attribute!=null)
             attrs.add(attribute);
     }
@@ -473,11 +458,10 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /**
      * @see org.rioproject.core.jsb.ComputeResourceManager#getPlatformCapability
      */
-    public PlatformCapability getPlatformCapability(String name) {
+    public PlatformCapability getPlatformCapability(final String name) {
         if(name == null)
             throw new IllegalArgumentException("name is null");
-        PlatformCapability pCap =
-            computeResource.getPlatformCapability(name);
+        PlatformCapability pCap = computeResource.getPlatformCapability(name);
         return (pCap);
     }
 
@@ -503,8 +487,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * @throws IllegalAccessException If there is a security exception
      * @throws InstantiationException If the class cannot be created
      */
-    public static PlatformCapability createPlatformCapability(String className,
-                                                              Map<String, Object> mapping)
+    public static PlatformCapability createPlatformCapability(final String className, final Map<String, Object> mapping)
     throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if(className == null)
             throw new IllegalArgumentException("className is null");
@@ -539,8 +522,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     public MeasurableCapability[] getMatchedMeasurableCapabilities() {
         List<MeasurableCapability> list = new ArrayList<MeasurableCapability>();
         SLA[] slas = sElem.getServiceLevelAgreements().getServiceSLAs();
-        MeasurableCapability[] mCaps =
-            computeResource.getMeasurableCapabilities();
+        MeasurableCapability[] mCaps = computeResource.getMeasurableCapabilities();
         /*
         * Check each of the MeasuredCapability objects for a match
         */
