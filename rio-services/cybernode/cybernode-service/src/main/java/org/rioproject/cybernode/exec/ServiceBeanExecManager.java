@@ -281,7 +281,7 @@ public class ServiceBeanExecManager {
     }
 
     private String getMainClass() {
-        String mainClass = System.getProperty("rio.script.mainClass", "com.sun.jini.start.ServiceStarter");
+        String mainClass = System.getProperty("rio.script.mainClass", "org.rioproject.start.ServiceStarter");
         return mainClass+" ";
     }
 
