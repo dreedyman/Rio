@@ -131,7 +131,7 @@ fi
 if [ "$start" = "1" ]; then
 
     # Run installer first
-    installRioToLocalRepository
+    #installRioToLocalRepository
 
     if [ -z "$RIO_NATIVE_DIR" ] ; then
         RIO_NATIVE_DIR="`toNative $RIO_LIB/native`"
@@ -156,19 +156,18 @@ if [ "$start" = "1" ]; then
     fi
     classpath="-cp `toNative $RIO_LIB/rio-start.jar:$RIO_LIB/resolver-api.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar:$SLF4J_CLASSPATH`"
     agentpath="-javaagent:`toNative $RIO_LIB/rio-start.jar`"
-    launchTarget=com.sun.jini.start.ServiceStarter
+    launchTarget=org.rioproject.start.ServiceStarter
     if [ -z "$1" ] ; then
         echo "A service to start is required, exiting"
         exit 1
     else
         starter_arg=$1
         getStarterConfig $1
-        echo "starter config [$starterConfig]"
+        echo "INFO  $(date +%T) starter config [$starterConfig]"
         shift
         command_line=$*
     fi
     ARGS="$starter_arg $command_line"
-
     # -------------------
     # System properties that change how Rio operates
     #
