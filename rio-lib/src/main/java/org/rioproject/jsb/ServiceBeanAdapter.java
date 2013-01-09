@@ -40,7 +40,7 @@ import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
-import org.rioproject.boot.LogAgent;
+import org.rioproject.start.LogAgent;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;

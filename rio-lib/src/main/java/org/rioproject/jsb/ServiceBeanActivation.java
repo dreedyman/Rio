@@ -27,7 +27,7 @@ import net.jini.id.UuidFactory;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.ServiceBeanControlException;
-import org.rioproject.boot.MulticastStatus;
+import org.rioproject.util.MulticastStatus;
 import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
