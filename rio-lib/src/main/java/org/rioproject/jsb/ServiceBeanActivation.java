@@ -67,7 +67,7 @@ import java.util.Properties;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceBeanActivation {
-    static final String COMPONENT = Constants.BASE_COMPONENT+".jsb";
+    static final String COMPONENT = ServiceBeanActivation.class.getPackage().getName();
     public static final String QOS_COMPONENT = Constants.BASE_COMPONENT+".system";
     public static final String BOOT_COMPONENT = Constants.BASE_COMPONENT+".boot";
     public static final String BOOT_CONFIG_COMPONENT = BOOT_COMPONENT+".configComponent";
@@ -90,13 +90,15 @@ public class ServiceBeanActivation {
      * @throws IOException If the hostname cannot be accessed
      * @throws IllegalArgumentException If any of the arguments are null.
      */
-    public static ServiceBeanContext getServiceBeanContext(String configComponent,
-                                                           String defaultServiceName,
-                                                           String[] configArgs,
-                                                           ClassLoader loader) throws ConfigurationException, IOException {
+    public static ServiceBeanContext getServiceBeanContext(final String configComponent,
+                                                           final String defaultServiceName,
+                                                           final String[] configArgs,
+                                                           final ClassLoader loader) throws ConfigurationException, IOException {
         if(configArgs == null)
             throw new IllegalArgumentException("configArgs is null");
+        logger.debug("Creating configuration for {}", configComponent);
         Configuration config = ConfigurationProvider.getInstance(configArgs, loader);
+        logger.debug("Created configuration for {}", configComponent);
         return getServiceBeanContext(configComponent, defaultServiceName, configArgs, config, loader);
 
     }
@@ -120,12 +122,13 @@ public class ServiceBeanActivation {
      * @throws IOException If the hostname cannot be accessed
      * @throws IllegalArgumentException If any of the arguments are null.
      */
-    public static ServiceBeanContext getServiceBeanContext(String configComponent,
-                                                           String defaultServiceName,
-                                                           String[] configArgs,
-                                                           Configuration config,
-                                                           ClassLoader loader) throws ConfigurationException,
+    public static ServiceBeanContext getServiceBeanContext(final String configComponent,
+                                                           final String defaultServiceName,
+                                                           final String[] configArgs,
+                                                           final Configuration config,
+                                                           final ClassLoader loader) throws ConfigurationException,
                                                                                       IOException {
+        logger.debug("Entering getServiceBeanContext");
         if(configComponent == null)
             throw new IllegalArgumentException("configComponent is null");
         if(defaultServiceName == null)
@@ -222,6 +225,7 @@ public class ServiceBeanActivation {
         JSBContext jsbContext = new JSBContext(sElem, jsbManager, computeResource, null); /* Shared Configuration */
         jsbContext.setConfiguration(config);
         jsbContext.setConfigurationFiles(configArgs);
+        logger.debug("Leaving getServiceBeanContext");
         return (jsbContext);
     }
 
@@ -240,9 +244,9 @@ public class ServiceBeanActivation {
      * @throws ConfigurationException if there are errors reading the configuration 1
      * @throws IllegalArgumentException If any of the arguments are null.
      */
-    static Map<String, Object> readServiceBeanConfig(String configComponent,
-                                                     String defaultServiceName,
-                                                     Configuration config)
+    static Map<String, Object> readServiceBeanConfig(final String configComponent,
+                                                     final String defaultServiceName,
+                                                     final Configuration config)
     throws ConfigurationException {
         if(configComponent == null)
             throw new IllegalArgumentException("configComponent is null");
@@ -310,7 +314,7 @@ public class ServiceBeanActivation {
      * @throws ConfigurationException if there are problems reading the configuration
      * @throws IllegalArgumentException If the config argument is null.
      */
-    static void checkUtilityConfiguration(Configuration config) throws IOException, ConfigurationException {
+    static void checkUtilityConfiguration(final Configuration config) throws IOException, ConfigurationException {
         if(config == null)
             throw new IllegalArgumentException("configArgs are null");
 
@@ -359,7 +363,7 @@ public class ServiceBeanActivation {
         /*
          * Register the ServiceBean to the LifeCycleManager and advertise it
          */
-        public void register(Object sbProxy, ServiceBeanContext context) throws ServiceBeanControlException {
+        public void register(final Object sbProxy, final ServiceBeanContext context) throws ServiceBeanControlException {
             try {
                 if(sbProxy == null)
                     throw new IllegalArgumentException("sbProxy is null");
@@ -460,7 +464,7 @@ public class ServiceBeanActivation {
         /**
          * @see com.sun.jini.start.LifeCycle#unregister
          */
-        public boolean unregister(Object impl) {
+        public boolean unregister(final Object impl) {
             if(terminated)
                 return (true);
             terminate();

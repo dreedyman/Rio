@@ -62,14 +62,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                     e.printStackTrace();
                 }
             }
-        } /*else {
-            System.out.println("===> logback.configurationFile: "+System.getProperty("logback.configurationFile"));
-            if(System.getProperty("logback.configurationFile")==null) {
-                InputStream inputStream = Thread.currentThread().getClass().getResourceAsStream("/logback-test.groovy");
-                System.out.println("===> logback-test.groovy: "+inputStream);
-                //loadLogBackConfigurationUsingReflection(inputStream);
-            }
-        }*/
+        }
     }
     TestManager testManager;
     TestConfig testConfig;
@@ -86,27 +79,6 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         super(clazz);
         logger.debug("TestRunner constructor called with [{}].", clazz);
     }
-
-    /*private static void loadLogBackConfigurationUsingReflection(InputStream config) {
-        try {
-            Object joranConfigurator = Class.forName("ch.qos.logback.classic.joran.JoranConfigurator").newInstance();
-            Object context = LoggerFactory.getILoggerFactory();
-            Method setContext = null;
-            Method doConfigure = joranConfigurator.getClass().getMethod("doConfigure", InputStream.class);
-            for(Method method : joranConfigurator.getClass().getDeclaredMethods()) {
-                System.out.println(method);
-                if(method.getName().equals("setContext")) {
-                    setContext = method;
-                }
-            }
-            if(setContext!=null) {
-                setContext.invoke(joranConfigurator, context);
-                doConfigure.invoke(joranConfigurator, config);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 
     @Override
     protected Statement withAfterClasses(Statement statement) {

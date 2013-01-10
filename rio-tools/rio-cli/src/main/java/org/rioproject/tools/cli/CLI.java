@@ -1269,7 +1269,7 @@ public class CLI {
         Configuration config = getConfiguration();
         Properties sysProps = new Properties();
         String[] systemProperties =
-            (String[])config.getEntry("org.rioproject.boot", "systemProperties", String[].class, new String[0]);
+            (String[])config.getEntry("org.rioproject.start", "systemProperties", String[].class, new String[0]);
         if(systemProperties.length > 0) {
             if(systemProperties.length%2 != 0) {
                 System.err.println("systemProperties elements has odd length : "+systemProperties.length);

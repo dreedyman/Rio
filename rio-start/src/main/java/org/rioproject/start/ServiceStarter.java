@@ -20,7 +20,6 @@ import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
-import org.rioproject.start.RioServiceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +38,7 @@ import java.util.List;
  * non-activatable services, and activatable services.
  * <p/>
  * The following implementation-specific items are discussed below: <ul> <li><a
- * href="#configEntries">Configuring ServiceStarter</a> <li><a
- * href="#logging">Logging</a> </ul>
+ * href="#configEntries">Configuring ServiceStarter</a> </ul>
  * <p/>
  * <a name="configEntries"> <h3>Configuring ServiceStarter</h3> </a>
  * <p/>
@@ -70,14 +68,6 @@ import java.util.List;
  * start. </table>
  * <p/>
  * <p/>
- * <a name="logging"> <h3>Loggers and Logging Levels</h3> </a>
- * <p/>
- * The implementation uses the {@link java.util.logging.Logger}, named
- * <code>org.rioproject.boot.service.starter</code>. The following table
- * describes the type of information logged as well as the levels of information
- * logged.
- * <p/>
- * <p/>
  *
  * @author Sun Microsystems, Inc.
  * @author Dennis Reedy
@@ -90,7 +80,7 @@ public class ServiceStarter {
     /**
      * Configure logger
      */
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT + ".starter");
+    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     /**
      * Array of strong references to transient services
      */
@@ -261,7 +251,7 @@ public class ServiceStarter {
      * to obtain a <tt>Configuration</tt> object.
      *
      * <p>This configuration object is then queried for the
-     * <tt>org.rioproject.boot.start.serviceDescriptors</tt> entry, which
+     * <tt>org.rioproject.start.serviceDescriptors</tt> entry, which
      * is assumed to be a <tt>ServiceDescriptor[]</tt>.
      *
      * <p>The <tt>create()</tt> method is then called on each of the array
@@ -291,7 +281,7 @@ public class ServiceStarter {
      * to obtain a <tt>Configuration</tt> object.
      *
      * <p>This configuration object is then queried for the
-     * <tt>org.rioproject.boot.start.serviceDescriptors</tt> entry, which
+     * <tt>org.rioproject.start.serviceDescriptors</tt> entry, which
      * is assumed to be a <tt>ServiceDescriptor[]</tt>.
      *
      * <p>The <tt>create()</tt> method is then called on each of the array
@@ -397,7 +387,7 @@ public class ServiceStarter {
      * <code>Configuration</code> object.
      *
      * <p>This configuration object is then queried for the
-     * <code>org.rioproject.boot.start.serviceDescriptors</code> entry, which
+     * <code>org.rioproject.start.serviceDescriptors</code> entry, which
      * is assumed to be a <code>ServiceDescriptor[]</code>.
      *
      * <p>The <code>create()</code> method is then called on each of the array

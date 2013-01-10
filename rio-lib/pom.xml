@@ -131,9 +131,8 @@
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
-                <version>1.3</version>
                 <configuration>
-                    <providerSelection>1.7</providerSelection>
+                    <providerSelection>${gmavenProviderSelection}</providerSelection>
                     <source/>
                 </configuration>
                 <executions>
@@ -146,6 +145,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>${groovy.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>

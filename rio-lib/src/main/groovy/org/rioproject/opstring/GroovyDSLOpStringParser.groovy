@@ -68,18 +68,22 @@ class GroovyDSLOpStringParser implements OpStringParser {
         def parent = null
 
         URL sourceLocation = null
+        GroovyCodeSource groovyCodeSource
         if(source instanceof URL) {
             sourceLocation = (URL)source
-            source = ((URL)source).newReader()
+            groovyCodeSource = new GroovyCodeSource(sourceLocation)
         } else if(source instanceof File) {
             sourceLocation = ((File)source).toURI().toURL()
+            groovyCodeSource = new GroovyCodeSource((File)source)
+        } else {
+            throw new DSLException("Unrecognized source "+source)
         }
 
         Script dslScript
         if(loader==null)
-            dslScript = new GroovyShell().parse(source)
+            dslScript = new GroovyShell().parse(groovyCodeSource)
         else
-            dslScript = new GroovyShell(loader).parse(source)
+            dslScript = new GroovyShell(loader).parse(groovyCodeSource)
 
         def opStrings = []
         OpStringParserHelper helper = new OpStringParserHelper()
