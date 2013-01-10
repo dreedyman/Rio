@@ -438,10 +438,12 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * Get the ServiceBeanContext and bootstrap the Cybernode
      */
     private void bootstrap(String[] configArgs) throws Exception {
+        logger.trace("Entering bootstrap");
         context = ServiceBeanActivation.getServiceBeanContext(getConfigComponent(),
                                                               "Cybernode",
                                                               configArgs,
                                                               getClass().getClassLoader());
+        logger.trace("Obtained ServiceBeanContext {}", context);
         BannerProvider bannerProvider = (BannerProvider)context.getConfiguration().getEntry(getConfigComponent(),
                                                                                             "bannerProvider",
                                                                                             BannerProvider.class,
@@ -486,6 +488,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             return null;
         }
         Object proxy = CybernodeProxy.getInstance(cybernode, getUuid());
+        logger.trace("Proxy created {}", proxy);
         /* Get the registry port */
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         registryPort = Integer.parseInt(sPort);
