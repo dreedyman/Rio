@@ -139,7 +139,7 @@ public class ITMonitorRulesTest {
     public void verifyScalingMultipleServicesWorks() {
         Throwable thrown = null;
         try {
-            testManager.deploy(new File("src"+File.separator+"test"+File.separator+"opstring", "test-opstring1.groovy"));
+            testManager.deploy(new File("src"+File.separator+"test"+File.separator+"opstring", "testOpstring1.groovy"));
             try {
                 s1Instances = getServices("S1", TestService.class, testManager.getGroups());
                 s2Instances = getServices("S2", TestService.class, testManager.getGroups());

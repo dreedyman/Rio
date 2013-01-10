@@ -11,7 +11,7 @@ ITMonitorRulesTest {
     numCybernodes = 1
     numMonitors = 1
     groups = "ITMonitorRulesTest"
-    opstring = 'src/test/opstring/test-opstring.groovy'
+    opstring = 'src/test/opstring/testOpstring.groovy'
     autoDeploy = true
 }
 
@@ -27,7 +27,7 @@ ITSystemUtilizationTest {
     numCybernodes = 1
     numMonitors = 1
     groups = "ITSystemUtilizationTest"
-    opstring = 'src/test/opstring/test-opstring2.groovy'
+    opstring = 'src/test/opstring/testOpstring2.groovy'
     autoDeploy = true
 }
 
