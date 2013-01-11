@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.system.measurable.memory;
+package org.rioproject.test.system.measurable.memory;
 
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.measurable.SigarHelper;
+import org.rioproject.test.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.measurable.memory.Memory;
 import org.rioproject.watch.ThresholdValues;
 
 /**
- * Simple test of Memory class
+ * Simple test of Memory class using SIGAR
  */
-public class MemoryTest {
+public class MemoryTestUsingSigar {
+
     @Before
-    public void checkNotWindows() {
-        Assume.assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
+    public void checkSigar() {
+        Assert.assertTrue(SigarHelper.sigarAvailable());
     }
 
     @Test

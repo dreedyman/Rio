@@ -202,7 +202,9 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <forkMode>always</forkMode>
-
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${basedir}/../distribution/target/rio-${project.version}/lib/hyperic/sigar.jar</additionalClasspathElement>
+                            </additionalClasspathElements>
                             <systemProperties>
                                 <property>
                                     <name>RIO_HOME</name>

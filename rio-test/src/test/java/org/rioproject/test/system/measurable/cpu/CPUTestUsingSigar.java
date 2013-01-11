@@ -13,28 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.system.measurable.cpu;
+package org.rioproject.test.system.measurable.cpu;
 
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.measurable.SigarHelper;
+import org.rioproject.test.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.measurable.cpu.CPU;
+import org.rioproject.system.measurable.cpu.CpuUtilization;
 import org.rioproject.watch.ThresholdValues;
 
 /**
- * Simple test of DiskSpace class
+ * Simple test of DiskSpace class using SIGAR
  */
-public class CPUTest {
+public class CPUTestUsingSigar {
     @Before
-    public void checkNotWindows() {
-        Assume.assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
+    public void checkSigar() {
+        Assert.assertTrue(SigarHelper.sigarAvailable());
     }
     @Test
     public void createAndVerifyCPUClassWithSigar() {
         CPU cpu = new CPU(EmptyConfiguration.INSTANCE);
+        Assert.assertTrue(SigarHelper.sigarAvailable());
         cpu.start();
         cpu.checkValue();
         MeasuredResource mRes = cpu.getMeasuredResource();

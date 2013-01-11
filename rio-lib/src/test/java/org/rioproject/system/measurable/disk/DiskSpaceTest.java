@@ -17,6 +17,8 @@ package org.rioproject.system.measurable.disk;
 
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.SimpleThresholdListener;
@@ -26,6 +28,11 @@ import org.rioproject.watch.ThresholdValues;
  * Simple test of DiskSpace class
  */
 public class DiskSpaceTest {
+    @Before
+    public void checkNotWindows() {
+        Assume.assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
+    }
+
     @Test
     public void createAndVerifyDiskSpaceClass() {
         DiskSpace diskSpace = new DiskSpace(EmptyConfiguration.INSTANCE);

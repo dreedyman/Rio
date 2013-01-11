@@ -76,12 +76,10 @@ public final class SigarHelper {
 
     private SigarHelper() {
         try {
-            Class sigarClass = Class.forName("org.hyperic.sigar.Sigar");
+            Class<?> sigarClass = Class.forName("org.hyperic.sigar.Sigar");
             Object sigar = sigarClass.newInstance();
-            Class sigarProxyClass = Class.forName("org.hyperic.sigar.SigarProxyCache");
-            Method newInstance = sigarProxyClass.getMethod("newInstance",
-                                                           sigarClass,
-                                                           int.class);
+            Class<?> sigarProxyClass = Class.forName("org.hyperic.sigar.SigarProxyCache");
+            Method newInstance = sigarProxyClass.getMethod("newInstance", sigarClass, int.class);
             synchronized(sigarLock) {
                 sigarInstance = newInstance.invoke(null, sigar, 5000);
                 /* Try to get the pid, if this passes SIGAR is available */
@@ -93,8 +91,7 @@ public final class SigarHelper {
                 }
             }
         } catch (Throwable e) {
-            if(logger.isDebugEnabled())
-                logger.debug("Could not load SIGAR");
+            logger.debug("Could not load SIGAR {}: {}", e.getClass(), e.getMessage());
         }
     }
     

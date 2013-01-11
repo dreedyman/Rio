@@ -13,60 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.system.measurable.cpu;
+package org.rioproject.test.system.measurable.disk;
 
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.measurable.SigarHelper;
+import org.rioproject.test.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.measurable.disk.DiskSpace;
+import org.rioproject.system.measurable.disk.DiskSpaceUtilization;
 import org.rioproject.watch.ThresholdValues;
 
 /**
- * Simple test of DiskSpace class
+ * Simple test of DiskSpace class using SIGAR
  */
-public class CPUTest {
+public class DiskSpaceTestUsingSigar {
     @Before
-    public void checkNotWindows() {
-        Assume.assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
+    public void checkSigar() {
+        Assert.assertTrue(SigarHelper.sigarAvailable());
     }
+
     @Test
-    public void createAndVerifyCPUClassWithSigar() {
-        CPU cpu = new CPU(EmptyConfiguration.INSTANCE);
-        cpu.start();
-        cpu.checkValue();
-        MeasuredResource mRes = cpu.getMeasuredResource();
+    public void createAndVerifyDiskSpaceClass() {
+        DiskSpace diskSpace = new DiskSpace(EmptyConfiguration.INSTANCE);
+        diskSpace.start();
+        MeasuredResource mRes = diskSpace.getMeasuredResource();
         Assert.assertTrue("MeasuredResource should not be null", mRes!=null);
-        Assert.assertTrue("MeasuredResource should be a CPUUtilization", mRes instanceof CpuUtilization);
-        double utilization = cpu.getUtilization();
+        Assert.assertTrue("MeasuredResource should be a DiskSpaceUtilization", mRes instanceof DiskSpaceUtilization);
+        double utilization = diskSpace.getUtilization();
         Assert.assertTrue("Utilization should be > 0", utilization>0);
     }
 
     @Test
-    public void createAndVerifyCPUWithLowerThresholdBeingCrossedWithSigar() {
-        CPU cpu = new CPU(EmptyConfiguration.INSTANCE);
+    public void createAndVerifyDiskSpaceWithLowerThresholdBeingCrossed() {
+        DiskSpace diskSpace = new DiskSpace(EmptyConfiguration.INSTANCE);
         ThresholdValues tVals = new ThresholdValues(0.30, 0.90);
-        cpu.setThresholdValues(tVals);
+        diskSpace.setThresholdValues(tVals);
         SimpleThresholdListener l = new SimpleThresholdListener();
-        cpu.start();
-        cpu.checkValue();
-        double utilization = cpu.getUtilization();
-        Assert.assertTrue("Utilization should be > 0", utilization>0);
-        Assert.assertTrue(l.getType()== null);
-    }
-
-    @Test
-    public void createAndVerifyCPUWithUpperThresholdBeingCrossedWithSigar() {
-        CPU cpu = new CPU(EmptyConfiguration.INSTANCE);
-        ThresholdValues tVals = new ThresholdValues(0.00, 0.05);
-        cpu.setThresholdValues(tVals);
-        SimpleThresholdListener l = new SimpleThresholdListener();
-        cpu.start();
-        cpu.checkValue();
-        double utilization = cpu.getUtilization();
+        diskSpace.start();
+        double utilization = diskSpace.getUtilization();
         Assert.assertTrue("Utilization should be > 0", utilization>0);
         Assert.assertTrue(l.getType()==null);
     }
+
+    @Test
+    public void createAndVerifyDiskSpaceWithUpperThresholdBeingCrossed() {
+        DiskSpace diskSpace = new DiskSpace(EmptyConfiguration.INSTANCE);
+        ThresholdValues tVals = new ThresholdValues(0.00, 0.05);
+        diskSpace.setThresholdValues(tVals);
+        SimpleThresholdListener l = new SimpleThresholdListener();
+        diskSpace.start();
+        double utilization = diskSpace.getUtilization();
+        Assert.assertTrue("Utilization should be > 0", utilization>0);
+        Assert.assertTrue(l.getType()==null);
+    }
+        
 }
