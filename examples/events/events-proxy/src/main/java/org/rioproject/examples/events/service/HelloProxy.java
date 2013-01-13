@@ -25,7 +25,7 @@ import java.rmi.RemoteException;
 /**
  * A proxy example
  */
-public class HelloProxy implements Hello, ReferentUuid, Serializable {
+public final class HelloProxy implements Hello, ReferentUuid, Serializable {
     static final long serialVersionUID = 1L;
     private final Hello hello;
     private final Uuid uuid;

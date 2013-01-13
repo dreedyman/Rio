@@ -27,6 +27,7 @@ import java.util.Map;
 /**
  * Configuration for a test case.
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class TestConfig {
     public enum LoggingSystem { JUL, LOGBACK }
     private String groups;
@@ -71,13 +72,10 @@ public class TestConfig {
         }
 
         if (throwException) {
-            throw new RuntimeException(
-                "Cannot load [" + location + "], it is not found or " +
-                "your location of the file is incorrect. Yu have declared " +
-                "that your test [" + testClassName +
-                "] requires a configuration " +
-                "file, but the file cannot be loaded. Check the setting of the " +
-                "org.rioproject.test.config system property");
+            throw new RuntimeException("Cannot load [" + location + "], it is not found or your location of the file " +
+                                       "is incorrect. Yu have declared that your test [" + testClassName +"] requires " +
+                                       "a configuration file, but the file cannot be loaded. Check the setting of the " +
+                                       "org.rioproject.test.config system property");
         }
         ConfigObject config = new ConfigSlurper().parse(url);
         Map<String, Object> configMap = config.flatten();

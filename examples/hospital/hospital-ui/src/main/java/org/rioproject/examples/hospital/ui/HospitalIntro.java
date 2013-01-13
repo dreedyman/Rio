@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 /**
  * Introduction panel for the hospital example.
  */
+@SuppressWarnings("unused")
 public class HospitalIntro extends JPanel {
 
     public HospitalIntro(final Object obj) {
@@ -29,7 +30,7 @@ public class HospitalIntro extends JPanel {
         });
     }
 
-    String getIntro() {
+    private String getIntro() {
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>\n");
         sb.append("<h2>Introduction</h2>\n");
