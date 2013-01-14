@@ -21,7 +21,6 @@ import net.jini.lookup.entry.Host;
 import org.rioproject.associations.Association;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
                 add(item);
             }
         } catch (UnknownHostException e) {
-            logger.warn("Unable to obtain host address", ThrowableUtil.getRootCause(e));
+            logger.warn("Unable to obtain host address", e);
         }
     }
 
@@ -78,7 +77,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
         if(item!=null) {
             add(item);
         } else {
-            logger.warn("Unable to obtain ServiceItem for " + service + ", force refresh all service instances");
+            logger.warn("Unable to obtain ServiceItem for {}, force refresh all service instances ", service);
             synchronized(serviceList) {
                 serviceList.clear();
                 for(ServiceItem serviceItem : association.getServiceItems())
