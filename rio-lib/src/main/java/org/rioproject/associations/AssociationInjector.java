@@ -70,8 +70,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
     /**
      * Map of Associations to their generated proxy
      */
-    private final Map<Association, AssociationProxy<T>> proxyMap =
-        new HashMap<Association, AssociationProxy<T>>();
+    private final Map<Association, AssociationProxy<T>> proxyMap = new HashMap<Association, AssociationProxy<T>>();
     private String targetPropertyName;
     static final String COMPONENT = "org.rioproject.associations";
     private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
@@ -137,12 +136,10 @@ public class AssociationInjector<T> implements AssociationListener<T> {
      * entries is returned. A new Map is created each time this method is called.
      */
     public Map<AssociationDescriptor, Long> getInvocationMap() {
-        Map<AssociationDescriptor, Long> map =
-            new HashMap<AssociationDescriptor, Long>();
+        Map<AssociationDescriptor, Long> map = new HashMap<AssociationDescriptor, Long>();
         for(Map.Entry<Association, AssociationProxy<T>> entry : proxyMap.entrySet()) {
             AssociationProxy<T> aProxy = entry.getValue();
-            map.put(aProxy.getAssociation().getAssociationDescriptor(),
-                    aProxy.getInvocationCount());
+            map.put(aProxy.getAssociation().getAssociationDescriptor(), aProxy.getInvocationCount());
         }
         return map;
     }
@@ -177,8 +174,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                                  association.getName(), method.toString());
                     return;
                 }
-                String proxyClass =
-                    association.getAssociationDescriptor().getProxyClass();
+                String proxyClass = association.getAssociationDescriptor().getProxyClass();
                 /*
                  * Check for null proxyFactoryClass. If null,
                  * AssociationProxySupport is default
@@ -193,9 +189,9 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                 try {
                     AssociationProxy associationProxy =
                         (AssociationProxy)AssociationProxyFactory.createProxy(proxyClass,
-                                                                              strategyClass,
-                                                                              association,
-                                                                              getCallerClassLoader());
+                                                                                             strategyClass,
+                                                                                             association,
+                                                                                             getCallerClassLoader());
                     logger.debug("Association [{}], is DISCOVERED, inject dependency", association.getName());
                     method.invoke(target, getInjectionArg(method, association, (T)associationProxy));
                     if (logger.isDebugEnabled()) {

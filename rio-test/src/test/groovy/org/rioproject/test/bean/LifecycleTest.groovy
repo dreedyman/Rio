@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 package org.rioproject.test.bean
-
 import org.rioproject.cybernode.StaticCybernode
 import org.rioproject.deploy.ServiceBeanInstantiationException
-import org.rioproject.opstring.ServiceElement
-import org.rioproject.opstring.ClassBundle
-import org.rioproject.opstring.ServiceBeanConfig
-import org.rioproject.associations.AssociationDescriptor
-import org.rioproject.associations.AssociationType
-import org.rioproject.opstring.OpString
-import org.rioproject.admin.ServiceBeanControl
-import org.rioproject.admin.ServiceBeanControlException
-
 /**
  * Test bean lifecycle
  *
@@ -38,8 +28,7 @@ public class LifecycleTest extends GroovyTestCase {
         StaticCybernode cybernode = new StaticCybernode()
         Throwable thrown = null
         try {
-            ServiceBeanService service =
-            cybernode.activate(org.rioproject.test.bean.ServiceBeanService.class.name)
+            ServiceBeanService service = cybernode.activate(ServiceBeanService.class.name) as ServiceBeanService
             assertTrue service.something != null
             assertTrue service.something2 != null
             assertTrue service.bogusProxy != null
@@ -55,8 +44,7 @@ public class LifecycleTest extends GroovyTestCase {
         StaticCybernode cybernode = new StaticCybernode()
         Throwable thrown = null
         try {
-            Service service =
-            cybernode.activate(org.rioproject.test.bean.Service.class.name)
+            Service service = cybernode.activate(Service.class.name) as Service
             assertTrue service.something != null
             assertTrue service.something2 != null
             assertTrue service.bogusProxy != null
@@ -70,98 +58,118 @@ public class LifecycleTest extends GroovyTestCase {
 
     void testCreateProxy() {
         StaticCybernode cybernode = new StaticCybernode()
-        Service service =
-            cybernode.activate(org.rioproject.test.bean.Service.class.name)
+        Service service = cybernode.activate(Service.class.name) as Service
         assertTrue service.initializedInvoked
         cybernode.destroy()
     }
 
     void testInitialized() {
         StaticCybernode cybernode = new StaticCybernode()
-        Service service =
-            cybernode.activate(org.rioproject.test.bean.Service.class.name)
+        Service service = cybernode.activate(Service.class.name) as Service
         assertTrue service.initializedInvoked
         cybernode.destroy()
     }
 
     void testInitialized2() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.initializedInvoked
         cybernode.destroy()
     }
 
     void testStarted() {
         StaticCybernode cybernode = new StaticCybernode()
-        Service service =
-            cybernode.activate(org.rioproject.test.bean.Service.class.name)
+        Service service = cybernode.activate(Service.class.name) as Service
         assertTrue service.startedInvoked
         cybernode.destroy()
     }
 
     void testStarted2() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.startedInvoked
         cybernode.destroy()
     }
 
     void testSetServiceBeanContext() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.contextInvoked
         cybernode.destroy()
     }
 
     void testSetConfiguration() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.configInvoked
         cybernode.destroy()
     }
 
     void testSetParameters() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.parametersInvoked
         cybernode.destroy()
     }
 
     void testSetServiceBean() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.parametersInvoked
         cybernode.destroy()
     }
 
     void testPreAdvertise() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         assertTrue service.preAdvertisedInvoked
         cybernode.destroy()
     }
 
     void testPostUnAdvertise() {
         StaticCybernode cybernode = new StaticCybernode()
-        AnnotatedService service =
-            cybernode.activate(org.rioproject.test.bean.AnnotatedService.class.name)
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
         cybernode.destroy()
         assertTrue service.postUnAdvertisedInvoked
     }
 
     void testPreDestroy() {
         StaticCybernode cybernode = new StaticCybernode()
-        Service service =
-            cybernode.activate(org.rioproject.test.bean.Service.class.name)
+        Service service = cybernode.activate(Service.class.name) as Service
         cybernode.destroy()
         assertTrue service.destroyedInvoked
+    }
+
+    void testOrder() {
+        StaticCybernode cybernode = new StaticCybernode()
+        AnnotatedService service = cybernode.activate(AnnotatedService.class.name) as AnnotatedService
+        assertEquals 7, service.order.size()
+        assertEquals "set-parameters", service.order.get(0)
+        assertEquals "set-config", service.order.get(1)
+        assertEquals "set-context", service.order.get(2)
+        assertEquals "set-service-bean", service.order.get(3)
+        assertEquals "initialized", service.order.get(4)
+        assertEquals "started", service.order.get(5)
+        assertEquals "pre-advertise", service.order.get(6)
+        cybernode.destroy()
+    }
+
+    void testOrderWithAssociations() {
+        StaticCybernode cybernode = new StaticCybernode()
+        Map<String, Object> map = cybernode.activate(new File("src/test/resources/opstring/annotatedService.groovy"))
+        Service service1 = map.get("Annotated-1")  as Service
+        assertEquals 4, service1.order.size()
+        assertEquals "inject-service", service1.order.get(0)
+        assertEquals "initialized", service1.order.get(1)
+        assertEquals "started", service1.order.get(2)
+        assertEquals "pre-advertise", service1.order.get(3)
+
+        Service service2 = map.get("Annotated-2")  as Service
+        assertEquals 3, service2.order.size()
+        assertEquals "initialized", service2.order.get(0)
+        assertEquals "started", service2.order.get(1)
+        assertEquals "pre-advertise", service2.order.get(2)
+        cybernode.destroy()
     }
 
     void testThatServiceThatThrowsDoesNotGetCreated() {

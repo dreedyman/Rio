@@ -26,15 +26,18 @@ public class AnnotatedService {
     boolean postUnAdvertisedInvoked = false
     boolean parametersInvoked = false
     boolean serviceBeanInvoked = false
+    List<String> order = new LinkedList<>()
 
     @Initialized
     public void initialized() {
         initializedInvoked = true
+        order.add("initialized")
     }
 
     @Started
     public void started() {
         startedInvoked = true
+        order.add("started")
     }
 
     @PreDestroy
@@ -45,31 +48,37 @@ public class AnnotatedService {
     @SetConfiguration
     public void config(Configuration config) {
         configInvoked = true
+        order.add("set-config")
     }
 
     @SetServiceBeanContext
     public void context(ServiceBeanContext context) {
         contextInvoked = context!=null
+        order.add("set-context")
     }
 
     @SetParameters
     public void parameters(Map<String, Object> parameters) {
         parametersInvoked = parameters!=null
+        order.add("set-parameters")
     }
 
     @SetServiceBean
     public void serviceBean(ServiceBean bean) {
         serviceBeanInvoked = bean!=null
+        order.add("set-service-bean")
     }
 
     @PreAdvertise
     public void preAdvertise() {
         preAdvertisedInvoked = true
+        order.add("pre-advertise")
     }
 
     @PostUnAdvertise
     public void postUnAdvertise() {
         postUnAdvertisedInvoked = true
+        order.add("post-unadvertise")
     }
 
 

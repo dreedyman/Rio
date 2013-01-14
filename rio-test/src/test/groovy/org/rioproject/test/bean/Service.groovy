@@ -17,6 +17,7 @@ package org.rioproject.test.bean
 
 import net.jini.config.Configuration
 import org.rioproject.bean.Initialized
+import org.rioproject.bean.PreAdvertise
 import org.rioproject.bean.Started
 import org.rioproject.bean.PreDestroy
 import org.rioproject.bean.CreateProxy
@@ -31,15 +32,27 @@ public class Service implements ServiceInterface {
     String something2
     Map<String, ?> parms = null
     ServiceInterfaceProxy bogusProxy
+    List<String> order = new LinkedList<>()
 
     @Initialized
     public void initialized() {
         initializedInvoked = true
+        order.add("initialized")
+    }
+
+    @PreAdvertise
+    public void preAdvertise() {
+        order.add("pre-advertise")
     }
 
     @Started
     public void started() {
         startedInvoked = true
+        order.add("started")
+    }
+
+    public void setService(ServiceInterface service) {
+        order.add("inject-service")
     }
 
     @PreDestroy

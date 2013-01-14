@@ -35,6 +35,7 @@ import net.jini.lookup.entry.Name;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.ServiceBeanControl;
+import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.cybernode.ServiceBeanContainer;
 import org.rioproject.cybernode.ServiceBeanContainerListener;
@@ -386,8 +387,11 @@ public class AssociationMgmt implements AssociationManagement {
                 }
 
                 addAssociationDescriptors(newDesc);
-                if(numRequires.get()==0)
+                if(numRequires.get()==0) {
                     advertised.set(true);
+                } else {
+
+                }
             } else {
                 /* Determine if any of the AssociationDescriptors are new or
                  * are no longer needed */
@@ -586,6 +590,13 @@ public class AssociationMgmt implements AssociationManagement {
     }
 
     /**
+     * Checks to see if the service should be advertised.
+     */
+    public void checkAdvertise() {
+        listener.checkAdvertise();
+    }
+
+    /**
      * {@inheritDoc}
      */
     public List<Association<?>> addAssociationDescriptors(final AssociationDescriptor... aDescs) {
@@ -638,14 +649,20 @@ public class AssociationMgmt implements AssociationManagement {
      */
     @SuppressWarnings("unchecked")
     class Listener implements AssociationListener {
-        final List<Association> requiredAssociations = Collections.synchronizedList(new ArrayList<Association>());
-        AssociationInjector associationInjector;
+        private final List<Association> requiredAssociations = Collections.synchronizedList(new ArrayList<Association>());
+        private AssociationInjector associationInjector;
 
+        AssociationInjector getAssociationInjector() {
+            return associationInjector;
+        }
+
+        void addRequiredAssociation(final Association association) {
+            requiredAssociations.add(association);
+        }
         /*
          * Create injector
          */
-        private void createAssociationInjector(final Object backend)
-            throws IntrospectionException {
+        private void createAssociationInjector(final Object backend) throws IntrospectionException {
             if(associationInjector==null)
                 associationInjector = new AssociationInjector(backend);
             else
@@ -662,8 +679,9 @@ public class AssociationMgmt implements AssociationManagement {
 
                 if(aType.equals(AssociationType.REQUIRES) && !requiredAssociations.contains(assoc)) {
                     requiredAssociations.add(assoc);
-                    if(associationInjector!=null)
+                    if(associationInjector!=null) {
                         associationInjector.discovered(assoc, service);
+                    }
                     checkAdvertise();
                 }
             } else {
@@ -682,7 +700,16 @@ public class AssociationMgmt implements AssociationManagement {
             logger.trace("Check advertise for [{}] advertised={}, numRequires={}, requiredAssociations.size()={}",
                          clientName, advertised.get(), numRequires, requiredAssociations.size());
             if((requiredAssociations.size() >= numRequires.get()) && !advertised.get()) {
-                advertise();
+                Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
+                if(!configParms.containsKey(Constants.STARTING)) {
+                    logger.info("Advertising service [{}]", clientName);
+                    advertise();
+                } else {
+                    logger.info("[{}] is still starting, do not advertise", clientName);
+                    context.getServiceElement().setAutoAdvertise(true);
+                    advertisePending.set(true);
+
+                }
             } else if((requiredAssociations.size() < numRequires.get()) && advertised.get())
                 unadvertise();
         }
@@ -945,7 +972,9 @@ public class AssociationMgmt implements AssociationManagement {
         @SuppressWarnings("unchecked")
         protected void exec() {
             if(!aDesc.isLazyInject()) {
-                listener.associationInjector.injectEmpty(association);
+                listener.getAssociationInjector().injectEmpty(association);
+                listener.addRequiredAssociation(association);
+                listener.checkAdvertise();
             }
             try {
                 boolean lookupService = false;

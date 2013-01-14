@@ -25,6 +25,7 @@ import net.jini.id.Uuid;
 import org.rioproject.admin.ServiceBeanControlException;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationManagement;
+import org.rioproject.associations.AssociationMgmt;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.bean.BeanHelper;
 import org.rioproject.bean.Initialized;
@@ -56,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.ObjectName;
-import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -307,12 +307,15 @@ public class JSBDelegate implements ServiceBeanDelegate {
         }
         if(terminated.get() || terminating.get())
             throw new ServiceBeanControlException("advertising service while in the process of terminating");
-        /* If any of the associations are of type requires, service
+        /* If any of the associations are of type requires, and they are lazily (not eagerly) injected, service
          * advertisement is managed by AssociationManagement */
-        for (Association assoc : context.getAssociationManagement().getAssociations()) {
-            if (assoc.getAssociationType()== AssociationType.REQUIRES) {
+        for (Association association : context.getAssociationManagement().getAssociations()) {
+            if (association.getAssociationType()== AssociationType.REQUIRES) {
                 logger.debug("{} has at least one requires Association, advertisement managed by AssociationManagement",
-                            sElem.getName());
+                             sElem.getName());
+                if(context.getAssociationManagement() instanceof AssociationMgmt) {
+                    ((AssociationMgmt)context.getAssociationManagement()).checkAdvertise();
+                }
                 return;
             }
         }
@@ -453,7 +456,8 @@ public class JSBDelegate implements ServiceBeanDelegate {
         */
         StringBuilder threadName = new StringBuilder();
         threadName.append(sElem.getName()).append("-");
-        threadName.append(sElem.getServiceBeanConfig().getInstanceID()).append("-delegate");
+        Long instanceID = sElem.getServiceBeanConfig().getInstanceID();
+        threadName.append(instanceID==null?"<?>":instanceID).append("-delegate");
         Thread jsbThread = new Thread(threadName.toString()) {
             public void run() {
                 starting.set(true);
@@ -531,11 +535,12 @@ public class JSBDelegate implements ServiceBeanDelegate {
                          * the ServiceBean */
                         registerPlatformCapabilities();
 
-                        try {
-                            Method setBackend = associationManagement.getClass().getMethod("setBackend", Object.class);
-                            setBackend.invoke(associationManagement, loadResult.getImpl());
-                        } catch(Exception e) {
-                            logger.warn("Failed to get setBackend method from ServiceBean [{}] impl", sElem.getName(), e);
+                        if(context.getAssociationManagement() instanceof AssociationMgmt) {
+                            ((AssociationMgmt)context.getAssociationManagement()).setBackend(loadResult.getImpl());
+                        } else {
+                            logger.warn("The service's AssociationManagement is not an instance of {}, " +
+                                        "failed to invoke setBackend method on [{}] impl",
+                                        context.getAssociationManagement(), sElem.getName());
                         }
                         associationManagement.setServiceBeanContainer(container);
                         associationManagement.setServiceBeanContext(context);
@@ -640,8 +645,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
              * context, similar to the above, we will not have a context for
              * the service if it has been forked/exec'd (RIO-141) */
             if(context!=null) {
-                Map<String, Object> configParms =
-                    context.getServiceBeanConfig().getConfigurationParameters();
+                Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
                 configParms.remove(Constants.STARTING);
                 context.getServiceBeanConfig().setConfigurationParameters(configParms);
             }
