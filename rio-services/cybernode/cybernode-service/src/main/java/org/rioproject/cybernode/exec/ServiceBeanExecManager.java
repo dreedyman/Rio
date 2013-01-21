@@ -129,7 +129,9 @@ public class ServiceBeanExecManager {
                                              jvmOptions,
                                              logDir));
         inputArgsBuilder.append(getMainClass());
-        inputArgsBuilder.append(getStarterConfig(rioHome));
+        String serviceBeanExecStarter = getStarterConfig(rioHome);
+        logger.debug("Using service bean exec starter: {}", serviceBeanExecStarter);
+        inputArgsBuilder.append(serviceBeanExecStarter);
 
         exDesc.setInputArgs(inputArgsBuilder.toString());
         exDesc.setWorkingDirectory(System.getProperty("user.dir"));
@@ -286,6 +288,9 @@ public class ServiceBeanExecManager {
     }
 
     private String getStarterConfig(final String rioHome) throws IOException {
+        String startConfig = System.getProperty(Constants.START_SERVICE_BEAN_EXEC_CONFIG);
+        if(startConfig!=null)
+            return startConfig;
         StringBuilder configBuilder = new StringBuilder();
         configBuilder
             .append(rioHome)
