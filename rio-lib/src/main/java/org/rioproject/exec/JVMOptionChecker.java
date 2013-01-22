@@ -84,9 +84,8 @@ public class JVMOptionChecker {
                 if (argValue.equals(runtimeArgValue)) {
                     add = false;
                     int ndx = inputArgs.indexOf(runtimeArg);
-                    if(logger.isDebugEnabled())
-                        logger.debug("Replacing runtime arg [{}] (resolved as: {}) with user arg [{}] (resolved as: {}) at index [{}]",
-                                     runtimeArg, runtimeArgValue, userArg, argValue, ndx);
+                    logger.debug("Replacing runtime arg [{}] (resolved as: {}) with user arg [{}] (resolved as: {}) at index [{}]",
+                                 runtimeArg, runtimeArgValue, userArg, argValue, ndx);
                     inputArgs.set(ndx, userArg);
                 }
             }
