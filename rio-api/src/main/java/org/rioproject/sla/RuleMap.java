@@ -28,7 +28,7 @@ public class RuleMap implements Serializable {
     public void addRuleMapping(RuleDefinition rule, ServiceDefinition... serviceDefinitions) {
         if(rule==null)
             throw new IllegalArgumentException("rule cannot be null");
-        if(services==null)
+        if(serviceDefinitions==null)
             throw new IllegalArgumentException("serviceDefinitions cannot be null");
         if(serviceDefinitions.length==0)
             throw new IllegalArgumentException("serviceDefinitions cannot be empty");
@@ -53,17 +53,14 @@ public class RuleMap implements Serializable {
 
         RuleMap ruleMap = (RuleMap) o;
 
-        return !(ruleDefinition != null? !ruleDefinition.equals(ruleMap.ruleDefinition):
-                 ruleMap.ruleDefinition != null) &&
-               !(services != null? !services.equals(ruleMap.services):
-                 ruleMap.services !=null);
-
+        return !(ruleDefinition != null ? !ruleDefinition.equals(ruleMap.ruleDefinition) :
+                 ruleMap.ruleDefinition != null) && services.equals(ruleMap.services);
     }
 
     @Override
     public int hashCode() {
         int result = ruleDefinition != null ? ruleDefinition.hashCode() : 0;
-        result = 31 * result + (services != null ? services.hashCode() : 0);
+        result = 31 * result + (services.hashCode());
         return result;
     }
 
@@ -175,12 +172,9 @@ public class RuleMap implements Serializable {
 
             ServiceDefinition that = (ServiceDefinition) o;
 
-            return !(opStringName != null? !opStringName.equals(that.opStringName):
-                     that.opStringName != null) &&
-                   !(serviceName != null ? !serviceName.equals(that.serviceName):
-                     that.serviceName !=null) &&
-                   !(watches != null? !watches.equals(that.watches):
-                     that.watches != null);
+            return !(opStringName != null ? !opStringName.equals(that.opStringName) :
+                     that.opStringName != null) && !(serviceName != null ? !serviceName.equals(that.serviceName) :
+                                                     that.serviceName != null) && watches.equals(that.watches);
         }
 
         @Override
@@ -188,7 +182,7 @@ public class RuleMap implements Serializable {
             int result = serviceName != null ? serviceName.hashCode() : 0;
             result = 31 * result +
                      (opStringName != null ? opStringName.hashCode() : 0);
-            result = 31 * result + (watches != null ? watches.hashCode() : 0);
+            result = 31 * result + (watches.hashCode());
             return result;
         }
 
