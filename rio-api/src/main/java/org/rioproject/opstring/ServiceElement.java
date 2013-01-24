@@ -206,6 +206,8 @@ public class ServiceElement implements Serializable {
      * @return The name of the ServiceElement
      */
     public String getName() {
+        if(sbConfig==null)
+            return null;
         return(sbConfig.getName());
     }        
 
@@ -219,8 +221,7 @@ public class ServiceElement implements Serializable {
      */
     public void setPlanned(int planned) {
         if(planned<0)
-            throw new IllegalArgumentException("planned cannot be less " +
-                                               "then 0");
+            throw new IllegalArgumentException("planned cannot be < 0");
         this.planned = planned;
     }
 
@@ -393,6 +394,8 @@ public class ServiceElement implements Serializable {
      * @return Name of the OperationalString
      */
     public String getOperationalStringName() {
+        if(sbConfig==null)
+            return null;
         return(sbConfig.getOperationalStringName());
     }
 
@@ -597,18 +600,6 @@ public class ServiceElement implements Serializable {
     }
 
     /**
-     * Set the associations for the service
-     * 
-     * @param associationDescriptors An Array of AssociationDescriptor objects
-     */
-    @Deprecated
-    public void setAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
-        if(associationDescriptors!=null) {
-            Collections.addAll(associations, associationDescriptors);
-        }
-    }
-
-    /**
      * Add {@code AssociationDescriptor} for the service
      *
      * @param associationDescriptors An Array of AssociationDescriptor objects
@@ -781,7 +772,7 @@ public class ServiceElement implements Serializable {
              * components bundles they are the same */
             if(this.componentBundle==null && that.componentBundle==null)
                 return(true);
-            /* If the ServiceEleents do have components, make sure the component
+            /* If the ServiceElements do have components, make sure the component
              * jar names are equal */
             if(this.componentBundle!=null && that.componentBundle!=null) {
                 return(this.componentBundle.equals(that.componentBundle));
@@ -796,7 +787,7 @@ public class ServiceElement implements Serializable {
         sb.append("ServiceElement");
         sb.append("{provisionType=").append(provisionType);
         sb.append(", sbConfig=").append(sbConfig);
-        sb.append(", associations=").append(associations == null? "null": Arrays.asList(associations).toString());
+        sb.append(", associations=").append(associations);
         sb.append(", componentBundle=").append(componentBundle);
         sb.append(", exportBundles=").append(exportBundles == null? "null": Arrays.asList(exportBundles).toString());
         sb.append(", provisionableCapabilities=").append(provisionableCapabilities);
