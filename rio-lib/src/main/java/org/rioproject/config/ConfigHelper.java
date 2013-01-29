@@ -15,12 +15,10 @@
  */
 package org.rioproject.config;
 
+
 import org.rioproject.util.PropertyHelper;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,8 +121,7 @@ public class ConfigHelper {
         if (args[0].equals("-"))
             return args;
         if(args[0].startsWith(CLASSPATH_RESOURCE)) {
-            String classPathArgs = args[0].substring(CLASSPATH_RESOURCE.length(),
-                                                     args[0].length());
+            String classPathArgs = args[0].substring(CLASSPATH_RESOURCE.length(), args[0].length());
 
             List<String> list = new ArrayList<String>();
             for(String s : classPathArgs.split(",")) {
@@ -163,34 +160,32 @@ public class ConfigHelper {
 
                 File f = new File(fileName);
                 if(!f.exists())
-                    throw new IOException("Unable to load declared configuration " +
-                                          "file ["+fileArg+"], resolved " +
-                                          "as ["+fileName+"]. File does not exist");
+                    throw new FileNotFoundException("Unable to load declared configuration " +
+                                                    "file ["+fileArg+"], resolved " +
+                                                    "as ["+fileName+"]. File does not exist");
                 list.add(fileName);
             }
             return list.toArray(new String[list.size()]);
         }
-        /*
-        if(args[0].endsWith(".config") || args[0].endsWith(".groovy")) {
-            return new String[]{
-                PropertyHelper.expandProperties(args[0],
-                                                PropertyHelper.PARSETIME)};
-        }
-        */
-        String extension = isGroovy(args)? ".groovy":".config";
-        File tmp = File.createTempFile("tmp", extension);
-        tmp.deleteOnExit();
-        BufferedWriter out = null;
-        try {
-            out = new BufferedWriter(new FileWriter(tmp));
-            for (String arg : args) {
-                out.write(arg);
+
+        if(isGroovy(args)) {
+            return args;
+        } else {
+            String extension = ".config";
+            File tmp = File.createTempFile("tmp", extension);
+            tmp.deleteOnExit();
+            BufferedWriter out = null;
+            try {
+                out = new BufferedWriter(new FileWriter(tmp));
+                for (String arg : args) {
+                    out.write(arg);
+                }
+            } finally {
+                if (out != null)
+                    out.close();
             }
-        } finally {
-            if (out != null)
-                out.close();
+            return (new String[]{tmp.getCanonicalPath()});
         }
-        return (new String[]{tmp.getCanonicalPath()});
     }
 
     private static boolean isGroovy(final String... args) {
