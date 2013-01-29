@@ -58,20 +58,17 @@ public class JSBLoader implements ServiceBeanFactory {
         Created created;
         try {
             ClassBundle jsbBundle = context.getServiceElement().getComponentBundle();
-            if(logger.isTraceEnabled())
-                logger.trace("Loading class [{}], using ClassLoader: {}", jsbBundle.getClassName(), jsbCL.toString());
-            Class implClass = jsbCL.loadClass(jsbBundle.getClassName());
+            logger.trace("Loading class [{}], using ClassLoader: {}", jsbBundle.getClassName(), jsbCL.toString());
+            Class<?> implClass = jsbCL.loadClass(jsbBundle.getClassName());
             if(useActivationConstructor(implClass) && !isServiceBean(implClass)) {
                 Constructor constructor = implClass.getDeclaredConstructor(activationTypes);
-                if(logger.isTraceEnabled())
-                    logger.trace("Obtained implementation constructor: {}", constructor);
+                logger.trace("Obtained implementation constructor: {}", constructor);
                 constructor.setAccessible(true);
                 LifeCycle lifeCycle = (LifeCycle)context.getServiceBeanManager().getDiscardManager();
                 String[] args = ConfigHelper.getConfigArgs(context.getServiceBeanConfig().getConfigArgs());
                 Object impl = constructor.newInstance(args, lifeCycle);
                 Object proxy;
-                if(logger.isTraceEnabled())
-                    logger.trace("Obtained implementation instance: {}", impl);
+                logger.trace("Obtained implementation instance: {}", impl);
                 if(impl instanceof ServiceProxyAccessor) {
                     proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
                 } else if(impl instanceof ProxyAccessor) {
@@ -83,15 +80,12 @@ public class JSBLoader implements ServiceBeanFactory {
 
             } else {
                 if(isServiceBean(implClass)) {
-                    if(logger.isTraceEnabled())
-                        logger.trace("Activating as ServiceBean");
+                    logger.trace("Activating as ServiceBean");
                     Constructor constructor = implClass.getConstructor((Class[])null);
-                    if(logger.isTraceEnabled())
-                        logger.trace("Obtained implementation constructor: {}", constructor);
+                    logger.trace("Obtained implementation constructor: {}", constructor);
                     Object impl = constructor.newInstance((Object[])null);
                     ServiceBean instance = (ServiceBean)impl;
-                    if(logger.isTraceEnabled())
-                        logger.trace("Obtained implementation instance: {}", instance);
+                    logger.trace("Obtained implementation instance: {}", instance);
                     Object proxy = instance.start(context);
                     created = new Created(impl, proxy);
                 } else {
@@ -101,6 +95,7 @@ public class JSBLoader implements ServiceBeanFactory {
             }
 
         } catch(Throwable t) {
+            logger.warn("Could not create service", t);
             ServiceBeanLoader.unload(jsbCL, context.getServiceElement());
             if(t instanceof ServiceBeanInstantiationException)
                 throw (ServiceBeanInstantiationException)t;
@@ -118,7 +113,7 @@ public class JSBLoader implements ServiceBeanFactory {
      * Determine if a class has a declared constructor matching that required by
      * an activation constructor
      */
-    static boolean useActivationConstructor(Class clazz) {
+    static boolean useActivationConstructor(Class<?> clazz) {
         try {
             clazz.getDeclaredConstructor(activationTypes);
             return (true);
@@ -131,7 +126,7 @@ public class JSBLoader implements ServiceBeanFactory {
      * Determine if a class has method signatures as those found in the
      * ServiceBean
      */
-    static boolean isServiceBean(Class clazz) {
+    static boolean isServiceBean(Class<?> clazz) {
         try {
             clazz.getMethod("start", startType);
             return (true);
