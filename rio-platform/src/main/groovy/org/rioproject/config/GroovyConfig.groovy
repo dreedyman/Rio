@@ -29,8 +29,8 @@ class GroovyConfig implements Configuration {
     private Map<String, GroovyObject> groovyConfigs = new HashMap<String, GroovyObject>()
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
-    //private def log = LoggerFactory.getLogger(GroovyConfig.class.getPackage().name)
 
+    @SuppressWarnings("unused")
     GroovyConfig(String gFile) {
         File f = new File(gFile)
         GroovyClassLoader gcl = new GroovyClassLoader(getClass().getClassLoader())
