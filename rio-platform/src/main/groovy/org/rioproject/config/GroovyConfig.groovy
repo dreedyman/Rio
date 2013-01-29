@@ -30,13 +30,6 @@ class GroovyConfig implements Configuration {
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
 
-    @SuppressWarnings("unused")
-    GroovyConfig(String gFile) {
-        File f = new File(gFile)
-        GroovyClassLoader gcl = new GroovyClassLoader(getClass().getClassLoader())
-        parseAndLoad(new GroovyCodeSource(f), gcl)
-    }
-
     /**
      * Constructor required for Jini Configuration
      */
@@ -44,7 +37,7 @@ class GroovyConfig implements Configuration {
         if(args==null || args.length==0) {
             configFile = new ConfigurationFile(args, loader)
         } else {
-            if(!args[0].endsWith(".groovy")) {
+            if(args[0].endsWith(".config")) {
                 configFile = new ConfigurationFile(args, loader)
             } else {
                 /* Make sure we have all groovy files */
@@ -55,10 +48,10 @@ class GroovyConfig implements Configuration {
     }
 
     def checkInputs(String[] args) {
-        args.each { arg ->
+        for(String arg : args) {
             if(arg.endsWith(".groovy")) {
                 log.trace(arg)
-            } else {
+            } else if(arg.endsWith(".config")){
                 StringBuffer buffer = new StringBuffer()
                 args.each { a ->
                     buffer.append(a).append(' ')
@@ -74,38 +67,36 @@ class GroovyConfig implements Configuration {
             loader = Thread.currentThread().getContextClassLoader()
         GroovyClassLoader gcl = new GroovyClassLoader(loader)
         args.each { arg ->
-            String groovyFile = arg
+            String groovySource = arg
             //Reader is = null
             long t0 = System.currentTimeMillis()
-            GroovyCodeSource groovyCodeSource = null
             try {
-                if(groovyFile.startsWith("jar:")) {
-                    String resource = groovyFile
-                    int ndx = groovyFile.indexOf("!")
+                GroovyCodeSource groovyCodeSource
+                if(groovySource.startsWith("jar:")) {
+                    String resource = groovySource
+                    int ndx = groovySource.indexOf("!")
                     if(ndx!=-1)
-                        resource = groovyFile.substring(ndx+2)
+                        resource = groovySource.substring(ndx+2)
                     groovyCodeSource = new GroovyCodeSource(loader.getResource(resource))
-                    //is = loader.getResourceAsStream(resource)
                 } else {
-                    if(groovyFile.startsWith("file:")) {
-                        groovyCodeSource = new GroovyCodeSource(new URL(groovyFile))
+                    if(groovySource.startsWith("file:")) {
+                        groovyCodeSource = new GroovyCodeSource(new URL(groovySource))
                     } else {
-                        groovyCodeSource = new GroovyCodeSource(new File(groovyFile))
+                        File groovyFile = new File(groovySource)
+                        if (groovyFile.exists()) {
+                            groovyCodeSource = new GroovyCodeSource(groovyFile)
+                        } else {
+                            groovyCodeSource = new GroovyCodeSource((String)groovySource, "", "groovy/script")
+                        }
                     }
                 }
                 parseAndLoad(groovyCodeSource, gcl)
             } catch (FileNotFoundException e) {
-                throw new ConfigurationNotFoundException("The configuration file [${groovyFile}] does not exist", e)
+                throw new ConfigurationNotFoundException("The configuration file [${groovySource}] does not exist", e)
             } catch(Throwable t) {
-                throw new ConfigurationException("The configuration file [${groovyFile}] could not be parsed", t)
+                throw new ConfigurationException("The configuration file [${groovySource}] could not be parsed", t)
             } finally {
-                /*if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
-                }*/
-                log.trace "Time to parse ${groovyFile} : ${(System.currentTimeMillis()-t0)} milliseconds"
+                log.trace "Time to parse ${groovySource} : ${(System.currentTimeMillis()-t0)} milliseconds"
             }
         }
         gcl = null
