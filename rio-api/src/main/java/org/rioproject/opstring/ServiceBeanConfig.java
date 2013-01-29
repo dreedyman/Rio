@@ -244,7 +244,7 @@ public class ServiceBeanConfig implements Serializable {
         String[] groups = (String[])configParms.get(GROUPS);
         if(groups == null || groups.length == 0)
             groups = NO_GROUPS;
-        if(groups != null && groups.length > 0) {
+        if(groups.length > 0) {
             if(groups.length == 1 && groups[0].equals("all")) {
                 groups = ALL_GROUPS;
             } else {
@@ -339,13 +339,11 @@ public class ServiceBeanConfig implements Serializable {
     }
     
     /**
-     * Get the ServiceBean configuration arguments
+     * Get the service's configuration arguments
      * 
-     * @return The ServiceBean configuration arguments. The returned String[]
+     * @return The service's configuration arguments. The returned String[]
      * value is suitable for the creation of a {@link net.jini.config.Configuration}
-     * object. If any part of the configuration contains the "$instanceID" token,
-     * and the instanceID proeprty has been assigned (is not zero), the value
-     * will be replaced by the instanceID value.
+     * object.
      */
     public String[] getConfigArgs() {
         if(configArgs == null)
