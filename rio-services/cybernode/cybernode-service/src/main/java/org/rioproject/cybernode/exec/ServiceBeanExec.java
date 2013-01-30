@@ -38,7 +38,6 @@ import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
@@ -95,21 +94,17 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         throws Exception {
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         if (Integer.parseInt(sPort) == 0)
-            logger.warn("The RMI Registry port provided " +
-                        "(or obtained by default) is 0. " +
-                        "Because it is 0, the port will default to "+
-                        Registry.REGISTRY_PORT+". This port may be " +
-                        "taken by another RMI Registry instance. If there is " +
-                        "an MBeanServer bound to that RMI Registry " +
-                        "instance, the ServiceBeanExec will monitor the " +
-                        "ability to connect to that MBeanServer. If that " +
-                        "MBeanServer is terminated, the ServiceBeanExec " +
-                        "will also terminate. Care should be taken to not " +
-                        "use the default RMI Registry port.");
+            logger.warn("The RMI Registry port provided (or obtained by default) is 0. " +
+                        "Because it is 0, the port will default to {}. This port may be " +
+                        "taken by another RMI Registry instance. If there is an MBeanServer " +
+                        "bound to that RMI Registry instance, the ServiceBeanExec will monitor the " +
+                        "ability to connect to that MBeanServer. If that MBeanServer is terminated, " +
+                        "the ServiceBeanExec will also terminate. Care should be taken to not " +
+                        "use the default RMI Registry port.", Registry.REGISTRY_PORT);
         cybernodeRegistryPort = Integer.parseInt(sPort);
         execBindName = System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME, "ServiceBeanExec");
         bootstrap(configArgs);
-        logger.info("Started ServiceBeanExecutor for "+execBindName);
+        logger.info("Started ServiceBeanExecutor for {}", execBindName);
     }
 
     private void bootstrap(String[] configArgs) throws Exception {
@@ -126,9 +121,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         computeResource.setPersistentProvisioning(provisionEnabled);        
         String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
         if(provisionEnabled) {
-            if(logger.isDebugEnabled())
-                logger.debug(String.format("Software provisioning has been enabled, using provision root [%s]",
-                                          provisionRoot));
+            logger.debug("Software provisioning has been enabled, using provision root [{}]", provisionRoot);
         }
         computeResource.setPersistentProvisioningRoot(provisionRoot);
 
@@ -179,7 +172,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         if(pCaps==null)
             return;
         for(PlatformCapability pCap : pCaps) {
-            logger.info("Adding ["+pCap.getName()+"] capability");
+            logger.info("Adding [{}] capability", pCap.getName());
             computeResource.addPlatformCapability(pCap);
         }
     }
@@ -187,11 +180,9 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     public ServiceBeanInstance instantiate(ServiceElement sElem,
                                            OperationalStringManager opStringMgr)
         throws ServiceBeanInstantiationException {
-        logger.info("Instantiating "+sElem.getName()+", " +
-                    "service counter="+container.getServiceCounter());
+        logger.info("Instantiating {}, service counter={}", sElem.getName(), container.getServiceCounter());
         if (container.getServiceCounter() > 0)
-            throw new ServiceBeanInstantiationException("ServiceBeanExecutor has " +
-                                                "already instantiated a service");
+            throw new ServiceBeanInstantiationException("ServiceBeanExecutor has already instantiated a service");
 
         OperationalStringManager opMgr = opStringMgr;
         try {
@@ -199,10 +190,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                                                   opStringMgr,
                                                   context.getDiscoveryManagement());
         } catch (Exception e) {
-            logger.warn("Unable to create proxy for " +
-                        "OperationalStringManager, " +
-                        "using provided OperationalStringManager",
-                        ThrowableUtil.getRootCause(e));
+            logger.warn("Unable to create proxy for OperationalStringManager, using provided OperationalStringManager", e);
 
         }
 
@@ -221,8 +209,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                 slaThresholdEventHandler = result.getBeanAdapter().getSLAEventHandler();
             } else {
                 String className = result.getImpl()==null?"<NO IMPLEMENTATION>":result.getImpl().getClass().getName();
-                logger.warn(String.format("Unable to create ComputeResourcePolicyHandler, unknown service class %s",
-                                             className));
+                logger.warn("Unable to create ComputeResourcePolicyHandler, unknown service class {}", className);
             }
         }
         if(slaThresholdEventHandler!=null) {
@@ -235,8 +222,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         return instance;
     }
 
-    public void update(ServiceElement element,
-                       OperationalStringManager opStringMgr)  {
+    public void update(ServiceElement element, OperationalStringManager opStringMgr)  {
         container.update(new ServiceElement[]{element}, opStringMgr);
     }
 
@@ -246,9 +232,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
 
     public void serviceInstantiated(ServiceRecord record) {
         ServiceElement service = record.getServiceElement();
-        logger.info(String.format("Instantiated %s, %s",
-                    CybernodeLogUtil.logName(service), CybernodeLogUtil.discoveryInfo(service)));
-        logger.info("Instantiated "+record.getServiceElement().getName());
+        logger.info("Instantiated {}, {}", CybernodeLogUtil.logName(service), CybernodeLogUtil.discoveryInfo(service));
         try {
             listener.serviceInstantiated(record);
         } catch (RemoteException e) {
@@ -257,7 +241,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     }
 
     public void serviceDiscarded(ServiceRecord record) {
-        logger.info("Destroying ServiceBeanExecutor for "+execBindName);
+        logger.info("Destroying ServiceBeanExecutor for {}", execBindName);
         fdh.terminate();
 
         if(computeResourcePolicyHandler!=null) {
@@ -268,13 +252,13 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
         try {
             registry.unbind(execBindName);
         } catch (Exception e) {
-            logger.warn(e.getClass().getName()+": "+e.getMessage()+", Unbinding from RMI Registry");
+            logger.warn("{}: {}, Unbinding from RMI Registry", e.getClass().getName(), e.getMessage());
         }
         if(record!=null) {
             try {
                 listener.serviceDiscarded(record);
             } catch (RemoteException e) {
-                logger.warn(e.getClass().getName()+": "+e.getMessage()+", Notifying Cybernode that we are exiting");
+                logger.warn("{}: {}, Notifying Cybernode that we are exiting", e.getClass().getName(), e.getMessage());
             }
         }
         
