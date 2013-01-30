@@ -19,7 +19,6 @@ package org.rioproject.watch;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import org.rioproject.jmx.JMXUtil;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -292,12 +291,7 @@ public class Watch implements WatchMBean {
         try {
             watchDataSource.addCalculable(calc);
         } catch(RemoteException e) {
-            //logger.warn(
-            //           "WatchDataSource not available for Watch "+ getId(),
-            //           e);
-            Throwable cause = ThrowableUtil.getRootCause(e);
-            logger.warn("WatchDataSource not available for Watch={}, {}:{}",
-                           getId(), cause.getClass().getName(), cause.getMessage());
+            logger.warn("WatchDataSource not available for Watch={}", getId(), e);
         }
     }
 
