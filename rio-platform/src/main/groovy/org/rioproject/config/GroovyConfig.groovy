@@ -37,7 +37,7 @@ class GroovyConfig implements Configuration {
         if(args==null || args.length==0) {
             configFile = new ConfigurationFile(args, loader)
         } else {
-            if(args[0].endsWith(".config")) {
+            if(args[0].endsWith(".config") || args[0].equals("-")) {
                 configFile = new ConfigurationFile(args, loader)
             } else {
                 /* Make sure we have all groovy files */
