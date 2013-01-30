@@ -20,6 +20,7 @@ import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Shell;
 import org.rioproject.exec.Util;
 import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +34,10 @@ import java.util.Map;
  * @author Dennis Reedy
  */
 public class PosixShell implements Shell {
-    private static final String COMPONENT = PosixShell.class.getPackage().getName();
     private static final String EXEC_SCRIPT="exec-template.sh";
     //private static final String EXEC_NOHUP_SCRIPT="exec-nohup-template.sh";
     private String template = EXEC_SCRIPT;
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(PosixShell.class);
 
     public void setShellTemplate(String template) {
         if(template==null)
@@ -61,13 +61,15 @@ public class PosixShell implements Shell {
         commandLine = "exec "+commandLine;
 
         if (execDescriptor.getInputArgs() != null) {
-            commandLine = commandLine+" "+execDescriptor.getInputArgs();
+            commandLine = commandLine+" "+ PropertyHelper.expandProperties(execDescriptor.getInputArgs());
         }
         if (execDescriptor.getStdOutFileName() != null) {
-            commandLine = commandLine + " > "+(new File(execDescriptor.getStdOutFileName())).getPath();
+            String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
+            commandLine = commandLine + " > "+(new File(stdOutFileName)).getPath();
         }
         if (execDescriptor.getStdErrFileName() != null) {
-            commandLine = commandLine + " 2> "+(new File(execDescriptor.getStdErrFileName())).getPath();
+            String stdErrFileName = PropertyHelper.expandProperties(execDescriptor.getStdErrFileName());
+            commandLine = commandLine + " 2> "+(new File(stdErrFileName)).getPath();
         }
 
         File pidFile = File.createTempFile("exec-", ".pid");
