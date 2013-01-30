@@ -677,8 +677,10 @@ public class AssociationMgmt implements AssociationManagement {
             if(numRequires.get() > 0) {
                 AssociationType aType = assoc.getAssociationType();
 
-                if(aType.equals(AssociationType.REQUIRES) && !requiredAssociations.contains(assoc)) {
-                    requiredAssociations.add(assoc);
+                if(aType.equals(AssociationType.REQUIRES)) {
+                    if(!requiredAssociations.contains(assoc)) {
+                        requiredAssociations.add(assoc);
+                    }
                     if(associationInjector!=null) {
                         associationInjector.discovered(assoc, service);
                     }
@@ -700,15 +702,20 @@ public class AssociationMgmt implements AssociationManagement {
             logger.trace("Check advertise for [{}] advertised={}, numRequires={}, requiredAssociations.size()={}",
                          clientName, advertised.get(), numRequires, requiredAssociations.size());
             if((requiredAssociations.size() >= numRequires.get()) && !advertised.get()) {
-                Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
-                if(!configParms.containsKey(Constants.STARTING)) {
-                    logger.info("Advertising service [{}]", clientName);
-                    advertise();
+                if(context!=null) {
+                    Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
+                    if(!configParms.containsKey(Constants.STARTING)) {
+                        logger.info("Advertising service [{}]", clientName);
+                        advertise();
+                    } else {
+                        logger.info("[{}] is still starting, do not advertise", clientName);
+                        context.getServiceElement().setAutoAdvertise(true);
+                        advertisePending.set(true);
+                    }
                 } else {
-                    logger.info("[{}] is still starting, do not advertise", clientName);
-                    context.getServiceElement().setAutoAdvertise(true);
-                    advertisePending.set(true);
-
+                    logger.debug("AssociationManagement created without ServiceBeanContext, unable to verify service {} " +
+                                "lifecycle. Proceeding with service advertisement", clientName);
+                    advertise();
                 }
             } else if((requiredAssociations.size() < numRequires.get()) && advertised.get())
                 unadvertise();

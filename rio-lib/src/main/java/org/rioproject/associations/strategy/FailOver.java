@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,17 +44,15 @@ import java.util.List;
  */
 public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     private String hostAddress;
-    private final List<ServiceItem> serviceList = new ArrayList<ServiceItem>();
+    private final List<ServiceItem> serviceList = Collections.synchronizedList(new ArrayList<ServiceItem>());
     static final Logger logger = LoggerFactory.getLogger(FailOver.class.getName());
 
     @SuppressWarnings("unchecked")
     public T getService() {
         T service = null;
-        synchronized(serviceList) {
-            if(!serviceList.isEmpty()) {
-                ServiceItem item = serviceList.get(0);
-                service = (T)item.service;
-            }
+        if(!serviceList.isEmpty()) {
+            ServiceItem item = serviceList.get(0);
+            service = (T)item.service;
         }
         return service;
     }
@@ -78,11 +77,9 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
             add(item);
         } else {
             logger.warn("Unable to obtain ServiceItem for {}, force refresh all service instances ", service);
-            synchronized(serviceList) {
-                serviceList.clear();
-                for(ServiceItem serviceItem : association.getServiceItems())
-                    add(serviceItem);
-            }
+            serviceList.clear();
+            for(ServiceItem serviceItem : association.getServiceItems())
+                add(serviceItem);
         }
     }
 
@@ -99,6 +96,9 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
      * Add a service to the list, sorting by returned host address
      */
     private synchronized void add(ServiceItem item) {
+        if(serviceList.contains(item)) {
+            logger.trace("Already have {}, service count now {}", item, serviceList.size());
+        }
         int ndx = -1;
         if (hostAddress != null) {
             Host host = getHostEntry(item);
@@ -131,10 +131,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
      * remove a service
      */
     private void remove(T service) {
-        ServiceItem[] items;
-        synchronized (serviceList) {
-            items = serviceList.toArray(new ServiceItem[serviceList.size()]);
-        }
+        ServiceItem[] items = serviceList.toArray(new ServiceItem[serviceList.size()]);
         ServiceItem item = null;
         for (ServiceItem si : items) {
             if (si.service.equals(service)) {
@@ -143,9 +140,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
             }
         }
         if (item != null) {
-            synchronized (serviceList) {
-                serviceList.remove(item);
-            }
+            serviceList.remove(item);
         }
     }
 

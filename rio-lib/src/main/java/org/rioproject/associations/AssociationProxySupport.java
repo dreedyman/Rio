@@ -82,6 +82,7 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
      * Notification that an Association has been discovered
      */
     public void discovered(Association<T> association, T service) {
+        logger.trace("Adding service for {}", association.getName());
         strategy.serviceAdded(service);
     }
 

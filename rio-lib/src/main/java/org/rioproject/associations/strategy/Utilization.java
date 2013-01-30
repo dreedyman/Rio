@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,7 +56,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     private SLA sla;
-    private final List<ServiceCapability<T>> services = new ArrayList<ServiceCapability<T>>();
+    private final List<ServiceCapability<T>> services = Collections.synchronizedList(new ArrayList<ServiceCapability<T>>());
     private OperationalStringManager opMgr;
     /** Scheduler for Cybernode utilization gathering */
     private ScheduledExecutorService scheduler;
@@ -74,39 +75,26 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
 
     public T getService() {
         T service = null;
-        synchronized(services) {
-            ServiceCapability<T> selected = null;
-            /* Fail-Over
-            for(ServiceCapability<T> sc : getServices()) {
-                if(sc.isInvokable()) {
-                    service = sc.getService();
-                    break;
-                } else {
-                    services.remove(sc);
-                    services.add(sc);
-                }
+        ServiceCapability<T> selected = null;
+        /*  Round-Robin */
+        for(ServiceCapability<T> sc : getServices()) {
+            if(sc.isInvokable()) {
+                services.remove(sc);
+                services.add(sc);
+                selected = sc;
+                service = sc.getService();
+                break;
             }
-             */
-            /*  Round-Robin */
-            for(ServiceCapability<T> sc : getServices()) {
-                if(sc.isInvokable()) {
-                    services.remove(sc);
-                    services.add(sc);
-                    selected = sc;
-                    service = sc.getService();
-                    break;
-                }
-            }
-            if(logger.isTraceEnabled()) {
-                String name = association==null?"<unknown>":association.getName();
-                if(selected!=null) {
-                    String address = selected.cru==null?"<unknown>":selected.cru.getAddress();
-                    String util = selected.cru==null?"<unknown>":selected.cru.getUtilization().toString();
-                    logger.trace("Using associated service [{}] at Host address={}, Utilization={}, values={}", 
-                                 name, address, util, selected.getMeasuredResourcesAsList().toString());
-                } else {
-                    logger.trace("All services are either breached, or none are available for associated service [{}]", name);
-                }
+        }
+        if(logger.isTraceEnabled()) {
+            String name = association==null?"<unknown>":association.getName();
+            if(selected!=null) {
+                String address = selected.cru==null?"<unknown>":selected.cru.getAddress();
+                String util = selected.cru==null?"<unknown>":selected.cru.getUtilization().toString();
+                logger.trace("Using associated service [{}] at Host address={}, Utilization={}, values={}",
+                             name, address, util, selected.getMeasuredResourcesAsList().toString());
+            } else {
+                logger.trace("All services are either breached, or none are available for associated service [{}]", name);
             }
         }
         return service;
@@ -114,16 +102,16 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
 
     @Override
     public void serviceAdded(final T service) {
+        logger.trace("Adding service for {}, {}", association.getName(), service);
         ServiceItem item = association.getServiceItem(service);
+        logger.trace("Found ServiceItem?, {}", item);
         if(item!=null) {
             addService(item);
         } else {
             logger.warn("Unable to obtain ServiceItem for {}, force refresh all service instances", service.toString());
-            synchronized(services) {
-                services.clear();
-                for(ServiceItem serviceItem : association.getServiceItems())
-                    addService(serviceItem);
-            }
+            services.clear();
+            for(ServiceItem serviceItem : association.getServiceItems())
+                addService(serviceItem);
         }
     }
 
@@ -171,20 +159,22 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                 long period = 1000*5;                
                 scheduler = Executors.newSingleThreadScheduledExecutor();
                 scheduler.scheduleAtFixedRate(cruf, initialDelay, period, TimeUnit.MILLISECONDS);
+                logger.trace("Initialized");
             } catch (RemoteException e) {
                 logger.warn("Getting ServiceElement for [{}]", association.getName(), e);
             } catch (Exception e) {
                 logger.warn("Unable to create OpStringManagerProxy for associated service [{}]", association.getName(), e);
             }
+        } else {
+            logger.warn("Unable to initialize successfully. opStringNameToUse: {}, opMgr: {}, association.getServiceItem(): {}",
+                        opStringNameToUse, opMgr, association.getServiceItem());
         }
     }
 
     private void setServiceList(final ServiceItem[] items) {
-        synchronized(services) {
-            services.clear();
-            for(ServiceItem item : items) {
-                addService(item);
-            }
+        services.clear();
+        for(ServiceItem item : items) {
+            addService(item);
         }
     }
 
@@ -208,17 +198,19 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                                       item.serviceID.getLeastSignificantBits());
         }
 
-        synchronized(services) {
-            boolean alreadyHaveIt = false;
-            for(ServiceCapability<T> sc : services) {
-                if(sc.uuid.equals(uuid)) {
-                    alreadyHaveIt = true;
-                    break;
-                }
+        boolean alreadyHaveIt = false;
+        for(ServiceCapability<T> sc : services) {
+            if(sc.uuid.equals(uuid)) {
+                alreadyHaveIt = true;
+                break;
             }
-            if(!alreadyHaveIt) {
-                services.add(new ServiceCapability(item.service, uuid));
-            }
+        }
+
+        if(!alreadyHaveIt) {
+            services.add(new ServiceCapability(item.service, uuid));
+            logger.trace("Adding new ServiceCapability, service count now {}", services.size());
+        } else {
+            logger.trace("Already have {}, service count now {}", item, services.size());
         }
     }
 
@@ -226,9 +218,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         boolean removed = false;
         for(ServiceCapability sc : getServices()) {
             if(sc.getService().equals(service)) {
-                synchronized(services) {
-                    removed = services.remove(sc);
-                }
+                removed = services.remove(sc);
             }
         }
         return removed;
@@ -236,11 +226,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
 
     @SuppressWarnings("unchecked")
     private ServiceCapability<T>[] getServices() {
-        ServiceCapability<T>[] scArray;
-        synchronized(services) {
-            scArray =  services.toArray(new ServiceCapability[services.size()]);
-        }
-        return scArray;
+        return services.toArray(new ServiceCapability[services.size()]);
     }
 
     class ComputeResourceUtilizationFetcher implements Runnable {
@@ -274,17 +260,15 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                 logger.warn("Getting utilization for service [{}], terminating", association.getAssociationDescriptor(), e);
                 terminate();
             }
-            synchronized(services) {
-                for(DeployedService deployed : list) {
-                    ServiceBeanInstance sbi = deployed.getServiceBeanInstance();
-                    ComputeResourceUtilization cru =
-                        deployed.getComputeResourceUtilization();
-                    for(ServiceCapability sc : services) {
-                        if(sc.uuid.equals(sbi.getServiceBeanID())) {
-                            logger.trace("Obtained ComputeResourceUtilization for [{}]", association.getName());
-                            sc.setComputeResourceUtilization(cru);
-                            break;
-                        }
+            for(DeployedService deployed : list) {
+                ServiceBeanInstance sbi = deployed.getServiceBeanInstance();
+                ComputeResourceUtilization cru =
+                    deployed.getComputeResourceUtilization();
+                for(ServiceCapability sc : services) {
+                    if(sc.uuid.equals(sbi.getServiceBeanID())) {
+                        logger.trace("Obtained ComputeResourceUtilization for [{}]", association.getName());
+                        sc.setComputeResourceUtilization(cru);
+                        break;
                     }
                 }
             }
@@ -376,7 +360,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                     if(isInvokable && wasBreached) {
                         logger.debug("Associated service at Host address={}, Utilization={} was breached, now invokable",
                                      cru.getAddress(), cru.getUtilization());
-                }
+                    }
                 }
             }
             wasBreached = !isInvokable;
