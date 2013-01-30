@@ -37,6 +37,7 @@ public class ServiceBeanInstantiationException extends Exception {
      */
     private boolean unInstantiable = false;
     private ExceptionDescriptor exDesc;
+    private transient Throwable cause;
 
     /**
      * Constructs a {@code ServiceBeanInstantiationException} with no detail
@@ -66,6 +67,7 @@ public class ServiceBeanInstantiationException extends Exception {
      */
     public ServiceBeanInstantiationException(final String s, final Throwable cause) {
         super(s);
+        this.cause = cause;
         this.exDesc = new ExceptionDescriptor(cause);
     }
 
@@ -82,6 +84,7 @@ public class ServiceBeanInstantiationException extends Exception {
      */
     public ServiceBeanInstantiationException(final String s, final Throwable cause, final boolean unInstantiable) {
         super(s);
+        this.cause = cause;
         this.exDesc = new ExceptionDescriptor(cause);
         this.unInstantiable = unInstantiable;
     }    
@@ -128,6 +131,17 @@ public class ServiceBeanInstantiationException extends Exception {
         if(exDesc!=null) {
             pw.print(exDesc.format());
         }
+    }
+
+    @Override
+    public synchronized Throwable getCause() {
+        if(exDesc==null)
+            return super.getCause();
+        if(cause!=null)
+            return cause;
+        Throwable cause = new Throwable(exDesc.getMessage());
+        cause.setStackTrace(exDesc.getStacktrace());
+        return cause;
     }
 
     /**
