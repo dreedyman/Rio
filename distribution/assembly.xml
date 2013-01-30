@@ -50,8 +50,6 @@
             <includes>
                 <include>**</include>
             </includes>
-            <!--<filtered>true</filtered>
-            <fileMode>0644</fileMode>-->
             <outputDirectory>/docs</outputDirectory>
         </fileSet>
 
@@ -61,8 +59,6 @@
             <includes>
                 <include>examples.zip</include>
             </includes>
-            <!--<filtered>true</filtered>
-            <fileMode>0644</fileMode>-->
             <outputDirectory>/</outputDirectory>
         </fileSet>
 
@@ -72,7 +68,6 @@
             <includes>
                 <include>policy.all</include>
             </includes>
-            <filtered>true</filtered>
             <fileMode>0644</fileMode>
             <outputDirectory>/policy</outputDirectory>
         </fileSet>
