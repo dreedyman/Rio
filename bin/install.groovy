@@ -13,7 +13,7 @@ if (args.length ==0) {
     StringBuilder builder = new StringBuilder()
     builder.append("When calling the install script with arguments, you must provide the location ")
     builder.append("of Rio and Java home. ").append("\n")
-    builder.append("You may alternatley call the install script with no arguments, ")
+    builder.append("You may alternately call the install script with no arguments, ")
     builder.append("and the environment will be checked ").append("\n")
     builder.append("for the existence of JAVA_HOME and RIO_HOME").append("\n\n")
     builder.append("\tinstall.groovy [java-home-location rio-home-location]")
