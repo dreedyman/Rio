@@ -53,8 +53,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -69,12 +69,12 @@
                     <excludes>
                         <exclude>**/*IT*.java</exclude>
                     </excludes>
-                    <systemProperties>
+                   <!-- <systemProperties>
                         <property>
                             <name>java.util.logging.config.file</name>
                             <value>${basedir}/../../../rio-test/src/test/conf/rio-test-logging.properties</value>
                         </property>
-                    </systemProperties>
+                    </systemProperties>-->
                 </configuration>
             </plugin>
 
@@ -155,6 +155,10 @@
                                 <property>
                                     <name>RIO_HOME</name>
                                     <value>${basedir}/../../../distribution/target/rio-${project.version}</value>
+                                </property>
+                                <property>
+                                    <name>java.security.policy</name>
+                                    <value>${basedir}/../../../distribution/target/rio-${project.version}/policy/policy.all</value>
                                 </property>
                             </systemProperties>
                             <includes>
