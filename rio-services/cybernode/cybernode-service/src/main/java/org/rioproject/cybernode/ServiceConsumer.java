@@ -439,9 +439,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 logger.warn("ProvisionManager security exception", e);
                 break;
             } catch(Exception e) {
-                Throwable cause = ThrowableUtil.getRootCause(e);
                 logger.warn("Recovering ProvisionManager Lease attempt retry count [{}] {}:{}",
-                            i, cause.getClass().getName(), cause.getMessage());
+                            i, e.getClass().getName(), e.getMessage());
                 /* Determine if we should even try to reconnect */
                 final int category = ThrowableConstants.retryable(e);
                 if(category==ThrowableConstants.INDEFINITE ||
@@ -514,7 +513,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                     lease.cancel();
                     logger.trace("Canceled Lease to ProvisionManager");
                 } catch(AccessControlException e) {
-                    logger.warn("Permissions problem dropping lease", ThrowableUtil.getRootCause(e));
+                    logger.warn("Permissions problem dropping lease", e);
                 } catch(Exception e) {
                     logger.warn("ProvisionLeaseManager: could not drop lease {}: {}",
                                 e.getClass().getName(), e.getMessage());

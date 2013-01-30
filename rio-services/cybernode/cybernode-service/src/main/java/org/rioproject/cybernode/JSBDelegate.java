@@ -623,7 +623,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
         jsbThread.start();
         try {
             jsbThread.join();
-                logger.trace("ServiceBean [{}] start thread completed", sElem.getName());
+            logger.trace("ServiceBean [{}] start thread completed", sElem.getName());
         } catch(InterruptedException e) {
             logger.warn("ServiceBean [{}] start Thread interrupted", sElem.getName(), e);
         } finally {

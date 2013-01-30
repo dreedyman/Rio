@@ -54,7 +54,6 @@ import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.persistence.SnapshotHandler;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
@@ -243,9 +242,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     ObjectName objectName = getObjectName(pCap);
                     MBeanServerFactory.getMBeanServer().unregisterMBean(objectName);
                 } catch (Exception e) {
-                    Throwable cause = ThrowableUtil.getRootCause(e);
-                    logger.warn("Unregistering PlatformCapability [{}], Exception: {}",
-                                pCap.getName(), cause.getClass().getName());
+                    logger.warn("Unregistering PlatformCapability [{}]", pCap.getName(), e);
                 }
             }
         }
@@ -1159,7 +1156,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     } catch (Exception e) {
                         loaderLogger.warn("Unable to create proxy for OperationalStringManager, " +
                                           "using provided OperationalStringManager",
-                                          ThrowableUtil.getRootCause(e));
+                                          e);
                         if(shutdownSequence.get()) {
                             throw new ServiceBeanInstantiationException(
                                 String.format("Cancel allocation of %s, Cybernode is shutting down",
