@@ -44,8 +44,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -78,8 +78,12 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
-                            <forkMode>once</forkMode>
+                            <forkMode>always</forkMode>
                             <systemProperties>
+                                <property>
+                                    <name>java.security.policy</name>
+                                    <value>${basedir}/../../../distribution/target/rio-${rio.version}/policy/policy.all</value>
+                                </property>
                                 <property>
                                     <name>opstring</name>
                                     <value>../src/main/opstring/springbean.groovy</value>

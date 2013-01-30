@@ -27,6 +27,8 @@ import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 
+import java.rmi.RemoteException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -56,16 +58,9 @@ public class ITCalculatorClientTest extends ITAbstractCalculatorTest {
     }
 
     @Test
-    public void testInjectedService() {
-        Throwable thrown = null;
-        try {
-            Calculator service = future.get();
-            Assert.assertNotNull(service);
-            testService(service);
-        } catch (Exception e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull("Should not have thrown an exception", thrown);
+    public void testInjectedService() throws RemoteException, ExecutionException, InterruptedException {
+        Calculator service = future.get();
+        Assert.assertNotNull(service);
+        testService(service);
     }
 }
