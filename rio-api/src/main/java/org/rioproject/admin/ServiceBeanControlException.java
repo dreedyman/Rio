@@ -15,9 +15,6 @@
  */
 package org.rioproject.admin;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
 /**
  * Thrown when a Service Bean cannot be controlled
  *
@@ -27,14 +24,7 @@ public class ServiceBeanControlException extends Exception {
     /**
      * serialVersionUID
      */
-    static final long serialVersionUID = 2L;
-
-    /**
-     * Constructs a <code>ServiceBeanControlException</code> with no detail message.
-     */
-    public ServiceBeanControlException() {
-        super();
-    }
+    private static final long serialVersionUID = 2L;
 
     /**
      * Constructs a <code>ServiceBeanControlException</code> with the specified detail
@@ -55,48 +45,5 @@ public class ServiceBeanControlException extends Exception {
      */
     public ServiceBeanControlException(String s, Throwable cause) {
         super(s, cause);
-    }
-
-    /**
-     * Prints the stack trace. If an exception occurred during JSB
-     * instantiation it prints that exception's stack trace, or else prints the
-     * stack trace of this exception.
-     * 
-     * @see java.lang.System#err
-     */
-    public void printStackTrace() {
-        printStackTrace(System.err);
-    }
-
-    /**
-     * Prints the stack trace to the specified print stream. If an exception
-     * occurred during service instantiation it prints that exception's stack trace,
-     * or else prints the stack trace of this exception.
-     */
-    public void printStackTrace(PrintStream ps) {
-        Throwable cause = getCause();
-        if(cause != null) {
-            ps.print("org.rioproject.admin.ServiceBeanControlException: ");
-            cause.printStackTrace(ps);
-        } else {
-            super.printStackTrace(ps);
-        }
-    }
-
-    /**
-     * Prints the stack backtrace to the specified print writer. If an exception
-     * occurred during class loading it prints that exception's stack trace, or
-     * else prints the stack backtrace of this exception.
-     */
-    public void printStackTrace(PrintWriter pw) {
-        synchronized(pw) {
-            Throwable cause = getCause();
-            if(cause != null) {
-                pw.print("org.rioproject.admin.ServiceBeanControlException: ");
-                cause.printStackTrace(pw);
-            } else {
-                super.printStackTrace(pw);
-            }
-        }
     }
 }
