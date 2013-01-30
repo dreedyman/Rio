@@ -75,6 +75,8 @@ class GroovyDSLOpStringParser implements OpStringParser {
         } else if(source instanceof File) {
             sourceLocation = ((File)source).toURI().toURL()
             groovyCodeSource = new GroovyCodeSource((File)source)
+        } else if (source instanceof String) {
+            groovyCodeSource = new GroovyCodeSource((String)source, "", "groovy/script")
         } else {
             throw new DSLException("Unrecognized source "+source)
         }
@@ -569,14 +571,15 @@ class GroovyDSLOpStringParser implements OpStringParser {
             emc.include = { String opStringRef ->
                 def resolved = false
                 if(opStringRef.endsWith(".xml"))
-                    throw new DSLException("Unable to process XML docuemnts.")
+                    throw new DSLException("Unable to process XML documents.")
 
-                if (source instanceof File)
+                if (source instanceof File) {
                     if (new File(((File)source).parent, opStringRef).exists())
                         resolved = true
+                }
 
                 def location = null
-                File tempResolvedOpString = null
+                //File tempResolvedOpString = null
                 if(opStringRef.indexOf(":")!=-1) {
                     Resolver r = ResolverHelper.getResolver()
                     URL u = r.getLocation(opStringRef, "oar")
@@ -594,21 +597,13 @@ class GroovyDSLOpStringParser implements OpStringParser {
 
                     JarFile oarJar = jarConn.getJarFile()
                     JarEntry entry = oarJar.getJarEntry(includeOpString)
-                    int ndx = includeOpString.lastIndexOf(".")
-                    if(ndx!=-1)
-                        includeOpString = includeOpString.substring(0, ndx)
-                    tempResolvedOpString = File.createTempFile(includeOpString+"_", ".groovy")
-                    tempResolvedOpString.deleteOnExit()
-                    def file = new FileOutputStream(tempResolvedOpString)
-                    def out = new BufferedOutputStream(file)
-                    out << oarJar.getInputStream(entry)
-                    out.close()
-                    location = tempResolvedOpString
+                    String contents = oarJar.getInputStream(entry).text
+                    location = contents
                     resolved = true
                 }
 
                 if (resolved) {
-                    if (source instanceof File && tempResolvedOpString==null) {
+                    if (source instanceof File) {
                         location = new File(((File)source).parentFile, opStringRef)
                     }
                 } else {
@@ -627,8 +622,6 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 def includes
                 try {
                     includes = parse(location, loader, defaultExportJars, defaultGroups, loadPath)
-                    if(tempResolvedOpString!=null)
-                        tempResolvedOpString.delete()
 
                     includes.each {
                         List<OpString> nested = nestedTable.get(opStringName)
