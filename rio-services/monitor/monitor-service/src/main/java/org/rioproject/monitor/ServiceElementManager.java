@@ -687,11 +687,10 @@ public class ServiceElementManager implements InstanceIDManager {
                             if (id != null && id.intValue() > lastID)
                                 lastID = id.intValue();
                         }
-                    } catch(Throwable e) {
-                        Throwable t = ThrowableUtil.getRootCause(e);
+                    } catch(Throwable t) {
                         mgrLogger.warn("Unable to set FaultDetectionHandler to existing instance of [{}], " +
-                                          "assume service is unavailable. {}: {}",
-                                          LoggingUtil.getLoggingName(svcElement), t.getClass(), t.getMessage());
+                                       "assume service is unavailable. {}: {}",
+                                       LoggingUtil.getLoggingName(svcElement), t.getClass(), t.getMessage());
                     }
                 }
             } else {
