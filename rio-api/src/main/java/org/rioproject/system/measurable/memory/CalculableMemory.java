@@ -60,7 +60,9 @@ public class CalculableMemory extends Calculable {
      * @return Value of property totalMemory.
      */
     public double getTotalMemory() {
-        return (memoryUtilization.getMaxHeap());
+        if(memoryUtilization==null)
+            return Double.NaN;
+        return memoryUtilization.getMaxHeap();
     }
 
     /**
@@ -69,6 +71,8 @@ public class CalculableMemory extends Calculable {
      * @return The amount of used memory
      */
     public double getUsedMemory() {
+        if(memoryUtilization==null)
+            return Double.NaN;
         return(getValue()*memoryUtilization.getMaxHeap());
     }
 
@@ -78,6 +82,8 @@ public class CalculableMemory extends Calculable {
      * @return The amount of free memory
      */
     public double getFreeMemory() {
+        if(memoryUtilization==null)
+            return Double.NaN;
         return (memoryUtilization.getMaxHeap()-getUsedMemory());
     }
 
