@@ -34,7 +34,6 @@ import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resources.servicecore.ServiceResource;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1123,12 +1122,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             try {
                 preparedListener = (ServiceProvisionListener) serviceProvisionListenerPreparer.prepareProxy(listener);
             } catch (RemoteException e) {
-                Throwable cause = ThrowableUtil.getRootCause(e);
-                if (logger.isDebugEnabled())
-                    logger.debug("Notifying ServiceProvisionListener of " +
-                                 "redeployment, continue with redeployment. " +
-                                 cause.getClass().getName() + ": " +
-                                 cause.getLocalizedMessage());
+                logger.trace("Notifying ServiceProvisionListener of redeployment, continue with redeployment. ", e);
             }
         }
 
