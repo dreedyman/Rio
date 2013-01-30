@@ -389,8 +389,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 for(ServiceRecord record : records)
                     statement.putServiceRecord(ir.getInstantiatorUuid(), record);
             } catch (RemoteException e) {
-                Throwable cause = ThrowableUtil.getRootCause(e);
-                mgrLogger.warn("Could not obtain ServiceRecords from {}", ir.getName(), cause);
+                mgrLogger.warn("Could not obtain ServiceRecords from {}", ir.getName(), e);
             }
         }
         return statement;
