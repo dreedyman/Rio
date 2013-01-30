@@ -147,9 +147,7 @@ public class ProvisionTask implements Runnable {
                     try {
                         context.getProvisionRequest().getServiceProvisionListener().succeeded(jsbInstance);
                     } catch (Exception e) {
-                        Throwable cause = ThrowableUtil.getRootCause(e);
-                        logger.trace("Notifying ServiceProvisionListeners on success. [{}:{}]",
-                                      cause.getClass().getName() , cause.getLocalizedMessage());
+                        logger.trace("Notifying ServiceProvisionListeners on success.", e);
                     }
                 }
             }
