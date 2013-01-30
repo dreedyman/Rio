@@ -60,10 +60,16 @@ def appenders = []
  */
 if (System.console() != null) {
     appender("CONSOLE", ConsoleAppender) {
-        if(!System.getProperty("os.name").startsWith("Windows"))
+        if(!System.getProperty("os.name").startsWith("Windows")) {
             withJansi = true
-        encoder(PatternLayoutEncoder) {
-            pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
+
+            encoder(PatternLayoutEncoder) {
+                pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
+            }
+        } else {
+            encoder(PatternLayoutEncoder) {
+                pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
+            }
         }
     }
     appenders << "CONSOLE"
@@ -92,7 +98,7 @@ if (System.getProperty("org.rioproject.service")!=null) {
 
         }
         encoder(PatternLayoutEncoder) {
-            pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
+            pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
         }
     }
     appenders << "ROLLING"
@@ -116,6 +122,7 @@ logger("org.rioproject.monitor.services", DEBUG)
 logger("org.rioproject.resolver.aether", OFF)
 
 logger("org.rioproject.gnostic", INFO)
+logger("org.rioproject.gnostic.drools", INFO)
 
 logger("net.jini.discovery.LookupDiscovery", OFF)
 logger("net.jini.lookup.JoinManager", OFF)
