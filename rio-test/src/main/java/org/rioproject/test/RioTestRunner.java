@@ -35,7 +35,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.rmi.RMISecurityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.LogManager;
@@ -49,9 +48,9 @@ import java.util.logging.LogManager;
 public class RioTestRunner extends BlockJUnit4ClassRunner {
     static final Logger logger = LoggerFactory.getLogger(RioTestRunner.class.getName());
     static {
-        Utils.checkSecurityPolicy();
         if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new RMISecurityManager());
+            Utils.checkSecurityPolicy();
+            System.setSecurityManager(new SecurityManager());
         }
         if(LogAgent.usingJUL()) {
             if(System.getProperty("java.util.logging.config.file")==null) {

@@ -115,10 +115,10 @@ public class SimpleForkTest {
                 String pid = managedVM.substring(0, managedVM.indexOf(" "));
                 long forkedPID = Long.valueOf(pid);
                 if(forkedPID!=-1) {
-                    logger.debug("PID of exec'd process obtained: "+forkedPID);
+                    logger.info("PID of exec'd process obtained: "+forkedPID);
                     try {
                         MBeanServerConnection mbsc = JMXConnectionUtil.attach(Long.toString(forkedPID));
-                        logger.debug("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
+                        logger.info("JMX Attach succeeded to exec'd JVM with pid: "+forkedPID);
                         RuntimeMXBean runtime = JMXUtil.getPlatformMXBeanProxy(mbsc,
                                                                                ManagementFactory.RUNTIME_MXBEAN_NAME,
                                                                                RuntimeMXBean.class);
@@ -133,8 +133,7 @@ public class SimpleForkTest {
                     }
                 }
             } else {
-                logger.debug("Could not obtain actual pid of exec'd process, " +
-                             "process cpu and java memory utilization are not available");
+                logger.warn("Could not obtain actual pid of exec'd process, process cpu and java memory utilization are not available");
             }
         }
         return null;

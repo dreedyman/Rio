@@ -7,7 +7,7 @@ appender("CONSOLE", ConsoleAppender) {
     if(!System.getProperty("os.name").startsWith("Windows"))
         withJansi = true
     encoder(PatternLayoutEncoder) {
-        pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n"
+        pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
     }
 }
 

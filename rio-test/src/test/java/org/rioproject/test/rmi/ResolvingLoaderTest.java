@@ -15,19 +15,18 @@
  */
 package org.rioproject.test.rmi;
 
-import static org.junit.Assert.*;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rioproject.RioVersion;
 import org.rioproject.rmi.ResolvingLoader;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.rmi.RMISecurityManager;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests the {@link org.rioproject.rmi.ResolvingLoader}
@@ -36,13 +35,9 @@ public class ResolvingLoaderTest {
     @BeforeClass
     public static void setSecurityPolicy() {
         URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
-        String rioHome = System.getProperty("RIO_HOME");
-        assertNotNull(rioHome);
-        StringBuilder sb = new StringBuilder();
-        sb.append(rioHome).append(File.separator).append("policy").append(File.separator).append("policy.all");
-        System.setProperty("java.security.policy", sb.toString());
-        if (System.getSecurityManager() == null)
-            System.setSecurityManager(new RMISecurityManager());
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
     }
 
     @Test

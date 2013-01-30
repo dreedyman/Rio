@@ -15,9 +15,12 @@
  */
 package org.rioproject.test.associations;
 
+import java.io.IOException;
+
 /**
  * Dummy interface
  */
 public interface Dummy {    
-    int getIndex();
+    int getIndex() throws IOException;
+    int getIndexFromAnotherDummy() throws IOException;
 }

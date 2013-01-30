@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import org.rioproject.config.Constants
+import org.rioproject.net.HostUtil
 
 /*
  * Configuration properties used to launch Rio services from the test framework
@@ -41,6 +42,9 @@ manager {
 
     log = "${rootLogDir}/${name}/logs/${logExt}/"
 
+    String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+    System.setProperty("hostAddress", address)
+
     jvmOptions='''
         -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
         -Djava.protocol.handler.pkgs=org.rioproject.url
@@ -48,7 +52,8 @@ manager {
         -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
         -DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME} -DRIO_TEST_ATTACH
         -Dorg.rioproject.groups=${org.rioproject.groups}
-        -Dorg.rioproject.service=${service}'''
+        -Dorg.rioproject.service=${service}
+        -DhostAddress=${hostAddress}'''
 
     /*
      * Remove any previously created service log files
@@ -57,9 +62,9 @@ manager {
 
     mainClass='org.rioproject.start.ServiceStarter'
 
-    reggieStarter = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-reggie.groovy'
+    reggieStarter    = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-reggie.groovy'
 
-    monitorStarter = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-monitor.groovy'
+    monitorStarter   = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-monitor.groovy'
 
     cybernodeStarter = '${RIO_HOME}${/}config${/}start-cybernode.groovy'
 

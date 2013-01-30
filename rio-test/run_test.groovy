@@ -142,7 +142,7 @@ final runTest = { testClass, properties ->
 }
 
 testJVMProperties =
-        ['java.security.policy'               : "${cwd}/../${rioDist}/policy/policy.all",
+        ['java.security.policy'               : "${cwd}/../${rioDist}/policy/rio.policy",
          'RIO_HOME'                           : "${cwd}/../${rioDist}",
          'RIO_TEST_HOME'                      : "${cwd}",
          'org.rioproject.test.manager.config' : "${cwd}/src/test/conf/manager-config.groovy",

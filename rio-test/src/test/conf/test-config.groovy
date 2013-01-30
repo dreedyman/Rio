@@ -14,6 +14,15 @@ SimpleDeployTest {
     //testManager = new org.rioproject.test.TestManager(true)
 }
 
+AssociationManagementTest {
+    groups = "AssociationManagementTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/opstring/associationManagement.groovy'
+    autoDeploy = true
+}
+
 SLAThresholdEventNotificationTest {
     groups = "SLAThresholdEventNotificationTest"
     //locators = ''

@@ -294,12 +294,10 @@ public class StaticCybernode {
             throw new ServiceBeanInstantiationException("The StaticCybernode does not " +
                                                         "support the instantiation of a " +
                                                         "service declared to be forked");
-        ServiceBeanInstance instance =
-            instantiator.activate(elem,
-                                  null,  // OperationalStringManager
-                                  null); // EventHandler (slas)
-        JSBDelegate delegate =
-            (JSBDelegate) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
+        ServiceBeanInstance instance = instantiator.activate(elem,
+                                                             null,  // OperationalStringManager
+                                                             null); // EventHandler (slas)
+        JSBDelegate delegate = (JSBDelegate) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
         Object impl = delegate.getImpl();
         serviceSet.add(new ActivatedService(impl, delegate.getProxy(), delegate));
         return impl;

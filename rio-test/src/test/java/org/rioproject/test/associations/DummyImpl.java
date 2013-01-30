@@ -15,6 +15,7 @@
  */
 package org.rioproject.test.associations;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -23,6 +24,10 @@ import java.io.Serializable;
 public class DummyImpl implements Dummy, Serializable {
     int index;
     String name;
+    Dummy anotherDummy;
+
+    public DummyImpl() {
+    }
 
     DummyImpl(int index) {
         this.index = index;
@@ -37,6 +42,13 @@ public class DummyImpl implements Dummy, Serializable {
         return index;
     }
 
+    public void setDummy(Dummy dummy) {
+        this.anotherDummy = dummy;
+    }
+
+    public int getIndexFromAnotherDummy() throws IOException {
+        return anotherDummy.getIndex();
+    }
 
     @Override
     public boolean equals(Object o) {
