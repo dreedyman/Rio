@@ -18,6 +18,8 @@ package org.rioproject.resources.util;
 import com.sun.jini.constants.ThrowableConstants;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Utility for getting things from a Throwable
  *
@@ -26,7 +28,10 @@ import org.rioproject.deploy.ServiceBeanInstantiationException;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ThrowableUtil {
     public static Throwable getRootCause(Throwable e) {
-        if(e instanceof ServiceBeanInstantiationException) {
+        Throwable cause = e;
+        if(e instanceof InvocationTargetException) {
+            cause = e.getCause()==null? ((InvocationTargetException)e).getTargetException(): e.getCause();
+        } else if(e instanceof ServiceBeanInstantiationException) {
             if(((ServiceBeanInstantiationException)e).getCauseExceptionDescriptor()!=null) {
                 ServiceBeanInstantiationException.ExceptionDescriptor exDesc =
                     ((ServiceBeanInstantiationException)e).getCauseExceptionDescriptor();
@@ -38,13 +43,13 @@ public class ThrowableUtil {
                 t.setStackTrace(exDesc.getStacktrace());
                 return t;
             }
-        }
-        Throwable cause = e;
-        Throwable t = cause;
-        while(t != null) {
-            t = cause.getCause();
-            if(t != null)
-                cause = t;
+        } else {
+            Throwable t = cause;
+            while(t != null) {
+                t = cause.getCause();
+                if(t != null)
+                    cause = t;
+            }
         }
         return (cause);
     }
