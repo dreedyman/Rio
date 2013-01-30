@@ -22,7 +22,7 @@ package org.rioproject.opstring;
  * @author Dennis Reedy
  */
 public class OperationalStringException extends Exception {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private boolean managed = true;
 
     /**

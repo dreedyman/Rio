@@ -21,7 +21,7 @@ package org.rioproject.event;
  * @author Dennis Reedy
  */
 public class NoEventConsumerException extends Exception {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructs an NoEventConsumerException with the specified detail message.
@@ -29,12 +29,5 @@ public class NoEventConsumerException extends Exception {
      */
     public NoEventConsumerException(String reason) {
         super(reason);
-    }
-
-    /**
-     * Constructs an NoEventConsumerException with no detail message.
-     */
-    public NoEventConsumerException() {
-        super();
     }
 }
