@@ -165,6 +165,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
 
         Method method = getInjectionMethod(propertyName);
         if (method != null) {
+            logger.debug("Association [{}] method []", association.toString(), method.toString());
             synchronized(injectedMap) {
                 if(injectedMap.containsKey(association)) {
                     AssociationProxy<T> associationProxy = proxyMap.get(association);
@@ -173,6 +174,8 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                     logger.debug("Association [{}] has already been injected to [{}]",
                                  association.getName(), method.toString());
                     return;
+                } else {
+                    logger.debug("Association [{}] not found in map, create new AssociationProxy", association.toString());
                 }
                 String proxyClass = association.getAssociationDescriptor().getProxyClass();
                 /*
@@ -189,9 +192,9 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                 try {
                     AssociationProxy associationProxy =
                         (AssociationProxy)AssociationProxyFactory.createProxy(proxyClass,
-                                                                                             strategyClass,
-                                                                                             association,
-                                                                                             getCallerClassLoader());
+                                                                              strategyClass,
+                                                                              association,
+                                                                              getCallerClassLoader());
                     logger.debug("Association [{}], is DISCOVERED, inject dependency", association.getName());
                     method.invoke(target, getInjectionArg(method, association, (T)associationProxy));
                     if (logger.isDebugEnabled()) {
