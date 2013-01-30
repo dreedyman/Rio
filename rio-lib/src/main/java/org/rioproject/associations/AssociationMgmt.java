@@ -364,8 +364,7 @@ public class AssociationMgmt implements AssociationManagement {
             Thread.currentThread().setContextClassLoader(callerCL);
             setConfiguration(context.getConfiguration());
         } catch (ConfigurationException e) {
-            logger.warn("Unable to get Configuration from ServiceBeanContext. Will proceed without configuration",
-                       ThrowableUtil.getRootCause(e));
+            logger.warn("Unable to get Configuration from ServiceBeanContext. Will proceed without configuration", e);
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }

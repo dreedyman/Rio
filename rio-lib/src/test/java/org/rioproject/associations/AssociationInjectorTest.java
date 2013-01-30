@@ -18,10 +18,6 @@ package org.rioproject.associations;
 import junit.framework.Assert;
 import net.jini.core.lookup.ServiceItem;
 import org.junit.Test;
-import org.rioproject.associations.Association;
-import org.rioproject.associations.AssociationDescriptor;
-import org.rioproject.associations.AssociationInjector;
-import org.rioproject.associations.AssociationServiceListener;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -114,7 +110,7 @@ public class AssociationInjectorTest {
     
     @Test
     public void testEagerInjection() {
-        AssociationMgmt aMgr = new AssociationMgmt();        
+        AssociationMgmt aMgr = new AssociationMgmt();
         Target5 target = new Target5();
         aMgr.setBackend(target);
         AssociationDescriptor descriptor = createAssociationDescriptor();

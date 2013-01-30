@@ -27,7 +27,6 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.*;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -161,17 +160,16 @@ public class JMXConnectionUtil {
      * Java Virtual Machine identified, or null if the connection cannot be
      * created.
      *
-     * @throws IOException if the MBeanServerConnection cannot be created.
-     * @throws AttachNotSupportedException if the underlying provider either does not exist,
-     * or if the provider attempts to attach to a Java virtual machine with which it is not compatible.
-     * @throws AgentInitializationException thrown when an agent fails to initialize in the
-     * target Java virtual machine.
-     * @throws AgentLoadException when an agent cannot be loaded into the target Java virtual machine.
+     * @throws Exception if the following occurs:
+     * <ul>
+     *     <li>MBeanServerConnection cannot be created</li>
+     *     <li>If the underlying provider either does not exist, or if the provider attempts to attach to a
+     *     Java virtual machine with which it is not compatible.</li>
+     *     <li>If an agent fails to initialize in the target Java virtual machine.</li>
+     *     <li>If an agent cannot be loaded into the target Java virtual machine.</li>
+     * </ul>
      */
-    public static MBeanServerConnection attach(final String id) throws IOException,
-                                                                       AttachNotSupportedException,
-                                                                       AgentInitializationException,
-                                                                       AgentLoadException {
+    public static MBeanServerConnection attach(final String id) throws Exception {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {
             logger.info("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
@@ -196,9 +194,8 @@ public class JMXConnectionUtil {
     }
 
     /**
-     * Using the <a
-     * href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">
-     * JMX Attach API </a>, list the available local Java Virtual Machines.
+     * Using the <a href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">JMX Attach API </a>,
+     * list the available local Java Virtual Machines.
      *
      * <p>This utility requires Java 6 or greater.
      *
@@ -231,6 +228,7 @@ public class JMXConnectionUtil {
      * @return A String array of Java Virtual Machine IDs followed by the
      * displayName of each discovered <tt>VirtualMachine</tt>
      */
+    @SuppressWarnings("unchecked")
     public static String[] listManagedVMs() {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {

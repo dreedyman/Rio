@@ -15,7 +15,6 @@
  */
 package org.rioproject.system.measurable;
 
-import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -977,10 +976,9 @@ public final class SigarHelper {
     }
 
     private void log(final String s, final Throwable t) {
-        Throwable cause = ThrowableUtil.getRootCause(t);
         if(logger.isDebugEnabled())
             logger.debug(s, t);
         else
-            logger.warn("{}. Caused by: {}: {}", s, cause.getClass().getName(), cause.getMessage());
+            logger.warn("{}. Caused by: {}: {}", s, t.getClass().getName(), t.getMessage());
     }
 }

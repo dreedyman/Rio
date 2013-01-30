@@ -16,7 +16,6 @@
 package org.rioproject.bean;
 
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,24 +60,23 @@ public class BeanHelper {
         try {
             Method method = bean.getClass().getMethod(methodNameToInvoke, (Class[]) null);
             logger.trace("Invoking method [{}] on [{}]", methodNameToInvoke, bean.getClass().getName());
-
             method.invoke(bean, (Object[]) null);
         } catch (NoSuchMethodException e) {
-            logger.trace("Bean [{}] does not have lifecycle method {}() defined",
-                         bean.getClass().getName(), methodNameToInvoke);
+            logger.trace("Bean [{}] does not have lifecycle method {}() defined", bean.getClass().getName(), methodNameToInvoke);
         } catch (IllegalAccessException e) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Bean [{}] {}() method security access", bean.getClass().getName(), methodNameToInvoke, e);
-            }
+            logger.trace("Bean [{}] {}() method security access", bean.getClass().getName(), methodNameToInvoke, e);
             abort = e;
         } catch (InvocationTargetException e) {
-            abort = ThrowableUtil.getRootCause(e);
-            logger.trace("Bean [{}] {}() method invocation", bean.getClass().getName(), methodNameToInvoke, abort);
+            abort = e.getCause()==null? e.getTargetException(): e.getCause();
+            logger.trace("Bean [{}] {}() method invocation", bean.getClass().getName(), methodNameToInvoke, e);
+        } catch(Throwable t) {
+            abort = t;
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
         if(abort!=null) {
             String message = String.format("Invoking Bean [%s] %s() method", bean.getClass().getName(), methodNameToInvoke);
+            logger.warn(message, abort);
             throw new ServiceBeanInstantiationException(message, abort, true);
         }
     }
@@ -119,14 +117,17 @@ public class BeanHelper {
             logger.trace("Bean [{}] {}() method security access", bean.getClass().getName(), methodNameToInvoke, e);
             abort = e;
         } catch (InvocationTargetException e) {
-            abort = ThrowableUtil.getRootCause(e);
+            abort = e.getCause()==null? e.getTargetException(): e.getCause();
             logger.trace("Bean [{}] {}() method invocation", bean.getClass().getName(), methodNameToInvoke, abort);
+        } catch(Throwable t) {
+            logger.trace("Bean [{}] {}() method invocation", bean.getClass().getName(), methodNameToInvoke, abort);
+            abort = t;
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
         if(abort!=null) {
             String message = String.format("Invoking Bean [%s] %s() method", bean.getClass().getName(), methodNameToInvoke);
-            throw new ServiceBeanInstantiationException(message, ThrowableUtil.getRootCause(abort), true);
+            throw new ServiceBeanInstantiationException(message, abort, true);
         }
         return (result);
     }

@@ -76,7 +76,7 @@ public class BeanFactory implements ServiceBeanFactory {
         final Thread currentThread = Thread.currentThread();
         ClassBundle bundle = context.getServiceElement().getComponentBundle();
         ClassLoader beanCL = currentThread.getContextClassLoader();
-        Class beanClass = beanCL.loadClass(bundle.getClassName());
+        Class<?> beanClass = beanCL.loadClass(bundle.getClassName());
         logger.trace("Load service class: {}", beanClass);
         logger.trace("Activating as ServiceBean");
         Constructor constructor = beanClass.getConstructor((Class[])null);

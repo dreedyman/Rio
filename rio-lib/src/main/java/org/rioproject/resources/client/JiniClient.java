@@ -21,12 +21,9 @@ import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.*;
-import net.jini.lookup.LookupCache;
 import net.jini.lookup.entry.Name;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.loader.ClassBundleLoader;
-import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,8 +175,7 @@ public class JiniClient {
      * @return A {@link net.jini.core.discovery.LookupLocator}  array of
      * parsed locator urls. If the locatorUrls parameter is null, return null
      *
-     * @throws MalformedURLException If the locatorUrls contains a value that
-     * has an illegal format
+     * @throws MalformedURLException If the locatorUrls contains a value that has an illegal format
      */
     public static LookupLocator[] parseLocators(String locatorUrls) throws MalformedURLException {
         LookupLocator[] locators = null;
@@ -203,102 +199,25 @@ public class JiniClient {
     }
 
     /**
-     * Returns an array consisting of the names of the groups whose members are
-     * the lookup services to discover from an array of group names that may not
-     * map to Jini technology specific group name nuances
-     * 
-     * @param groups String[] of group names to transform. Transformation is
-     * determined as follows:
-     * <ul>
-     * <li>If the groups property is null or has a zero length, then the
-     * returned value is LookupDiscovery.NO_GROUPS
-     * <li>If an element has the value of "all", that value will be transformed
-     * to LookupDiscovery.ALL_GROUPS
-     * <li>If an element has the value of "public", that value is transformed
-     * to an empty string ""
-     * </ul>
-     * @return String array of groups
-     */
-    public static String[] transformGroupNames(String[] groups) {
-        String[] adjustedGroups = groups;
-        if(groups == null || groups.length == 0)
-            adjustedGroups = LookupDiscovery.NO_GROUPS;
-        if(adjustedGroups != null && adjustedGroups.length > 0) {
-            if(adjustedGroups.length == 1 && adjustedGroups[0].equals("all")) {
-                adjustedGroups = LookupDiscovery.ALL_GROUPS;
-            } else {
-                for(int i = 0; i < adjustedGroups.length; i++) {
-                    if(adjustedGroups[i].equals("public"))
-                        adjustedGroups[i] = "";
-                }
-            }
-        }
-        return (adjustedGroups);
-    }
-
-    /**
      * Create a ServiceTemplate from a ServiceElement
      *
      * @param sElem A ServiceElement
+     * @param interfaceClass The interface class use
      *
-     * @return A ServiceTemplate which can be used to discover
-     * the service
+     * @return A ServiceTemplate which can be used to discover the service
      *
-     * @throws IOException If the interface class(es) are not in the context ClassLoader.
-     * and the configured URLs pointing to the class(es) classpath are invalid.
-     * @throws ClassNotFoundException If the interface class(es) cannot be loaded
+     * @throws IllegalArgumentException if the {@code sElem} or {@code interfaceClass} arguments are {@code null}
      */
-    public static ServiceTemplate getServiceTemplate(ServiceElement sElem) throws IOException, ClassNotFoundException {
-        return(getServiceTemplate(sElem, null));
-    }
-
-    /**
-     * Create a ServiceTemplate from a ServiceElement
-     * 
-     * @param sElem A ServiceElement
-     * @param cl The ClassLoader to use to load the interface class. If null,
-     * the threads context classloader will be used
-     * @return A ServiceTemplate which can be used to discover
-     * the service
-     *
-     * @throws IOException If the interface class(es) are not in the context ClassLoader.
-     * and the configured URLs pointing to the class(es) classpath are invalid.
-     * @throws ClassNotFoundException If the interface class(es) cannot be loaded
-     */
-    public static ServiceTemplate getServiceTemplate(final ServiceElement sElem, final ClassLoader cl) throws IOException,
-                                                                                                  ClassNotFoundException {
+    public static ServiceTemplate getServiceTemplate(final ServiceElement sElem, final Class<?> interfaceClass) {
         if(sElem == null)
             throw new IllegalArgumentException("sElem is null");
+        if(interfaceClass == null)
+            throw new IllegalArgumentException("interfaceClass is null");
         ServiceTemplate template;
-        ClassLoader loader = cl;
-        if(loader==null) {
-            final Thread currentThread = Thread.currentThread();
-            loader = AccessController.doPrivileged(
-                new PrivilegedAction<ClassLoader>() {
-                    public ClassLoader run() {
-                        return (currentThread.getContextClassLoader());
-                    }
-                });
-        }
-        ClassBundle[] eBundles = sElem.getExportBundles();
-        Class[] interfaces = new Class[eBundles.length];
-
-        for(int i = 0; i < eBundles.length; i++) {
-            try {
-                interfaces[i] = Class.forName(eBundles[i].getClassName(), false, loader);
-            } catch(ClassNotFoundException e) {
-                /* CNFE means the interface(s) are not in the context ClassLoader.
-                 * So load the interface class(es) using the URLs in the
-                 * export ClassBundle
-                 */
-                interfaces[i] = ClassBundleLoader.loadClass(eBundles[i]);
-            }
-        }
-
         if(sElem.getMatchOnName())
-            template = new ServiceTemplate(null, interfaces, new Entry[]{new Name(sElem.getName())});
+            template = new ServiceTemplate(null, new Class[]{interfaceClass}, new Entry[]{new Name(sElem.getName())});
         else
-            template = new ServiceTemplate(null, interfaces, null);
+            template = new ServiceTemplate(null, new Class[]{interfaceClass}, null);
         return (template);
     }
 
@@ -319,18 +238,6 @@ public class JiniClient {
         return (discoPool.getDiscoveryManager(sElem.getOperationalStringName(),
                                               sElem.getServiceBeanConfig().getGroups(),
                                               sElem.getServiceBeanConfig().getLocators()));
-    }
-
-    /**
-     * Create a ServiceTemplate from an AssociationDescriptor
-     * 
-     * @param aDesc The AssociationDescriptor
-     * @return A ServiceTemplate which can be used to discover the service
-     *
-     * @throws ClassNotFoundException If the interface class in the AssociationDescriptor cannot be loaded
-     */
-    public static ServiceTemplate getServiceTemplate(AssociationDescriptor aDesc) throws ClassNotFoundException {
-        return (getServiceTemplate(aDesc, null));
     }
 
     /**
@@ -376,46 +283,6 @@ public class JiniClient {
     }
 
     /**
-     * Get a LookupCache instance from service attributes in a ServiceBeanContext
-     * 
-     * @param context A ServiceBeanContext
-     * @param cl The classloader to use. If null use the current context
-     * classloader
-     * @return A LookupCache instance from a pool of LookupCache 
-     * instances based on ServiceBeanContext attributes
-     *
-     *
-     * @throws IOException If the interface class(es) are not in the context ClassLoader.
-     * and the configured URLs pointing to the class(es) classpath are invalid.
-     * @throws ClassNotFoundException If the interface class(es) cannot be loaded
-     */
-    public static LookupCache getLookupCache(ServiceBeanContext context, ClassLoader cl) throws IOException,
-                                                                                                ClassNotFoundException {
-        if(context == null)
-            throw new IllegalArgumentException("context is null");
-        LookupCachePool lcPool = LookupCachePool.getInstance();
-        return(lcPool.getLookupCache(context.getDiscoveryManagement(),
-                                     getServiceTemplate(context.getServiceElement(), cl)));
-    }
-
-    /**
-     * Get a LookupCache instance from service attributes in a
-     * ServiceBeanContext
-     *
-     * @param context A ServiceBeanContext
-     *
-     * @return A LookupCache instance from a pool of LookupCache instances based
-     *         on ServiceBeanContext attributes
-     *
-     * @throws IOException If the interface class(es) are not in the context ClassLoader.
-     * and the configured URLs pointing to the class(es) classpath are invalid.
-     * @throws ClassNotFoundException If the interface class(es) cannot be loaded
-     */
-    public static LookupCache getLookupCache(ServiceBeanContext context) throws ClassNotFoundException, IOException {
-        return(getLookupCache(context, null));
-    }
-
-    /**
      * Get the DiscoveryManagement instance
      * 
      * @return Returns the instance of DiscoveryManagement that was either
@@ -424,36 +291,6 @@ public class JiniClient {
      */
     public DiscoveryManagement getDiscoveryManager() {
         return discoverer;
-    }
-
-    /**
-     * Get all ServiceRegistrar instances that have been discovered
-     *
-     * @return An array of all discovered ServiceRegistrar instances
-     */
-    public ServiceRegistrar[] getRegistrars() {
-        return (getServiceRegistrars());
-    }
-
-    /**
-     * Add a Locator to discover. The method will construct a new LookupLocator
-     * object, set up to perform discovery to the given URL.
-     *
-     * <p>If a <code>DiscoveryManagement</code> is provided to JiniClient and
-     * does not implement the DiscoveryLocatorManagement interface, no action is
-     * taken
-     * <p>
-     * The URL in question must be of the form jini://host/ or jini://host:port/
-     * <br>
-     *
-     * @param locator The locator url to add
-     *
-     * @throws MalformedURLException the URL passed in could not be parsed
-     */
-    public void addLocator(String locator) throws MalformedURLException {
-        if(discoverer instanceof DiscoveryLocatorManagement)
-            ((DiscoveryLocatorManagement)discoverer).addLocators(
-                                  new LookupLocator[]{new LookupLocator(locator)});
     }
 
     /**
@@ -558,15 +395,6 @@ public class JiniClient {
     }
 
     /**
-     * Discard a ServiceRegistrar that had been previously discovered
-     *
-     * @param registrar The ServiceRegistrar to discard
-     */
-    public void discardRegistrar(ServiceRegistrar registrar) {
-        discoverer.discard(registrar);
-    }
-
-    /**
      * Stop this JiniClient and terminate discovery management. This method will
      * also terminate all ServiceCache instances that it has created
      */
@@ -574,17 +402,6 @@ public class JiniClient {
         if(createdDiscoverer)
             stopDiscoverer();
         regArray.clear();
-    }
-
-    /**
-     * Return an array of ServiceRegistrars that this client has discovered
-     *
-     * @return An array of discovered ServiceRegistrar instances
-     *
-     * @see net.jini.discovery.DiscoveryManagement#getRegistrars()
-     */
-    ServiceRegistrar[] getServiceRegistrars() {
-        return (discoverer.getRegistrars());
     }
 
     void stopDiscoverer() {
