@@ -78,7 +78,7 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
     private ComputeResource computeResource;
     private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
-    private Logger logger = LoggerFactory.getLogger(CONFIG_COMPONENT);
+    private Logger logger = LoggerFactory.getLogger(ServiceBeanExec.class);
 
     /**
      * Create a ServiceBeanExecutor launched from the ServiceStarter

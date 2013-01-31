@@ -58,8 +58,8 @@ import java.util.concurrent.TimeUnit;
 public class ComputeResource {
     /** Name to use when getting Configuration values and to get the Logger */
     static final String COMPONENT = "org.rioproject.system";
-    static Logger logger = LoggerFactory.getLogger(COMPONENT);
-    /**                                                              w
+    static Logger logger = LoggerFactory.getLogger(ComputeResource.class);
+    /**
      * A description of the <code>ComputeResource</code> 
      */
     private String description;
@@ -494,7 +494,7 @@ public class ComputeResource {
     public void stateChange() {
         if(initializing)
             return;
-        logger.debug("Notify listeners of a state change");
+        logger.trace("Notify listeners of a state change");
         notifyResourceCapabilityChangeListeners();
     }
 
