@@ -32,8 +32,7 @@ import java.rmi.RemoteException;
  */
 public abstract class EventNotificationAdapter implements RemoteEventListener {
     protected final ObjectName objectName;
-    protected final NotificationBroadcasterSupport
-        notificationBroadcasterSupport;
+    protected final NotificationBroadcasterSupport notificationBroadcasterSupport;
 
     /**
      * Creates an EventNotificationAdapter, initializing required properties
@@ -45,14 +44,12 @@ public abstract class EventNotificationAdapter implements RemoteEventListener {
      * @throws IllegalArgumentException if any of the constructor arguments are
      * <code>null</code>
      */
-    public EventNotificationAdapter(
-        ObjectName objectName,
-        NotificationBroadcasterSupport notificationBroadcasterSupport) {
+    public EventNotificationAdapter(final ObjectName objectName,
+                                    final NotificationBroadcasterSupport notificationBroadcasterSupport) {
         if(objectName==null)
             throw new IllegalArgumentException("objectName is null");
         if(notificationBroadcasterSupport == null)
-            throw new IllegalArgumentException("notificationBroadcasterSupport " +
-                                           "is null");
+            throw new IllegalArgumentException("notificationBroadcasterSupport is null");
         this.objectName = objectName;
         this.notificationBroadcasterSupport = notificationBroadcasterSupport;
     }
@@ -71,8 +68,7 @@ public abstract class EventNotificationAdapter implements RemoteEventListener {
      *
      * @see net.jini.core.event.RemoteEventListener#notify(net.jini.core.event.RemoteEvent)
      */
-    public abstract void notify(RemoteEvent theEvent)
-            throws UnknownEventException, RemoteException;
+    public abstract void notify(RemoteEvent theEvent) throws UnknownEventException, RemoteException;
 
     /**
      * Get the MBeanNotificationInfo for the transformed event

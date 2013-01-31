@@ -29,6 +29,7 @@ import org.rioproject.watch.WatchDataSourceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.NoSuchElementException;
@@ -51,7 +52,7 @@ public abstract class EventHandler {
     protected LeasedListManager resourceMgr;
     public static final String RESPONSE_WATCH = "Response Time - ";
     protected long t0, t1, sendTime;
-    static final Logger logger = LoggerFactory.getLogger("org.rioproject.event");
+    static final Logger logger = LoggerFactory.getLogger(EventHandler.class);
     /**
      * The sequence number is an increasing value that will act as a hint to the
      * number of occurrences of an event type. The sequence number should differ
@@ -68,9 +69,9 @@ public abstract class EventHandler {
      * 
      * @param descriptor EventDescriptor for the event to handle
      *
-     * @throws Exception If a landlord lease manager cannot be created
+     * @throws IOException If a landlord lease manager cannot be created
      */
-    public EventHandler(EventDescriptor descriptor) throws Exception {
+    public EventHandler(EventDescriptor descriptor) throws IOException {
         this(descriptor, net.jini.config.EmptyConfiguration.INSTANCE);
     }
 
@@ -83,10 +84,9 @@ public abstract class EventHandler {
      * @param descriptor EventDescriptor for the event to handle
      * @param config A Configuration object
      *
-     * @throws Exception If a landlord lease manager cannot be created
+     * @throws IOException If a landlord lease manager cannot be created
      */
-    public EventHandler(EventDescriptor descriptor, Configuration config)
-        throws Exception {
+    public EventHandler(EventDescriptor descriptor, Configuration config) throws IOException {
         if(descriptor == null)
             throw new IllegalArgumentException("descriptor is null");
         this.descriptor = descriptor;

@@ -28,6 +28,7 @@ import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.rmi.MarshalledObject;
 
@@ -41,7 +42,7 @@ import java.rmi.MarshalledObject;
 public class DynamicEventConsumer extends BasicEventConsumer {
     private ServiceDiscoveryManager sdm;
     private LookupCache lCache;
-    private static Logger logger = BasicEventConsumer.logger;
+    private static Logger logger = LoggerFactory.getLogger(DynamicEventConsumer.class);
 
     /**
      * Create a DynamicEventConsumer with an EventDescriptor

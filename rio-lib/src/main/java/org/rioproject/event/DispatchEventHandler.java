@@ -23,6 +23,7 @@ import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 
@@ -42,7 +43,7 @@ import static java.lang.String.format;
  * @author Dennis Reedy
  */
 public class DispatchEventHandler extends EventHandler {
-    static Logger logger = LoggerFactory.getLogger("org.rioproject.event");
+    static Logger logger = LoggerFactory.getLogger(DispatchEventHandler.class);
 
     /**
      * Construct a DispatchEventHandler with an EventDescriptor and default
@@ -50,9 +51,9 @@ public class DispatchEventHandler extends EventHandler {
      *
      * @param descriptor The EventDescriptor
      *
-     * @throws Exception If a landlord lease manager cannot be created
+     * @throws IOException If a landlord lease manager cannot be created
      */
-    public DispatchEventHandler(EventDescriptor descriptor) throws Exception {
+    public DispatchEventHandler(EventDescriptor descriptor) throws IOException {
         super(descriptor);
     }
 
@@ -63,10 +64,9 @@ public class DispatchEventHandler extends EventHandler {
      * @param descriptor The EventDescriptor
      * @param config The configuration object
      *
-     * @throws Exception If a landlord lease manager cannot be created
+     * @throws IOException If a landlord lease manager cannot be created
      */
-    public DispatchEventHandler(EventDescriptor descriptor, Configuration config)
-        throws Exception {
+    public DispatchEventHandler(EventDescriptor descriptor, Configuration config) throws IOException {
         super(descriptor, config);
     }
 

@@ -23,6 +23,7 @@ import org.rioproject.resources.servicecore.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 
@@ -45,7 +46,7 @@ import java.rmi.RemoteException;
  * @author Dennis Reedy
  */
 public class RoundRobinEventHandler extends EventHandler {
-    static Logger logger = LoggerFactory.getLogger("org.rioproject.event");
+    static Logger logger = LoggerFactory.getLogger(RoundRobinEventHandler.class);
 
     /**
      * Construct a RoundRobinEventHandler with an EventDescriptor and default
@@ -53,9 +54,9 @@ public class RoundRobinEventHandler extends EventHandler {
      *
      * @param descriptor The EventDescriptor
      *
-     * @throws Exception If a landlord lease manager cannot be created
+     * @throws IOException If a landlord lease manager cannot be created
      */
-    public RoundRobinEventHandler(final EventDescriptor descriptor) throws Exception {
+    public RoundRobinEventHandler(final EventDescriptor descriptor) throws IOException {
         this(descriptor, EmptyConfiguration.INSTANCE);
     }
 
@@ -66,9 +67,9 @@ public class RoundRobinEventHandler extends EventHandler {
      * @param descriptor The EventDescriptor
      * @param config The configuration object
      *
-     * @throws Exception If a landlord lease manager cannot be created
+     * @throws IOException If a landlord lease manager cannot be created
      */
-    public RoundRobinEventHandler(final EventDescriptor descriptor, Configuration config) throws Exception {
+    public RoundRobinEventHandler(final EventDescriptor descriptor, Configuration config) throws IOException {
         super(descriptor, config);
     }
 
