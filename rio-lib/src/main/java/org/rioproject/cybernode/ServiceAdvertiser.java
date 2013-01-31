@@ -85,12 +85,6 @@ public class ServiceAdvertiser {
                     controller.advertise();
                     /* Additional attributes are ignored here, they are obtained
                      * by the ServiceBeanAdmin.advertise() method */
-                    /*
-                    if(attrs.length>0) {
-                        JoinAdmin joinAdmin = (JoinAdmin)adminObject;
-                        addAttributes(attrs, joinAdmin);
-                    }
-                    */
                 } else if (adminObject instanceof JoinAdmin) {
                     Entry[] configuredAttributes = getConfiguredAttributes(componentName,
                                                                            config,
@@ -110,20 +104,22 @@ public class ServiceAdvertiser {
                         } else {
                             logger.warn("Unable to obtain the OperationalStringEntry for {}", serviceName);
                         }
-
-                        Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, proxyCL);
-                        if (hostEntry != null) {
-                            addList.add(hostEntry);
-                            logger.debug("Added Host [{}] for {}", ((Host)hostEntry).hostName, serviceName);
-                        } else {
-                            logger.warn("Unable to obtain the Host entry for {}", serviceName);
-                        }
                     } else {
                         logger.trace("OperationalString name is {}", (opStringName == null ? "[null]" : "[empty string]"));
                     }
+
+                    /* Next, try and add the net.jini.lookup.entry.Host */
+                    Entry hostEntry = loadEntry("net.jini.lookup.entry.Host", joinAdmin, hostAddress, proxyCL);
+                    if (hostEntry != null) {
+                        addList.add(hostEntry);
+                        logger.debug("Added Host [{}] for {}", ((Host)hostEntry).hostName, serviceName);
+                    } else {
+                        logger.warn("Unable to obtain the Host entry for {}", serviceName);
+                    }
+
                     /* Process the net.jini.lookup.entry.Name attribute */
                     try {
-                        Class nameClass = proxyCL.loadClass("net.jini.lookup.entry.Name");
+                        Class<?> nameClass = proxyCL.loadClass("net.jini.lookup.entry.Name");
                         Constructor cons = nameClass.getConstructor(String.class);
                         Entry name = (Entry) cons.newInstance(serviceName);
                         boolean add = true;
@@ -321,7 +317,7 @@ public class ServiceAdvertiser {
         Entry entry = null;
         try {
             boolean add = true;
-            Class entryClass = loader.loadClass(entryClassName);
+            Class<?> entryClass = loader.loadClass(entryClassName);
             Constructor cons = entryClass.getConstructor(String.class);
             Entry newEntry = (Entry)cons.newInstance(value);
             /* Check if the service already has the Entry, if it does perform
@@ -338,7 +334,7 @@ public class ServiceAdvertiser {
                 entry = newEntry;
 
         } catch(Exception e) {
-            logger.warn("{} not found, cannot add {}"+entryClassName, entryClassName.toLowerCase(), e);
+            logger.warn("{} not found, cannot add {}", entryClassName, entryClassName.toLowerCase(), e);
         }
         return(entry);
     }
