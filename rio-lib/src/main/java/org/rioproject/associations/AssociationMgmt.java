@@ -132,7 +132,7 @@ public class AssociationMgmt implements AssociationManagement {
     /**
      * The Logger.
      */
-    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.associations");
+    private static final Logger logger = LoggerFactory.getLogger(AssociationMgmt.class);
     /**
      * Configuration component attribute
      */
@@ -704,16 +704,15 @@ public class AssociationMgmt implements AssociationManagement {
                 if(context!=null) {
                     Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
                     if(!configParms.containsKey(Constants.STARTING)) {
-                        logger.info("Advertising service [{}]", clientName);
                         advertise();
                     } else {
-                        logger.info("[{}] is still starting, do not advertise", clientName);
+                        logger.debug("[{}] is still starting, do not advertise", clientName);
                         context.getServiceElement().setAutoAdvertise(true);
                         advertisePending.set(true);
                     }
                 } else {
                     logger.debug("AssociationManagement created without ServiceBeanContext, unable to verify service {} " +
-                                "lifecycle. Proceeding with service advertisement", clientName);
+                                 "lifecycle. Proceeding with service advertisement", clientName);
                     advertise();
                 }
             } else if((requiredAssociations.size() < numRequires.get()) && advertised.get())
@@ -759,10 +758,10 @@ public class AssociationMgmt implements AssociationManagement {
     private synchronized void advertise() {
         try {
             if(control != null && !advertised.get()) {
+                logger.info("Advertise Service: {}", clientName);
                 control.advertise();
                 advertised.set(true);
                 advertisePending.set(false);
-                logger.debug("Advertise Service: {}", clientName);
             } else {
                 advertisePending.set(true);
                 logger.debug("Service [{}] advertisement pending, ServiceBeanControl is null", clientName);

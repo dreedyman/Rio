@@ -70,7 +70,7 @@ public class ServiceBeanExecManager {
     private int forkedServiceWaitTime = 60; // number of seconds
     private static final String CONFIG_COMPONENT = "service.load";
     private static final String COMPONENT = "org.rioproject.cybernode";
-    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceBeanExecManager.class);
 
     public ServiceBeanExecManager(final ServiceElement sElem,
                                   final ServiceBeanContainer container) {
@@ -130,7 +130,7 @@ public class ServiceBeanExecManager {
                                              logDir));
         inputArgsBuilder.append(getMainClass());
         String serviceBeanExecStarter = getStarterConfig(rioHome);
-        logger.debug("Using service bean exec starter: {}", serviceBeanExecStarter);
+        logger.trace("Using service bean exec starter: {}", serviceBeanExecStarter);
         inputArgsBuilder.append(serviceBeanExecStarter);
 
         exDesc.setInputArgs(inputArgsBuilder.toString());

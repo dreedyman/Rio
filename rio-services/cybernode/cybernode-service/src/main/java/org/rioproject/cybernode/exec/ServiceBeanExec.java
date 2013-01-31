@@ -209,7 +209,8 @@ public class ServiceBeanExec implements ServiceBeanExecutor,
                 slaThresholdEventHandler = result.getBeanAdapter().getSLAEventHandler();
             } else {
                 String className = result.getImpl()==null?"<NO IMPLEMENTATION>":result.getImpl().getClass().getName();
-                logger.warn("Unable to create ComputeResourcePolicyHandler, unknown service class {}", className);
+                logger.warn("SLAThresholdEvent notifications from this forked service are not enabled, service class does not provide support for Rio event registration {}.",
+                            className);
             }
         }
         if(slaThresholdEventHandler!=null) {
