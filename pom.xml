@@ -84,7 +84,7 @@
                             <breakiterator>true</breakiterator>
                             <top><![CDATA[<h2>Rio Project ${project.version} API Documentation</h2>]]></top>
                             <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
-                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.cybernode.ui:org.rioproject.monitor.ui:org.rioproject.tools.ui:org.rioproject.tools.discovery:org.rioproject.tools.maven:org.rioproject.ui:org.rioproject.tools.harvest:org.rioproject.resolver.maven2:org.rioproject.resolver.aether</excludePackageNames>
+                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.resources.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.test</excludePackageNames>
                         </configuration>
                         <reports>
                             <report>aggregate</report>
