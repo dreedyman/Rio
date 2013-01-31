@@ -30,6 +30,13 @@ class GroovyConfig implements Configuration {
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
 
+    @SuppressWarnings("unused")
+    GroovyConfig(String gFile) {
+        File f = new File(gFile)
+        GroovyClassLoader gcl = new GroovyClassLoader(getClass().getClassLoader())
+        parseAndLoad(new GroovyCodeSource(f), gcl)
+    }
+
     /**
      * Constructor required for Jini Configuration
      */
