@@ -107,12 +107,17 @@ class OpStringParserHelper {
     AssociationDescriptor createAssociationDescriptor(Map attributes, opStringName) {
         AssociationDescriptor association = new AssociationDescriptor(AssociationType.valueOf(attributes.type.toUpperCase()),
                                                                       attributes.name,
-                                                                      opStringName,
-                                                                      attributes.property)
+                                                                      /*opStringName,
+                                                                      attributes.property*/)
         boolean matchOnName = attributes.matchOnName == null? true: (attributes.matchOnName? true : false)
         association.matchOnName = matchOnName
-        if (attributes.serviceType)
+        /* If the association declares a service interface there is no need to use the operational string name */
+        if (attributes.serviceType) {
             association.interfaceNames = [attributes.serviceType]
+        } else {
+            association.operationalStringName = opStringName
+        }
+        association.propertyName = attributes.property
         attributes.put("association", association)
         association
     }

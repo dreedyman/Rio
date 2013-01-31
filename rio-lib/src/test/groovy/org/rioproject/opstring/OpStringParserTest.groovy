@@ -15,6 +15,7 @@
  */
 package org.rioproject.opstring
 
+import org.rioproject.associations.AssociationDescriptor
 import org.rioproject.associations.AssociationType
 import org.rioproject.deploy.StagedSoftware
 
@@ -41,6 +42,16 @@ import org.rioproject.system.SystemWatchID
 class OpStringParserTest extends GroovyTestCase {
     def OpStringParser dslParser = new GroovyDSLOpStringParser()
 
+    void testAssociationWithNoOpStringFiltering() {
+        File file = new File("src/test/resources/opstrings/monitorAssociation.groovy")
+        def opstrings = dslParser.parse(file, null, null, null, null)
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = opstrings[0]
+        ServiceElement serviceElement = opstring.services[0]
+        assertEquals 1, serviceElement.associationDescriptors.length
+        AssociationDescriptor associationDescriptor = serviceElement.getAssociationDescriptors()[0]
+        assertTrue associationDescriptor.operationalStringName==null
+    }
     void testRangeParsing() {
         File file = new File("src/test/resources/opstrings/servicebeanRange.groovy")
         def opstrings = dslParser.parse(file, null, null, null, null)

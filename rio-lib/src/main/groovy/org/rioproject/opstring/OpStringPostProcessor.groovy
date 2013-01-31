@@ -62,7 +62,7 @@ class OpStringPostProcessor {
                     throw new IllegalArgumentException("Invalid AssociationDescriptor : A service cannot have an association to itself")
 
                 /* Check to see if an association has been declared with no opstring name, that an interface
-                 * id declared. This will allow service discovery to occur. */
+                 * is declared. This will allow service discovery to occur. */
                 String assocOpStringName = associationDescriptor.operationalStringName
                 if (assocOpStringName == null) {
                     if (associationDescriptor.interfaceNames.length == 0)
@@ -85,7 +85,7 @@ class OpStringPostProcessor {
 
                 if (assocOpStringName && !(assocOpStringName == opString.name)) {
                     if (opString.containsOperationalString(assocOpStringName)) {
-                        OpString op = opString.getNestedOperationalString(assocOpStringName)
+                        OpString op = opString.getNestedOperationalString(assocOpStringName) as OpString
                         def sElem1 = op.getNamedService(associatedName)
                         if (sElem1 == null)
                             throw new IllegalArgumentException("Associated service [$associatedName] not in [$assocOpStringName] OperationalString")
