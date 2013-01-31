@@ -32,7 +32,7 @@ import org.rioproject.resolver.aether.AetherService
 import org.rioproject.resolver.aether.ProjectWorkspaceReader
 
 /**
- * Resolves artifacts from within (or among) a project (module)
+ * Resolves artifacts from within (or among) a project (module).
  */
 class ProjectModuleResolver extends AetherResolver {
 
