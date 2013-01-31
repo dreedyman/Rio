@@ -25,9 +25,9 @@
                 downloaded properly.
             </p>
 
-            <h2>Download Rio 5.0 M1</h2>
+            <h2>Download Rio 5.0 M2</h2>
             <p>
-                Rio 5.0 M1 is the first milestone delivery for Rio 5.0. is a recommended update.
+                Rio 5.0 M2 is the second milestone delivery for Rio 5.0. is a recommended update.
             </p>
             <table>
                 <tbody>
@@ -39,7 +39,7 @@
                         <th>Date</th>
                     </tr>
                     <tr>
-                        <td>Rio 5.0 M1 (zip)</td>
+                        <td>Rio 5.0 M2 (zip)</td>
                         <td><a href="http://www.rio-project.org/releases/rio-5.0-M2.zip">Download</a></td>
                         <td>23 MB</td>
                         <td><a href="http://www.rio-project.org/releases/rio-5.0-M2.zip.md5">MD5</a></td>
@@ -54,7 +54,7 @@
                 The Rio Installer is a Java installer that installs Rio, and
                 allows to select which parts you'd like to install. For Windows users,
                 it also adds some useful shortcuts in the Windows menu.
-                <a href="http://www.rio-project.org/releases/rio-5.0-M2-installer.jar">Download Rio 5.0 M1 using the installer</a>
+                <a href="http://www.rio-project.org/releases/rio-5.0-M2-installer.jar">Download Rio 5.0 M2 using the installer</a>
             </p>
 
             <h2>Previous Releases</h2>
@@ -67,6 +67,13 @@
                         <th>Size</th>
                         <th>Signature</th>
                         <th>Date</th>
+                    </tr>
+                    <tr>
+                        <td>Rio 5.0-M1 (zip)</td>
+                        <td><a href="http://www.rio-project.org/releases/rio-5.0-M1.zip">Download</a></td>
+                        <td>18 MB</td>
+                        <td><a href="http://www.rio-project.org/releases/rio-5.0-M1.zip.md5">MD5</a></td>
+                        <td align="center">12/2010</td>
                     </tr>
                     <tr>
                         <td>Rio 4.2 (zip)</td>
