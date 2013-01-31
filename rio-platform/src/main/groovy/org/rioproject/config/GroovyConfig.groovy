@@ -86,7 +86,7 @@ class GroovyConfig implements Configuration {
                         if (groovyFile.exists()) {
                             groovyCodeSource = new GroovyCodeSource(groovyFile)
                         } else {
-                            groovyCodeSource = new GroovyCodeSource((String)groovySource, "", "groovy/script")
+                            groovyCodeSource = new GroovyCodeSource((String)groovySource, "DynamicGroovyConfig", "groovy/script")
                         }
                     }
                 }

@@ -76,7 +76,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
             sourceLocation = ((File)source).toURI().toURL()
             groovyCodeSource = new GroovyCodeSource((File)source)
         } else if (source instanceof String) {
-            groovyCodeSource = new GroovyCodeSource((String)source, "", "groovy/script")
+            groovyCodeSource = new GroovyCodeSource((String)source, "DynamicOpstring", "groovy/script")
         } else {
             throw new DSLException("Unrecognized source "+source)
         }
@@ -579,7 +579,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 }
 
                 def location = null
-                //File tempResolvedOpString = null
+                def resolvedAsOAR = false
                 if(opStringRef.indexOf(":")!=-1) {
                     Resolver r = ResolverHelper.getResolver()
                     URL u = r.getLocation(opStringRef, "oar")
@@ -600,10 +600,11 @@ class GroovyDSLOpStringParser implements OpStringParser {
                     String contents = oarJar.getInputStream(entry).text
                     location = contents
                     resolved = true
+                    resolvedAsOAR = true
                 }
 
                 if (resolved) {
-                    if (source instanceof File) {
+                    if (!resolvedAsOAR && source instanceof File) {
                         location = new File(((File)source).parentFile, opStringRef)
                     }
                 } else {
