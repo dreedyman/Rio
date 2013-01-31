@@ -1014,6 +1014,7 @@ public class AssociationMgmt implements AssociationManagement {
                     logger.trace("Association [{}]  ProxyPreparer : {}",
                                  aDesc.getName(), proxyPreparer.getClass().getName());
                     template = JiniClient.getServiceTemplate(aDesc, callerCL);
+                    logger.trace("Created ServiceTemplate {}", template.toString());
                     LookupCachePool lcPool = LookupCachePool.getInstance();
                     String sharedName = aDesc.getOperationalStringName();
 
@@ -1029,7 +1030,9 @@ public class AssociationMgmt implements AssociationManagement {
             } catch(IOException e) {
                 logger.warn("Creating an AssociationHandler", e);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                logger.error("Creating an AssociationHandler", e);
+            } catch(Throwable t) {
+                logger.error("Creating an AssociationHandler", t);
             }
         }
 

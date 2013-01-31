@@ -19,6 +19,8 @@ import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.ServiceItemFilter;
 import org.rioproject.entry.OperationalStringEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 
@@ -29,6 +31,7 @@ import java.lang.reflect.Field;
  */
 public class OpStringFilter implements ServiceItemFilter {
     private String opStringName;
+    private static final Logger logger = LoggerFactory.getLogger(OpStringFilter.class);
     /**
      * Create an OpStringFilter
      * 
@@ -73,32 +76,37 @@ public class OpStringFilter implements ServiceItemFilter {
      */
     public static boolean matches(Entry[] attrs, String opStringName) {
         boolean matched = false;
-        for(int x=0; x < attrs.length; x++) {
-            if(attrs[x].getClass().getName().equals(
-                                       OperationalStringEntry.class.getName())) {                                               
-                if(attrs[x] instanceof OperationalStringEntry) {
-                    OperationalStringEntry oe = (OperationalStringEntry)attrs[x];
-                    if(oe.name.equals(opStringName)) {
+        for (Entry attr : attrs) {
+            if (attr.getClass().getName().equals(OperationalStringEntry.class.getName())) {
+                if (attr instanceof OperationalStringEntry) {
+                    OperationalStringEntry oe = (OperationalStringEntry) attr;
+                    if (oe.name.equals(opStringName)) {
+                        logger.trace("Matched required {} with value of {}", oe.name, opStringName);
                         matched = true;
                         break;
+                    } else {
+                        logger.trace("Did not match required {} with value of {}", oe.name, opStringName);
                     }
                 } else {
                     /*
                      * This addresses the issue where the discovered service
                      * has an OperationalStringEntry but there is a class loading
                      * problem, which results in the classes being loaded by sibling
-                     * class loaders, and assignability doesnt work.
+                     * class loaders, and assignment does not work.
                      */
                     OperationalStringEntry oe = new OperationalStringEntry();
                     try {
-                        Field name = attrs[x].getClass().getDeclaredField("name");                
-                        oe.name = (String)name.get(attrs[x]);
-                        if(oe.name.equals(opStringName)) {
+                        Field name = attr.getClass().getDeclaredField("name");
+                        oe.name = (String) name.get(attr);
+                        if (oe.name.equals(opStringName)) {
+                            logger.trace("Reflective matching: Matched required {} with value of {}", oe.name, opStringName);
                             matched = true;
                             break;
+                        } else {
+                            logger.trace("Reflective matching: Did not match required {} with value of {}", oe.name, opStringName);
                         }
-                    } catch(Exception e) {
-                        e.printStackTrace();                    
+                    } catch (Exception e) {
+                        logger.warn("Could not obtain {}", OperationalStringEntry.class.getName(), e);
                     }
                 }
             }

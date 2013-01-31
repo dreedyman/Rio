@@ -273,10 +273,7 @@ public class JiniClient {
         }
 
         if(aDesc.matchOnName())
-            template = new ServiceTemplate(null,
-                                           interfaces,
-                                           new Entry[]{new Name(
-                                               aDesc.getName())});
+            template = new ServiceTemplate(null, interfaces, new Entry[]{new Name(aDesc.getName())});
         else
             template = new ServiceTemplate(null, interfaces, null);
         return (template);
