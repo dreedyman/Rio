@@ -24,9 +24,6 @@ import java.io.PrintStream;
  * system out and system error to the name of the service log file. If Java Util Logging being used, and a console is
  * not available, remove any {@link java.util.logging.ConsoleHandler}s.
  * <p/>
- * <p>The resulting {@code service}.out and {@code service}.err will be stored in the location declared by the
- * {@code RIO_LOG_DIR} system property.
- * </p>
  *
  * @author Dennis Reedy
  */
