@@ -9,26 +9,6 @@
     </head>
     <body>
         <section name="Overview">
-
-            <!--<div>
-                <div id="downloadbox">
-                    <p>
-                        <a href="download.html">
-                            <img valign="top" align="right" src="images/download.png" border="0" alt="" title="download"/><br/>
-                            Download </a> Rio 5.0 M1
-                    </p>
-                    <br/>
-
-                </div>
-                <div id="emptyrightbox">
-                    <p>
-                        <a href="http://www.apache.org/licenses/LICENSE-2.0.html">
-                            <img src="images/license_asl.png" height="50px"/>
-                        </a>
-                    </p>
-                </div>
-            </div>-->
-            
             <div>
                 <p> Rio is an open source technology that provides a dynamic
                     architecture for developing, deploying and managing
