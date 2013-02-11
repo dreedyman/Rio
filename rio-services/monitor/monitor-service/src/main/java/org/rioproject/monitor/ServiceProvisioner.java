@@ -322,9 +322,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             preparedResource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
         ServiceResource[] svcResources = selector.getServiceResources();
         if(svcResources.length == 0) {
-            logger.warn("Force removal of all Leases, we have no registered Cybernodes");
+            logger.warn("{} is updating resource information, but we don't have any registered Cybernodes. " +
+                        "Force removal of all Leases", resource.getName());
             landlord.removeAll();
-            throw new UnknownLeaseException("Empty Collection, no leases");
+            throw new UnknownLeaseException("Update failed, there are no known leases.");
         }
         boolean updated = false;
 
@@ -362,10 +363,8 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         }
 
         if(!updated) {
-            logger.warn("No matching registration found for {}", resource.getName());
-            throw new UnknownLeaseException("No matching registration found for Cybernode");
-        } else {
-
+            logger.warn("Update failed, no matching registration found for {}", resource.getName());
+            throw new UnknownLeaseException("Update failed, no matching registration found");
         }
     }
 
