@@ -17,6 +17,8 @@
 package org.rioproject.watch;
 
 import net.jini.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A CounterWatch provides a mechanism to count a monotonically increasing
@@ -24,6 +26,7 @@ import net.jini.config.Configuration;
  */
 public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
     public static final String VIEW = "org.rioproject.watch.CounterCalculableView";
+    private final Logger logger = LoggerFactory.getLogger(CounterWatch.class);
 
     /**
      * Create a new Counter Watch
@@ -70,9 +73,7 @@ public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
      * @see org.rioproject.watch.CounterWatchMBean#setCounter(long)
      */
     public void setCounter(long counter) {
-        addWatchRecord(new Calculable(id,
-                                      (double)counter,
-                                      System.currentTimeMillis()));
+        addWatchRecord(new Calculable(id, (double)counter, System.currentTimeMillis()));
     }
 
     /**

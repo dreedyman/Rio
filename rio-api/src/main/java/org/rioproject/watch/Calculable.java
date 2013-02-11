@@ -34,7 +34,7 @@ public class Calculable implements Serializable {
      * recorded
      */
     private long when;
-    /** Holds Optional detail about the metric*/
+    /** Holds Optional detail about the metric */
     private String detail;
 
     /**

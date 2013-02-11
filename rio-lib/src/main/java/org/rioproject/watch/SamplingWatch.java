@@ -96,15 +96,14 @@ public class SamplingWatch extends PeriodicWatch {
                 metric = (Calculable)value;
             } else {
                 Double d = new Double(value.toString());
-                metric = new Calculable(getId(),
-                                        d,
-                                        System.currentTimeMillis());
+                metric = new Calculable(getId(), d, System.currentTimeMillis());
             }
+            logger.debug("id: [{}], value: [{}]", getId(), metric.getValue());
             addWatchRecord(metric);
             
         } catch(Throwable t) {
-            logger.warn("SamplingWatch ["+getId()+"], Invoking ["+accessor.getReturnType().getName()+"="+accessor.getName()+"()]",
-                       t);
+            logger.warn("SamplingWatch [{}], Invoking [{}={}()]",
+                        getId(), accessor.getReturnType().getName(), accessor.getName(), t);
         }
     }
 

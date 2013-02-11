@@ -127,8 +127,8 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
                     logger.warn("Setting ThresholdValues for a remote WatchDataSource", e);
                 }
             } else {
-                logger.warn(String.format("%s No WatchDataSource set for watch, unable to apply threshold values: %s",
-                                          getId(), tValues));
+                logger.warn("{} No WatchDataSource set for watch, unable to apply threshold values: {}",
+                            getId(), tValues);
             }
         }
     }
@@ -176,18 +176,18 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      * @see org.rioproject.watch.ThresholdWatchMBean#setCurrentHighThreshold
      */
     public void setCurrentHighThreshold(final double threshold) {
-        ThresholdValues tVals = getThresholdValues();
-        tVals.setCurrentHighThreshold(threshold);
-        thresholdManager.setThresholdValues(tVals);
+        ThresholdValues thresholdValues = getThresholdValues();
+        thresholdValues.setCurrentHighThreshold(threshold);
+        thresholdManager.setThresholdValues(thresholdValues);
     }
 
     /**
      * @see org.rioproject.watch.ThresholdWatchMBean#setCurrentLowThreshold
      */
     public void setCurrentLowThreshold(final double threshold) {
-        ThresholdValues tVals = getThresholdValues();
-        tVals.setCurrentLowThreshold(threshold);
-        thresholdManager.setThresholdValues(tVals);
+        ThresholdValues thresholdValues = getThresholdValues();
+        thresholdValues.setCurrentLowThreshold(threshold);
+        thresholdManager.setThresholdValues(thresholdValues);
     }
 
     /**

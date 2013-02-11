@@ -148,7 +148,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     /** Component for accessing configuration and getting a Logger */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A suitable Logger */
-    protected static Logger logger = LoggerFactory.getLogger(WatchDataSourceImpl.class.getName());
+    protected static Logger logger = LoggerFactory.getLogger(WatchDataSourceImpl.class);
     private final List<WatchDataReplicator> replicators = new ArrayList<WatchDataReplicator>();
 
     /**
@@ -195,8 +195,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
                                                 1,
                                                 MAX_COLLECTION_SIZE);
         } catch(ConfigurationException e) {
-            if(logger.isTraceEnabled())
-                logger.trace("Getting WatchDataSource collection size", e);
+            logger.trace("Getting WatchDataSource collection size", e);
             collectionSize = DEFAULT_COLLECTION_SIZE;
         }
         logger.trace("Watch [{}] history collection size={}", id, collectionSize);

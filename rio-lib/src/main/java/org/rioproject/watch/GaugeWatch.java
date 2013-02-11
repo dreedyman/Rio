@@ -17,12 +17,15 @@
 package org.rioproject.watch;
 
 import net.jini.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A GaugeWatch provides a mechanism to record values that can go up and down,
  * and can be positive or negative.
  */
 public class GaugeWatch extends ThresholdWatch {
+    private final Logger logger = LoggerFactory.getLogger(GaugeWatch.class);
     /**
      * Create a new GaugeWatch
      * 
@@ -60,9 +63,21 @@ public class GaugeWatch extends ThresholdWatch {
      * @param value New value
      */
     public void addValue(long value) {
-        addWatchRecord(new Calculable(id,
-                                      (double)value,
-                                      System.currentTimeMillis()));
+        logger.debug("id: [{}], value: [{}]", getId(), value);
+        addWatchRecord(new Calculable(id, (double)value, System.currentTimeMillis()));
+    }
+
+    /**
+     * Add a value
+     *
+     * @param value New value.
+     * @param detail Detail about the metric.
+     */
+    public void addValue(long value, String detail) {
+        logger.debug("id: [{}], value: [{}], detail: [{}]", getId(), value, detail);
+        Calculable calculable = new Calculable(id, (double)value, System.currentTimeMillis());
+        calculable.setDetail(detail);
+        addWatchRecord(calculable);
     }
     
     /**
@@ -71,8 +86,20 @@ public class GaugeWatch extends ThresholdWatch {
      * @param value New value
      */
     public void addValue(double value) {
-        addWatchRecord(new Calculable(id,
-                                      value,
-                                      System.currentTimeMillis()));
+        logger.debug("id: [{}], value: [{}]", getId(), value);
+        addWatchRecord(new Calculable(id, value, System.currentTimeMillis()));
+    }
+
+    /**
+     * Add a value
+     *
+     * @param value New value.
+     * @param detail Detail about the metric.
+     */
+    public void addValue(double value, String detail) {
+        logger.debug("id: [{}], value: [{}], detail: [{}]", getId(), value, detail);
+        Calculable calculable = new Calculable(id, value, System.currentTimeMillis());
+        calculable.setDetail(detail);
+        addWatchRecord(calculable);
     }
 }

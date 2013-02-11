@@ -86,7 +86,7 @@ public class Watch implements WatchMBean {
             doSetWatchDataSource(wds);
 
         } catch(Throwable t) {
-            logger.warn("Creating WatchDataSourceImpl for Watch [" + id + "]", t);
+            logger.warn("Creating WatchDataSourceImpl for Watch [{}]", id, t);
         }
     }
 
@@ -124,8 +124,7 @@ public class Watch implements WatchMBean {
      */
     public void setWatchDataSource(WatchDataSource wds) {
         if(wds == null) {
-            if(logger.isTraceEnabled())
-                logger.trace("WatchDataSource is null for Watch={}", id);
+            logger.trace("WatchDataSource is null for Watch={}", id);
             return;
         }
         doSetWatchDataSource(wds);
@@ -188,7 +187,7 @@ public class Watch implements WatchMBean {
                 try {
                     watchDataSource.setView(viewClass);
                 } catch(RemoteException e) {
-                    logger.warn("Setting View class for Watch ["+getId()+"]", e);
+                    logger.warn("Setting View class for Watch [{}]", getId(), e);
                 }
             } else {
                 logger.warn("WatchDataSource is null for Watch {}", getId());
@@ -331,29 +330,5 @@ public class Watch implements WatchMBean {
      */
     public String toString() {
         return (id == null ? "null" : id);
-    }
-
-    // unit test
-    public static void main(String[] args) {
-        try {
-            Watch w = new Watch("Test");
-            w.addWatchRecord(new Calculable("test", 5.4));
-            w.addWatchRecord(new Calculable("test1", 1.1));
-            w.addWatchRecord(new Calculable("test2", 2.2));
-            w.addWatchRecord(new Calculable("test", 3.2));
-            w.addWatchRecord(new Calculable("test", 2.1));
-            Thread.sleep(1000);
-            System.out.println("Main: Ready to Interrupt");
-            System.out.flush();
-            Calculable c[] = w.getWatchDataSource().getCalculable();
-            for(int i = 0; i < c.length; i++)
-                System.out.println(i + "). " + c[i]);
-            System.out.flush();
-
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        System.out.flush();
-        System.exit(0);
     }
 }
