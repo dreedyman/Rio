@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document>
     <properties>
-        <title>Welcome to the Rio Project</title>
+        <title>Rio Dynamic Distributed Services</title>
         <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
     </properties>
     <head>
         <meta name="keywords" content="cloud computing, cloud, dynamic, distributed services, dennis reedy"/>
     </head>
     <body>
-        <section name="Welcome to the Rio Project">
+        <section name="Overview">
 
-            <div>
+            <!--<div>
                 <div id="downloadbox">
                     <p>
                         <a href="download.html">
                             <img valign="top" align="right" src="images/download.png" border="0" alt="" title="download"/><br/>
-                            Download </a> Rio 5.0 M2
+                            Download </a> Rio 5.0 M1
                     </p>
                     <br/>
 
@@ -27,7 +27,7 @@
                         </a>
                     </p>
                 </div>
-            </div>
+            </div>-->
             
             <div>
                 <p> Rio is an open source technology that provides a dynamic
@@ -42,7 +42,8 @@
                 </p>
                 <p>Developing services for use with Rio is simple. Rio provides
                     a non-intrusive model that removes the complexity surrounding
-                    service development and deployment.
+                    service development and deployment. Build your services using Maven and
+                    deploy using service artifacts.
                 </p>
 
                 <p>Key features include:
@@ -61,15 +62,12 @@
                         <li>Spring</li>
                         <li>Maven based artifact resolution</li>
                     </ul>
-                    <li><font color="blue">NEW</font> Integration with
-                         Drools for rules based SLA Management</li>
+                    <li><font color="blue">NEW</font> Integration with Drools for rules based SLA Management</li>
                 </ul>
             </div>
+        </section>
 
-
-
-        <h2>Tutorials</h2>
-
+        <section name="Tutorials">
             <ul>
                 <li><a href="tutorial/service/service-intro.html">Service tutorial</a> <br/>
                     Learn how to create a project, develop and run a service in just a few minutes.
@@ -88,6 +86,7 @@
             </ul>
 
         </section>
+
         <section name="Get Involved">
             <p> Feedback Welcome! Send email to the <a href="mailto:rio-users@googlegroups.com">users list</a>,
                 or join the  <a href="http://groups.google.com/group/rio-users">mailing list</a>

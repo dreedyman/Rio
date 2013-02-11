@@ -232,37 +232,51 @@ public void testSomethingThatTakesALongTime() {
             </div>
 <pre name="code" class="java:nocontrols">
 manager {
-    execClassPath =
-        '${RIO_HOME}${/}lib${/}boot.jar${:}${RIO_HOME}${/}lib/${/}start.jar${:}${JAVA_HOME}${/}lib${/}tools.jar${:}${RIO_HOME}${/}lib${/}groovy-all.jar'
+
+    String rioHome = System.getProperty("RIO_HOME")
+    StringBuilder classPath = new StringBuilder()
+    ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
+    if(classPath.length()>0)
+    classPath.append(File.pathSeparator)
+    classPath.append(rioHome+'/lib/'+jar)
+    }
+
+    classPath.append(File.pathSeparator).append(System.getProperty("JAVA_HOME")).append("/lib/tools.jar")
+    execClassPath = classPath.toString()
 
     inheritOptions = true
 
-    jvmOptions = '''
-        -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts
-        -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
-        -DRIO_HOME=${RIO_HOME} -Dorg.rioproject.groups=${org.rioproject.groups}'''
-
-    mainClass = 'com.sun.jini.start.ServiceStarter'
-
-    /* The ${service} token will be replaced by the name of the starter file.
-     * For start-reggie the service name will be reggie, for start-monitor the
-     * service name will be monitor, etc ... */
-    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                                       System.getProperty('user.name'))
-    String logDir = '/tmp/logs/rio/'
+    /* Get the directory that the logging FileHandler will create the service log.  */
+    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
     String opSys = System.getProperty('os.name')
-    if(opSys.startsWith("Windows"))
-        logDir = '${java.io.tmpdir}/logs/rio/'
-    log = logDir + logExt + '/${service}.log'
+    String rootLogDir = opSys.startsWith("Windows")?'${java.io.tmpdir}':'/tmp'
+    String name = System.getProperty('user.name')
+
+    log = "${rootLogDir}/${name}/logs/${logExt}/"
+
+    jvmOptions = '''
+    -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
+    -Djava.protocol.handler.pkgs=org.rioproject.url
+    -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs
+    -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}rio.policy
+    -DRIO_HOME=${RIO_HOME} -DRIO_TEST_ATTACH
+    -Dorg.rioproject.groups=${org.rioproject.groups}
+    -Dorg.rioproject.service=${service}'''
 
     /*
     * Remove any previously created service log files
     */
     cleanLogs = true
 
+    mainClass = 'org.rioproject.start.ServiceStarter'
+
     monitorStarter = '${RIO_HOME}/config/start-monitor.groovy'
+
     cybernodeStarter = '${RIO_HOME}/config/start-cybernode.groovy'
-}
+    }
+
+
+
 </pre>
             <p>
                 The configuration file can be overridden by setting the following system property:

@@ -1,47 +1,128 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="Rio">
+<project name="Rio"
+         xmlns="http://maven.apache.org/DECORATION/1.3.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd">
 
     <bannerLeft>
-		<name>Rio</name>
-		<href>http://www.rio-project.org/</href>
-        <src>images/rio.png</src>
+        <!--<name>Rio</name>
+        <href>http://www.rio-project.org/</href>
+        <src>images/rio.png</src>-->
+        <!-- Rio Dynamic Distributed Services, but with "Rio" highlighted -->
+        <name><![CDATA[
+          <font color="#3232A0"">Rio</font> Dynamic Distributed Services
+        ]]>
+        </name>
+        <href>http://www.rio-project.org/</href>
 	</bannerLeft>
 
-    <bannerRight>
-        <name>GitHub</name>
-        <src>images/forkme_right_gray.png</src>
-        <href>https://github.com/dreedyman/Rio</href>
-    </bannerRight>
+    <publishDate position="bottom" format="yyyy-MM-dd" />
+    <version position="bottom" />
 
+    <custom>
+        <reflowSkin>
+            <!-- Make this to 'false' for local development, i.e. file:// URLs -->
+            <protocolRelativeURLs>false</protocolRelativeURLs>
+            <smoothScroll>true</smoothScroll>
+            <navbarInverse>true</navbarInverse>
+            <skinAttribution>false</skinAttribution>
+
+            <theme>default</theme>
+            <highlightJs>true</highlightJs>
+            <highlightJsTheme>github</highlightJsTheme>
+
+            <slogan>Dynamic architecture for developing, deploying and managing distributed systems composed of Java services</slogan>
+            <titleTemplate>%2$s | %1$s</titleTemplate>
+            <toc>left</toc>
+            <tocTopMax>6</tocTopMax>
+
+            <!-- Include the documentation, developers, examples and contribute in the top navigation (in addition to links) -->
+            <topNav>Documentation|Developers|Examples|Contribute</topNav>
+
+            <bottomNav>
+                <column>Main</column>
+                <column>Download</column>
+                <column>Support</column>
+            </bottomNav>
+
+            <pages>
+                <index prohect="rio-parent">
+                    <!-- Override the title -->
+                    <titleTemplate>Rio | Dynamic Distributed Services</titleTemplate>
+                    <!-- no breadcrumbs on the main index page -->
+                    <breadcrumbs>false</breadcrumbs>
+                    <!-- no ToC on the main index page -->
+                    <toc>false</toc>
+                    <markPageHeader>false</markPageHeader>
+                    <sections>
+                        <!--<carousel />
+                       <thumbs>2</thumbs>-->
+                        <columns>2</columns>
+                        <body />
+                    </sections>
+                </index>
+
+                <contribute>
+                    <breadcrumbs>false</breadcrumbs>
+                </contribute>
+
+                <!-- Disable source highlighting for Maven reports -->
+                <source-repository>
+                    <highlightJs>false</highlightJs>
+                </source-repository>
+
+                <issue-tracking>
+                    <highlightJs>false</highlightJs>
+                    <toc>false</toc>
+                </issue-tracking>
+
+                <license>
+                    <highlightJs>false</highlightJs>
+                    <toc>false</toc>
+                </license>
+
+                <!-- Disable ToC for some Maven reports -->
+                <project-info>
+                    <toc>false</toc>
+                </project-info>
+
+            </pages>
+        </reflowSkin>
+    </custom>
     <skin>
-		<groupId>org.rioproject</groupId>
+        <!--<groupId>org.rioproject</groupId>
 		<artifactId>rio-maven-skin</artifactId>
-		<version>1.0</version>
-	</skin>
+		<version>1.0</version>-->
+        <groupId>lt.velykis.maven.skins</groupId>
+        <artifactId>reflow-maven-skin</artifactId>
+        <version>1.0.0</version>
+    </skin>
 
-	<body>        
-        <menu name="Main">
-			<item name="Welcome" href="./index.html"/>
+	<body>
+        <links>
+            <item name="Home" href="./index.html" />
+            <item name="Download" href="./download.html" />
+        </links>
+
+        <menu name="Main" inherit="top">
+			<item name="Home" href="./index.html"/>
         </menu>
 		
-        <menu name="Get Rio">
+        <menu name="Download" inherit="top">
             <item name="Download" href="./download.html"/>
 			<item name="License" href="./license.html"/>
         </menu>
 
-        <menu name="About Rio">
+        <menu name="Documentation" inherit="top">
             <item name="Overview" href="./overview.html"/>
             <item name="Getting Started" href="./getting-started.html"/>
 			<item name="FAQ" href="./faq.html"/>
-            <item name="Contributions" href="./contributions.html"/>
             <item name="Wiki" href="https://github.com/dreedyman/Rio/wiki"/>
             <item name="Getting Help" href="./getting-help.html"/>
-            <item name="Issue Tracking" href="./issue-tracking.html"/>
             <item name="Source Repository" href="./source-repository.html"/>
-            <item name="Contributing" href="./contributing.html"/>
         </menu>
 
-        <menu name="Developers">
+        <menu name="Developers" inherit="top">
             <item name="Conventions" href="./conventions.html"/>
             <item name="Rio Maven Archetype" href="./rio-archetype.html"/>
             <item name="Rio Maven Plugin" href="./plugin-intro.html"/>
@@ -55,21 +136,26 @@
             <item name="API Documentation" href="./documentation.html"/>
 		</menu>
 
-        <menu name="Examples">
-            <item name="Overview" href="./examples/index.html">
-                <item name="Calculator" href="./examples/calculator/index.html"/>
-                <item name="Events" href="./examples/events/index.html"/>
-                <item name="Hospital" href="./examples/hospital/index.html"/>
-                <item name="Spring" href="./examples/springbean/index.html"/>
-                <item name="Tomcat" href="./examples/tomcat/index.html"/>
-                <item name="Workflow" href="./examples/workflow/index.html"/>
-            </item>
+        <menu name="Examples" inherit="top">
+            <item name="Calculator" href="./examples/calculator/index.html"/>
+            <item name="Events" href="./examples/events/index.html"/>
+            <item name="Hospital" href="./examples/hospital/index.html"/>
+            <item name="Spring" href="./examples/springbean/index.html"/>
+            <item name="Tomcat" href="./examples/tomcat/index.html"/>
+            <item name="Workflow" href="./examples/workflow/index.html"/>
+        </menu>
+
+        <menu name="Contribute" inherit="top">
+            <item name="Contributing" href="./contributing.html"/>
+            <item name="Issue Tracking" href="./issue-tracking.html"/>
+            <item name="Fork on GitHub" href="https://github.com/dreedyman/Rio/" />
+            <item name="Contributions" href="./contributions.html"/>
         </menu>
 
         <menu name="Support">
             <item name="Rio Support" href="support.html"/>
         </menu>
 
-        <menu ref="reports"/>
+        <menu name="Maven documentation" ref="reports" inherit="bottom"/>
 	</body>
 </project>
