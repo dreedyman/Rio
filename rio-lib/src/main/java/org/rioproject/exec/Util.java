@@ -43,8 +43,7 @@ public class Util {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         URL url = loader.getResource(RESOURCE_ROOT+resource);
         if(url==null)
-            throw new IOException("unable to load "+RESOURCE_ROOT+resource+" " +
-                                  "resource");
+            throw new IOException("unable to load "+RESOURCE_ROOT+resource+" resource");
         return url;
     }
 
@@ -66,9 +65,7 @@ public class Util {
             process = Runtime.getRuntime().exec("chmod "+perms+" "+toExec);
             process.waitFor();
         } catch (InterruptedException e) {
-            throw new IOException("Failed to chmod " +
-                                  "["+file+"] " +
-                                  "with permissions ["+perms+"]");
+            throw new IOException("Failed to chmod ["+file+"] with permissions ["+perms+"]");
         } finally {
             if(process!=null) {
                 close(process.getOutputStream());
@@ -89,8 +86,7 @@ public class Util {
     public static void chmodX(final File file) throws IOException {
         boolean execChmod = false;
         try {
-            Method setExecutable = File.class.getMethod("setExecutable",
-                                                        boolean.class);
+            Method setExecutable = File.class.getMethod("setExecutable", boolean.class);
             setExecutable.invoke(file, true);
         } catch (Exception e) {
             execChmod = true;
@@ -103,8 +99,7 @@ public class Util {
                 process = Runtime.getRuntime().exec("chmod +x "+toExec);
                 process.waitFor();
             } catch (InterruptedException e) {
-                throw new IOException("Failed to chmod +x" +
-                                      "["+file+"]");
+                throw new IOException("Failed to chmod +x ["+file+"]");
             } finally {
                 if(process!=null) {
                     close(process.getOutputStream());

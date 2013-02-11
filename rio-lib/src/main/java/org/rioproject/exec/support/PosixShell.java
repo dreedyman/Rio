@@ -65,11 +65,11 @@ public class PosixShell implements Shell {
         }
         if (execDescriptor.getStdOutFileName() != null) {
             String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
-            commandLine = commandLine + " > "+(new File(stdOutFileName)).getPath();
+            commandLine = commandLine + " > "+stdOutFileName;
         }
         if (execDescriptor.getStdErrFileName() != null) {
             String stdErrFileName = PropertyHelper.expandProperties(execDescriptor.getStdErrFileName());
-            commandLine = commandLine + " 2> "+(new File(stdErrFileName)).getPath();
+            commandLine = commandLine + " 2> "+stdErrFileName;
         }
 
         File pidFile = File.createTempFile("exec-", ".pid");
@@ -77,6 +77,7 @@ public class PosixShell implements Shell {
 
         /* Delete the generated file on exit */
         generatedShellScript.deleteOnExit();
+        logger.info("Generated exec script here: {}", generatedShellScript.getPath());
 
         URL url = Util.getResource(template);
         StringBuilder sb = new StringBuilder();

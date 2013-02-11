@@ -146,9 +146,9 @@ public class ServiceBeanExecManager {
             exDesc.setEnvironment(env);
         } 
 
-        String serviceLog = logDir+normalizedServiceName+".log";
-        /*exDesc.setStdErrFileName(serviceLog);
-        exDesc.setStdOutFileName(serviceLog);*/
+        String serviceOut = logDir+normalizedServiceName+".out";
+        exDesc.setStdErrFileName(serviceOut);
+        exDesc.setStdOutFileName(serviceOut);
 
         try {
             Registry registry = LocateRegistry.getRegistry(regPort);
@@ -203,8 +203,8 @@ public class ServiceBeanExecManager {
             if (wait >= forkedServiceWaitTime) {
                 logger.warn("Timed out waiting for [{}]. Waited [{}] seconds, configured wait " +
                             "time is [{}] seconds. Killing spawned process and unregistering from local " +
-                            "registry. Check the service's output log [{}] to determine root cause(s)",
-                            serviceBindName, wait, forkedServiceWaitTime, serviceLog);
+                            "registry. Check the service's output log to determine root cause(s)",
+                            serviceBindName, wait, forkedServiceWaitTime);
                 manager.destroy(true);
                 throw new ServiceBeanInstantiationException("Failed to fork");
             }
