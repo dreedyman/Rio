@@ -5,10 +5,6 @@
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd">
 
     <bannerLeft>
-        <!--<name>Rio</name>
-        <href>http://www.rio-project.org/</href>
-        <src>images/rio.png</src>-->
-        <!-- Rio Dynamic Distributed Services, but with "Rio" highlighted -->
         <name><![CDATA[
           <font color="#3232A0"">Rio</font> Dynamic Distributed Services
         ]]>
@@ -18,6 +14,12 @@
 
     <publishDate position="bottom" format="yyyy-MM-dd" />
     <version position="bottom" />
+
+    <skin>
+        <groupId>lt.velykis.maven.skins</groupId>
+        <artifactId>reflow-maven-skin</artifactId>
+        <version>1.0.0</version>
+    </skin>
 
     <custom>
         <reflowSkin>
@@ -31,7 +33,7 @@
             <highlightJs>true</highlightJs>
             <highlightJsTheme>github</highlightJsTheme>
 
-            <slogan>Dynamic architecture for developing, deploying and managing distributed systems composed of Java services</slogan>
+            <slogan>Dynamic architecture for developing, deploying and managing distributed systems composed of Java services.</slogan>
             <titleTemplate>%2$s | %1$s</titleTemplate>
             <toc>left</toc>
             <tocTopMax>6</tocTopMax>
@@ -89,14 +91,6 @@
             </pages>
         </reflowSkin>
     </custom>
-    <skin>
-        <!--<groupId>org.rioproject</groupId>
-		<artifactId>rio-maven-skin</artifactId>
-		<version>1.0</version>-->
-        <groupId>lt.velykis.maven.skins</groupId>
-        <artifactId>reflow-maven-skin</artifactId>
-        <version>1.0.0</version>
-    </skin>
 
 	<body>
         <links>
