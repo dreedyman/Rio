@@ -42,7 +42,7 @@ public class ProvisionTask implements Runnable {
     private String failureReason = null;
     private ServiceProvisionContext context;
     private PendingManager pendingManager;
-    private final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor.provision");
+    private final Logger logger = LoggerFactory.getLogger(ProvisionTask.class);
 
     /**
      * Create a ProvisionTask
