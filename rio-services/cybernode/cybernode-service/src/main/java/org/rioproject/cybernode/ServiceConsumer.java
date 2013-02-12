@@ -308,7 +308,6 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      *
      * @param monitor The monitor to cancel
      */
-
     private void cancelRegistration(final ProvisionManager monitor) {
         ProvisionLeaseManager leaseManager = leaseTable.get(monitor);
         if(leaseManager != null) {
