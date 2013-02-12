@@ -16,10 +16,8 @@
 package org.rioproject.monitor.managers;
 
 import org.rioproject.jsb.ServiceElementUtil;
-import org.rioproject.monitor.InstantiatorResource;
-import org.rioproject.monitor.ProvisionException;
-import org.rioproject.monitor.ProvisionRequest;
-import org.rioproject.monitor.ServiceProvisionContext;
+import org.rioproject.monitor.*;
+import org.rioproject.monitor.tasks.ProvisionFailureEventTask;
 import org.rioproject.monitor.tasks.ProvisionTask;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.resources.servicecore.ServiceResource;
@@ -37,7 +35,7 @@ import java.util.Set;
 public class FixedServiceManager extends PendingServiceElementManager {
     private final List<ServiceResource> inProcessResource = Collections.synchronizedList(new ArrayList<ServiceResource>());
     private final ServiceProvisionContext context;
-    private final Logger logger = LoggerFactory.getLogger(FixedServiceManager.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(FixedServiceManager.class);
 
     /**
      * Create a FixedServiceManager
@@ -55,11 +53,10 @@ public class FixedServiceManager extends PendingServiceElementManager {
      */
     public void process() {
         ServiceResource[] resources = context.getSelector().getServiceResources();
-        if(logger.isDebugEnabled()) {
-            logger.debug("{} processing {} resources", getType(), resources.length);
-        }
-        for (ServiceResource resource : resources)
+        logger.debug("{} processing {} resources", getType(), resources.length);
+        for (ServiceResource resource : resources) {
             process(resource);
+        }
     }
 
     /**
@@ -94,7 +91,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
         }
     }
 
-    /* Process the fixed services collection with an input ServiceResource
+    /*
+     * Process the fixed services collection with an input ServiceResource
      */
     public void process(final ServiceResource resource) {
         if (resource == null)
@@ -114,17 +112,20 @@ public class FixedServiceManager extends PendingServiceElementManager {
              * the service elements that have been processed */
             synchronized (collection) {
                 Set<Key> requests = collection.keySet();
+                int numDeployed = 0;
                 for (Key requestKey : requests) {
                     ProvisionRequest request = collection.get(requestKey);
                     try {
-                        if (clearedMaxPerMachineAndIsolated(request, ir.getHostAddress()) &&
-                            ir.canProvision(request))
-                            doDeploy(resource, request);
+                        if (clearedMaxPerMachineAndIsolated(request, ir.getHostAddress()) && ir.canProvision(request)) {
+                            numDeployed = doDeploy(resource, request);
+                        }
                     } catch (ProvisionException e) {
                         request.setType(ProvisionRequest.Type.UNINSTANTIABLE);
                         logger.warn("Service [{}] is un-instantiable, do not resubmit",
                                     LoggingUtil.getLoggingName(request));
+                        processProvisionFailure(request, e);
                     }
+
                 }
             }
 
@@ -134,6 +135,17 @@ public class FixedServiceManager extends PendingServiceElementManager {
             inProcessResource.remove(resource);
             ir.setDynamicEnabledOn();
         }
+    }
+
+    /*
+     * Helper method to dispatch a ProvisionFailureEventTask and send a ProvisionFailureEvent
+     */
+    void processProvisionFailure(ProvisionRequest request, Exception e) {
+        ProvisionFailureEvent event = new ProvisionFailureEvent(context.getEventSource(),
+                                                                request.getServiceElement(),
+                                                                request.getFailureReasons(),
+                                                                e);
+        context.getProvisionFailurePool().execute(new ProvisionFailureEventTask(event, context.getFailureHandler()));
     }
 
     /**
