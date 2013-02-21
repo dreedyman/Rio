@@ -15,6 +15,7 @@
  */
 package org.rioproject.opstring;
 
+import junit.framework.Assert;
 import org.junit.Test;
 import org.rioproject.sla.ServiceLevelAgreements;
 
@@ -43,8 +44,7 @@ public class ServiceElementTest {
                                                new ClassBundle(fdh),
                                                impl);
 
-        ClassBundle export2 =
-            new ClassBundle("org.rioproject.resources.servicecore.Service");
+        ClassBundle export2 = new ClassBundle("org.rioproject.resources.servicecore.Service");
         export2.addJAR("rio-api.jar");
         export2.addJAR("service-dl.jar");
         export2.setCodebase("http://10.1.1.3:9000");
@@ -54,11 +54,9 @@ public class ServiceElementTest {
                                                new ClassBundle[]{export2},
                                                new ClassBundle(fdh),
                                                impl);
-        System.out.println("s1 equal s2 ? " + s1.equals(s2));
-        System.out.println("s2 equal s1 ? " + s2.equals(s1));
-        System.out.println("s1 equal s1 ? " + s1.equals(s1));
-        System.out.println("s2 equal s2 ? " + s2.equals(s2));
-        System.out.println("s1 hash : " + s1.hashCode());
-        System.out.println("s2 hash : " + s2.hashCode());
+        Assert.assertTrue("s1 equal s2 ? ", s1.equals(s2));
+        Assert.assertTrue("s2 equal s1 ? ", s2.equals(s1));
+        Assert.assertTrue("s1 equal s1 ? ", s1.equals(s1));
+        Assert.assertTrue("s2 equal s2 ? ", s2.equals(s2));
     }
 }
