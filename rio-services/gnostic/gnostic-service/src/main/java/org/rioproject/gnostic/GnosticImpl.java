@@ -335,7 +335,7 @@ public class GnosticImpl implements Gnostic {
                 try {
                     monitor = monitorFuture.get(30, TimeUnit.SECONDS);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Problem waiting for the ProvisionMonitor", e);
                 }
             }
         }
