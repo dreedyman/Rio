@@ -134,6 +134,7 @@ public class GnosticImpl implements Gnostic {
     }
 
     @Started
+    @SuppressWarnings("unused")
     public void started() {
         logger.info("{}: started [{}]",
                     context.getServiceBeanConfig().getName(), JiniClient.getDiscoveryAttributes(context));
