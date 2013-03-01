@@ -77,7 +77,7 @@ public class PosixShell implements Shell {
 
         /* Delete the generated file on exit */
         generatedShellScript.deleteOnExit();
-        logger.info("Generated exec script here: {}", generatedShellScript.getPath());
+        logger.debug("Generated exec script here: {}", generatedShellScript.getPath());
 
         URL url = Util.getResource(template);
         StringBuilder sb = new StringBuilder();
