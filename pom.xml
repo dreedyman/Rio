@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>5.0-M2</version>
+    <version>5.0-M3</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -77,7 +77,7 @@
                         <id>aggregate</id>
                         <configuration>
                             <links>
-                                <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
+                                <link>http://docs.oracle.com/javase/7/docs/api/</link>
                                 <link>https://river.apache.org/doc/api/</link>
                             </links>
                             <detectLinks>true</detectLinks>
@@ -436,7 +436,7 @@
         <gmaven.version>1.4</gmaven.version>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
         <junit.version>4.8.2</junit.version>
-        <rio.version>5.0-M2</rio.version>
+        <rio.version>5.0-M3</rio.version>
         <rio.plugin.version>5.0</rio.plugin.version>
         <river.version>2.1.1</river.version>
         <hyperic.version>1.6.3.82</hyperic.version>
