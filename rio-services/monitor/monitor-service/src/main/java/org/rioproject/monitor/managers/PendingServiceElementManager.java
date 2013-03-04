@@ -169,13 +169,10 @@ public abstract class PendingServiceElementManager {
     int getCount(ServiceElement sElem) {
         int count = 0;
         synchronized(collection) {
-            Collection c = collection.values();
-            if(c != null) {
-                for (Object aC : c) {
-                    ProvisionRequest pr = (ProvisionRequest) aC;
-                    if (pr.getServiceElement().equals(sElem)) {
-                        count++;
-                    }
+            Collection<ProvisionRequest> provisionRequests = collection.values();
+            for (ProvisionRequest pr : provisionRequests) {
+                if (pr.getServiceElement().equals(sElem)) {
+                    count++;
                 }
             }
         }
@@ -222,7 +219,7 @@ public abstract class PendingServiceElementManager {
     /**
      * Remove all ServiceElement instances from the collection
      *
-     * @param sElem The ServicEElement
+     * @param sElem The ServiceElement
      * 
      * @return An array of ProvisionRequest instances that have been removed. If 
      * there are no instances that have been removed, return an empty array
@@ -248,7 +245,7 @@ public abstract class PendingServiceElementManager {
                 }
             }
         } else {
-            logger.warn("{}: There are no pending instances of [{}] to remove", type, LoggingUtil.getLoggingName(sElem));
+            logger.warn("{}: There are no pending instances of [{}] to remove ", type, LoggingUtil.getLoggingName(sElem), new Throwable());
         }
         return (removed.toArray(new ProvisionRequest[removed.size()]));
     }
