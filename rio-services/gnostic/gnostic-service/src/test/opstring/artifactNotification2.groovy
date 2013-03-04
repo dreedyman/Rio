@@ -9,8 +9,8 @@ deployment(name: 'Notification Using Artifact Test Part Deaux') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.0-M2'
-    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.0-M2'
+    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.0-M3'
+    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.0-M3'
     artifact id: 'test', 'org.rioproject.gnostic:test:1.0'
 
     logging {
