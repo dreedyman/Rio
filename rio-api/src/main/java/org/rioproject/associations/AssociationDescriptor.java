@@ -360,7 +360,7 @@ public class AssociationDescriptor implements Serializable {
         String[] adjustedGroups = groups;
         if(groups == null || groups.length == 0)
             adjustedGroups = ServiceBeanConfig.NO_GROUPS;
-        if(adjustedGroups != null && adjustedGroups.length > 0) {
+        if(adjustedGroups.length > 0) {
             if(adjustedGroups.length == 1 && adjustedGroups[0].equals("all")) {
                 adjustedGroups = ServiceBeanConfig.ALL_GROUPS;
             } else {
@@ -415,6 +415,8 @@ public class AssociationDescriptor implements Serializable {
      *
      * @throws IllegalArgumentException if the proxyType is not {@link AssociationDescriptor#JDK_PROXY}
      */
+    @Deprecated
+    @SuppressWarnings("unused")
     public void setProxyType(final String proxyType) {
         if(proxyType==null) {
             this.proxyType = null;
