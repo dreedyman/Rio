@@ -153,17 +153,24 @@ public class CybernodeUtilizationPanel extends JPanel {
                 JMenuItem jconsole = null;
                 if(showJConsoleOption) {
                     jconsole = new JMenuItem("Launch JConsole");
-                    jconsole.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent ae) {
-                            String jmxConn = JMXUtil.getJMXConnection(
-                                serviceItemAccessor.getServiceItem().attributeSets);
-                            try {
-                                Runtime.getRuntime().exec("jconsole "+jmxConn);
-                            } catch (IOException e1) {
-                                Util.showError(e1, component, "Creating jconsole");
+                    final ServiceItem serviceItem = serviceItemAccessor.getServiceItem();
+                    if(serviceItem!=null) {
+                        jconsole.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                String jmxConn = JMXUtil.getJMXConnection(serviceItem.attributeSets);
+                                try {
+                                    Runtime.getRuntime().exec("jconsole "+jmxConn);
+                                } catch (IOException e1) {
+                                    Util.showError(e1, component, "Creating jconsole");
+                                }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                                      "There is no ServiceItem for []",
+                                                      "Missing ServiceItem",
+                                                      JOptionPane.WARNING_MESSAGE);
+                    }
                 }
                 popup.add(serviceUI);
                 if(jconsole!=null) {
