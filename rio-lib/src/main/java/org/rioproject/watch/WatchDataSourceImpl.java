@@ -363,7 +363,7 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
             if(history.size() > max)
                 trimHistory((history.size() - max) - 1);
             history.add(calculable);
-            logger.debug("[{}] Adding [{}] to history", id, calculable.toString());
+            logger.trace("[{}] Adding [{}] to history", id, calculable.toString());
         }
     }
     
