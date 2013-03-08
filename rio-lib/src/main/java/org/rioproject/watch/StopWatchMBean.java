@@ -40,7 +40,7 @@ public interface StopWatchMBean extends ThresholdWatchMBean {
      * Sets the elapsed time of the measured interval
      *
      * @param elapsed milliseconds of elapsed time
-     * @param now the current time in milliseconcds since the epoch.
+     * @param now the current time in milliseconds since the epoch.
      */
     void setElapsedTime(long elapsed, long now);
 
