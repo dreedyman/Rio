@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * The ProvisionRequest class provides a container object holding information  
- * to provision a ServiceBean
+ * to provision a service.
  *
  * @author Dennis Reedy
  */
@@ -111,11 +111,8 @@ public class ProvisionRequest {
      * @param svcProvisionListener Remote ServiceProvisionListener
      * @param instance The ServiceBeanInstance
      * @param excludeUuid The Uuid to exclude when selecting a compute resource
-     * @param requestedUuid The requested uuid of the ServiceBeanInstantiator to
-     * provision the service to
-     * @param type The type of ProvisionRequest, must be either
-     * ProvisionRequest.Type.PROVISION, ProvisionRequest.Type.RELOCATE or
-     * ProvisionRequest.Type.UNINSTANTIABLE
+     * @param requestedUuid The requested uuid of the ServiceBeanInstantiator to provision the service to
+     * @param type The ProvisionRequest.Type
      */
     public ProvisionRequest(ServiceElement sElem,
                             ProvisionListener listener,
@@ -131,11 +128,6 @@ public class ProvisionRequest {
         this.svcProvisionListener = svcProvisionListener;
         this.instance = instance;
         this.excludeUuid = excludeUuid;
-        this.requestedUuid = requestedUuid;
-        if(!(type.equals(Type.PROVISION) ||
-             type.equals(Type.RELOCATE) ||
-             type.equals(Type.UNINSTANTIABLE)))
-            throw new IllegalArgumentException("invalid type");
         this.type = type;
     }
 

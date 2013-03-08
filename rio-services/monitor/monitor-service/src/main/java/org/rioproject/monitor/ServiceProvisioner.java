@@ -403,7 +403,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                            index));
             } else {
                 int total = selector.getServiceResources().length;
-                String action = (request.getType()==ProvisionRequest.Type.PROVISION? "provision":"relocate");
+                String action = request.getType().name().toLowerCase();
                 StringBuilder failureReasonBuilder = new StringBuilder();
                 String failureReason =
                     String.format("A compute resource could not be obtained to %s [%s], total registered=%d",
@@ -429,9 +429,8 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                         logger.warn("ServiceBeanInstantiatorListener notification", e);
                     }
                 }
-                /* If this is not the result of a relocation request, add to the 
-                 * pending testManager */
-                if(request.getType()==ProvisionRequest.Type.PROVISION) {
+                /* If this is not the result of a relocation request, add to the pending testManager */
+                if(!request.getType().equals(ProvisionRequest.Type.RELOCATE)) {
                     pendingMgr.addProvisionRequest(request, index);
                     logger.debug("Wrote [{}] to {}", LoggingUtil.getLoggingName(request), pendingMgr.getType());
                     pendingMgr.dumpCollection();
