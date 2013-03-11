@@ -128,6 +128,7 @@ public class ProvisionRequest {
         this.svcProvisionListener = svcProvisionListener;
         this.instance = instance;
         this.excludeUuid = excludeUuid;
+        this.requestedUuid = requestedUuid;
         this.type = type;
     }
 
