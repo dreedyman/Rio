@@ -91,7 +91,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
         if(logger.isDebugEnabled())
-            logger.debug(String.format("%s added ThresholdListener %s", getId(), listener));
+            logger.debug("{} added ThresholdListener {}", getId(), listener);
         thresholdManager.addThresholdListener(listener);
     }
 
@@ -104,7 +104,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
         if(logger.isDebugEnabled())
-            logger.debug(String.format("%s removed ThresholdListener %s", getId(), listener));
+            logger.debug("{} removed ThresholdListener {}", getId(), listener);
         thresholdManager.removeThresholdListener(listener);
     }
 
@@ -124,7 +124,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
                 try {
                     watchDataSource.setThresholdValues(getThresholdValues());
                 } catch(RemoteException e) {
-                    logger.warn("Setting ThresholdValues for a remote WatchDataSource", e);
+                    logger.error("Setting ThresholdValues for a remote WatchDataSource", e);
                 }
             } else {
                 logger.warn("{} No WatchDataSource set for watch, unable to apply threshold values: {}",
@@ -147,7 +147,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      */
     @Override
     public void addWatchRecord(final Calculable record) {
-        super.addWatchRecord(record);        
+        super.addWatchRecord(record);
         thresholdManager.checkThreshold(record);
     }
 
