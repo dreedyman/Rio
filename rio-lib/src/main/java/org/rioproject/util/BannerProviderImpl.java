@@ -30,6 +30,11 @@ public class BannerProviderImpl implements BannerProvider {
         banner.append("|  \\ | |__|   Version: ").append(RioVersion.VERSION).append(", Build: ").append(RioVersion.getBuildNumber()).append("\n");
         banner.append("\n");
         banner.append("Rio Home: ").append(System.getProperty("RIO_HOME"));
+        banner.append("\n");
+        banner.append("Java version: ").append(System.getProperty("java.version"));
+        banner.append(", vendor: ").append(System.getProperty("java.vm.vendor"));
+        banner.append("\n");
+        banner.append("Java home: ").append(System.getProperty("java.home"));
         return banner.toString();
     }
 }
