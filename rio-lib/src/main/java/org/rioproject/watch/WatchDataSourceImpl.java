@@ -350,7 +350,8 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
         if(!closed) {
             addToHistory(calculable);
             for(WatchDataReplicator replicator : getWatchDataReplicators()) {
-                logger.trace("Replicating [{}] to {} {}", calculable.toString(), replicator, replicator.getClass().getName());
+                if(logger.isTraceEnabled())
+                    logger.trace("Replicating [{}] to {} {}", calculable.toString(), replicator, replicator.getClass().getName());
                 replicator.addCalculable(calculable);
             }
         }
@@ -363,7 +364,8 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
             if(history.size() > max)
                 trimHistory((history.size() - max) - 1);
             history.add(calculable);
-            logger.trace("[{}] Adding [{}] to history", id, calculable.toString());
+            if(logger.isTraceEnabled())
+                logger.trace("[{}] Adding [{}] to history", id, calculable.toString());
         }
     }
     
