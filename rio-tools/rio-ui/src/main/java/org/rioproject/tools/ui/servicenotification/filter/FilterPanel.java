@@ -38,8 +38,9 @@ import java.util.Properties;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unchecked")
 public class FilterPanel extends JPanel {
-    private final JComboBox<String> filterQuery;
+    private final JComboBox filterQuery;
     private final FilterParser filterParser = new FilterParser();
     private final EventCollectorListener eventCollectorListener;
     private final EventColorManager eventColorManager = new EventColorManager();
