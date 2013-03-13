@@ -129,8 +129,6 @@ if (System.getProperty("org.rioproject.service")!=null) {
 def createWatchAppender() {
     String watchLogName = getWatchLogDir()+"watches"
     appender("WATCH-LOG", RollingFileAppender) {
-        /*file = getWatchLogDir()+"watches.log"*/
-
         /*
          * In prudent mode, RollingFileAppender will safely write to the specified file,
          * even in the presence of other FileAppender instances running in different JVMs
