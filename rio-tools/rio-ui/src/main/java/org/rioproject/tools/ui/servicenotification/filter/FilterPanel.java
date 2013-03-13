@@ -54,7 +54,7 @@ public class FilterPanel extends JPanel {
         this.eventCollectorListener = eventCollectorListener;
         setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
                                                      BorderFactory.createEmptyBorder(8, 8, 8, 8)));
-        filterQuery = new JComboBox<String>();
+        filterQuery = new JComboBox();
         filterQuery.setEditable(true);
         filterQuery.addItem("");
         filterQuery.setSelectedIndex(0);
