@@ -17,8 +17,6 @@
 package org.rioproject.watch;
 
 import net.jini.config.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -30,7 +28,6 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
     public static final String VIEW = "org.rioproject.watch.ResponseTimeCalculableView";
     /** Table of thread ids, and recorded start time.*/
     private final ConcurrentMap <Long, Long> startTimeTable = new ConcurrentHashMap<Long, Long>();
-    private final Logger logger = LoggerFactory.getLogger(StopWatch.class);
 
     /**
      * Creates new Stop Watch
@@ -80,8 +77,7 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
     public void stopTiming() {
         long now = System.currentTimeMillis();
         long startTime = getStartTime();
-        long elapsed = now -startTime;
-        logger.debug("id: [{}], start: [{}], elapsed: [{}]", getId(), startTime, elapsed);
+        long elapsed = now - startTime;
         setElapsedTime(elapsed, now);
     }
 
@@ -91,8 +87,7 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
     public void stopTiming(String detail) {
         long now = System.currentTimeMillis();
         long startTime = getStartTime();
-        long elapsed = now -startTime;
-        logger.debug("id: [{}], start: [{}], elapsed: [{}], detail: [{}]", getId(), startTime, elapsed);
+        long elapsed = now - startTime;
         setElapsedTime(elapsed, now, detail);
     }
 
@@ -111,13 +106,11 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
      * @see org.rioproject.watch.StopWatchMBean#setElapsedTime(long, long)
      */
     public void setElapsedTime(long elapsed, long now) {
-        logger.debug("id: [{}], start: [{}], elapsed: [{}]", getId(), now, elapsed);
-        addWatchRecord(new Calculable(id, (double)elapsed, now));
+        addWatchRecord(new StopWatchCalculable(id, elapsed, now));
     }
 
     public void setElapsedTime(long elapsed, long now, String detail) {
-        logger.debug("id: [{}], start: [{}], elapsed: [{}], detail: [{}]", getId(), now, elapsed, detail);
-        Calculable calculable = new Calculable(id, (double)elapsed, now);
+        Calculable calculable = new StopWatchCalculable(id, elapsed, now);
         calculable.setDetail(detail);
         addWatchRecord(calculable);
     }
@@ -141,5 +134,4 @@ public class StopWatch extends ThresholdWatch implements StopWatchMBean {
             startTimeTable.put(key, startTime);
         }
     }
-
 }

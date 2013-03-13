@@ -48,6 +48,7 @@ public class Watch implements WatchMBean {
     private String view = DEFAULT_VIEW;
     /** The configuration*/
     private Configuration config;
+    private final Logger dataLogger;
 
     /**
      * Creates new Watch, creates and exports a WatchDataSourceImpl
@@ -75,6 +76,7 @@ public class Watch implements WatchMBean {
             throw new IllegalArgumentException("config is null");
         this.id = id;
         this.config = config;
+        dataLogger = LoggerFactory.getLogger("watch."+id);
         try {
             WatchDataSource wds = (WatchDataSource) config.getEntry(COMPONENT,
                                                                     "watchDataSource",
@@ -104,6 +106,7 @@ public class Watch implements WatchMBean {
         this.id = id;
         doSetWatchDataSource(watchDataSource);
         this.watchDataSource = watchDataSource;
+        dataLogger = LoggerFactory.getLogger("watch."+id);
     }
 
     /**
@@ -274,12 +277,14 @@ public class Watch implements WatchMBean {
     /**
      * Add a watch record to the history
      * 
-     * @param calc the Calculable record to be added
+     * @param calculable the Calculable record to be added
      */
-    public void addWatchRecord(Calculable calc) {
+    public void addWatchRecord(Calculable calculable) {
+        if(calculable!=null && dataLogger.isDebugEnabled())
+            dataLogger.debug("{}", calculable.toString());
         /* Try direct reference first */
         if(localRef != null) {
-            localRef.addCalculable(calc);
+            localRef.addCalculable(calculable);
             return;
         }
         /* Use proxy */
@@ -288,7 +293,7 @@ public class Watch implements WatchMBean {
             return;
         }
         try {
-            watchDataSource.addCalculable(calc);
+            watchDataSource.addCalculable(calculable);
         } catch(RemoteException e) {
             logger.warn("WatchDataSource not available for Watch={}", getId(), e);
         }

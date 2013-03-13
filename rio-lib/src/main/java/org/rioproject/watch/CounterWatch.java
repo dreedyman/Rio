@@ -17,16 +17,16 @@
 package org.rioproject.watch;
 
 import net.jini.config.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A CounterWatch provides a mechanism to count a monotonically increasing
  * non-negative value of an arbitrary occurrence of something over time.
+ *
+ * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
     public static final String VIEW = "org.rioproject.watch.CounterCalculableView";
-    private final Logger logger = LoggerFactory.getLogger(CounterWatch.class);
 
     /**
      * Create a new Counter Watch
@@ -73,7 +73,16 @@ public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
      * @see org.rioproject.watch.CounterWatchMBean#setCounter(long)
      */
     public void setCounter(long counter) {
-        addWatchRecord(new Calculable(id, (double)counter, System.currentTimeMillis()));
+        setCounter(counter, null);
+    }
+
+    /**
+     * @see org.rioproject.watch.CounterWatchMBean#setCounter(long)
+     */
+    public void setCounter(long counter, String detail) {
+        Calculable calculable = new Calculable(id, (double)counter, System.currentTimeMillis());
+        calculable.setDetail(detail);
+        addWatchRecord(calculable);
     }
 
     /**
@@ -84,10 +93,24 @@ public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
     }
 
     /**
+     * Increment with detail
+     */
+    public void increment(String detail) {
+        setCounter(getCounter() + 1, detail);
+    }
+
+    /**
      * @see org.rioproject.watch.CounterWatchMBean#increment(long)
      */
     public void increment(long value) {
         setCounter(getCounter() + value);
+    }
+
+    /**
+     * Increment with detail
+     */
+    public void increment(long value, String detail) {
+        setCounter(getCounter() + value, detail);
     }
 
     /**
@@ -98,9 +121,23 @@ public class CounterWatch extends ThresholdWatch implements CounterWatchMBean {
     }
 
     /**
+     * Decrement with detail
+     */
+    public void decrement(String detail) {
+        setCounter(getCounter() - 1, detail);
+    }
+
+    /**
      * @see org.rioproject.watch.CounterWatchMBean#decrement(long)
      */
     public void decrement(long value) {
         setCounter(getCounter() - value);
+    }
+
+    /**
+     * Decrement with detail
+     */
+    public void decrement(long value, String detail) {
+        setCounter(getCounter() - value, detail);
     }
 }
