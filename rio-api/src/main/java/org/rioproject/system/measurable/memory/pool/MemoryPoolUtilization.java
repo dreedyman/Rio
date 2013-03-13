@@ -26,20 +26,19 @@ public class MemoryPoolUtilization extends MeasuredResource {
     private long init;
     private long max;
     private long used;
-    
-    /**
-     * Construct a MeasuredResource with parameters
-     *
-     * @param identifier Identifier for the MeasurableResource
-     * @param value The measured value
-     * @param thresholdValues ThresholdValues for the MeasurableResource
-     */
-    public MemoryPoolUtilization(String identifier,
-                                 double value,
-                                 ThresholdValues thresholdValues) {
-        super(identifier, value, thresholdValues);
-    }
 
+    /**
+     * Create a {@code MemoryPoolUtilization} instance
+     *
+     * @param identifier The identifier to use
+     * @param value The percentage of the pool that has een used
+     * @param committed The amount of memory in bytes that is committed for the JVM to use.
+     * @param init The amount of memory in bytes that the JVM initially requests from the operating system for
+     *             memory management.
+     * @param max  The maximum amount of memory in bytes that can be used for memory management.
+     * @param used The amount of used memory in bytes.
+     * @param thresholdValues {@code ThresholdValues} that have been applied.
+     */
     public MemoryPoolUtilization(String identifier,
                                  double value,                                 
                                  long committed,

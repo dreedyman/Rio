@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.examples.hospital;
-
-import org.rioproject.watch.Calculable;
+package org.rioproject.watch;
 
 /**
- * A {@link org.rioproject.watch.Calculable} that includes the {@link Patient}
+ * A {@code Calculable} for use with a {@code StopWatch}.
+ *
+ * @author Dennis Reedy
  */
-public class CalculablePatient extends Calculable {
-    private Patient patient;
+public class StopWatchCalculable extends Calculable {
+    private final long start;
 
-    public CalculablePatient(String id, double value, Patient patient) {
-        super(id, value);
-        this.patient = patient;
-    }
-
-    public Patient getPatient() {
-        return patient;
+    public StopWatchCalculable(String id, long elapsed, long end) {
+        super(id, elapsed, end);
+        this.start = end - elapsed;
     }
 
     @Override
     public String toString() {
-        return String.format("%s - id: [%s], patient: [%s], value: [%s]",
-                             getFormattedDate(), getId(), patient.getPatientInfo().getName(), getValue());
-
+        String s;
+        if (getDetail() != null) {
+            s = String.format("id: [%s], start: [%s], elapsed: [%s], detail: [%s]", getId(), start, getValue(), getDetail());
+        } else {
+            s = String.format("id: [%s], start: [%s], elapsed: [%s]", getId(), start, getValue());
+        }
+        return s;
     }
 }

@@ -666,7 +666,7 @@ class TestManager {
             }
         }
 
-        jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir
+        jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir+' -DRIO_WATCH_LOG_DIR='+logDir
         String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpathBuilder.toString()+' '+mainClass+' '+starter
         log.info "Logging for $service will be sent to ${logDir}"
         log.info "Starting ${service}, using starter config [${starter}]"

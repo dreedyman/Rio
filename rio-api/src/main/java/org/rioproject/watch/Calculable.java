@@ -23,19 +23,18 @@ import java.util.Date;
 /**
  * A Calculable is the atomic attribute that is being 'watched'
  */
+@SuppressWarnings("unused")
 public class Calculable implements Serializable {
     static final long serialVersionUID = 1L;
     /** The identifier for the Calculable */
     private String id;
     /** The value for the Calculable */
     private double value;
-    /**
-     * Holds value of property when, indicates when the Calculable was
-     * recorded
-     */
+    /** Holds value of property when, indicates when the {@code Calculable} was recorded */
     private long when;
     /** Holds Optional detail about the metric */
     private String detail;
+    private final DateFormat formatter = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss,SSS");
 
     /**
      * Create a new Calculable
@@ -73,16 +72,7 @@ public class Calculable implements Serializable {
      * @return Value of property id.
      */
     public String getId() {
-        return (id);
-    }
-
-    /**
-     * Setter for property id
-     * 
-     * @param id New value of property id.
-     */
-    public void setId(String id) {
-        this.id = id;
+        return id;
     }
 
     /**
@@ -91,7 +81,7 @@ public class Calculable implements Serializable {
      * @return Value of property value.
      */
     public double getValue() {
-        return (value);
+        return value;
     }
 
     /**
@@ -109,16 +99,7 @@ public class Calculable implements Serializable {
      * @return Value of property when.
      */
     public long getWhen() {
-        return (when);
-    }
-
-    /**
-     * Setter for property when.
-     * 
-     * @param when New value of property when.
-     */
-    public void setWhen(long when) {
-        this.when = when;
+        return when;
     }
 
     /**
@@ -169,22 +150,30 @@ public class Calculable implements Serializable {
      * Gets an archival representation for this Calculable
      * 
      * @return a string representation in archive format
+     * @deprecated Use toString()
      */
+    @Deprecated
     public String getArchiveRecord() {
-        return (getId() + '|' + getValue() + '|' + when);
+        return toString();
+    }
+
+    protected String getFormattedDate() {
+        Date date = new Date(when);
+        return formatter.format(date);
     }
 
     /**
-     * Returns a string representation of the object.
+     * Returns a string representation of the {@code Calculable}.
      * 
-     * @return String representation of the object.
+     * @return String representation of the {@code Calculable}
      */
     public String toString() {
-        String format = "yyyy.MM.dd HH:mm:ss,SSS";
-        DateFormat formatter = new SimpleDateFormat(format);
-        Date date = new Date(when);
-        StringBuilder builder = new StringBuilder();
-        builder.append(id).append(" = ").append(getValue()).append(", ").append(formatter.format(date));
-        return builder.toString();
+        String s;
+        if(getDetail()==null) {
+            s = String.format("%s - id: [%s], value: [%s]", getFormattedDate(), getId(), getValue());
+        } else {
+            s = String.format("%s - id: [%s], value: [%s], detail: [%s]", getFormattedDate(), getId(), getValue(), getDetail());
+        }
+        return s;
     }
 }

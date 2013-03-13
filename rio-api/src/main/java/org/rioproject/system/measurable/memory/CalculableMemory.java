@@ -93,25 +93,7 @@ public class CalculableMemory extends Calculable {
      * @return a string representation of the object.
      */
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CalculableMemory {");
-        sb.append(" total=").append(getTotalMemory());
-        sb.append(", used=").append(getUsedMemory());
-        sb.append(", value=").append(getValue());
-        sb.append("}");
-        return sb.toString();
-    }
-
-    /**
-     * Gets an archival representation for this Calculable
-     *
-     * @return a string representation in archive format
-     */
-    public String getArchiveRecord() {
-        return (getId()+'|'+
-                getValue()+'|'+
-                getTotalMemory()+'|'+
-                getUsedMemory()+'|'+
-                getWhen());
+        return String.format("%s - id: [%s], total: [%s], used: [%s], free: [%s]",
+                             getFormattedDate(), getId(), getTotalMemory(), getUsedMemory(), getFreeMemory());
     }
 }

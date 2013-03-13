@@ -44,16 +44,15 @@ public class CalculableSystemMemory  extends Calculable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("CalculableSystemMemory { ");
-        sb.append("total=").append(memoryUtilization.getTotal());
-        sb.append(", free=").append(memoryUtilization.getFree());
-        sb.append(", used=").append(memoryUtilization.getUsed());
-        sb.append(", freePerc=").append(memoryUtilization.getFreePercentage());
-        sb.append(", usedPerc=").append(memoryUtilization.getUsedPercentage());
-        sb.append(", ram=").append(memoryUtilization.getRam());
-        sb.append(", value=").append(getValue());
-        sb.append('}');
-        return sb.toString();
+        return String.format("%s - id: [%s], total: [%s], free: [%s], used: [%s], free percent: [%s], used percent: [%s], ram: [%s], value: [%s]",
+                             getFormattedDate(),
+                             getId(),
+                             memoryUtilization.getTotal(),
+                             memoryUtilization.getFree(),
+                             memoryUtilization.getUsed(),
+                             memoryUtilization.getFreePercentage(),
+                             memoryUtilization.getUsedPercentage(),
+                             memoryUtilization.getRam(),
+                             getValue());
     }
 }

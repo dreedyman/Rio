@@ -101,9 +101,7 @@ public class Memory extends MeasurableCapability {
                                                                      "thresholdValues",
                                                                      ThresholdValues.class,
                                                                      new ThresholdValues(0.0, 1.0));
-            if(logger.isDebugEnabled()) {
-                logger.debug(String.format("%s threshold values: %s", getId(), tVals.toString()));
-            }
+            logger.trace("{} threshold values: {}", getId(), tVals.toString());
             setThresholdValues(tVals);
             
             ResourceCostModel rCostModel = (ResourceCostModel)config.getEntry(getComponentName(),
@@ -199,8 +197,7 @@ public class Memory extends MeasurableCapability {
             count = 0;
             tempUtilization = 0;
         }
-        if(logger.isTraceEnabled())
-            logger.trace("Memory : {} utilization={}", getComponentName(), utilization);
+        logger.trace("Memory : {} utilization={}", getComponentName(), utilization);
 
         return utilization;
     }

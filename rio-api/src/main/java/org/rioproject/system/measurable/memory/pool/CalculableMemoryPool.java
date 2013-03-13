@@ -36,7 +36,19 @@ public class CalculableMemoryPool extends Calculable {
         this.memoryPoolUtilization = memoryPoolUtilization;
     }
 
+    @SuppressWarnings("unused")
     public MemoryPoolUtilization getMemoryUtilization() {
         return memoryPoolUtilization;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s - id: [%s], committed: [%s], max: [%s], init: [%s], used: [%s]",
+                             getFormattedDate(),
+                             getId(),
+                             memoryPoolUtilization.getCommitted(),
+                             memoryPoolUtilization.getMax(),
+                             memoryPoolUtilization.getInit(),
+                             memoryPoolUtilization.getUsed());
     }
 }

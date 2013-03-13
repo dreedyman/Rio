@@ -22,6 +22,7 @@ import org.rioproject.watch.Calculable;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class CalculableProcessCPU extends Calculable {
     static final long serialVersionUID = 1L;
     private ProcessCpuUtilization cpuUtilization;
@@ -88,26 +89,7 @@ public class CalculableProcessCPU extends Calculable {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("CalculableProcessCPU { ");
-        sb.append("system=").append(getSystem());
-        sb.append(", user=").append(getUser());
-        sb.append(", total=").append(getTotal());
-        sb.append(", value=").append(getValue());
-        sb.append("}");
-        return sb.toString();
-    }
-
-    /**
-     * Gets an archival representation for this Calculable
-     *
-     * @return a string representation in archive format
-     */
-    public String getArchiveRecord() {
-        return(getId() +'|'+
-               getSystem() +'|'+
-               getUser() +'|'+
-               getValue() +'|'+
-               getWhen());
+        return String.format("%s - id: [%s], system: [%s], user: [%s], total: [%s], value: [%s]",
+                             getFormattedDate(), getId(), getSystem(), getUser(), getTotal(), getValue());
     }
 }

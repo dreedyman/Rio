@@ -61,20 +61,16 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
             }
             if(jmxCPUUtilization==null) {
                 if(OperatingSystemType.isLinux()) {
-                    if(logger.isDebugEnabled())
-                        logger.debug("Create LinuxHandler");
+                    logger.debug("Create LinuxHandler");
                     altMonitor = new LinuxHandler();
                 } else if(OperatingSystemType.isSolaris()) {
-                    if(logger.isDebugEnabled())
-                        logger.debug("Create MpstatOutputParser");
+                    logger.debug("Create MpstatOutputParser");
                     altMonitor = new MpstatOutputParser();
                 } else if(OperatingSystemType.isMac()) {
-                    if(logger.isDebugEnabled())
-                        logger.debug("Create MacTopOutputParser");
+                    logger.debug("Create MacTopOutputParser");
                     altMonitor = new MacTopOutputParser();
                 } else {
-                    if(logger.isDebugEnabled())
-                        logger.debug("Create GenericCPUMeasurer");
+                    logger.debug("Create GenericCPUMeasurer");
                     altMonitor = new GenericCPUMeasurer();
                 }
             }

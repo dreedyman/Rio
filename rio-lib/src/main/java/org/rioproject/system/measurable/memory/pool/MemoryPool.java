@@ -136,9 +136,7 @@ public class MemoryPool extends MeasurableCapability {
             count = 0;
             tempUtilization = 0;
         }
-        if(logger.isTraceEnabled())
-            logger.trace("Memory : utilization={}", utilization);
-
+        logger.trace("Memory : utilization={}", utilization);
         return utilization;
     }
 }

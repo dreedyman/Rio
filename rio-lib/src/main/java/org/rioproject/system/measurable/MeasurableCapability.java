@@ -97,7 +97,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
                                                 MAX_COLLECTION_SIZE);
         } catch(ConfigurationException e) {
             if(logger.isTraceEnabled())
-                logger.trace("Getting WatchDataSource collection size", e);
+            logger.trace("Getting WatchDataSource collection size", e);
             collectionSize = DEFAULT_COLLECTION_SIZE;
         }
         try {
@@ -122,7 +122,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
             try {
                 watchDataSource.addWatchDataReplicator(replicator);
             } catch (RemoteException e) {
-                logger.warn("Could not add WatchDataReplicator", e);
+                logger.error("Could not add WatchDataReplicator", e);
             }
         }
     }

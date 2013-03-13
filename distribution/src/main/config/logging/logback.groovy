@@ -33,6 +33,15 @@ def jmxConfigurator() {
 jmxConfigurator()
 
 /*
+ * Utility to check if the passed in string ends with a File.separator
+ */
+def checkEndsWithFileSeparator(String s) {
+    if (!s.endsWith(File.separator))
+        s = s+File.separator
+    return s
+}
+
+/*
  * Naming pattern for the output file:
  *
  * a) The output file is placed in the directory defined by the "RIO_LOG_DIR" System property
@@ -41,9 +50,7 @@ jmxConfigurator()
  * following format: pid@hostname. If the return includes the @hostname, the @hostname is stripped off.
  */
 def getLogLocationAndName() {
-    String logDir = System.getProperty("RIO_LOG_DIR")
-    if (!logDir.endsWith(File.separator))
-        logDir = logDir+File.separator
+    String logDir = checkEndsWithFileSeparator(System.getProperty("RIO_LOG_DIR"))
     String name = ManagementFactory.getRuntimeMXBean().getName();
     String pid = name;
     int ndx = name.indexOf("@");
@@ -51,6 +58,18 @@ def getLogLocationAndName() {
         pid = name.substring(0, ndx);
     }
     return "$logDir${System.getProperty("org.rioproject.service")}-$pid"
+}
+
+/*
+ * Get the location of the watch.log. If the "RIO_WATCH_LOG_DIR" System property is not set, use
+ * the "RIO_HOME" System property appended by /logs
+ */
+def getWatchLogDir() {
+    String watchLogDir = System.getProperty("RIO_WATCH_LOG_DIR")
+    if(watchLogDir==null) {
+        watchLogDir = checkEndsWithFileSeparator(System.getProperty("RIO_HOME"))+"logs"
+    }
+    return checkEndsWithFileSeparator(watchLogDir)
 }
 
 def appenders = []
@@ -64,11 +83,11 @@ if (System.console() != null) {
             withJansi = true
 
             encoder(PatternLayoutEncoder) {
-                pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
+                pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %logger{36} - %msg%n%rEx"
             }
         } else {
             encoder(PatternLayoutEncoder) {
-                pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
+                pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} - %msg%n%rEx"
             }
         }
     }
@@ -88,9 +107,9 @@ if (System.getProperty("org.rioproject.service")!=null) {
             /* Rollover daily */
             fileNamePattern = "${serviceLogFilename}-%d{yyyy-MM-dd}.%i.log"
 
-            /* Or whenever the file size reaches 5MB */
+            /* Or whenever the file size reaches 10MB */
             timeBasedFileNamingAndTriggeringPolicy(SizeAndTimeBasedFNATP) {
-                maxFileSize = "5MB"
+                maxFileSize = "10MB"
             }
 
             /* Keep 5 archived logs */
@@ -98,10 +117,44 @@ if (System.getProperty("org.rioproject.service")!=null) {
 
         }
         encoder(PatternLayoutEncoder) {
-            pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} [%thread] - %msg%n%rEx"
+            pattern = "%-5level %d{HH:mm:ss.SSS} %logger{36} - %msg%n%rEx"
         }
     }
     appenders << "ROLLING"
+}
+
+/*
+ * This method needs to be called if watch logging is to be used
+ */
+def createWatchAppender() {
+    String watchLogName = getWatchLogDir()+"watches"
+    appender("WATCH-LOG", RollingFileAppender) {
+        /*file = getWatchLogDir()+"watches.log"*/
+
+        /*
+         * In prudent mode, RollingFileAppender will safely write to the specified file,
+         * even in the presence of other FileAppender instances running in different JVMs
+         */
+        prudent = true
+
+        rollingPolicy(TimeBasedRollingPolicy) {
+
+            /* Rollover daily */
+            fileNamePattern = "${watchLogName}-%d{yyyy-MM-dd}.%i.log"
+
+            /* Or whenever the file size reaches 10MB */
+            timeBasedFileNamingAndTriggeringPolicy(SizeAndTimeBasedFNATP) {
+                maxFileSize = "10MB"
+            }
+
+            /* Keep 5 archived logs */
+            maxHistory = 5
+
+        }
+        encoder(PatternLayoutEncoder) {
+            pattern = "%msg%n"
+        }
+    }
 }
 
 /* Set up loggers */
@@ -128,5 +181,28 @@ logger("net.jini.discovery.LookupDiscovery", OFF)
 logger("net.jini.lookup.JoinManager", OFF)
 logger("org.rioproject.resolver.aether.util.ConsoleRepositoryListener", WARN)
 
-
 root(INFO, appenders)
+
+/*
+ * The following method call to create the Watch appender must be uncommented if you want to have watches log to a
+ * file
+ */
+//createWatchAppender()
+
+/* The following loggers are system watch loggers. When set to debug they will use the WATCH-LOG appender,
+ * and have as output values being logged for these particular watches. Uncomment out the loggers you would like
+ * to have logged.
+ *
+ * If you have watches in your service that you want put into a watch-log, then add them as needed, with the
+ * logger name of:
+ *     "watch.<name of your watch>"
+ */
+/*
+logger("watch.CPU", DEBUG, ["WATCH-LOG"], false)
+logger("watch.CPU (Proc)", DEBUG, ["WATCH-LOG"], false)
+logger("watch.System Memory", DEBUG, ["WATCH-LOG"], false)
+logger("watch.Process Memory", DEBUG, ["WATCH-LOG"], false)
+logger("watch.Perm Gen", DEBUG, ["WATCH-LOG"], false)
+*/
+
+

@@ -33,9 +33,7 @@ public class CalculableDiskSpace extends Calculable {
      * @param diskSpaceUtilization The DiskSpaceUtilization
      * @param when the time when the recorded utilization was captured
      */
-    public CalculableDiskSpace(String id,
-                               DiskSpaceUtilization diskSpaceUtilization,
-                               long when) {
+    public CalculableDiskSpace(final String id, final DiskSpaceUtilization diskSpaceUtilization, final long when) {
         super(id, diskSpaceUtilization.getValue(), when);
         this.diskSpaceUtilization = diskSpaceUtilization;
     }
@@ -74,21 +72,7 @@ public class CalculableDiskSpace extends Calculable {
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("CalculableDiskSpace {").
-            append("capacity: ").append(getCapacity()).append(", ").
-            append("available: ").append(getAvailable()).append(", ").
-            append("}");
-        return sb.toString();
-    }
-
-    /**
-     * Gets an archival representation for this Calculable
-     *
-     * @return a string representation in archive format
-     */
-    public String getArchiveRecord() {
-        return(getId() + '|' + getValue() + '|' + getCapacity() +
-            '|' + getAvailable() + '|' + getWhen());
+        return String.format("%s - id: [%s], capacity: [%s], available: [%s], used: [%s]",
+                             getFormattedDate(), getId(), getCapacity(), getAvailable(), getValue());
     }
 }

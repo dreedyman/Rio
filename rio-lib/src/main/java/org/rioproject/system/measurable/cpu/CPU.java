@@ -38,8 +38,7 @@ import java.lang.management.ManagementFactory;
  * @author Dennis Reedy
  */
 public class CPU extends MeasurableCapability {
-    public static final String VIEW = 
-        "org.rioproject.system.measurable.cpu.CalculableCPUView";
+    public static final String VIEW = "org.rioproject.system.measurable.cpu.CalculableCPUView";
     /** Iteration value for calculating utilization of sampleSize >1 */
     private int count;
     /** Temporary utilization value */
@@ -73,8 +72,7 @@ public class CPU extends MeasurableCapability {
         if(!isEnabled())
             return;
         setView(VIEW);
-        if(logger.isDebugEnabled())
-            logger.debug("Creating [{}]", id);
+        logger.trace("Creating [{}]", id);
         try {
             ThresholdValues defaultThresholdVals;
             int numCPUs = Runtime.getRuntime().availableProcessors();
@@ -128,7 +126,7 @@ public class CPU extends MeasurableCapability {
             setMeasurableMonitor(monitor);
 
         } catch (Throwable e) {
-            logger.warn("Getting CPU Configuration", e);
+            logger.error("Getting CPU Configuration", e);
         }
     }
     
@@ -156,9 +154,8 @@ public class CPU extends MeasurableCapability {
             utilization = tempUtilization/sampleSize;                                    
             count = 0;
             tempUtilization = 0;            
-        } 
-        if(logger.isDebugEnabled())
-            logger.debug("{}: utilization={}", getId(), utilization);
+        }
+        logger.trace("{}: utilization={}", getId(), utilization);
 
         if(mRes instanceof CpuUtilization)
             addWatchRecord(new CalculableCPU(getId(), (CpuUtilization)mRes, now));
