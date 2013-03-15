@@ -97,33 +97,35 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
     private void addItem(AbstractMutableTreeTableNode node,
                          AbstractMutableTreeTableNode parent,
                          AbstractMutableTreeTableNode filterParent) {
-        int index = parent.getChildCount();
-        if(node instanceof RemoteServiceEventNode) {
-            RemoteServiceEventNode rNode = (RemoteServiceEventNode)node;
-            if(hasRemoteServiceEventNode(rNode, parent))
-                return;
-            if(filterParent!=null && hasRemoteServiceEventNode(rNode, filterParent))
-                return;
-            /* If we have a filter and the node passes filter step, insert into filterModel */
-            if(filterCriteria!=null && filterParent!=null && filterControl.include(filterCriteria, rNode)) {
-                index = getItemIndex(rNode, filterParent);
+        synchronized (completeModel) {
+            int index = parent.getChildCount();
+            if(node instanceof RemoteServiceEventNode) {
+                RemoteServiceEventNode rNode = (RemoteServiceEventNode)node;
+                if(hasRemoteServiceEventNode(rNode, parent))
+                    return;
+                if(filterParent!=null && hasRemoteServiceEventNode(rNode, filterParent))
+                    return;
+                /* If we have a filter and the node passes filter step, insert into filterModel */
+                if(filterCriteria!=null && filterParent!=null && filterControl.include(filterCriteria, rNode)) {
+                    index = getItemIndex(rNode, filterParent);
+                    if(index!=-1) {
+                        filterParent.insert(rNode, index);
+                        //this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(filterParent)), index, rNode);
+                        this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(filterParent)));
+                    }
+                }
+                /* Always insert into the complete model */
+                index = getItemIndex(rNode, parent);
                 if(index!=-1) {
-                    filterParent.insert(rNode, index);
-                    //this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(filterParent)), index, rNode);
-                    this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(filterParent)));
+                    parent.insert(node, index);
+                    if(filterCriteria==null) {
+                        this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index, rNode);
+                    }
                 }
-            }
-            /* Always insert into the complete model */
-            index = getItemIndex(rNode, parent);
-            if(index!=-1) {
+            }  else {
                 parent.insert(node, index);
-                if(filterCriteria==null) {
-                    this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index, rNode);
-                }
+                this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index, node);
             }
-        }  else {
-            parent.insert(node, index);
-            this.modelSupport.fireChildAdded(new TreePath(getPathToRoot(parent)), index, node);
         }
     }
 
@@ -154,42 +156,48 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
 
     public void removeItem(int row) {
         AbstractMutableTreeTableNode node = getNode(row);
-        TreePath treePath = null;
-        if(node instanceof DeploymentNode) {
+        if(node!=null) {
+            TreePath treePath = null;
+            if(node instanceof DeploymentNode) {
 
-        } else {
-            treePath = treeTable.getPathForRow(getDeploymentNodeRow((DeploymentNode)node.getParent()));
-
-        }
-        removeItem(node);
-        if(treePath!=null) {
-            this.modelSupport.fireChildrenRemoved(treePath, new int[]{row}, new Object[]{node});
+            } else {
+                DeploymentNode dNode = (DeploymentNode) node.getParent();
+                if(dNode!=null)
+                    treePath = treeTable.getPathForRow(getDeploymentNodeRow(dNode));
+            }
+            removeItem(node);
+            if(treePath!=null) {
+                this.modelSupport.fireTreeStructureChanged(treePath);
+                //this.modelSupport.fireChildrenRemoved(treePath, new int[]{row}, new Object[]{node});
+            }
         }
     }
 
     public void removeItem(AbstractMutableTreeTableNode node) {
-        if(node!=null) {
-            AbstractMutableTreeTableNode parent = (AbstractMutableTreeTableNode)node.getParent();
-            removeNodeFromParent(node);
-            this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(parent)));
-            DeploymentNode deploymentNode = null;
-            if(node instanceof DeploymentNode) {
-                deploymentNode = (DeploymentNode)node;
-            }
-            if(parent.getChildCount()==0 && parent.getParent()!=null) {
-                removeNodeFromParent(parent);
-                this.modelSupport.fireNewRoot();
-                deploymentNode = (DeploymentNode)parent;
-            }
-            if(deploymentNode!=null) {
-                if(filterCriteria!=null) {
-                    filteredModel.remove(deploymentNode);
-                    DeploymentNode dNode = getDeploymentNode(deploymentNode.getName(), completeModel);
-                    if(dNode!=null) {
-                        completeModel.remove(dNode);
+        synchronized (completeModel) {
+            if(node!=null) {
+                AbstractMutableTreeTableNode parent = (AbstractMutableTreeTableNode)node.getParent();
+                removeNodeFromParent(node);
+                this.modelSupport.fireTreeStructureChanged(new TreePath(getPathToRoot(parent)));
+                DeploymentNode deploymentNode = null;
+                if(node instanceof DeploymentNode) {
+                    deploymentNode = (DeploymentNode)node;
+                }
+                if(parent.getChildCount()==0 && parent.getParent()!=null) {
+                    removeNodeFromParent(parent);
+                    this.modelSupport.fireNewRoot();
+                    deploymentNode = (DeploymentNode)parent;
+                }
+                if(deploymentNode!=null) {
+                    if(filterCriteria!=null) {
+                        filteredModel.remove(deploymentNode);
+                        DeploymentNode dNode = getDeploymentNode(deploymentNode.getName(), completeModel);
+                        if(dNode!=null) {
+                            completeModel.remove(dNode);
+                        }
+                    } else {
+                        completeModel.remove(deploymentNode);
                     }
-                } else {
-                    completeModel.remove(deploymentNode);
                 }
             }
         }
@@ -395,7 +403,6 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
         }
         return rowCounter;
     }
-
 
     class RemoteServiceEventNodeComparator implements Comparator<RemoteServiceEventNode> {
         public int compare(RemoteServiceEventNode node1, RemoteServiceEventNode node2) {

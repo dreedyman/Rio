@@ -374,7 +374,7 @@ public class Main extends JFrame {
 
         //splitPane.setTopComponent(topTabs);
         splitPane.setTopComponent(new GlassPaneContainer(p));
-        splitPane.setBottomComponent(utilitiesPanel);
+        //splitPane.setBottomComponent(utilitiesPanel);
         splitPane.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         splitPane.setDividerSize(8);
 
@@ -384,10 +384,11 @@ public class Main extends JFrame {
 
         //content.add(splitPane);
         mainTabs.add("Deployments", splitPane);
+        mainTabs.add("Utilization", utilitiesPanel);
         remoteEventTable = new RemoteEventTable(config, startupProps);
         JLabel label = TabLabel.create("Service Event Notifications", remoteEventTable);
         mainTabs.addTab(null, remoteEventTable);
-        mainTabs.setTabComponentAt(1, label);
+        mainTabs.setTabComponentAt(2, label);
 
         content.add(mainTabs);
 

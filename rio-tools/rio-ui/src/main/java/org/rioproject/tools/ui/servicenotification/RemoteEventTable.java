@@ -278,7 +278,17 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     }
 
     public int getTotalItemCount() {
-        return dataModel.getRowCount();
+        int rowCounter = 0;
+        for(DeploymentNode dNode : dataModel.getDeploymentNodes()) {
+            for(int i=0; i<dNode.getChildCount(); i++) {
+                RemoteServiceEventNode rNode = (RemoteServiceEventNode)dNode.getChildAt(i);
+                if(eventColorManager.isCritical((String)rNode.getValueAt(0))) {
+                    rowCounter++;
+                }
+            }
+        }
+        //return dataModel.getRowCount();
+        return rowCounter;
     }
 
     class RowListener extends MouseAdapter {

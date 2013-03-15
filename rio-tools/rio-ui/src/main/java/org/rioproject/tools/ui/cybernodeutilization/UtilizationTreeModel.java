@@ -200,7 +200,11 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
             setServiceNodeUtilization(sNode, node.getAdmin());
             insertNodeInto(sNode, node, node.getChildCount());
         }
-        modelSupport.fireTreeStructureChanged(nodeToTreePath(node));
+        try {
+            modelSupport.fireTreeStructureChanged(nodeToTreePath(node));
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         if (expandAll) {
             treeTable.expandRow(getCybernodeRow(node.getCybernode()));
         }
