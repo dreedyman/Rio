@@ -83,7 +83,7 @@
             <id>run-integration-test</id>
             <activation>
                 <file>
-                    <exists>${basedir}/../../../distribution/target/rio.dist</exists>
+                    <exists>${env.RIO_HOME}</exists>
                 </file>
             </activation>
             <build>
@@ -96,11 +96,7 @@
                             <systemProperties>
                                 <property>
                                     <name>java.security.policy</name>
-                                    <value>${basedir}/../../../distribution/target/rio-${rio.version}/policy/policy.all</value>
-                                </property>
-                                <property>
-                                    <name>RIO_HOME</name>
-                                    <value>${basedir}/../../../distribution/target/rio-${rio.version}</value>
+                                    <value>${env.RIO_HOME}/policy/policy.all</value>
                                 </property>
                             </systemProperties>
                             <excludes>
@@ -123,15 +119,11 @@
                             <systemProperties>
                                 <property>
                                     <name>java.security.policy</name>
-                                    <value>${basedir}/../../../distribution/target/rio-${rio.version}/policy/policy.all</value>
+                                    <value>${env.RIO_HOME}/policy/policy.all</value>
                                 </property>
                                 <property>
                                     <name>opstring</name>
                                     <value>../src/main/opstring/workflow.groovy</value>
-                                </property>
-                                <property>
-                                    <name>RIO_HOME</name>
-                                    <value>${basedir}/../../../distribution/target/rio-${rio.version}</value>
                                 </property>
                             </systemProperties>
                             <excludes>
