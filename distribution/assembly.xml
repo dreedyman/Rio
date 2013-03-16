@@ -141,7 +141,6 @@
                 <exclude>ch.qos.logback:*</exclude>
             </excludes>
             <outputDirectory>lib</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <!-- Get jsk-dl.jar, jmx-lookup.jar, reggie-dl.jar and serviceui.jar into the lib-dl directory -->
@@ -154,7 +153,6 @@
                 <include>com.sun.jini:reggie-dl</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <!-- The rest of the service download (-api, -proxy and -ui) jars go into the lib-dl directory -->
@@ -173,7 +171,6 @@
                 <include>org.rioproject:watch-ui</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <dependencySet>
@@ -189,7 +186,6 @@
                 <include>nekohtml:*</include>
             </includes>
             <outputDirectory>lib/resolver</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <!-- Put the SLF4J jars into lib/logging, defaulting to logback -->

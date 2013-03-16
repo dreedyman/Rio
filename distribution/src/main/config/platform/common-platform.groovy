@@ -29,7 +29,7 @@ class CommonPlatformConfig {
                                                 "1.0",
                                                 "Apache Commons Compress",
                                                 "Apache Software Foundation",
-                                                libDir+"commons-compress.jar")
+                                                libDir+"commons-compress-1.0.jar")
         configs << new PlatformCapabilityConfig("Sigar",
                                                 "1.6.2",
                                                 "Hyperic SIGAR",

@@ -25,6 +25,7 @@ import net.jini.lease.LeaseRenewalManager
 import net.jini.lookup.ServiceDiscoveryManager
 import net.jini.lookup.entry.Name
 import org.junit.Assert
+import org.rioproject.RioVersion
 import org.rioproject.config.Constants
 import org.rioproject.config.GroovyConfig
 import org.rioproject.cybernode.Cybernode
@@ -871,7 +872,7 @@ class TestManager {
 
     private def loadManagerConfig() {
         String defaultManagerConfig =
-            "jar:file:${Utils.getRioHome()}/lib/rio-test.jar!/default-manager-config.groovy"
+            "jar:file:${Utils.getRioHome()}/lib/rio-test-${RioVersion.VERSION}.jar!/default-manager-config.groovy"
         String mgrConfig = System.getProperty('org.rioproject.test.manager.config',
                                               defaultManagerConfig)
         log.info "Using TestManager configuration ${mgrConfig}"

@@ -119,7 +119,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Rio-Version>${project.version}</Rio-Version>
                                         <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>rio-start.jar jsk-lib.jar jsk-platform.jar</Class-Path>
+                                        <Class-Path>rio-start-${river.version}.jar jsk-lib-${river.version}.jar jsk-platform-${river.version}.jar</Class-Path>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

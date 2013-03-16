@@ -66,7 +66,7 @@ public final class ServiceDescriptorUtil {
      * @param policy The security policy file to use
      * @param roots The roots webster should serve
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * webster using an anonymous port. The <tt>webster.jar</tt> file will be
+     * webster using an anonymous port. The <tt>webster-${rio-version}.jar</tt> file will be
      * loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
@@ -85,7 +85,7 @@ public final class ServiceDescriptorUtil {
      * @param sPort The port webster should use
      * @param roots The roots webster should serve
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * webster using a specified port. The <tt>webster.jar</tt> file will be
+     * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
      * loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
@@ -105,7 +105,7 @@ public final class ServiceDescriptorUtil {
      * @param roots The roots webster should serve
      * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * webster using a specified port. The <tt>webster.jar</tt> file will be
+     * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
      * loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
@@ -117,7 +117,7 @@ public final class ServiceDescriptorUtil {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
-        String webster = rioHome+File.separator+"lib"+File.separator+"webster.jar";
+        String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
         return(getWebster(policy, sPort, roots, debug, webster));
 
     }
@@ -132,7 +132,7 @@ public final class ServiceDescriptorUtil {
      * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
      * @param webster The location an name of the webster jar
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * webster using a specified port. The <tt>webster.jar</tt> file will be
+     * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
      * loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
@@ -186,7 +186,7 @@ public final class ServiceDescriptorUtil {
      * @param policy The security policy file to use
      * @param cybernodeConfig The configuration file the Cybernode will use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * the Cybernode using an anonymous port. The <tt>cybernode.jar</tt> file
+     * the Cybernode using an anonymous port. The <tt>cybernode-service-${rio-version}.jar</tt> file
      * will be loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
@@ -205,10 +205,10 @@ public final class ServiceDescriptorUtil {
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         List<String> jarList = new ArrayList<String>();
-        jarList.add("cybernode-service.jar");
+        jarList.add(createVersionedJar("cybernode-service"));
         if(System.getProperty("RIO_TEST_ATTACH")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
-            jarList.add("rio-test.jar");
+            jarList.add(createVersionedJar("rio-test"));
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
@@ -224,7 +224,7 @@ public final class ServiceDescriptorUtil {
         sb.append(rioHome).append(File.separator)
             .append("lib").append(File.separator)
             .append("resolver").append(File.separator)
-            .append("resolver-project.jar");
+            .append(createVersionedJar("resolver-project"));
         return sb.toString();
     }
 
@@ -235,7 +235,7 @@ public final class ServiceDescriptorUtil {
      * @param policy The security policy file to use
      * @param monitorConfig The configuration options the Monitor will use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * the Monitor using an anonymous port. The <tt>monitor.jar</tt> file will
+     * the Monitor using an anonymous port. The <tt>monitor-service-${rio-version}.jar</tt> file will
      * be loaded from <tt>RIO_HOME/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
@@ -247,10 +247,10 @@ public final class ServiceDescriptorUtil {
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         List<String> jarList = new ArrayList<String>();
-        jarList.add("monitor-service.jar");
+        jarList.add(createVersionedJar("monitor-service"));
         if(System.getProperty("RIO_TEST_ATTACH")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
-            jarList.add("rio-test.jar");
+            jarList.add(createVersionedJar("rio-test"));
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
@@ -266,7 +266,7 @@ public final class ServiceDescriptorUtil {
      *
      * @param policy The security policy file to use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
-     * Reggie using an anonymous port. The <tt>reggie.jar</tt> file will
+     * Reggie using an anonymous port. The <tt>reggie-${river-version}.jar</tt> file will
      * be loaded from <tt>RIO_HOME/lib</tt>
      * @param lookupConfig The configuration options Reggie will use
      *
@@ -278,8 +278,8 @@ public final class ServiceDescriptorUtil {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
-        String reggieClasspath = rioHome+File.separator+"lib"+File.separator+"reggie.jar";
-        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/2.1.1";
+        String reggieClasspath = rioHome+File.separator+"lib"+File.separator+createVersionedJar("reggie", Constants.RIVER_VERSION);
+        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/"+Constants.RIVER_VERSION;
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }
@@ -311,6 +311,14 @@ public final class ServiceDescriptorUtil {
             sb.append(dir).append(File.separator).append(jar);
         }
         return sb.toString();
+    }
+
+    private static String createVersionedJar(String name) {
+        return createVersionedJar(name, RioVersion.VERSION);
+    }
+
+    private static String createVersionedJar(String name, String version) {
+        return String.format("%s-%s.jar", name, version);
     }
 
 }

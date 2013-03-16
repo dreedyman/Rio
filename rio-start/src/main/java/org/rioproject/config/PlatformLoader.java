@@ -303,7 +303,7 @@ public class PlatformLoader {
             throw new Exception(rioHome+" does not exist");
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig();
-        File rioJar = new File(rioHomeDir, "lib"+File.separator+"rio-lib.jar");
+        File rioJar = new File(rioHomeDir, "lib"+File.separator+String.format("rio-lib-%s.jar", RioVersion.VERSION));
         //File rioApiJar = new File(rioHomeDir, "lib-dl"+File.separator+"rio-api.jar");
         //Resolver resolver = ResolverHelper.getResolver();
         //String[] rioAPIClassPath = resolver.getClassPathFor("org.rioproject:rio-api:"+RioVersion.VERSION);
@@ -321,10 +321,10 @@ public class PlatformLoader {
         rioCap.setClasspath(rioClassPath.toString());
 
         PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig();
-        File jskLibJar = new File(rioHomeDir, "lib"+File.separator+"jsk-lib.jar");
+        File jskLibJar = new File(rioHomeDir, "lib"+File.separator+String.format("jsk-lib-%s.jar", Constants.RIVER_VERSION));
         jiniCap.setCommon("yes");
         jiniCap.setName("Apache River");
-        jiniCap.setVersion("2.1.1");
+        jiniCap.setVersion(Constants.RIVER_VERSION);
         jiniCap.setClasspath(jskLibJar.getAbsolutePath());
 
         Collection<PlatformCapabilityConfig> c = new ArrayList<PlatformCapabilityConfig>();

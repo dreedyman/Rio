@@ -73,7 +73,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Rio-Version>${project.version}</Rio-Version>
                                         <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>rio-start.jar rio-lib.jar webster.jar groovy-all.jar</Class-Path>
+                                        <Class-Path>rio-start-${project.version}.jar rio-lib-${project.version}.jar webster-${project.version}.jar groovy-all-${groovy.version}.jar</Class-Path>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

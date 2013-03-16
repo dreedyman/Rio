@@ -22,10 +22,19 @@ import org.rioproject.config.Constants
 manager {
     String rioHome = System.getProperty("RIO_HOME")
     StringBuilder classPath = new StringBuilder()
-    ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
-        if(classPath.length()>0)
-            classPath.append(File.pathSeparator)
-        classPath.append(rioHome+'/lib/'+jar)
+    File rioLib = new File(rioHome+'/lib/')
+    String rioStartJar = null
+    for(File file : rioLib.listFiles()) {
+        if(file.name.startsWith("rio-start")) {
+            if(classPath.length()>0)
+                classPath.append(File.pathSeparator)
+            classPath.append(file.path)
+            rioStartJar = file.path
+        } else if(file.name.startsWith("groovy-all")) {
+            if(classPath.length()>0)
+                classPath.append(File.pathSeparator)
+            classPath.append(file.path)
+        }
     }
 
     classPath.append(File.pathSeparator).append(System.getProperty("JAVA_HOME")).append("/lib/tools.jar")
@@ -41,14 +50,13 @@ manager {
 
     log = "${rootLogDir}/${name}/logs/${logExt}/"
 
-    jvmOptions='''
-        -javaagent:${RIO_HOME}${/}lib${/}rio-start.jar
-        -Djava.protocol.handler.pkgs=org.rioproject.url
-        -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs
-        -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all
-        -DRIO_HOME=${RIO_HOME} -DRIO_TEST_ATTACH
-        -Dorg.rioproject.groups=${org.rioproject.groups}
-        -Dorg.rioproject.service=${service}'''
+    jvmOptions =
+        '-javaagent:'+rioStartJar+' -Djava.protocol.handler.pkgs=org.rioproject.url '+
+        '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs '+
+        '-server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all '+
+        '-DRIO_HOME=${RIO_HOME} -DRIO_TEST_ATTACH '+
+        '-Dorg.rioproject.groups=${org.rioproject.groups} '+
+        '-Dorg.rioproject.service=${service}'
 
 
     mainClass = 'org.rioproject.start.ServiceStarter'

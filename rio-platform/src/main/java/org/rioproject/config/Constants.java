@@ -94,9 +94,12 @@ public interface Constants {
      * Default name of the OperationalString name for core-services
      */
     static final String CORE_OPSTRING="System-Core";
-
     /**
      * Property to use for the starter configuration for forking a service
      */
     static final String START_SERVICE_BEAN_EXEC_CONFIG = BASE_COMPONENT+".start-service-bean-exec";
+    /**
+     * Version of River
+     */
+    static final String RIVER_VERSION = "2.1.1";
 }

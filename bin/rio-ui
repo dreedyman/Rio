@@ -3,21 +3,23 @@
 # Launches the Rio UI
 #
 
+rioVersion=5.0-M3
+
 scriptDir="`dirname $0`"
 if [ -z "$RIO_HOME" ] ; then
     if [ "$scriptDir" = "bin" ] ; then
         RIO_HOME="$scriptDir"
-        path_to_jar="lib/rio-ui.jar"
+        path_to_jar="lib/rio-ui-$rioVersion.jar"
     else
         if [ "$scriptDir" = "." ] ; then
-            path_to_jar="../lib/rio-ui.jar"
+            path_to_jar="../lib/rio-ui-$rioVersion.jar"
         else
             echo "Dont know how to start Rio UI from [$scriptDir]"
             exit 1
         fi
     fi
 else
-    path_to_jar="$RIO_HOME/lib/rio-ui.jar"
+    path_to_jar="$RIO_HOME/lib/rio-ui-$rioVersion.jar"
 fi
 
 # Check for running on OS/X

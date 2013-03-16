@@ -75,10 +75,17 @@ toWindows() {
     cygpath -pw "$@"
 }
 
+# -----------------------------------
+# Versions of jars used in the script
+# -----------------------------------
+rioVersion=5.0-M3
+riverVersion=2.1.1
+groovyVersion=2.0.6
+
 # Call the install script, do not assume that Groovy has been installed.
 installRioToLocalRepository() {
-    if [ -f "$RIO_LIB/groovy-all.jar" ]; then
-        groovyClasspath="-cp `toNative $RIO_LIB/groovy-all.jar`"
+    if [ -f "$RIO_LIB/groovy-all-$groovyVersion.jar" ]; then
+        groovyClasspath="-cp `toNative $RIO_LIB/groovy-all-$groovyVersion.jar`"
         ""$JAVACMD"" $groovyClasspath org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain \
         $scriptDir/install.groovy $JAVA_HOME $RIO_HOME
     else
@@ -131,7 +138,8 @@ fi
 if [ "$start" = "1" ]; then
 
     # Run installer first
-    #installRioToLocalRepository
+    echo "INFO  $(date +%T) check local repository"
+    installRioToLocalRepository
 
     if [ -z "$RIO_NATIVE_DIR" ] ; then
         RIO_NATIVE_DIR="`toNative $RIO_LIB/native`"
@@ -154,8 +162,8 @@ if [ "$start" = "1" ]; then
         fi
         USER_OPTS="-DRIO_NATIVE_DIR=$RIO_NATIVE_DIR $USER_OPTS"
     fi
-    classpath="-cp `toNative $RIO_LIB/rio-start.jar:$RIO_LIB/resolver-api.jar:$RIO_LIB/start.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all.jar:$SLF4J_CLASSPATH`"
-    agentpath="-javaagent:`toNative $RIO_LIB/rio-start.jar`"
+    classpath="-cp `toNative $RIO_LIB/rio-start-$rioVersion.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all-$groovyVersion.jar:$SLF4J_CLASSPATH`"
+    agentpath="-javaagent:`toNative $RIO_LIB/rio-start-$rioVersion.jar`"
     launchTarget=org.rioproject.start.ServiceStarter
     if [ -z "$1" ] ; then
         echo "A service to start is required, exiting"
@@ -206,7 +214,7 @@ else
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
     cliExt="$RIO_HOME/config/tools.groovy"
     launchTarget=org.rioproject.tools.cli.CLI
-    classpath="-cp `toNative $RIO_LIB/rio-cli.jar:$RIO_LIB_DL/rio-api.jar:$RIO_LIB_DL/jmx-lookup.jar:$RIO_LIB/jsk-lib.jar:$RIO_LIB/jsk-platform.jar:$RIO_LIB/groovy-all.jar:$SLF4J_CLASSPATH`"
+    classpath="-cp `toNative $RIO_LIB/rio-cli-$rioVersion.jar:$RIO_LIB_DL/rio-api-$rioVersion.jar:$RIO_LIB_DL/jmx-lookup-2.1.jar:$RIO_LIB/jsk-lib-$riverVersion.jar:$RIO_LIB/jsk-platform-$riverVersion.jar:$RIO_LIB/groovy-all-$groovyVersion.jar:$SLF4J_CLASSPATH`"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \

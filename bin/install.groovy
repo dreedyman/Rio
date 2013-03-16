@@ -46,11 +46,21 @@ if(!new File(rioHome, "lib").exists()) {
     System.err.println("Invalid location of Rio: "+rioHome)
     System.exit(2)
 }
-
+def getJar(File dir, String name) {
+    File jar = null
+    for(File file : dir.listFiles()) {
+        if (file.name.startsWith(name)) {
+            jar = file
+            break;
+        }
+    }
+    return jar
+}
 StringBuilder classPath = new StringBuilder()
-classPath.append(new File(rioHome, "lib/groovy-all.jar").path)
+File rioLib= new File(rioHome, "lib")
+classPath.append(getJar(rioLib, "groovy-all").path)
 classPath.append(File.pathSeparator)
-classPath.append(new File(rioHome, "lib/rio-start.jar").path)
+classPath.append(getJar(rioLib, "rio-start").path)
 classPath.append(File.pathSeparator)
 File resolverLibs = new File(rioHome, "lib/resolver")
 for(File f: resolverLibs.listFiles()) {
