@@ -14,7 +14,6 @@ set RIO_LIB=%RIO_HOME%\lib
 
 rem Set Versions
 set rioVersion=5.0-M3
-set riverVersion=2.1.1
 set groovyVersion=2.0.6
 
 if "%JAVA_HOME%" == "" goto noJavaHome
