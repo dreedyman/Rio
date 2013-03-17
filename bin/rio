@@ -214,7 +214,7 @@ else
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
     cliExt="$RIO_HOME/config/tools.groovy"
     launchTarget=org.rioproject.tools.cli.CLI
-    classpath="-cp `toNative $RIO_LIB/rio-cli-$rioVersion.jar:$RIO_LIB_DL/rio-api-$rioVersion.jar:$RIO_LIB_DL/jmx-lookup-2.1.jar:$RIO_LIB/jsk-lib-$riverVersion.jar:$RIO_LIB/jsk-platform-$riverVersion.jar:$RIO_LIB/groovy-all-$groovyVersion.jar:$SLF4J_CLASSPATH`"
+    classpath="-cp `toNative $RIO_LIB/rio-cli-$rioVersion.jar:$SLF4J_CLASSPATH`"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
