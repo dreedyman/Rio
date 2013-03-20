@@ -32,9 +32,11 @@ public class StopWatchCalculable extends Calculable {
     public String toString() {
         String s;
         if (getDetail() != null) {
-            s = String.format("id: [%s], start: [%s], elapsed: [%s], detail: [%s]", getId(), start, getValue(), getDetail());
+            s = String.format("%s - id: [%s], start: [%s], elapsed: [%s], detail: [%s]",
+                              getFormattedDate(), getId(), start, getValue(), getDetail());
         } else {
-            s = String.format("id: [%s], start: [%s], elapsed: [%s]", getId(), start, getValue());
+            s = String.format("%s - id: [%s], start: [%s], elapsed: [%s]",
+                              getFormattedDate(), getId(), start, getValue());
         }
         return s;
     }
