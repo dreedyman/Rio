@@ -64,7 +64,7 @@ public class ServiceBeanSLAManager {
     private SLAThresholdEventAdapter slaAdapter;
     /* Monitors thread deadlocks in forked vms */
     static final String COMPONENT = ServiceBeanSLAManager.class.getName();
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(ServiceBeanSLAManager.class);
 
     public ServiceBeanSLAManager(final Object impl,
                                  final Object proxy,
@@ -202,11 +202,13 @@ public class ServiceBeanSLAManager {
                     logger.warn("Creating SLAPolicyHandler for SLA [{}]", sla.getIdentifier(), e);
                 }
             }
-
-            logger.trace("[{}] Adding SLA [{}] to the Watch Registry for subsequent association",
-                         context.getServiceElement().getName(), identifier);
             if (handler != null) {
+                logger.trace("[{}] Adding SLA [{}] to the Watch Registry for subsequent association",
+                             context.getServiceElement().getName(), identifier);
                 context.getWatchRegistry().addThresholdListener(identifier, handler);
+            } else {
+                logger.error("[{}] Could not addSLA [{}] to the Watch Registry for subsequent association, handler is null",
+                             context.getServiceElement().getName(), identifier);
             }
         }
     }

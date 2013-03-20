@@ -39,7 +39,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
     /** The ServiceBeanContext */
     private ServiceBeanContext context;
     /** A Logger */
-    private static Logger logger = LoggerFactory.getLogger("org.rioproject.watch");
+    private static Logger logger = LoggerFactory.getLogger(WatchDataSourceRegistry.class);
 
     /**
      * @see org.rioproject.watch.WatchRegistry#deregister
