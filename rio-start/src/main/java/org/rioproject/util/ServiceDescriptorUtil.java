@@ -290,7 +290,7 @@ public final class ServiceDescriptorUtil {
      * @throws UnknownHostException If the host cannot be resolved
      */
     public static void checkForLoopback() throws UnknownHostException {
-            InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         if(address.isLoopbackAddress()) {
             StringBuilder builder = new StringBuilder();
             builder.append("\n");
