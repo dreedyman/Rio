@@ -34,7 +34,7 @@ public class Calculable implements Serializable {
     private long when;
     /** Holds Optional detail about the metric */
     private String detail;
-    private final DateFormat formatter = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss,SSS");
+    public static final DateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss,SSS");
 
     /**
      * Create a new Calculable
@@ -159,7 +159,7 @@ public class Calculable implements Serializable {
 
     protected String getFormattedDate() {
         Date date = new Date(when);
-        return formatter.format(date);
+        return DATE_FORMATTER.format(date);
     }
 
     /**
