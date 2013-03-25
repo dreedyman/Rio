@@ -17,6 +17,7 @@
 package org.rioproject.tools.webster;
 
 import org.rioproject.config.Constants;
+import org.rioproject.net.HostUtil;
 import org.rioproject.net.PortRangeServerSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,8 +258,12 @@ public class Webster implements Runnable {
             debug = true;
         setupRoots(roots);
         try {
-            InetAddress addr = InetAddress.getByName(bindAddress==null?
-                                                     InetAddress.getLocalHost().getHostAddress():bindAddress);
+            InetAddress addr;
+            if(bindAddress==null) {
+                addr = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+            } else {
+                addr = InetAddress.getByName(bindAddress);
+            }
             if(socketFactory==null) {
                 ss = new ServerSocket(port, 0, addr);
             } else {
