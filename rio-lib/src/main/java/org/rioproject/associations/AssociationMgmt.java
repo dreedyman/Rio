@@ -39,6 +39,7 @@ import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.cybernode.ServiceBeanContainer;
 import org.rioproject.cybernode.ServiceBeanContainerListener;
+import org.rioproject.cybernode.ServiceBeanDelegate;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.fdh.FaultDetectionHandler;
@@ -1127,7 +1128,6 @@ public class AssociationMgmt implements AssociationManagement {
                 try {
                     serviceDiscovered(item);
                 } catch(Exception e) {
-                    e.printStackTrace();
                     if(!ThrowableUtil.isRetryable(e)) {
                         lCache.discard(item.service);
                     }
@@ -1182,7 +1182,7 @@ public class AssociationMgmt implements AssociationManagement {
                 builder.append("[").append(clientName).append("] ");
                 builder.append("Unable to notify Listeners on failure, returned ServiceItem is null for association ");
                 builder.append(association.getName());
-                builder.append("The Association reports ").append(association.getServiceCount()).append(" services");
+                builder.append(". The Association reports ").append(association.getServiceCount()).append(" services");
                 logger.warn(builder.toString());
             }
             fdhTable.remove(sid);
@@ -1244,10 +1244,18 @@ public class AssociationMgmt implements AssociationManagement {
          * @throws Exception if the fault detection handler cannot be attached
          */
         protected void setFaultDetectionHandler(final Object service, final ServiceID serviceID) throws Exception {
-            FaultDetectionHandler<ServiceID> fdh;
-            if(getAssociation().getAssociationType()==AssociationType.COLOCATED) {
-                fdh = new ColocatedListener();
-            } else {
+            FaultDetectionHandler<ServiceID> fdh = null;
+            if(container!=null) {
+                ServiceBeanDelegate delegate =
+                    container.getServiceBeanDelegate(UuidFactory.create(serviceID.getMostSignificantBits(),
+                                                                        serviceID.getLeastSignificantBits()));
+                if(delegate!=null) {
+                    logger.debug("Create FDH to monitor colocated service [{}]", association.getName());
+                    fdh = new ColocatedListener();
+                }
+            }
+            if(fdh==null) {
+                logger.debug("Create FDH to monitor external service [{}]", association.getName());
                 ClassLoader cl = service.getClass().getClassLoader();
                 fdh = FaultDetectionHandlerFactory.getFaultDetectionHandler(aDesc, cl);
             }
