@@ -103,6 +103,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
      *
      * @see InvocationHandler#invoke(Object, java.lang.reflect.Method, Object[])
      */
+    @SuppressWarnings("unchecked")
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         PackagedMethod template = null;
         try {
@@ -115,7 +116,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
                 return(beanMethod.invoke(bean, args));
             }
         } catch (InvocationTargetException e) {
-            throw e.getTargetException();
+            throw e.getCause()==null? e.getTargetException(): e.getCause();
         } finally {
             if(template!=null)
                 template.clear();
