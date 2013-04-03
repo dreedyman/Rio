@@ -78,6 +78,8 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         ServiceCapability<T> selected = null;
         /*  Round-Robin */
         for(ServiceCapability<T> sc : getServices()) {
+            if(sc==null)
+                continue;
             if(sc.isInvokable()) {
                 services.remove(sc);
                 services.add(sc);
