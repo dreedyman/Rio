@@ -365,7 +365,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             logger.warn(sb.toString());
         } else{
             sb.append(", All Measured Resources within range");
-            logger.debug(sb.toString());
+            logger.trace(sb.toString());
         }
 
         for (ProvisionLeaseManager mgr : mgrs) {
