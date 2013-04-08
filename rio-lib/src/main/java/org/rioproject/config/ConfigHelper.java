@@ -154,6 +154,10 @@ public class ConfigHelper {
             List<String> list = new ArrayList<String>();
 
             for(String fileName : fileArgs.split(",")) {
+                if(fileName.startsWith("http:") || fileName.startsWith("https:")) {
+                    list.add(fileName);
+                    continue;
+                }
                 if(!fileName.startsWith(File.separator)) {
                     fileName = System.getProperty("user.dir")+File.separator+fileName;
                 }

@@ -86,7 +86,7 @@ class GroovyConfig implements Configuration {
                         resource = groovySource.substring(ndx+2)
                     groovyCodeSource = new GroovyCodeSource(loader.getResource(resource))
                 } else {
-                    if(groovySource.startsWith("file:")) {
+                    if(groovySource.startsWith("file:") || groovySource.startsWith("http:") || groovySource.startsWith("https:")) {
                         groovyCodeSource = new GroovyCodeSource(new URL(groovySource))
                     } else {
                         File groovyFile = new File(groovySource)
