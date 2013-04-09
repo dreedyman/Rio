@@ -47,7 +47,12 @@ public class SLAThresholdEventNode extends RemoteServiceEventNode<SLAThresholdEv
         builder.append(getEvent().getHostAddress()).append(" SLA ");
         builder.append("\"").append(sla.getIdentifier()).append("\"").append(" ");
         builder.append(getStatus().toLowerCase()).append(", ");
-        builder.append("value: ").append(formatPercent(getEvent().getCalculable().getValue()));
+        builder.append("value: ");
+        double value = getEvent().getCalculable().getValue();
+        if(value<1)
+            builder.append(formatPercent(value));
+        else
+            builder.append(value);
         return builder.toString();
     }
 
