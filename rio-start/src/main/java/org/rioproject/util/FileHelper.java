@@ -18,7 +18,7 @@ package org.rioproject.util;
 import java.io.File;
 
 /**
- * Utility for looking for a file in a directory or getting the version from the file name.
+ * Utility for looking for a file in a directory or getting the version from a file name.
  *
  * @author Dennis Reedy
  */
