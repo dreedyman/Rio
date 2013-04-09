@@ -278,8 +278,9 @@ public final class ServiceDescriptorUtil {
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
-        String reggieClasspath = rioHome+File.separator+"lib"+File.separator+createVersionedJar("reggie", Constants.RIVER_VERSION);
-        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/"+Constants.RIVER_VERSION;
+        String reggieClasspath = FileHelper.find(new File(rioHome, "lib"), "reggie").getPath();
+        File reggieDL = FileHelper.find(new File(rioHome, "lib-dl"), "reggie-dl");
+        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }
@@ -314,11 +315,7 @@ public final class ServiceDescriptorUtil {
     }
 
     private static String createVersionedJar(String name) {
-        return createVersionedJar(name, RioVersion.VERSION);
-    }
-
-    private static String createVersionedJar(String name, String version) {
-        return String.format("%s-%s.jar", name, version);
+        return String.format("%s-%s.jar", name, RioVersion.VERSION);
     }
 
 }

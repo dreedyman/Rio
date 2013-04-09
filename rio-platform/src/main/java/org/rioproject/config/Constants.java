@@ -76,6 +76,7 @@ public interface Constants {
      * the Resolver will not include the Rio platform (and it's dependencies) in
      * generated classpaths.
      */
+    @SuppressWarnings("unused")
     static final String RESOLVER_PRUNE_PLATFORM = BASE_COMPONENT+".resolver.prune.platform";
     /**
      * Property to indicate the jar(s) to use when creating the class loader to load an implementation
@@ -98,8 +99,4 @@ public interface Constants {
      * Property to use for the starter configuration for forking a service
      */
     static final String START_SERVICE_BEAN_EXEC_CONFIG = BASE_COMPONENT+".start-service-bean-exec";
-    /**
-     * Version of River
-     */
-    static final String RIVER_VERSION = "2.1.1";
 }

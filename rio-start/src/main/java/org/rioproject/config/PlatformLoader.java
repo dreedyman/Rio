@@ -19,6 +19,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import org.rioproject.RioVersion;
+import org.rioproject.util.FileHelper;
 import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -321,10 +322,10 @@ public class PlatformLoader {
         rioCap.setClasspath(rioClassPath.toString());
 
         PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig();
-        File jskLibJar = new File(rioHomeDir, "lib"+File.separator+String.format("jsk-lib-%s.jar", Constants.RIVER_VERSION));
+        File jskLibJar = FileHelper.find(new File(rioHomeDir, "lib"), "jsk-lib");
         jiniCap.setCommon("yes");
         jiniCap.setName("Apache River");
-        jiniCap.setVersion(Constants.RIVER_VERSION);
+        jiniCap.setVersion(FileHelper.getJarVersion(jskLibJar.getName()));
         jiniCap.setClasspath(jskLibJar.getAbsolutePath());
 
         Collection<PlatformCapabilityConfig> c = new ArrayList<PlatformCapabilityConfig>();
@@ -332,4 +333,5 @@ public class PlatformLoader {
         c.add(jiniCap);
         return(c.toArray(new PlatformCapabilityConfig[c.size()]));
     }
+
 }
