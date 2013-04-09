@@ -20,6 +20,7 @@ import java.io.Serializable;
 /**
  * Representation of a remote repository.
  */
+@SuppressWarnings("unused")
 public class RemoteRepository implements Serializable {
     static final long serialVersionUID = 1L;
     private String id;
@@ -27,11 +28,44 @@ public class RemoteRepository implements Serializable {
     private String url;
     private boolean snapshots = true;
     private boolean releases = true;
-    private String releaseChecksumPolicy = "fail";
-    private String snapshotChecksumPolicy = "fail";
-    private String releaseUpdatePolicy = "daily";
-    private String snapshotUpdatePolicy = "daily";
+    private String releaseChecksumPolicy = CHECKSUM_POLICY_FAIL;
+    private String snapshotChecksumPolicy = CHECKSUM_POLICY_FAIL;
+    private String releaseUpdatePolicy = UPDATE_POLICY_DAILY;
+    private String snapshotUpdatePolicy = UPDATE_POLICY_DAILY;
     private boolean mirrored;
+    /**
+     * Verify checksums and fail the resolution if they do not match.
+     */
+    public static final String CHECKSUM_POLICY_FAIL = "fail";
+
+    /**
+     * Verify checksums and warn if they do not match.
+     */
+    public static final String CHECKSUM_POLICY_WARN = "warn";
+
+    /**
+     * Do not verify checksums.
+     */
+    public static final String CHECKSUM_POLICY_IGNORE = "ignore";
+    /**
+     * Never update locally cached data.
+     */
+    public static final String UPDATE_POLICY_NEVER = "never";
+
+    /**
+     * Always update locally cached data.
+     */
+    public static final String UPDATE_POLICY_ALWAYS = "always";
+
+    /**
+     * Update locally cached data once a day.
+     */
+    public static final String UPDATE_POLICY_DAILY = "daily";
+
+    /**
+     * Update locally cached data every X minutes as given by "interval:X".
+     */
+    public static final String UPDATE_POLICY_INTERVAL = "interval";
 
     public boolean supportsSnapshots() {
         return snapshots;
