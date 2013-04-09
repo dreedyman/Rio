@@ -134,17 +134,14 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 try {
                     logger.debug("Resolve {} ", codebase);
                     StringBuilder builder = new StringBuilder();
-                    String[] codebaseParts = codebase.split(" ");
-                    for(String codebasePart : codebaseParts) {
-                        String path =  codebasePart.substring(codebase.indexOf(":")+1);
-                        ArtifactURLConfiguration artifactURLConfiguration = new ArtifactURLConfiguration(path);
-                        String[] cp = resolver.getClassPathFor(artifactURLConfiguration.getArtifact(),
-                                                               artifactURLConfiguration.getRepositories());
-                        for(String s : cp) {
-                            if(builder.length()>0)
-                                builder.append(" ");
-                            builder.append(new File(s).toURI().toURL().toExternalForm());
-                        }
+                    String path =  codebase.substring(codebase.indexOf(":")+1);
+                    ArtifactURLConfiguration artifactURLConfiguration = new ArtifactURLConfiguration(path);
+                    String[] cp = resolver.getClassPathFor(artifactURLConfiguration.getArtifact(),
+                                                           artifactURLConfiguration.getRepositories());
+                    for(String s : cp) {
+                        if(builder.length()>0)
+                            builder.append(" ");
+                        builder.append(new File(s).toURI().toURL().toExternalForm());
                     }
                     adaptedCodebase = builder.toString();
                     artifactToCodebase.put(codebase, adaptedCodebase);
