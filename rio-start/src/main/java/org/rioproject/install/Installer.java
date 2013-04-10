@@ -134,7 +134,7 @@ public final class Installer {
     }
 
     private static Artifact createArtifact(String ga, File jar) {
-        return new Artifact(String.format("%s:%s", ga, FileHelper.getJarVersion(jar)));
+        return new Artifact(String.format("%s:%s", ga, FileHelper.getJarVersion(jar.getName())));
     }
 
     private static void formatAndAddToMap(String a, String j, Map<Artifact, String> map) {
