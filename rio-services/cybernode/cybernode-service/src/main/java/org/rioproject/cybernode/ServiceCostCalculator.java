@@ -19,15 +19,11 @@ import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.system.ComputeResource;
-import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.measurable.MeasurableCapability;
-import org.rioproject.watch.Calculable;
-import org.rioproject.watch.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,13 +33,10 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class ServiceCostCalculator {
-    private static String COMPONENT = "org.rioproject.cybernode.instrument";
-    static Logger logger = LoggerFactory.getLogger(COMPONENT);
-    ComputeResource computeResource;
-    DownloadRecord[] downloadRecords;
-    ServiceBeanContext context;
-    double lastCPUUtilization;
-    double lastMemoryUtilization;
+    static Logger logger = LoggerFactory.getLogger(ServiceCostCalculator.class);
+    private ComputeResource computeResource;
+    private DownloadRecord[] downloadRecords;
+    private ServiceBeanContext context;
 
     /**
      * Set the ComputeResource
@@ -79,18 +72,13 @@ public class ServiceCostCalculator {
     }
 
     /**
-     * Calculate ResourceCost instances for cpu, memory, matched platform
+     * Calculate ResourceCost instances for matched platform
      * capabilities and software downloads
      *
      * @param duration The time between cost calculations
      *
-     * @return An array of ResourceCost objects containing at least a
-     * ResourceCost for cpu and memory.
+     * @return An array of ResourceCost objects.
      * <ul>
-     * <li>Both cpu and memory resource costs are computed as the mean of the
-     * calculated utilizations each respective
-     * {@link org.rioproject.system.measurable.MeasurableCapability} has recorded
-     * over the time period provided.
      * <li>For each matched {@link org.rioproject.system.capability.PlatformCapability}
      * class a ResourceCost is added.
      * <li>If there are DownloadRecord instances, a ResourceCost for
@@ -100,43 +88,14 @@ public class ServiceCostCalculator {
      */
     public ResourceCost[] calculateCosts(long duration) {
         List<ResourceCost> costList = new ArrayList<ResourceCost>();
-        long now = System.currentTimeMillis();
-        long from = now-duration;
-        double utilization;
-        
-        /* CPU utilization is the mean of the last calculated utilization as well
-         * as the mean of values returned from the last calculation */
-        MeasurableCapability mCap = computeResource.getMeasurableCapability(
-            SystemWatchID.PROC_CPU);
-        if(mCap!=null) {
-            utilization = getMean(mCap, from, now, lastCPUUtilization);
-            double cpuUtilization = (lastCPUUtilization==0?utilization:
-                                     (lastCPUUtilization+utilization)/2);
-            lastCPUUtilization = utilization;
-            costList.add(mCap.calculateResourceCost(cpuUtilization, duration));
-        }
-
-        /* Memory utilization is calculated the same as CPU (above); the mean
-         * of the last calculated utilization as well as the mean of values
-         * returned from the last calculation */
-        mCap = computeResource.getMeasurableCapability("Memory");
-        if(mCap!=null) {
-            utilization = getMean(mCap, from, now, lastMemoryUtilization);
-            double memUnits = (lastMemoryUtilization==0?utilization:
-                               (lastMemoryUtilization+utilization)/2);
-            lastMemoryUtilization = utilization;
-            costList.add(mCap.calculateResourceCost(memUnits, duration));
-
-        }
         if(downloadRecords!=null) {
             for (DownloadRecord downloadRecord : downloadRecords) {
                 int size = downloadRecord.getDownloadedSize();
                 if (downloadRecord.unarchived())
                     size += downloadRecord.getExtractedSize();
-                mCap = computeResource.getMeasurableCapability("DiskSpace");
+                MeasurableCapability mCap = computeResource.getMeasurableCapability("DiskSpace");
                 if (mCap != null)
-                    costList.add(mCap.calculateResourceCost(
-                        new Integer(size).doubleValue(), duration));
+                    costList.add(mCap.calculateResourceCost(new Integer(size).doubleValue(), duration));
                 else {
                     if (logger.isDebugEnabled()) {
                         logger.warn("DiskSpace capability not found, cannot create ResourceCost");
@@ -153,23 +112,6 @@ public class ServiceCostCalculator {
                     pCap.calculateResourceCost((double) duration, duration));
         }
         return(costList.toArray(new ResourceCost[costList.size()]));
-    }
-
-    private double getMean(MeasurableCapability mCap, long from, long to, double last) {
-        if(mCap==null)
-            return 0;
-        double mean = 0;
-        try {
-            Calculable[] calcs = mCap.getWatchDataSource().getCalculable(from, to);
-            Statistics stats = new Statistics();
-            stats.setValues(calcs);
-            if (last != 0)
-                stats.addValue(last);
-            mean = stats.mean();
-        } catch (RemoteException e) {
-            logger.warn("Getting the mean", e);
-        }
-        return (Double.isNaN(mean)?0:mean);
     }
 
 }
