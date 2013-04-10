@@ -68,7 +68,7 @@ public class Handler extends URLStreamHandler {
             resolver = ResolverHelper.getResolver();
         } catch (ResolverException e) {
             logger.error("Could not get a ResolverInstance", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException("Could not get a ResolverInstance", e);
         }
     }
     private final ConcurrentMap<Artifact, URL> cache = new ConcurrentHashMap<Artifact, URL>();
