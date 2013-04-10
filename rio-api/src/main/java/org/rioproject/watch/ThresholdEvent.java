@@ -17,7 +17,7 @@ package org.rioproject.watch;
 
 import org.rioproject.event.RemoteServiceEvent;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * The ThresholdEvent extends RemoteServiceEvent allowing for remote
@@ -25,16 +25,15 @@ import java.io.Serializable;
  *
  * @author Dennis Reedy
  */
-@SuppressWarnings("unused")
 public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
-    static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
     public static final long ID = 1000000000;
     /** Holds value of property Calculable */
     private Calculable calculable;
     /** Holds value of property ThresholdValue. */
     private ThresholdValues thresholdValues;
     /** The type of the ThresholdEvent, breached or cleared */
-    private ThresholdType type;
+    private ThresholdType thresholdType;
     /** Optional detail describing the ThresholdEvent */
     private String detail;
 
@@ -79,7 +78,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
         super(source);
         this.calculable = calculable;
         this.thresholdValues = thresholdValues;
-        this.type = type;
+        this.thresholdType = type;
         this.detail = detail;
     }
 
@@ -89,7 +88,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
      * @return type Whether the threshold has been breached or cleared
      */
     public ThresholdType getThresholdType() {
-        return (type);
+        return thresholdType;
     }
 
     /**
@@ -98,7 +97,7 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
      * @param type Whether the threshold has been breached or cleared
      */
     public void setThresholdType(ThresholdType type) {
-        this.type = type;
+        this.thresholdType = type;
     }
 
     /**
@@ -143,5 +142,32 @@ public class ThresholdEvent extends RemoteServiceEvent implements Serializable {
 
     public void setDetail(String detail) {
         this.detail = detail;
+    }
+
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+        ObjectInputStream.GetField fields = in.readFields();
+        for(ObjectStreamField field : fields.getObjectStreamClass().getFields()) {
+            if(field.getName().equals("calculable")) {
+                this.calculable = (Calculable) fields.get(field.getName(), null);
+            }
+            if(field.getName().equals("detail")) {
+                this.detail = (String) fields.get(field.getName(), null);
+            }
+            if(field.getName().equals("type")) {
+                int type = fields.get("type", 0);
+                /** Conversion from an older version of ThresholdEvent. A type of 0 is BREACHED, 1 is CLEARED */
+                if(type==0) {
+                    this.thresholdType = ThresholdType.BREACHED;
+                } else {
+                    this.thresholdType = ThresholdType.CLEARED;
+                }
+            }
+            if(field.getName().equals("thresholdType")) {
+                this.thresholdType = (ThresholdType) fields.get(field.getName(), null);
+            }
+            if(field.getName().equals("thresholdValues")) {
+                this.thresholdValues = (ThresholdValues) fields.get(field.getName(), null);
+            }
+        }
     }
 }
