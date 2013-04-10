@@ -21,6 +21,7 @@ import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resolver.maven2.Repository;
+import org.rioproject.util.FileHelper;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -71,24 +72,24 @@ public final class Installer {
 
             /* Install rio-platform */
             Artifact rioPlatform = new Artifact("org.rioproject:rio-platform:" + RioVersion.VERSION);
-            install(rioPlatform, null, new File(libDir, "rio-platform.jar"), aetherServiceInstance);
+            install(rioPlatform, null, FileHelper.find(libDir, "rio-platform"), aetherServiceInstance);
 
             /* Install Rio Resolver API */
             Artifact resolverAPI = new Artifact("org.rioproject.resolver:resolver-api:" + RioVersion.VERSION);
-            install(resolverAPI, null, new File(libDir, "resolver-api.jar"), aetherServiceInstance);
+            install(resolverAPI, null, FileHelper.find(libDir, "resolver-api"), aetherServiceInstance);
 
             /* Install client and proxy jars */
-            rioArtifactJars.put(new Artifact("org.rioproject.cybernode:cybernode-api:" + RioVersion.VERSION), "cybernode-api.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject.cybernode:cybernode-proxy:" + RioVersion.VERSION), "cybernode-proxy.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject.cybernode:cybernode-ui:" + RioVersion.VERSION), "cybernode-ui.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject.monitor:monitor-api:" + RioVersion.VERSION), "monitor-api.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject.gnostic:gnostic-api:" + RioVersion.VERSION), "gnostic-api.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject.monitor:monitor-proxy:" + RioVersion.VERSION), "monitor-proxy.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject:rio-api:" + RioVersion.VERSION), "rio-api.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject:watch-ui:" + RioVersion.VERSION), "watch-ui.jar");
+            formatAndAddToMap("org.rioproject.cybernode:cybernode-api", "cybernode-api", rioArtifactJars);
+            formatAndAddToMap("org.rioproject.cybernode:cybernode-proxy", "cybernode-proxy", rioArtifactJars);
+            formatAndAddToMap("org.rioproject.cybernode:cybernode-ui", "cybernode-ui", rioArtifactJars);
+            formatAndAddToMap("org.rioproject.monitor:monitor-api", "monitor-api", rioArtifactJars);
+            formatAndAddToMap("org.rioproject.gnostic:gnostic-api", "gnostic-api", rioArtifactJars);
+            formatAndAddToMap("org.rioproject.monitor:monitor-proxy", "monitor-proxy", rioArtifactJars);
+            formatAndAddToMap("org.rioproject:rio-api", "rio-api", rioArtifactJars);
+            formatAndAddToMap("org.rioproject:watch-ui", "watch-ui", rioArtifactJars);
 
-            rioArtifactJars.put(new Artifact("org.rioproject.event-collector:event-collector-api:" + RioVersion.VERSION), "event-collector-api.jar");
-            rioArtifactJars.put(new Artifact("org.rioproject.event-collector:event-collector-proxy:" + RioVersion.VERSION), "event-collector-proxy.jar");
+            formatAndAddToMap("org.rioproject.event-collector:event-collector-api", "event-collector-api", rioArtifactJars);
+            formatAndAddToMap("org.rioproject.event-collector:event-collector-proxy", "event-collector-proxy", rioArtifactJars);
 
             File libDlDir = new File(rioHome + File.separator + "lib-dl");
             for (Map.Entry<Artifact, String> entry : rioArtifactJars.entrySet()) {
@@ -101,22 +102,26 @@ public final class Installer {
             Artifact gnosticParent = new Artifact("org.rioproject:gnostic:" + RioVersion.VERSION);
             install(gnosticParent, new File(pomDir, "rio-gnostic.pom"), null, aetherServiceInstance);
             Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
-            install(gnosticService, null, new File(libDir, "gnostic-service.jar"), aetherServiceInstance);
-            
-            String jiniVersion = "2.1.1";
+            install(gnosticService, null, FileHelper.find(libDir, "gnostic-service"), aetherServiceInstance);
+
+            File jskPlatformJar = FileHelper.find(libDir, "jsk-platform");
+            File jmxLookupJar = FileHelper.find(libDlDir, "jmx-lookup");
+            File jskDLJar = FileHelper.find(libDlDir, "jsk-dl");
+            File reggieDLJar = FileHelper.find(libDlDir, "reggie-dl");
+            File serviceUIJar = FileHelper.find(libDlDir, "serviceui");
 
             /* Install third party jars */
-            Artifact jskPlatform = new Artifact("net.jini:jsk-platform:"+jiniVersion);
-            Artifact jmxLookup = new Artifact("net.jini.lookup:jmx-lookup:2.1");
-            Artifact jskDL = new Artifact("net.jini:jsk-dl:"+jiniVersion);
-            Artifact reggieDL = new Artifact("com.sun.jini:reggie-dl:"+jiniVersion);
-            Artifact serviceUI = new Artifact("net.jini.lookup:serviceui:"+jiniVersion);
+            Artifact jskPlatform = createArtifact("net.jini:jsk-platform", jskPlatformJar);
+            Artifact jmxLookup = createArtifact("net.jini.lookup:jmx-lookup", jmxLookupJar);
+            Artifact jskDL = createArtifact("net.jini:jsk-dl", jskDLJar);
+            Artifact reggieDL = createArtifact("com.sun.jini:reggie-dl", reggieDLJar);
+            Artifact serviceUI = createArtifact("net.jini.lookup:serviceui", serviceUIJar);
 
-            install(jskPlatform, new File(pomDir, "jsk-platform.pom"), new File(libDir, "jsk-platform.jar"), aetherServiceInstance);
-            install(jmxLookup, new File(pomDir, "jmx-lookup.pom"), new File(libDlDir, "jmx-lookup.jar"), aetherServiceInstance);
-            install(jskDL, new File(pomDir, "jsk-dl.pom"), new File(libDlDir, "jsk-dl.jar"), aetherServiceInstance);
-            install(reggieDL, new File(pomDir, "reggie-dl.pom"), new File(libDlDir, "reggie-dl.jar"), aetherServiceInstance);
-            install(serviceUI, new File(pomDir, "serviceui.pom"), new File(libDlDir, "serviceui.jar"), aetherServiceInstance);
+            install(jskPlatform, new File(pomDir, "jsk-platform.pom"), jskPlatformJar, aetherServiceInstance);
+            install(jmxLookup, new File(pomDir, "jmx-lookup.pom"), jmxLookupJar, aetherServiceInstance);
+            install(jskDL, new File(pomDir, "jsk-dl.pom"), jskDLJar, aetherServiceInstance);
+            install(reggieDL, new File(pomDir, "reggie-dl.pom"), reggieDLJar, aetherServiceInstance);
+            install(serviceUI, new File(pomDir, "serviceui.pom"), serviceUIJar, aetherServiceInstance);
 
             /* Dont forget groovy */
 
@@ -126,6 +131,16 @@ public final class Installer {
         } finally {
             Thread.currentThread().setContextClassLoader(cCL);
         }
+    }
+
+    private static Artifact createArtifact(String ga, File jar) {
+        return new Artifact(String.format("%s:%s", ga, FileHelper.getJarVersion(jar)));
+    }
+
+    private static void formatAndAddToMap(String a, String j, Map<Artifact, String> map) {
+        Artifact artifact = new Artifact(String.format("%s:%s", a, RioVersion.VERSION));
+        String jarName = String.format("%s-%s.jar", j, RioVersion.VERSION);
+        map.put(artifact, jarName);
     }
 
     /**
