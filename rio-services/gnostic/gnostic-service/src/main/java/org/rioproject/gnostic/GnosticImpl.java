@@ -262,21 +262,11 @@ public class GnosticImpl implements Gnostic {
          * to be resolved. If for some reason we do not resolve these associations,
          * this service will never be advertised.
          */
-        return createAssociationDescriptor(name, null, AssociationType.REQUIRES, groups);
-    }
-
-    private AssociationDescriptor createAssociationDescriptor(String name,
-                                                              String opStringName,
-                                                              AssociationType aType,
-                                                              String[] groups) {
-
-        AssociationDescriptor ad = new AssociationDescriptor(aType, name);
+        AssociationDescriptor ad = new AssociationDescriptor(AssociationType.REQUIRES, name);
         ad.setInterfaceNames(ProvisionMonitor.class.getName());
         //ad.setPropertyName("service");
         ad.setGroups(groups);
-        if(opStringName!=null)
-            ad.setOperationalStringName(opStringName);
-        ad.setMatchOnName(true);
+        ad.setMatchOnName(false);
         return ad;
     }
 
