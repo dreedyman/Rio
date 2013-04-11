@@ -59,7 +59,7 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactInstalling(RepositoryEvent event) {
-        //out.println("Installing " + event.getArtifact() + " to " + event.getFile());
+        out.println("Installing " + event.getArtifact() + " to " + event.getFile());
     }
 
     public void artifactResolved(RepositoryEvent event) {

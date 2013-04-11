@@ -98,7 +98,6 @@ public final class Installer {
             }
 
             /* Install the Gnostic service and the Gnostic pom */
-
             Artifact gnosticParent = new Artifact("org.rioproject:gnostic:" + RioVersion.VERSION);
             install(gnosticParent, new File(pomDir, "rio-gnostic.pom"), null, aetherServiceInstance);
             Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
@@ -122,9 +121,6 @@ public final class Installer {
             install(jskDL, new File(pomDir, "jsk-dl.pom"), jskDLJar, aetherServiceInstance);
             install(reggieDL, new File(pomDir, "reggie-dl.pom"), reggieDLJar, aetherServiceInstance);
             install(serviceUI, new File(pomDir, "serviceui.pom"), serviceUIJar, aetherServiceInstance);
-
-            /* Dont forget groovy */
-
 
         } catch (ResolverException e) {
             e.printStackTrace();
