@@ -17,7 +17,6 @@ package org.rioproject.test.rmi;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.rioproject.RioVersion;
 import org.rioproject.rmi.ResolvingLoader;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
@@ -51,7 +50,7 @@ public class ResolvingLoaderTest {
         ResolvingLoader loader = new ResolvingLoader();
         assertNotNull(loader);
         ClassLoader sysCL = ClassLoader.getSystemClassLoader();
-        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie-dl//2.1.1;http://www.rio-project.org/maven2");
+        ClassLoader classLoader = loader.getClassLoader("artifact:com.sun.jini/reggie-dl/2.1.1;http://www.rio-project.org/maven2;http://repo1.maven.org/maven2/@central;http://10.0.1.9:52117@Provision Monitor ");
         assertNotNull(classLoader);
         assertTrue("Returned ClassLoader should not be the same as the system ClassLoader", !(classLoader.equals(sysCL)));
         Class c = classLoader.loadClass("com.sun.jini.reggie.ConstrainableAdminProxy");
@@ -68,23 +67,6 @@ public class ResolvingLoaderTest {
         assertTrue("Returned ClassLoader should be an instanceof URLClassLoader", classLoader instanceof URLClassLoader);
         for(URL u : ((URLClassLoader)classLoader).getURLs())
             assertTrue(u.getProtocol().equals("file"));
-    }
-
-    @Test
-    public void testGetClassLoaderWith2Artifacts() throws MalformedURLException, ClassNotFoundException {
-        ResolvingLoader loader = new ResolvingLoader();
-        assertNotNull(loader);
-        ClassLoader sysCL = ClassLoader.getSystemClassLoader();
-        StringBuilder sb = new StringBuilder();
-        sb.append("artifact:com.sun.jini/reggie/jar/dl/2.1;http://www.rio-project.org/maven2");
-        sb.append(" ");
-        sb.append("artifact:org.rioproject/rio-api/"+RioVersion.VERSION+";http://www.rio-project.org/maven2");
-        ClassLoader classLoader = loader.getClassLoader(sb.toString());
-        assertNotNull(classLoader);
-        assertTrue("Returned ClassLoader should not be the same as the system ClassLoader", !(classLoader.equals(sysCL)));
-        assertTrue("Returned ClassLoader should be an instanceof URLClassLoader", classLoader instanceof URLClassLoader);
-        Class c = classLoader.loadClass("com.sun.jini.reggie.ConstrainableAdminProxy");
-        assertNotNull(c);
     }
 
     @Test
