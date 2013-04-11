@@ -48,6 +48,8 @@ getStarterConfig() {
     service="$1"
     if [ -f "$RIO_HOME/config/start-$service.groovy" ] ; then
 	    starterConfig="$RIO_HOME/config/start-$service.groovy"
+    elif [ -f "$service" ] ; then
+        starterConfig="$service"
     else
 	    echo "Cannot locate expected service starter file [start-$service.groovy] in [$RIO_HOME/config], exiting"
 	    exit 1
@@ -137,7 +139,7 @@ fi
 if [ "$start" = "1" ]; then
 
     # Run installer first
-    echo "INFO  $(date +%T) check local repository"
+    echo "INFO  $(date +%T) check local repository for artifacts"
     installRioToLocalRepository
 
     if [ -z "$RIO_NATIVE_DIR" ] ; then
