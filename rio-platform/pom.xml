@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <!--<scope>provided</scope>-->
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -60,18 +60,35 @@
 	    <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-							<Implementation-Title>Rio Project</Implementation-Title>
-							<Implementation-Version>${project.version}</Implementation-Version>
-						    <Rio-Version>${project.version}</Rio-Version>
-						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
-						    <Class-Path>resolver-api-${project.version}.jar jsk-platform-${river.version}.jar groovy-all-${groovy.version}</Class-Path>
-						</manifestEntries>
-                    </archive>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.slf4j:slf4j-api</include>
+                                </includes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Implementation-Title>Rio Project Platform</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Rio-Version>${project.version}</Rio-Version>
+                                        <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                                        <Class-Path>resolver-api-${project.version}.jar jsk-platform-${river.version}.jar groovy-all-${groovy.version}</Class-Path>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

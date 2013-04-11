@@ -193,7 +193,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
-                <include>org.slf4j:slf4j-api</include>
                 <include>ch.qos.logback:logback-core</include>
                 <include>ch.qos.logback:logback-classic</include>
             </includes>
