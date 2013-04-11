@@ -69,7 +69,12 @@
 
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
 
@@ -94,13 +99,14 @@
                                     <include>org.rioproject.monitor:monitor-api</include>
                                     <include>org.rioproject:rio-api</include>
                                     <include>org.rioproject:rio-lib</include>
+                                    <include>org.rioproject:webster</include>
                                     <include>org.rioproject.event-collector:event-collector-api</include>
                                     <include>net.jini.lookup:jmx-lookup</include>
                                     <include>net.jini.lookup:serviceui</include>
+                                    <include>net.jini:jsk-lib</include>
                                     <include>org.prefuse:prefuse</include>
                                     <include>org.swinglabs:swingx</include>
-                                    <include>org.slf4j:slf4j-api</include>
-                                    <include>org.slf4j:slf4j-simple</include>
+                                    <include>org.slf4j:*</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -112,7 +118,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Rio-Version>${project.version}</Rio-Version>
                                         <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>rio-start-${project.version}.jar rio-lib-${project.version}.jar webster-${project.version}.jar groovy-all-${groovy.version}.jar</Class-Path>
+                                        <Class-Path>rio-start-${project.version}.jar groovy-all-${groovy.version}.jar</Class-Path>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

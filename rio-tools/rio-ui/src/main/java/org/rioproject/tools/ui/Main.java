@@ -48,7 +48,6 @@ import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.util.SecurityPolicyLoader;
 import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
@@ -67,6 +66,8 @@ import org.rioproject.tools.webster.InternalWebster;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -76,7 +77,6 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.server.ExportException;
 import java.security.PrivilegedExceptionAction;
@@ -1406,11 +1406,12 @@ public class Main extends JFrame {
             PrivilegedExceptionAction<Main> createViewer =
                 new PrivilegedExceptionAction<Main>() {
                 public Main run() throws Exception {
-                    String securityPolicy = System.getProperty("java.security.policy");
-                    if(securityPolicy == null) 
-                        SecurityPolicyLoader.load(Main.class, "rio-ui.policy");
-                    else
-                        System.setSecurityManager(new RMISecurityManager());
+                    System.setSecurityManager(new SecurityManager());
+                    Logger logger = LoggerFactory.getLogger(Main.class);
+                    logger.info("From the UI bitch!");
+                    logger.warn("From the UI bitch!");
+                    logger.error("From the UI bitch!");
+                    logger.debug("From the UI bitch!");
 
                     /* Set properties for execution on a Mac client */
                     if(MacUIHelper.isMacOS()) {
