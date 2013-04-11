@@ -15,10 +15,9 @@
  */
 package org.rioproject.resources.servicecore;
 
-import net.jini.core.lease.Lease;
-import net.jini.id.Uuid;
-import net.jini.id.UuidFactory; 
 import com.sun.jini.landlord.LeasedResource;
+import net.jini.id.Uuid;
+import net.jini.id.UuidFactory;
 
 /**
  * Leased service resources to be used with <code>LeaseDurationPolicy</code> and/or
@@ -27,17 +26,16 @@ import com.sun.jini.landlord.LeasedResource;
  * @author Dennis Reedy
  */
 public class ServiceResource implements LeasedResource {
-    protected Uuid cookie;
-    protected long expiration;
-    public Lease lease;
-    public Object resource;
+    private Uuid cookie;
+    private long expiration;
+    private final Object resource;
 
     /**
      * Create a ServiceResource
      * 
      * @param resource The resource being leased
      */
-    public ServiceResource(Object resource) {
+    public ServiceResource(final Object resource) {
         this.resource = resource;
         synchronized(ServiceResource.class) {
             cookie = UuidFactory.generate();
@@ -50,7 +48,7 @@ public class ServiceResource implements LeasedResource {
      * @return The expiration time in milliseconds since the beginning of the epoch
      */
     public long getExpiration() {
-        return(expiration);
+        return expiration;
     }
 
     /**
@@ -68,7 +66,7 @@ public class ServiceResource implements LeasedResource {
      * the resource to identify it
      */
     public Uuid getCookie() {
-        return(cookie);
+        return cookie;
     }
 
     /**
@@ -77,7 +75,7 @@ public class ServiceResource implements LeasedResource {
      * @return The actual resource
      */
     public Object getResource() {
-        return(resource);
+        return resource;
     }
 
     /**
@@ -88,7 +86,7 @@ public class ServiceResource implements LeasedResource {
             ServiceResource sr = (ServiceResource)o;
             return(cookie.equals(sr.cookie));
         }
-        return(false);
+        return false;
     }
 
     /**
@@ -96,6 +94,6 @@ public class ServiceResource implements LeasedResource {
      * cookie attribute
      */
     public int hashCode() {
-        return(cookie.hashCode());
+        return cookie.hashCode();
     }
 }
