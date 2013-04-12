@@ -15,33 +15,30 @@
  */
 package org.rioproject.test.log;
 
-import org.junit.runner.RunWith;
+import net.jini.core.entry.Entry;
+import net.jini.core.lookup.ServiceItem;
+import net.jini.core.lookup.ServiceTemplate;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.rioproject.deploy.DeployAdmin;
-import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.test.RioTestRunner;
-import org.rioproject.test.TestManager;
-import org.rioproject.test.SetTestManager;
-import org.junit.Assert;
-import net.jini.core.lookup.ServiceTemplate;
 import org.rioproject.log.ServiceLogEvent;
-import net.jini.core.entry.Entry;
-import net.jini.core.lookup.ServiceItem;
-import org.junit.Before;
-import org.junit.Test;
+import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.test.SetTestManager;
+import org.rioproject.test.TestManager;
 import org.rioproject.test.simple.Simple;
 
 import java.io.File;
 import java.rmi.RemoteException;
 
 /**
- * Tests ServiceEventLog notifications
+ * @author Dennis Reedy
  */
-@RunWith (RioTestRunner.class)
-public class ServiceEventLogTest {
+public class BaseServiceEventLogTest {
     @SetTestManager
     static TestManager testManager;
     ProvisionMonitor monitor;
@@ -55,11 +52,11 @@ public class ServiceEventLogTest {
     @Test
     public void testNotifyWithContainedService() {
         File opstring = new File(System.getProperty("user.dir")+File.separator+
-                                    "src"+File.separator+
-                                    "test"+File.separator+
-                                    "resources"+File.separator+
-                                    "opstring"+File.separator+
-                                    "logging_simple_opstring.groovy");
+                                 "src"+File.separator+
+                                 "test"+File.separator+
+                                 "resources"+File.separator+
+                                 "opstring"+File.separator+
+                                 "logging_simple_opstring.groovy");
         Assert.assertNotNull(opstring);
         testManager.deploy(opstring);
         Simple simple = (Simple)testManager.waitForService(Simple.class);
@@ -69,7 +66,7 @@ public class ServiceEventLogTest {
         ServiceTemplate template = new ServiceTemplate(null, null, attrs);
         ServiceItem[] items = testManager.getServiceDiscoveryManager().lookup(template, Integer.MAX_VALUE, null);
         try {
-            Assert.assertEquals("Expected 1 service", 1, items.length);
+            Assert.assertEquals("Expected 2 services", 2, items.length);
             doVerifyLogging(items, simple, 1);
         } finally {
             testManager.undeployAll(monitor);
@@ -90,11 +87,11 @@ public class ServiceEventLogTest {
         }
         Assert.assertNull(thrown);
         File opstring = new File(System.getProperty("user.dir")+File.separator+
-                                    "src"+File.separator+
-                                    "test"+File.separator+
-                                    "resources"+File.separator+
-                                    "opstring"+File.separator+
-                                    "logging_simple_forked_opstring.groovy");
+                                 "src"+File.separator+
+                                 "test"+File.separator+
+                                 "resources"+File.separator+
+                                 "opstring"+File.separator+
+                                 "logging_simple_forked_opstring.groovy");
         Assert.assertNotNull(opstring);
         OperationalStringManager mgr = testManager.deploy(opstring);
         testManager.waitForDeployment(mgr);
@@ -106,7 +103,7 @@ public class ServiceEventLogTest {
         ServiceItem[] items = testManager.getServiceDiscoveryManager().lookup(template,
                                                                               Integer.MAX_VALUE,
                                                                               null);
-        Assert.assertEquals("Expected 2 services", 2, items.length);
+        Assert.assertEquals("Expected 3 services to have ServiceLogEvent descriptors", 3, items.length);
         doVerifyLogging(items, simple, 3);
 
         testManager.undeployAll(monitor);

@@ -15,32 +15,31 @@
  */
 package org.rioproject.test.simple;
 
-import org.rioproject.log.ServiceLogEventHandler;
+import org.rioproject.logging.ServiceLogEventHandler;
+import org.rioproject.logging.ServiceLogEventHandlerHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A Simple service that logs.
  */
 public class LoggingSimpleImpl implements Simple {
-    Logger logger = Logger.getLogger(LoggingSimpleImpl.class.getName());
+    Logger logger = LoggerFactory.getLogger(LoggingSimpleImpl.class.getName());
     
     public String hello(String message)  {
         if(System.getProperty("org.rioproject.serviceBeanExec")!=null) {
-            for(Handler h : Logger.getLogger("").getHandlers()) {
-                if(h instanceof ServiceLogEventHandler) {
-                    ServiceLogEventHandler s = (ServiceLogEventHandler)h;
-                    s.addPublishableLogger(logger.getName());
-                    s.setPublishOnLevel(Level.INFO.toString());
-                    logger.info("Set to "+Level.INFO);
-                    break;
-                }
+            ServiceLogEventHandler handler = ServiceLogEventHandlerHelper.findInstance();
+            if(handler!=null) {
+                handler.addPublishableLogger(logger.getName());
+                handler.setPublishOnLevel("INFO");
+                logger.info("Set to INFO");
+            } else {
+                logger.error("Unable to obtain a ServiceLogEventHandler");
             }
         }
         if(message==null) {
-            logger.severe("Passed a null message parameter");
+            logger.error("Passed a null message parameter");
         }
         return(processMessage(message));
     }
@@ -51,7 +50,7 @@ public class LoggingSimpleImpl implements Simple {
             int length = message.length();
             response = "You sent a message that was "+length+" long";
         } catch(Throwable t) {
-            logger.log(Level.WARNING, "Caught while processing message", t);
+            logger.warn("Caught while processing message", t);
         }
         return response;
     }

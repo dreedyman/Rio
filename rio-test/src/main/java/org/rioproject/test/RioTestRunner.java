@@ -25,7 +25,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
-import org.rioproject.start.LogAgent;
+import org.rioproject.logging.LoggingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
             Utils.checkSecurityPolicy();
             System.setSecurityManager(new SecurityManager());
         }
-        if(LogAgent.usingJUL()) {
+        if(LoggingSystem.usingJUL()) {
             if(System.getProperty("java.util.logging.config.file")==null) {
                 LogManager logManager = LogManager.getLogManager();
                 try {

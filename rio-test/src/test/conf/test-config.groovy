@@ -107,12 +107,19 @@ ScalingServiceTest {
     groups = "ScalingServiceTest"
 }
 
-ServiceEventLogTest {
-    groups = "ServiceEventLogTest"
+JULServiceLogEventHandlerTest {
+    groups = "JULServiceLogEventHandlerTest"
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
     loggingSystem = TestConfig.LoggingSystem.JUL
+}
+
+LogbackServiceLogEventAppenderTest {
+    groups = "LogbackServiceLogEventAppenderTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
 }
 
 PermGenTest {

@@ -642,7 +642,8 @@ class TestManager {
         StringBuilder classpathBuilder = new StringBuilder()
         classpathBuilder.append(classpath)
         File loggingLibDir = new File("$rioHome/lib/logging")
-        classpathBuilder.append(buildClassPath(loggingLibDir, "slf4j-api"))
+        if(!service.equals(("reggie")))
+            classpathBuilder.append(buildClassPath(loggingLibDir, "rio-logging-support"))
 
         /* Check if logback is being used, if so set logback configuration */
         if(testConfig.getLoggingSystem()==TestConfig.LoggingSystem.LOGBACK) {
