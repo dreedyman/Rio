@@ -231,6 +231,9 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
 
     private Map<String, DeploymentNode> getDeploymentNodes(String name) {
         Map<String, DeploymentNode> nodeMap = new HashMap<String, DeploymentNode>();
+        if(name==null) {
+            return nodeMap;
+        }
         DeploymentNode node = getDeploymentNode(name, completeModel);
         if(node==null) {
             node = new DeploymentNode(name);
@@ -256,6 +259,8 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
     }
 
     public DeploymentNode getDeploymentNode(String name, List<DeploymentNode> nodes) {
+        if(name==null)
+            return null;
         DeploymentNode dNode = null;
         for(DeploymentNode node : nodes) {
             if(node.getName().equals(name)) {
