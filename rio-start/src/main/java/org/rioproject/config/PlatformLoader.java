@@ -48,7 +48,7 @@ import java.util.List;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class PlatformLoader {
     static final String COMPONENT = "org.rioproject.boot";
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    protected static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Parse the platform
@@ -135,7 +135,7 @@ public class PlatformLoader {
     /*
      * Parse the platform
      */
-    Collection<PlatformCapabilityConfig> parsePlatform(URL configURL) throws Exception {
+    protected Collection<PlatformCapabilityConfig> parsePlatform(URL configURL) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputStream is = configURL.openStream();

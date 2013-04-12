@@ -8,18 +8,24 @@
         <groupId>org.rioproject</groupId>
         <version>5.0-M2</version>
     </parent>
-    <artifactId>rio-start</artifactId>
-    <name>Module :: Rio service starters</name>
+
+	<artifactId>rio-start</artifactId>
+	<version>5.0-M2_sorcer</version>
+	<name>Module :: Rio service starters</name>
     <packaging>jar</packaging>
     <description>
         Provides boot strapping support for starting services.
     </description>
 
+	<properties>
+		<v.rio>5.0-M2</v.rio>
+	</properties>
+
     <dependencies>
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-platform</artifactId>
-            <version>${project.version}</version>
+            <version>${v.rio}</version>
         </dependency>
 
         <dependency>
@@ -45,7 +51,7 @@
         <dependency>
             <groupId>org.rioproject.resolver</groupId>
             <artifactId>resolver-api</artifactId>
-            <version>${project.version}</version>
+            <version>${v.rio}</version>
         </dependency>
 
         <dependency>
@@ -62,7 +68,7 @@
 		<dependency>
 			<groupId>org.rioproject.resolver</groupId>
 			<artifactId>resolver-aether</artifactId>
-			<version>${project.version}</version>
+			<version>${v.rio}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -80,7 +86,7 @@
 	                        <Main-Class>com.sun.jini.start.ServiceStarter</Main-Class>
 							<Implementation-Title>Rio Project</Implementation-Title>
 							<Implementation-Version>${project.version}</Implementation-Version>
-						    <Rio-Version>${project.version}</Rio-Version>
+						    <Rio-Version>${v.rio}</Rio-Version>
 						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
 						    <Class-Path>resolver-api.jar rio-platform.jar start.jar</Class-Path>
 						    <Premain-Class>org.rioproject.start.AgentHook</Premain-Class>
