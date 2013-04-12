@@ -1,0 +1,13 @@
+<!--
+Second stage Logback configuration for custom appenders
+-->
+<configuration scan="true">
+    <appender name="SERVICE-LOG-EVENT" class="org.rioproject.logging.logback.LogbackServiceLogEventHandler">
+        <publishOnLevel>error</publishOnLevel>
+    </appender>
+
+    <root>
+        <appender-ref ref="SERVICE-LOG-EVENT" />
+    </root>
+</configuration>
+

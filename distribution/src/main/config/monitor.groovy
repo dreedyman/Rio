@@ -10,6 +10,7 @@ import org.rioproject.config.Component
 import org.rioproject.config.Constants
 import org.rioproject.monitor.selectors.LeastActiveSelector
 import org.rioproject.monitor.selectors.ServiceResourceSelector
+import org.rioproject.resolver.RemoteRepository
 import org.rioproject.resources.client.JiniClient
 import net.jini.security.BasicProxyPreparer
 import net.jini.core.constraint.InvocationConstraints
@@ -29,7 +30,7 @@ import org.rioproject.serviceui.UIFrameFactory
 */
 @Component('org.rioproject.monitor')
 class MonitorConfig {
-    String serviceName = 'Monitor'
+    String serviceName = 'Provision Monitor'
     String serviceComment = 'Dynamic Provisioning Agent'
     String jmxName = 'org.rioproject.monitor:type=Monitor'
 
@@ -37,6 +38,16 @@ class MonitorConfig {
         def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                       System.getProperty('user.name'))]
         return groups as String[]
+    }
+
+    RemoteRepository[] getRemoteRepositories() {
+        RemoteRepository remoteRepository = new RemoteRepository();
+        remoteRepository.setId(serviceName)
+        remoteRepository.setUrl(System.getProperty(Constants.CODESERVER))
+        remoteRepository.setSnapshotChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE)
+        remoteRepository.setReleaseChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE)
+        def repositories = [remoteRepository]
+        return repositories as RemoteRepository[]
     }
 
     LookupLocator[] getInitialLookupLocators() {

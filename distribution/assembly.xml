@@ -117,6 +117,7 @@
                 <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
                 <exclude>org.rioproject:rio-api:jar</exclude>
                 <exclude>org.rioproject:watch-ui</exclude>
+                <exclude>org.rioproject:rio-logging-support:jar</exclude>
                 <exclude>junit:junit</exclude>
                 <exclude>ant:*</exclude>
                 <exclude>jline:*</exclude>
@@ -188,11 +189,12 @@
             <outputDirectory>lib/resolver</outputDirectory>
         </dependencySet>
 
-        <!-- Put the SLF4J jars into lib/logging, defaulting to logback -->
+        <!-- Put Rio Appender jar and the SLF4J jars into lib/logging, defaulting to logback -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
+                <include>org.rioproject:rio-logging-support</include>
                 <include>ch.qos.logback:logback-core</include>
                 <include>ch.qos.logback:logback-classic</include>
             </includes>
