@@ -19,6 +19,9 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import org.rioproject.RioVersion;
+import org.rioproject.resolver.Resolver;
+import org.rioproject.resolver.ResolverException;
+import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +33,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -223,6 +230,7 @@ public class PlatformLoader {
             }
         }
         NodeList nodes = element.getChildNodes();
+		List<String> classPath = new LinkedList<String>();
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             if(node.getNodeType()==Node.ELEMENT_NODE) {
@@ -237,7 +245,7 @@ public class PlatformLoader {
                     cap.setManufacturer(getTextValue(nodeElement));
                 }
                 if(nodeElement.getTagName().equals("classpath")) {
-                    cap.setClasspath(getTextValue(nodeElement));
+					visitElement_classpath(nodeElement, cap, classPath);
                 }
                 if(nodeElement.getTagName().equals("path")) {
                     cap.setPath(getTextValue(nodeElement));
@@ -250,9 +258,97 @@ public class PlatformLoader {
                 }
             }
         }
+		postProcessClassPath(cap, classPath);
         return(cap);
     }
 
+	/**
+	 * Text node of classpath element is set as {@link PlatformCapabilityConfig#classpath} and all text nodes under classpath/entry are put to classPath parameter for further processing in {@link #postProcessClassPath}
+	 *
+	 * @param parentElement capability/classpath element
+	 * @param cap           target capability object
+	 * @param classPath     class path entry list built from classpath/entry
+	 */
+	void visitElement_classpath(Element parentElement, PlatformCapabilityConfig cap, List<String> classPath) {
+		NodeList childNodes = parentElement.getChildNodes();
+		for (int i = 0; i < childNodes.getLength(); i++) {
+			Node node = childNodes.item(i);
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				Element nodeElement = (Element) node;
+				if ("entry".equals(nodeElement.getTagName())) {
+					classPath.add(getTextValue(node));
+				}
+			} else if (node.getNodeType() == Node.TEXT_NODE) {
+				cap.setClasspath(getTextValue(parentElement));
+			}
+		}
+	}
+
+	/**
+	 * Resolve maven artifacts from classpath/entry nodes and set {@link PlatformCapabilityConfig#classpath}
+	 * <p/>
+	 * If artfact coordinates miss version, the {@link PlatformCapabilityConfig#version} is used
+	 *
+	 * @param cap       Capability config
+	 * @param classPath list of classpath/entry values
+	 */
+	void postProcessClassPath(PlatformCapabilityConfig cap, List<String> classPath) {
+		if (classPath.isEmpty()) {
+			return;
+		}
+		Resolver resolver;
+		try {
+			resolver = ResolverHelper.getResolver();
+		} catch (ResolverException e) {
+			throw new IllegalStateException("Resolver not properly configured", e);
+		}
+		List<String> classPathList = new LinkedList<String>();
+		for (String cpEntry : classPath) {
+			classPathList.addAll(resolveArtifact(cpEntry, resolver, cap.getVersion()));
+		}
+		cap.setClasspath(join(classPathList));
+	}
+
+	/**
+	 * Try to resolve {@code userClassPathEntry} as artifact coordinates, if successful, resolve its classpath. Otherwise just return userClassPathEntry so it's trated as a file path.
+	 * <p/>
+	 * If userClassPathEntry looks like artifactCoordinates without version (groupId:artifactId) the defaultVersion is used.
+	 *
+	 * @param userClassPathEntry text value of the classpath/entry element
+	 * @param resolver           Artifact resolver
+	 * @param defaultVersion     capability version
+	 * @return classpath as returned by {@link Resolver#getClassPathFor(String)}
+	 */
+	List<String> resolveArtifact(String userClassPathEntry, Resolver resolver, String defaultVersion) {
+		String[] strings = userClassPathEntry.split(":");
+		if (strings.length > 1) {
+			try {
+				String coords = userClassPathEntry;
+				if (strings.length == 2) {
+					coords += ":" + defaultVersion;
+				}
+				String[] classPathEntries = resolver.getClassPathFor(coords);
+				return Arrays.asList(classPathEntries);
+			} catch (ResolverException e) {
+				//entry isn't a path to existing file nor is a proper artifact - allow to fail on missing file.
+				return Collections.singletonList(userClassPathEntry);
+			}
+		} else {
+			return Collections.singletonList(userClassPathEntry);
+		}
+	}
+
+	static String join(List<String> strings) {
+		if (strings == null || strings.isEmpty()) {
+			return "";
+		}
+		Iterator<String> iter = strings.iterator();
+		StringBuilder result = new StringBuilder(iter.next());
+		while (iter.hasNext()) {
+			result.append(File.pathSeparator).append(iter.next());
+		}
+		return result.toString();
+	}
 
     /**
      * Get the text value for a node

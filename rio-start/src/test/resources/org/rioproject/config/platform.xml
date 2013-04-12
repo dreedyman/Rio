@@ -1,0 +1,9 @@
+<platform>
+	<capability name="river">
+		<version>2.1</version>
+		<manufacturer>apache</manufacturer>
+		<classpath>
+			<entry>net.jini:jini-core</entry>
+		</classpath>
+	</capability>
+</platform>
