@@ -40,7 +40,6 @@ import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceAdminImpl;
 import org.rioproject.bean.BeanAdapter;
-import org.rioproject.start.LogAgent;
 import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
@@ -59,7 +58,9 @@ import org.rioproject.fdh.HeartbeatClient;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.ServiceLogEvent;
-import org.rioproject.log.ServiceLogEventHandler;
+import org.rioproject.logging.ServiceLogEventHandler;
+import org.rioproject.logging.ServiceLogEventHandlerHelper;
+import org.rioproject.logging.ServiceLogEventPublisherImpl;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.servicecore.Joiner;
@@ -91,7 +92,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Handler;
 
 /**
  * The ServiceBeanAdapter implements the ServiceBean interface and provides the
@@ -109,8 +109,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
                                                                  ServiceBeanAdapterMBean,
                                                                  MBeanRegistration,
                                                                  NotificationEmitter {
-    /** Logger name */
-    static final String LOGGER = "org.rioproject.jsb";
     /**
      * A ServiceBeanContext provides the ServiceBean with necessary context
      * required to obtain information about it's environment, attributes and
@@ -180,7 +178,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      */
     protected String serviceBeanComponent;
     /** Logger */
-    static final Logger logger = LoggerFactory.getLogger(LOGGER);
+    static final Logger logger = LoggerFactory.getLogger(ServiceBeanAdapter.class);
     /** The HeartbeatClient, which will manage sending heartbeat announcements */
     private HeartbeatClient heartbeatClient;
     /** Our login context, for logging out */
@@ -281,7 +279,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /*
      * Get the root case
      */
-    private Throwable getRootCause(Throwable thrown) {
+    private Throwable getRootCause(final Throwable thrown) {
         Throwable cause = thrown;
         Throwable t = cause;
         while(t != null) {
@@ -299,7 +297,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @return An Object that can be used to communicate with the service
      * @throws Exception
      */
-    private Object doStart(ServiceBeanContext context) throws Exception {
+    private Object doStart(final ServiceBeanContext context) throws Exception {
         if (jsbState.getState() < ServiceBeanState.STARTED) {
             jsbState.setState(ServiceBeanState.STARTING);
 
@@ -341,7 +339,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @param context The ServiceBeanContext to initialize the ServiceBean with
      * @throws Exception If something unexpected happens
      */
-    public void initialize(ServiceBeanContext context) throws Exception {
+    public void initialize(final ServiceBeanContext context) throws Exception {
         initialize(context, null);
     }
 
@@ -359,7 +357,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * ServiceBeanContextManager will not be created
      * @throws Exception If something unexpected happens
      */
-    public void initialize(ServiceBeanContext context, PersistentStore store)
+    public void initialize(final ServiceBeanContext context, final PersistentStore store)
             throws Exception {
         if (context == null)
             throw new IllegalArgumentException("ServiceBeanContext is null");
@@ -404,35 +402,14 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         getEventTable().put(slaEventDesc.eventID, slaEventHandler);
         addAttribute(slaEventDesc);
 
-        if(LogAgent.usingJUL()) {
-            /*
-            * If the ServiceLogEventHandler has not had it's source service set,
-            * create the eventDescriptor for the ServiceLogEvent and add as an
-            * attribute
-            */
-            for(Handler h : java.util.logging.Logger.getLogger("").getHandlers()) {
-                if(h instanceof ServiceLogEventHandler) {
-                    ServiceLogEventHandler s = (ServiceLogEventHandler)h;
-                    if(s.getSource()==null) {
-                        EventDescriptor serviceLogEventDescriptor = ServiceLogEvent.getEventDescriptor();
-                        EventHandler serviceLogEventHandler = new DispatchEventHandler(serviceLogEventDescriptor, config);
-                        getEventTable().put(serviceLogEventDescriptor.eventID, serviceLogEventHandler);
-                        s.setEventHandler(serviceLogEventHandler);
-                        s.setSource((EventProducer)getExportedProxy());
-                        addAttribute(serviceLogEventDescriptor);
-                    }
-                    break;
-                }
-            }
+        ServiceLogEventHandler appender = ServiceLogEventHandlerHelper.findInstance();
+        if(appender!=null) {
+            applyServiceLogEventHandlerProperties(appender, config);
+        } else {
+            logger.error("Unable to obtain a ServiceLogEventHandler");
         }
 
         this.computeResource = context.getComputeResourceManager().getComputeResource();
-        /*
-        * Create the ComputeResource observer object that will listen for
-        * changes to the ComputeResource component
-        */
-        /*computeResourceObserver = new ComputeResourceObserver(computeResource, context, slaEventHandler);
-        computeResourceObserver.setSource(getServiceProxy());*/
         /*
          * Create a ServiceElementChangeManager to listen for updates to the
          * ServiceElement object by the ServiceBeanManager
@@ -443,6 +420,26 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         initializeJMX(context);
     }
 
+    /*
+     * Apply settings for a {@link ServiceLogEventHandler}.
+     *
+     * @param s The {@code ServiceLogEventHandler}
+     * @param config Configuration to use
+     * @throws IOException
+     */
+    private void applyServiceLogEventHandlerProperties(final ServiceLogEventHandler s, final Configuration config)
+        throws IOException {
+        if(s.getServiceLogEventPublisher()==null) {
+            EventDescriptor serviceLogEventDescriptor = ServiceLogEvent.getEventDescriptor();
+            EventHandler serviceLogEventHandler = new DispatchEventHandler(serviceLogEventDescriptor, config);
+            getEventTable().put(serviceLogEventDescriptor.eventID, serviceLogEventHandler);
+            ServiceLogEventPublisherImpl publisher = new ServiceLogEventPublisherImpl(serviceLogEventHandler,
+                                                                                      (EventProducer)getExportedProxy());
+            s.setServiceLogEventPublisher(publisher);
+            addAttribute(serviceLogEventDescriptor);
+        }
+    }
+
     /**
      * Called from initialize() to prepare JMX resources such as registering with
      * MBeanServer
@@ -450,7 +447,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @param context The ServiceBeanContext
      * @throws Exception If errors occur
      */
-    protected void initializeJMX(ServiceBeanContext context) throws Exception {
+    protected void initializeJMX(final ServiceBeanContext context) throws Exception {
         ObjectName objectName = createObjectName(context);
         MBeanServer mbeanServer = org.rioproject.jmx.MBeanServerFactory.getMBeanServer();
         registerMBean(objectName, mbeanServer);
@@ -476,7 +473,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @throws MBeanRegistrationException If the bean is already registered
      * @throws InstanceAlreadyExistsException If the instance already exists
      */
-    protected void registerMBean(ObjectName oName, MBeanServer mbeanServer)
+    protected void registerMBean(final ObjectName oName, final MBeanServer mbeanServer)
     throws NotCompliantMBeanException, MBeanRegistrationException, InstanceAlreadyExistsException {
         mbeanServer.registerMBean(this, oName);
     }
@@ -507,7 +504,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @throws MalformedObjectNameException If there are errors creating the
      * JMX object name
      */
-    protected ObjectName createObjectName(ServiceBeanContext context) throws MalformedObjectNameException {
+    protected ObjectName createObjectName(final ServiceBeanContext context) throws MalformedObjectNameException {
         return JMXUtil.getObjectName(context, serviceBeanComponent, context.getServiceElement().getName());
     }
 
@@ -516,7 +513,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      *
      * @see javax.management.MBeanRegistration#preRegister(javax.management.MBeanServer, javax.management.ObjectName)
      */
-    public ObjectName preRegister(MBeanServer mBeanServer, ObjectName objectName) throws Exception {
+    public ObjectName preRegister(final MBeanServer mBeanServer, final ObjectName objectName) throws Exception {
         this.objectName = objectName;
         this.mbeanServer = mBeanServer;
         return objectName;
@@ -526,7 +523,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * Implemented as part of the contract for a
      * {@link javax.management.MBeanRegistration}, empty implementation
      */
-    public void postRegister(Boolean aBoolean) {
+    public void postRegister(final Boolean aBoolean) {
     }
 
     /**
@@ -656,7 +653,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * 
      * @param attribute Entry to add
      */
-    public void addAttribute(Entry attribute) {
+    public void addAttribute(final Entry attribute) {
         if (attribute == null) {
             logger.trace("attribute is null");
             return;
@@ -678,7 +675,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * 
      * @param attributes Array of Entry attributes
      */
-    public void addAttributes(Entry[] attributes) {
+    public void addAttributes(final Entry[] attributes) {
         if (attributes == null)
             throw new IllegalArgumentException("attributes are null");
         for (Entry attribute : attributes)
@@ -831,7 +828,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         return sInfo;
     }
 
-    private String getVersionFromArtifact(String a) {
+    private String getVersionFromArtifact(final String a) {
         String version = null;
         String[] parts = a.split(":");
         if(parts.length<3 )
@@ -885,7 +882,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      *
      * @throws IllegalStateException If the state transition is illegal
      */
-    public void stop(boolean force) {
+    public void stop(final boolean force) {
         if(jsbState.getState()!=ServiceBeanState.ABORTED)
             jsbState.verifyTransition(ServiceBeanState.STOPPED);
 
@@ -951,7 +948,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /**
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#destroy(boolean)
      */
-    public void destroy(boolean force) {
+    public void destroy(final boolean force) {
         logger.debug("Destroy {}", ServiceElementUtil.getLoggingName(context));
         if (inShutdown)
             return;
@@ -1075,7 +1072,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /**
      * @see org.rioproject.admin.MonitorableService#monitor
      */
-    public Lease monitor(long duration) throws LeaseDeniedException {
+    public Lease monitor(final long duration) throws LeaseDeniedException {
         if (duration <= 0)
             throw new LeaseDeniedException("lease duration of ["+duration+"] is invalid");
         String phonyResource = this.getClass().getName() + ":"+ System.currentTimeMillis();
@@ -1087,7 +1084,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /**
      * @see org.rioproject.admin.MonitorableService#startHeartbeat
      */
-    public void startHeartbeat(String[] configArgs) throws ConfigurationException {
+    public void startHeartbeat(final String[] configArgs) throws ConfigurationException {
         if (heartbeatClient == null)
             heartbeatClient = new HeartbeatClient(uuid);
         heartbeatClient.addHeartbeatServer(configArgs);
@@ -1150,7 +1147,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * </ul>
      * @throws Exception If there are errors getting the Exporter
      */
-    protected Exporter getExporter(Configuration config) throws Exception {
+    protected Exporter getExporter(final Configuration config) throws Exception {
         if(config==null)
             throw new IllegalArgumentException("config is null");
         Exporter exporter = ExporterConfig.getExporter(config, serviceBeanComponent, "serverExporter");
@@ -1167,7 +1164,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      *
      * @throws Exception If errors occur
      */
-    protected Remote exportDo(Exporter exporter) throws Exception {
+    protected Remote exportDo(final Exporter exporter) throws Exception {
         if(exporter==null)
             throw new IllegalArgumentException("exporter is null");
         return(exporter.export(this));
@@ -1194,7 +1191,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /**
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#setLookupGroups
      */
-    public void setLookupGroups(String[] groups) {
+    public void setLookupGroups(final String[] groups) {
         admin.setLookupGroups(groups);
     }
 
@@ -1218,16 +1215,19 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         return(adminExporter);
     }
 
-    public void removeNotificationListener(NotificationListener listener, NotificationFilter filter, Object object)
-            throws ListenerNotFoundException {
+    public void removeNotificationListener(final NotificationListener listener,
+                                           final NotificationFilter filter,
+                                           final Object object) throws ListenerNotFoundException {
         getNotificationBroadcasterSupport().removeNotificationListener(listener, filter, object);
     }
 
-    public void addNotificationListener(NotificationListener listener, NotificationFilter filter, Object object) {
+    public void addNotificationListener(final NotificationListener listener,
+                                        final NotificationFilter filter,
+                                        final Object object) {
         getNotificationBroadcasterSupport().addNotificationListener(listener, filter, object);
     }
 
-    public void removeNotificationListener(NotificationListener listener) throws ListenerNotFoundException {
+    public void removeNotificationListener(final NotificationListener listener) throws ListenerNotFoundException {
         getNotificationBroadcasterSupport().removeNotificationListener(listener);
     }
 
@@ -1246,7 +1246,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         Exporter exporter;
         boolean force;
 
-        UnexportTask(Exporter exporter, boolean force) {
+        UnexportTask(final Exporter exporter, final boolean force) {
             super("UnexportTask");
             this.exporter = exporter;
             this.force = force;
@@ -1313,7 +1313,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
                          ServiceElementUtil.getLoggingName(context), unexported, (System.currentTimeMillis() - start));
         }
 
-        boolean unexportDo(boolean force) {
+        boolean unexportDo(final boolean force) {
             boolean result = exporter==null;
             try {
                 if(exporter!=null)
@@ -1334,7 +1334,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         /**
          * @see org.rioproject.core.jsb.ServiceElementChangeListener#changed
          */
-        public void changed(ServiceElement preElem, ServiceElement postElem) {
+        public void changed(final ServiceElement preElem, final ServiceElement postElem) {
 
             /* --- Check for different ServiceUI --- */
             /* Get the current attribute collection from JoinManager, and extract 
@@ -1396,7 +1396,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * thread so it will not hang up in progress remote calls
      */
     public class SnapshotThread extends Thread {
-        SnapshotThread(String name) {
+        SnapshotThread(final String name) {
             super(name + ":SnapshotThread");
             setDaemon(true);
         }

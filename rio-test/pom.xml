@@ -233,7 +233,7 @@
 
                             <excludes>
                                 <exclude>**/*$*</exclude>
-                                <!--<exclude>**/PermGenTest.java</exclude>-->
+                                <exclude>**/BaseServiceEventLogTest.java</exclude>
                             </excludes>
 
                         </configuration>
