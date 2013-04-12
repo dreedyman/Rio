@@ -15,7 +15,11 @@
  */
 package org.rioproject.start;
 
+import org.slf4j.LoggerFactory;
+
+import java.io.PrintStream;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 
 /**
  * Allows the instrumentation class to be accessed and checks for log redirection if running without a console.
@@ -23,6 +27,8 @@ import java.lang.instrument.Instrumentation;
  * @author Dennis Reedy
  */
 public class AgentHook {
+    private static final org.slf4j.Logger stdOutLogger = LoggerFactory.getLogger("std.out");
+    private static final org.slf4j.Logger stdErrLogger = LoggerFactory.getLogger("std.err");
     static Instrumentation instrumentation;
 
     public static Instrumentation getInstrumentation() {
@@ -31,6 +37,33 @@ public class AgentHook {
 
     public static void premain(String agentArgs, Instrumentation inst) {
         instrumentation = inst;
-        LogAgent.redirectIfNecessary();
+        redirectIfNecessary();
+        try {
+            Class cl = Class.forName("org.rioproject.logging.ServiceLogEventHandlerHelper");
+            @SuppressWarnings("unchecked")
+            Method addServiceLogEventHandler = cl.getMethod("addServiceLogEventHandler");
+            addServiceLogEventHandler.invoke(null);
+        } catch(Exception e) {
+            stdErrLogger.warn("Unable to add ServiceLogEventHandler {}: {}", e.getClass().getName(), e.getMessage());
+        }
+    }
+
+    static void redirectIfNecessary() {
+        if(System.console()==null) {
+            redirectToLogger();
+        }
+    }
+
+    public static void redirectToLogger(){
+        System.setOut(new PrintStream(System.out){
+            public void print(String s){
+                stdOutLogger.info(s);
+            }
+        });
+        System.setErr(new PrintStream(System.err){
+            public void print(String s){
+                stdErrLogger.error(s);
+            }
+        });
     }
 }
