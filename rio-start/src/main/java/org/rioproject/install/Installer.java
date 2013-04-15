@@ -176,7 +176,7 @@ public final class Installer {
             int ndx = artifactFile.getName().lastIndexOf(".");
             String jarName = artifactFile.getName().substring(0, ndx);
             String extension = artifactFile.getName().substring(ndx, artifactFile.getName().length());
-            sb.append(jarName).append("-").append(version).append(extension);
+            sb.append(jarName).append(extension);
             File jar = new File(localRepository, sb.toString());
             if (jar.exists())
                 return;
