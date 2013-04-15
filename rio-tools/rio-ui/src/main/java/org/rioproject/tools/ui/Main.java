@@ -42,6 +42,7 @@ import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.eventcollector.api.EventCollector;
+import org.rioproject.install.Installer;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.*;
@@ -62,7 +63,6 @@ import org.rioproject.tools.ui.serviceui.UndeployPanel;
 import org.rioproject.tools.ui.util.SwingDeployHelper;
 import org.rioproject.tools.ui.util.SwingWorker;
 import org.rioproject.tools.ui.util.TabLabel;
-import org.rioproject.tools.webster.InternalWebster;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
@@ -1425,8 +1425,8 @@ public class Main extends JFrame {
                         URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
                     }
 
-                    InternalWebster.startWebster("sdm-dl.jar");
                     Main.redirect();
+                    Installer.install();
                     return new Main(config, true, props);
                 }
             };
