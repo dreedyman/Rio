@@ -33,9 +33,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +48,13 @@ public class PlatformLoader {
     static final String COMPONENT = "org.rioproject.boot";
     protected static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
-    /**
+	protected Resolver resolver;
+
+	public PlatformLoader() throws ResolverException {
+		resolver = ResolverHelper.getResolver();
+	}
+
+	/**
      * Parse the platform
      *
      * @param directory The directory to search for XML or groovy configuration documents
@@ -296,15 +300,9 @@ public class PlatformLoader {
 		if (classPath.isEmpty()) {
 			return;
 		}
-		Resolver resolver;
-		try {
-			resolver = ResolverHelper.getResolver();
-		} catch (ResolverException e) {
-			throw new IllegalStateException("Resolver not properly configured", e);
-		}
 		List<String> classPathList = new LinkedList<String>();
 		for (String cpEntry : classPath) {
-			classPathList.addAll(resolveArtifact(cpEntry, resolver, cap.getVersion()));
+			classPathList.add(resolveArtifact(cpEntry, cap.getVersion()));
 		}
 		cap.setClasspath(join(classPathList));
 	}
@@ -315,11 +313,10 @@ public class PlatformLoader {
 	 * If userClassPathEntry looks like artifactCoordinates without version (groupId:artifactId) the defaultVersion is used.
 	 *
 	 * @param userClassPathEntry text value of the classpath/entry element
-	 * @param resolver           Artifact resolver
 	 * @param defaultVersion     capability version
 	 * @return classpath as returned by {@link Resolver#getClassPathFor(String)}
 	 */
-	List<String> resolveArtifact(String userClassPathEntry, Resolver resolver, String defaultVersion) {
+	String resolveArtifact(String userClassPathEntry, String defaultVersion) {
 		String[] strings = userClassPathEntry.split(":");
 		if (strings.length > 1) {
 			try {
@@ -327,15 +324,25 @@ public class PlatformLoader {
 				if (strings.length == 2) {
 					coords += ":" + defaultVersion;
 				}
-				String[] classPathEntries = resolver.getClassPathFor(coords);
-				return Arrays.asList(classPathEntries);
+				return findArtifact(strings[0], strings[1], resolver.getClassPathFor(coords));
 			} catch (ResolverException e) {
 				//entry isn't a path to existing file nor is a proper artifact - allow to fail on missing file.
-				return Collections.singletonList(userClassPathEntry);
+				return userClassPathEntry;
 			}
 		} else {
-			return Collections.singletonList(userClassPathEntry);
+			return userClassPathEntry;
 		}
+	}
+
+	private String findArtifact(String groupId, String artifactId, String[] artifacts) {
+		String groupIdDir = "/" + groupId.replace('.', '/') + "/";
+		String artifactIdDir = "/" + artifactId + "/";
+		for (String artifact : artifacts) {
+			if (artifact.contains(groupIdDir) && artifact.contains(artifactIdDir)) {
+				return artifact;
+			}
+		}
+		throw new IllegalArgumentException("Could not resolve artifact " + groupId + ":" + artifactId);
 	}
 
 	static String join(List<String> strings) {
