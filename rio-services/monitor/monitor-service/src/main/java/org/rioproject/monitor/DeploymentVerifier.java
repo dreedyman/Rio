@@ -38,6 +38,15 @@ import java.util.List;
  */
 public class DeploymentVerifier {
     static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
+    private final RemoteRepository monitorRepository;
+
+    public DeploymentVerifier() {
+        this.monitorRepository = new RemoteRepository();
+        monitorRepository.setId("ProvisionMonitor");
+        monitorRepository.setUrl(System.getProperty(Constants.CODESERVER));
+        monitorRepository.setSnapshotChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE);
+        monitorRepository.setReleaseChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE);
+    }
 
     public void verifyDeploymentRequest(DeployRequest request) throws ResolverException, IOException {
         for(OperationalString o : request.getOperationalStrings()) {
@@ -83,8 +92,12 @@ public class DeploymentVerifier {
                 sb1.append(export.getCodebase()).append(jar);
             }
         }
-        if(didResolve)
-            service.setRemoteRepositories(resolver.getRemoteRepositories());
+        if(didResolve) {
+            List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+            remoteRepositories.addAll(resolver.getRemoteRepositories());
+            remoteRepositories.add(monitorRepository);
+            service.setRemoteRepositories(remoteRepositories);
+        }
         sb.append(sb1.toString());
         logger.debug("{} derived classpath for loading artifact {}", service.getName(), sb.toString());
     }
