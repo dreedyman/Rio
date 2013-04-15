@@ -48,11 +48,7 @@ public class PlatformLoader {
     static final String COMPONENT = "org.rioproject.boot";
     protected static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
-	protected Resolver resolver;
-
-	public PlatformLoader() throws ResolverException {
-		resolver = ResolverHelper.getResolver();
-	}
+	private Resolver resolver;
 
 	/**
      * Parse the platform
@@ -324,7 +320,7 @@ public class PlatformLoader {
 				if (strings.length == 2) {
 					coords += ":" + defaultVersion;
 				}
-				return findArtifact(strings[0], strings[1], resolver.getClassPathFor(coords));
+				return findArtifact(strings[0], strings[1], getResolver().getClassPathFor(coords));
 			} catch (ResolverException e) {
 				//entry isn't a path to existing file nor is a proper artifact - allow to fail on missing file.
 				return userClassPathEntry;
@@ -355,6 +351,17 @@ public class PlatformLoader {
 			result.append(File.pathSeparator).append(iter.next());
 		}
 		return result.toString();
+	}
+
+	protected Resolver getResolver() throws ResolverException {
+		if (resolver == null) {
+			synchronized (this) {
+				if (resolver == null) {
+					resolver = ResolverHelper.getResolver();
+				}
+			}
+		}
+		return resolver;
 	}
 
     /**
