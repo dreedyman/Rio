@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.rolling.RollingFileAppender
@@ -168,6 +167,7 @@ logger("org.rioproject.monitor.sbi", DEBUG)
 logger("org.rioproject.monitor.provision", DEBUG)
 logger("org.rioproject.monitor.selector", OFF)
 logger("org.rioproject.monitor.services", DEBUG)
+logger("org.rioproject.monitor.InstantiatorResource", INFO)
 logger("org.rioproject.resolver.aether", OFF)
 
 logger("org.rioproject.gnostic", INFO)
