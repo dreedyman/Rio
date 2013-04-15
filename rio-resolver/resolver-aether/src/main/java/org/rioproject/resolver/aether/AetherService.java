@@ -255,18 +255,38 @@ public final class AetherService {
      */
     public void install(final String groupId, final String artifactId, final String version, final File pomFile, final File artifactFile)
         throws InstallationException {
+        install(groupId, artifactId, version, null, pomFile, artifactFile);
+    }
+
+    /**
+     * Installs a JAR and its POM to the local repository.
+     *
+     * @param groupId The group identifier of the artifact, may be {@code null}.
+     * @param artifactId The artifact identifier of the artifact, may be {@code null}.
+     * @param version The version of the artifact, may be {@code null}.
+     * @param classifier The classifier of the artifact, may be {@code null}.
+     * @param pomFile The pom File, can not be {@code null}.
+     * @param artifactFile The file for the project's artifact, may be {@code null}. If null, the <i>type</i> of the
+     * artifact is determined to be <code>.pom</code>. Otherwise the type is obtained from the
+     * <code>artifactFile</code>'s extension
+     *
+     * @throws InstallationException if the requested installation is unsuccessful
+     * @throws IllegalArgumentException if the groupId, artifactId, version or pomFile is null.
+     */
+    public void install(final String groupId, final String artifactId, final String version, final String classifier, final File pomFile, final File artifactFile)
+        throws InstallationException {
 
         InstallRequest installRequest = new InstallRequest();
         if(artifactFile!=null) {
             String name = artifactFile.getName();
             String type = name.substring(artifactFile.getName().lastIndexOf(".")+1, name.length());
-            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", type, version);
+            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, classifier, type, version);
             jarArtifact = jarArtifact.setFile(artifactFile);
-            Artifact pomArtifact = new SubArtifact(jarArtifact, "", "pom");
+            Artifact pomArtifact = new SubArtifact(jarArtifact, classifier, "pom");
             pomArtifact = pomArtifact.setFile(pomFile);
             installRequest = installRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
         } else {
-            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "", "pom", version);
+            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, classifier, "pom", version);
             pomArtifact = pomArtifact.setFile(pomFile);
             installRequest = installRequest.addArtifact(pomArtifact);
         }
@@ -282,17 +302,30 @@ public final class AetherService {
                        final String repositoryId,
                        final String repositoryURL) throws DeploymentException {
 
+        deploy(groupId, artifactId, version, null, artifactFile, pomFile, repositoryId, repositoryURL);
+    }
+
+    @SuppressWarnings("unused")
+    public void deploy(final String groupId,
+                       final String artifactId,
+                       final String version,
+                       final String classifier,
+                       final File artifactFile,
+                       final File pomFile,
+                       final String repositoryId,
+                       final String repositoryURL) throws DeploymentException {
+
         DeployRequest deployRequest = new DeployRequest();
         if(artifactFile!=null) {
             String name = artifactFile.getName();
             String type = name.substring(artifactFile.getName().lastIndexOf(".")+1, name.length());
-            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, "", type, version);
+            Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, classifier, type, version);
             jarArtifact = jarArtifact.setFile(artifactFile);
-            Artifact pomArtifact = new SubArtifact(jarArtifact, "", "pom");
+            Artifact pomArtifact = new SubArtifact(jarArtifact, classifier, "pom");
             pomArtifact = pomArtifact.setFile(pomFile);
             deployRequest = deployRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
         } else {
-            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "", "pom", version);
+            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, classifier, "pom", version);
             pomArtifact = pomArtifact.setFile(pomFile);
             deployRequest = deployRequest.addArtifact(pomArtifact);
         }

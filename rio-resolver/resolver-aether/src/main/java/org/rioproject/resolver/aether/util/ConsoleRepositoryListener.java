@@ -34,7 +34,7 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public ConsoleRepositoryListener(PrintStream out) {
-        this.out = (out != null) ? out : System.out;
+        this.out = (out != null) ? out : System.err;
     }
 
     public void artifactDeployed(RepositoryEvent event) {
@@ -55,11 +55,11 @@ public class ConsoleRepositoryListener extends AbstractRepositoryListener {
     }
 
     public void artifactInstalled(RepositoryEvent event) {
-        logger.info("Installed " + event.getArtifact() + " to " + event.getFile());
+        out.println("Installed " + event.getArtifact() + " to " + event.getFile());
     }
 
     public void artifactInstalling(RepositoryEvent event) {
-        out.println("Installing " + event.getArtifact() + " to " + event.getFile());
+        //out.println("Installing " + event.getArtifact() + " to " + event.getFile());
     }
 
     public void artifactResolved(RepositoryEvent event) {
