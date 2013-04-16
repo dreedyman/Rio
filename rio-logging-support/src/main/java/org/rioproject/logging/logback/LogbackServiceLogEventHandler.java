@@ -21,8 +21,6 @@ import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.AppenderBase;
 import org.rioproject.logging.ServiceLogEventHandler;
 import org.rioproject.logging.ServiceLogEventPublisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,13 +42,11 @@ public class LogbackServiceLogEventHandler extends AppenderBase<ILoggingEvent> i
     private final Collection<String> publishableLoggers = Collections.synchronizedCollection(new ArrayList<String>());
     private ServiceLogEventPublisher eventPublisher;
     private final BlockingQueue<ILoggingEvent> eventQ = new LinkedBlockingQueue<ILoggingEvent>();
-    private static final Logger logger = LoggerFactory.getLogger(LogbackServiceLogEventHandler.class);
 
     public LogbackServiceLogEventHandler() {
         Executor eventExecutor = Executors.newSingleThreadExecutor();
         eventExecutor.execute(new CheckThenPublish());
         start();
-        logger.info("Started LogbackServiceLogEventHandler");
     }
 
     @Override
