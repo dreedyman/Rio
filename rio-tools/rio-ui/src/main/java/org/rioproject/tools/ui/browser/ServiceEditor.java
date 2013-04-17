@@ -36,13 +36,8 @@ import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import net.jini.lookup.DiscoveryAdmin;
 import net.jini.lookup.entry.UIDescriptor;
-import net.jini.lookup.ui.factory.JComponentFactory;
-import net.jini.lookup.ui.factory.JDialogFactory;
-import net.jini.lookup.ui.factory.JFrameFactory;
-import net.jini.lookup.ui.factory.JWindowFactory;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import org.rioproject.ui.Util;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -1075,40 +1070,7 @@ class ServiceEditor extends JFrame {
             if (uiDescriptor == null) {
                 return;
             }
-
-            try {
-                Object factory = uiDescriptor.getUIFactory(Thread.currentThread().getContextClassLoader());
-                Class factoryClass = factory.getClass();
-                if(JFrameFactory.class.isAssignableFrom(factoryClass)) {
-                    JFrameFactory uiFactory = (JFrameFactory)factory;
-                    JFrame frame = uiFactory.getJFrame(serviceItem);
-                    frame.validate();
-                    frame.setVisible(true);
-                }
-                else if(JWindowFactory.class.isAssignableFrom(factoryClass)) {
-                    JWindowFactory uiFactory = (JWindowFactory)factory;
-                    JWindow window = uiFactory.getJWindow(serviceItem);
-                    window.validate();
-                    window.setVisible(true);
-                } else if(JComponentFactory.class.isAssignableFrom(factoryClass)) {
-                    JComponentFactory uiFactory = (JComponentFactory)factory;
-                    JComponent component = uiFactory.getJComponent(item);
-                    String name = component.getAccessibleContext().getAccessibleName();
-                    if(name==null) {
-                        component.getAccessibleContext().setAccessibleName(component.getClass().getName());
-                    }
-                    JComponentFrame componentFrame = new JComponentFrame(component, name);
-                    componentFrame.setLocationRelativeTo(browser);
-                    componentFrame.setVisible(true);
-                } else if(JDialogFactory.class.isAssignableFrom(factoryClass)) {
-                    JDialogFactory uiFactory = (JDialogFactory)factory;
-                    JDialog dialog = uiFactory.getJDialog(serviceItem);
-                    dialog.validate();
-                    dialog.setVisible(true);
-                }
-            } catch (Exception e) {
-                Util.showError(e, browser, "Service UI Exception");
-            }
+            ServiceUIHelper.handle(uiDescriptor, serviceItem, browser);
         }
 
         public void popupMenuWillBecomeVisible(PopupMenuEvent ev) {
@@ -1208,21 +1170,4 @@ class ServiceEditor extends JFrame {
         return new ServiceEditor.UIDescriptorPopup();
     }
 
-    class JComponentFrame extends JFrame {
-        public JComponentFrame(JComponent component, String name)  {
-            super();
-            setTitle("Service UI for "+name);
-            Container container = getContentPane();
-            if(container!=null)
-                container.add(component);
-            WindowListener l = new WindowAdapter() {
-                public void windowClosing(WindowEvent e) {
-                    dispose();
-                }
-            };
-            addWindowListener(l);
-            // Set dimensions and show
-            setSize(565, 588);
-        }
-    }
 }

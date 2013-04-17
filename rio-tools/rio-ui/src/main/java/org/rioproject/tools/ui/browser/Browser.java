@@ -46,11 +46,12 @@ import net.jini.lease.LeaseRenewalEvent;
 import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.DiscoveryAdmin;
 import net.jini.lookup.entry.UIDescriptor;
-import net.jini.lookup.ui.factory.JFrameFactory;
 import net.jini.security.*;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import net.jini.space.JavaSpace;
 import net.jini.space.JavaSpace05;
+import org.rioproject.tools.ui.serviceui.AdminFrame;
+import org.rioproject.ui.Util;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -269,6 +270,7 @@ public class Browser extends JFrame {
 
         getContentPane().setLayout(new BorderLayout());
         int textRows = 8;
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
         if (isAdmin) {
             textRows = 4;
             JPanel bpanel = new JPanel();
@@ -284,16 +286,16 @@ public class Browser extends JFrame {
             list.setFixedCellHeight(20);
             list.setCellRenderer((ListCellRenderer)
                                      wrap(new ServiceItemRenderer(), ListCellRenderer.class));
-            list.addMouseListener(
-                                     wrap(new MouseReceiver(new ServiceListPopup())));
+            list.addMouseListener(wrap(new MouseReceiver(new ServiceListPopup())));
             listScrollPane = new JScrollPane(list);
-            bpanel.add(listScrollPane, "Center");
-            getContentPane().add(bpanel, "South");
+            bpanel.add(listScrollPane, BorderLayout.CENTER);
+            splitPane.setBottomComponent(bpanel);
         }
         text = new JTextArea(genText(false), textRows, 40);
         text.setEditable(false);
         JScrollPane scroll = new JScrollPane(text);
-        getContentPane().add(scroll, "Center");
+        splitPane.setTopComponent(scroll);
+        getContentPane().add(splitPane, BorderLayout.CENTER);
 
         validate();
         SwingUtilities.invokeLater(wrap(new Runnable() {
@@ -339,9 +341,7 @@ public class Browser extends JFrame {
         return buf.toString();
     }
 
-    private void genEntries(StringBuffer buf,
-                            Entry[] entries,
-                            boolean showNulls) {
+    private void genEntries(StringBuffer buf, Entry[] entries, boolean showNulls) {
         for (Entry entry : entries) {
             if (entry == null) {
                 buf.append("null\n");
@@ -389,8 +389,7 @@ public class Browser extends JFrame {
                 buf.append("Groups: <all>\n");
             } else if (groups.length > 0) {
                 buf.append("Groups:");
-                for (int i = 0; i < groups.length; i++) {
-                    String group = groups[i];
+                for (String group : groups) {
                     if (group.length() == 0)
                         group = "public";
                     buf.append(" ");
@@ -402,12 +401,12 @@ public class Browser extends JFrame {
                 ((DiscoveryLocatorManagement) disco).getLocators();
             if (locators.length > 0) {
                 buf.append("Addresses:");
-                for (int i = 0; i < locators.length; i++) {
+                for (LookupLocator locator : locators) {
                     buf.append(" ");
-                    buf.append(locators[i].getHost());
-                    if (locators[i].getPort() != Constants.discoveryPort) {
+                    buf.append(locator.getHost());
+                    if (locator.getPort() != Constants.discoveryPort) {
                         buf.append(":");
-                        buf.append(locators[i].getPort());
+                        buf.append(locator.getPort());
                     }
                 }
                 buf.append("\n");
@@ -449,7 +448,7 @@ public class Browser extends JFrame {
             }
         }
 
-        if (isAdmin) {
+        if (isAdmin && matches.items != null) {
             for (int i = 0; i < matches.items.length; i++)
                 listModel.addElement(new ServiceListItem(matches.items[i]));
             list.setModel(listModel);
@@ -470,7 +469,7 @@ public class Browser extends JFrame {
         buf.append("\nMatching services: ");
         buf.append(matches.totalMatches);
 
-        if (!isAdmin) {
+        if (!isAdmin && matches.items != null) {
             if (!match)
                 return;
             buf.append("\n\n");
@@ -565,19 +564,19 @@ public class Browser extends JFrame {
                     addNone(menu);
                 return;
             }
-            for (int i = 0; i < types.length; i++) {
+            for (Class type : types) {
                 Class[] stypes;
-                if (types[i] == null) {
+                if (type == null) {
                     all.addElement(new JMenuItem("null"));
                     continue;
                 }
-                if (types[i].isInterface() || sclass.getState()) {
-                    stypes = new Class[]{types[i]};
+                if (type.isInterface() || sclass.getState()) {
+                    stypes = new Class[]{type};
                 } else {
-                    stypes = getInterfaces(types[i]);
+                    stypes = getInterfaces(type);
                 }
-                for (int j = 0; j < stypes.length; j++) {
-                    addType(stypes[j], all);
+                for (Class stype : stypes) {
+                    addType(stype, all);
                 }
             }
         }
@@ -595,8 +594,8 @@ public class Browser extends JFrame {
             if (sclass.getState() && type.getSuperclass() != null)
                 addType(type.getSuperclass(), all);
             Class[] stypes = type.getInterfaces();
-            for (int i = 0; i < stypes.length; i++) {
-                addType(stypes[i], all);
+            for (Class stype : stypes) {
+                addType(stype, all);
             }
         }
 
@@ -661,13 +660,12 @@ public class Browser extends JFrame {
             throws Throwable {
             if (method.getDeclaringClass() == Object.class) {
                 if ("equals".equals(method.getName()))
-                    return Boolean.valueOf(proxy == args[0]);
+                    return proxy == args[0];
                 else if ("hashCode".equals(method.getName()))
-                    return Integer.valueOf(System.identityHashCode(proxy));
+                    return System.identityHashCode(proxy);
             }
             try {
-                return AccessController.doPrivileged(
-                                                        ctx.wrap(new PrivilegedExceptionAction() {
+                return AccessController.doPrivileged(ctx.wrap(new PrivilegedExceptionAction() {
                                                             public Object run() throws Exception {
                                                                 Thread t = Thread.currentThread();
                                                                 ClassLoader occl = t.getContextClassLoader();
@@ -779,11 +777,11 @@ public class Browser extends JFrame {
                 return;
             }
             Vector all = new Vector();
-            for (int i = 0; i < types.length; i++) {
-                if (types[i] == null)
+            for (Class type : types) {
+                if (type == null)
                     menu.add(new JMenuItem("null"));
                 else
-                    addType(types[i], all);
+                    addType(type, all);
             }
         }
 
@@ -849,21 +847,17 @@ public class Browser extends JFrame {
             menu.add(match);
             Entry ent = tmpl.attributeSetTemplates[index];
             Field[] fields = ent.getClass().getFields();
-            for (int i = 0; i < fields.length; i++) {
-                Field field = fields[i];
+            for (Field field : fields) {
                 if (!valid(field))
                     continue;
                 try {
                     if (field.get(ent) != null) {
-                        JCheckBoxMenuItem item =
-                            new JCheckBoxMenuItem(field.getName(), true);
-                        item.addActionListener(
-                                                  wrap(new Value(index, field, null)));
+                        JCheckBoxMenuItem item = new JCheckBoxMenuItem(field.getName(), true);
+                        item.addActionListener(wrap(new Value(index, field, null)));
                         menu.add(item);
                     } else {
                         JMenu item = new JMenu(field.getName());
-                        item.addMenuListener(
-                                                wrap(new Values(item, index, field)));
+                        item.addMenuListener(wrap(new Values(item, index, field)));
                         menu.add(item);
                     }
                 } catch (Throwable t) {
@@ -923,10 +917,9 @@ public class Browser extends JFrame {
                 addNone(menu);
                 return;
             }
-            for (int i = 0; i < values.length; i++) {
-                JMenuItem item = new JMenuItem(values[i].toString());
-                item.addActionListener(
-                                          wrap(new Value(index, field, values[i])));
+            for (Object value : values) {
+                JMenuItem item = new JMenuItem(value.toString());
+                item.addActionListener(wrap(new Value(index, field, value)));
                 menu.add(item);
             }
         }
@@ -1297,8 +1290,7 @@ public class Browser extends JFrame {
                 isAccessible &&
                 item.service instanceof Administrable) {
                 try {
-                    admin = adminPreparer.prepareProxy(
-                                                          ((Administrable) item.service).getAdmin());
+                    admin = adminPreparer.prepareProxy(((Administrable) item.service).getAdmin());
                 } catch (Throwable t) {
                     logger.log(Levels.HANDLED, "failed to get admin proxy", t);
                     isAccessible = false;
@@ -1401,9 +1393,7 @@ public class Browser extends JFrame {
         }
     }
 
-    private class ServiceListPopup
-        extends JPopupMenu
-        implements ActionListener, PopupMenuListener {
+    private class ServiceListPopup extends JPopupMenu implements ActionListener, PopupMenuListener {
         protected JMenuItem infoItem;
         protected JMenuItem browseItem;
         protected JMenuItem adminItem;
@@ -1477,37 +1467,20 @@ public class Browser extends JFrame {
                                               "ServiceItem Information",
                                               JOptionPane.INFORMATION_MESSAGE);
             } else if (command.equals("browseService")) {
-                new ServiceBrowser(item, lookup,
-                                   Browser.this).setVisible(true);
+                new ServiceBrowser(item, lookup, Browser.this).setVisible(true);
             } else if (command.equals("adminService")) {
-                new ServiceEditor(item, listItem.getAdmin(),
-                                  lookup, Browser.this).setVisible(true);
+                new ServiceEditor(item, listItem.getAdmin(), lookup, Browser.this).setVisible(true);
             } else if (command.equals("browseEntry")) {
-                new SpaceBrowser(item.service instanceof JavaSpace05 ?
-                                 item.service : listItem.getAdmin(),
+                new SpaceBrowser(item.service instanceof JavaSpace05 ? item.service : listItem.getAdmin(),
                                  Browser.this).setVisible(true);
             } else if (command.equals("showUI")) {
-                UIDescriptor uiDescriptor = getSelectedUIDescriptor();
-
-                if (uiDescriptor == null) {
+                if (!getHasUIDescriptors()) {
                     return;
                 }
-
                 try {
-                    JFrameFactory uiFactory = (JFrameFactory)
-                                                  uiDescriptor.getUIFactory(
-                                                                               Thread.currentThread()
-                                                                                   .getContextClassLoader());
-                    JFrame frame = uiFactory.getJFrame(item);
-
-                    frame.validate();
-                    frame.setVisible(true);
+                    new AdminFrame(item, Browser.this);
                 } catch (Exception e) {
-                    logger.log(Level.INFO, "show ui failed", e);
-                    JOptionPane.showMessageDialog(Browser.this,
-                                                  e.getMessage(),
-                                                  e.getClass().getName(),
-                                                  JOptionPane.WARNING_MESSAGE);
+                    Util.showError(e, Browser.this, "Unable to create AdminFrame");
                 }
             }
         }
@@ -1521,25 +1494,16 @@ public class Browser extends JFrame {
         public void popupMenuCanceled(PopupMenuEvent ev) {
         }
 
-        private UIDescriptor getSelectedUIDescriptor() {
-
-            if (!(new ServiceListItem(item)).isUI()) {
-                return null;
-            }
-
+        private boolean getHasUIDescriptors() {
             Entry[] attrs = item.attributeSets;
             if ((attrs != null) && (attrs.length != 0)) {
                 for (Entry attr : attrs) {
                     if (attr instanceof UIDescriptor) {
-                        UIDescriptor desc = (UIDescriptor) attr;
-                        if (!"javax.swing".equals(desc.toolkit)) {
-                            continue;
-                        }
-                        return desc;
+                        return true;
                     }
                 }
             }
-            return null;
+            return false;
         }
     }
 
