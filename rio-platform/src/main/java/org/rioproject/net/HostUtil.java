@@ -65,7 +65,7 @@ public final class HostUtil {
     /**
      * Return the local host address based on the value of a system property.
      * using {@link java.net.InetAddress#getByName(String)}. If the system
-     * property is not resolvable, return the first non-loopback address. If there are non -non-loopback addresses,
+     * property is not resolvable, return the first non-loopback address. If there are no non-loopback addresses,
      * return the default host address obtained from {@link java.net.InetAddress#getLocalHost()}.
      *
      * @param property The property name to use
@@ -81,7 +81,7 @@ public final class HostUtil {
     /**
      * Return the {@code InetAddress} based on the value of a system property.
      * using {@link java.net.InetAddress#getByName(String)}. If the system
-     * property is not resolvable, return the first non-loopback address. If there are non -non-loopback addresses,
+     * property is not resolvable, return the first non-loopback address. If there are no non-loopback addresses,
      * return the default host address obtained from {@link java.net.InetAddress#getLocalHost()}.
      *
      * @param property The property name to use
