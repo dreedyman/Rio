@@ -53,6 +53,7 @@ import org.rioproject.resources.util.ThrowableUtil;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.tools.discovery.RecordingDiscoveryListener;
+import org.rioproject.tools.ui.browser.Browser;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.discovery.GroupSelector;
 import org.rioproject.tools.ui.multicast.MulticastMonitor;
@@ -74,7 +75,10 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -520,6 +524,18 @@ public class Main extends JFrame {
             public void actionPerformed(ActionEvent ae) {
                 JDialog dialog = MulticastMonitor.getDialog(frame);
                 dialog.setVisible(true);
+            }
+        });
+        JMenuItem browserMenu = toolsMenu.add(new JMenuItem("Service Browser..."));
+        final JFrame parent = this;
+        browserMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    Browser browser = new Browser(config, parent);
+                    browser.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
