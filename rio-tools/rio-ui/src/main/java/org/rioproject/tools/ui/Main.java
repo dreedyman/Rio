@@ -55,6 +55,7 @@ import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.tools.discovery.RecordingDiscoveryListener;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.discovery.GroupSelector;
+import org.rioproject.tools.ui.multicast.MulticastMonitor;
 import org.rioproject.tools.ui.prefs.PreferencesDialog;
 import org.rioproject.tools.ui.progresspanel.WaitingDialog;
 import org.rioproject.tools.ui.servicenotification.RemoteEventTable;
@@ -460,10 +461,7 @@ public class Main extends JFrame {
         JMenu fileMenu = null;
         if(!MacUIHelper.isMacOS()) {
             fileMenu = new JMenu("File");
-            fileMenu.setMnemonic('F');
-            JMenuItem preferencesMenuItem =
-                fileMenu.add(new JMenuItem("Preferences"));
-            preferencesMenuItem.setMnemonic('P');
+            JMenuItem preferencesMenuItem = fileMenu.add(new JMenuItem("Preferences"));
             preferencesMenuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     PreferencesDialog prefs = new PreferencesDialog(frame, graphView, cup);
@@ -471,7 +469,6 @@ public class Main extends JFrame {
                 }
             });
             JMenuItem exitMenuItem = fileMenu.add(new JMenuItem("Exit"));
-            exitMenuItem.setMnemonic('x');
             exitMenuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     terminateAndClose();
@@ -487,16 +484,12 @@ public class Main extends JFrame {
             }
         });
         JMenuItem addLocator = discoMenu.add(new JMenuItem("Add Locator..."));
-        addLocator.setMnemonic('L');
         addLocator.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 addLocator();
             }
         });
         JMenuItem remLocator = discoMenu.add(new JMenuItem("Remove Locator..."));
-        remLocator.setAccelerator(
-            KeyStroke.getKeyStroke(KeyEvent.VK_C,
-                                   Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         remLocator.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 removeLocator();
@@ -505,7 +498,6 @@ public class Main extends JFrame {
         discoMenu.addSeparator();
         //String[] gps = jiniClient.getRegistrarGroups();
         JMenuItem addGroup = discoMenu.add(new JMenuItem("Add Group..."));
-        addGroup.setMnemonic('A');
         //if (gps == null)
         //    addGroup.setEnabled(false);
         addGroup.addActionListener(new ActionListener() {
@@ -514,12 +506,20 @@ public class Main extends JFrame {
             }
         });
         JMenuItem remGroup = discoMenu.add(new JMenuItem("Remove Group..."));
-        remGroup.setMnemonic('R');
         //if (gps == null)
         //    remGroup.setEnabled(false);
         remGroup.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 removeGroup();
+            }
+        });
+
+        JMenu toolsMenu = new JMenu("Tools");
+        JMenuItem multiCastMonitor = toolsMenu.add(new JMenuItem("Multicast Monitor..."));
+        multiCastMonitor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                JDialog dialog = MulticastMonitor.getDialog(frame);
+                dialog.setVisible(true);
             }
         });
 
@@ -540,6 +540,7 @@ public class Main extends JFrame {
         if (fileMenu!=null)
             menuBar.add(fileMenu);
         menuBar.add(discoMenu);
+        menuBar.add(toolsMenu);
         if (helpMenu!=null) {
             menuBar.add(Box.createGlue());
             menuBar.add(helpMenu);
