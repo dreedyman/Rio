@@ -97,6 +97,8 @@ public class RemoteEventTreeModel extends DefaultTreeTableModel {
     private void addItem(AbstractMutableTreeTableNode node,
                          AbstractMutableTreeTableNode parent,
                          AbstractMutableTreeTableNode filterParent) {
+        if(parent==null)
+            return;
         synchronized (completeModel) {
             int index = parent.getChildCount();
             if(node instanceof RemoteServiceEventNode) {
