@@ -20,7 +20,6 @@ package org.rioproject.tools.ui.browser;
 import com.sun.jini.admin.DestroyAdmin;
 import com.sun.jini.config.Config;
 import com.sun.jini.logging.Levels;
-import com.sun.jini.outrigger.JavaSpaceAdmin;
 import com.sun.jini.proxy.BasicProxyTrustVerifier;
 import net.jini.admin.Administrable;
 import net.jini.admin.JoinAdmin;
@@ -48,8 +47,6 @@ import net.jini.lookup.DiscoveryAdmin;
 import net.jini.lookup.entry.UIDescriptor;
 import net.jini.security.*;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import net.jini.space.JavaSpace;
-import net.jini.space.JavaSpace05;
 import org.rioproject.tools.ui.serviceui.AdminFrame;
 import org.rioproject.ui.Util;
 
@@ -301,7 +298,8 @@ public class Browser extends JFrame {
         SwingUtilities.invokeLater(wrap(new Runnable() {
             public void run() {
                 pack();
-                show();
+                setSize(new Dimension(490, 450));
+                setVisible(true);
             }
         }));
         LookupListener adder = new LookupListener();
@@ -310,6 +308,7 @@ public class Browser extends JFrame {
     }
 
     private void terminate() {
+        System.out.println(getSize());
         Browser.this.dispose();
         cancelLease();
         listen.unexport();
@@ -363,6 +362,7 @@ public class Browser extends JFrame {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
             buf.append("\n");
         }
@@ -523,13 +523,13 @@ public class Browser extends JFrame {
     }
 
     static Class[] getInterfaces(Class c) {
-        Set set = new HashSet();
+        Set<Class> set = new HashSet<Class>();
         for (; c != null; c = c.getSuperclass()) {
             Class[] ifs = c.getInterfaces();
             for (int i = ifs.length; --i >= 0; )
                 set.add(ifs[i]);
         }
-        return (Class[]) set.toArray(new Class[set.size()]);
+        return set.toArray(new Class[set.size()]);
     }
 
     private class Services implements MenuListener {
@@ -544,10 +544,10 @@ public class Browser extends JFrame {
                 addNone(menu);
                 return;
             }
-            Vector all = new Vector();
+            List<Class> all = new ArrayList<Class>();
             Class[] types = tmpl.serviceTypes;
             for (int i = 0; i < types.length; i++) {
-                all.addElement(types[i]);
+                all.add(types[i]);
                 JCheckBoxMenuItem item =
                     new JCheckBoxMenuItem(types[i].getName(), true);
                 item.addActionListener(wrap(new Service(types[i], i)));
@@ -567,7 +567,6 @@ public class Browser extends JFrame {
             for (Class type : types) {
                 Class[] stypes;
                 if (type == null) {
-                    all.addElement(new JMenuItem("null"));
                     continue;
                 }
                 if (type.isInterface() || sclass.getState()) {
@@ -581,10 +580,10 @@ public class Browser extends JFrame {
             }
         }
 
-        private void addType(Class type, Vector all) {
+        private void addType(Class type, List<Class> all) {
             if (all.contains(type))
                 return;
-            all.addElement(type);
+            all.add(type);
             JCheckBoxMenuItem item =
                 new JCheckBoxMenuItem(type.getName(), false);
             item.addActionListener(wrap(new Service(type, -1)));
@@ -776,7 +775,7 @@ public class Browser extends JFrame {
                     addNone(menu);
                 return;
             }
-            Vector all = new Vector();
+            List<Class> all = new ArrayList<Class>();
             for (Class type : types) {
                 if (type == null)
                     menu.add(new JMenuItem("null"));
@@ -785,10 +784,10 @@ public class Browser extends JFrame {
             }
         }
 
-        private void addType(Class type, Vector all) {
+        private void addType(Class type, List<Class> all) {
             if (all.contains(type))
                 return;
-            all.addElement(type);
+            all.add(type);
             JCheckBoxMenuItem item =
                 new JCheckBoxMenuItem(typeName(type), false);
             item.addActionListener(wrap(new AttrSet(type)));
@@ -959,13 +958,11 @@ public class Browser extends JFrame {
         final RemoteEventListener proxy;
 
         public Listener() throws ConfigurationException, ExportException {
-            exporter = (Exporter)
-                           Config.getNonNullEntry(config, BROWSER, "listenerExporter",
-                                                  Exporter.class,
-                                                  new BasicJeriExporter(
-                                                                           TcpServerEndpoint.getInstance(0),
-                                                                           new BasicILFactory(),
-                                                                           false, false));
+            exporter = (Exporter)Config.getNonNullEntry(config, BROWSER, "listenerExporter",
+                                                        Exporter.class,
+                                                        new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
+                                                                              new BasicILFactory(),
+                                                                              false, false));
             proxy = (RemoteEventListener) exporter.export(this);
         }
 
@@ -998,8 +995,8 @@ public class Browser extends JFrame {
             final ServiceRegistrar[] newregs = e.getRegistrars();
             SwingUtilities.invokeLater(wrap(new Runnable() {
                 public void run() {
-                    for (int i = 0; i < newregs.length; i++) {
-                        addOne(newregs[i]);
+                    for (ServiceRegistrar newreg : newregs) {
+                        addOne(newreg);
                     }
                     if (lookup == null)
                         setText(false);
@@ -1011,8 +1008,8 @@ public class Browser extends JFrame {
             final ServiceRegistrar[] regs = e.getRegistrars();
             SwingUtilities.invokeLater(wrap(new Runnable() {
                 public void run() {
-                    for (int i = 0; i < regs.length; i++) {
-                        ServiceID id = regs[i].getServiceID();
+                    for (ServiceRegistrar reg : regs) {
+                        ServiceID id = reg.getServiceID();
                         if (lookup != null &&
                             id.equals(lookup.getServiceID())) {
                             lookup = null;
@@ -1306,31 +1303,8 @@ public class Browser extends JFrame {
                     admin instanceof DiscoveryAdmin);
         }
 
-        public boolean isSpaceBrowsable() {
-            return (item.service instanceof JavaSpace05 ||
-                    (item.service instanceof JavaSpace &&
-                     getAdmin() instanceof JavaSpaceAdmin));
-        }
-
-        private boolean isUI() {
-            Entry[] attrs = item.attributeSets;
-            if ((attrs != null) && (attrs.length != 0)) {
-                for (int i = 0; i < attrs.length; i++) {
-                    if (attrs[i] instanceof UIDescriptor) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         public ServiceItem getServiceItem() {
             return item;
-        }
-
-        public Entry[] getAttributes() {
-            return item.attributeSets;
         }
 
         public Icon getIcon() {
@@ -1348,6 +1322,18 @@ public class Browser extends JFrame {
         }
     }
 
+    private boolean isUI(ServiceItem item) {
+        Entry[] attrs = item.attributeSets;
+        if ((attrs != null) && (attrs.length != 0)) {
+            for (Entry attr : attrs) {
+                if (attr instanceof UIDescriptor) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private class MouseReceiver extends MouseAdapter {
         private ServiceListPopup popup;
 
@@ -1360,12 +1346,13 @@ public class Browser extends JFrame {
                 ServiceListItem listItem = getTargetListItem(ev);
                 if (listItem != null) {
                     ServiceItem item = listItem.getServiceItem();
-                    if (listItem.isAdministrable())
-                        new ServiceEditor(item, listItem.getAdmin(), lookup,
-                                          Browser.this).setVisible(true);
-                    else if (listItem.isAccessible())
-                        new ServiceBrowser(item, lookup,
-                                           Browser.this).setVisible(true);
+                    if (listItem.isAdministrable()) {
+                        JDialog dialog = ServiceEditor.getDialog(item, listItem.getAdmin(), lookup,
+                                                                 Browser.this);
+                        dialog.setVisible(true);
+                    } else if (listItem.isAccessible()) {
+                        new ServiceBrowser(item, lookup, Browser.this).setVisible(true);
+                    }
                 }
             }
         }
@@ -1442,8 +1429,7 @@ public class Browser extends JFrame {
             infoItem.setEnabled(listItem.isAccessible());
             browseItem.setEnabled(listItem.isAccessible());
             adminItem.setEnabled(listItem.isAdministrable());
-            spaceItem.setEnabled(listItem.isSpaceBrowsable());
-            uiItem.setEnabled(listItem.isUI());
+            uiItem.setEnabled(isUI(item));
         }
 
         public void actionPerformed(ActionEvent ev) {
@@ -1469,12 +1455,10 @@ public class Browser extends JFrame {
             } else if (command.equals("browseService")) {
                 new ServiceBrowser(item, lookup, Browser.this).setVisible(true);
             } else if (command.equals("adminService")) {
-                new ServiceEditor(item, listItem.getAdmin(), lookup, Browser.this).setVisible(true);
-            } else if (command.equals("browseEntry")) {
-                new SpaceBrowser(item.service instanceof JavaSpace05 ? item.service : listItem.getAdmin(),
-                                 Browser.this).setVisible(true);
+                JDialog dialog = ServiceEditor.getDialog(item, listItem.getAdmin(), lookup, Browser.this);
+                dialog.setVisible(true);
             } else if (command.equals("showUI")) {
-                if (!getHasUIDescriptors()) {
+                if (!isUI(item)) {
                     return;
                 }
                 try {
@@ -1492,45 +1476,6 @@ public class Browser extends JFrame {
         }
 
         public void popupMenuCanceled(PopupMenuEvent ev) {
-        }
-
-        private boolean getHasUIDescriptors() {
-            Entry[] attrs = item.attributeSets;
-            if ((attrs != null) && (attrs.length != 0)) {
-                for (Entry attr : attrs) {
-                    if (attr instanceof UIDescriptor) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
-
-    /**
-     * An action listener that cancels any lookup service event registration
-     * lease and then disposes.
-     */
-    public static class Exit implements ActionListener {
-
-        /**
-         * Cancels any lookup service event registration lease and
-         * disposes the frame.
-         */
-        public void actionPerformed(ActionEvent ev) {
-            Object src = ev.getSource();
-            while (!(src instanceof Browser) && src instanceof Component) {
-                if (src instanceof JPopupMenu)
-                    src = ((JPopupMenu) src).getInvoker();
-                else
-                    src = ((Component) src).getParent();
-            }
-            if (src instanceof Browser) {
-                Browser browser = (Browser) src;
-                browser.cancelLease();
-                browser.dispose();
-            }
-
         }
     }
 }

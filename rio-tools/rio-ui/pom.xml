@@ -62,12 +62,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sun.jini</groupId>
-            <artifactId>outrigger-dl</artifactId>
-            <version>${river.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
             <version>1.6.1</version>

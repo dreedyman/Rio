@@ -76,8 +76,25 @@ public class ServiceUIHelper {
             super();
             setTitle("Service UI for "+name);
             Container container = getContentPane();
+
+            JPanel p = new JPanel(new BorderLayout(8, 8));
+            JPanel labels = new JPanel();
+            /*icons[0] = MetalIcons.getBlueFolderIcon();	// Administrable Service, Controllable Attribute
+            icons[1] = MetalIcons.getGrayFolderIcon();	// Non-administrable Service
+            icons[2] = MetalIcons.getOrangeFolderIcon();	// Uncontrollable Attribute
+            icons[3] = MetalIcons.getBlueFileIcon();	// Administrable Service, Controllable Attribute
+            icons[4] = MetalIcons.getGrayFileIcon();	// Non-administrable Service
+            icons[5] = MetalIcons.getOrangeFileIcon();	// Uncontrollable Attribute*/
+            labels.add(new JLabel(MetalIcons.getBlueFolderIcon()));
+            labels.add(new JLabel(MetalIcons.getGrayFolderIcon()));
+            labels.add(new JLabel(MetalIcons.getOrangeFolderIcon()));
+            labels.add(new JLabel(MetalIcons.getBlueFileIcon()));
+            labels.add(new JLabel(MetalIcons.getGrayFileIcon()));
+            labels.add(new JLabel(MetalIcons.getOrangeFileIcon()));
+            p.add(labels, BorderLayout.NORTH);
+            p.add(component, BorderLayout.CENTER);
             if(container!=null)
-                container.add(component);
+                container.add(p);
             WindowListener l = new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {
                     dispose();

@@ -67,7 +67,7 @@ import java.util.logging.Logger;
  * <li> field modification is not based on EditableTree
  * </ul>
  */
-class ServiceEditor extends JFrame {
+class ServiceEditor extends JPanel {
     private static final Logger logger = Browser.logger;
 
     private Browser browser;
@@ -80,15 +80,15 @@ class ServiceEditor extends JFrame {
     private long eventID = 0;
     private long seqNo = Long.MAX_VALUE;
     private AttributeTreePanel attrPanel;
+    private static JDialog dialog;
 
     private final static int MINIMUM_WINDOW_WIDTH = 320;
 
-    public ServiceEditor(ServiceItem item,
-                         Object admin,
-                         ServiceRegistrar registrar,
-                         Browser browser) {
-        super("ServiceItem Editor");
-
+    private ServiceEditor(final ServiceItem item,
+                          final Object admin,
+                          final ServiceRegistrar registrar,
+                          final Browser browser) {
+        super(new BorderLayout());
         this.item = item;
         this.admin = admin;
         this.registrar = registrar;
@@ -110,20 +110,17 @@ class ServiceEditor extends JFrame {
             cancelNotify();
         }
 
-        addWindowListener(browser.wrap(new WindowAdapter() {
+        dialog.addWindowListener(browser.wrap(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 cleanup();
             }
         }));
+
         // add menu and attr panel
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(new JoinMenuBar(), "North");
-        getContentPane().add(attrPanel, "Center");
+        add(new JoinMenuBar(), BorderLayout.NORTH);
+        add(attrPanel, BorderLayout.CENTER);
 
         validate();
-        pack();
-        setSize(((getSize().width < MINIMUM_WINDOW_WIDTH) ? MINIMUM_WINDOW_WIDTH : getSize().width),
-                getSize().height);
 
         // center in parent frame
         Rectangle bounds = browser.getBounds();
@@ -134,12 +131,29 @@ class ServiceEditor extends JFrame {
                     (ypos < 0) ? 0 : ypos);
     }
 
+    static JDialog getDialog(ServiceItem item,
+                             Object admin,
+                             ServiceRegistrar registrar,
+                             Browser browser) {
+        dialog = new JDialog(browser, "ServiceItem Editor", true);
+        ServiceEditor serviceEditor = new ServiceEditor(item, admin, registrar, browser);
+        dialog.getContentPane().add(serviceEditor);
+        dialog.pack();
+        dialog.setSize(((dialog.getSize().width < MINIMUM_WINDOW_WIDTH) ?
+                        MINIMUM_WINDOW_WIDTH :
+                        dialog.getSize().width),
+                       dialog.getSize().height);
+        dialog.setModal(false);
+        dialog.setLocationRelativeTo(browser);
+        return (dialog);
+    }
+
     void cleanup() {
         // cancel lease
         cancelNotify();
         // release resources and close all child frames
-        dispose();
         receiver.unexport();
+        dialog.dispose();
     }
 
     protected void cancelNotify() {
@@ -217,8 +231,8 @@ class ServiceEditor extends JFrame {
             JMenuItem mitem;
 
             // "File" Menu
-            JMenu fileMenu = (JMenu) add(new JMenu("File"));
-            mitem = (JMenuItem) fileMenu.add(new JMenuItem("Show Info"));
+            JMenu fileMenu = add(new JMenu("File"));
+            mitem = fileMenu.add(new JMenuItem("Show Info"));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     Class[] infs = Browser.getInterfaces(item.service.getClass());
@@ -238,13 +252,13 @@ class ServiceEditor extends JFrame {
                                                   JOptionPane.INFORMATION_MESSAGE);
                 }
             }));
-            mitem = (JMenuItem) fileMenu.add(new JMenuItem("Refresh"));
+            mitem = fileMenu.add(new JMenuItem("Refresh"));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     attrPanel.refreshPanel();
                 }
             }));
-            mitem = (JMenuItem) fileMenu.add(new JMenuItem("Close"));
+            mitem = fileMenu.add(new JMenuItem("Close"));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     cleanup();
@@ -252,8 +266,8 @@ class ServiceEditor extends JFrame {
             }));
 
             // "Edit" Menu
-            JMenu editMenu = (JMenu) add(new JMenu("Edit"));
-            mitem = (JMenuItem) editMenu.add(new JMenuItem("Add Attribute..."));
+            JMenu editMenu = add(new JMenu("Edit"));
+            mitem = editMenu.add(new JMenuItem("Add Attribute..."));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     attrPanel.addAttr();
@@ -261,7 +275,7 @@ class ServiceEditor extends JFrame {
             }));
             if (!(admin instanceof JoinAdmin))
                 mitem.setEnabled(false);
-            mitem = (JMenuItem) editMenu.add(new JMenuItem("Remove Attribute"));
+            mitem = editMenu.add(new JMenuItem("Remove Attribute"));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     attrPanel.removeAttr();
@@ -271,10 +285,10 @@ class ServiceEditor extends JFrame {
                 mitem.setEnabled(false);
 
             // "Admin" Menu
-            JMenu adminMenu = (JMenu) add(new JMenu("Admin"));
+            JMenu adminMenu = add(new JMenu("Admin"));
 
             // Group (JoinAdmin)
-            mitem = (JMenuItem) adminMenu.add(new JMenuItem("Joining groups..."));
+            mitem = adminMenu.add(new JMenuItem("Joining groups..."));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     new GroupLister("Joining Groups").showFrame();
@@ -284,7 +298,7 @@ class ServiceEditor extends JFrame {
                 mitem.setEnabled(false);
 
             // Locator (JoinAdmin)
-            mitem = (JMenuItem) adminMenu.add(new JMenuItem("Joining locators..."));
+            mitem = adminMenu.add(new JMenuItem("Joining locators..."));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     new LocatorLister("Joining Locators").showFrame();
@@ -297,7 +311,7 @@ class ServiceEditor extends JFrame {
             adminMenu.addSeparator();
 
             // Group (DiscoveryAdmin)
-            mitem = (JMenuItem) adminMenu.add(new JMenuItem("Member groups..."));
+            mitem = adminMenu.add(new JMenuItem("Member groups..."));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     new MemberGroupLister("Member Groups").showFrame();
@@ -307,7 +321,7 @@ class ServiceEditor extends JFrame {
                 mitem.setEnabled(false);
 
             // Unicast port (DiscoveryAdmin)
-            mitem = (JMenuItem) adminMenu.add(new JMenuItem("Unicast port..."));
+            mitem = adminMenu.add(new JMenuItem("Unicast port..."));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     try {
@@ -352,7 +366,7 @@ class ServiceEditor extends JFrame {
             adminMenu.addSeparator();
 
             // DestroyAdmin
-            mitem = (JMenuItem) adminMenu.add(new JMenuItem("Destroy"));
+            mitem = adminMenu.add(new JMenuItem("Destroy"));
             mitem.addActionListener(browser.wrap(new ActionListener() {
                 public void actionPerformed(ActionEvent ev) {
                     if (JOptionPane.showConfirmDialog(ServiceEditor.this,
@@ -401,7 +415,7 @@ class ServiceEditor extends JFrame {
                     ServiceMatches matches = registrar.lookup(stmpl, 1);
                     if (matches.totalMatches != 1)
                         Browser.logger.log(Level.INFO, "unexpected lookup matches: {0}",
-                                           Integer.valueOf(matches.totalMatches));
+                                           matches.totalMatches);
                     else
                         item.attributeSets = matches.items[0].attributeSets;
                 } catch (Throwable t) {
@@ -450,11 +464,10 @@ class ServiceEditor extends JFrame {
                                                         "Modify a field",
                                                         JOptionPane.QUESTION_MESSAGE);
 
-            if (result == null) {
-            } else {
+            if (result != null) {
                 // Save current value as template
                 Entry template = cloneEntry((Entry) node.getEntryTop());
-                Object oldVal = null;
+                Object oldVal;
 
                 if (result.length() == 0) {
                     oldVal = node.setValue(null);
@@ -505,8 +518,7 @@ class ServiceEditor extends JFrame {
                                                         "Add an attribute",
                                                         JOptionPane.QUESTION_MESSAGE);
 
-            if (result == null || result.length() == 0) {
-            } else {
+            if (!(result == null || result.length() == 0)) {
                 try {
                     Class clazz = Class.forName(result);
                     Object attr = clazz.newInstance();
@@ -604,7 +616,6 @@ class ServiceEditor extends JFrame {
                     int index = root.getIndex(node);
                     root.remove(node);
                     model.nodesWereRemoved(root, new int[]{index}, new Object[]{node});
-                    node = null;
                 } catch (Throwable t) {
                     logger.log(Level.INFO, "attribute removal failed", t);
                     JOptionPane.showMessageDialog(AttributeTreePanel.this,
@@ -621,10 +632,10 @@ class ServiceEditor extends JFrame {
                 Entry template = (Entry) realClass.newInstance();
 
                 Field[] f = realClass.getFields();
-                for (int i = 0; i < f.length; i++) {
-                    if (!usableField(f[i]))
+                for (Field field : f) {
+                    if (!usableField(field))
                         continue;
-                    f[i].set(template, f[i].get(attr));
+                    field.set(template, field.get(attr));
                 }
 
                 return template;
@@ -645,22 +656,6 @@ class ServiceEditor extends JFrame {
             // skip anything that isn't a public per-object mutable field
             int mods = field.getModifiers();
             return (0 == (mods & (Modifier.TRANSIENT | Modifier.STATIC | Modifier.FINAL)));
-        }
-
-        private Entry generateTemplate(Entry attr) {
-            try {
-                Class realClass = attr.getClass();
-                Entry template = (Entry) realClass.newInstance();
-
-                Field[] f = realClass.getFields();
-                for (int i = 0; i < f.length; i++)
-                    f[i].set(template, null);
-
-                return template;
-            } catch (Throwable t) {
-                logger.log(Level.INFO, "instantiating template failed", t);
-            }
-            return null;
         }
 
         class DoubleClicker extends MouseAdapter {
@@ -837,8 +832,8 @@ class ServiceEditor extends JFrame {
 
             try {
                 String[] groups = ((JoinAdmin) admin).getLookupGroups();
-                for (int i = 0; i < groups.length; i++) {
-                    model.addElement(new GroupItem(groups[i]));
+                for (String group : groups) {
+                    model.addElement(new GroupItem(group));
                 }
             } catch (Throwable t) {
                 logger.log(Level.INFO, "obtaining groups failed", t);
@@ -898,8 +893,8 @@ class ServiceEditor extends JFrame {
         protected void initListModel() {
             try {
                 String[] groups = ((DiscoveryAdmin) admin).getMemberGroups();
-                for (int i = 0; i < groups.length; i++) {
-                    model.addElement(new GroupItem(groups[i]));
+                for (String group : groups) {
+                    model.addElement(new GroupItem(group));
                 }
             } catch (Throwable t) {
                 logger.log(Level.INFO, "obtaining groups failed", t);
@@ -911,7 +906,7 @@ class ServiceEditor extends JFrame {
         }
 
         protected String getRemoveMessage(Object[] items) {
-            StringBuffer msg = new StringBuffer();
+            StringBuilder msg = new StringBuilder();
             if (items.length > 1)
                 msg.append("Remove these groups : ");
             else
@@ -981,8 +976,8 @@ class ServiceEditor extends JFrame {
 
             try {
                 LookupLocator[] locators = ((JoinAdmin) admin).getLookupLocators();
-                for (int i = 0; i < locators.length; i++) {
-                    model.addElement(locators[i]);
+                for (LookupLocator locator : locators) {
+                    model.addElement(locator);
                 }
             } catch (Throwable t) {
                 logger.log(Level.INFO, "obtaining locators failed", t);
@@ -1070,7 +1065,7 @@ class ServiceEditor extends JFrame {
             if (uiDescriptor == null) {
                 return;
             }
-            ServiceUIHelper.handle(uiDescriptor, serviceItem, browser);
+            ServiceUIHelper.handle(uiDescriptor, serviceItem, dialog);
         }
 
         public void popupMenuWillBecomeVisible(PopupMenuEvent ev) {
