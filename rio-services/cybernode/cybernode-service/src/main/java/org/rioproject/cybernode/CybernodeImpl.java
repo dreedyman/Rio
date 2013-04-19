@@ -564,7 +564,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             pid = name.substring(0, ndx);
         }
         instantiatorIDBuilder.append(pid).append("@");
-        instantiatorIDBuilder.append(HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS));
+        instantiatorIDBuilder.append(InetAddress.getLocalHost().getHostName());
         instantiatorID = instantiatorIDBuilder.toString();
 
         /*
