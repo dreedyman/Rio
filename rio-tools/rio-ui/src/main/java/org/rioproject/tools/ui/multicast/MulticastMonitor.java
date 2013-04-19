@@ -59,7 +59,7 @@ public class MulticastMonitor extends JPanel {
                 }
             }
         });
-        JButton dismiss = new JButton("Dismiss");
+        JButton dismiss = new JButton("Close");
         dismiss.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
