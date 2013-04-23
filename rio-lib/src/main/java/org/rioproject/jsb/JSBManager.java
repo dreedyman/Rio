@@ -87,7 +87,7 @@ public class JSBManager implements ServiceBeanManager {
      * @param sElem The ServiceElement
      * @param opStringManager The OperationalStringManager
      * @param hostAddress The host address the service bean was instantiated on
-     * @param cybernodeUuid The Uuuid of the Cybernode
+     * @param cybernodeUuid The Uuid of the Cybernode
      *
      * @throws IllegalArgumentException if the sElem or hostAddress parameters are null
      */
