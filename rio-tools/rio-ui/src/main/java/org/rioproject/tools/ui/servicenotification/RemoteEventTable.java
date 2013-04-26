@@ -28,7 +28,6 @@ import org.rioproject.eventcollector.api.EventCollector;
 import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.tools.ui.AbstractNotificationUtility;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
-import org.rioproject.tools.ui.Constants;
 import org.rioproject.tools.ui.servicenotification.filter.FilterCriteria;
 import org.rioproject.tools.ui.servicenotification.filter.FilterListener;
 import org.rioproject.tools.ui.servicenotification.filter.FilterPanel;
@@ -46,7 +45,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.rmi.server.ExportException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Utility to display {@link org.rioproject.event.RemoteServiceEvent}s using either an {@link EventCollector} or
@@ -201,13 +203,7 @@ public class RemoteEventTable extends AbstractNotificationUtility {
     }
 
     public void init(final Properties props) {
-        String s = props.getProperty(Constants.EVENTS_DIVIDER);
-        int dividerLocation;
-        if(s==null) {
-            dividerLocation = splitPane.getHeight()-splitPane.getHeight()/6;
-        } else {
-            dividerLocation = Integer.parseInt(s);
-        }
+        int dividerLocation = splitPane.getHeight()-splitPane.getHeight()/6;
         splitPane.setDividerLocation(dividerLocation);
     }
 
