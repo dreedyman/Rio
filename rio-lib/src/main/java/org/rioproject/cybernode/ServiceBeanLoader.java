@@ -464,12 +464,7 @@ public class ServiceBeanLoader {
                     context.getAssociationManagement().setServiceBeanControl((ServiceBeanControl)adminObject);
                 }                    
             }
-
             logger.trace("Proxy =  {}", proxy);
-            //TODO - factor in code integrity for MO
-            //proxy = (new MarshalledObject(proxy)).get();
-            //currentThread.setContextClassLoader(currentClassLoader);
-            
         } catch(Throwable t) {
             ServiceBeanInstantiationException e;
             logger.trace("Loading ServiceBean", t);
