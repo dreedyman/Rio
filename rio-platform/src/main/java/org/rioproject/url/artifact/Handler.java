@@ -98,10 +98,10 @@ public class Handler extends URLStreamHandler {
         try {
             u = cache.get(a);
             if(u==null) {
-                if(logger.isDebugEnabled())
-                    logger.debug("Get location of {}", a);
                 u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
                 cache.put(a, u);
+                if(logger.isDebugEnabled())
+                    logger.debug("Location of {} is {}", a, u.toExternalForm());
             }
         } catch (ResolverException e) {
             logger.warn(String.format("Could not resolve %s", a), e);
