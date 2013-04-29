@@ -99,7 +99,7 @@ public class Handler extends URLStreamHandler {
             u = cache.get(a);
             if(u==null) {
                 if(logger.isDebugEnabled())
-                    logger.debug(String.format("Get location of %s", a));
+                    logger.debug("Get location of {}", a);
                 u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
                 cache.put(a, u);
             }
