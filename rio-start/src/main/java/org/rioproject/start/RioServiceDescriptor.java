@@ -430,7 +430,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             array[i] = tok.nextToken();
             i++;
         }
-        return(array);
+        return array;
     }
 
     public String toString() {
