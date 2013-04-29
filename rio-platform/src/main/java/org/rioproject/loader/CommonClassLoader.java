@@ -76,7 +76,7 @@ public final class CommonClassLoader extends URLClassLoader {
                     buffer.append(", ");
                 buffer.append(urls[i].toExternalForm());
             }
-            logger.trace("Context ClassLoader=%s URLs=%s", cl.toString(), buffer.toString());
+            logger.trace("Context ClassLoader={} URLs={}", cl.toString(), buffer.toString());
         } 
         return(urls);
     }

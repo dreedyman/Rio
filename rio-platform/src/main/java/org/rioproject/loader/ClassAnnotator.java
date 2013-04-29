@@ -16,6 +16,8 @@
 package org.rioproject.loader;
 
 import net.jini.loader.ClassAnnotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URL;
@@ -29,6 +31,8 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class ClassAnnotator implements ClassAnnotation {
+    private static final Logger logger = LoggerFactory.getLogger(ClassAnnotator.class);
+
     /**
      * URLs to return when being queried for annotations
      */
@@ -57,6 +61,9 @@ public class ClassAnnotator implements ClassAnnotation {
         if(codebase != null) {
             urls = new URL[codebase.length];
             System.arraycopy(codebase, 0, urls, 0, urls.length);
+            if(logger.isTraceEnabled()) {
+                logger.trace("URLs: {}", urls);
+            }
         }
         return (urls);
     }
