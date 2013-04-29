@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.rmi.MarshalledObject;
 import java.security.AllPermission;
 import java.security.Permission;
 import java.security.Policy;
@@ -363,8 +362,6 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             }
             logger.trace("Proxy:  {}", proxy==null?"<NULL>":proxy.toString());
             currentThread.setContextClassLoader(currentClassLoader);
-            //TODO - factor in code integrity for MO
-            proxy = (new MarshalledObject<Object>(proxy)).get();
         } catch(InvocationTargetException e) {
             Throwable t = e.getCause()==null? e.getTargetException(): e.getCause();
             if(t!=null && t instanceof Exception)
