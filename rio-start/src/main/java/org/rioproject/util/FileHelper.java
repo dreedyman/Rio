@@ -16,6 +16,8 @@
 package org.rioproject.util;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility for looking for a file in a directory or getting the version from a file name.
@@ -50,6 +52,33 @@ public class FileHelper {
             }
         }
         return found;
+    }
+
+    /**
+     * Get all files in a provided directory if the directory exists. If the directory does not exist or is empty,
+     * return the provided default.
+     *
+     * @param dir The directory to check. Must not be {@code null}
+     * @param defaultFilePath The file to use if the directory does not exist or is empty. May be {@code null},
+     *
+     * @return A List of String file paths. If the provided directory is not found or is empty,  return the provided
+     * default (as long as the provided default is not {@code null}.
+     */
+    public static List<String> getIfExists(File dir, String defaultFilePath) {
+        if(dir==null)
+            throw new IllegalArgumentException("directory can not be null");
+        List<String> files = new ArrayList<String>();
+        if (dir.exists()) {
+            File[] list = dir.listFiles();
+            if(list!=null) {
+                for (File f : list)
+                    files.add(f.getPath());
+            }
+        }
+        if(files.size()==0 && defaultFilePath!=null) {
+            files.add(defaultFilePath);
+        }
+        return files;
     }
 
     /**

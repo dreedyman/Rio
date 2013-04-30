@@ -29,9 +29,9 @@ class StartServiceBeanExecConfig {
 
     String[] getConfigArgs(String rioHome) {
         ServiceDescriptorUtil.checkForLoopback()
-        File common = new File(rioHome + '/config/bin/common')
-        File cybernode = new File(rioHome + '/config/bin/cybernode')
-        File computeResource = new File(rioHome + '/config/bin/compute_resource')
+        File common = new File(rioHome + '/config/compiled/common')
+        File cybernode = new File(rioHome + '/config/compiled/cybernode')
+        File computeResource = new File(rioHome + '/config/compiled/compute_resource')
 
         def configArgs = []
         configArgs.addAll(FileHelper.getIfExists(common, rioHome + '/config/common.groovy'))
