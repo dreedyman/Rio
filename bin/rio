@@ -1,5 +1,4 @@
 #!/bin/sh
-
 #
 # Copyright to the original author or authors.
 #
@@ -214,6 +213,7 @@ if [ "$start" = "1" ]; then
         $loggingConfig \
         -Dcom.sun.jini.jeri.tcp.useNIO=true \
         -Dorg.rioproject.service=$service \
+        -Djava.rmi.server.useCodebaseOnly=false \
         -DRIO_HOME=$RIO_HOME \
         -DRIO_LOG_DIR=$RIO_HOME/logs/ \
         -Drio.script.mainClass="$launchTarget" \
@@ -236,6 +236,7 @@ else
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
+        -Djava.rmi.server.useCodebaseOnly=false \
         $loggingConfig \
         $PROPS \
         $NETWORK \
