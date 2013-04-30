@@ -57,7 +57,7 @@ class MonitorConfig {
 
     RemoteRepository[] getRemoteRepositories() {
         RemoteRepository remoteRepository = new RemoteRepository();
-        remoteRepository.setId(serviceName)
+        remoteRepository.setId(serviceName.replaceAll(" ", ""))
         remoteRepository.setUrl(System.getProperty(Constants.CODESERVER))
         remoteRepository.setSnapshotChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE)
         remoteRepository.setReleaseChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE)
