@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.cybernode.exec;
+package org.rioproject.exec;
 
 import net.jini.id.Uuid;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
@@ -87,7 +87,7 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
      * ServiceElement attributes (and contained class attributes) which may
      * trigger behavior changes as follows: <ol> <li>Additions/removals or
      * changes to declared {@link org.rioproject.sla.SLA} instances
-     * <li>Additions/removals or changes to declared {@link
+     * <li>Additions/removals or changes to declared {@code
      * org.rioproject.associations.Association} instances <li>Additions/removals to
      * declared parameters </ol>
      *
@@ -98,6 +98,17 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
      */
     void update(ServiceElement elem, OperationalStringManager opStringMgr)
         throws RemoteException;
+
+    /**
+     * Get the {@link ServiceBeanInstance} for a service that has been instantiated by the
+     * {@code ServiceBeanExecutor}
+     *
+     * @return The {@link ServiceBeanInstance} for a service that has been instantiated by the
+     * {@code ServiceBeanExecutor}
+     *
+     * @throws RemoteException If communication errors happen
+     */
+    ServiceBeanInstance getServiceBeanInstance() throws RemoteException;
 
     /**
      * The ServiceBeanExecutor will create an RMI Registry. This method gets the
@@ -126,7 +137,6 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
      * @param listener The ServiceBeanExecListener
      * @throws RemoteException If for some reason communication fails
      */
-    void setServiceBeanExecListener(ServiceBeanExecListener listener) throws
-                                                                      RemoteException;
+    void setServiceBeanExecListener(ServiceBeanExecListener listener) throws RemoteException;
 
 }
