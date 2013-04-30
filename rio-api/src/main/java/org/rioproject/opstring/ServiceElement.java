@@ -600,9 +600,21 @@ public class ServiceElement implements Serializable {
     }
 
     /**
+     * Set {@code AssociationDescriptor} for the service
+     *
+     * @param associationDescriptors {@code AssociationDescriptor} to set
+     */
+    public void setAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
+        associations.clear();
+        if(associationDescriptors!=null) {
+            Collections.addAll(associations, associationDescriptors);
+        }
+    }
+
+    /**
      * Add {@code AssociationDescriptor} for the service
      *
-     * @param associationDescriptors An Array of AssociationDescriptor objects
+     * @param associationDescriptors {@code AssociationDescriptor} to add
      */
     public void addAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
         if(associationDescriptors!=null) {
