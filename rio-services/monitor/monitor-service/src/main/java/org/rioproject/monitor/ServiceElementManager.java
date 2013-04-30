@@ -156,11 +156,11 @@ public class ServiceElementManager implements InstanceIDManager {
     private ProxyPreparer proxyPreparer;
     private final ServiceChannelClient serviceChannelClient = new ServiceChannelClient();
     /** Logger instance */
-    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.monitor");
+    private static final Logger logger = LoggerFactory.getLogger(ServiceElementManager.class);
     /** Logger instance for ServiceElementManager details */
     private static final Logger mgrLogger = LoggerFactory.getLogger("org.rioproject.monitor.services");
     /** Logger instance for ServiceBeanInstance tracking */
-    private static final Logger sbiLogger = LoggerFactory.getLogger("org.rioproject.monitor.sbi");
+    private static final Logger sbiLogger = LoggerFactory.getLogger(InstanceIDManager.class);
     /** Used to access service provisioning configuration */
     private static final String SERVICE_PROVISION_CONFIG_COMPONENT="service.provision";
 
@@ -1912,6 +1912,11 @@ public class ServiceElementManager implements InstanceIDManager {
                 return;
             ServiceBeanInstance instance;
             Uuid uuid = UuidFactory.create(sID.getMostSignificantBits(), sID.getLeastSignificantBits());
+            mgrLogger.warn("********************************\n[{}] service failure, type: {}, proxy: {}, active monitor? {}\n********",
+                           LoggingUtil.getLoggingName(svcElement),
+                           svcElement.getProvisionType(),
+                           proxy.getClass().getName(),
+                           getActive());
             try {
                 /* Clean up instances of the service and decrease the number
                  * of services if the service's proxy was removed from the
@@ -1920,13 +1925,13 @@ public class ServiceElementManager implements InstanceIDManager {
                  */
                 instance = cleanService(proxy, uuid, (svcElement.getProvisionType() == ProvisionType.FIXED));
                 if(instance!=null) {
-                    mgrLogger.debug("[{}] service failure, instance: {}, host address: {}, type: {}",
+                    mgrLogger.warn("[{}] service failure, instance: {}, host address: {}, type: {}",
                                    LoggingUtil.getLoggingName(svcElement),
                                    instance.getServiceBeanConfig().getInstanceID(),
                                    instance.getHostAddress(),
                                    svcElement.getProvisionType());
                 } else {
-                    mgrLogger.debug("[{}] service failure, type: {}, proxy: {}, COULD NOT OBTAIN INSTANCE, active monitor? {}",
+                    mgrLogger.warn("[{}] service failure, type: {}, proxy: {}, COULD NOT OBTAIN INSTANCE, active monitor? {}",
                                    LoggingUtil.getLoggingName(svcElement),
                                    svcElement.getProvisionType(),
                                    proxy.getClass().getName(),
@@ -1976,7 +1981,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 if(svcElement.getProvisionType()==ProvisionType.DYNAMIC) {
                     int pending = provisioner.getPendingManager().getCount(svcElement);
                     //int actual = getActual()+pending;
-                    /* Dont count pending */
+                    /* Do not count pending */
                     int actual = getActual()+pending;
                     mgrLogger.debug("[{}] Removed: actual [{}], pending [{}], maintain [{}]",
                                    LoggingUtil.getLoggingName(svcElement), actual, pending, maintain);
@@ -1984,6 +1989,9 @@ public class ServiceElementManager implements InstanceIDManager {
                     if(actual<maintain) {
                         doDispatchProvisionRequests(new ProvisionRequest[]{provRequest});
                     }
+                }  else {
+                    logger.info("Dispatch ProvisionRequest for [{}] FIXED", LoggingUtil.getLoggingName(svcElement));
+                    provisioner.getFixedServiceManager().deploy(provRequest, hostAddress);
                 }
                 
             } catch(Throwable t) {

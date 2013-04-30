@@ -15,6 +15,8 @@
  */
 package org.rioproject.monitor;
 
+import net.jini.config.Configuration;
+import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.OpStringUtil;
@@ -38,14 +40,19 @@ import java.util.List;
  */
 public class DeploymentVerifier {
     static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
-    private final RemoteRepository monitorRepository;
+    private final List<RemoteRepository> additionalRepositories = new ArrayList<RemoteRepository>();
 
-    public DeploymentVerifier() {
-        this.monitorRepository = new RemoteRepository();
-        monitorRepository.setId("ProvisionMonitor");
-        monitorRepository.setUrl(System.getProperty(Constants.CODESERVER));
-        monitorRepository.setSnapshotChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE);
-        monitorRepository.setReleaseChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE);
+    public DeploymentVerifier(Configuration config) {
+        try {
+            RemoteRepository[]  remoteRepositories = (RemoteRepository[]) config.getEntry("org.rioproject.monitor",
+                                                                                          "remoteRepositories",
+                                                                                          RemoteRepository[].class,
+                                                                                          new RemoteRepository[0]);
+            Collections.addAll(additionalRepositories, remoteRepositories);
+            logger.info("Configured {} additional repositories", additionalRepositories);
+        } catch (ConfigurationException e) {
+            logger.warn("Getting RemoteRepositories", e);
+        }
     }
 
     public void verifyDeploymentRequest(DeployRequest request) throws ResolverException, IOException {
@@ -95,7 +102,7 @@ public class DeploymentVerifier {
         if(didResolve) {
             List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
             remoteRepositories.addAll(resolver.getRemoteRepositories());
-            remoteRepositories.add(monitorRepository);
+            remoteRepositories.addAll(additionalRepositories);
             service.setRemoteRepositories(remoteRepositories);
         }
         sb.append(sb1.toString());

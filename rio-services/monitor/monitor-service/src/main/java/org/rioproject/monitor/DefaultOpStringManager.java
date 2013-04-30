@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The DefaultOpStringManager provides the management for an OperationalString that
@@ -76,7 +77,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * keep track of the service described by it's ServiceElement object but
      * not issue provision requests
      */
-    private Boolean active = true;
+    private final AtomicBoolean active = new AtomicBoolean(true);
     /**
      * The Exporter for the OperationalStringManager
      */
@@ -85,7 +86,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * Object supporting remote semantics required for an
      * OperationalStringManager
      */
-    private OperationalStringManager proxy;
+    private final OperationalStringManager proxy;
     /**
      * A List of scheduled TimerTasks
      */
@@ -106,11 +107,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     private OAR oar;
     /** The service proxy for the ProvisionMonitor */
     private ProvisionMonitor serviceProxy;
-    private Configuration config;
+    private final Configuration config;
     private ProvisionMonitorEventProcessor eventProcessor;
-    private OpStringMangerController opStringMangerController;
+    private final OpStringMangerController opStringMangerController;
     private StateManager stateManager;
-    private DeploymentVerifier deploymentVerifier = new DeploymentVerifier();
+    private final DeploymentVerifier deploymentVerifier;
     private ServiceProvisioner provisioner;
     private Uuid uuid;
 
@@ -129,7 +130,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                   final OpStringManager parent,
                                   final boolean mode,
                                   final Configuration config,
-                                  final OpStringMangerController opStringMangerController) throws RemoteException {
+                                  final OpStringMangerController opStringMangerController) throws IOException {
 
         this.config = config;
         this.opStringMangerController = opStringMangerController;
@@ -148,9 +149,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             logger.warn("Getting opStringManager Exporter", e);
         }
 
+        deploymentVerifier = new DeploymentVerifier(myConfig);
+
         proxy = (OperationalStringManager) exporter.export(this);
         this.opString = opString;
-        this.active = mode;
+        this.active.set(mode);
         if (parent != null) {
             addParent(parent);
             parent.addNested(this);
@@ -200,18 +203,18 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      */
     public void setActive(boolean newActive) {
         synchronized (this) {
-            if (active != newActive) {
-                active = newActive;
+            if (active.get() != newActive) {
+                active.set(newActive);
                 List<ServiceElement> list = new ArrayList<ServiceElement>();
                 ServiceElementManager[] mgrs = getServiceElementManagers();
                 for (ServiceElementManager mgr : mgrs) {
-                    mgr.setActive(active);
+                    mgr.setActive(active.get());
                     list.add(mgr.getServiceElement());
                 }
                 if (logger.isDebugEnabled())
                     logger.debug("OperationalStringManager for [{}] set active [{}] for OperationalString [{}]",
                                  getProxy().toString(), active, getName());
-                if (active) {
+                if (active.get()) {
                     ServiceElement[] sElems = list.toArray(new ServiceElement[list.size()]);
                     updateServiceElements(sElems);
                 }
@@ -239,7 +242,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     public boolean isActive() {
         boolean mode;
         //synchronized(this) {
-        mode = active;
+        mode = active.get();
         //}
         return (mode);
     }
@@ -312,7 +315,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                 ServiceProvisioner provisioner,
                                 Uuid uuid,
                                 ServiceProvisionListener listener) throws Exception {
-        this.active = mode;
+        this.active.set(mode);
         this.provisioner = provisioner;
         this.uuid = uuid;
         Map<String, Throwable> map = new HashMap<String, Throwable>();
@@ -566,8 +569,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (!isActive())
             return;
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
-        Map<InstantiatorResource, List<ServiceElement>> map =
-            new HashMap<InstantiatorResource, List<ServiceElement>>();
+        Map<InstantiatorResource, List<ServiceElement>> map =new HashMap<InstantiatorResource, List<ServiceElement>>();
         for (ServiceResource resource : resources) {
             InstantiatorResource ir =
                 (InstantiatorResource) resource.getResource();

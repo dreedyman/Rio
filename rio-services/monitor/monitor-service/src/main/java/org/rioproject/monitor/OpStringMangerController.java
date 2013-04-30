@@ -29,6 +29,7 @@ import org.rioproject.opstring.ServiceElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 
@@ -243,7 +244,7 @@ public class OpStringMangerController {
                     opMgr.setServiceProxy(serviceProxy);
                     opMgr.setEventProcessor(eventProcessor);
                     opMgr.setStateManager(stateManager);
-                } catch (RemoteException e) {
+                } catch (IOException e) {
                     logger.warn("Creating OpStringManager", e);
                     return(null);
                 }

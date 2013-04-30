@@ -104,7 +104,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     private ProvisionMonitorPeer provisionMonitorPeer;
     private ProvisionMonitorEventProcessor eventProcessor;
     private final OpStringMangerController opStringMangerController = new OpStringMangerController();
-    private final DeploymentVerifier deploymentVerifier = new DeploymentVerifier();
+    private DeploymentVerifier deploymentVerifier;
     private StateManager stateManager;
     /** A Timer used to schedule load tasks */
     private TaskTimer taskTimer;
@@ -796,6 +796,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 super.initialize(context);
             }
             Configuration config = context.getConfiguration();
+            deploymentVerifier = new DeploymentVerifier(config);
             eventProcessor = new ProvisionMonitorEventProcessor(config);
             provisionWatch = new GaugeWatch("Provision Clock", config);
             getWatchRegistry().register(provisionWatch);
@@ -832,7 +833,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
              */
 
             /* Check for JMXConnection */
-            addAttributes(JMXUtil.getJMXConnectionEntries(config));
+            addAttributes(JMXUtil.getJMXConnectionEntries());
             
             addAttribute(ProvisionMonitorEvent.getEventDescriptor());
             addAttribute(failureEventDesc);
@@ -891,7 +892,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 if(!rioHome.endsWith("/"))
                     rioHome = rioHome+"/";
                 File deployDir = new File(rioHome+"deploy");
-                DeployHandler fsDH = new FileSystemOARDeployHandler(deployDir);
+                DeployHandler fsDH = new FileSystemOARDeployHandler(deployDir, deploymentVerifier);
                 DeployHandler[] deployHandlers = (DeployHandler[]) config.getEntry(CONFIG_COMPONENT,
                                                                                    "deployHandlers",
                                                                                    DeployHandler[].class,

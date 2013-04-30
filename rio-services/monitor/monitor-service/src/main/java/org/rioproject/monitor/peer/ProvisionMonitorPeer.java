@@ -82,11 +82,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     /** Flag which indicates my backup is local, on the same machine */
     private boolean localBackup = false;
     /**
-     * Table of service IDs to FaultDetectionHandler instances, one for each
-     * service
+     * Table of service IDs to FaultDetectionHandler instances, one for each service
      */
-    private final Hashtable<ServiceID, FaultDetectionHandler> fdhTable =
-        new Hashtable<ServiceID, FaultDetectionHandler>();
+    private final Hashtable<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
     /** ServiceTemplate for ProvisionMonitor discovery */
     private ServiceTemplate template;
     /** DiscoveryManagement instance */
@@ -101,7 +99,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     private ProvisionMonitor serviceProxy;
     private ProvisionMonitorEventProcessor eventProcessor;
     private OpStringMangerController opStringMangerController;
-    private DeploymentVerifier deploymentVerifier = new DeploymentVerifier();
+    private DeploymentVerifier deploymentVerifier;
 
     public void initialize() throws Exception {
         if(config==null)
@@ -119,6 +117,8 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                                                            "peerProxyPreparer",
                                                            ProxyPreparer.class,
                                                            new BasicProxyPreparer());
+        deploymentVerifier = new DeploymentVerifier(config);
+
         /* Create the PeerInfo object */
         java.util.Random rand = new java.util.Random(System.currentTimeMillis());
         long randomNumber = rand.nextLong();

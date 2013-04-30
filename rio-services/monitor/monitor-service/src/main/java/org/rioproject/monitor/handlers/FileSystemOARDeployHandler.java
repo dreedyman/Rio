@@ -15,6 +15,7 @@
  */
 package org.rioproject.monitor.handlers;
 
+import org.rioproject.monitor.DeploymentVerifier;
 import org.rioproject.opstring.OAR;
 import org.rioproject.opstring.OARException;
 import org.rioproject.opstring.OARUtil;
@@ -45,9 +46,10 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
      * directory
      *
      * @param dir The drop and installation directory for OAR files
+     * @param deploymentVerifier The {@link DeploymentVerifier} to use
      */
-    public FileSystemOARDeployHandler(File dir) {
-        this(dir, dir);        
+    public FileSystemOARDeployHandler(File dir, DeploymentVerifier deploymentVerifier) {
+        this(dir, dir, deploymentVerifier);
     }
 
     /**
@@ -56,10 +58,13 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
      *
      * @param dropDirectory The directory where OAR files will be dropped
      * @param installDirectory The directory to install OARs into
+     * @param deploymentVerifier The {@link DeploymentVerifier} to use
      */
     public FileSystemOARDeployHandler(File dropDirectory,
-                                      File installDirectory) {
+                                      File installDirectory,
+                                      DeploymentVerifier deploymentVerifier) {
         super();
+        this.deploymentVerifier = deploymentVerifier;
         this.dropDirectory = dropDirectory;
         this.installDirectory = installDirectory;
         if(!dropDirectory.exists()) {

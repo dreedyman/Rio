@@ -237,7 +237,7 @@ public abstract class PendingServiceElementManager {
             }
         }
         if(!removals.isEmpty()) {
-            logger.info("{}: removing [{}] [{}] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
+            logger.debug("{}: removing [{}] [{}] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
             synchronized(collection) {
                 for (Key removal : removals) {
                     ProvisionRequest pr = collection.remove(removal);
@@ -245,7 +245,7 @@ public abstract class PendingServiceElementManager {
                 }
             }
         } else {
-            logger.warn("{}: There are no pending instances of [{}] to remove ", type, LoggingUtil.getLoggingName(sElem), new Throwable());
+            logger.debug("{}: There are no pending instances of [{}] to remove ", type, LoggingUtil.getLoggingName(sElem));
         }
         return (removed.toArray(new ProvisionRequest[removed.size()]));
     }

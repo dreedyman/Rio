@@ -77,7 +77,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param landlord The LandlordLessor
      */
-    public void setLandlordLessor(LandlordLessor landlord) {
+    public void setLandlordLessor(final LandlordLessor landlord) {
         this.landlord = landlord;
         landlord.addLeaseListener(this);
     }
@@ -94,7 +94,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @throws Exception If there are errors getting a ServiceResource
      */
-    public ServiceResource getServiceResource(ProvisionRequest provisionRequest) throws Exception {
+    public ServiceResource getServiceResource(final ProvisionRequest provisionRequest) throws Exception {
         ServiceResource[] svcResources = getServiceResources();
         if(svcResources.length==0) {
             provisionRequest.addFailureReason(String.format("There are no registered Cybernodes, unable to provision %s",
@@ -119,9 +119,9 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @throws ProvisionException if any errors occur selecting a resource
      */
-    public ServiceResource getServiceResource(ProvisionRequest provisionRequest,
-                                              Uuid uuid,
-                                              boolean inclusive) throws ProvisionException {
+    public ServiceResource getServiceResource(final ProvisionRequest provisionRequest,
+                                              final Uuid uuid,
+                                              final boolean inclusive) throws ProvisionException {
         return (selectServiceResource(provisionRequest, getServiceResources(uuid, inclusive)));
     }
 
@@ -137,7 +137,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @throws org.rioproject.monitor.ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
-    protected ServiceResource selectServiceResource(ProvisionRequest provisionRequest,
+    protected ServiceResource selectServiceResource(final ProvisionRequest provisionRequest,
                                                     final ServiceResource[] svcResources) throws ProvisionException {
         if(svcResources.length==0) {
             provisionRequest.addFailureReason(String.format("There are no available Cybernodes, unable to provision %s",
@@ -220,7 +220,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return An array of suitable ServiceResource instances
      */
-    public ServiceResource[] filterIsolated(ProvisionRequest provisionRequest, ServiceResource... candidates) {
+    public ServiceResource[] filterIsolated(final ProvisionRequest provisionRequest, final ServiceResource... candidates) {
         /* For the set of candidate instantiator resources, remove the
          * candidate instantiator resources that have the same host name */
         InstantiatorResource[] known = getInstantiatorResources(provisionRequest.getServiceElement(), true);
@@ -250,7 +250,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @param candidates
      * @return
      */
-    public ServiceResource[] filterMachineBoundaries(ProvisionRequest provisionRequest, ServiceResource... candidates) {
+    public ServiceResource[] filterMachineBoundaries(final ProvisionRequest provisionRequest, final ServiceResource... candidates) {
         ServiceElement elem = provisionRequest.getServiceElement();
         int maxPerMachine = elem.getMaxPerMachine();
         if(!(maxPerMachine!=-1 &&
@@ -334,7 +334,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @throws ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
-    public ServiceResource[] getServiceResources(ProvisionRequest provisionRequest) throws ProvisionException {
+    public ServiceResource[] getServiceResources(final ProvisionRequest provisionRequest) throws ProvisionException {
         ServiceResource[] svcResources = getServiceResources();
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
@@ -367,7 +367,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of ServiceResource instances that match
      * the host address
      */
-    ServiceResource[] getServiceResources(Uuid uuid, boolean inclusive) {
+    ServiceResource[] getServiceResources(final Uuid uuid, final boolean inclusive) {
         ServiceResource[] svcResources = getServiceResources();
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
@@ -394,7 +394,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return Array of ServiceResource instances that match the host address
      */
-    public ServiceResource[] getServiceResources(String hostAddress, boolean inclusive) {
+    public ServiceResource[] getServiceResources(final String hostAddress, final boolean inclusive) {
         return(getServiceResources(getServiceResources(), hostAddress, inclusive));
     }
 
@@ -410,7 +410,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return Array of ServiceResource instances that match the host address
      */
-    ServiceResource[] getServiceResources(ServiceResource[] svcResources, String hostAddress, boolean inclusive) {
+    ServiceResource[] getServiceResources(final ServiceResource[] svcResources, final String hostAddress, final boolean inclusive) {
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
@@ -433,7 +433,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param resource The ServiceResource
      */
-    public void dropServiceResource(ServiceResource resource) {
+    public void dropServiceResource(final ServiceResource resource) {
         remove(resource);
         try {
             landlord.cancel(resource.getCookie());
@@ -465,7 +465,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param resource The resource associated with the expiration
      */
-    public void expired(LeasedResource resource) {
+    public void expired(final LeasedResource resource) {
         if(resource != null)
             remove(resource);
     }
@@ -475,7 +475,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param resource The resource associated with the removal
      */
-    public void removed(LeasedResource resource) {
+    public void removed(final LeasedResource resource) {
         if(resource != null)
             remove(resource);
     }
@@ -485,7 +485,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param resource The resource associated with the new Lease.
      */
-    public void register(LeasedResource resource) {
+    public void register(final LeasedResource resource) {
         add(resource);
     }
 
@@ -494,7 +494,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * 
      * @param resource The resource associated with the new Lease.
      */
-    public void renewed(LeasedResource resource) {
+    public void renewed(final LeasedResource resource) {
         update(resource);
     }
 
@@ -505,7 +505,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @param resource The LeasedResource to add
      */
-    protected void add(LeasedResource resource) {
+    protected void add(final LeasedResource resource) {
         try {
             synchronized(collectionLock) {
                 collection.add(resource);
@@ -522,7 +522,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @param resource The LeasedResource to remove
      */
-    protected void remove(LeasedResource resource) {
+    protected void remove(final LeasedResource resource) {
         try {
             synchronized(collectionLock) {
                 if(resource != null) {
@@ -541,7 +541,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @param resource The LeasedResource
      */
-    protected void update(LeasedResource resource) {
+    protected void update(final LeasedResource resource) {
         try {
             synchronized(collectionLock) {
                 collection.add(resource);
@@ -559,7 +559,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of InstantiatorResource instances that have instantiated
      * the ServiceElement
      */
-    public InstantiatorResource[] getInstantiatorResources(ServiceElement sElem) {
+    public InstantiatorResource[] getInstantiatorResources(final ServiceElement sElem) {
         return(getInstantiatorResources(sElem, false));
     }
 
@@ -572,7 +572,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of InstantiatorResource instances that have instantiated
      * the ServiceElement
      */
-    InstantiatorResource[] getInstantiatorResources(ServiceElement sElem, boolean includeInProcess) {
+    InstantiatorResource[] getInstantiatorResources(final ServiceElement sElem, final boolean includeInProcess) {
         ServiceResource[] svcResources = getServiceResources();
         ArrayList<InstantiatorResource> list = new ArrayList<InstantiatorResource>();
         for (ServiceResource svcResource : svcResources) {

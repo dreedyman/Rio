@@ -35,12 +35,13 @@ import java.util.*;
 public abstract class AbstractOARDeployHandler implements DeployHandler {
     protected OpStringLoader opStringLoader;
     protected Logger logger = LoggerFactory.getLogger(getClass().getName());
+    protected DeploymentVerifier deploymentVerifier;
+
     protected abstract List<OperationalString> look(Date from);
 
     protected AbstractOARDeployHandler() {
         try {
-            opStringLoader =
-                new OpStringLoader(this.getClass().getClassLoader());
+            opStringLoader = new OpStringLoader(this.getClass().getClassLoader());
         } catch (Exception e) {
             logger.error("Could not create OpStringLoader, unable to deploy " +
                          "OperationalString Archive (OAR) files",
@@ -74,7 +75,6 @@ public abstract class AbstractOARDeployHandler implements DeployHandler {
         List<OperationalString> list = new ArrayList<OperationalString>();
         File dir = new File(oar.getDeployDir());
         File opstringFile = OARUtil.find(oar.getOpStringName(), dir);
-        DeploymentVerifier deploymentVerifier = new DeploymentVerifier();
         if (opstringFile != null) {
             Date opstringDate = new Date(opstringFile.lastModified());
             if (opstringDate.after(from)) {

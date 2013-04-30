@@ -51,6 +51,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
      * Process the entire Fixed collection over all known ServiceResource
      * instances
      */
+    @Override
     public void process() {
         ServiceResource[] resources = context.getSelector().getServiceResources();
         logger.debug("{} processing {} resources", getType(), resources.length);
@@ -66,9 +67,27 @@ public class FixedServiceManager extends PendingServiceElementManager {
      * @param request The ProvisionRequest to deploy
      */
     public void deploy(final ProvisionRequest request) {
+        deploy(request, null);
+    }
+
+    /**
+     * Used to deploy a specific ProvisionRequest to a specific ServiceResource
+     * instance.
+     *
+     * @param request The ProvisionRequest to deploy
+     */
+    public void deploy(final ProvisionRequest request, String hostAddress) {
         try {
             logger.debug("Deploy [{}]", LoggingUtil.getLoggingName(request) );
-            ServiceResource[] resources = context.getSelector().getServiceResources(request);
+            ServiceResource[] resources;
+            boolean changeInstanceId;
+            if(hostAddress==null) {
+                resources = context.getSelector().getServiceResources(request);
+                changeInstanceId = true;
+            } else {
+                resources = context.getSelector().getServiceResources(hostAddress, true);
+                changeInstanceId = false;
+            }
             logger.debug("{} processing {} resources", getType(), resources.length);
             /* Filter out isolated associations and max per machine levels
              * set at the physical level */
@@ -80,11 +99,11 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 for (ServiceResource resource : resources) {
                     try {
                         inProcessResource.add(resource);
-                        doDeploy(resource, request);
+                        doDeploy(resource, request, changeInstanceId);
                     } finally {
                         inProcessResource.remove(resource);
                     }
-                }                
+                }
             }
         } catch (Throwable t) {
             logger.warn("FixedServiceManager deployNew", t);
@@ -101,7 +120,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
             return;
         inProcessResource.add(resource);
         InstantiatorResource ir = (InstantiatorResource) resource.getResource();
-        logger.trace("{} processing {}", getType(), ir.getHostAddress());
+        logger.trace("{} processing {}", getType(), ir.getName());
         try {
             if(getSize() == 0)
                 return;
@@ -183,6 +202,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 ServiceProvisionContext spc = getServiceProvisionContext();
                 long nextID = (changeInstanceID ?
                                request.getInstanceIDMgr().getNextInstanceID() : currentID);
+                if(changeInstanceID)
+                    logger.warn("[{}] Changing instanceID", LoggingUtil.getLoggingName(request));
                 request.setServiceElement(ServiceElementUtil.prepareInstanceID(request.getServiceElement(),
                                                                                true,
                                                                                nextID));
@@ -216,7 +237,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
         if (request.getServiceElement().getMaxPerMachine() != -1 &&
             request.getServiceElement().getMaxPerMachine() < numAllowed)
             numAllowed = request.getServiceElement().getMaxPerMachine();
-        logger.trace("Cybernode at {} has {}, can accommodate {}", ir.getHostAddress(), actual, numAllowed);
+        logger.trace("Cybernode {} has {}, can accommodate {} of {}",
+                     ir.getName(), actual, numAllowed, LoggingUtil.getLoggingName(request));
         return (numAllowed);
     }
 
