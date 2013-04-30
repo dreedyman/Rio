@@ -32,6 +32,18 @@ class ConfigTest extends GroovyTestCase {
           JUnitCore.main(ConfigTest.class.getName());
     }
 
+    void testSimpleCompiled() {
+        def files = []
+        for(File f : new File('src/test/resources/compiled-configs').listFiles()) {
+            files << f.path
+        }
+        Configuration config = ConfigurationProvider.getInstance(files as String[])
+        String s = (String)config.getEntry('bean.config',
+                                           'food',
+                                           String.class);
+        assertEquals 'yummy', s
+    }
+
     void testSimple() {
         def conf = ['src/test/resources/bean_config.groovy']        
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -41,10 +53,22 @@ class ConfigTest extends GroovyTestCase {
         assertEquals 'yummy', s
     }
 
+    void testExtendsCompiled() {
+        def files = []
+        for(File f : new File('src/test/resources/compiled-configs').listFiles()) {
+            files << f.path
+        }
+        Configuration config = ConfigurationProvider.getInstance(files as String[])
+        doTestExtends(config)
+    }
+
     void testExtends() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
+        doTestExtends(config)
+    }
 
+    void doTestExtends(Configuration config) {
         Map<String, List<String>> map1 = (Map)config.getEntry('Bean',
                                                               'testMap',
                                                               Map.class);

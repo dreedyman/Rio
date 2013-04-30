@@ -17,6 +17,7 @@ package org.rioproject.config
 
 import groovy.util.logging.Slf4j
 import net.jini.config.*
+import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.lang.reflect.Constructor
 /**
@@ -73,9 +74,8 @@ class GroovyConfig implements Configuration {
         if(loader==null)
             loader = Thread.currentThread().getContextClassLoader()
         GroovyClassLoader gcl = new GroovyClassLoader(loader)
-        args.each { arg ->
+        for(String arg : args) {
             String groovySource = arg
-            //Reader is = null
             long t0 = System.currentTimeMillis()
             try {
                 GroovyCodeSource groovyCodeSource
@@ -103,7 +103,7 @@ class GroovyConfig implements Configuration {
             } catch(Throwable t) {
                 throw new ConfigurationException("The configuration file [${groovySource}] could not be parsed", t)
             } finally {
-                log.trace "Time to parse ${groovySource} : ${(System.currentTimeMillis()-t0)} milliseconds"
+                log.debug "Time to parse ${groovySource} : ${(System.currentTimeMillis()-t0)} milliseconds"
             }
         }
         gcl = null
@@ -121,27 +121,47 @@ class GroovyConfig implements Configuration {
     }
 
     def parseAndLoad(GroovyCodeSource groovyCodeSource, GroovyClassLoader gcl) {
-        gcl.parseClass(groovyCodeSource)
-        for(Class groovyClass : gcl.loadedClasses) {
-            if(visited.contains(groovyClass.name))
-                continue
-            visited.add(groovyClass.name)
-            for(Constructor c : groovyClass.getConstructors())  {
-                if(c.parameterTypes.length==0) {
-                    c.setAccessible(true)
-                    GroovyObject gO = (GroovyObject)c.newInstance()
-                    String component
-                    if(groovyClass.isAnnotationPresent(Component.class)) {
-                        Component comp = groovyClass.getAnnotation(Component.class)
-                        component = comp.value()
-                    } else {
-                        component = getComponentName(gO.getMetaClass())
-                    }
-                    if (!validQualifiedIdentifier(component)) {
-                        throw new IllegalArgumentException("component must be a valid qualified identifier");
-                    }
-                    groovyConfigs.put(component, gO)
+        if(groovyCodeSource.getName().endsWith(".class")) {
+            GroovyClassLoader newCl
+            try {
+                CompilerConfiguration config = new CompilerConfiguration()
+                config.classpath = groovyCodeSource.file.parentFile.path
+                newCl = new GroovyClassLoader(gcl, config, true)
+                String name = groovyCodeSource.file.name.substring(0, groovyCodeSource.file.name.indexOf("."))
+                load(newCl.loadClass(name))
+            } catch(Throwable t) {
+                throw t
+            } finally {
+                newCl = null
+            }
+        } else {
+            gcl.parseClass(groovyCodeSource)
+            for(Class groovyClass : gcl.loadedClasses) {
+                load(groovyClass)
+            }
+        }
+    }
+
+    def load(Class groovyClass)  {
+        log.debug("Loading {}", groovyClass.name)
+        if(visited.contains(groovyClass.name))
+            return
+        visited.add(groovyClass.name)
+        for(Constructor c : groovyClass.getConstructors())  {
+            if(c.parameterTypes.length==0) {
+                c.setAccessible(true)
+                GroovyObject gO = (GroovyObject)c.newInstance()
+                String component
+                if(groovyClass.isAnnotationPresent(Component.class)) {
+                    Component comp = groovyClass.getAnnotation(Component.class)
+                    component = comp.value()
+                } else {
+                    component = getComponentName(gO.getMetaClass())
                 }
+                if (!validQualifiedIdentifier(component)) {
+                    throw new IllegalArgumentException("component must be a valid qualified identifier");
+                }
+                groovyConfigs.put(component, gO)
             }
         }
     }
