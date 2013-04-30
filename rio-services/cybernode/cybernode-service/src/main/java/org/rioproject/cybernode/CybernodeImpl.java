@@ -26,6 +26,8 @@ import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
 import net.jini.io.MarshalledInstance;
+import net.jini.jeri.BasicILFactory;
+import net.jini.jeri.BasicJeriExporter;
 import net.jini.lookup.entry.ServiceInfo;
 import net.jini.lookup.entry.StatusType;
 import net.jini.lookup.ui.AdminUI;
@@ -35,6 +37,7 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
+import org.rioproject.config.ExporterConfig;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.core.jsb.ServiceBeanManager;
@@ -587,7 +590,12 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Get the Configuration */
         config = context.getConfiguration();
         try {
-            Exporter defaultExporter = (Exporter)config.getEntry(RIO_CONFIG_COMPONENT, DEFAULT_EXPORTER, Exporter.class);
+            Exporter defaultExporter = (Exporter)config.getEntry(RIO_CONFIG_COMPONENT,
+                                                                 DEFAULT_EXPORTER,
+                                                                 Exporter.class,
+                                                                 null);
+            if(defaultExporter==null)
+                defaultExporter = new BasicJeriExporter(ExporterConfig.getServerEndpoint(), new BasicILFactory());
             logger.trace("{} has been set as the defaultExporter", defaultExporter);
         } catch(Exception e) {
             logger.error("The {}.{} attribute must be set", RIO_CONFIG_COMPONENT, DEFAULT_EXPORTER);
@@ -633,7 +641,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                           ProxyPreparer.class,
                                                                           new BasicProxyPreparer());
         /* Check for JMXConnection */
-        addAttributes(JMXUtil.getJMXConnectionEntries(config));
+        addAttributes(JMXUtil.getJMXConnectionEntries());
 
         /* Add service UIs programmatically */
         addAttributes(getServiceUIs());
@@ -1172,7 +1180,10 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                          getSLAEventHandler());
                     loaderLogger.trace("Activated {}", CybernodeLogUtil.logName(event));
                     ServiceBeanDelegate delegate = container.getServiceBeanDelegate(jsbInstance.getServiceBeanID());
-                    ComputeResourceUtilization cru = delegate.getComputeResourceUtilization();
+                    ComputeResourceUtilization cru = null;
+                    if(delegate!=null) {
+                        cru = delegate.getComputeResourceUtilization();
+                    }
                     deployedService = new DeployedService(event.getServiceElement(), jsbInstance, cru);
                     loaderLogger.trace("Created DeployedService for {}", CybernodeLogUtil.logName(event));
                 } catch(ServiceBeanInstantiationException e) {

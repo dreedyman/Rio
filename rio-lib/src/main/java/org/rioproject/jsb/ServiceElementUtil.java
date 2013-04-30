@@ -381,7 +381,7 @@ public final class ServiceElementUtil {
         elem.setMachineBoundary(sElem.getMachineBoundary());
         elem.setAutoAdvertise(sElem.getAutoAdvertise());
         elem.setDiscoveryManagementPooling(sElem.getDiscoveryManagementPooling());
-        elem.addAssociationDescriptors(sElem.getAssociationDescriptors());
+        elem.setAssociationDescriptors(sElem.getAssociationDescriptors());
         elem.setExecDescriptor(sElem.getExecDescriptor());
         elem.setStagedData(sElem.getStagedData());
         elem.setFork(sElem.forkService());

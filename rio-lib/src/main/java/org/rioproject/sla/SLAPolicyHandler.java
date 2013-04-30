@@ -63,7 +63,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
     private final List<SLAPolicyEventListener> listeners =
         new ArrayList<SLAPolicyEventListener>();
     /** The description of the SLA Handler */
-    private static final String description = "Default Policy Handler";
+    private String description = "Default Policy Handler";
     /** Host address of the compute resource */
     private String hostAddress;
     private final BlockingQueue<SLAThresholdEvent> eventQ =
@@ -122,6 +122,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
      * 
      * @return The Object used as the event source
      */
+    @SuppressWarnings("unused")
     protected Object getEventSource() {
        return(eventSource);
     }
@@ -134,7 +135,12 @@ public class SLAPolicyHandler implements SettableThresholdListener {
     public String getDescription() {
         return(description);
     }
-    
+
+    @SuppressWarnings("unused")
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     /**
      * Set or update the SLA
      * 
@@ -254,6 +260,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
      *
      * @param listener The SLAPolicyEventListener
      */
+    @SuppressWarnings("unused")
     public void registerListener(final SLAPolicyEventListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");
@@ -269,6 +276,7 @@ public class SLAPolicyHandler implements SettableThresholdListener {
      *
      * @param listener The SLAPolicyEventListener
      */
+    @SuppressWarnings("unused")
     public void unregisterListener(final SLAPolicyEventListener listener) {
         if(listener==null)
             throw new IllegalArgumentException("listener is null");

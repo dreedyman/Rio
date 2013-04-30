@@ -28,7 +28,6 @@ import java.util.Map;
  * entries programmatically at runtime.
  */
 public class DynamicConfiguration extends AbstractConfiguration {
-
     /**
      * Maps entry names to entry objects.
      */
@@ -36,18 +35,11 @@ public class DynamicConfiguration extends AbstractConfiguration {
 
 
     /**
-     * Constructs a <code>DynamicConfiguration</code>.
-     */
-    public DynamicConfiguration() {
-    }
-
-
-    /**
      * Sets an <code>int</code> entry.
      *
      * @param component the component name
-     * @param name the entry (short) name
-     * @param value the entry value
+     * @param name      the entry (short) name
+     * @param value     the entry value
      */
     public void setEntry(String component, String name, int value) {
         setEntry(component, name, int.class, value);
@@ -57,14 +49,13 @@ public class DynamicConfiguration extends AbstractConfiguration {
      * Sets an arbitrary entry.
      *
      * @param component the component name
-     * @param name the entry (short) name
-     * @param type the entry type
-     * @param value the entry value
+     * @param name      the entry (short) name
+     * @param type      the entry type
+     * @param value     the entry value
      */
     public void setEntry(String component, String name, Class type, Object value) {
         if (component == null || name == null || type == null) {
-            throw new IllegalArgumentException(
-                "Component, name, and type cannot be null");
+            throw new IllegalArgumentException("Component, name, and type cannot be null");
         }
         Entry entry = new Entry();
         entry.type = type;
@@ -73,20 +64,16 @@ public class DynamicConfiguration extends AbstractConfiguration {
     }
 
 
-    // javadoc gets copied from the base class
-    protected Object getEntryInternal(String component, String name,
-                                      Class type, Object data)
+    @SuppressWarnings("unchecked")
+    protected Object getEntryInternal(String component, String name, Class type, Object data)
         throws ConfigurationException {
 
         if (component == null || name == null || type == null) {
-            throw new IllegalArgumentException(
-                "Component, name, and type cannot be null");
+            throw new IllegalArgumentException("Component, name, and type cannot be null");
         }
         Entry entry = entries.get(component + '.' + name);
         if (entry == null) {
-            throw new NoSuchEntryException(
-                "Entry not found for "
-                + "component [" + component + "], name [" + name + "]");
+            throw new NoSuchEntryException("Entry not found for component [" + component + "], name [" + name + "]");
         }
         if (type == entry.type || type.isAssignableFrom(entry.type)) {
             if (entry.type.isPrimitive()) {
@@ -95,10 +82,9 @@ public class DynamicConfiguration extends AbstractConfiguration {
                 return entry.value;
             }
         }
-        throw new ConfigurationException(
-            "Entry of wrong type for "
-            + "component [" + component + "], name [" + name + "]:"
-            + "expected [" + type + ", found [" + entry.type + "]");
+        throw new ConfigurationException("Entry of wrong type for "
+                                         + "component [" + component + "], name [" + name + "]:"
+                                         + "expected [" + type + ", found [" + entry.type + "]");
     }
 
 

@@ -348,7 +348,7 @@ public class JSBContainer implements ServiceBeanContainer {
 
     /*
      * Notify all <code>ServiceBeanContainerListener</code> objects that a
-     * ServiceBean has just been instantiatied
+     * ServiceBean has just been instantiated
      */
     void notifyOnInstantiation(ServiceRecord serviceRecord) {
         ServiceBeanContainerListener[] scl;

@@ -15,7 +15,6 @@
  */
 package org.rioproject.rmi;
 
-import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
 import org.slf4j.Logger;
@@ -128,32 +127,34 @@ public class RegistryUtil {
      * <p>If the RMI Registry is created, this method will also set the
      * @link org.rioproject.config.Constants#REGISTRY_PORT} system property
      *
-     * @param config Configuration object to use
-     *
+     * @return The port the RMI Registry was created on, or -1 if the
+     * RMIRegistry could not be created
      * @throws ConfigurationException If there are errors reading the
      * configuration
      */
-    public static void checkRegistry(Configuration config) throws ConfigurationException {
+    public static int checkRegistry() throws ConfigurationException {
+        int port;
         synchronized(RegistryUtil.class) {
             if(System.getProperty(Constants.REGISTRY_PORT)==null) {
-                int port = getRegistry(config);
+                port = getRegistry();
                 if(port>0)
                     System.setProperty(Constants.REGISTRY_PORT, Integer.toString(port));
+            } else {
+                port = Integer.parseInt(System.getProperty(Constants.REGISTRY_PORT));
             }
         }
+        return port;
     }
 
     /**
      * Check if RMI Registry has been started for the VM, if not start it.
-     *
-     * @param config Configuration object to use
      *
      * @return The port the RMI Registry was created on, or -1 if the
      * RMIRegistry could not be created
      * @throws ConfigurationException If there are errors reading the
      * configuration
      */
-    public static int getRegistry(Configuration config) throws ConfigurationException {
+    public static int getRegistry() throws ConfigurationException {
         int registryPort;
         synchronized(RegistryUtil.class) {
             int[] portRange = getRegistryPortRange();
@@ -167,14 +168,14 @@ public class RegistryUtil {
                     LocateRegistry.createRegistry(registryPort);
                 } catch (IOException e) {
                     if(logger.isTraceEnabled())
-                            logger.trace("Failed to create RMI Registry for port range "+
-                                          portRange[0]+"-"+portRange[1]);
+                            logger.trace("Failed to create RMI Registry for port range {}-{}"+
+                                          portRange[0], portRange[1]);
                     registryPort = -1;
                 }
             } else {
-                registryPort = getRegistryPort(config);
+                registryPort = DEFAULT_PORT;
                 int originalPort = registryPort;
-                int registryRetries = getRegistryRetries(config);
+                int registryRetries = DEFAULT_RETRY_COUNT;
                 Registry registry = null;
                 for(int i = 0; i < registryRetries; i++) {
                     try {
@@ -182,42 +183,22 @@ public class RegistryUtil {
                         break;
                     } catch(RemoteException e1) {
                         if(logger.isTraceEnabled())
-                            logger.trace("Failed to create RMI Registry using "+
-                                         "port ["+registryPort+"], increment " +
-                                         "port and try again");
+                            logger.trace("Failed to create RMI Registry using port [{}], increment port and try again",
+                                         registryPort);
                     }
                     registryPort++;
                 }
                 if(registry==null) {
-                    logger.warn("Unable to create RMI Registry using ports "+originalPort+" through "+registryPort);
+                    logger.warn("Unable to create RMI Registry using ports {} through {}", originalPort, registryPort);
                     registryPort = -1;
                 } else {
                     if(logger.isDebugEnabled())
-                        logger.debug("Created RMI Registry on port="+System.getProperty(Constants.REGISTRY_PORT));
+                        logger.debug("Created RMI Registry on port={}", System.getProperty(Constants.REGISTRY_PORT));
                 }
             }
         }
 
         return registryPort;
-    }
-
-
-    /**
-     * Get the registryPort property.
-     *
-     * @param config The Configuration to use, if null a default value is
-     * returned
-     *
-     * @return The port used to create RMI Registry instance
-     */
-    static int getRegistryPort(Configuration config) {
-        int registryPort = DEFAULT_PORT;
-        try {
-            registryPort = (Integer) config.getEntry(COMPONENT, "registryPort", int.class, DEFAULT_PORT);
-        } catch(ConfigurationException e) {
-            logger.warn(String.format("Reading %s .registryPort", COMPONENT), e);
-        }
-        return(registryPort);
     }
 
     /**
@@ -246,25 +227,9 @@ public class RegistryUtil {
     /**
      * Get the registryRetries property.
      *
-     * @param config The Configuration to use, if null a default value is
-     * returned
-     *
      * @return The number of times to attempt to find an RMI Registry instance
      */
-    public static int getRegistryRetries(Configuration config) {
-        int retryCount = DEFAULT_RETRY_COUNT;
-        if(config==null)
-            return(retryCount);
-        try {
-            retryCount =
-                (Integer) config.getEntry(COMPONENT,
-                                          "registryRetries",
-                                          Integer.class,
-                                          DEFAULT_RETRY_COUNT);
-        } catch(ConfigurationException e) {
-            logger.warn(String.format("Reading %s.registryRetries", COMPONENT), e);
-        }
-
-        return(retryCount);
+    public static int getRegistryRetries() {
+        return DEFAULT_RETRY_COUNT;
     }
 }

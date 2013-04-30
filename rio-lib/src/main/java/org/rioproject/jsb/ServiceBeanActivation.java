@@ -142,7 +142,7 @@ public class ServiceBeanActivation {
 
         Map<String, Object> configParms = new HashMap<String, Object>();
 
-        RegistryUtil.checkRegistry(config);
+        RegistryUtil.checkRegistry();
         
         configParms.putAll(readServiceBeanConfig(configComponent, defaultServiceName, config));
 

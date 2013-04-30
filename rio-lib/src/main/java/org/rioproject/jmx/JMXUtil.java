@@ -15,7 +15,6 @@
  */
 package org.rioproject.jmx;
 
-import net.jini.config.Configuration;
 import net.jini.core.entry.Entry;
 import net.jini.id.Uuid;
 import net.jini.lookup.entry.jmx.JMXProperty;
@@ -291,9 +290,6 @@ public class JMXUtil {
     /**
      * Get the attributes to add to a service's attribute collection
      *
-     * @param config The configuration to use to optionally create an
-     * RMI Registry and obtain an optionally configured host address
-     *
      * @return An array of {@link net.jini.core.entry.Entry}s. If the
      * <tt>org.rioproject.jmxServiceURL</tt> system property exists (is not null)
      * create an array of 2 attributes, one being
@@ -306,10 +302,10 @@ public class JMXUtil {
      *
      * @throws Exception If the RMI registry or JMXConnection cannot be created
      */
-    public static Entry[] getJMXConnectionEntries(final Configuration config) throws Exception {
+    public static Entry[] getJMXConnectionEntries() throws Exception {
         Entry[] entries = new Entry[0];
         /* Check for JMXConnection */
-        JMXConnectionUtil.createJMXConnection(config);
+        JMXConnectionUtil.createJMXConnection();
         String jmxServiceURL = System.getProperty(Constants.JMX_SERVICE_URL);
         if(jmxServiceURL!=null) {
             entries = new Entry[2];

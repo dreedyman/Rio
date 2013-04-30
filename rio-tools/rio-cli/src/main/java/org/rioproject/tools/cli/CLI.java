@@ -607,7 +607,7 @@ public class CLI {
         void destroyFromRegistry(final PrintStream out) {
             List<Registry> rmiRegistries = new ArrayList<Registry>();
             int port = RegistryUtil.DEFAULT_PORT;
-            for(int i=0; i< RegistryUtil.getRegistryRetries(sysConfig); i++) {
+            for(int i=0; i< RegistryUtil.getRegistryRetries(); i++) {
                 try {
                     Registry registry = LocateRegistry.getRegistry(port++);
                     rmiRegistries.add(registry);

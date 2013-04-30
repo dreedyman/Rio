@@ -34,7 +34,7 @@ import org.rioproject.config.Constants;
 import org.rioproject.core.jsb.DiscardManager;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.costmodel.ResourceCost;
-import org.rioproject.cybernode.exec.ServiceBeanExecManager;
+import org.rioproject.exec.ServiceBeanExecHandler;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
@@ -110,7 +110,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
     private ServiceElementChangeManager sElemChangeMgr;
     private ServiceCostCalculator serviceCostCalculator;
     //private ServiceProvisionEvent provisionEvent;
-    private ServiceBeanExecManager execManager;
+    private ServiceBeanExecHandler execManager;
     private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<PlatformCapability>();
     private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
@@ -479,23 +479,22 @@ public class JSBDelegate implements ServiceBeanDelegate {
                     /* Check if we are forking a service bean */
                     if(sElem.forkService() && !runningForked()) {
                         logger.debug("Fork required for {}", CybernodeLogUtil.logName(sElem));
-                        logger.trace("Created a ServiceBeanExecManager for {}", CybernodeLogUtil.logName(sElem));
-                        execManager = new ServiceBeanExecManager(sElem, container);
+                        logger.trace("Created a ServiceBeanExecHandler for {}", CybernodeLogUtil.logName(sElem));
+                        execManager = new ServiceBeanExecHandler(sElem, container.getSharedConfiguration(), container.getUuid());
                         try {
                             /* Get matched PlatformCapability instances to apply */
                             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
                             PlatformCapability[] matched = ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
-                            logger.trace("Invoke ServiceBeanExecManager.exec for {}", CybernodeLogUtil.logName(sElem));
-                            instance = execManager.exec(sElem, opStringMgr, new JSBDiscardManager(), matched);
-                            logger.trace("ServiceBeanInstance obtained from ServiceBeanExecManager for {}", CybernodeLogUtil.logName(sElem));
+                            logger.trace("Invoke ServiceBeanExecHandler.exec for {}", CybernodeLogUtil.logName(sElem));
+                            instance = execManager.exec(opStringMgr, new JSBDiscardManager(), matched);
+                            logger.trace("ServiceBeanInstance obtained from ServiceBeanExecHandler for {}", CybernodeLogUtil.logName(sElem));
                             serviceRecord = execManager.getServiceRecord();
-                            logger.trace("ServiceRecord obtained from ServiceBeanExecManager for {}", CybernodeLogUtil.logName(sElem));
+                            logger.trace("ServiceRecord obtained from ServiceBeanExecHandler for {}", CybernodeLogUtil.logName(sElem));
                         } catch (Exception e) {
                             abortThrowable = e;
                         }
 
                     } else {
-                        logger.debug("Create {} within Cybernode's JVM ", CybernodeLogUtil.logName(sElem));
                         /* Create the DiscardManager */
                         JSBDiscardManager discardManager = new JSBDiscardManager();
 
@@ -625,7 +624,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
             jsbThread.join();
             logger.trace("ServiceBean [{}] start thread completed", sElem.getName());
         } catch(InterruptedException e) {
-            logger.warn("ServiceBean [{}] start Thread interrupted", sElem.getName(), e);
+            logger.warn("ServiceBean [{}] start Thread interrupted, abort start", sElem.getName());
         } finally {
             starting.set(false);
         }

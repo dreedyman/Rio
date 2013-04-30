@@ -459,7 +459,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         mbeanNoticationInfoList.add(slaThresholdEventAdapter.getNotificationInfo());
         if(context.getServiceElement().forkService() &&
            System.getProperty(Constants.SERVICE_BEAN_EXEC_NAME)!=null) {
-            addAttributes(JMXUtil.getJMXConnectionEntries(context.getConfiguration()));
+            addAttributes(JMXUtil.getJMXConnectionEntries());
         }
     }
 
@@ -949,7 +949,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#destroy(boolean)
      */
     public void destroy(final boolean force) {
-        logger.debug("Destroy {}", ServiceElementUtil.getLoggingName(context));
+        logger.info("Destroy {}", ServiceElementUtil.getLoggingName(context));
         if (inShutdown)
             return;
         inShutdown = true;
@@ -1207,11 +1207,14 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @throws UnknownHostException If the host is unknown
      */
     protected Exporter getAdminExporter() throws ConfigurationException, UnknownHostException {
-        Exporter adminExporter = ExporterConfig.getExporter(context.getConfiguration(),
-                                                            serviceBeanComponent,
-                                                            "adminExporter");
-        logger.debug("[{}] using admin exporter: {}",
-                     ServiceElementUtil.getLoggingName(context), adminExporter.toString());
+        Exporter adminExporter = null;
+        if(context!=null) {
+            adminExporter = ExporterConfig.getExporter(context.getConfiguration(),
+                                                       serviceBeanComponent,
+                                                       "adminExporter");
+            logger.debug("[{}] using admin exporter: {}",
+                         ServiceElementUtil.getLoggingName(context), adminExporter.toString());
+        }
         return(adminExporter);
     }
 

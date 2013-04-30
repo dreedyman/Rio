@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
  * Utility to replace JVM input args.
  */
 public class JVMOptionChecker {
-    static final Logger logger = LoggerFactory.getLogger(JVMOptionChecker.class.getPackage().getName());
+    static final Logger logger = LoggerFactory.getLogger(JVMOptionChecker.class);
 
     public static String getJVMInputArgs(String userArgs) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();

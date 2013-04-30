@@ -15,8 +15,8 @@
  */
 package org.rioproject.jmx;
 
-import com.sun.tools.attach.*;
-import net.jini.config.Configuration;
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
 import org.rioproject.rmi.RegistryUtil;
@@ -38,7 +38,6 @@ import java.util.Map;
  * @author Dennis Reedy
  */
 public class JMXConnectionUtil {
-    static final String COMPONENT = "org.rioproject.jmx";
     static final Logger logger = LoggerFactory.getLogger(JMXConnectionUtil.class);
 
     /**
@@ -90,16 +89,14 @@ public class JMXConnectionUtil {
      * </li>
      * </ul>
      *
-     * @param config Configuration object to use
-     *
      * @throws Exception If there are errors reading the configuration, or
      * creating the {@link javax.management.remote.JMXConnectorServer}
      */
     @SuppressWarnings("unchecked")
-    public static void createJMXConnection(final Configuration config) throws Exception {
+    public static void createJMXConnection() throws Exception {
         if(System.getProperty(Constants.JMX_SERVICE_URL)!=null)
             return;
-        RegistryUtil.checkRegistry(config);
+        RegistryUtil.checkRegistry();
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         int registryPort = Integer.parseInt(sPort);
 
@@ -108,15 +105,10 @@ public class JMXConnectionUtil {
             throw new Exception("Unable to create the JMXConnectorServer");
         }
 
-        String defaultAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-
-        String hostAddress = (String) config.getEntry(COMPONENT, "hostAddress", String.class, defaultAddress);
-
+        String hostAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         MBeanServer mbs = MBeanServerFactory.getMBeanServer();
-
         JMXServiceURL jmxServiceURL = new JMXServiceURL("service:jmx:rmi://"+hostAddress+":"+registryPort+
                                                         "/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
-
         if(logger.isInfoEnabled())
             logger.info("JMXServiceURL={}", jmxServiceURL);
 
