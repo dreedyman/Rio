@@ -4,7 +4,7 @@ if [ ! -x ${command} ]; then
     chmod +x ${command}
 fi
 
-export RIO_X; RIO_X="Exec'd by Rio"
+export RIO_EXEC; RIO_EXEC="rio.exec"
 
 ${commandLine} &
 echo $! > ${pidFile}
