@@ -49,7 +49,9 @@ public class AgentHook {
     }
 
     static void redirectIfNecessary() {
-        if(System.console()==null) {
+        /* If we have been exec'd by Rio (such as a service that has been declared to be forked,
+         * stdout and stderr have already been redirected */
+        if(System.getenv("RIO_EXEC")==null && System.console()==null) {
             redirectToLogger();
         }
     }
