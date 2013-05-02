@@ -29,7 +29,6 @@ import org.rioproject.cybernode.CybernodeLogUtil;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
-import org.rioproject.exec.support.PosixShell;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
@@ -167,7 +166,7 @@ public class ServiceBeanExecHandler {
             ServiceBeanExecListener listener = forkedServiceListener.getServiceBeanExecListener();
             long start = System.currentTimeMillis();
 
-            Shell shell = new PosixShell();
+            Shell shell = ShellFactory.createShell();
             try {
                 String shellTemplate = (String)config.getEntry(COMPONENT,
                                                                "serviceBeanExecShellTemplate",

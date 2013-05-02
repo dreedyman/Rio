@@ -22,7 +22,6 @@ import net.jini.config.ConfigurationProvider;
 import org.rioproject.core.jsb.ServiceBean;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.exec.support.PosixShell;
 import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.jsb.ServiceElementUtil;
@@ -30,7 +29,6 @@ import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.OperatingSystemType;
 import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.measurable.SigarHelper;
@@ -465,17 +463,12 @@ public class ServiceExecutor {
     }
 
     public ProcessManager exec(ExecDescriptor exDesc) throws IOException {
-        if (!OperatingSystemType.isWindows()) {
-            Shell shell = new PosixShell();
-            if(shellTemplate!=null)
-                shell.setShellTemplate(shellTemplate);
-            processManager = shell.exec(exDesc);
+        Shell shell = ShellFactory.createShell();
+        if(shellTemplate!=null)
+            shell.setShellTemplate(shellTemplate);
 
-        } else {
-            throw new UnsupportedOperationException("ServiceExecutor " +
-                                                    "support not provided for " +
-                                                    "Windows");
-        }
+        processManager = shell.exec(exDesc);
+
         processManager.registerListener(new ProcessManager.Listener() {
             public void processTerminated(int pid) {
                 if(logger.isDebugEnabled())
@@ -544,9 +537,11 @@ public class ServiceExecutor {
                         //svcExecutor.terminate();
                     }
                 }).start();
-                manager.waitFor();
+                manager.getProcess().waitFor();
                 System.out.println("Manager returned from waitFor()");
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         } catch (ConfigurationException e) {

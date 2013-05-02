@@ -181,7 +181,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
              */
             int planned = sElem.getPlanned();
             int actual = ir.getServiceElementCount(sElem);
-            logger.debug("{} has [{}] instance(s), planned [{}] of [{}/{}]",
+            logger.trace("{} has [{}] instance(s), planned [{}] of [{}/{}]",
                          ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
             if (actual >= planned) {
                 String message = String.format("%s has reached service limit of [%s], cannot be used to instantiate [%s/%s]",
@@ -193,7 +193,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                 try {
                     if (ir.canProvision(provisionRequest)) {
                         serviceResourceSelected(svcResource);
-                        logger.debug("[{}, service count: {}] has been selected for service [{}/{}]",
+                        logger.trace("[{}, service count: {}] has been selected for service [{}/{}]",
                                      ir.getName(), ir.getServiceCount(), sElem.getOperationalStringName(),
                                      sElem.getName());
                         return (svcResource);
@@ -206,7 +206,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                         throw (ProvisionException)e;
                 }
             } else {
-                logger.debug("{}, dynamic enabled: {}", ir.getName(), ir.getDynamicEnabled());
+                logger.trace("{}, dynamic enabled: {}", ir.getName(), ir.getDynamicEnabled());
             }
         }
         return (null);

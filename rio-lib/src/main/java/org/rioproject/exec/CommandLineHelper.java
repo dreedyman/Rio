@@ -113,6 +113,8 @@ public final class CommandLineHelper {
         argsBuilder.append(" ");
         argsBuilder.append(getOption("java.protocol.handler.pkgs", "org.rioproject.url"));
         argsBuilder.append(" ");
+        argsBuilder.append(getOption("java.rmi.server.useCodebaseOnly", "false"));
+        argsBuilder.append(" ");
         String policyDir = buildDirectory(rioHome, "policy");
         argsBuilder.append(getOption("java.security.policy", policyDir+"policy.all"));
         argsBuilder.append(" ");

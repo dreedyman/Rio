@@ -56,6 +56,7 @@ manager {
 
     jvmOptions =
         '-javaagent:'+rioStartJar+' -Djava.protocol.handler.pkgs=org.rioproject.url '+
+        '-Djava.rmi.server.useCodebaseOnly=false '+
         '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs '+
         '-server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all '+
         '-DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME} -DRIO_TEST_ATTACH '+

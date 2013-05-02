@@ -36,8 +36,7 @@ public abstract class ProcessManager {
      * @param process The {@link Process} the ProcessManager will manage
      * @param pid The process ID of the started Process
      */
-    public ProcessManager(Process process,
-                          int pid) {
+    public ProcessManager(final Process process, final int pid) {
         if (process == null)
             throw new IllegalArgumentException("process is null");
         if (pid <= 0)
@@ -113,12 +112,6 @@ public abstract class ProcessManager {
      * ID of the managed process and forcibly terminate them.
      */
     public abstract void destroy(boolean includeChildren);
-
-    /**
-     * Waits for the process to exit
-     */
-    public abstract void waitFor();
-
 
     /**
      * Notification for Process termination

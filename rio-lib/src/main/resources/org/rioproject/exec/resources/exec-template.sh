@@ -6,5 +6,5 @@ fi
 
 export RIO_EXEC; RIO_EXEC="rio.exec"
 
-${commandLine} &
+exec ${commandLine} &
 echo $! > ${pidFile}

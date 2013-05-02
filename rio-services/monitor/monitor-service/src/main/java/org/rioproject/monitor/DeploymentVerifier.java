@@ -49,7 +49,7 @@ public class DeploymentVerifier {
                                                                                           RemoteRepository[].class,
                                                                                           new RemoteRepository[0]);
             Collections.addAll(additionalRepositories, remoteRepositories);
-            logger.info("Configured {} additional repositories", additionalRepositories);
+            logger.debug("Configured {} additional repositories", additionalRepositories);
         } catch (ConfigurationException e) {
             logger.warn("Getting RemoteRepositories", e);
         }

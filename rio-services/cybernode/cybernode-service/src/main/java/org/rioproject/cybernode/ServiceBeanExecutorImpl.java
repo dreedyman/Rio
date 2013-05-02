@@ -32,6 +32,7 @@ import org.rioproject.exec.ServiceBeanExecListener;
 import org.rioproject.exec.ServiceBeanExecutor;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
+import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanAdapter;
 import org.rioproject.jsb.ServiceElementUtil;
@@ -56,7 +57,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Provides support to create a ServiceBean in it's own JVM.
@@ -331,7 +331,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         }
 
         public void run() {
-            boolean connected = true;
+            /*boolean connected = true;
             while(connected) {
                 try {
                     registry.list();
@@ -341,14 +341,15 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
                         Thread.currentThread().interrupt();
                     }
                 } catch (RemoteException e) {
+                    logger.error("Registry connection failure ", e);
                     connected = false;
                     logger.warn("Could not connect to Registry, assume that parent is no longer present");
                     faultDetectionListener.serviceFailure(null, null);
                 }
-            }
-            /*try {
-                JMXConnectionUtil.createJMXConnection(config);
-                *//* Setup FDH to make sure Cybernode doesnt orphan us *//*
+            }*/
+            try {
+                JMXConnectionUtil.createJMXConnection();
+                 /*Setup FDH to make sure Cybernode doesn't orphan us*/
                 fdh = new JMXFaultDetectionHandler();
                 fdh.setConfiguration(config);
                 String jmxServiceURL = JMXConnectionUtil.getJMXServiceURL(cybernodeRegistryPort, "localhost");
@@ -358,7 +359,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
                 fdh.monitor();
             } catch (Exception e) {
                 logger.error("Unable to setup FDH to make sure Cybernode doesn't orphan us ", e);
-            }*/
+            }
         }
     }
 }

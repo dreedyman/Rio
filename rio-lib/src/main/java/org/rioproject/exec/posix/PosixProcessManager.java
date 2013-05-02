@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.exec.support;
+package org.rioproject.exec.posix;
 
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
@@ -38,7 +38,6 @@ public class PosixProcessManager extends ProcessManager {
     private boolean terminated = false;
     private File commandFile;
     private String commandLine;
-    private final Object processLock = new Object();
     private static final String COMPONENT = PosixProcessManager.class.getPackage().getName();
     private static final String KILL_SCRIPT="ps-kill-template.sh";
     private static final String PROC_STATUS_SCRIPT="proc-status-template.sh";
@@ -141,26 +140,6 @@ public class PosixProcessManager extends ProcessManager {
             }
         }
         terminated = true;
-    }
-
-    /**
-     * Waits for the process to exit
-     */
-    public void waitFor() {
-        registerListener(new Listener() {
-            public void processTerminated(int pid) {
-                synchronized(processLock) {
-                    processLock.notifyAll();
-                }
-            }
-        });
-        synchronized(processLock) {
-            try {
-                processLock.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private File genProcStatusScript(File procStatusFile) throws IOException {

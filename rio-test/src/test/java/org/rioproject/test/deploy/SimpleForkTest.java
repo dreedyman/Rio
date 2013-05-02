@@ -84,7 +84,24 @@ public class SimpleForkTest {
             Assert.assertEquals(1, instances.length);
             Fork fork = (Fork)instances[0].getService();
             Assert.assertTrue("Expected verify() to return true, check service log for details", fork.verify());
-            testManager.undeploy(opstring.getName());
+            //logger.info("Wait for 5 minutes, make sure that only one service remains....");
+            //Thread.sleep(TimeUnit.MINUTES.toMillis(5));
+            //testManager.undeploy(opstring.getName());
+            testManager.stopCybernode(cybernode);
+            System.out.println("\nService Bean Exec JVMs\n============");
+            String listing = null;
+            long t0 = System.currentTimeMillis();
+            for(int i=0; i<180; i++) {
+                listing = list();
+                if(listing.length()==0 || (System.currentTimeMillis()-t0)>15000)
+                    break;
+                if(i % 5 == 0)
+                    System.out.println(listing);
+                Thread.sleep(500);
+            }
+            System.out.println("Time to exit: "+(System.currentTimeMillis()-t0));
+            Assert.assertTrue(listing!=null);
+            Assert.assertTrue(listing.length()==0);
         } catch(Exception e) {
             thrown = e;
             e.printStackTrace();
@@ -131,12 +148,27 @@ public class SimpleForkTest {
                         logger.warn("Could not attach to the exec'd JVM with pid: "+forkedPID+", continue service execution",
                                    e);
                     }
+                } else {
+                    logger.warn("Could not obtain actual pid of exec'd process, " +
+                                "process cpu and java memory utilization are not available [{}]", managedVM);
                 }
-            } else {
-                logger.warn("Could not obtain actual pid of exec'd process, process cpu and java memory utilization are not available");
             }
         }
         return null;
+    }
+
+    private String list() {
+        String[] managedVMs = JMXConnectionUtil.listManagedVMs();
+        StringBuilder list = new StringBuilder();
+        for(String managedVM : managedVMs) {
+            if(managedVM.contains("start-service-bean-exec")) {
+                if(list.length()>0)
+                    list.append("\n");
+                list.append("\t").append(managedVM);
+            }
+        }
+
+        return list.toString();
     }
 
     private String[] toArray(String s) {

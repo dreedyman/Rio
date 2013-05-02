@@ -13,64 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.exec.support;
+package org.rioproject.exec.posix;
 
+import org.rioproject.exec.AbstractShell;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
-import org.rioproject.exec.Shell;
 import org.rioproject.exec.Util;
 import org.rioproject.resources.util.FileUtils;
-import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * A Shell implementation that forks commands for posix compliant systems
  *
  * @author Dennis Reedy
  */
-public class PosixShell implements Shell {
-    private static final String EXEC_SCRIPT="exec-template.sh";
-    //private static final String EXEC_NOHUP_SCRIPT="exec-nohup-template.sh";
-    private String template = EXEC_SCRIPT;
+public class PosixShell extends AbstractShell {
+    private static final String DEFAULT_EXEC_SCRIPT="classpath:exec-template.sh";
     static final Logger logger = LoggerFactory.getLogger(PosixShell.class);
 
-    public void setShellTemplate(String template) {
-        if(template==null)
-            throw new IllegalArgumentException("template cannot be null");
-        this.template = template;
-        logger.info("Set PosixShell template to: {}", template);
+    public PosixShell() {
+        super(DEFAULT_EXEC_SCRIPT);
     }
 
     /**
      * @see org.rioproject.exec.Shell#exec(org.rioproject.exec.ExecDescriptor)
      */
     public ProcessManager exec(ExecDescriptor execDescriptor) throws IOException {
-        String commandLine = execDescriptor.getCommandLine();
         String workingDirectory = execDescriptor.getWorkingDirectory();
-
-        if (commandLine == null) {
-            throw new IllegalArgumentException("commandLine cannot be null");
-        }
-        String command = commandLine;
-
-        commandLine = "exec "+commandLine;
-
-        if (execDescriptor.getInputArgs() != null) {
-            commandLine = commandLine+" "+ PropertyHelper.expandProperties(execDescriptor.getInputArgs());
-        }
-        if (execDescriptor.getStdOutFileName() != null) {
-            String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
-            commandLine = commandLine + " > "+stdOutFileName;
-        }
-        if (execDescriptor.getStdErrFileName() != null) {
-            String stdErrFileName = PropertyHelper.expandProperties(execDescriptor.getStdErrFileName());
-            commandLine = commandLine + " 2> "+stdErrFileName;
-        }
+        String commandLine = buildCommandLine(execDescriptor);
+        String originalCommand = execDescriptor.getCommandLine();
 
         File pidFile = File.createTempFile("exec-", ".pid");
         File generatedShellScript = File.createTempFile("exec-", ".sh");
@@ -79,12 +54,12 @@ public class PosixShell implements Shell {
         generatedShellScript.deleteOnExit();
         logger.debug("Generated exec script here: {}", generatedShellScript.getPath());
 
-        URL url = Util.getResource(template);
+        URL url = getTemplateURL();
         StringBuilder sb = new StringBuilder();
         BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str;
         while ((str = in.readLine()) != null) {
-            str = Util.replace(str, "${command}", command);
+            str = Util.replace(str, "${command}", originalCommand);
             str = Util.replace(str, "${pidFile}", FileUtils.getFilePath(pidFile));
             str = Util.replace(str, "${commandLine}", commandLine);
             sb.append(str).append("\n");
@@ -95,8 +70,8 @@ public class PosixShell implements Shell {
         Util.chmodX(generatedShellScript);        
 
         String toExec = FileUtils.getFilePath(generatedShellScript);
-        logger.debug("Executing command [{}]", commandLine);
-        ProcessBuilder pb = new ProcessBuilder(toExec);
+        logger.debug("Generated command line: [{}]", commandLine);
+        /*ProcessBuilder pb = new ProcessBuilder(toExec);
 
         Map<String, String> declaredEnv = execDescriptor.getEnvironment();
         Map<String, String> environment = pb.environment();
@@ -114,11 +89,16 @@ public class PosixShell implements Shell {
 
         if(workingDirectory!=null) {
             pb = pb.directory(new File(workingDirectory));
-            logger.debug("Process Builder's working directory set to [{}]", pb.directory().getCanonicalFile());
+            logger.debug("Process Builder's working directory set to [{}]", pb.directory().getPath());
         }
 
-        pb.redirectErrorStream(true);
-        Process process = pb.start();        
+        logger.debug("ProcessBuilder command: {}", pb.command());
+        logger.debug("ProcessBuilder environment: {}", pb.environment());
+
+        pb.redirectErrorStream(true);*/
+        ProcessBuilder processBuilder = createProcessBuilder(toExec, execDescriptor, workingDirectory);
+        Process process = processBuilder.start();
+
         /* Started process, wait for pid file ... */
         while(pidFile.length()==0) {
             try {
@@ -127,7 +107,6 @@ public class PosixShell implements Shell {
                 e.printStackTrace();
             }
         }
-
         in = new BufferedReader(new FileReader(pidFile));
         String s = in.readLine();
         int pid = Integer.parseInt(s);
