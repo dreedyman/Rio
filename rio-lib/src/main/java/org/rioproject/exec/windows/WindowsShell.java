@@ -82,7 +82,7 @@ public class WindowsShell extends AbstractShell {
         String toExec = FileUtils.getFilePath(generatedCommandScript);
         logger.debug("Generated command line: [{}]", commandLine);
 
-        ProcessBuilder processBuilder = createProcessBuilder(toExec, execDescriptor, workingDirectory);
+        ProcessBuilder processBuilder = createProcessBuilder(workingDirectory, execDescriptor, "cmd", "/C", toExec);
         Process process = processBuilder.start();
 
         return new WindowsProcessManager(process, 1);

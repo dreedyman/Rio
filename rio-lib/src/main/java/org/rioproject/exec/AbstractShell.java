@@ -61,9 +61,9 @@ public abstract class AbstractShell implements Shell {
 
     protected abstract String getRedirection(ExecDescriptor execDescriptor);
 
-    protected ProcessBuilder createProcessBuilder(final String commandToExec,
+    protected ProcessBuilder createProcessBuilder(final String workingDirectory,
                                                   final ExecDescriptor execDescriptor,
-                                                  final String workingDirectory) {
+                                                  final String... commandToExec) {
         ProcessBuilder pb = new ProcessBuilder(commandToExec);
 
         Map<String, String> declaredEnv = execDescriptor.getEnvironment();

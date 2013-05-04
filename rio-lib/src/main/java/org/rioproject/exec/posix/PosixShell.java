@@ -86,7 +86,7 @@ public class PosixShell extends AbstractShell {
 
         String toExec = FileUtils.getFilePath(generatedShellScript);
         logger.debug("Generated command line: [{}]", commandLine);
-        ProcessBuilder processBuilder = createProcessBuilder(toExec, execDescriptor, workingDirectory);
+        ProcessBuilder processBuilder = createProcessBuilder(workingDirectory,  execDescriptor, toExec);
         Process process = processBuilder.start();
 
         /* Started process, wait for pid file ... */
