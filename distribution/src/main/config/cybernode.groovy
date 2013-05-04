@@ -58,7 +58,7 @@ class CybernodeConfig {
             String opSys = System.getProperty('os.name')
             String rootLogDir = opSys.startsWith("Windows")?System.getProperty("java.io.tmpdir"):'/tmp'
             String name = System.getProperty('user.name')
-            serviceLogRootDirectory = rootLogDir+'/'+name+'/logs/'+logExt
+            serviceLogRootDirectory = rootLogDir+File.separator+name+File.separator+'logs'+File.separator+logExt
         }
         return serviceLogRootDirectory
     }
