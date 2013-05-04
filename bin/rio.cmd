@@ -1,33 +1,33 @@
 @echo off
-rem
-rem Copyright to the original author or authors.
-rem
-rem Licensed under the Apache License, Version 2.0 (the "License");
-rem you may not use this file except in compliance with the License.
-rem You may obtain a copy of the License at
-rem
-rem      http://www.apache.org/licenses/LICENSE-2.0
-rem
-rem Unless required by applicable law or agreed to in writing, software
-rem distributed under the License is distributed on an "AS IS" BASIS,
-rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-rem See the License for the specific language governing permissions and
-rem limitations under the License.
-rem
+::
+:: Copyright to the original author or authors.
+::
+:: Licensed under the Apache License, Version 2.0 (the "License");
+:: you may not use this file except in compliance with the License.
+:: You may obtain a copy of the License at
+::
+::      http://www.apache.org/licenses/LICENSE-2.0
+::
+:: Unless required by applicable law or agreed to in writing, software
+:: distributed under the License is distributed on an "AS IS" BASIS,
+:: WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+:: See the License for the specific language governing permissions and
+:: limitations under the License.
+::
 
-rem This script provides the command and control utility for starting
-rem Rio services and the Rio command line interface
+:: This script provides the command and control utility for starting
+:: Rio services and the Rio command line interface
 
-rem Use local variables
+:: Use local variables
 setLocal EnableDelayedExpansion
 
-rem Set local variables
+:: Set local variables
 if "%RIO_HOME%" == "" set RIO_HOME=%~dp0..
 
 set SLF4J_CLASSPATH="%RIO_HOME%\lib\logging\*";"%RIO_HOME%\config\logging"
 set RIO_LIB=%RIO_HOME%\lib
 
-rem Set Versions
+:: Set Versions
 set rioVersion=5.0-M3
 set groovyVersion=2.0.6
 
@@ -42,14 +42,14 @@ set JAVACMD=java.exe
 
 if "%JAVA_MEM_OPTIONS%" == "" set JAVA_MEM_OPTIONS="-XX:MaxPermSize=256m"
 
-rem Parse command line
+:: Parse command line
 if "%1"=="" goto interactive
 if "%1"=="start" goto start
 if "%1"=="create-project" goto create-project
 
 :interactive
-rem set cliExt="%RIO_HOME%"\config\rio_cli.groovy
-rem set cliExt=""
+:: set cliExt="%RIO_HOME%"\config\rio_cli.groovy
+:: set cliExt=""
 set command_line=%*
 set launchTarget=org.rioproject.tools.cli.CLI
 set classpath=-cp "%RIO_HOME%\lib\rio-cli-%rioVersion%.jar";"%SLF4J_CLASSPATH%";
@@ -63,7 +63,7 @@ goto end
 
 :start
 
-rem Get the service starter
+:: Get the service starter
 shift
 if "%1"=="" goto noService
 set service=%1
@@ -71,7 +71,7 @@ set starterConfig="%RIO_HOME%\config\start-%1.groovy"
 if not exist "%starterConfig%" goto noStarter
 shift
 
-rem Call the install script, do not assume that Groovy has been installed.
+:: Call the install script, do not assume that Groovy has been installed.
 set groovyClasspath=-cp "%RIO_HOME%\lib\groovy-all-%groovyVersion%.jar"
 "%JAVA_HOME%\bin\java" %groovyClasspath% org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain "%RIO_HOME%\bin\install.groovy" "%JAVA_HOME%" "%RIO_HOME%"
 
@@ -87,7 +87,7 @@ set launchTarget=org.rioproject.start.ServiceStarter
 
 set loggingConfig="%RIO_HOME%\config\logging\rio-logging.properties"
 
-"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.rmi.server.useCodebaseOnly=false -Djava.util.logging.config.file=%loggingConfig% -Dorg.rioproject.service=%service% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
+"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.rmi.server.useCodebaseOnly=false -Djava.util.logging.config.file=%loggingConfig% -Dorg.rioproject.service=%service% %USER_OPTS% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -DRIO_HOME="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -DRIO_NATIVE_DIR=%RIO_NATIVE_DIR% -DRIO_LOG_DIR=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
 goto end
 
 :noStarter
