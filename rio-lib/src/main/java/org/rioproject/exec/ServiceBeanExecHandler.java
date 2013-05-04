@@ -123,8 +123,8 @@ public class ServiceBeanExecHandler {
         String sPort = Integer.toString(regPort);
 
         String logDir = getLogDirectory(config, sElem.getOperationalStringName());
-        if(!logDir.endsWith("/"))
-            logDir = logDir+"/";
+        if(!logDir.endsWith(File.separator))
+            logDir = logDir+File.separator;
 
         /* Create command line */
         exDesc.setCommandLine(CommandLineHelper.getJava());
@@ -280,16 +280,6 @@ public class ServiceBeanExecHandler {
         void createFDH(final int forkedRegistryPort, final ServiceBeanExecutor execHandler) {
             this.forkedRegistryPort = forkedRegistryPort;
             new Thread(new ServiceBeanExecutorTask(name, execHandler, this)).start();
-            /*JMXFaultDetectionHandler fdh = new JMXFaultDetectionHandler();
-            fdh.setInvocationDelay(3*1000);
-            fdh.setRetryCount(0);
-            fdh.setJMXConnection(JMXConnectionUtil.getJMXServiceURL(forkedRegistryPort, "localhost"));
-            fdh.register(this);
-            try {
-                fdh.monitor();
-            } catch (Exception e) {
-                logger.warn("Enable to monitor forked service [{}]", name, e);
-            }*/
         }
 
         void setName(String name) {

@@ -16,6 +16,7 @@
 package org.rioproject.exec;
 
 import org.rioproject.config.Constants;
+import org.rioproject.system.OperatingSystemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +159,11 @@ public final class CommandLineHelper {
         argsBuilder.append(getLoggerConfig(jvmInputArgs, rioHome));
 
         argsBuilder.append(jvmInputArgs);
-        argsBuilder.append("-XX:OnOutOfMemoryError=\"kill -9 %p\"");
+        if(OperatingSystemType.isWindows()) {
+            argsBuilder.append("-XX:OnOutOfMemoryError=\"taskkill /F /PID %%p\"");
+        } else {
+            argsBuilder.append("-XX:OnOutOfMemoryError=\"kill -9 %p\"");
+        }
         argsBuilder.append(" ");
         argsBuilder.append(getOption(Constants.REGISTRY_PORT, sRegPort));
         argsBuilder.append(" ");

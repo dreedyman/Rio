@@ -20,6 +20,7 @@ import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
 import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +44,28 @@ public class WindowsShell extends AbstractShell {
     }
 
     @Override
-    public ProcessManager exec(ExecDescriptor execDescriptor) throws IOException {
+    protected String getRedirection(final ExecDescriptor execDescriptor) {
+        StringBuilder redirection = new StringBuilder();
+        if (execDescriptor.getStdOutFileName() != null) {
+            String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
+            redirection.append(" > ").append(stdOutFileName);
+        }
+        if (execDescriptor.getStdErrFileName() != null) {
+            redirection.append(" 2>&1");
+        }
+        return redirection.toString();
+    }
+
+    @Override
+    public ProcessManager exec(final ExecDescriptor execDescriptor) throws IOException {
         String workingDirectory = execDescriptor.getWorkingDirectory();
         String commandLine = buildCommandLine(execDescriptor);
 
         File generatedCommandScript = File.createTempFile("start-", ".cmd");
 
         /* Delete the generated file on exit */
-        generatedCommandScript.deleteOnExit();
-        logger.debug("Generated start script here: {}", generatedCommandScript.getPath());
+        //generatedCommandScript.deleteOnExit();
+        logger.info("Generated start script here: {}", generatedCommandScript.getPath());
 
         URL url = getTemplateURL();
         StringBuilder sb = new StringBuilder();

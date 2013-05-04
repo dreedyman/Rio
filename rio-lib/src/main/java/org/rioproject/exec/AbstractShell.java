@@ -54,16 +54,12 @@ public abstract class AbstractShell implements Shell {
         if (execDescriptor.getInputArgs() != null) {
             commandLineBuilder.append(" ").append(PropertyHelper.expandProperties(execDescriptor.getInputArgs()));
         }
-        if (execDescriptor.getStdOutFileName() != null) {
-            String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
-            commandLineBuilder.append(" > ").append(stdOutFileName);
-        }
-        if (execDescriptor.getStdErrFileName() != null) {
-            String stdErrFileName = PropertyHelper.expandProperties(execDescriptor.getStdErrFileName());
-            commandLineBuilder.append(" 2> ").append(stdErrFileName);
-        }
+        commandLineBuilder.append(" ").append(getRedirection(execDescriptor));
+
         return commandLineBuilder.toString();
     }
+
+    protected abstract String getRedirection(ExecDescriptor execDescriptor);
 
     protected ProcessBuilder createProcessBuilder(final String commandToExec,
                                                   final ExecDescriptor execDescriptor,

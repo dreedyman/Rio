@@ -20,6 +20,7 @@ import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
 import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +40,24 @@ public class PosixShell extends AbstractShell {
         super(DEFAULT_EXEC_SCRIPT);
     }
 
+    @Override
+    protected String getRedirection(final ExecDescriptor execDescriptor) {
+        StringBuilder redirection = new StringBuilder();
+        if (execDescriptor.getStdOutFileName() != null) {
+            String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
+            redirection.append(" > ").append(stdOutFileName);
+        }
+        if (execDescriptor.getStdErrFileName() != null) {
+            String stdErrFileName = PropertyHelper.expandProperties(execDescriptor.getStdErrFileName());
+            redirection.append(" 2> ").append(stdErrFileName);
+        }
+        return redirection.toString();
+    }
+
     /**
      * @see org.rioproject.exec.Shell#exec(org.rioproject.exec.ExecDescriptor)
      */
-    public ProcessManager exec(ExecDescriptor execDescriptor) throws IOException {
+    public ProcessManager exec(final ExecDescriptor execDescriptor) throws IOException {
         String workingDirectory = execDescriptor.getWorkingDirectory();
         String commandLine = buildCommandLine(execDescriptor);
         String originalCommand = execDescriptor.getCommandLine();
@@ -71,38 +86,13 @@ public class PosixShell extends AbstractShell {
 
         String toExec = FileUtils.getFilePath(generatedShellScript);
         logger.debug("Generated command line: [{}]", commandLine);
-        /*ProcessBuilder pb = new ProcessBuilder(toExec);
-
-        Map<String, String> declaredEnv = execDescriptor.getEnvironment();
-        Map<String, String> environment = pb.environment();
-        for(Map.Entry<String, String> entry : environment.entrySet()) {
-            String value = declaredEnv.get(entry.getKey());
-            if(value!=null) {
-                String oldValue = entry.getValue();
-                String setValue = oldValue+File.pathSeparator+value;
-                environment.put(entry.getKey(), setValue);
-                logger.info("{} was [{}], now [{}]", entry.getKey(), oldValue, environment.get(entry.getKey()));
-            }
-        }
-        environment.putAll(execDescriptor.getEnvironment());
-        logger.trace("Process Builder's environment={}", environment);
-
-        if(workingDirectory!=null) {
-            pb = pb.directory(new File(workingDirectory));
-            logger.debug("Process Builder's working directory set to [{}]", pb.directory().getPath());
-        }
-
-        logger.debug("ProcessBuilder command: {}", pb.command());
-        logger.debug("ProcessBuilder environment: {}", pb.environment());
-
-        pb.redirectErrorStream(true);*/
         ProcessBuilder processBuilder = createProcessBuilder(toExec, execDescriptor, workingDirectory);
         Process process = processBuilder.start();
 
         /* Started process, wait for pid file ... */
         while(pidFile.length()==0) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
