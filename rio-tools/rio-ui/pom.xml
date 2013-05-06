@@ -99,11 +99,15 @@
                                     <include>org.rioproject.monitor:monitor-api</include>
                                     <include>org.rioproject:rio-api</include>
                                     <include>org.rioproject:rio-lib</include>
+                                    <include>org.rioproject:rio-platform</include>
+                                    <include>org.rioproject.resolver:resolver-api</include>
+                                    <include>org.rioproject:rio-start</include>
                                     <include>org.rioproject:webster</include>
                                     <include>org.rioproject.event-collector:event-collector-api</include>
                                     <include>net.jini.lookup:jmx-lookup</include>
                                     <include>net.jini.lookup:serviceui</include>
                                     <include>net.jini:jsk-lib</include>
+                                    <include>net.jini:jsk-platform</include>
                                     <include>org.prefuse:prefuse</include>
                                     <include>org.swinglabs:swingx</include>
                                     <include>org.slf4j:*</include>
@@ -118,7 +122,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Rio-Version>${project.version}</Rio-Version>
                                         <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>rio-start-${project.version}.jar groovy-all-${groovy.version}.jar</Class-Path>
+                                        <Class-Path>groovy-all-${groovy.version}.jar</Class-Path>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
