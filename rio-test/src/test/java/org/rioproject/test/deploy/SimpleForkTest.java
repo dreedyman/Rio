@@ -27,7 +27,6 @@ import org.rioproject.jmx.JMXUtil;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.test.IfPropertySet;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -46,7 +45,6 @@ import java.util.StringTokenizer;
  * Tests simple deploy scenario that forks a service
  */
 @RunWith (RioTestRunner.class)
-@IfPropertySet (name = "os.name", notvalue = "Windows*")
 public class SimpleForkTest {
     @SetTestManager
     static TestManager testManager;
