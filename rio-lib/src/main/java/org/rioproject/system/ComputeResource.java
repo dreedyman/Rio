@@ -67,7 +67,11 @@ public class ComputeResource {
      * The <code>InetAddress</code> of the compute resource the 
      * <code>ComputeResource</code> object was constructed on
      */
-    private InetAddress address;
+    private final InetAddress address;
+    /**
+     * The local host, used for host name
+     */
+    private final InetAddress localHost;
     /** 
      * The <code>platformCapabilities</code> defines a <code>Collection</code> of 
      * <code>PlatformCapabilities</code> which are specific types of mechanism(s) 
@@ -146,6 +150,7 @@ public class ComputeResource {
                         System.getProperty("os.version");
         this.config = config;
         address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        localHost = InetAddress.getLocalHost();
 
         String defaultDescription = address.getHostName()+" "+system;
         description = (String)config.getEntry(COMPONENT, "description", String.class, defaultDescription);
@@ -207,11 +212,19 @@ public class ComputeResource {
     /**
      * Get the InetAddress ComputeResource object has been configured to represent
      * 
-     * @return The InetAddress ComputeResource object has been configured to 
-     * represent
+     * @return The InetAddress ComputeResource object has been configured to represent
      */
     public InetAddress getAddress() {
         return(address);
+    }
+
+    /**
+     * Get the host name.
+     *
+     * @return The host name.
+     */
+    public String getHostName() {
+        return localHost.getHostName();
     }
 
     /**

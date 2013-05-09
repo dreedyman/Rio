@@ -16,21 +16,19 @@
 package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
-import org.rioproject.deploy.ServiceRecord;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.util.TimeUtil;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.tools.cli.ServiceFinder.ServiceInfo;
+import org.rioproject.util.TimeUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -42,7 +40,6 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Reedy
  */
 public class Formatter {
-    static final int EXPORT_CODEBASE = 1;
     static final int MAX_ITEM_LENGTH = 30;
 
     public static String asList(ServiceItem[] items) {
@@ -101,12 +98,6 @@ public class Formatter {
                 groups = new String[]{"<?>"};
 
             String[] optionValues= new String[] {"", "", ""};
-            if((options & EXPORT_CODEBASE) != 0) {
-                String exportCodebase = getExportCodebase(items[i].service);
-                /* The leading spaces are for 1.4 formatting, they'll be 
-                 * stripped if we use the 1.5 format capabilities */
-                optionValues[1] = "   "+exportCodebase;
-            }
 
             OutputInfo oi = new OutputInfo();
             oi.itemNum = "["+(i+1)+"]";
@@ -118,8 +109,7 @@ public class Formatter {
             oi.option2 = optionValues[2].trim();
             list.add(oi);
         }
-        OutputInfo[] oi =
-            list.toArray(new OutputInfo[list.size()]);
+        OutputInfo[] oi = list.toArray(new OutputInfo[list.size()]);
         List<String> output = new ArrayList<String>();
         int[] widths = new int[]{0, 0, 0, 0, 0, 0, 0};
         for (OutputInfo anOi : oi) {
@@ -142,14 +132,13 @@ public class Formatter {
                                      getFormatString(widths[4]) + " " +
                                      getFormatString(widths[5]) + " " +
                                      getFormatString(widths[6]),
-                                     (Object[]) new String[]{
-                                         anOi.itemNum,
-                                         anOi.name,
-                                         anOi.groups,
-                                         anOi.host,
-                                         anOi.option0,
-                                         anOi.option1,
-                                         anOi.option2}));
+                                     anOi.itemNum,
+                                     anOi.name,
+                                     anOi.groups,
+                                     anOi.host,
+                                     anOi.option0,
+                                     anOi.option1,
+                                     anOi.option2));
         }
 
         return(output.toArray(new String[list.size()]));
@@ -305,10 +294,8 @@ public class Formatter {
             out.println(provisioners[i]);
             try {
                 if(items[i].service instanceof ProvisionMonitor) {
-                    DeployAdmin deployAdmin =
-                        (DeployAdmin)((ProvisionMonitor)items[i].service).getAdmin();
-                    OperationalStringManager[] opMgrs =
-                        deployAdmin.getOperationalStringManagers();
+                    DeployAdmin deployAdmin = (DeployAdmin)((ProvisionMonitor)items[i].service).getAdmin();
+                    OperationalStringManager[] opMgrs = deployAdmin.getOperationalStringManagers();
                     if(opMgrs.length==0)
                         out.println("\tNo Managed Deployments");
                     for (OperationalStringManager opMgr : opMgrs) {
@@ -363,57 +350,33 @@ public class Formatter {
                 if(counter % listLength==0)
                     promptMore(br, out);
 
-                out.println("\t" + pad +
+                out.println(String.format("\t%s%-30s planned=%-3s actual=%-3s pending=%-3s",
+                                          pad,
+                                          sElem.getName(),
+                                          sElem.getPlanned(),
+                                          sElem.getActual(),
+                                          pending));
+                /*out.println("\t" + pad +
                             sElem.getName() + tabs +
                             "planned=" + sElem.getPlanned() + "\t" +
                             "actual=" + sElem.getActual() + "\t" +
-                            pending);
+                            pending);*/
                 counter++;
-                ServiceBeanInstance[] instances =
-                    opMgr.getServiceBeanInstances(sElem);
+                ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(sElem);
                 for (ServiceBeanInstance instance : instances) {
                     Long id = instance.getServiceBeanConfig().getInstanceID();
                     if(counter % listLength==0)
                         promptMore(br, out);
-                    out.println("\t" + pad + pad +
+                    out.println(String.format("\t%s%sid=%-3s\t%s", pad, pad, id, instance.getHostName()));
+                    /*out.println("\t" + pad + pad +
                                 "id=" + id + "\t\t" +
-                                instance.getHostAddress());
+                                instance.getHostName());*/
                     counter++;
                 }
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Get the codebase for the service by getting the service's classloader
-     * and extracting only the http: address and port number
-     * 
-     * @param service The service
-     * 
-     * @return A String codebase
-     */
-    public static String getExportCodebase(final Object service) {
-        URLClassLoader cl = (URLClassLoader)service.getClass().getClassLoader();
-        URL[] urls = cl.getURLs();
-        String exportCodebase = urls[0].toExternalForm();
-        if(exportCodebase.contains(".jar")) {
-            int index = exportCodebase.lastIndexOf('/');
-            if(index != -1)
-                exportCodebase = exportCodebase.substring(0, index + 1);
-        } else {
-            System.out.println("Cannot determine export codebase");
-        }
-        /*
-         * TODO: If the exportCodebase starts with httpmd, replace 
-         * httpmd with http. Need to figure out a mechanism to use the 
-         * httpmd in a better way
-         */
-        if(exportCodebase.startsWith("httpmd")) {
-            exportCodebase = "http" + exportCodebase.substring(6);
-        }
-        return(exportCodebase);
     }
 
     /**

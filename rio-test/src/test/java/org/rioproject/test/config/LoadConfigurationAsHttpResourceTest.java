@@ -59,6 +59,7 @@ public class LoadConfigurationAsHttpResourceTest {
 
         ServiceBeanContext context = new JSBContextFactory().create(serviceElement,
                                                                     new JSBManager(serviceElement,
+                                                                                   InetAddress.getLocalHost().getHostName(),
                                                                                    InetAddress.getLocalHost().getHostAddress(),
                                                                                    UuidFactory.generate()),
                                                                     new ComputeResource(),

@@ -51,9 +51,7 @@ public class ListHandler implements OptionHandler {
         tok = new StringTokenizer(modifiableInput);
         while(tok.hasMoreTokens()) {
             String option = tok.nextToken();
-            if(option.equals("codeserver"))
-                options |= Formatter.EXPORT_CODEBASE;
-            else if(option.startsWith("timeout")) {
+            if(option.startsWith("timeout")) {
                 StringTokenizer tok1 = new StringTokenizer(option, "= ");
                 if(tok1.countTokens()<2)
                     return("Bad discovery timeout option : "+option);
@@ -122,42 +120,19 @@ public class ListHandler implements OptionHandler {
             } else if(value.equals(CYBERNODE)) {
                 lookFor = value;
             } else {
-                if(!isValidOption(value))
-                    return(null);
+                return(null);
             }
         }
         return(lookFor);
     }
 
-    /**
-     * Determine if the input contains a valid option
-     *
-     * @param input The option
-     *
-     * @return True if valid
-     */
-    boolean isValidOption(String input) {
-        boolean valid = true;
-        StringTokenizer tok = new StringTokenizer(input);
-        while(tok.hasMoreTokens()) {
-            String option = tok.nextToken();
-            valid = option.equals("codeserver");
-            if(!valid) {
-                break;
-            }
-        }
-        return(valid);
-    }
-
-    public String getUsage() {        
-        return("usage: list [type] [options]\n\n"+
-               "type:\n" +
-               "   "+MONITOR+" | "+CYBERNODE+"\t\t"+
-               "Only one allowed, default is to list \"all\" discovered services\"\n"+
-               "\noptions:\n"+
-               "   codeserver\t"+
-               "Use when the type is either \""+CYBERNODE+"\" " +
-               "or \""+MONITOR+"\n\n"+
-               "Example: rio> list cybernode\n");
+    public String getUsage() {
+        StringBuilder usage = new StringBuilder();
+        usage.append("usage: list [type]\n\n");
+        usage.append("type:\n");
+        usage.append("   ").append(MONITOR).append(" | ").append(CYBERNODE).append("\t\t");
+        usage.append("Only one allowed, default is to list \"all\" discovered services\n\n");
+        usage.append("Example: rio> list cybernode\n");
+        return(usage.toString());
     }
 }

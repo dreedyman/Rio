@@ -1305,6 +1305,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         return new ServiceBeanInstance(getUuid(),
                                        new MarshalledInstance(getServiceProxy()),
                                        context.getServiceElement().getServiceBeanConfig(),
+                                       computeResource.getHostName(),
                                        computeResource.getAddress().getHostAddress(),
                                        getUuid());
     }

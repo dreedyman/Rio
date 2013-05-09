@@ -709,11 +709,12 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if (opStringName != null)
             attrList.add(new OperationalStringEntry(opStringName));
         /* 3. Create and add ComputeResourceInfo */
-        ComputeResourceInfo aInfo = new ComputeResourceInfo();
-        aInfo.initialize(computeResource.getAddress());
-        attrList.add(aInfo);
+        ComputeResourceInfo computeResourceInfo = new ComputeResourceInfo();
+        computeResourceInfo.initialize(computeResource.getAddress());
+        computeResourceInfo.hostName = computeResource.getHostName();
+        attrList.add(computeResourceInfo);
         /* 4. Create and add Host */
-        Host host = new Host(computeResource.getAddress().getHostAddress());
+        Host host = new Host(computeResource.getHostName());
         attrList.add(host);
         /* 5. Create and add Name */
         Name name = new Name(context.getServiceElement().getName());

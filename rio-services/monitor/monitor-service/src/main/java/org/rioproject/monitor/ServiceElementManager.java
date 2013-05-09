@@ -1541,6 +1541,7 @@ public class ServiceElementManager implements InstanceIDManager {
             }
         }
         if(instance==null) {
+            String hostName = null;
             String hostAddress = null;
             ServiceBeanConfig jsbConfig = null;
             Uuid instantiatorUuid = null;
@@ -1553,9 +1554,10 @@ public class ServiceElementManager implements InstanceIDManager {
                 }
             }
 
-            ComputeResourceInfo ai = getComputeResourceInfo(item.attributeSets);
-            if(ai!=null) {
-                hostAddress = ai.hostAddress;
+            ComputeResourceInfo computeResourceInfo = getComputeResourceInfo(item.attributeSets);
+            if(computeResourceInfo!=null) {
+                hostName = computeResourceInfo.hostName;
+                hostAddress = computeResourceInfo.hostAddress;
             }
 
             if(svcElement.getProvisionType() == ProvisionType.EXTERNAL) {
@@ -1603,12 +1605,12 @@ public class ServiceElementManager implements InstanceIDManager {
                 if(!instanceIDs.contains(jsbConfig.getInstanceID()))
                     instanceIDs.add(jsbConfig.getInstanceID());
                 /* Create the ServiceBeanInstance */
-                instance =
-                    new ServiceBeanInstance(uuid,
-                                            new MarshalledInstance(item.service),
-                                            jsbConfig,
-                                            hostAddress,
-                                            instantiatorUuid);
+                instance = new ServiceBeanInstance(uuid,
+                                                   new MarshalledInstance(item.service),
+                                                   jsbConfig,
+                                                   hostName,
+                                                   hostAddress,
+                                                   instantiatorUuid);
             }
         }
         return(instance);
@@ -1707,7 +1709,7 @@ public class ServiceElementManager implements InstanceIDManager {
         public void serviceProvisioned(ServiceBeanInstance instance, final InstantiatorResource resource) {
             try {
                 Object proxy = instance.getService();
-                String hostAddress = instance.getHostAddress();
+                String hostName = instance.getHostName();
                 if(shutdown.get()) {
                     StringBuilder builder = new StringBuilder();
                     builder.append("Service Provision notification for ").append(LoggingUtil.getLoggingName(svcElement));
@@ -1726,16 +1728,16 @@ public class ServiceElementManager implements InstanceIDManager {
 
                     addServiceProxy(proxy);
 
-                    /* If for some reason the hostAddress or instantiatorUuid
+                    /* If for some reason the hostName or instantiatorUuid
                      * is null, then construct a new ServiceBeanInstance with
                      * the hostAddress and Uuid of the InstantiatorResource */
-                    if(hostAddress==null ||
+                    if(hostName==null ||
                         instance.getServiceBeanInstantiatorID()==null) {
-                        hostAddress = resource.getHostAddress();
                         instance = new ServiceBeanInstance(instance.getServiceBeanID(),
                                                            instance.getMarshalledInstance(),
                                                            instance.getServiceBeanConfig(),
-                                                           hostAddress,
+                                                           resource.getHostName(),
+                                                           resource.getHostAddress(),
                                                            instance.getServiceBeanInstantiatorID());
                     }
                     if(hasServiceBeanInstance(instance)) {
@@ -1782,9 +1784,9 @@ public class ServiceElementManager implements InstanceIDManager {
                                         "Attempts will be made to resolve the serviceID of this service. {}",
                                         LoggingUtil.getLoggingName(svcElement),
                                         proxy.getClass().getName(),
-                                        hostAddress,
+                                        hostName,
                                         sb.toString());
-                        ambiguousServices.put(proxy, hostAddress);
+                        ambiguousServices.put(proxy, hostName);
                     }
                 } catch(Exception e) {
                     mgrLogger.warn("Unable to set or create FaultDetectionHandler for [{}]",

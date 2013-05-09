@@ -16,22 +16,20 @@
 package org.rioproject.config
 
 import net.jini.config.Configuration
-import net.jini.config.NoSuchEntryException
-import net.jini.config.ConfigurationProvider
-import org.junit.runner.JUnitCore
 import net.jini.config.ConfigurationException
+import net.jini.config.ConfigurationProvider
+import net.jini.config.NoSuchEntryException
+import org.junit.Test
+import static org.junit.Assert.*
 
 /**
  * Test groovy configs
  *
  * @author Dennis Reedy
  */
-class ConfigTest extends GroovyTestCase {
+class ConfigTest  {
 
-    public static void main(String... args) {
-          JUnitCore.main(ConfigTest.class.getName());
-    }
-
+    @Test
     void testSimpleCompiled() {
         def files = []
         for(File f : new File('src/test/resources/compiled-configs').listFiles()) {
@@ -44,6 +42,7 @@ class ConfigTest extends GroovyTestCase {
         assertEquals 'yummy', s
     }
 
+    @Test
     void testSimple() {
         def conf = ['src/test/resources/bean_config.groovy']        
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -53,6 +52,7 @@ class ConfigTest extends GroovyTestCase {
         assertEquals 'yummy', s
     }
 
+    @Test
     void testExtendsCompiled() {
         def files = []
         for(File f : new File('src/test/resources/compiled-configs').listFiles()) {
@@ -62,6 +62,7 @@ class ConfigTest extends GroovyTestCase {
         doTestExtends(config)
     }
 
+    @Test
     void testExtends() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -98,6 +99,7 @@ class ConfigTest extends GroovyTestCase {
         assertEquals 'baz', ls2.get(1)
     }
 
+    @Test
     void testCheckDefaults() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -114,6 +116,7 @@ class ConfigTest extends GroovyTestCase {
         assertEquals usedDefault, s2
     }
 
+    @Test
     void testCheckforFailure() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -137,6 +140,7 @@ class ConfigTest extends GroovyTestCase {
         assertEquals NoSuchEntryException.class.name, thrown.class.name
     }
 
+    @Test
     void testForNulls() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -144,6 +148,7 @@ class ConfigTest extends GroovyTestCase {
         assertNull shouldbeNull
     }
 
+    @Test
     void testGetLong() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -153,6 +158,7 @@ class ConfigTest extends GroovyTestCase {
         assertEquals 99, l
     }
 
+    @Test
     void testGetWithClosure() {
         def conf = ['src/test/resources/bean_config.groovy']
         Configuration config = ConfigurationProvider.getInstance((String[])conf)
@@ -165,6 +171,7 @@ class ConfigTest extends GroovyTestCase {
 
     }
 
+    @Test
     void testBadComponentName() {
         Exception thrown = null
         def conf = ['src/test/resources/bad_config.groovy']
@@ -176,6 +183,7 @@ class ConfigTest extends GroovyTestCase {
         assertNotNull 'Should have non-null exception', thrown        
     }
 
+    @Test
     void testBadScript() {
         Exception thrown = null
         def conf = ['src/test/resources/bad_config2.groovy']

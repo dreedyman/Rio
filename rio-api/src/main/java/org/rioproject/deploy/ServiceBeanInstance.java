@@ -54,6 +54,10 @@ public class ServiceBeanInstance implements Serializable {
      */
     private ServiceBeanConfig sbConfig;
     /**
+     * The name of the compute resource the service is executing on
+     */
+    private String hostName;
+    /**
      * The IP address of the compute resource the service is executing on
      */
     private String hostAddress;
@@ -68,7 +72,7 @@ public class ServiceBeanInstance implements Serializable {
      * @param identifier Unique identifier for the service
      * @param mi MarshalledInstance of the service's proxy
      * @param sbConfig ServiceBeanConfig object for the service
-     * @param hostAddress The hostAddress the service is executing on
+     * @param hostName The hostName the service is executing on
      * @param instantiatorID The Unique identifier of the
      * <tt>ServiceBeanInstantiator</tt> that instantiated the service
      */
@@ -76,6 +80,7 @@ public class ServiceBeanInstance implements Serializable {
                                MarshalledInstance mi,
                                ServiceBeanConfig sbConfig,
                                /* Optional */
+                               String hostName,
                                String hostAddress,
                                Uuid instantiatorID) {
         if(identifier==null)
@@ -87,6 +92,7 @@ public class ServiceBeanInstance implements Serializable {
         sbID = identifier;
         this.mi = mi;
         this.sbConfig = sbConfig;
+        this.hostName = hostName;
         this.hostAddress = hostAddress;
         this.instantiatorID = instantiatorID;
     }
@@ -151,6 +157,16 @@ public class ServiceBeanInstance implements Serializable {
      */
     public ServiceBeanConfig getServiceBeanConfig() {
         return(sbConfig);
+    }
+
+    /**
+     * Get the host name of the compute resource the service is executing on
+     *
+     * @return The host name of of the compute resource the service is
+     * executing on. This value may be null
+     */
+    public String getHostName() {
+        return hostName;
     }
 
     /**

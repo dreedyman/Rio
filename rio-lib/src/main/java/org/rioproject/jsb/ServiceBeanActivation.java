@@ -219,7 +219,10 @@ public class ServiceBeanActivation {
         ComputeResource computeResource = new ComputeResource(config);
 
         Uuid serviceID = UuidFactory.generate();
-        JSBManager jsbManager = new JSBManager(sElem, computeResource.getAddress().getHostAddress(), serviceID);
+        JSBManager jsbManager = new JSBManager(sElem,
+                                               computeResource.getHostName(),
+                                               computeResource.getAddress().getHostAddress(),
+                                               serviceID);
         jsbManager.setDiscardManager(sbLifeCycleManager);
         jsbManager.setServiceID(serviceID);
         JSBContext jsbContext = new JSBContext(sElem, jsbManager, computeResource, null); /* Shared Configuration */

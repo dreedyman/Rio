@@ -589,11 +589,19 @@ public class InstantiatorResource {
     /**
      * Get the host address of the ServiceBeanInstantiator
      * 
-     * @return The host address of the ServiceBeanInstantiator as a
-     * String "%d.%d.%d.%d"
+     * @return The host address of the ServiceBeanInstantiator
      */
     public String getHostAddress() {
         return (resourceCapability.getAddress());
+    }
+
+    /**
+     * Get the host name of the ServiceBeanInstantiator
+     *
+     * @return The host name of the ServiceBeanInstantiator
+     */
+    public String getHostName() {
+        return (resourceCapability.getHostName());
     }
 
     /**

@@ -634,12 +634,12 @@ public class ServiceFinder {
                         sInfo.setHost(host.hostName);
                         updateHost();
                     } else {
-                        ComputeResourceInfo ai = getComputeResourceInfo(item.attributeSets);
-                        if(ai != null) {
-                            if(ai.hostName.equals(ai.hostAddress))
-                                sInfo.setHost(ai.hostName);
-                            else
-                                sInfo.setHost(ai.hostName+"@"+ai.hostAddress);
+                        ComputeResourceInfo computeResourceInfo = getComputeResourceInfo(item.attributeSets);
+                        if(computeResourceInfo != null) {
+                            /*if(computeResourceInfo.hostName.equals(computeResourceInfo.hostAddress))
+                                sInfo.setHost(computeResourceInfo.hostName);
+                            else*/
+                                sInfo.setHost(computeResourceInfo.hostName+"@"+computeResourceInfo.hostAddress);
 
                             updateHost();
                         }

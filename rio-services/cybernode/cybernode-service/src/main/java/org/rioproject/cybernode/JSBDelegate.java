@@ -501,6 +501,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         /* Create the ServiceBeanManager */
                         JSBManager jsbManager = new JSBManager(sElem,
                                                                opStringMgr,
+                                                               computeResource.getHostName(),
                                                                computeResource.getAddress().getHostAddress(),
                                                                container.getUuid());
                         jsbManager.setDiscardManager(discardManager);
@@ -573,6 +574,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                         instance = new ServiceBeanInstance(serviceID,
                                                            loadResult.getMarshalledInstance(),
                                                            context.getServiceBeanConfig(),
+                                                           container.getComputeResource().getHostName(),
                                                            container.getComputeResource().getAddress().getHostAddress(),
                                                            container.getUuid());
 

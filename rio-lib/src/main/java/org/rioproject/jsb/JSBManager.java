@@ -57,6 +57,8 @@ public class JSBManager implements ServiceBeanManager {
     private Uuid cybernodeUuid;
     /** The  marshalledInstance */
     private MarshalledInstance marshalledInstance;
+    /** The host name the service bean was instantiated on */
+    private String hostName;
     /** The host address the service bean was instantiated on */
     private String hostAddress;
     /** List of listeners */
@@ -71,14 +73,14 @@ public class JSBManager implements ServiceBeanManager {
      * Create a JSBManager
      *
      * @param sElem The ServiceElement
+     * @param hostName The host name the service bean was instantiated on
      * @param hostAddress The host address the service bean was instantiated on
      * @param cybernodeUuid The Uuuid of the Cybernode
      *
-     * @throws IllegalArgumentException if the sElem or hostAddress parameters
-     * are null
+     * @throws IllegalArgumentException if the sElem hostName, or hostAddress parameters are null
      */
-    public JSBManager(final ServiceElement sElem, final String hostAddress, final Uuid cybernodeUuid) {
-       this(sElem, null, hostAddress, cybernodeUuid);
+    public JSBManager(final ServiceElement sElem, final String hostName, final String hostAddress, final Uuid cybernodeUuid) {
+       this(sElem, null, hostName, hostAddress, cybernodeUuid);
     }
 
     /**
@@ -86,24 +88,29 @@ public class JSBManager implements ServiceBeanManager {
      *
      * @param sElem The ServiceElement
      * @param opStringManager The OperationalStringManager
+     * @param hostName The host name the service bean was instantiated on
      * @param hostAddress The host address the service bean was instantiated on
      * @param cybernodeUuid The Uuid of the Cybernode
      *
-     * @throws IllegalArgumentException if the sElem or hostAddress parameters are null
+     * @throws IllegalArgumentException if the sElem hostName, or hostAddress parameters are null
      */
     public JSBManager(final ServiceElement sElem,
                       final OperationalStringManager opStringManager,
+                      final String hostName,
                       final String hostAddress,
                       final Uuid cybernodeUuid) {
         super();
         if(sElem==null)
             throw new IllegalArgumentException("sElem is null");
-         if(hostAddress==null)
+         if(hostName==null)
+            throw new IllegalArgumentException("hostName is null");
+        if(hostAddress==null)
             throw new IllegalArgumentException("hostAddress is null");
         if(cybernodeUuid==null)
             throw new IllegalArgumentException("cybernodeUuid is null");
         this.sElem = sElem;
         this.opStringManager = opStringManager;
+        this.hostName = hostName;
         this.hostAddress = hostAddress;
         this.cybernodeUuid = cybernodeUuid;
     }
@@ -291,6 +298,7 @@ public class JSBManager implements ServiceBeanManager {
         return(new ServiceBeanInstance(serviceID,
                                        marshalledInstance,
                                        sElem.getServiceBeanConfig(),
+                                       hostName,
                                        hostAddress,
                                        cybernodeUuid));
     }
