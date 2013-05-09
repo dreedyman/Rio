@@ -82,7 +82,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Rio-Version>${project.version}</Rio-Version>
                                         <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>resolver-api-${project.version}.jar jsk-platform-${river.version}.jar groovy-all-${groovy.version}</Class-Path>
+                                        <Class-Path>resolver-api-${project.version}.jar jsk-platform-${river.version}.jar</Class-Path>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
