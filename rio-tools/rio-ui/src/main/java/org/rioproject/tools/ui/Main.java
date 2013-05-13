@@ -68,8 +68,6 @@ import org.rioproject.tools.ui.util.TabLabel;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -1424,12 +1422,6 @@ public class Main extends JFrame {
                 new PrivilegedExceptionAction<Main>() {
                 public Main run() throws Exception {
                     System.setSecurityManager(new SecurityManager());
-                    Logger logger = LoggerFactory.getLogger(Main.class);
-                    logger.info("From the UI bitch!");
-                    logger.warn("From the UI bitch!");
-                    logger.error("From the UI bitch!");
-                    logger.debug("From the UI bitch!");
-
                     /* Set properties for execution on a Mac client */
                     if(MacUIHelper.isMacOS()) {
                         MacUIHelper.setSystemProperties();                        
