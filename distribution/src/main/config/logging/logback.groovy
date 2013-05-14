@@ -167,11 +167,17 @@ logger("org.rioproject.monitor.sbi", DEBUG)
 logger("org.rioproject.monitor.provision", DEBUG)
 logger("org.rioproject.monitor.selector", OFF)
 logger("org.rioproject.monitor.services", DEBUG)
+logger("org.rioproject.monitor.DeploymentVerifier", INFO)
 logger("org.rioproject.monitor.InstantiatorResource", INFO)
+logger("org.rioproject.monitor.managers.FixedServiceManager", INFO)
 logger("org.rioproject.resolver.aether", OFF)
+
+logger("org.rioproject.rmi.ResolvingLoader", OFF)
 
 logger("org.rioproject.gnostic", INFO)
 logger("org.rioproject.gnostic.drools", INFO)
+logger("org.rioproject.gnostic.DroolsCEPManager", INFO)
+logger("org.rioproject.config.GroovyConfig", INFO)
 
 logger("net.jini.discovery.LookupDiscovery", OFF)
 logger("net.jini.lookup.JoinManager", OFF)
