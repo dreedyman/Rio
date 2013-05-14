@@ -125,6 +125,7 @@ public class ServiceBeanExecHandler {
         String logDir = getLogDirectory(config, sElem.getOperationalStringName());
         if(!logDir.endsWith(File.separator))
             logDir = logDir+File.separator;
+        logger.info("Logging for {} will be sent to {}", sElem.getName(), logDir);
 
         /* Create command line */
         exDesc.setCommandLine(CommandLineHelper.getJava());
@@ -244,10 +245,13 @@ public class ServiceBeanExecHandler {
 
     private String getLogDirectory(final Configuration config,
                                    final String opstringName) throws ConfigurationException, IOException {
+        String logDirDefault = System.getProperty("RIO_LOG_DIR");
+        if(logDirDefault==null)
+            logDirDefault = System.getProperty("RIO_HOME")+File.separator+"logs";
         String serviceLogRootDirectory = (String)config.getEntry(COMPONENT,
                                                                  "serviceLogRootDirectory",
                                                                  String.class,
-                                                                 System.getProperty("RIO_HOME")+File.separator+"logs");
+                                                                 logDirDefault);
         File rootDir = new File(serviceLogRootDirectory);
         FileUtils.checkDirectory(rootDir, "service log root");
 
