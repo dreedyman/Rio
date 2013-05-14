@@ -143,8 +143,10 @@ public class InstantiatorResource {
         synchronized(serviceElementMap) {
             if(serviceElementMap.containsKey(sElem)) {
                 List<DeployedService> list = serviceElementMap.get(sElem);
-                list.add(newDeployedService);
-                serviceElementMap.put(sElem, list);
+                if(!list.contains(newDeployedService)) {
+                    list.add(newDeployedService);
+                    serviceElementMap.put(sElem, list);
+                }
             } else {
                 List<DeployedService> list = new ArrayList<DeployedService>();
                 list.add(newDeployedService);
@@ -166,8 +168,10 @@ public class InstantiatorResource {
                 ServiceElement sElem = deployedService.getServiceElement();
                 if (serviceElementMap.containsKey(sElem)) {
                     List<DeployedService> list = serviceElementMap.get(sElem);
-                    list.add(deployedService);
-                    serviceElementMap.put(sElem, list);
+                    if(!list.contains(deployedService)) {
+                        list.add(deployedService);
+                        serviceElementMap.put(sElem, list);
+                    }
                 } else {
                     List<DeployedService> list = new ArrayList<DeployedService>();
                     list.add(deployedService);
@@ -883,7 +887,6 @@ public class InstantiatorResource {
             String failureReason =
                 String.format("%s does not meet general or quantitative requirements for %s service [%s]",
                               getName(), provType, LoggingUtil.getLoggingName(sElem));
-            provisionRequest.addFailureReason(failureReason);
             logger.debug(failureReason);
             return (false);
         }

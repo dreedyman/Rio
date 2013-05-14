@@ -181,7 +181,7 @@ public class ProvisionRequest {
     }
 
     public void addFailureReason(String failureReason) {
-        if(failureReason!=null)
+        if(failureReason!=null && !failureReasons.contains(failureReason))
             failureReasons.add(failureReason);
     }
 

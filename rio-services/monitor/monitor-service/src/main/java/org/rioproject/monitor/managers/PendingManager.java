@@ -18,6 +18,7 @@ package org.rioproject.monitor.managers;
 import org.rioproject.monitor.ProvisionRequest;
 import org.rioproject.monitor.ServiceProvisionContext;
 import org.rioproject.monitor.selectors.Selector;
+import org.rioproject.monitor.util.FailureReasonFormatter;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.servicecore.ServiceResource;
 import org.slf4j.Logger;
@@ -77,17 +78,21 @@ public class PendingManager extends PendingServiceElementManager {
                 synchronized (collection) {
                     request = collection.get(key);
                     if (request != null && request.getServiceElement() != null) {
+                        request.getFailureReasons().clear();
                         resource = Selector.acquireServiceResource(request, context.getSelector());
                         if (resource != null) {
                             synchronized (collection) {
                                 collection.remove(key);
                             }
+                        } else {
+                            logger.warn(FailureReasonFormatter.format(request, context.getSelector()));
                         }
                     }
                 }
 
-                if (resource == null)
+                if (resource == null) {
                     continue;
+                }
                 try {
                     context.getDispatcher().dispatch(request, resource, key.index);
                 } catch (Exception e) {

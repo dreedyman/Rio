@@ -39,6 +39,7 @@ import org.rioproject.monitor.selectors.Selector;
 import org.rioproject.monitor.selectors.ServiceResourceSelector;
 import org.rioproject.monitor.tasks.ProvisionFailureEventTask;
 import org.rioproject.monitor.tasks.ProvisionTask;
+import org.rioproject.monitor.util.FailureReasonFormatter;
 import org.rioproject.monitor.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resources.servicecore.LandlordLessor;
@@ -402,18 +403,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                            pendingMgr,
                                                            index));
             } else {
-                int total = selector.getServiceResources().length;
-                String action = request.getType().name().toLowerCase();
-                StringBuilder failureReasonBuilder = new StringBuilder();
-                String failureReason =
-                    String.format("A compute resource could not be obtained to %s [%s], total registered=%d",
-                                  action, LoggingUtil.getLoggingName(request), total);
-                failureReasonBuilder.append(failureReason);
-                if(!request.getFailureReasons().isEmpty()) {
-                    for(String reason : request.getFailureReasons())
-                        failureReasonBuilder.append("\n    ").append(reason);
-                }
-                logger.debug(failureReasonBuilder.toString());
+                logger.warn(FailureReasonFormatter.format(request, selector));
 
                 /* If we have a ServiceProvisionListener, notify the
                  * listener */
