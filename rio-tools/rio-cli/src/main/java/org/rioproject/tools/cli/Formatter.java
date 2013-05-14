@@ -350,7 +350,7 @@ public class Formatter {
                 if(counter % listLength==0)
                     promptMore(br, out);
 
-                out.println(String.format("\t%s%-30s planned=%-3s actual=%-3s pending=%-3s",
+                out.println(String.format("\t%s%-30s planned=%-3s actual=%-3s %s",
                                           pad,
                                           sElem.getName(),
                                           sElem.getPlanned(),
