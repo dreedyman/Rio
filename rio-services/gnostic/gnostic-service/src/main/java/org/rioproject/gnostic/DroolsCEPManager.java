@@ -153,7 +153,7 @@ public class DroolsCEPManager implements CEPSession {
         if(stream==null)
             throw new IllegalStateException("Could not insert calculable into CEP engine, " +
                                             "the working memory entryPoint (stream) is null");
-        logger.debug("Inserting [{}] into CEP engine", calculable);
+        logger.trace("Inserting [{}] into CEP engine", calculable);
         try {
             stream.insert(calculable);
         } catch(Exception e) {
@@ -166,6 +166,7 @@ public class DroolsCEPManager implements CEPSession {
         } catch (Throwable t) {
             logger.warn("Could not fire rules", t);
         }
+        logger.debug("Working Memory Size: {}", session.getFactCount());
     }
 
     public void close() {
@@ -249,7 +250,7 @@ public class DroolsCEPManager implements CEPSession {
         Collection<RuleParameters> parameters = new ArrayList<RuleParameters>();
         parameters.add(ruleParameters);
         String drl = converter.compile(parameters, is);
-        logger.debug("\n------------\n{}\n------------", drl);
+        logger.trace("\n------------\n{}\n------------", drl);
         Reader rdr = new StringReader(drl);
         return ResourceFactory.newReaderResource(rdr);
     }
