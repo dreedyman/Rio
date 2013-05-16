@@ -974,8 +974,16 @@ public class InstantiatorResource {
                         found = true;
                 }
                 if(!found) {
-                    String failureReason = String.format("%s not found in cluster requirement for [%s]",
-                                                         getName(), LoggingUtil.getLoggingName(sElem));
+                    StringBuilder builder = new StringBuilder();
+                    for(String m : machineCluster) {
+                        if(builder.length()>0)
+                            builder.append(", ");
+                        builder.append(m);
+                    }
+                    String failureReason = String.format("%s not found in cluster requirement [%s] for [%s]",
+                                                         getName(),
+                                                         builder.toString(),
+                                                         LoggingUtil.getLoggingName(sElem));
                     provisionRequest.addFailureReason(failureReason);
                     logger.debug(failureReason);
                     return (false);
