@@ -26,7 +26,6 @@ Getting Help
 * Submit an issue
 
   If it turns out that there is indeed something wrong with Rio, you should report it to our
-  issue management system {{{http://jira.rio-project.org}JIRA}}.
+  {{{https://github.com/dreedyman/Rio/issues}issue management system}}. Rio uses GitHub to manage its issues.
 
-  You will need to create an account in JIRA. This is so that we can communicate with you while we work together
-  on the issue. Go to the sign up form to create an account if you don't already have one.
+

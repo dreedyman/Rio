@@ -27,8 +27,8 @@
                 distribution/website before using any of them in your own environment.
             </p>
             <p>
-                The distribution includes the following third party technology: Apache River 2.1.1 (Jini),
-                CGLIB 2.1_3, Hyperic SIGAR, Commons Compress 1.0, Groovy, SLF4J, Logback and the
+                The distribution includes the following third party technology: Apache River 2.2.1 (Jini),
+                Hyperic SIGAR, Commons Compress 1.0, Groovy, SLF4J, Logback and the
                 Prefuse Visualization Toolkit.
             </p>
 
@@ -65,6 +65,7 @@
                 <li><b>docs</b> - The directory that contains API documentation, and other documentation</li>
                 <li><b>examples</b> - Contains examples of how to develop and deploy applications using Rio</li>
                 <li><b>lib</b> - The directory where the JAR files are located.</li>
+                <li><b>lib/logging</b> - The directory where logging JAR files are located.</li>
                 <li><b>lib-dl</b> - The directory where the client (download) JAR files are located.</li>
                 <li><b>logs</b> - This directory contains log files for Rio</li>
                 <li><b>policy</b> - The directory that contains a policy file</li>

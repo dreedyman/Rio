@@ -8,9 +8,9 @@ Dennis Reedy
 
 Manual Pages
 
-  The following "manual pages" define how to configure Rio services and tools contained in the core module
+  The following "manual pages" define how to configure Rio services and tools
 
-  * {{{http://www.rio-project.org/apidocs/org/rioproject/boot/package-summary.html#package_description}System}} - Describes
+  * {{{http://www.rio-project.org/apidocs/org/rioproject/start/package-summary.html#package_description}System}} - Describes
   bootstrap and initialization attributes for the Rio system.
 
   * {{{http://www.rio-project.org/apidocs/org/rioproject/cybernode/package-summary.html#package_description}Cybernode}} - Lightweight

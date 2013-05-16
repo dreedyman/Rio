@@ -26,7 +26,7 @@
             <!-- Make this to 'false' for local development, i.e. file:// URLs -->
             <protocolRelativeURLs>false</protocolRelativeURLs>
             <smoothScroll>true</smoothScroll>
-            <navbarInverse>true</navbarInverse>
+            <navbarInverse>false</navbarInverse>
             <skinAttribution>false</skinAttribution>
 
             <theme>default</theme>
@@ -41,14 +41,17 @@
             <!-- Include the documentation, developers, examples and contribute in the top navigation (in addition to links) -->
             <topNav>Documentation|Developers|Examples|Contribute</topNav>
 
-            <bottomNav>
+            <bottomNav maxSpan="9">
                 <column>Main</column>
                 <column>Download</column>
                 <column>Support</column>
+                <column>reports</column>
             </bottomNav>
-
+            <bottomDescription>
+                <![CDATA[ <span class="color-highlight">Rio rules]]>
+            </bottomDescription>
             <pages>
-                <index prohect="rio-parent">
+                <index project="rio-parent">
                     <!-- Override the title -->
                     <titleTemplate>Rio | Dynamic Distributed Services</titleTemplate>
                     <!-- no breadcrumbs on the main index page -->
@@ -83,7 +86,15 @@
                     <toc>false</toc>
                 </license>
 
+                <about>
+                    <highlightJs>false</highlightJs>
+                    <toc>false</toc>
+                </about>
+
                 <!-- Disable ToC for some Maven reports -->
+                <project-reports>
+                    <toc>false</toc>
+                </project-reports>
                 <project-info>
                     <toc>false</toc>
                 </project-info>
@@ -110,8 +121,6 @@
         <menu name="Documentation" inherit="top">
             <item name="Overview" href="./overview.html"/>
             <item name="Getting Started" href="./getting-started.html"/>
-			<item name="FAQ" href="./faq.html"/>
-            <item name="Wiki" href="https://github.com/dreedyman/Rio/wiki"/>
             <item name="Getting Help" href="./getting-help.html"/>
             <item name="Source Repository" href="./source-repository.html"/>
         </menu>
@@ -150,6 +159,6 @@
             <item name="Rio Support" href="support.html"/>
         </menu>
 
-        <menu name="Maven documentation" ref="reports" inherit="bottom"/>
+        <menu name="Maven Reports" ref="reports" inherit="bottom"/>
 	</body>
 </project>

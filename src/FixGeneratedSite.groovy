@@ -22,7 +22,7 @@ if (!docsDir.exists())
 
 def getReplacement(String depth) {
     return "        <a href=\"https://github.com/dreedyman/Rio\"><img style=\"position: absolute; top: 0; right: 0; border: 0; z-index: 1000000;\" src=\"" + depth + "images/forkme_right_green_007200.png\" alt=\"Fork me on GitHub\"></a>\n" +
-           "<div class=\"navbar navbar-fixed-top navbar-inverse\">"
+           "<div class=\"navbar navbar-fixed-top\">"
 }
 
 def dirs = [new File(docsDir, "examples"), new File(docsDir, "opstring"), new File(docsDir, "tutorial")]
@@ -44,7 +44,7 @@ def fixItUp(file) {
     fileText = fileText.replaceAll("<ul class=\"nav pull-right\">", "<ul class=\"nav pull-left\">")
 
     /* The places the "Fork me on GitHub" image in the upper right */
-    fileText = fileText.replaceAll("<div class=\"navbar navbar-fixed-top navbar-inverse\">", getReplacement(depth))
+    fileText = fileText.replaceAll("<div class=\"navbar navbar-fixed-top\">", getReplacement(depth))
 
     file.write(fileText);
     backupFile.delete()
