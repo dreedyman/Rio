@@ -16,13 +16,13 @@
             <!--<fileset dir="${staging.dir}"/>-->
         </delete>
     </target>
-    
-    <target name="release" depends="clean">        
+
+    <target name="release" depends="clean">
 
         <echo message="Building Rio Release Archive [${release.dir}/${release.archive}.zip] ...."/>
 
-        <tar destfile="${release.dir}/${release.archive}.tar" >
-            
+        <tar destfile="${release.dir}/${release.archive}.tar" longfile="gnu">
+
             <tarfileset dir="${release.dir}/rio-${version}"
                         prefix="rio-${version}">
                 <include name="NOTICE"/>
@@ -41,7 +41,7 @@
                         prefix="rio-${version}/bin" mode="755">
                 <include name="**"/>
             </tarfileset>
-                        
+
         </tar>
 
         <zip destfile="${release.dir}/${release.archive}.zip">
