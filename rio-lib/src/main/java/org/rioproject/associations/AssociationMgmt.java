@@ -389,8 +389,6 @@ public class AssociationMgmt implements AssociationManagement {
                 addAssociationDescriptors(newDesc);
                 if(numRequires.get()==0) {
                     advertised.set(true);
-                } else {
-
                 }
             } else {
                 /* Determine if any of the AssociationDescriptors are new or
@@ -1176,14 +1174,17 @@ public class AssociationMgmt implements AssociationManagement {
             ServiceItem item = association.removeService(proxy);
             if(item!=null) {
                 notifyOnFailure(item);
-                logger.debug("[{}] Service FAILURE : {}", clientName, item.service.getClass().getName());
+                if(logger.isDebugEnabled())
+                    logger.debug("[{}] Service FAILURE : {}", clientName, item.service.getClass().getName());
             } else {
-                StringBuilder builder = new StringBuilder();
-                builder.append("[").append(clientName).append("] ");
-                builder.append("Unable to notify Listeners on failure, returned ServiceItem is null for association ");
-                builder.append(association.getName());
-                builder.append(". The Association reports ").append(association.getServiceCount()).append(" services");
-                logger.warn(builder.toString());
+                if(listeners.size()>0) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("[").append(clientName).append("] ");
+                    builder.append("Unable to notify Listeners on failure, returned ServiceItem is null for association ");
+                    builder.append(association.getName());
+                    builder.append(". The Association reports ").append(association.getServiceCount()).append(" services");
+                    logger.warn(builder.toString());
+                }
             }
             fdhTable.remove(sid);
         }

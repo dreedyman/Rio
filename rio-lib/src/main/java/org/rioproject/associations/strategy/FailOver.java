@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,7 +43,7 @@ import java.util.List;
  */
 public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     private String hostAddress;
-    private final List<ServiceItem> serviceList = Collections.synchronizedList(new ArrayList<ServiceItem>());
+    private volatile List<ServiceItem> serviceList = new ArrayList<ServiceItem>();
     static final Logger logger = LoggerFactory.getLogger(FailOver.class.getName());
 
     @SuppressWarnings("unchecked")
@@ -73,6 +72,8 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     @Override
     public void serviceAdded(T service) {
         ServiceItem item = association.getServiceItem(service);
+        if(logger.isTraceEnabled())
+            logger.trace("Adding service {}, item: {}", association.getName(),  service);
         if(item!=null) {
             add(item);
         } else {
@@ -88,16 +89,18 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
         if(service!=null) {
             remove(service);
         } else {
-            logger.warn("The service is null, cannot remove from "+FailOver.class.getName());
+            logger.warn("The service is null, cannot remove from {}", FailOver.class.getName());
         }
     }
 
     /*
-     * Add a service to the list, sorting by returned host address
+     * Add a service to the list, sorting by returned host name
      */
-    private synchronized void add(ServiceItem item) {
+    private void add(ServiceItem item) {
         if(serviceList.contains(item)) {
-            logger.trace("Already have {}, service count now {}", item, serviceList.size());
+            if(logger.isTraceEnabled()) {
+                logger.trace("Already have {}, service count now {}", item, serviceList.size());
+            }
         }
         int ndx = -1;
         if (hostAddress != null) {
@@ -120,10 +123,15 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
                 }
             }
         }
-        if (ndx == -1)
+        if (ndx == -1) {
             serviceList.add(item);
-        else
+        } else {
             serviceList.add(ndx, item);
+        }
+
+        if(logger.isTraceEnabled()) {
+            logger.trace("Added item: {}, now have {}", item, serviceList.size());
+        }
     }
 
 

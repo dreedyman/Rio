@@ -72,8 +72,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
      */
     private final Map<Association, AssociationProxy<T>> proxyMap = new HashMap<Association, AssociationProxy<T>>();
     private String targetPropertyName;
-    static final String COMPONENT = "org.rioproject.associations";
-    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(AssociationInjector.class);
 
     /**
      * Create an AssociationInjector
@@ -165,7 +164,6 @@ public class AssociationInjector<T> implements AssociationListener<T> {
 
         Method method = getInjectionMethod(propertyName);
         if (method != null) {
-            logger.debug("Association [{}] method []", association.toString(), method.toString());
             synchronized(injectedMap) {
                 if(injectedMap.containsKey(association)) {
                     AssociationProxy<T> associationProxy = proxyMap.get(association);
@@ -175,7 +173,7 @@ public class AssociationInjector<T> implements AssociationListener<T> {
                                  association.getName(), method.toString());
                     return;
                 } else {
-                    logger.debug("Association [{}] not found in map, create new AssociationProxy", association.toString());
+                    logger.debug("Association [{}] not found in map, create new AssociationProxy", association.getName());
                 }
                 String proxyClass = association.getAssociationDescriptor().getProxyClass();
                 /*

@@ -16,6 +16,7 @@
 package org.rioproject.associations;
 
 import net.jini.core.discovery.LookupLocator;
+import org.rioproject.associations.strategy.FailOver;
 import org.rioproject.resources.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AssociationProxySupport<T> implements AssociationProxy<T> {
     private ServiceSelectionStrategy<T> strategy;
     private final List<String> proxyMethods = new ArrayList<String>();
-    Logger logger = LoggerFactory.getLogger(AssociationProxy.class.getName());
+    Logger logger = LoggerFactory.getLogger(AssociationProxySupport.class);
     private AtomicLong invocationCount = new AtomicLong();
     private boolean terminated;
 
@@ -216,7 +217,9 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
         }
         sb.append(", ");
         sb.append("strategy=[");
-        sb.append(a.getAssociationDescriptor().getServiceSelectionStrategy());
+        String strategy = a.getAssociationDescriptor().getServiceSelectionStrategy();
+        strategy = (strategy==null? FailOver.class.getName() : strategy);
+        sb.append(strategy);
         sb.append("]");
         return sb.toString();
     }
