@@ -129,14 +129,19 @@ class OpStringParserHelper {
             associationDescriptor.serviceSelectionStrategy = attributes.strategy
         if(attributes.serviceDiscoveryTimeout)
             associationDescriptor.serviceDiscoveryTimeout = attributes.serviceDiscoveryTimeout
-        if(attributes.serviceDiscoveryTimeoutUnits) {
-            TimeUnit timeUnit
-            if (attributes.serviceDiscoveryTimeoutUnits instanceof TimeUnit)
-                timeUnit = attributes.serviceDiscoveryTimeoutUnits
-            else if (attributes.serviceDiscoveryTimeoutUnits instanceof String)
-                timeUnit = TimeUnit.valueOf(attributes.serviceDiscoveryTimeoutUnits.toUpperCase())
+        if(attributes.serviceDiscoveryTimeoutUnits || attributes.units) {
+            def value
+            if(attributes.serviceDiscoveryTimeoutUnits)
+                value = attributes.serviceDiscoveryTimeoutUnits
             else
-                throw new DSLException("unknown serviceDiscoveryTimeoutUnits type")
+                value = attributes.units
+            TimeUnit timeUnit
+            if (value instanceof TimeUnit)
+                timeUnit = value
+            else if (value instanceof String)
+                timeUnit = TimeUnit.valueOf(value.toUpperCase())
+            else
+                throw new DSLException("unknown serviceDiscoveryTimeoutUnits type ${value}")
             associationDescriptor.serviceDiscoveryTimeUnits = timeUnit
         }
         if (attributes.filter)
