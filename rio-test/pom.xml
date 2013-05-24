@@ -74,14 +74,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sun.jini</groupId>
+            <groupId>org.apache.river</groupId>
             <artifactId>outrigger-dl</artifactId>
             <version>${river.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>com.sun.jini</groupId>
+            <groupId>org.apache.river</groupId>
             <artifactId>outrigger</artifactId>
             <version>${river.version}</version>
             <scope>test</scope>

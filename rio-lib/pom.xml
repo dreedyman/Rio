@@ -54,7 +54,7 @@
         </dependency>
 
 		<dependency>
-		    <groupId>net.jini</groupId>
+		    <groupId>org.apache.river</groupId>
 		    <artifactId>start</artifactId>
             <optional>true</optional>
         </dependency>

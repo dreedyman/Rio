@@ -124,12 +124,12 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sun.jini</groupId>
+            <groupId>org.apache.river</groupId>
             <artifactId>reggie</artifactId>
         </dependency>
 
          <dependency>
-            <groupId>com.sun.jini</groupId>
+            <groupId>org.apache.river</groupId>
             <artifactId>reggie-dl</artifactId>
         </dependency>
         

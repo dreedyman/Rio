@@ -106,7 +106,7 @@
                 <exclude>net.jini:jsk-dl</exclude>
                 <exclude>net.jini.lookup:jmx-lookup</exclude>
                 <exclude>net.jini.lookup:serviceui</exclude>
-                <exclude>com.sun.jini:reggie-dl</exclude>
+                <exclude>org.apache.river:reggie-dl</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-api:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-proxy:jar</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-ui:jar</exclude>
@@ -151,7 +151,7 @@
                 <include>net.jini:jsk-dl</include>
                 <include>net.jini.lookup:jmx-lookup</include>
                 <include>net.jini.lookup:serviceui</include>
-                <include>com.sun.jini:reggie-dl</include>
+                <include>org.apache.river:reggie-dl</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
         </dependencySet>

@@ -280,7 +280,7 @@ public final class ServiceDescriptorUtil {
             throw new RuntimeException("RIO_HOME property not declared");
         String reggieClasspath = FileHelper.find(new File(rioHome, "lib"), "reggie").getPath();
         File reggieDL = FileHelper.find(new File(rioHome, "lib-dl"), "reggie-dl");
-        String reggieCodebase = "artifact:com.sun.jini/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());
+        String reggieCodebase = "artifact:org.apache.river/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }

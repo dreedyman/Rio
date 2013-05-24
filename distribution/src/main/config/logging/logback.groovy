@@ -161,6 +161,7 @@ logger("org.rioproject.system", DEBUG)
 logger("org.rioproject.cybernode.ServiceBeanLoader", INFO)
 logger("org.rioproject.system.measurable", INFO)
 logger("org.rioproject.jsb", INFO)
+logger("org.rioproject.associations", INFO)
 
 logger("org.rioproject.monitor", DEBUG)
 logger("org.rioproject.monitor.sbi", DEBUG)
