@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,7 +44,7 @@ import java.util.List;
  */
 public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     private String hostAddress;
-    private volatile List<ServiceItem> serviceList = new ArrayList<ServiceItem>();
+    private final List<ServiceItem> serviceList = Collections.synchronizedList(new ArrayList<ServiceItem>());
     static final Logger logger = LoggerFactory.getLogger(FailOver.class.getName());
 
     @SuppressWarnings("unchecked")

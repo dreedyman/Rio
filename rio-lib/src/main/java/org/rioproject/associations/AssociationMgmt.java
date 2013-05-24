@@ -1177,14 +1177,12 @@ public class AssociationMgmt implements AssociationManagement {
                 if(logger.isDebugEnabled())
                     logger.debug("[{}] Service FAILURE : {}", clientName, item.service.getClass().getName());
             } else {
-                if(listeners.size()>0) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("[").append(clientName).append("] ");
-                    builder.append("Unable to notify Listeners on failure, returned ServiceItem is null for association ");
-                    builder.append(association.getName());
-                    builder.append(". The Association reports ").append(association.getServiceCount()).append(" services");
-                    logger.warn(builder.toString());
-                }
+                StringBuilder builder = new StringBuilder();
+                builder.append("[").append(clientName).append("] ");
+                builder.append("Unable to notify Listeners on failure, returned ServiceItem is null for association ");
+                builder.append(association.getName());
+                builder.append(". The Association reports ").append(association.getServiceCount()).append(" services");
+                logger.warn(builder.toString());
             }
             fdhTable.remove(sid);
         }
