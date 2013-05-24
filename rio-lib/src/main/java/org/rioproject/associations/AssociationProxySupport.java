@@ -143,11 +143,15 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
                                 System.currentTimeMillis()+
                                 aDesc.getServiceDiscoveryTimeUnits().toMillis(aDesc.getServiceDiscoveryTimeout()): stopTime);
                     if(System.currentTimeMillis()<stopTime) {
-                        logger.trace("The association proxy for {} is not available. A service discovery timeout of " +
-                                     "[{}], has been configured, and the computed stop time is: {}, sleep for one " +
-                                     "second and re-evaluate",
-                                     formatAssociationService(a),
-                                     aDesc.getServiceDiscoveryTimeout(), new Date(stopTime));
+                        if(logger.isTraceEnabled()) {
+                            logger.trace("The association proxy for {} is not available. A service discovery timeout of " +
+                                         "[{} {}], has been configured, and the computed stop time is: {}, sleep for one " +
+                                         "second and re-evaluate",
+                                         formatAssociationService(a),
+                                         aDesc.getServiceDiscoveryTimeout(),
+                                         aDesc.getServiceDiscoveryTimeUnits().name(),
+                                         new Date(stopTime));
+                        }
                         Thread.sleep(1000);
                         continue;
                     } else {
@@ -268,7 +272,8 @@ public class AssociationProxySupport<T> implements AssociationProxy<T> {
             Object result;
 
             if (!isProxyMethod(method)) {
-                logger.trace("Invoking local method [{}]", method.toString());
+                if(logger.isTraceEnabled())
+                    logger.trace("Invoking local method [{}]", method.toString());
                 result = method.invoke(localRef, args);
             } else {
                 result = doInvokeService(association, method, args);
