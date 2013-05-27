@@ -53,42 +53,6 @@ public class JMXConnectionUtil {
      * <p>This utility uses the {@link org.rioproject.rmi.RegistryUtil} class to
      * obtain the port to access the RMI Registry.
      *
-     * <h4>Configuration</h4>
-     * This method supports the following configuration entries;
-     * where each configuration entry name is associated with the component name
-     * <tt>org.rioproject.jmx</tt>.
-     * <ul>
-     * <li><span
-     * style="font-weight: bold; font-family: courier new,courier,monospace;
-     * color: rgb(0, 0, 0);">hostAddress</span>
-     * <table style="text-align: left; width: 100%;" border="0"
-     * cellspacing="2" cellpadding="2">
-     * <tbody>
-     * <tr>
-     * <td
-     * style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
-     * </td>
-     * <td style="vertical-align: top; font-family: monospace;">String<br>
-     * </td>
-     * </tr>
-     * <tr>
-     * <td
-     * style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
-     * </td>
-     * <td style="vertical-align: top;">If the<span
-     * style="font-weight: bold;"> </span><span
-     * style="font-family: monospace;">java.rmi.server.hostname</span>
-     * property
-     * is set,<span style="font-weight: bold;"> </span>use this as the
-     * default, otherwise use the value returned by {@link
-     * java.net.InetAddress#getLocalHost()}<span style="font-weight: bold;"><br>
-     * </span></td>
-     * </tr>
-     * </tbody>
-     * </table>
-     * </li>
-     * </ul>
-     *
      * @throws Exception If there are errors reading the configuration, or
      * creating the {@link javax.management.remote.JMXConnectorServer}
      */
