@@ -30,7 +30,6 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides JMX connection utilities.
@@ -56,7 +55,6 @@ public class JMXConnectionUtil {
      * @throws Exception If there are errors reading the configuration, or
      * creating the {@link javax.management.remote.JMXConnectorServer}
      */
-    @SuppressWarnings("unchecked")
     public static void createJMXConnection() throws Exception {
         if(System.getProperty(Constants.JMX_SERVICE_URL)!=null)
             return;
@@ -65,7 +63,7 @@ public class JMXConnectionUtil {
         int registryPort = Integer.parseInt(sPort);
 
         if(registryPort==0) {
-            logger.error("RMI Registry property ["+Constants.REGISTRY_PORT+"] not found, unable to create MBeanServer");
+            logger.error("RMI Registry property [{}] not found, unable to create MBeanServer", Constants.REGISTRY_PORT);
             throw new Exception("Unable to create the JMXConnectorServer");
         }
 
@@ -76,8 +74,7 @@ public class JMXConnectionUtil {
         if(logger.isInfoEnabled())
             logger.info("JMXServiceURL={}", jmxServiceURL);
 
-        Map env = System.getProperties();
-        JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, env, mbs);
+        JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null, mbs);
         if(jmxConn != null) {
             jmxConn.start();
             System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
@@ -184,17 +181,15 @@ public class JMXConnectionUtil {
      * @return A String array of Java Virtual Machine IDs followed by the
      * displayName of each discovered <tt>VirtualMachine</tt>
      */
-    @SuppressWarnings("unchecked")
     public static String[] listManagedVMs() {
         String jvmVersion = System.getProperty("java.version");
         if(jvmVersion.contains("1.5")) {
-            logger.info("The JMX Attach APIs require Java 6 or above. " +
-                        "You are running Java "+jvmVersion);
+            logger.info("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
             return new String[0];
         }
         List<String> vmList = new ArrayList<String>();
         try {
-            Class vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
+            Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
             Method list = vmClass.getMethod("list");
             List vmDescriptors = (List)list.invoke(null);
             for (Object vmDesc : vmDescriptors) {
