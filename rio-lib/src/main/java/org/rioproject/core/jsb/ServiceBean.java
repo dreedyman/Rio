@@ -19,7 +19,7 @@ package org.rioproject.core.jsb;
 import java.io.IOException;
 
 /**
- * The ServiceBean interface specifies the semantics that a Jini Service Bean
+ * The {@code ServiceBean} interface specifies the semantics that a dynamic service
  * must adhere to in order to be instantiated, initialized, started, advertised,
  * unadvertised, stopped and destroyed.
  *
@@ -27,39 +27,38 @@ import java.io.IOException;
  */
 public interface ServiceBean {
     /**
-     * The start method provides the capability for a ServiceBean to initialize
+     * The start method provides the capability for a dynamic service to initialize
      * itself and make it ready to accept inbound communications, returning an
-     * Object which can be used to communicate with the ServiceBean. It is the
-     * responsibility of the ServiceBean to initiate appropriate startup logic.
-     * If the ServiceBean has started itself, subsequent invocations of this
-     * method will not re-start the ServiceBean, but return the Object created
+     * Object which can be used to communicate with the service. It is the
+     * responsibility of the service to initiate appropriate startup logic.
+     * If the service has started itself, subsequent invocations of this
+     * method will not re-start the service, but return the Object created
      * during the initial start
      * 
-     * @param context The ServiceBeanContext containing ServiceBean
+     * @param context The ServiceBeanContext containing service
      * initialization attributes
-     * @return An Object that can be used to communicate to the
-     * ServiceBean
+     * @return An Object that can be used to communicate to the service
      * @throws Exception If any errors or unexpected conditions occur
      */
     Object start(ServiceBeanContext context) throws Exception;
 
     /**
      * The initialize method is invoked by the start method to initialize the
-     * ServiceBean. this method is called only once during the lifecycle of a
+     * service. this method is called only once during the lifecycle of a
      * ServiceBean
      * 
-     * @param context The ServiceBeanContext containing ServiceBean
+     * @param context The ServiceBeanContext containing service
      * initialization attributes
      * @throws Exception If any errors or unexpected conditions occur
      */
     void initialize(ServiceBeanContext context) throws Exception;
 
     /**
-     * The advertise method provides the capability for a ServiceBean to
+     * The advertise method provides the capability for a service to
      * advertise itself on the network providing access to all clients. The
-     * ServiceBean must be ready to accept incoming communications (has been
-     * started). If the ServiceBean has advertised itself, subsequent
-     * invocations of this method will not re-advertise the ServiceBean
+     * service must be ready to accept incoming communications (has been
+     * started). If the service has advertised itself, subsequent
+     * invocations of this method will not re-advertise the service
      * 
      * @throws IOException If errors occur access underlying communication
      * mechanisms
@@ -67,10 +66,10 @@ public interface ServiceBean {
     void advertise() throws IOException;
 
     /**
-     * The unadvertise method informs the ServiceBean to cancel all
+     * The unadvertise method informs the service to cancel all
      * advertisements (registrations, etc...) it has made on the network. The
-     * ServiceBean must still be available to accept incoming communications. If
-     * the ServiceBean has not advertised itself, this method has no defined
+     * service must still be available to accept incoming communications. If
+     * the service has not advertised itself, this method has no defined
      * behavior
      * 
      * @throws IOException If errors occur access underlying communication
@@ -79,25 +78,25 @@ public interface ServiceBean {
     void unadvertise() throws IOException;
 
     /**
-     * The stop method informs the ServiceBean to unexport itself from any
+     * The stop method informs the service to unexport itself from any
      * underlying distributed Object communication mechanisms making it
      * incapable of accepting inbound communications
      * 
-     * @param force If true, unexports the ServiceBean even if there are
-     * pending or in-progress calls; if false, only unexports the ServiceBean if
+     * @param force If true, unexports the service even if there are
+     * pending or in-progress calls; if false, only unexports the service if
      * there are no pending or in-progress calls
      */
     void stop(boolean force);
 
     /**
-     * The destroy method is used to destroy an instance of a ServiceBean. Once
-     * this method is invoked the ServiceBean should provide appropriate
+     * The destroy method is used to destroy an instance of a service. Once
+     * this method is invoked the service should provide appropriate
      * termination logic including unadvertise() and stop() method invocations.
      * Note: The implementer of this method should not invoke System.exit()
      * during the processing of this method
      * 
-     * @param force If true, unexports the ServiceBean even if there are
-     * pending or in-progress calls; if false, only unexports the ServiceBean if
+     * @param force If true, unexports the service even if there are
+     * pending or in-progress calls; if false, only unexports the service if
      * there are no pending or in-progress calls
      */
     void destroy(boolean force);
