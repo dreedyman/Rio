@@ -299,18 +299,20 @@ public class JMXUtil {
      * <tt>org.rioproject.jmxServiceURL</tt>. If the
      * <tt>org.rioproject.jmxServiceURL</tt> property is not found, return a
      * zero-length array. A new array is created each time.
-     *
-     * @throws Exception If the RMI registry or JMXConnection cannot be created
      */
-    public static Entry[] getJMXConnectionEntries() throws Exception {
+    public static Entry[] getJMXConnectionEntries() {
         Entry[] entries = new Entry[0];
         /* Check for JMXConnection */
-        JMXConnectionUtil.createJMXConnection();
-        String jmxServiceURL = System.getProperty(Constants.JMX_SERVICE_URL);
-        if(jmxServiceURL!=null) {
-            entries = new Entry[2];
-            entries[0] = new JMXProtocolType(JMXProtocolType.RMI);
-            entries[1] = new JMXProperty(Constants.JMX_SERVICE_URL, jmxServiceURL);
+        try {
+            JMXConnectionUtil.createJMXConnection();
+            String jmxServiceURL = System.getProperty(Constants.JMX_SERVICE_URL);
+            if(jmxServiceURL!=null) {
+                entries = new Entry[2];
+                entries[0] = new JMXProtocolType(JMXProtocolType.RMI);
+                entries[1] = new JMXProperty(Constants.JMX_SERVICE_URL, jmxServiceURL);
+            }
+        } catch (Exception e) {
+            logger.warn("Could not create JMX Connection, JMX monitoring not available", e);
         }
         return(entries);
     }

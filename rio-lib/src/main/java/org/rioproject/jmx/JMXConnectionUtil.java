@@ -25,8 +25,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.remote.*;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,22 +69,33 @@ public class JMXConnectionUtil {
             throw new Exception("Unable to create the JMXConnectorServer");
         }
 
-        String hostAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         MBeanServer mbs = MBeanServerFactory.getMBeanServer();
+        String hostAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         JMXServiceURL jmxServiceURL = new JMXServiceURL("service:jmx:rmi://"+hostAddress+":"+registryPort+
                                                         "/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
+        System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
         if(logger.isInfoEnabled())
             logger.info("JMXServiceURL={}", jmxServiceURL);
-
         JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null, mbs);
-        if(jmxConn != null) {
-            jmxConn.start();
-            System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
-            if(logger.isDebugEnabled())
-                logger.debug("JMX Platform MBeanServer exported with RMI Connector");
-        } else {
-            throw new Exception("Unable to create the JMXConnectorServer");
-        }
+        jmxConn.start();
+        if(logger.isDebugEnabled())
+            logger.debug("JMX Platform MBeanServer exported with RMI Connector");
+
+    }
+
+    /**
+     * Get the agentID of the Platform MBeanServer
+     *
+     * @return The agentID of the Platform MBeanServer
+     *
+     * @throws Exception if the agent ID cannot be found
+     */
+    public static String getPlatformMBeanServerAgentId() throws Exception {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        final String SERVER_DELEGATE = "JMImplementation:type=MBeanServerDelegate";
+        final String MBEAN_SERVER_ID_KEY = "MBeanServerId";
+        ObjectName delegateObjName = new ObjectName(SERVER_DELEGATE);
+        return (String) mbs.getAttribute(delegateObjName, MBEAN_SERVER_ID_KEY );
     }
 
     /**

@@ -16,6 +16,8 @@
 package org.rioproject.jmx;
 
 import org.rioproject.config.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
@@ -26,7 +28,7 @@ import java.lang.management.ManagementFactory;
  * @author Dennis Reedy
  */
 public class MBeanServerFactory {
-
+    private static final Logger logger = LoggerFactory.getLogger(MBeanServerFactory.class);
     /**
      * Get the MBeanServer to use. If the system property
      * {@link org.rioproject.config.Constants#JMX_MBEANSERVER} is set, locate
@@ -38,16 +40,12 @@ public class MBeanServerFactory {
     public static MBeanServer getMBeanServer() {
         MBeanServer server = null;
         if(System.getProperty(Constants.JMX_MBEANSERVER)!=null) {
+            String agentID = System.getProperty(Constants.JMX_MBEANSERVER);
             try {
-                for (Object o : 
-                    javax.management.MBeanServerFactory.findMBeanServer(
-                        Constants.JMX_MBEANSERVER)) {
-                    server = (MBeanServer) o;
-                    if (server != null)
-                        break;
-                }
+                server = javax.management.MBeanServerFactory.findMBeanServer(agentID).get(0);
+                logger.info("Obtained MBeanServer using agentID: {}", agentID);
             } catch(Exception e) {
-                e.printStackTrace();
+                logger.warn("Could not get MBeanServer from agentId: {}", agentID, e);
             }
         }
         if(server==null) {
