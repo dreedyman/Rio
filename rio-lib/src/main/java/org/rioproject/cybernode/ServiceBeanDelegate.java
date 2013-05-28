@@ -108,8 +108,8 @@ public interface ServiceBeanDelegate {
      * Get the ComputeResourceUtilization
      *
      * @return The ComputeResourceUtilization for the represented service. If
-     * the service is contained within the CYbernode, return the
-     * ComputeResourceUtilization of the Cybernode. Oherwise reetun the
+     * the service is contained within the Cybernode, return the
+     * ComputeResourceUtilization of the Cybernode. Otherwise return the
      * ComputeResourceUtilization of the process hosting the represented service
      */
     ComputeResourceUtilization getComputeResourceUtilization();
