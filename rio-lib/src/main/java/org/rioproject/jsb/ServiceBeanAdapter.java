@@ -302,10 +302,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             jsbState.setState(ServiceBeanState.STARTING);
 
             BeanAdapter.invokeLifecycleInjectors(this, context);
-            
-            /* Set the Configuration for this ServiceProvider */
-            //setConfiguration(context.getConfiguration());
-            
+
             /* Set the WatchRegistry for this ServiceProvider */
             setWatchRegistry(context.getWatchRegistry());
             /* Set the event table for this ServiceProvider */
@@ -324,9 +321,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
                 getServiceProxy();
             }
             jsbState.setState(ServiceBeanState.STARTED);
-        } /*else {
-            computeResourceObserver.setSource(proxy);
-        }*/
+        }
         return (proxy);
     }
 
@@ -451,7 +446,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         ObjectName objectName = createObjectName(context);
         MBeanServer mbeanServer = org.rioproject.jmx.MBeanServerFactory.getMBeanServer();
         registerMBean(objectName, mbeanServer);
-
         //translate events to notifications
         slaThresholdEventAdapter = new SLAThresholdEventAdapter(objectName, getNotificationBroadcasterSupport());
         register(SLAThresholdEvent.getEventDescriptor(), slaThresholdEventAdapter, null, Long.MAX_VALUE);
