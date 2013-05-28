@@ -338,7 +338,7 @@ public class JSBDelegate implements ServiceBeanDelegate {
                             "service [{}], the service may be " +
                             "in the process of failing or may have already " +
                             "failed. {}:{}",
-                            sElem.getName(), e.getClass().getName(), e.getMessage());
+                            ServiceElementUtil.getLoggingName(sElem), e.getClass().getName(), e.getMessage());
             }
         } else if(loadResult.getImpl() instanceof ServiceExecutor) {
             cru = ((ServiceExecutor)loadResult.getImpl()).getComputeResourceUtilization();
