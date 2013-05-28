@@ -667,8 +667,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
          */
         String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
         if(provisionEnabled) {
-            logger.debug("Software provisioning has been enabled, default provision root location is [{}]",
-                        provisionRoot);
+            if(logger.isTraceEnabled())
+                logger.trace("Software provisioning has been enabled, default provision root location is [{}]",
+                             provisionRoot);
         }
         computeResource.setPersistentProvisioningRoot(provisionRoot);
 
