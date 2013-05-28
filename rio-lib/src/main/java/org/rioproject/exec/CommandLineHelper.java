@@ -169,6 +169,8 @@ public final class CommandLineHelper {
         argsBuilder.append(" ");
         argsBuilder.append(getOption(Constants.SERVICE_BEAN_EXEC_NAME, serviceBindName));
         argsBuilder.append(" ");
+        argsBuilder.append(getOption(Constants.PROC_FILE_NAME, ProcFileHelper.getProcFileName()));
+        argsBuilder.append(" ");
         logger.trace("Resulting JVM Options for service [{}]: {}", serviceBindName, jvmInputArgs);
         return argsBuilder.toString();
     }

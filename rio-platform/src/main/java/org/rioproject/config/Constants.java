@@ -33,6 +33,10 @@ public interface Constants {
      */
     static final String REGISTRY_PORT = BASE_COMPONENT+".registryPort";
     /**
+     * System property for the cybernode's proc file name
+     */
+    static final String PROC_FILE_NAME = BASE_COMPONENT+".proc.file.name";
+    /**
      * System property set to indicate to use a specific MBeanServer. If not
      * set then the Platform MBeanServer is to be used
      */

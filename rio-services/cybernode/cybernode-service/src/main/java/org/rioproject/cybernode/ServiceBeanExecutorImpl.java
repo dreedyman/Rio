@@ -28,11 +28,11 @@ import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.event.EventHandler;
+import org.rioproject.exec.ProcFileHelper;
 import org.rioproject.exec.ServiceBeanExecListener;
 import org.rioproject.exec.ServiceBeanExecutor;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
-import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jsb.ServiceBeanActivation;
 import org.rioproject.jsb.ServiceBeanAdapter;
 import org.rioproject.jsb.ServiceElementUtil;
@@ -51,12 +51,14 @@ import org.rioproject.watch.WatchDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides support to create a ServiceBean in it's own JVM.
@@ -72,13 +74,13 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     private String execBindName;
     private ServiceBeanContext context;
     private int cybernodeRegistryPort;
-    private int createdRegistryPort;
     private Registry registry;
     private ServiceBeanExecListener listener;
     private JMXFaultDetectionHandler fdh;
     private ComputeResource computeResource;
     private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     private ServiceBeanInstance instance;
+    private File procFile;
     static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     private Logger logger = LoggerFactory.getLogger(ServiceBeanExecutorImpl.class);
 
@@ -122,9 +124,6 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
                                                              true);
         computeResource.setPersistentProvisioning(provisionEnabled);        
         String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
-        if(provisionEnabled) {
-            logger.debug("Software provisioning has been enabled, using provision root [{}]", provisionRoot);
-        }
         computeResource.setPersistentProvisioningRoot(provisionRoot);
 
         MeasurableCapability[] mCaps = loadMeasurables(config);
@@ -145,19 +144,23 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
         exporter = ExporterConfig.getExporter(config, "org.rioproject.cybernode", "exporter");
 
-        createdRegistryPort = RegistryUtil.getRegistry();
-        if(createdRegistryPort>0)
+        procFile = ProcFileHelper.createProcFile();
+
+        int createdRegistryPort = RegistryUtil.getRegistry();
+        if(createdRegistryPort>0) {
             System.setProperty(Constants.REGISTRY_PORT, Integer.toString(createdRegistryPort));
-        else
+        } else {
             throw new RuntimeException("Unable to create RMI Registry");
+        }
 
         Remote proxy = exporter.export(this);
         registry.bind(execBindName, proxy);
+
         new Thread(new CreateFDH(config, this)).start();
     }
 
-    public int getRegistryPort() {
-        return createdRegistryPort;
+    public File getProcFile() {
+        return procFile;
     }
 
     public void setUuid(final Uuid uuid) {
@@ -331,35 +334,17 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         }
 
         public void run() {
-            /*boolean connected = true;
-            while(connected) {
+            String cybernodeProcFileName = System.getProperty(Constants.PROC_FILE_NAME);
+            File cybernodeProcFile = ProcFileHelper.getProcFile(cybernodeProcFileName);
+            while(cybernodeProcFile.exists()) {
                 try {
-                    registry.list();
-                    try {
-                        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                } catch (RemoteException e) {
-                    logger.error("Registry connection failure ", e);
-                    connected = false;
-                    logger.warn("Could not connect to Registry, assume that parent is no longer present");
-                    faultDetectionListener.serviceFailure(null, null);
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            }*/
-            try {
-                JMXConnectionUtil.createJMXConnection();
-                 /*Setup FDH to make sure Cybernode doesn't orphan us*/
-                fdh = new JMXFaultDetectionHandler();
-                fdh.setConfiguration(config);
-                String jmxServiceURL = JMXConnectionUtil.getJMXServiceURL(cybernodeRegistryPort, "localhost");
-                logger.info("Connect to JMXServiceURL: {}", jmxServiceURL);
-                fdh.setJMXConnection(jmxServiceURL);
-                fdh.register(faultDetectionListener);
-                fdh.monitor();
-            } catch (Exception e) {
-                logger.error("Unable to setup FDH to make sure Cybernode doesn't orphan us ", e);
             }
+            logger.warn("Parent's service proc file no longer exists, assume that parent is no longer present");
+            faultDetectionListener.serviceFailure(null, null);
         }
     }
 }

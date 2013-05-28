@@ -16,19 +16,20 @@
 package org.rioproject.exec;
 
 import net.jini.id.Uuid;
-import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.watch.Watchable;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * Defines the interface for a utility that will fork a service bean into
+ * Defines the interface for a utility that will fork a service into
  * it's own process
  *
  * @author Dennis Reedy
@@ -46,8 +47,8 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
     ComputeResourceUtilization getComputeResourceUtilization() throws RemoteException;
 
     /**
-     * If the forked service bean required provisioning of additional software,
-     * apply the installed
+     * If the forked service required provisioning of additional software,
+     * apply the installed {@code PlatformCapability} objects.
      *
      * @param pCaps Array of {@link org.rioproject.system.capability.PlatformCapability}
      * to apply. If the array is null or empty, no action is taken.
@@ -71,17 +72,16 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
      * loading or instantiating the ServiceBean
      * @throws RemoteException if communication errors occur
      */
-    ServiceBeanInstance instantiate(ServiceElement sElem,
-                                    OperationalStringManager opStringMgr)
+    ServiceBeanInstance instantiate(ServiceElement sElem, OperationalStringManager opStringMgr)
         throws ServiceBeanInstantiationException, RemoteException;
 
     /**
-     * Invoked to update an instantiated ServiceBean instance of changes in the
+     * Invoked to update an instantiated service instance of changes in the
      * {@link org.rioproject.opstring.ServiceElement}, and {@link
      * org.rioproject.opstring.OperationalStringManager} reference. This method
      * invocation is typically triggered when the {@link
      * org.rioproject.opstring.OperationalString} has been updated, or the
-     * OperationalStringManager has been changed.
+     * {@code OperationalStringManager} has been changed.
      * <p/>
      * ServiceElement updates can trigger changes in running services.
      * ServiceElement attributes (and contained class attributes) which may
@@ -111,14 +111,14 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
     ServiceBeanInstance getServiceBeanInstance() throws RemoteException;
 
     /**
-     * The ServiceBeanExecutor will create an RMI Registry. This method gets the
-     * port the Registry has been created on
+     * The ServiceBeanExecutor will create a {@code File} to indicate it is available. Once the
+     * ServiceBeanExecutor exits, the file will be deleted.
      *
-     * @return The port the ServiceBeanExecutor has created an RMI Registry on
+     * @return The {@code File} created by the ServiceBeanExecutor
      *
      * @throws RemoteException If there are communication problems
      */
-    int getRegistryPort() throws RemoteException;
+    File getProcFile() throws RemoteException;
 
     /**
      * Set the Uuid for the ServiceBeanExecutor. This will be used to create the

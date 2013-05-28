@@ -122,6 +122,9 @@ public class ServiceBeanExecHandler {
         int regPort = RegistryUtil.checkRegistry();
         String sPort = Integer.toString(regPort);
 
+        /* Create the Cybernode's proc file (if not already created) */
+        ProcFileHelper.createProcFile();
+
         String logDir = getLogDirectory(config, sElem.getOperationalStringName());
         if(!logDir.endsWith(File.separator))
             logDir = logDir+File.separator;
@@ -187,8 +190,7 @@ public class ServiceBeanExecHandler {
             do {
                 try {
                     execHandler = (ServiceBeanExecutor)registry.lookup(serviceBindName);
-                    int execRegPort = execHandler.getRegistryPort();
-                    forkedServiceListener.createFDH(execRegPort, execHandler);
+                    forkedServiceListener.createFDH(execHandler);
                     execHandler.setUuid(uuid);
                     execHandler.setServiceBeanExecListener(listener);
 
@@ -270,7 +272,7 @@ public class ServiceBeanExecHandler {
         Exporter exporter;
         ServiceBeanExecListener listener;
         int registryPort;
-        int forkedRegistryPort;
+        //int forkedRegistryPort;
         String name;
 
         ForkedServiceBeanListener(final DiscardManager discardManager) {
@@ -281,8 +283,8 @@ public class ServiceBeanExecHandler {
             this.registryPort = registryPort;
         }
 
-        void createFDH(final int forkedRegistryPort, final ServiceBeanExecutor execHandler) {
-            this.forkedRegistryPort = forkedRegistryPort;
+        void createFDH(final ServiceBeanExecutor execHandler) {
+            //this.forkedRegistryPort = forkedRegistryPort;
             new Thread(new ServiceBeanExecutorTask(name, execHandler, this)).start();
         }
 
@@ -342,14 +344,23 @@ public class ServiceBeanExecHandler {
         }
 
         public void run() {
+            File procFile = null;
             boolean connected = true;
             while(connected) {
                 try {
-                    execHandler.getRegistryPort();
-                    try {
-                        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                    if(procFile==null) {
+                        procFile = execHandler.getProcFile();
+                    }
+                    if(procFile.exists()) {
+                        try {
+                            Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    } else {
+                        connected = false;
+                        logger.info("Service proc file no longer exists, assume that {} is no longer present", name);
+                        faultDetectionListener.serviceFailure(null, null);
                     }
                 } catch (RemoteException e) {
                     connected = false;

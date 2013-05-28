@@ -189,7 +189,7 @@ public class ServiceExecutor {
         sigar = SigarHelper.getInstance();
     }
 
-    public void setServiceBeanContext(ServiceBeanContext context)
+    public void setServiceBeanContext(final ServiceBeanContext context)
         throws ServiceBeanInstantiationException, IOException, ConfigurationException {
         this.context = context;
         this.config = context.getConfiguration();
@@ -365,7 +365,7 @@ public class ServiceExecutor {
         return new ComputeResourceUtilization("", "", "", mRes);
     }
 
-    private void setThreadDeadlockDetector(ServiceElement elem) {
+    private void setThreadDeadlockDetector(final ServiceElement elem) {
         ServiceElementUtil.setThreadDeadlockDetector(elem, mbsc);
     }
 
@@ -407,9 +407,9 @@ public class ServiceExecutor {
         }
     }
 
-    private <T> T getPlatformMXBeanProxy(MBeanServerConnection mbsc,
-                                         String name,
-                                         Class<T> mxBeanInterface) {
+    private <T> T getPlatformMXBeanProxy(final MBeanServerConnection mbsc,
+                                         final String name,
+                                         final Class<T> mxBeanInterface) {
         return JMXUtil.getPlatformMXBeanProxy(mbsc, name, mxBeanInterface);
     }
 
@@ -424,7 +424,7 @@ public class ServiceExecutor {
         }
     }
 
-    private String getCommandLine(ExecDescriptor exec) {
+    private String getCommandLine(final ExecDescriptor exec) {
         String cmd;
         if(exec.getWorkingDirectory()!=null) {
             String wd = exec.getWorkingDirectory();
@@ -440,14 +440,14 @@ public class ServiceExecutor {
     }
 
     @SuppressWarnings("unused")
-    public void setExecDescriptor(ExecDescriptor execDescriptor) {
+    public void setExecDescriptor(final ExecDescriptor execDescriptor) {
         if (execDescriptor == null)
             throw new IllegalArgumentException("ExecDescriptor is null");
         this.execDescriptor = execDescriptor;
     }
 
     @SuppressWarnings("unused")
-    public void setServiceBean(ServiceBean serviceBean) {
+    public void setServiceBean(final ServiceBean serviceBean) {
         this.serviceBean = serviceBean;
     }
 
@@ -462,7 +462,7 @@ public class ServiceExecutor {
         return exec(execDescriptor);
     }
 
-    public ProcessManager exec(ExecDescriptor exDesc) throws IOException {
+    public ProcessManager exec(final ExecDescriptor exDesc) throws IOException {
         Shell shell = ShellFactory.createShell();
         if(shellTemplate!=null)
             shell.setShellTemplate(shellTemplate);
