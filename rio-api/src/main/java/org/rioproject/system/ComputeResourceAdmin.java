@@ -49,40 +49,4 @@ public interface ComputeResourceAdmin {
      * @throws RemoteException If communication errors occur
      */
     ComputeResourceUtilization getComputeResourceUtilization() throws RemoteException;
-
-    /**
-     * Get the reportInterval property which controls how often the ComputeResource
-     * will inform registered Observers of a state change. A state change is
-     * determined if any of the MeasurableCapability components contained within
-     * this ComputeResource provide an update in the interval specified by the
-     * reportInterval property
-     *
-     * @return The interval controlling when the ComputeResource reports change
-     * of state
-     *
-     * @throws RemoteException If communication errors occur
-     */
-    //long getReportInterval() throws RemoteException;
-
-    /**
-     * Set the reportInterval property which controls how often the ComputeResource
-     * will inform registered Observers of a state change. A state change is
-     * determined if any of the MeasurableCapability components contained within
-     * this ComputeResource provide an update in the interval specified by the
-     * reportInterval property.
-     *
-     * <p>Note: MeasurableCapability components contained within
-     * the ComputeResource may have reportRates greater than then the
-     * reportInterval. If this is the case, the ComputeResource will only report
-     * state changes if the values reported by the contained
-     * MeasurableCapability objects change.
-     *
-     * @param reportInterval The interval controlling when the ComputeResource
-     * reports change of state to registered Observers
-     *
-     * @throws IllegalArgumentException if the reportInterval < 0
-     * @throws RemoteException If communication errors occur
-     */
-    //void setReportInterval(long reportInterval) throws RemoteException;
-
 }
