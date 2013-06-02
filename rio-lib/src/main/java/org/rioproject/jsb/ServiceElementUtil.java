@@ -58,6 +58,8 @@ public final class ServiceElementUtil {
     private ServiceElementUtil() {}
 
     public static String getLoggingName(ServiceBeanContext context) {
+        if(context==null)
+            return "<unknown>";
         return getLoggingName(context.getServiceElement());
     }
 
