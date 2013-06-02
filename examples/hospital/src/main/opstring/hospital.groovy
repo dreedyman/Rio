@@ -5,8 +5,8 @@ deployment(name: 'Hospital') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject.examples.hospital:hospital-service:2.0.2'
-    artifact id: 'service-dl', 'org.rioproject.examples.hospital:hospital-api:2.0.2'
+    artifact id: 'service', 'org.rioproject.examples.hospital:hospital-service:2.1'
+    artifact id: 'service-dl', 'org.rioproject.examples.hospital:hospital-api:2.1'
 
     service(name: 'Admission') {
         interfaces {
@@ -61,7 +61,7 @@ deployment(name: 'Hospital') {
     rules {
         rule {
             resource 'DoctorRule, AvailableBedRule'
-            ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.0.2'
+            ruleClassPath 'org.rioproject.examples.hospital:hospital-rule:2.1'
             serviceFeed(name: "Doctors") {
                 watches "numPatients"
             }

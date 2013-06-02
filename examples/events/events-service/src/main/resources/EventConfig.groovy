@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import org.rioproject.config.Component
-import net.jini.core.entry.Entry
-import org.rioproject.entry.UIDescriptorFactory
-import org.rioproject.resolver.ResolverHelper
-import org.rioproject.resolver.Resolver
-import net.jini.lookup.ui.MainUI
-import org.rioproject.serviceui.UIComponentFactory
 
+import net.jini.core.entry.Entry
+import net.jini.lookup.ui.MainUI
+import org.rioproject.config.Component
+import org.rioproject.entry.UIDescriptorFactory
+import org.rioproject.serviceui.UIComponentFactory
 /**
  * Configuration loaded as a resource for the Events example
  */
@@ -30,7 +28,7 @@ class EventConfig {
 
     Entry[] getServiceUIs(String codebase) {
         String uiClass = 'org.rioproject.examples.events.service.ui.HelloEventUI'
-        URL url = new URL("artifact:org.rioproject.examples..events:events-ui:2.0.2")
+        URL url = new URL("artifact:org.rioproject.examples..events:events-ui:2.1")
         def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIComponentFactory(url, uiClass))]
         return entry as Entry[]
     }
