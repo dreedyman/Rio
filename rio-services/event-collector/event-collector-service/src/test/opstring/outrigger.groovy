@@ -1,8 +1,8 @@
 deployment(name:'Outrigger') {
     groups('${user.name}')
 
-    artifact id: 'outrigger-dl',   'com.sun.jini:outrigger-dl:2.1.1'
-    artifact id: 'outrigger-impl', 'com.sun.jini:outrigger:2.1.1'
+    artifact id: 'outrigger-dl', "org.apache.river:outrigger-dl:2.2.1"
+    artifact id: 'outrigger-impl', "org.apache.river:outrigger:2.2.1"
 
     service(name:'Outrigger') {
         interfaces {
