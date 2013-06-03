@@ -40,24 +40,21 @@ import java.util.TimerTask;
  *
  * <p>
  * The HeartbeatFaultDetectionHandler creates a server socket and listens for
- * notifications from the service for the service's reachability. If the service
+ * notifications from the service to determine a service's reachability. If the service
  * fails to provide a heartbeat notification within the timeframe specified, the
- * HeartbeatFaultDetectionHandler will notify
- * {@link FaultDetectionListener} instances
+ * HeartbeatFaultDetectionHandler will notify {@link FaultDetectionListener} instances
  * of the failure.
  * <p>
  * Additionally, the HeartbeatFaultDetectionHandler will register with Lookup
- * Services for
- * {@link net.jini.core.lookup.ServiceRegistrar#TRANSITION_MATCH_NOMATCH}
- * transitions for the
- * service being monitored. If the service is adminstratively removed from the
+ * Services for {@link net.jini.core.lookup.ServiceRegistrar#TRANSITION_MATCH_NOMATCH}
+ * transitions for the service being monitored. If the service is adminstratively removed from the
  * network, or the service monitoring lease is between lease renewal points and
  * the service has actually been removed from the network, the transition will
  * be noted and FaultDetectionListener instances will be notified of the
  * failure.
  * <p>
  * If the service does not implement the
- * <tt>org.rioproject.core.MonitorableService</tt> interface, the
+ * <tt>org.rioproject.admin.MonitorableService</tt> interface, the
  * HeartbeatFaultDetectionHandler will not perform heartbeat monitoring, but
  * will only create the event consumer for Lookup Service
  * TRANSITION_MATCH_NOMATCH transitions.
@@ -65,7 +62,7 @@ import java.util.TimerTask;
  * <p>
  * <b><font size="+1">Configuring HeartbeatFautDetectionHandler</font></b>
  * <p>
- * This implementation of HeartbeatFautDetectionHandler supports
+ * This implementation of HeartbeatFaultDetectionHandler supports
  * the following configuration entries; where each configuration entry
  * name is associated with the component name
  * <code>org.rioproject.fdh.HeartbeatFautDetectionHandler</code>.
@@ -170,8 +167,7 @@ public class HeartbeatFaultDetectionHandler extends AbstractFaultDetectionHandle
     /** The Timer to use for scheduling heartbeat timeout tasks */
     private Timer taskTimer;
     /** Component name, used for config and logger */
-    private static final String COMPONENT =
-        "org.rioproject.fdh.HeartbeatFaultDetectionHandler";
+    private static final String COMPONENT = "org.rioproject.fdh.HeartbeatFaultDetectionHandler";
     /** A Logger */
     static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
