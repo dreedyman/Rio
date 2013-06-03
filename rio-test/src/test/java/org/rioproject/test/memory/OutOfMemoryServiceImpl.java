@@ -26,7 +26,8 @@ public class OutOfMemoryServiceImpl implements OutOfMemory {
                             float used = memoryBean.getHeapMemoryUsage().getUsed();
                             float max = memoryBean.getHeapMemoryUsage().getMax();
                             float pctUsed = (used / max)*100;
-                            logger.info("Percent Heap Memory Used: {}", pctUsed);
+                            if(count % 100 == 0)
+                                logger.info("Percent Heap Memory Used: {}", pctUsed);
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
                             logger.error("Oops", e);

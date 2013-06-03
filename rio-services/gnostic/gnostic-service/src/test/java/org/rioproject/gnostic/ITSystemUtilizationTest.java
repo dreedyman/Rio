@@ -51,7 +51,7 @@ public class ITSystemUtilizationTest {
                 }
                 waited += duration;
             }
-            Assert.assertTrue(t.getStatus().equals(TestService.Status.DISALLOWED));
+            Assert.assertTrue("Got "+t.getStatus().name(), t.getStatus().equals(TestService.Status.DISALLOWED));
         } catch (IOException e) {
             thrown = e;
             e.printStackTrace();
