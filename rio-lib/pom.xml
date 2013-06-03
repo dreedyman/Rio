@@ -178,7 +178,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                     <!--<forkMode>never</forkMode>-->
                     <excludes>
                         <exclude>**/WatchDataSourceImplTest.java</exclude>
                         <exclude>**/CounterWatchTest.java</exclude>

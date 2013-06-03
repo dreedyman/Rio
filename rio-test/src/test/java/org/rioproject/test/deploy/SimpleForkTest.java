@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.exec.ExecDescriptor;
+import org.rioproject.exec.VirtualMachineHelper;
 import org.rioproject.jmx.JMXConnectionUtil;
 import org.rioproject.jmx.JMXUtil;
 import org.rioproject.opstring.OperationalString;
@@ -123,8 +124,8 @@ public class SimpleForkTest {
         }
     }
 
-    private RuntimeMXBean attach(final String matchName) {
-        String[] managedVMs = JMXConnectionUtil.listManagedVMs();
+    private RuntimeMXBean attach(final String matchName) throws Exception {
+        String[] managedVMs = VirtualMachineHelper.listManagedVMs();
         for(String managedVM : managedVMs) {
             if(managedVM.contains("start-service-bean-exec")) {
                 String pid = managedVM.substring(0, managedVM.indexOf(" "));
@@ -155,8 +156,8 @@ public class SimpleForkTest {
         return null;
     }
 
-    private String list() {
-        String[] managedVMs = JMXConnectionUtil.listManagedVMs();
+    private String list() throws Exception {
+        String[] managedVMs = VirtualMachineHelper.listManagedVMs();
         StringBuilder list = new StringBuilder();
         for(String managedVM : managedVMs) {
             if(managedVM.contains("start-service-bean-exec")) {

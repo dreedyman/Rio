@@ -42,10 +42,22 @@ public final class CommandLineHelper {
         StringBuilder builder = new StringBuilder();
         File rioLib = new File(System.getProperty("RIO_HOME"), "lib");
         builder.append(getFiles(rioLib, "rio-start", "groovy-all"));
-        File javaLib = new File(System.getProperty("JAVA_HOME", System.getProperty("java.home")), "lib");
+        File javaHome = new File(System.getProperty("JAVA_HOME", System.getProperty("java.home")));
+        File javaLib = new File(javaHome, "lib");
+        logger.info("java lib: {}", javaLib.getPath());
         String toolsJar = getFiles(javaLib, "tools");
         if (toolsJar.length() > 0) {
             builder.append(":").append(toolsJar);
+        } else {
+            File javaHomeParent = javaHome.getParentFile();
+            File javaHomeParentLib = new File(javaHomeParent, "lib");
+            logger.info("java lib: {}", javaHomeParentLib.getPath());
+            toolsJar = getFiles(javaHomeParentLib, "tools");
+            if (toolsJar.length() > 0) {
+                builder.append(":").append(toolsJar);
+            } else {
+                logger.error("Unable to find tools.jar");
+            }
         }
         File rioLoggingLib = new File(rioLib, "logging");
         builder.append(":").append(getFiles(rioLoggingLib));
@@ -169,7 +181,7 @@ public final class CommandLineHelper {
         argsBuilder.append(" ");
         argsBuilder.append(getOption(Constants.SERVICE_BEAN_EXEC_NAME, serviceBindName));
         argsBuilder.append(" ");
-        argsBuilder.append(getOption(Constants.PROC_FILE_NAME, ProcFileHelper.getProcFileName()));
+        argsBuilder.append(getOption(Constants.PROCESS_ID, VirtualMachineHelper.getID()));
         argsBuilder.append(" ");
         logger.trace("Resulting JVM Options for service [{}]: {}", serviceBindName, jvmInputArgs);
         return argsBuilder.toString();

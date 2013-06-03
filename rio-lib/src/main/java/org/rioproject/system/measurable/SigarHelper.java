@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is used to help in loading and using
@@ -39,32 +41,35 @@ public final class SigarHelper {
     private Object sigarInstance;
     private final Object sigarLock = new Object();
     
-    /* system cpu info method accessors */
+    /* System cpu info method accessors */
     private Method getCpuPercMethod;
     private Method getSysMethod;
     private Method getUserMethod;
     private Method getLoadAverageMethod;
 
-    /* process cpu method accessors */
+    /* Process statistics */
+    private Method getProcList;
+
+    /* Process cpu method accessors */
     private Method getPercentMethod;
     private Method getProcCpuMethod;
     private Method getProcCpuSysMethod;
     private Method getProcCpuUserMethod;
 
-    /* process memory usage method accessors */
+    /* Process memory usage method accessors */
     private Method getSizeMethod;
     private Method getProcMemMethod;
     private Method getResidentMethod;
     private Method getShareMethod;
 
-    /* system file system usage method accessors */
+    /* System file system usage method accessors */
     private Method getFileSystemUsageMethod;
     private Method fileSystemFreeMethod;
     private Method fileSystemUsedMethod;
     private Method fileSystemTotalMethod;
     private Method fileSystemUsedPercentMethod;
 
-    /* system memory usage method accessors */
+    /* System memory usage method accessors */
     private Method getMemMethod;
     private Method getUsedMemoryMethod;
     private Method getFreeMemoryMethod;
@@ -188,8 +193,7 @@ public final class SigarHelper {
                     found = new Long(pid);
                     break;
                 } else {
-                    long parent = matchChild(ppid,
-                                             new String[]{Long.toString(parentPID)});
+                    long parent = matchChild(ppid, new String[]{Long.toString(parentPID)});
                     if(parent==ppid) {
                         System.out.println("Matched parent, PID is: "+parent);
                         found = parent;
@@ -202,6 +206,22 @@ public final class SigarHelper {
         }
 
         return found;
+    }
+
+    public List<String> getProcessList() {
+        checkGetProcListMethod();
+        if(getProcList==null)
+            return null;
+        List<String> processList = new ArrayList<String>();
+        try {
+            long[] array = (long[])getProcList.invoke(sigarInstance);
+            for(long l : array) {
+                processList.add(Long.toString(l));
+            }
+        } catch (Exception e) {
+            log("Failed invoking getProcList method", e);
+        }
+        return processList;
     }
 
     /**
@@ -224,8 +244,7 @@ public final class SigarHelper {
         }
         double systemPercentage = NOT_AVAILABLE;
         try {
-            systemPercentage =
-                (Double)getSysMethod.invoke(getCpuPerc());
+            systemPercentage = (Double)getSysMethod.invoke(getCpuPerc());
         } catch (Exception e) {
             log("Failed invoking getSys method", e);
         }
@@ -325,8 +344,7 @@ public final class SigarHelper {
         double percent = NOT_AVAILABLE;
         try {
             synchronized(sigarLock) {
-                percent = (Double)getPercentMethod.invoke(getProcCpuMethod.invoke(sigarInstance,
-                                                                                  pid));
+                percent = (Double)getPercentMethod.invoke(getProcCpuMethod.invoke(sigarInstance, pid));
             }
         } catch (Exception e) {
             log("Failed invoking getPercent method", e);
@@ -368,8 +386,7 @@ public final class SigarHelper {
         long user = (long)NOT_AVAILABLE;
         try {
             synchronized(sigarLock) {
-                user = (Long)getProcCpuUserMethod.invoke(getProcCpuMethod.invoke(sigarInstance,
-                                                                                 pid));
+                user = (Long)getProcCpuUserMethod.invoke(getProcCpuMethod.invoke(sigarInstance, pid));
             }
         } catch (Exception e) {
             log("Failed invoking getUser method", e);
@@ -410,8 +427,7 @@ public final class SigarHelper {
         long sys = (long)NOT_AVAILABLE;
         try {
             synchronized(sigarLock) {
-                sys = (Long)getProcCpuSysMethod.invoke(getProcCpuMethod.invoke(sigarInstance,
-                                                                               pid));
+                sys = (Long)getProcCpuSysMethod.invoke(getProcCpuMethod.invoke(sigarInstance, pid));
             }
         } catch (Exception e) {
             log("Failed invoking getSys method", e);
@@ -734,7 +750,15 @@ public final class SigarHelper {
         return used;
     }
 
-
+    private void checkGetProcListMethod() {
+        if(getProcList==null) {
+            try {
+                getProcList = getMethod("getProcList");
+            } catch (NoSuchMethodException e) {
+                log("Could not obtain getProcList method from SIGAR", e);
+            }
+        }
+    }
 
     private void checkCpuPercMethod() {
         if(getCpuPercMethod==null) {
@@ -787,8 +811,7 @@ public final class SigarHelper {
         Object fsu;
         try {
             synchronized(sigarLock) {
-                fsu = getFileSystemUsageMethod.invoke(sigarInstance,
-                                                      fileSystem==null?File.separator:fileSystem);
+                fsu = getFileSystemUsageMethod.invoke(sigarInstance, fileSystem==null?File.separator:fileSystem);
             }
         } catch (Exception e) {
             log("Failed invoking getFileSystemUsage method", e);
@@ -847,8 +870,7 @@ public final class SigarHelper {
     private void checkFileSystemUsageMethod() {
         if(getFileSystemUsageMethod==null) {
             try {
-                getFileSystemUsageMethod = getMethod("getFileSystemUsage",
-                                                     String.class);
+                getFileSystemUsageMethod = getMethod("getFileSystemUsage", String.class);
             } catch (NoSuchMethodException e) {
                 log("Could not obtain getFileSystemUsage method from SIGAR", e);
             }
@@ -862,8 +884,7 @@ public final class SigarHelper {
             try {
                 Object mem = getMem();
                 if (mem != null)
-                    getFreeMemoryPercentMethod =
-                        mem.getClass().getMethod("getFreePercent");
+                    getFreeMemoryPercentMethod = mem.getClass().getMethod("getFreePercent");
             } catch (NoSuchMethodException e) {
                  log("Could not obtain getFreePercent method from "+
                      getMem().getClass().getName(), e);
@@ -873,8 +894,7 @@ public final class SigarHelper {
             try {
                 Object mem = getMem();
                 if (mem != null)
-                    getUsedMemoryPercentMethod =
-                        mem.getClass().getMethod("getUsedPercent");
+                    getUsedMemoryPercentMethod = mem.getClass().getMethod("getUsedPercent");
             } catch (NoSuchMethodException e) {
                  log("Could not obtain getUsePercent method from "+
                      getMem().getClass().getName(),
@@ -888,9 +908,7 @@ public final class SigarHelper {
                     getSystemRAMMethod =
                         mem.getClass().getMethod("getRam");
             } catch (NoSuchMethodException e) {
-                 log("Could not obtain getRam method from "+
-                     getMem().getClass().getName(),
-                     e);
+                 log("Could not obtain getRam method from "+getMem().getClass().getName(), e);
             }
         }
 
@@ -898,12 +916,9 @@ public final class SigarHelper {
             try {
                 Object mem = getMem();
                 if (mem != null)
-                    getSystemMemoryMethod =
-                        mem.getClass().getMethod("getTotal");
+                    getSystemMemoryMethod = mem.getClass().getMethod("getTotal");
             } catch (NoSuchMethodException e) {
-                 log("Could not obtain getTotal method from "+
-                     getMem().getClass().getName(),
-                     e);
+                 log("Could not obtain getTotal method from "+getMem().getClass().getName(), e);
             }
         }
 
@@ -911,12 +926,9 @@ public final class SigarHelper {
             try {
                 Object mem = getMem();
                 if (mem != null)
-                    getUsedMemoryMethod =
-                        mem.getClass().getMethod("getUsed");
+                    getUsedMemoryMethod = mem.getClass().getMethod("getUsed");
             } catch (NoSuchMethodException e) {
-                 log("Could not obtain getTotal method from "+
-                     getMem().getClass().getName(),
-                     e);
+                 log("Could not obtain getTotal method from "+getMem().getClass().getName(), e);
             }
         }
 
@@ -924,12 +936,9 @@ public final class SigarHelper {
             try {
                 Object mem = getMem();
                 if (mem != null)
-                    getFreeMemoryMethod =
-                        mem.getClass().getMethod("getFree");
+                    getFreeMemoryMethod = mem.getClass().getMethod("getFree");
             } catch (NoSuchMethodException e) {
-                 log("Could not obtain getFree method from "+
-                     getMem().getClass().getName(),
-                     e);
+                 log("Could not obtain getFree method from "+getMem().getClass().getName(), e);
             }
         }
     }

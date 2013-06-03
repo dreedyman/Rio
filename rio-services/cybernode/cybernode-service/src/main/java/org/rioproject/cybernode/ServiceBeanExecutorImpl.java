@@ -28,9 +28,10 @@ import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.event.EventHandler;
-import org.rioproject.exec.ProcFileHelper;
+import org.rioproject.exec.JVMProcessMonitor;
 import org.rioproject.exec.ServiceBeanExecListener;
 import org.rioproject.exec.ServiceBeanExecutor;
+import org.rioproject.exec.VirtualMachineHelper;
 import org.rioproject.fdh.FaultDetectionListener;
 import org.rioproject.fdh.JMXFaultDetectionHandler;
 import org.rioproject.jsb.ServiceBeanActivation;
@@ -51,14 +52,13 @@ import org.rioproject.watch.WatchDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Provides support to create a ServiceBean in it's own JVM.
@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings({"unused", "PMD.AvoidThrowingRawExceptionTypes"})
 public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
                                                 ServiceBeanContainerListener,
-                                                FaultDetectionListener<ServiceID> {
+                                                FaultDetectionListener<String> {
     private JSBContainer container;
     private Exporter exporter;
     private String execBindName;
@@ -80,7 +80,8 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     private ComputeResource computeResource;
     private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     private ServiceBeanInstance instance;
-    private File procFile;
+    private final String myID;
+    private final AtomicBoolean initializing = new AtomicBoolean(true);
     static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     private Logger logger = LoggerFactory.getLogger(ServiceBeanExecutorImpl.class);
 
@@ -96,6 +97,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
      */
     public ServiceBeanExecutorImpl(final String[] configArgs, final LifeCycle lifeCycle)
         throws Exception {
+        myID = VirtualMachineHelper.getID();
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         if (Integer.parseInt(sPort) == 0)
             logger.warn("The RMI Registry port provided (or obtained by default) is 0. " +
@@ -144,8 +146,6 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
         exporter = ExporterConfig.getExporter(config, "org.rioproject.cybernode", "exporter");
 
-        procFile = ProcFileHelper.createProcFile();
-
         int createdRegistryPort = RegistryUtil.getRegistry();
         if(createdRegistryPort>0) {
             System.setProperty(Constants.REGISTRY_PORT, Integer.toString(createdRegistryPort));
@@ -155,12 +155,13 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
         Remote proxy = exporter.export(this);
         registry.bind(execBindName, proxy);
+        initializing.set(false);
 
         new Thread(new CreateFDH(config, this)).start();
     }
 
-    public File getProcFile() {
-        return procFile;
+    public String getID() {
+        return myID;
     }
 
     public void setUuid(final Uuid uuid) {
@@ -282,7 +283,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         }).start();
     }
 
-    public void serviceFailure(final Object service, final ServiceID serviceID) {
+    public void serviceFailure(final Object service, final String pid) {
         logger.warn("Parent Cybernode has orphaned us, exiting");
         container.terminate();
         serviceDiscarded(null);
@@ -326,25 +327,33 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
     private class CreateFDH implements Runnable {
         private final Configuration config;
-        private final FaultDetectionListener<ServiceID> faultDetectionListener;
+        private final FaultDetectionListener<String> faultDetectionListener;
 
-        private CreateFDH(final Configuration config, final FaultDetectionListener<ServiceID> faultDetectionListener) {
+        private CreateFDH(final Configuration config, final FaultDetectionListener<String> faultDetectionListener) {
             this.config = config;
             this.faultDetectionListener = faultDetectionListener;
         }
 
         public void run() {
-            String cybernodeProcFileName = System.getProperty(Constants.PROC_FILE_NAME);
-            File cybernodeProcFile = ProcFileHelper.getProcFile(cybernodeProcFileName);
-            while(cybernodeProcFile.exists()) {
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+            final String parentPID = System.getProperty(Constants.PROCESS_ID);
+            if(parentPID!=null) {
+                JVMProcessMonitor.getInstance().monitor(parentPID, faultDetectionListener);
+            } else {
+                logger.error("Cybernode PID is null, unable to setup FDH to make sure Cybernode doesn't orphan us");
             }
-            logger.warn("Parent's service proc file no longer exists, assume that parent is no longer present");
-            faultDetectionListener.serviceFailure(null, null);
+        }
+    }
+
+    class WrappedFaultDetectionListener implements FaultDetectionListener<ServiceID> {
+        private final FaultDetectionListener<String> wrapped;
+
+        WrappedFaultDetectionListener(FaultDetectionListener<String> wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public void serviceFailure(Object service, ServiceID serviceID) {
+            wrapped.serviceFailure(service, serviceID==null?null:serviceID.toString());
         }
     }
 }

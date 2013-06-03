@@ -18,7 +18,6 @@ package org.rioproject.exec;
 import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
 import net.jini.jeri.BasicILFactory;
@@ -51,7 +50,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Creates and manages a service bean in it's own process
@@ -121,9 +119,6 @@ public class ServiceBeanExecHandler {
         /* Get the Cybernode's RMI Registry */
         int regPort = RegistryUtil.checkRegistry();
         String sPort = Integer.toString(regPort);
-
-        /* Create the Cybernode's proc file (if not already created) */
-        ProcFileHelper.createProcFile();
 
         String logDir = getLogDirectory(config, sElem.getOperationalStringName());
         if(!logDir.endsWith(File.separator))
@@ -266,13 +261,11 @@ public class ServiceBeanExecHandler {
         return opstringDir.getAbsolutePath();
     }
 
-
-    class ForkedServiceBeanListener implements ServiceBeanExecListener, FaultDetectionListener<ServiceID> {
+    class ForkedServiceBeanListener implements ServiceBeanExecListener, FaultDetectionListener<String> {
         final DiscardManager discardManager;
         Exporter exporter;
         ServiceBeanExecListener listener;
         int registryPort;
-        //int forkedRegistryPort;
         String name;
 
         ForkedServiceBeanListener(final DiscardManager discardManager) {
@@ -284,8 +277,11 @@ public class ServiceBeanExecHandler {
         }
 
         void createFDH(final ServiceBeanExecutor execHandler) {
-            //this.forkedRegistryPort = forkedRegistryPort;
-            new Thread(new ServiceBeanExecutorTask(name, execHandler, this)).start();
+            try {
+                JVMProcessMonitor.getInstance().monitor(execHandler.getID(), this);
+            } catch (RemoteException e) {
+                serviceFailure(execHandler, null);
+            }
         }
 
         void setName(String name) {
@@ -301,7 +297,6 @@ public class ServiceBeanExecHandler {
                     exporter = new BasicJeriExporter(ExporterConfig.getServerEndpoint(), new BasicILFactory());
                 listener = (ServiceBeanExecListener)exporter.export(this);
             }
-
             return listener;
         }
 
@@ -318,7 +313,7 @@ public class ServiceBeanExecHandler {
             discardManager.discard();
         }
 
-        public void serviceFailure(final Object service, final ServiceID serviceID) {
+        public void serviceFailure(final Object service, final String serviceID) {
             try {
                 Registry registry = LocateRegistry.getRegistry(registryPort);
                 registry.unbind(name);
@@ -330,45 +325,4 @@ public class ServiceBeanExecHandler {
         }
     }
 
-    class ServiceBeanExecutorTask implements Runnable {
-        final String name;
-        final ServiceBeanExecutor execHandler;
-        final FaultDetectionListener<ServiceID> faultDetectionListener;
-
-        ServiceBeanExecutorTask(final String name,
-                                final ServiceBeanExecutor execHandler,
-                                final FaultDetectionListener<ServiceID> faultDetectionListener) {
-            this.name = name;
-            this.execHandler = execHandler;
-            this.faultDetectionListener = faultDetectionListener;
-        }
-
-        public void run() {
-            File procFile = null;
-            boolean connected = true;
-            while(connected) {
-                try {
-                    if(procFile==null) {
-                        procFile = execHandler.getProcFile();
-                    }
-                    if(procFile.exists()) {
-                        try {
-                            Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    } else {
-                        connected = false;
-                        logger.info("Service proc file no longer exists, assume that {} is no longer present", name);
-                        faultDetectionListener.serviceFailure(null, null);
-                    }
-                } catch (RemoteException e) {
-                    connected = false;
-                    logger.info("Could not connect to exec handler, assume that {} is no longer present", name);
-                    faultDetectionListener.serviceFailure(null, null);
-                }
-            }
-        }
-
-    }
 }

@@ -24,7 +24,6 @@ import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.watch.Watchable;
 
-import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -111,14 +110,13 @@ public interface ServiceBeanExecutor extends Watchable, Remote {
     ServiceBeanInstance getServiceBeanInstance() throws RemoteException;
 
     /**
-     * The ServiceBeanExecutor will create a {@code File} to indicate it is available. Once the
-     * ServiceBeanExecutor exits, the file will be deleted.
+     * Get the {@code ID} for the JVM the forked service has been created in.
      *
-     * @return The {@code File} created by the ServiceBeanExecutor
+     * @return The {{@code ID} for the JVM the forked service has been created in.
      *
      * @throws RemoteException If there are communication problems
      */
-    File getProcFile() throws RemoteException;
+    String getID() throws RemoteException;
 
     /**
      * Set the Uuid for the ServiceBeanExecutor. This will be used to create the

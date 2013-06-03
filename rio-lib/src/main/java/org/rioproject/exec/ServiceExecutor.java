@@ -291,7 +291,13 @@ public class ServiceExecutor {
             long waited = 0;
             long t0 = System.currentTimeMillis();
             while(waited < 5) {
-                String[] ids = JMXConnectionUtil.listIDs();
+                String[] ids;
+                try {
+                    ids = VirtualMachineHelper.listIDs();
+                } catch (Exception e) {
+                    logger.error("Cannot load the Attach API", e);
+                    break;
+                }
                 StringBuilder s = new StringBuilder();
                 for(int i=0; i<ids.length; i++) {
                     if(i>0)
@@ -326,7 +332,12 @@ public class ServiceExecutor {
         if(sigar!=null) {
             if(actualPID==-1) {
                 logger.info("Try to obtain actual pid of exec'd process using SIGAR");
-                String[] ids = JMXConnectionUtil.listIDs();
+                String[] ids = new String[0];
+                try {
+                    ids = VirtualMachineHelper.listIDs();
+                } catch (Exception e) {
+                    logger.error("Cannot load the Attach API", e);
+                }
                 actualPID = sigar.matchChild(processManager.getPid(), ids);
             }
         } else {

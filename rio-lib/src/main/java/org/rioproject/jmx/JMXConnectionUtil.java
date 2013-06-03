@@ -16,7 +16,6 @@
 package org.rioproject.jmx;
 
 import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
 import org.rioproject.rmi.RegistryUtil;
@@ -29,9 +28,6 @@ import javax.management.ObjectName;
 import javax.management.remote.*;
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides JMX connection utilities.
@@ -99,22 +95,6 @@ public class JMXConnectionUtil {
     }
 
     /**
-     * Get a string that can be used as input for a
-     * {@link javax.management.remote.JMXServiceURL}
-     *
-     * @param port The port the MBeanServer has been created on
-     * @param hostAddress The host address the MBeanServer is running on
-     *
-     * @return A formatted string that can be used as input to create a
-     * {@link javax.management.remote.JMXServiceURL}
-     */
-    public static String getJMXServiceURL(final int port, final String hostAddress) {
-        if(hostAddress==null)
-            throw new IllegalArgumentException("hostAddress is null");
-        return "service:jmx:rmi:///jndi/rmi://"+hostAddress+":"+port+"/jmxrmi";
-    }
-
-    /**
      * Using the <a
      * href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">
      * JMX Attach API </a>, connect to a local Java Virtual Machine.
@@ -158,61 +138,4 @@ public class JMXConnectionUtil {
         }
         return mbs;
     }
-
-    /**
-     * Using the <a href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">JMX Attach API </a>,
-     * list the available local Java Virtual Machines.
-     *
-     * <p>This utility requires Java 6 or greater.
-     *
-     * @return A String array of Java Virtual Machine IDs.
-     */
-    public static String[] listIDs() {
-        String jvmVersion = System.getProperty("java.version");
-        if(jvmVersion.contains("1.5")) {
-            logger.info("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
-            return new String[0];
-        }
-        List<String> vmList = new ArrayList<String>();
-        try {
-            List<VirtualMachineDescriptor> vmDescriptors = VirtualMachine.list();
-            for (VirtualMachineDescriptor vmDesc : vmDescriptors) {
-                vmList.add(vmDesc.id());
-            }
-        } catch (Exception e) {
-            logger.warn("Could not obtain list of VMs", e);
-        }
-        return vmList.toArray(new String[vmList.size()]);
-	}
-
-    /**
-     * Using the <a href="http://java.sun.com/javase/6/docs/technotes/guides/attach/index.html">
-     * JMX Attach API </a>, list the available local Java Virtual Machines.
-     *
-     * <p>This utility requires Java 6 or greater.
-     *
-     * @return A String array of Java Virtual Machine IDs followed by the
-     * displayName of each discovered <tt>VirtualMachine</tt>
-     */
-    public static String[] listManagedVMs() {
-        String jvmVersion = System.getProperty("java.version");
-        if(jvmVersion.contains("1.5")) {
-            logger.info("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
-            return new String[0];
-        }
-        List<String> vmList = new ArrayList<String>();
-        try {
-            Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
-            Method list = vmClass.getMethod("list");
-            List vmDescriptors = (List)list.invoke(null);
-            for (Object vmDesc : vmDescriptors) {
-                Method displayName = vmDesc.getClass().getMethod("displayName");
-                Method id = vmDesc.getClass().getMethod("id");
-                vmList.add(id.invoke(vmDesc)+" "+displayName.invoke(vmDesc));
-            }
-        } catch (Exception e) {
-            logger.warn("Could not obtain list of VMs", e);
-        }
-        return vmList.toArray(new String[vmList.size()]);
-	}
 }
