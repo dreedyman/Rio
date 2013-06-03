@@ -111,7 +111,7 @@ installRioToLocalRepository() {
     fi
 }
 
-# Build the classpath for SLAF4J Logging
+# Build the classpath for SLF4J Logging
 for file in $RIO_HOME/lib/logging/*.jar; do
     case $file in
         *logback*)
@@ -211,7 +211,6 @@ if [ "$start" = "1" ]; then
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
         $loggingConfig \
-        -Dcom.sun.jini.jeri.tcp.useNIO=true \
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
         -DRIO_HOME=$RIO_HOME \
