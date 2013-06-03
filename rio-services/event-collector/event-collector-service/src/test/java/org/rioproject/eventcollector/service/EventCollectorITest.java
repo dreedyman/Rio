@@ -28,11 +28,11 @@ import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Dennis Reedy
@@ -54,8 +54,11 @@ public class EventCollectorITest {
 
     @Test
     public void testEventCollector() throws Exception {
-        URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
-
+        try {
+            URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
+        } catch(Error e) {
+            System.out.println("Factory already defined, move along");
+        }
         EventCollector eventCollector = (EventCollector)testManager.waitForService(EventCollector.class);
         Assert.assertNotNull(eventCollector);
         EventCollectorRegistration registration1 = eventCollector.register(Lease.ANY);
