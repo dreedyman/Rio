@@ -12,19 +12,11 @@
     <packaging>pom</packaging>
     <name>Example :: Events</name>
 
-    <scm>
-        <connection>scm:svn:https://rio.dev.java.net/svn/rio/trunk/examples/events --username guest</connection>
-        <developerConnection>scm:svn:https://rio.dev.java.net/svn/rio/trunk/examples/events --username username</developerConnection>
-        <url>https://rio.dev.java.net/source/browse/rio/trunk/examples/events</url>
-    </scm>
-
     <dependencies>
-
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-platform</artifactId>
         </dependency>
-
     </dependencies>
 
     <modules>

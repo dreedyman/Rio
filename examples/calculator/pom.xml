@@ -12,19 +12,11 @@
     <packaging>pom</packaging>
     <name>Example :: Calculator</name>
 
-    <scm>
-        <connection>scm:svn:https://rio.dev.java.net/svn/rio/trunk/examples/calculator --username guest</connection>
-        <developerConnection>scm:svn:https://rio.dev.java.net/svn/rio/trunk/examples/calculator --username username</developerConnection>
-        <url>https://rio.dev.java.net/source/browse/rio/trunk/examples/calculator</url>
-    </scm>
-
     <dependencies>
-
         <dependency>
             <groupId>org.rioproject</groupId>
             <artifactId>rio-platform</artifactId>
         </dependency>
-
     </dependencies>
 
     <modules>

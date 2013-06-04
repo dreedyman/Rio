@@ -85,7 +85,7 @@
                                 </property>
                                 <property>
                                     <name>opstring</name>
-                                    <value>../src/main/opstring/hospital.groovy</value>
+                                    <value>../target/opstring/hospital.groovy</value>
                                 </property>
                             </systemProperties>
                         </configuration>
