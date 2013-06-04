@@ -20,7 +20,9 @@
                 ensuring that the versioned components that have been used in
                 development, test and qualification are seamlessly carried over.
             </p>
-            <div class="section"><h3>Support</h3></div>
+            <div class="section">
+                <h3>Support</h3>
+            </div>
             <p>
                 The Rio Resolver currently resolves artifacts using configured
                 Maven 2 repositories. Using the declaration(s) found in Maven
@@ -33,15 +35,74 @@
                 The Rio Resolver abstracts the underlying dependency
                 resolution implementation in order to give the flexibility to
                 potentially support other repository based dependency management
-                approaches. <br/><br/>
+                approaches.
+                <br/>
+                <br/>
                 In the future we may seek to provide support for
-                <a href="http://ant.apache.org/ivy/">Ivy</a> or the
+                <a href="http://ant.apache.org/ivy/">Ivy</a>
+                or the
                 <a href="http://www.osgi.org/Repository/HomePage">OSGi Bundle Repository</a>.
                 Providing an abstraction on top of the concrete dependency management
                 solutions gives us flexibility going forward.
             </p>
 
-            <div class="section"><h3>Artifact Declaration</h3></div>
+            <div class="section">
+                <h3>Artifact URL</h3>
+            </div>
+            <p>Rio provides a custom <tt>artifact:</tt> protocol to use as a codebase annotation for services. The
+                <tt>artifact:</tt> provides a way to resolve an artifact's dependencies when used as a codebase
+                annotation. It provides an easy and efficient way to configure services in a versioned and
+                easy-to-deploy way.
+            </p>
+
+            <p>This allows classpath dependencies of the artifact resolved (direct and transitive dependencies) as the
+                codebase for a service, or a service user interface. So your 'depends on graph' is
+                complete, in as much as your dependency graph is correctly constructed for your artifact. This comes
+                naturally for maven/gradle projects, you can't produce your artifact unless the dependencies have been
+                declared correctly.
+            </p>
+
+            <p>Note that this becomes important especially for a client that uses a service. With the <tt>artifact:</tt>
+                URL scheme, instead of annotating a service's codebase with http:// based jars, the service's codebase
+                contains the artifact URL, which (when resolved) resolves the dependencies for the service's codebase at
+                the client. This not only presents a performance boost (why load classes over http if they can be loaded
+                locally), but also addresses lost codebase issues. Add to that secure repository connections that
+                require uid/password, and you can confirm that the artifact a service requires you download in order for
+                you to use that service, comes from a site you trust.
+            </p>
+
+            <p>Of course this is all versioned, and once loaded over the wire never needs to be loaded again. If the
+                service's version changes, it's artifact changes, and any jars that have not been resolved get resolved.
+            </p>
+
+            <p>The URL scheme for this handler is:
+                <br/>
+                <pre>artifact:groupId/artifactId/version[/type[/classifier]][;repository[@repositoryId]]</pre>
+            </p>
+
+            <p>Here are some examples:</p>
+            <ul>
+                <li>An artifact URL for groupId, artifactId and version
+                    <br/>
+                    <tt>artifact:org.rioproject.examples.calculator/calculator-service/2.0.1</tt>
+                    <br/>
+                </li>
+                <li>An artifact URL for groupId, artifactId, version and repository with an id
+                    <br/>
+                    <code>
+                        artifact:org.rioproject.examples.calculator/calculator-proxy/2.0.1;http://www.rio-project.org@rio
+                    </code>
+                </li>
+            </ul>
+
+            <p>Once an artifact has been resolved to a <tt>URL</tt>, the <tt>artifact:URL</tt>
+                pair is cached, avoiding future interactions with the underlying <tt>Resolver</tt>
+            </p>
+
+
+            <div class="section">
+                <h3>Artifact Declaration</h3>
+            </div>
             <p>
                 Artifacts are referenced in abstract terms
                 (<tt>groupId:artifactId[:type[:classifier]]:version</tt>), rather than a (logical) file
@@ -49,7 +110,8 @@
                 of artifacts in opstrings with Rio. Previously, you declared jars as
                 resources for both the interface and service implementation classes. With the
                 introduction of artifact declaration in opstrings, you now just declare the
-                <tt>ggroupId:artifactId[:type[:classifier]]:version</tt> instead.
+                <tt>ggroupId:artifactId[:type[:classifier]]:version</tt>
+                instead.
             </p>
             <p>
                 The benefits here are that the declared artifact, it's dependencies
@@ -66,7 +128,11 @@
             <img src="images/artifact-declaration.png"/>
 
             <p>
-                The keyword <tt>artifact</tt> in the DSL (or <tt>Artifact</tt> in an XML document)
+                The keyword
+                <tt>artifact</tt>
+                in the DSL (or
+                <tt>Artifact</tt>
+                in an XML document)
                 triggers artifact resolution. You cannot have both artifact resolution and
                 resource declarations in the same opstring.
             </p>
@@ -80,7 +146,9 @@
 
             <p>
                 The included artifact is resolved from configured repositories.
-                The artifact must have a <tt>.oar</tt> extension. Once located,
+                The artifact must have a
+                <tt>.oar</tt>
+                extension. Once located,
                 the resolved OAR is included in the deployment and subsequent
                 management of the declared service(s).
             </p>
@@ -90,14 +158,23 @@
                 OAR artifact inclusion is only supported with Groovy based opstrings.
             </div>
             <br/>
-            <div class="section"><h3>Artifact Resolution</h3></div>
+            <div class="section">
+                <h3>Artifact URL</h3>
+            </div>
+            <p>
+
+            </p>
+
+            <div class="section">
+                <h3>Artifact Resolution</h3>
+            </div>
             <p>
                 Artifacts and dependencies are resolved from repositories. The Rio
                 resolver obtains repository configuration from POMs and from
-                your <tt>settings.xml</tt>.  When service artifacts are being resolved,
+                your<tt>settings.xml</tt>. When service artifacts are being resolved,
                 repository configurations are lazily obtained, appending configured
                 repository definitions from POMs (if declared), and filtering them
-                against any declared mirror declarations in <tt>settings.xml</tt>.
+                against any declared mirror declarations in<tt>settings.xml</tt>.
                 Maven central is always included last.
             </p>
 
@@ -108,51 +185,61 @@
                 settings.xml. This makes for cleaner and predictable
                 deployments.
             </div>
-
+            <br/>
             <p>
-                By translating <tt>groupId:artifactId:[classifier:]version</tt> to
-                <tt>groupId/artifactId/version</tt> we can derive the location of
+                By translating
+                <tt>groupId:artifactId:[classifier:]version</tt>
+                to
+                <tt>groupId/artifactId/version</tt>
+                we can derive the location of
                 the artifact and download it to the (configured) local repository.
                 If there are issues with the message digests not matching, the
                 retrieval of the artifact is retried. If there are still issues with
                 the message digests not matching, the Rio Resolver will not provision
-                the artifact. In Maven terms, this follows a <tt>checksumPolicy</tt>
-                set to <tt>fail</tt>.
+                the artifact. In Maven terms, this follows a
+                <tt>checksumPolicy</tt>
+                set to<tt>fail</tt>.
             </p>
-                        
+
             <div id="tipbox">
                 <img src="images/check.gif"/>
                 We highly recommend the use of a repository manager.
             </div>
 
-            <div class="section"><h4>Automatic Dependency Exclusions</h4></div>
+            <div class="section">
+                <h4>Automatic Dependency Exclusions</h4>
+            </div>
 
-                Dependency scope is used to limit the transitivity of a dependency, and also
-                to affect the resolved classpath for a service. The following scopes are
-                automatically excluded:
-                <ul>
-                    <li>
-                        <b>test</b><br/>
-                        This scope indicates that the dependency is not required
-                        for normal use of the application, and is only available
-                        for the test compilation and execution phases.
-                    </li>
-                    <li>
-                        <b>provided</b><br/>
-                        Indicates you expect the dependency to be provided at runtime.
-                    </li>
-                    <li>
-                        <b>system</b><br/>
-                        Indicates you have to provide the dependency. The artifact is always
-                        available and is not looked up in a repository.
-                    </li>
-                    <li>
-                        <b>optional</b><br/>
-                        Although not a dependency <i>scope</i>, dependencies declared
-                        as optional are automatically excluded.
-                    </li>
-                </ul>
+            Dependency scope is used to limit the transitivity of a dependency, and also
+            to affect the resolved classpath for a service. The following scopes are
+            automatically excluded:
+            <ul>
+                <li>
+                    <b>test</b>
+                    <br/>
+                    This scope indicates that the dependency is not required
+                    for normal use of the application, and is only available
+                    for the test compilation and execution phases.
+                </li>
+                <li>
+                    <b>provided</b>
+                    <br/>
+                    Indicates you expect the dependency to be provided at runtime.
+                </li>
+                <li>
+                    <b>system</b>
+                    <br/>
+                    Indicates you have to provide the dependency. The artifact is always
+                    available and is not looked up in a repository.
+                </li>
+                <li>
+                    <b>optional</b>
+                    <br/>
+                    Although not a dependency<i>scope</i>, dependencies declared
+                    as optional are automatically excluded.
+                </li>
+            </ul>
 
         </section>
     </body>
- </document>
+</document>

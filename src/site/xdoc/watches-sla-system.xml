@@ -69,7 +69,7 @@
                 Examples of declaring SLAs for system watches follow:
             </p>
 
-<pre name="code" class="java:nocontrols:nogutter">
+<pre name="code">
 systemRequirements {
     utilization id:'CPU', high:0.8
 }
@@ -80,7 +80,7 @@ systemRequirements {
                 then 80%. Similar declaration can be made for 'Memory and 'DiskSpace'.
             </p>
 
-<pre name="code" class="java:nocontrols:nogutter">
+<pre name="code">
 systemRequirements {
     utilization id:'CPU', high:0.8
 }
@@ -101,13 +101,5 @@ systemRequirements {
             </p>
         </section>
     </body>
-    <script type="text/javascript" src="highlighter/shCore.js"></script>
-    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
-    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" language="javascript">
-        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
-        dp.SyntaxHighlighter.BloggerMode();
-        dp.SyntaxHighlighter.HighlightAll('code');
-    </script>
 </document>

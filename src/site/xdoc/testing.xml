@@ -37,7 +37,7 @@
                     instantiated by a Cybernode.
                 </p>
             </div>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 /**
  * Example testing the Calculator service and it's required services from the
  * OperationalString
@@ -104,7 +104,7 @@ public class ITCalculatorTest extends ITAbstractCalculatorTest {
             <p>
                 The corresponding opstring for the Calculator example is shown below. Note the association declarations.
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 import org.rioproject.config.Constants
 
 deployment(name:'Calculator') {
@@ -166,7 +166,7 @@ deployment(name:'Calculator') {
                     When writing a JUnit test case, your test case code needs to simply use the following annotation:
                 </p>
             </div>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 @RunWith(RioTestRunner.class)
 public class MyTest {
 ...
@@ -186,7 +186,7 @@ public class MyTest {
                  Defines the property to invoke to set the TestManager. The TestManager will be
                 injected by the <tt>RioTestRunner</tt> <b>prior</b> to test case method invocation.
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 public class MyTest {
     @SetTestManager
     static TestManager testManager;
@@ -212,7 +212,7 @@ public class MyTest {
                 <b>@IfPropertySet</b><br/>
                 Annotation to indicate that a test is to be run if a specific property is set.
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 @IfPropertySet(name="run.long.test", value="true")
 @Test
 public void testSomethingThatTakesALongTime() {
@@ -230,15 +230,15 @@ public void testSomethingThatTakesALongTime() {
                     using reasonable defaults. The default configuration that ships with Rio is included below:
                 </p>
             </div>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 manager {
 
     String rioHome = System.getProperty("RIO_HOME")
     StringBuilder classPath = new StringBuilder()
     ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
-    if(classPath.length()>0)
-    classPath.append(File.pathSeparator)
-    classPath.append(rioHome+'/lib/'+jar)
+        if(classPath.length()>0)
+            classPath.append(File.pathSeparator)
+        classPath.append(rioHome+'/lib/'+jar)
     }
 
     classPath.append(File.pathSeparator).append(System.getProperty("JAVA_HOME")).append("/lib/tools.jar")
@@ -273,9 +273,7 @@ manager {
     monitorStarter = '${RIO_HOME}/config/start-monitor.groovy'
 
     cybernodeStarter = '${RIO_HOME}/config/start-cybernode.groovy'
-    }
-
-
+}
 
 </pre>
             <p>
@@ -358,7 +356,7 @@ manager {
                     configuration file to run and configure your test classes. The following snippet illustrates the elements involved:
                 </p>
             </div>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 ITCalculatorDeployTest {
     groups = "Calculator"
     /* Comma separated locator names */
@@ -429,13 +427,4 @@ ITCalculatorDeployTest {
         </section>
 
     </body>
-    <script type="text/javascript" src="highlighter/shCore.js"></script>
-    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
-    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
-
-    <script type="text/javascript" language="javascript">
-        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
-        dp.SyntaxHighlighter.BloggerMode();
-        dp.SyntaxHighlighter.HighlightAll('code');
-    </script>
 </document>

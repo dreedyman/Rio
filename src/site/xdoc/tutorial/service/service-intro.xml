@@ -231,13 +231,5 @@ void testService(Hello service) {
             <img src="../../images/hello-service-deployed.png"/>    
         </section>
     </body>
-    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
-    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
-    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" language="javascript">
-        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
-        dp.SyntaxHighlighter.BloggerMode();
-        dp.SyntaxHighlighter.HighlightAll('code');
-    </script>
 </document>

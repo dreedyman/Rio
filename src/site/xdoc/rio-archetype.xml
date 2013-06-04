@@ -23,13 +23,13 @@
                    href="http://maven.apache.org/">here</a>. Install
                 it and then invoke:
             </p>
-            <div class="source">
+            <div >
                 <pre>
 mvn archetype:generate
 -DarchetypeGroupId=org.rioproject
 -DarchetypeArtifactId=rio-archetype
 -DarchetypeRepository=http://www.rio-project.org/maven2
--DarchetypeVersion=5.0-M3</pre>
+-DarchetypeVersion=5.1</pre>
             </div>
 
             <div id="tipbox">
@@ -64,7 +64,7 @@ mvn archetype:generate
                 interaction:
             </p>
 
-            <div class="source">
+            <div>
                 <pre>
 [INFO]
 ------------------------------------------------------------------------
@@ -122,11 +122,11 @@ Y: :
             <ul>
                 <li>The pom.xml</li>
                 <li><i>artifactId</i>-api/pom.xml</li>
-                <li><i>artifactId</i>-api/src/main/java/<i>package</i>/<i>artifactId</i>/<i>Service</i>.java (interface)</li>
-                <li><i>artifactId</i>-service/src/main/java/<i>package</i>/<i>artifactId</i>/<i>Service</i>Impl.java (implementation)</li>
-                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/ITAbstract<i>Service</i>Test.java (used as a base class for service testing)</li>
-                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/IT<i>Service</i>Test.java (uses a StaticCybernode for testing your service)</li>
-                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/IT<i>Service</i>DeployTest.java (starts Rio services and deploys your service for testing)</li>
+                <li><i>artifactId</i>-api/src/main/java/<i>package</i>/<i>artifactId</i>/<i>api</i>/<i>Service</i>.java (interface)</li>
+                <li><i>artifactId</i>-service/src/main/java/<i>package</i>/<i>artifactId</i>/<i>service</i>/<i>Service</i>Impl.java (implementation)</li>
+                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/<i>service</i>/ITAbstract<i>Service</i>Test.java (used as a base class for service testing)</li>
+                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/<i>service</i>/IT<i>Service</i>Test.java (uses a StaticCybernode for testing your service)</li>
+                <li><i>artifactId</i>-service/src/test/java/<i>package</i>/<i>artifactId</i>/<i>service</i>/IT<i>Service</i>DeployTest.java (starts Rio services and deploys your service for testing)</li>
                 <li><i>artifactId</i>-service/src/test/conf/test-config.groovy</li>
                 <li>src/main/opstring/artifactId.groovy (OperationalString)</li>
             </ul>

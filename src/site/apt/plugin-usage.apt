@@ -9,10 +9,9 @@
 Usage
 
  This page discusses the use of the Rio plugin and goes into detail on how to
- {{{Service}build a service}} and {{{OAR} build an OperationalString Archive (OAR)}}.
- Specifically the {{{classdepandjar-mojo.html}rio:classdepandjar}} and {{{oar-mojo.html}rio:oar}}
- goals. Other goals of the plugin are fairly self explanatory. For the following
- goals, please refer to the goal specific documentation:
+ build a service and build an OperationalString Archive (OAR).
+ Specifically the using the rio:oar goal. Other goals of the plugin are fairly self
+ explanatory. For the following goals, please refer to the goal specific documentation:
 
   * {{{./deploy-mojo.html}rio:deploy}}
 
@@ -28,9 +27,7 @@ Usage
 
   * {{{./ui-mojo.html}rio:ui}}
  
-* Building a {Service}
-
- {{{./classdepandjar-mojo.html}rio:classdepandjar}}
+* Building a Service
 
  When building a service in a distributed environment, we want to build jars that
  account for the ability to instantiate a service implementation, and to account
@@ -42,125 +39,38 @@ Usage
 *------------------+-----------+
 | <service>.jar    | This is the <implementation> jar for the service. The implementation jar contains all classes that the backend service requires to be instantiated. The implementation jar(s) will make up the classpath for the service.
 *------------------+-----------+
-| <service>-dl.jar | The -dl prefix is the naming convention and classifier used to indicate that this jar is the <download> jar. The download jar contains the classes that clients need to access the service. Additionally, the download jar is typically a subset of the classes in the implementation jar. Note that a download jar is required if the invoking client only knows about the interface the service you have developed (as opposed to knowing about any custom proxies and other service-specific support). In this case the client will most likely need to utilize Java's dynamic classloading capabilities, loading the requisite classes from the service's codebase.
+| <service>-api.jar | The -api prefix is the naming convention used to indicate that this jar contains the <API> for using the service. The API (or download) jar contains the classes that clients need to access the service. Note that a download jar is required if the invoking client only knows about the interface the service you have developed (as opposed to knowing about any custom proxies and other service-specific support). In this case the client will use Rio's artifact: protocol to provision the requisite artifacts (as needed) and load the resolved jars from your local repository.
 *------------------+-----------+
   
- In order to build these jars from a Maven project (that by convention builds only one jar),
- you need to change the packaging type of your project to <<<classdepandjar>>>.
- When the packaging of your project is <<<classdepandjar>>> instead of <<<jar>>>, the
- Maven build process is modified to use the Rio plugin as opposed to the usual
- packaging of your code into a jar file. For example:
-
-+-----+
- <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.rioprojects.examples</groupId>
-    <artifactId>bean</artifactId>
-    <version>1.0</version>
-    <packaging>classdepandjar</packaging>
-
-    ...
- </project>
-+-----+
-
- The plugin creates Jar files depending on declared class dependencies. The root
- classes of the dependency graph can be specified by individual classes.
-
- Starting with the root classes, a dependency graph is constructed by examining
- the compiled class file for a class, finding all of the classes it references,
- and then in turn examining those classes. The extent of the graph is determined
- by which packages are defined to be "inside" the graph and which are defined to
- be "outside" the graph. If a referenced class is in a package that is defined to
- be outside the graph, that class is not included in the graph, and none of
- classes that it references are examined. All of the root classes must be in
- packages that are defined to be "inside" the graph.
-
- To declare a package that is inside the graph, the following declaration is used:
-
-+-----+
-<in>org.foo.bar</in>
-+-----+
-
- If there are multiple packages that are inside the graph, use the following
- declaration. Note that there can be any number of <<<in>>> declarations using
- this approach.
-
-+-----+
-<ins>
-    <in>org.foo.bar</in>
-    <in>org.bar</in>
-</ins>
-+-----+
-
- Declaring the fully qualified name of an individual class to include as a
- root of the dependency graph is done as follows:
-
-+-----+
-<topclass>org.foo.bar.MyClassImpl</topclass>
-+-----+
-
- If there are multiple classes that are roots of the dependency graph,
- use the following declaration. Note that there can be any number of <<<topclass>>>
- declarations using this approach.
-
-+-----+
-<topclasses>
-    <topclass>org.foo.bar.MyClassImpl</topclass>
-    <topclass>org.bar.MyClass</topclass>
-</topclasses>
-+-----+
-
- If not provided, the jar created will  be added as the main artifact. To
- declare that either a download (dl) user interface jar (ui) be created use
- the classifier option:
-
-+-----+
-<classifier>dl</classifier>
-+-----+
-
- An example from the springbean example follows:
-
-+-----+
-<createJar>
-    <classifier>dl</classifier>
-    <in>org.rioproject.examples.springbean</in>
-    <topclass>org.rioproject.examples.springbean.Hello</topclass>
-</createJar>
-+-----+
-
- NOTE: By default, the plugin will generate a project <implementation> jar file
- with no declaration. If you need to have a custom <implementation> jar created,
- you can simply declare the requirements for the jar as above.
+ As discussed in the {{{./conventions.html}Conventions}} document, we create a multi-module project, where each module
+ reflects the basic architectural elements of a distributed service.
    
-* Building an OperationalString Archive ({OAR})
+* Building an OperationalString Archive (OAR)
 
  {{{oar-mojo.html}rio:oar}}
- 
- When the packaging of your project is <<<oar>>> instead of <<<jar>>>, the
- Maven build process is modified to use the Rio plugin as opposed to the usual
- packaging of your code into a jar file.
 
- The packaging type of <<<oar>>> extends the <<<classdepandjar>>> packaging type
- and produces a main artifact or type <<<.oar>>> for your project.
+ Using the Maven Rio Plugin, we create an additional artifact of type <<<.oar>>> for your project. The OAR
+ contains the OperationalString and associated meta-data allowing you to deploy your service as an artifact.
 
- In addition, you are required to provide the <<<opstring>>> that the OAR requires.
  A complete example from the springbean example follows:
 
 +-----+
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-rio-plugin</artifactId>
+    <version>${rio.plugin.version}</version>
     <extensions>true</extensions>
+    <executions>
+        <execution>
+            <id>build-oar</id>
+            <phase>package</phase>
+            <goals>
+                <goal>oar</goal>
+            </goals>
+        </execution>
+    </executions>
     <configuration>
-        <opstring>${basedir}/src/main/conf/springbean.groovy</opstring>
-        <createJar>
-            <classifier>dl</classifier>
-            <in>org.rioproject.examples.springbean</in>
-            <topclass>org.rioproject.examples.springbean.Hello</topclass>
-        </createJar>
-        </plugin>
+        <opstring>${basedir}/src/main/opstring/springbean.groovy</opstring>
     </configuration>
 </plugin>
 +-----+

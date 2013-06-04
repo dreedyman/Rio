@@ -25,7 +25,5 @@ Manual Pages
   * {{{http://www.rio-project.org/apidocs/org/rioproject/watch/package-summary.html#package_description}Watches}} -
   Describes the watch framework, used for monitoring performance and other measurable aspects of distributed system execution using Rio.
 
-  * {{{http://www.rio-project.org/apidocs/org/rioproject/tools/cli/package-summary.html#package_description}CLI}} -
-  Command Line Interface options and controls.
 
 

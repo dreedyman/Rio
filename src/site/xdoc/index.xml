@@ -10,8 +10,26 @@
     <body>
         <section name="Overview">
             <div>
-                <p> Rio is an open source technology that provides a dynamic
-                    architecture for developing, deploying and managing
+                <div id="downloadbox">
+                    <p>
+                        <a href="download.html">
+                            <img valign="top" align="right" src="images/download.png" border="0" alt="" title="download"/>
+                            <br/>Download</a><br/>Rio 5.0-M3
+                    </p>
+                    <br/>
+
+                </div>
+                <div id="emptyrightbox">
+                    <p>
+                        <a href="http://www.apache.org/licenses/LICENSE-2.0.html">
+                            <img src="images/license_asl.png" height="50px"/>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div>
+                <p>Rio is an open source technology that provides a dynamic
+                    framework for developing, deploying and managing
                     distributed systems composed of services.
                 </p>
                 <p>Rio turns a network of compute resources into a dynamic service,
@@ -34,7 +52,8 @@
                     <li>Built-in fault detection and recovery for your services</li>
                     <li>Policy based SLA enforcement</li>
                     <li>Support for external systems, encapsulate the control
-                        and monitoring of other frameworks</li>
+                        and monitoring of other frameworks
+                    </li>
                     <li>Built-in support for Maven artifact resolution at deploy time</li>
                     <li>Extensible service development &amp; deployment support:</li>
                     <ul>
@@ -42,25 +61,38 @@
                         <li>Spring</li>
                         <li>Maven based artifact resolution</li>
                     </ul>
-                    <li><font color="blue">NEW</font> Integration with Drools for rules based SLA Management</li>
+                    <li>
+                        <font color="blue">NEW</font>
+                        Integration with Drools for rules based SLA Management
+                    </li>
                 </ul>
             </div>
         </section>
 
         <section name="Tutorials">
             <ul>
-                <li><a href="tutorial/service/service-intro.html">Service tutorial</a> <br/>
+                <li>
+                    <a href="tutorial/service/service-intro.html">Service tutorial</a>
+                    <br/>
                     Learn how to create a project, develop and run a service in just a few minutes.
-                    <br/><br/>
+                    <br/>
+                    <br/>
                 </li>
 
-                <li><a href="tutorial/service-exec/service-exec-intro.html">Service Exec tutorial</a><br/>
+                <li>
+                    <a href="tutorial/service-exec/service-exec-intro.html">Service Exec tutorial</a>
+                    <br/>
                     Learn how to use the ServiceExec framework to start and control a Tomcat instance.
-                    <br/><br/>
+                    <br/>
+                    <br/>
                 </li>
 
-                <li><a href="tutorial/sla/sla-rules.html">SLA Rules tutorial</a><br/>
-                    Learn how to use <a href="http://www.jboss.org/drools">Drools</a> and the Gnostic
+                <li>
+                    <a href="tutorial/sla/sla-rules.html">SLA Rules tutorial</a>
+                    <br/>
+                    Learn how to use
+                    <a href="http://www.jboss.org/drools">Drools</a>
+                    and the Gnostic
                     service for rule based SLA Management.
                 </li>
             </ul>
@@ -68,8 +100,9 @@
         </section>
 
         <section name="Get Involved">
-            <p> Feedback Welcome! Send email to the <a href="mailto:rio-users@googlegroups.com">users list</a>,
-                or join the  <a href="http://groups.google.com/group/rio-users">mailing list</a>
+            <p>Feedback Welcome! Send email to the <a href="mailto:rio-users@googlegroups.com">users list</a>,
+                or join the
+                <a href="http://groups.google.com/group/rio-users">mailing list</a>
                 to participate in ongoing discussions.
             </p>
         </section>

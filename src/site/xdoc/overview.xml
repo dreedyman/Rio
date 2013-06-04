@@ -5,76 +5,80 @@
         <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
     </properties>
     <body>
-        <section name="Overview">
+        <h3>Overview</h3>
 
-            <p>Rio provides a model to
-                dynamically instantiate, monitor &amp; manage services as described in
-                an deployment descriptor called an OperationalString.
-            </p>
-            <p>
-                The
-                OperationalString provides context on service requirements,
-                dependencies, associations and operational parameters. Rio Provisioning
-                services additionally provide pluggable download distribution and
-                resource utilization analysis mechanisms to effectively take use of
-                resources on the network
+        <p>Rio provides a infrastructure to
+            dynamically instantiate, monitor &amp; manage services as described in
+            an deployment descriptor called an OperationalString.
+        </p>
+        <p>
+            The
+            OperationalString provides context on service requirements,
+            dependencies, associations and operational parameters. Rio Provisioning
+            services additionally provide pluggable download distribution and
+            resource utilization analysis mechanisms to effectively take use of
+            resources on the network
 
-            </p>
-            <p>
-                <h4>Dynamic Container</h4>
-            </p>
+        </p>
+        <p>
+            <h4>Dynamic Container</h4>
+        </p>
 
-			<p> The Dynamic Container support in Rio is called a Cybernode. Cybernodes embrace the recognition
-				that the network is composed of heterogeneous compute resources with multiple architectures,
-				operating systems - all with different capabilities. The Cybernode provides a lightweight 
-				dynamic 'agent' turning heterogeneous compute resources into services available through the
-				network. The Cybernode represents the capabilities of compute resource they run on through
-				quantitative &amp; qualitative mechanisms. Cybernode instances dynamically discover and enlist
-				with Rio Provisioning services, and provide a lightweight container to instantiate mobile
-				services. </p>
-				
-			<p>
-                <h4>Monitoring &amp; Management</h4>
-            </p>
+        <p>The Dynamic Container support in Rio is called a Cybernode. Cybernodes embrace the recognition
+            that the network is composed of heterogeneous compute resources with multiple architectures,
+            operating systems - all with different capabilities. The Cybernode provides a lightweight
+            dynamic 'agent' turning heterogeneous compute resources into services available through the
+            network. The Cybernode represents the capabilities of compute resource they run on through
+            quantitative &amp; qualitative mechanisms. Cybernode instances dynamically discover and enlist
+            with Rio Provisioning services, and provide a lightweight container to instantiate mobile
+            services.
+        </p>
 
-			<p> Key to keeping the services (and the tasks they
-				are processing) are still running. Utilizing Fault Detection Policies, Rio provides the
-				essential capability to detect existence of running and available services. If services
-				become unavailable, or fail to meet processing requirements, the recovery of those services
-				to available compute resources is enabled by provisioning mechanisms. </p>
+        <p>
+            <h4>Monitoring &amp; Management</h4>
+        </p>
 
-			<p> All application deployed services and Rio itself is managable using JMX, with notification
-				support that includes an elegant peer-to-peer event model, allowing interested consumers to be
-				notified of application and management specific events related to SLA enforcement, application
-				deployment and service availability. </p>
-				
-			<p>
-                <h4>Dynamic Services</h4>
-            </p>
+        <p>Key to keeping the services (and the tasks they
+            are processing) are still running. Utilizing Fault Detection Policies, Rio provides the
+            essential capability to detect existence of running and available services. If services
+            become unavailable, or fail to meet processing requirements, the recovery of those services
+            to available compute resources is enabled by provisioning mechanisms.
+        </p>
 
-			<p> Developing services for use with Rio is simple. The approach is to provide a non-intrusive
-				model that removes the complexity surrounding service development and deployment. Service
-				development follows an elegant approach towards the development of dynamic services, using
-				either a Plain Old Java Object (POJO) approach, Spring and/or other approaches. </p>
+        <p>All application deployed services and Rio itself is managable using JMX, with notification
+            support that includes an elegant peer-to-peer event model, allowing interested consumers to be
+            notified of application and management specific events related to SLA enforcement, application
+            deployment and service availability.
+        </p>
 
-            <p>External services are also a big part of the equation. Existing technology
-                (like LAMP, and other application server and/or infrastructure components) can be
-                turned into dynamic services by using Rio's execution framework. Using this approach,
-                Rio encapsulates the control and monitoring of external services, adding network wide
-                visibility and control. This allows metering and SLA control to be added to existing technology.
+        <p>
+            <h4>Dynamic Services</h4>
+        </p>
 
-            </p>
-			<p>
-                <h4>Quality of Service</h4>
-            </p>
+        <p>Developing services for use with Rio is simple. The approach is to provide a non-intrusive
+            model that removes the complexity surrounding service development and deployment. Service
+            development follows an elegant approach towards the development of dynamic services, using
+            either a Plain Old Java Object (POJO) approach, Spring and/or other approaches.
+        </p>
 
-			<p> Using the policy mechanisms available in Rio, services can have SLAs attached to them,
-				ensuring operational criteria is met.  The dynamic service's operational behavior can be
-				monitored and dynamically scale it's environment up &amp; down based on declarative attributes.
-				In this way the service grid works with the Rio provisioning agents to dynamically size and
-				provision the required services based on realtime operational demands. </p>
+        <p>External services are also a big part of the equation. Existing technology
+            (like LAMP, and other application server and/or infrastructure components) can be
+            turned into dynamic services by using Rio's execution framework. Using this approach,
+            Rio encapsulates the control and monitoring of external services, adding network wide
+            visibility and control. This allows metering and SLA control to be added to existing technology.
 
-		</section>
+        </p>
+        <p>
+            <h4>Quality of Service</h4>
+        </p>
+
+        <p>Using the policy mechanisms available in Rio, services can have SLAs attached to them,
+            ensuring operational criteria is met. The dynamic service's operational behavior can be
+            monitored and dynamically scale it's environment up &amp; down based on declarative attributes.
+            In this way the service grid works with the Rio provisioning agents to dynamically size and
+            provision the required services based on realtime operational demands.
+        </p>
+
 
     </body>
 </document>

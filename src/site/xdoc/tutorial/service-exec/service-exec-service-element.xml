@@ -35,7 +35,7 @@
             </div>
             <p></p>
 
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 deployment(name: 'Tomcat Deploy') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
@@ -102,13 +102,5 @@ deployment(name: 'Tomcat Deploy') {
             <a href="service-exec-provisioning.html">Persistent Provisioning and Data Staging</a> >
         </section>
     </body>
-    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
-    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
-    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" language="javascript">
-        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
-        dp.SyntaxHighlighter.BloggerMode();
-        dp.SyntaxHighlighter.HighlightAll('code');
-    </script>
 </document>

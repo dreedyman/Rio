@@ -7,7 +7,7 @@
                 The service that we will use will not extend ServiceBeanAdapter
                 (although you may choose to), just implement it's own interface.
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 public class EchoService implements RemoteEcho {
     private StopWatch time;
 
@@ -31,7 +31,7 @@ public class EchoService implements RemoteEcho {
                 the time watch records how long it took to invoke the delegate. Wiring
                 up this Watch to an SLA is done as follows (opstring snippet):
             </p>
-<pre name="code" class="java:nocontrols:nogutter">
+<pre name="code">
 sla(id:'time', high: 1000) {
     policy(type:'notify)
 }
@@ -50,7 +50,7 @@ sla(id:'time', high: 1000) {
                 the declared SLA thresholds. The SLA will be associated to the
                 name of the Monitor (which is a Watch). This is illustrated here:
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 public class EchoService implements RemoteEcho {
     private StopWatch time;
     private long time;
@@ -72,7 +72,7 @@ public class EchoService implements RemoteEcho {
                 based on the declaration in the opstring. Wiring up this Watch to
                 an SLA uses a variant of the declaration above:
             </p>
-<pre name="code" class="java:nocontrols:nogutter">
+<pre name="code">
 sla(id:'time', high: 1000) {
     policy(type:'notify)
     monitor(name: 'time', property: 'lastTime', period: 5000)
@@ -98,13 +98,5 @@ sla(id:'time', high: 1000) {
             <a href="watches-sla-external.html">Using Watches and SLAs with External Services</a> >
         </section>
     </body>
-    <script type="text/javascript" src="highlighter/shCore.js"></script>
-    <script type="text/javascript" src="highlighter/shBrushJava.js"></script>
-    <link href="highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" language="javascript">
-        dp.SyntaxHighlighter.ClipboardSwf = '/highlighter/clipboard.swf';
-        dp.SyntaxHighlighter.BloggerMode();
-        dp.SyntaxHighlighter.HighlightAll('code');
-    </script>
 </document>

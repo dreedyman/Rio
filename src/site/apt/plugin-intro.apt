@@ -14,8 +14,6 @@ Rio Maven Plugin
 
  The Rio plugin has the following goals:
 
- * {{{./classdepandjar-mojo.html}rio:classdepandjar}} Runs the ClassDepAndJarTask utility for a module.
-
  * {{{./deploy-mojo.html}rio:deploy}} Deploys a Rio OpString.
 
  * {{{./oar-mojo.html}rio:oar}} Creates an OAR (Operational String Archive).

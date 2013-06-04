@@ -1,0 +1,140 @@
+
+
+#textbox {
+    float: left;
+    margin: 0 2em 2em 1em;
+    padding: 1em;
+    border: 1px solid #999;
+    background-color: #eee;
+    text-align: center;
+    position:relative;
+}
+
+#infobox {
+    margin: 0 2em 0 2em;
+    padding: 1em;
+    border: 1px solid #457fb8;
+    text-align: left;
+    background-color: #d7e3f0;
+    font-size: smaller;
+}
+
+#tipbox {
+    margin: 0 2em 0 2em;
+    padding: 1em;
+    border: 1px solid #999;
+    text-align: left;
+    background-color: #dcfedc;
+    font-size: smaller;
+}
+
+#downloadbox {
+    float: right;
+    margin: 0 1em 0 2em;
+    padding: 1em;
+    border: 1px solid #999;
+    background-color: #eee;
+}
+
+#emptyrightbox {
+    float: right;
+    clear:right;
+    margin: 1em 1em 0 0;
+    text-align: center;
+    width: 128px;
+}
+
+#ohlohbox {
+    float: right;
+    clear:right;
+    margin: 0 1em 0 0;
+    text-align: center;
+    width: 100px;
+    padding-left: 2em;    
+}
+
+#downloadbox h5 {
+    color: #000;
+    margin: 0;
+    border-bottom: 1px solid #aaaaaa;
+    padding: 0;
+}
+
+#downloadbox p {
+    margin-top: 1em;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+#downloadbox p a {
+    color: #47a;
+    font-weight: inherit;
+}
+
+#downloadbox ul {
+    margin-top: 0;
+    margin-bottom: 1em;
+    list-style-type: disc;
+}
+
+#downloadbox li {
+    font-size: smaller;
+}
+
+#sourcebox {
+    font-size: 11px;
+    border: 1px solid #999;
+    margin: 0 2em 0 2em;
+    overflow: auto;
+    background-color: #eee;
+    padding-left: 1em;
+}
+
+table.bodyTable {
+    border-width: 1px;
+    border-color: #CCCCCC;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+table.bodyTable th {
+    background-color: #eee;
+    text-align: center;
+    font-weight: bold;
+    border-width: 1px;
+    border-style: inset;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    border-collapse: collapse;
+}
+
+table.bodyTable td {
+    background-color: white;
+    /*font-size: 12px;*/
+    border-style: inset;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    border-collapse: collapse;
+}
+
+table.bodyTable tr.a {
+    /*background-color: #ddd;*/
+    background-color: white;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    border-collapse: collapse;
+}
+
+table.bodyTable tr.b {
+    /*background-color: #eee;*/
+    background-color: white;
+    border-color: #CCCCCC;
+    border-width: 1px;
+    border-collapse: collapse;
+}
+
+pre, tt, code {
+  background-color: #eee;
+  font-family: "DejaVu Sans Mono", monospace;
+  margin: 0; padding: 0;
+}

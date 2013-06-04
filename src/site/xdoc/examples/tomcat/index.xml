@@ -30,10 +30,6 @@
                 configuration of the OperationalString.
             </p>
 
-            <div id="tipbox">
-                <img src="../../images/check.gif"/>
-                The OperationalString can be composed in both XML and using a Groovy based DSL. This example uses Groovy.
-            </div>
 
             <div class="section"><h3>Building the example</h3>
                 The Tomcat example is built as a Maven project, and uses the

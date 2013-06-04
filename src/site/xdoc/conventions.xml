@@ -61,7 +61,7 @@
                 is as you would expect. Using the example <tt>hello</tt> service from
                 above, we would have
             </p>
-            <div class="source">
+            <div>
                 <pre>
 hello
 |-- pom.xml

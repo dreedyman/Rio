@@ -83,7 +83,7 @@ then
 
             <p>
                 An example of a rule (taken from the Hospital example) follows:
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 declare CalculablePatient
     @role(event)
     @timestamp(date)
@@ -161,7 +161,7 @@ end</pre>
                 It shows a rule that checks if there are enough Beds in the Hospital. If the number of Beds is 0,
                 the <tt>DeployedServiceContext</tt> is used to increment (scale), the number of available Beds.
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 global org.rioproject.gnostic.DeployedServiceContext context;
 
 declare Calculable
@@ -229,7 +229,7 @@ end
             <p>
                 An example follows:
             </p>
-<pre name="code" class="java:nocontrols">
+<pre name="code">
 rules {
     rule {
         resource 'DoctorRule, PatientAlert, AvailableBedRule'
@@ -290,15 +290,5 @@ rules {
             </p>
         </section>
     </body>
-    <script type="text/javascript" src="../../highlighter/shCore.js"></script>
-    <script type="text/javascript" src="../../highlighter/shBrushJava.js"></script>
-    <link href="../../highlighter/SyntaxHighlighter.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" language="javascript">
-        //<![CDATA[
-        dp.SyntaxHighlighter.ClipboardSwf = '../../highlighter/clipboard.swf';
-        dp.SyntaxHighlighter.BloggerMode();
-        dp.SyntaxHighlighter.HighlightAll('code');
-        //]]>
-    </script>
 </document>
