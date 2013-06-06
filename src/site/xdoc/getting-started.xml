@@ -65,7 +65,9 @@
                 <li><b>docs</b> - The directory that contains API documentation, and other documentation</li>
                 <li><b>examples</b> - Contains examples of how to develop and deploy applications using Rio</li>
                 <li><b>lib</b> - The directory where the JAR files are located.</li>
+                <li><b>lib/hyperic</b> - The directory where Hyperic SIGAR JAR files are located.</li>
                 <li><b>lib/logging</b> - The directory where logging JAR files are located.</li>
+                <li><b>lib/resolver</b> - The directory where Rio and Aether resolver JAR files are located.</li>
                 <li><b>lib-dl</b> - The directory where the client (download) JAR files are located.</li>
                 <li><b>logs</b> - This directory contains log files for Rio</li>
                 <li><b>policy</b> - The directory that contains a policy file</li>
