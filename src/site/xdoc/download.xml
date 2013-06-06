@@ -40,9 +40,9 @@
                     </tr>
                     <tr>
                         <td>Rio 5.0 M3 (zip)</td>
-                        <td><a href="http://www.rio-project.org/releases/rio-5.0-M3.zip">Download</a></td>
+                        <td><a href="http://www.rio-project.org/releases/rio-5.0-M4.zip">Download</a></td>
                         <td>25 MB</td>
-                        <td><a href="http://www.rio-project.org/releases/rio-5.0-M3.zip.md5">MD5</a></td>
+                        <td><a href="http://www.rio-project.org/releases/rio-5.0-M4.zip.md5">MD5</a></td>
                         <td align="center">06/2013</td>
                     </tr>
                 </tbody>
@@ -54,7 +54,7 @@
                 The Rio Installer is a Java installer that installs Rio, and
                 allows to select which parts you'd like to install. For Windows users,
                 it also adds some useful shortcuts in the Windows menu.
-                <a href="http://www.rio-project.org/releases/rio-5.0-M3-installer.jar">Download Rio 5.0 M3 using the installer</a>
+                <a href="http://www.rio-project.org/releases/rio-5.0-M4-installer.jar">Download Rio 5.0 M3 using the installer</a>
             </p>
 
             <h2>Previous Releases</h2>

@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M3</version>
+        <version>5.0-M4</version>
     </parent>
     <artifactId>rio-lib</artifactId>
     <name>Module :: Rio Library</name>
