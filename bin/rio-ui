@@ -19,7 +19,7 @@
 # Launches the Rio UI
 #
 
-rioVersion=5.0-M3
+rioVersion=5.0-M4
 
 scriptDir="`dirname $0`"
 if [ -z "$RIO_HOME" ] ; then

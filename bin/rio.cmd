@@ -28,7 +28,7 @@ set SLF4J_CLASSPATH="%RIO_HOME%\lib\logging\*";"%RIO_HOME%\config\logging"
 set RIO_LIB=%RIO_HOME%\lib
 
 :: Set Versions
-set rioVersion=5.0-M3
+set rioVersion=5.0-M4
 set groovyVersion=2.0.6
 
 if "%JAVA_HOME%" == "" goto noJavaHome
