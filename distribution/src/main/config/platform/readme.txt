@@ -4,7 +4,7 @@ configuration file is used as follows:
 - Provides attributes for creating PlatformCapability classes and declaring
    what jars will be common across all service classloaders. If jars are common
    they are loaded by the CommonClassLoader, and are in the classpath of all
-   child class loaders. By default Rio and Jini technology jars are common
+   child class loaders. By default Rio and River technology jars are common
    across all service classloaders.
 
    For platform capabilities that are not loaded by the common classloader,
@@ -16,26 +16,7 @@ configuration file is used as follows:
 Platform configuration files are loaded when Rio starts. The contents of this
 directory will be scanned at startup time.
 
-You have a choice of using .xml or .groovy files to declare platform configurations.
-
-Using XML
-==========
-Each .xml file will be parsed for <platform> declarations.
-
-The structure of the documents are as follows:
-
-<platform>
-    <capability name="Foo" common="yes">
-        <description>An optional description</description>
-        <version>2.5</version>
-        <manufacturer>An optional manufacturer</manufacturer>
-        <classpath>Path separator (: or ;) delimited listing of directories and/or jars</classpath>
-        <path>The location on the file system where the capability is installed</path>
-        <native>Any native libraries that need to be loaded</native>
-        <costmodel>The resource cost model class name</costmodel>
-    </capability>
-</platform>
-
+Groovy is used to declare platform configurations.
 
 Using Groovy
 =============
@@ -68,3 +49,19 @@ class PlatformConfig  {
                                      "Manufacturer",
                                      "classpath-directory${File.separator}foo.jar")
 }
+
+You can also declare an artifact, the classpath will be resolved when the PlatformCapabilityConfig is created
+
+class PlatformConfig  {
+
+    def getPlatformCapabilityConfigs() {
+        def configs = []
+        configs << new PlatformCapabilityConfig("Foo",
+                                     "1.0",
+                                     "Description",
+                                     "Manufacturer",
+                                     "group:artifact:version")
+        return configs
+    }
+}
+

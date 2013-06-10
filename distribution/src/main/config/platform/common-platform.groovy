@@ -37,5 +37,5 @@ class CommonPlatformConfig {
                                                 libDir+"hyperic"+File.separator+"sigar.jar")
         return configs
     }
-    
+
 }

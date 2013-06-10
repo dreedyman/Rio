@@ -15,6 +15,10 @@
  */
 package org.rioproject.config;
 
+import org.rioproject.resolver.Artifact;
+import org.rioproject.resolver.ResolverException;
+import org.rioproject.resolver.ResolverHelper;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,84 +30,71 @@ import java.util.StringTokenizer;
  * Contains attributes for a platform capability.
  */
 public class PlatformCapabilityConfig {
-    String name;
-    String description;
-    String manufacturer;
-    String version;
-    String classpath;
-    String path;
-    String nativeLib;
-    String common="yes";
+    private final String name;
+    private final String description;
+    private final String manufacturer;
+    private final String version;
+    private final String[] classpath;
+    private String nativeLib;
+    private String path;
+    private String common="yes";
     static String DEFAULT_PLATFORM_CLASS = "org.rioproject.system.capability.software.SoftwareSupport";
-    String platformClass =DEFAULT_PLATFORM_CLASS;
-    String costModelClass;
+    private String platformClass = DEFAULT_PLATFORM_CLASS;
+    private String costModelClass;
 
-    public PlatformCapabilityConfig() {
+    public PlatformCapabilityConfig(String name,
+                                    String version,
+                                    String classpath) throws ResolverException {
+        this(name, version, null, null, classpath);
     }
 
     public PlatformCapabilityConfig(String name,
                                     String version,
                                     String description,
-                                    String manufacturer,                                    
-                                    String classpath) {
+                                    String manufacturer,
+                                    String classpath) throws ResolverException {
         this.name = name;
         this.description = description;
         this.manufacturer = manufacturer;
         this.version = version;
-        this.classpath = classpath;
+        if(classpath==null) {
+            this.classpath = new String[0];
+        } else if(Artifact.isArtifact(classpath)) {
+            this.classpath = ResolverHelper.getResolver().getClassPathFor(classpath);
+        } else {
+            StringTokenizer st = new StringTokenizer(classpath, File.pathSeparator);
+            String[] paths = new String[st.countTokens()];
+            int n=0;
+            while (st.hasMoreTokens ()) {
+                paths[n++] = st.nextToken();
+            }
+            this.classpath = paths;
+        }
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getManufacturer() {
         return manufacturer;
     }
 
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
     public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     public String[] getClasspath() {
-        if(classpath==null)
-            return(new String[0]);
-        StringTokenizer st = new StringTokenizer(classpath, File.pathSeparator);
-        String[] paths = new String[st.countTokens()];
-        int n=0;
-        while (st.hasMoreTokens ()) {
-            paths[n++] = st.nextToken();
-        }
-        return paths;
+        return classpath;
     }
 
     public URL[] getClasspathURLs() throws MalformedURLException {
         String[] classpath = getClasspath();
         return(toURLs(classpath));
-    }
-
-    public void setClasspath(String classpath) {
-        this.classpath = classpath;
     }
 
     public String getNativeLib() {

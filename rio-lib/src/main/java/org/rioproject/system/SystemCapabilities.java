@@ -379,12 +379,11 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                                                 String.class,
                                                                 defaultDir);
                 } catch (ConfigurationException e) {
-                    logger.warn(
-                               "An exception occurred tying to read the "+
-                               COMPONENT+".platformDirs property, continue on " +
-                               "and use default value of "+
-                               defaultDir,
-                               e);
+                    logger.warn("An exception occurred tying to read the "+
+                                "{}.platformDirs property, continue on " +
+                                "and use default value of {}",
+                                COMPONENT, defaultDir,
+                                e);
                     platformConfigDir = defaultDir;
                 }
             } else {
@@ -411,7 +410,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                                                               new DiskSpace(config),
                                                               config);
         } catch(ConfigurationException e) {
-            logger.warn( "Loading DiskSpace MeasurableCapability", e);
+            logger.warn("Loading DiskSpace MeasurableCapability", e);
         }
         return diskSpace;
     }
