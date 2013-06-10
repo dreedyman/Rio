@@ -1,4 +1,8 @@
 #!/usr/bin/env groovy
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
 /*
  * Copyright to the original author or authors.
  *
@@ -88,6 +92,19 @@ loggingLibDir.eachFile() { file ->
 }
 classPath.append(File.pathSeparator).append(new File(rioHome, "config/logging/"))
 
+File logDir = new File(rioHome+File.separator+"logs")
+if(!logDir.exists())
+    logDir.mkdirs()
+File installerLog = new File(logDir, "install.log")
+if(!installerLog.exists())
+    installerLog.createNewFile()
+else
+    return
+
+Date date = new Date(System.currentTimeMillis())
+DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+println "INFO  ${formatter.format(date)} check local repository for artifacts"
+
 StringBuffer out = new StringBuffer()
 long installDate = System.currentTimeMillis()
 String install = "${java.toString()} -Djava.security.policy=${rioHome}/policy/policy.all -DRIO_HOME=$rioHome -classpath ${classPath.toString()} org.rioproject.install.Installer"
@@ -97,12 +114,6 @@ process.consumeProcessErrorStream(out)
 process.waitFor()
 
 if(out.length()>0) {
-    File logDir = new File(rioHome+File.separator+"logs")
-    if(!logDir.exists())
-        logDir.mkdirs()
-    File installerLog = new File(logDir, "install.log")
-    if(!installerLog.exists())
-        installerLog.createNewFile()
     StringBuilder builder = new StringBuilder()
     builder.append("===============================================\n")
     builder.append("Installer").append("\n")
