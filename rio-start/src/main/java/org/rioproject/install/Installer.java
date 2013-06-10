@@ -22,10 +22,15 @@ import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resolver.maven2.Repository;
 import org.rioproject.util.FileHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -34,6 +39,7 @@ import java.util.jar.JarFile;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class Installer {
+    private static final Logger logger = LoggerFactory.getLogger(Installer.class);
 
     private Installer() {}
 
@@ -55,7 +61,7 @@ public final class Installer {
             Thread.currentThread().setContextClassLoader(resolverLoader);
             Object aetherServiceInstance = null;
             try {
-                Class aetherService = resolverLoader.loadClass("org.rioproject.resolver.aether.AetherService");
+                Class<?> aetherService = resolverLoader.loadClass("org.rioproject.resolver.aether.AetherService");
                 Method getDefaultInstance = aetherService.getDeclaredMethod("getDefaultInstance");
                 aetherServiceInstance = getDefaultInstance.invoke(null);
             } catch (Exception e) {
@@ -123,7 +129,7 @@ public final class Installer {
             install(serviceUI, new File(pomDir, "serviceui.pom"), serviceUIJar, aetherServiceInstance);
 
         } catch (ResolverException e) {
-            e.printStackTrace();
+            logger.error("Could not install artifacts", e);
         } finally {
             Thread.currentThread().setContextClassLoader(cCL);
         }
@@ -192,8 +198,8 @@ public final class Installer {
                 sb.append("META-INF/maven/").append(groupId).append("/").append(artifactId).append("/").append("pom.xml");
                 JarEntry pomEntry = jarFile.getJarEntry(sb.toString());
                 if (pomEntry == null) {
-                    System.err.println("Unable to find jar entry [" + sb.toString() + "], in [" + artifactFile.getPath() + "], " +
-                                       "cannot install " + groupId + ":" + artifactId + ":" + version);
+                    logger.error("Unable to find jar entry [{}], in [{}], cannot install {}:{}:{}",
+                                 sb.toString(), artifactFile.getPath(), groupId, artifactId, version);
                     return;
                 }
                 InputStream is = jarFile.getInputStream(pomEntry);
