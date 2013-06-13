@@ -1102,6 +1102,15 @@ public class AssociationMgmt implements AssociationManagement {
          */
         public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
             ServiceItem item = sdEvent.getPostEventServiceItem();
+            if(item.service==null) {
+                logger.warn("[{}] serviceAdded [{}], service is null, abort notification",
+                            clientName, association.getName());
+                return;
+            }
+            if(callerCL.equals(ClassLoader.getSystemClassLoader())) {
+                doServiceDiscovered(item);
+                return;
+            }
             final Thread currentThread = Thread.currentThread();
             final ClassLoader cCL = AccessController.doPrivileged(
                     new PrivilegedAction<ClassLoader>() {
@@ -1109,11 +1118,6 @@ public class AssociationMgmt implements AssociationManagement {
                             return (currentThread.getContextClassLoader());
                         }
                     });
-            if(item.service==null) {
-                logger.debug("[{}] serviceAdded [{}], service is null, abort notification",
-                             clientName, association.getName());
-                return;
-            }
             try {
                 AccessController.doPrivileged(new PrivilegedAction<Void>() {
                     public Void run() {
@@ -1123,23 +1127,28 @@ public class AssociationMgmt implements AssociationManagement {
                 });
                 item = new MarshalledObject<ServiceItem>(item).get();
                 item.service = proxyPreparer.prepareProxy(item.service);
-                try {
-                    serviceDiscovered(item);
-                } catch(Exception e) {
-                    if(!ThrowableUtil.isRetryable(e)) {
-                        lCache.discard(item.service);
-                    }
-                    logger.trace("Handling service discovery, unable to attach FDH", e);
-                }
+                doServiceDiscovered(item);
             } catch(Exception e) {
                 logger.warn("(Un)Marshalling ServiceItem", e);
             } finally {
                 AccessController.doPrivileged(new PrivilegedAction<Void>() {
                     public Void run() {
                         currentThread.setContextClassLoader(cCL);
-                        return (null);
+                        return null;
                     }
                 });
+            }
+
+        }
+
+        private void doServiceDiscovered(ServiceItem item) {
+            try {
+                serviceDiscovered(item);
+            } catch(Exception e) {
+                if(!ThrowableUtil.isRetryable(e)) {
+                    lCache.discard(item.service);
+                }
+                logger.trace("Handling service discovery, unable to attach FDH", e);
             }
         }
 
