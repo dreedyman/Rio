@@ -94,7 +94,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 }
                 builder.append(s);
             }
-            logger.trace("Load proxy classes {} using codebase {}, resolved to {}", builder.toString(), codebase, resolvedCodebase);
+            logger.trace("Load proxy classes {} using codebase {}, resolved to {}, defaultLoader: {}",
+                         builder.toString(), codebase, resolvedCodebase, defaultLoader);
         }
         return loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
     }
