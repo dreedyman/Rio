@@ -16,7 +16,6 @@
 package org.rioproject.util;
 
 import com.sun.jini.config.ConfigUtil;
-import com.sun.jini.start.NonActivatableServiceDescriptor;
 import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
@@ -29,6 +28,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -92,8 +92,33 @@ public final class ServiceDescriptorUtil {
      * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
      * set
      */
-    public static ServiceDescriptor getWebster(final String policy, final String sPort, final String[] roots) throws IOException {
+    public static ServiceDescriptor getWebster(final String policy,
+                                               final String sPort,
+                                               final String[] roots) throws IOException {
         return(getWebster(policy, sPort, roots, false));
+    }
+
+    /**
+     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * <tt>org.rioproject.tools.webster.Webster</tt>.
+     *
+     * @param policy The security policy file to use
+     * @param sPort The port webster should use
+     * @param roots The roots webster should serve
+     * @param options Options for Webster to use
+     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
+     * loaded from <tt>RIO_HOME/lib</tt>
+     *
+     * @throws IOException If there are problems getting the anonymous port
+     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * set
+     */
+    public static ServiceDescriptor getWebster(final String policy,
+                                               final String sPort,
+                                               final String[] roots,
+                                               final String[] options) throws IOException {
+        return(getWebster(policy, sPort, roots, options, false));
     }
 
     /**
@@ -118,7 +143,7 @@ public final class ServiceDescriptorUtil {
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
-        return(getWebster(policy, sPort, roots, debug, webster));
+        return(getWebster(policy, sPort, roots, null, debug, webster));
 
     }
 
@@ -129,6 +154,35 @@ public final class ServiceDescriptorUtil {
      * @param policy The security policy file to use
      * @param sPort The port webster should use
      * @param roots The roots webster should serve
+     * @param options Options for Webster to use
+     * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
+     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
+     * loaded from <tt>RIO_HOME/lib</tt>
+     *
+     * @throws IOException If there are problems getting the anonymous port
+     */
+    public static ServiceDescriptor getWebster(final String policy,
+                                               final String sPort,
+                                               final String[] roots,
+                                               final String[] options,
+                                               final boolean debug) throws IOException {
+        String rioHome = System.getProperty("RIO_HOME");
+        if(rioHome==null)
+            throw new RuntimeException("RIO_HOME property not declared");
+        String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
+        return(getWebster(policy, sPort, roots, options, debug, webster));
+
+    }
+
+    /**
+     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * <tt>org.rioproject.tools.webster.Webster</tt>
+     *
+     * @param policy The security policy file to use
+     * @param sPort The port webster should use
+     * @param roots The roots webster should serve
+     * @param options Options for Webster to use
      * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
      * @param webster The location an name of the webster jar
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
@@ -141,6 +195,7 @@ public final class ServiceDescriptorUtil {
     public static ServiceDescriptor getWebster(final String policy,
                                                final String sPort,
                                                final String[] roots,
+                                               final String[] options,
                                                final boolean debug,
                                                final String webster) throws IOException {
         if(webster==null)
@@ -166,17 +221,25 @@ public final class ServiceDescriptorUtil {
             System.setProperty("org.rioproject.tools.webster.debug", "1");
         }
         String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
-        return(new NonActivatableServiceDescriptor("",
-                                                   policy,
-                                                   webster,
-                                                   websterClass,
-                                                   new String[]{portOptionArg,
-                                                                portArg,
-                                                                "-roots",
-                                                                websterRoots,
-                                                                "-bindAddress",
-                                                                address
-                                                   }));
+        List<String> optionsList = new ArrayList<String>();
+        if(options!=null) {
+            Collections.addAll(optionsList, options);
+        }
+        if(!optionsList.contains("-roots")) {
+            optionsList.add("-roots");
+            optionsList.add(websterRoots);
+        }
+        if(!optionsList.contains("-bindAddress")) {
+            optionsList.add("-bindAddress");
+            optionsList.add(address);
+        }
+        optionsList.add(portOptionArg);
+        optionsList.add(portArg);
+        return(new RioServiceDescriptor("",
+                                        policy,
+                                        webster,
+                                        websterClass,
+                                        optionsList.toArray(new String[optionsList.size()])));
     }
 
     /**
