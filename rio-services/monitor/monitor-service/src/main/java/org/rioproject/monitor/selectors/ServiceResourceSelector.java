@@ -167,9 +167,14 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             int total = ir.getServiceElementCount() + ir.getInProcessCounter();
             if (total >= serviceLimit) {
                 String reason =
-                    String.format("%s reached service limit of [%d], cannot be used to instantiate [%s/%s]",
-                              ir.getName(), serviceLimit, sElem.getOperationalStringName(),
-                              sElem.getName());
+                    String.format("%s reached service limit of [%d] (service element count:%d, in-process:%d), " +
+                                  "cannot be used to instantiate [%s/%s]",
+                                  ir.getName(),
+                                  serviceLimit,
+                                  ir.getServiceElementCount(),
+                                  ir.getInProcessCounter(),
+                                  sElem.getOperationalStringName(),
+                                  sElem.getName());
                 provisionRequest.addFailureReason(reason);
                 logger.debug(reason);
                 continue;
