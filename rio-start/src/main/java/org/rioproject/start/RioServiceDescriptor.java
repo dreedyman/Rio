@@ -21,8 +21,6 @@ import net.jini.config.Configuration;
 import net.jini.export.ProxyAccessor;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
-import net.jini.security.policy.DynamicPolicyProvider;
-import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;
 import org.rioproject.loader.ClassAnnotator;
@@ -36,9 +34,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.security.AllPermission;
-import java.security.Permission;
-import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -86,20 +81,19 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * The parameter types for the "activation constructor".
      */
     private static final Class[] actTypes = {String[].class, LifeCycle.class};
-    private String codebase;
-    private String policy;
-    private String classpath;
-    private String implClassName;
-    private String[] serverConfigArgs;
-    private LifeCycle lifeCycle;
+    private final String codebase;
+    private final String policy;
+    private final String classpath;
+    private final String implClassName;
+    private final String[] serverConfigArgs;
+    private final LifeCycle lifeCycle;
     private static LifeCycle NoOpLifeCycle = new LifeCycle() { // default, no-op
                                                                // object
         public boolean unregister(Object impl) {
             return false;
         }
     };
-    private static AggregatePolicyProvider globalPolicy = null;
-    private static Policy initialGlobalPolicy = null;
+
     /**
      * Object returned by
      * {@link RioServiceDescriptor#create(net.jini.config.Configuration)
@@ -116,7 +110,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
          * @param impl reference to the implementation of the created service
          * @param proxy reference to the proxy of the created service
          */
-        public Created(Object impl, Object proxy) {
+        public Created(final Object impl, final Object proxy) {
             this.proxy = proxy;
             this.impl = impl;
         }
@@ -138,13 +132,13 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * @param lifeCycle <code>LifeCycle</code> reference for hosting
      * environment
      */
-    public RioServiceDescriptor(String codebase, 
-                            String policy, 
-                            String classpath,
-                            String implClassName,
-                            // Optional Args
-                            LifeCycle lifeCycle,
-                            String... serverConfigArgs) {
+    public RioServiceDescriptor(final String codebase,
+                                final String policy,
+                                final String classpath,
+                                final String implClassName,
+                                // Optional Args
+                                final LifeCycle lifeCycle,
+                                final String... serverConfigArgs) {
         if(codebase == null || policy == null || classpath == null || implClassName == null)
             throw new IllegalArgumentException("Codebase, policy, classpath, and implementation cannot be null");
         this.codebase = codebase;
@@ -170,12 +164,12 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * @param implClassName name of server implementation class
      * @param serverConfigArgs service configuration arguments
      */
-    public RioServiceDescriptor(String codebase,
-                                String policy,
-                                String classpath,
-                                String implClassName,
+    public RioServiceDescriptor(final String codebase,
+                                final String policy,
+                                final String classpath,
+                                final String implClassName,
                                 // Optional Args
-                                String... serverConfigArgs) {
+                                final String... serverConfigArgs) {
         this(codebase, policy, classpath, implClassName, null, serverConfigArgs);
     }
     
@@ -246,7 +240,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     /**
      * @see com.sun.jini.start.ServiceDescriptor#create
      */
-    public Object create(Configuration config) throws Exception {
+    public Object create(final Configuration config) throws Exception {
         ensureSecurityManager();
         Object proxy = null;
 
@@ -255,32 +249,31 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             HTTPDStatus.httpdWarning(getCodebase());
 
         /* Set common JARs to the CommonClassLoader */
-        String defaultDir = null;
+        String defaultDir;
         String rioHome = System.getProperty("RIO_HOME");
+        List<URL> urlList = new ArrayList<URL>();
         if(rioHome==null) {
             logger.warn("RIO_HOME not defined, no default platformDir");
         } else {
             defaultDir = rioHome+ File.separator+"config"+File.separator+"platform";
-        }
+            PlatformLoader platformLoader = new PlatformLoader();
 
-        PlatformLoader platformLoader = new PlatformLoader();
-        List<URL> urlList = new ArrayList<URL>();
-        PlatformCapabilityConfig[] caps = platformLoader.getDefaultPlatform(rioHome);
-        for (PlatformCapabilityConfig cap : caps) {
-            URL[] urls = cap.getClasspathURLs();
-            urlList.addAll(Arrays.asList(urls));
-        }
-
-        String platformDir = (String)config.getEntry(COMPONENT, "platformDir", String.class, defaultDir);
-        logger.debug("Platform directory set as {}", platformDir);
-        caps = platformLoader.parsePlatform(platformDir);
-        for (PlatformCapabilityConfig cap : caps) {
-            if (cap.getCommon()) {
+            PlatformCapabilityConfig[] caps = platformLoader.getDefaultPlatform(rioHome);
+            for (PlatformCapabilityConfig cap : caps) {
                 URL[] urls = cap.getClasspathURLs();
                 urlList.addAll(Arrays.asList(urls));
             }
-        }
 
+            String platformDir = (String)config.getEntry(COMPONENT, "platformDir", String.class, defaultDir);
+            logger.debug("Platform directory set as {}", platformDir);
+            caps = platformLoader.parsePlatform(platformDir);
+            for (PlatformCapabilityConfig cap : caps) {
+                if (cap.getCommon()) {
+                    URL[] urls = cap.getClasspathURLs();
+                    urlList.addAll(Arrays.asList(urls));
+                }
+            }
+        }
         URL[] commonJARs = urlList.toArray(new URL[urlList.size()]);
 
         /*
@@ -319,27 +312,6 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                                                               "servicePreparer",
                                                                               ProxyPreparer.class,
                                                                               new BasicProxyPreparer());
-        synchronized(RioServiceDescriptor.class) {
-            /* supplant global policy 1st time through */
-            if(globalPolicy == null) {
-                initialGlobalPolicy = Policy.getPolicy();
-                globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
-                Policy.setPolicy(globalPolicy);
-                logger.trace("Global policy set: {}", globalPolicy.toString());
-            }                        
-            DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(getPolicy()));
-            LoaderSplitPolicyProvider splitServicePolicy =
-                new LoaderSplitPolicyProvider(serviceCL, service_policy, new DynamicPolicyProvider(initialGlobalPolicy));
-            /*
-             * Grant "this" code enough permission to do its work under the
-             * service policy, which takes effect (below) after the context
-             * loader is (re)set.
-             */
-            splitServicePolicy.grant(RioServiceDescriptor.class,
-                                     null, /* Principal[] */
-                                     new Permission[]{new AllPermission()});
-            globalPolicy.setPolicy(serviceCL, splitServicePolicy);
-        }
         Object impl;
         try {
             Class<?> implClass;
@@ -378,7 +350,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * Iterate through the classpath, for each jar see if there is a ClassPath
      * manifest setting. If there is, append the settings to the classpath
      */
-    private String setClasspath(String cp) {
+    private String setClasspath(final String cp) {
         logger.debug("Create classpath from [{}]", cp);
         StringBuilder buff = new StringBuilder();
         for(String s : toArray(cp, "," + File.pathSeparator)) {
@@ -422,7 +394,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         return buff.toString();
     }
 
-    private String[] toArray(String arg, String delim) {
+    private String[] toArray(final String arg, final String delim) {
         StringTokenizer tok = new StringTokenizer(arg, delim);
         String[] array = new String[tok.countTokens()];
         int i=0;
