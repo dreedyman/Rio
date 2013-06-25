@@ -15,14 +15,14 @@
  */
 package org.rioproject.tools.webster;
 
-import com.sun.jini.start.NonActivatableServiceDescriptor;
 import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.util.ServiceDescriptorUtil;
 
-import java.io.*;
+import java.io.IOException;
+import java.lang.reflect.Field;
 
 public class ITWebsterTest {
 
@@ -37,6 +37,7 @@ public class ITWebsterTest {
             desc = ServiceDescriptorUtil.getWebster(System.getProperty("java.security.policy"),
                                                     "0",
                                                     new String[]{System.getProperty("user.dir")},
+                                                    null,
                                                     false,
                                                     webster);
         } catch (IOException e) {
@@ -60,6 +61,7 @@ public class ITWebsterTest {
             desc = ServiceDescriptorUtil.getWebster(System.getProperty("java.security.policy"),
                                                     "10000-10005",
                                                     new String[]{System.getProperty("user.dir")},
+                                                    null,
                                                     false,
                                                     webster);
         } catch (IOException e) {
@@ -78,9 +80,9 @@ public class ITWebsterTest {
     private Webster getWebster(ServiceDescriptor desc) {
         Webster w = null;
         try {
-            NonActivatableServiceDescriptor.Created created =
-                (NonActivatableServiceDescriptor.Created) desc.create(EmptyConfiguration.INSTANCE);
-            w = (Webster) created.impl;
+            Object created = desc.create(EmptyConfiguration.INSTANCE);
+            Field impl = created.getClass().getDeclaredField("impl");
+            w = (Webster) impl.get(created);
         } catch(Exception e) {
             e.printStackTrace();
         }
