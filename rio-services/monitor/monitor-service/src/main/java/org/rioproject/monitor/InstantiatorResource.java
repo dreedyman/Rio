@@ -59,7 +59,7 @@ public class InstantiatorResource {
     /**
      * The maximum number of services the ServiceBeanInstantiator can instantiate 
      */
-    private int serviceLimit;
+    private AtomicInteger serviceLimit = new AtomicInteger(0);
     /**
      * An in-process counter indicating the InstantiatorResource is being used to
      * provision a service 
@@ -126,7 +126,7 @@ public class InstantiatorResource {
         this.instantiatorUuid = instantiatorUuid;
         this.handback = handback;
         this.resourceCapability = resourceCapability;
-        this.serviceLimit = serviceLimit;
+        this.serviceLimit.set(serviceLimit);
     }
 
     public MarshalledObject<ServiceBeanInstantiator> getWrappedServiceBeanInstantiator() {
@@ -399,7 +399,7 @@ public class InstantiatorResource {
                 totalInstances += list.size();
             }
         }
-        return (totalInstances);
+        return totalInstances;
     }
 
     /**
@@ -484,27 +484,19 @@ public class InstantiatorResource {
     /**
      * Set the serviceLimit property
      * 
-     * @param serviceLimit The maximum number of services the 
-     * ServiceBeanInstantiator can instantiate 
+     * @param serviceLimit The maximum number of services the ServiceBeanInstantiator can instantiate
      */
     void setServiceLimit(int serviceLimit) {
-        synchronized(this) {
-            this.serviceLimit = serviceLimit;
-        }
+        this.serviceLimit.set(serviceLimit);
     }
 
     /**
      * Get the serviceLimit property
      * 
-     * @return The maximum number of services the ServiceBeanInstantiator can 
-     * instantiate 
+     * @return The maximum number of services the ServiceBeanInstantiator can instantiate
      */
     public int getServiceLimit() {
-        int limit;
-        synchronized(this) {
-            limit = serviceLimit;
-        }
-        return(limit);
+        return serviceLimit.get();
     }
 
     /**
@@ -546,12 +538,12 @@ public class InstantiatorResource {
     }
 
     /**
-     * Get the inprocess counter value
+     * Get the in-process counter value
      *
-     * @return The inprocess counter value
+     * @return The in-process counter value
      */
     public int getInProcessCounter() {
-        return(inProcessCounter.intValue());
+        return inProcessCounter.get();
     }
 
     /**
@@ -651,11 +643,11 @@ public class InstantiatorResource {
         /*
          * Check if the serviceLimit has been reached
          */
-        if(getServiceElementCount() == serviceLimit) {
+        if(getServiceElementCount() == serviceLimit.get()) {
             if(!provType.equals(ServiceElement.ProvisionType.FIXED.toString())) {
                 String failureReason =
                     String.format("%s not selected to allocate service [%s], it has reached it's service limit of [%d]",
-                                  getName(), LoggingUtil.getLoggingName(sElem), serviceLimit);
+                                  getName(), LoggingUtil.getLoggingName(sElem), serviceLimit.get());
 
                 provisionRequest.addFailureReason(failureReason);
                 logger.debug(failureReason);
