@@ -39,8 +39,7 @@ public class AgentHook {
         instrumentation = inst;
         redirectIfNecessary();
         try {
-            Class cl = Class.forName("org.rioproject.logging.ServiceLogEventHandlerHelper");
-            @SuppressWarnings("unchecked")
+            Class<?> cl = Class.forName("org.rioproject.logging.ServiceLogEventHandlerHelper");
             Method addServiceLogEventHandler = cl.getMethod("addServiceLogEventHandler");
             addServiceLogEventHandler.invoke(null);
         } catch(Exception e) {
