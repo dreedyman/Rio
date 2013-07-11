@@ -94,18 +94,14 @@ public final class VirtualMachineHelper {
             return new String[0];
         }
         List<String> vmList = new ArrayList<String>();
-        //try {
-            Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
-            Method list = vmClass.getMethod("list");
-            List vmDescriptors = (List)list.invoke(null);
-            for (Object vmDesc : vmDescriptors) {
-                Method displayName = vmDesc.getClass().getMethod("displayName");
-                Method id = vmDesc.getClass().getMethod("id");
-                vmList.add(id.invoke(vmDesc)+" "+displayName.invoke(vmDesc));
-            }
-        /*} catch (Exception e) {
-            logger.warn("Could not obtain list of VMs", e);
-        }*/
+        Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
+        Method list = vmClass.getMethod("list");
+        List vmDescriptors = (List)list.invoke(null);
+        for (Object vmDesc : vmDescriptors) {
+            Method displayName = vmDesc.getClass().getMethod("displayName");
+            Method id = vmDesc.getClass().getMethod("id");
+            vmList.add(id.invoke(vmDesc)+" "+displayName.invoke(vmDesc));
+        }
         return vmList.toArray(new String[vmList.size()]);
     }
 }
