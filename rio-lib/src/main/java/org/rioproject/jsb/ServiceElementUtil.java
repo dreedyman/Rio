@@ -66,7 +66,10 @@ public final class ServiceElementUtil {
     public static String getLoggingName(ServiceElement element) {
         StringBuilder sb = new StringBuilder();
         sb.append(element.getOperationalStringName()).append("/").append(element.getName());
-        sb.append(":").append(element.getServiceBeanConfig().getInstanceID());
+        Long id = element.getServiceBeanConfig().getInstanceID();
+        if(id!=null) {
+            sb.append(":").append(id.toString());
+        }
         return sb.toString();
     }
 
