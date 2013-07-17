@@ -1,0 +1,27 @@
+package org.rioproject.gnostic;
+
+import org.rioproject.watch.Calculable;
+import org.rioproject.system.measurable.cpu.CalculableProcessCPU;
+import org.rioproject.system.measurable.memory.CalculableMemory;
+import java.util.List;
+import java.lang.Exception;
+import java.lang.System;
+import java.util.Date;
+
+global org.rioproject.gnostic.DeployedServiceContext context;
+
+declare CalculableMemory
+    @role(event)
+    @timestamp(date)
+    @expires(1s)
+end
+
+rule "MemoryRule"
+when
+    $mem : Number(doubleValue > 0.875)
+              from accumulate(CalculableMemory($value : value) over window:time(30s)
+              from entry-point "calculables-stream", average($value))
+then
+    System.err.println(new Date(System.currentTimeMillis()) + ": Memory is at " + $mem );
+end
+
