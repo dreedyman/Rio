@@ -21,8 +21,6 @@ import org.drools.KnowledgeBaseConfiguration;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.*;
 import org.drools.conf.EventProcessingOption;
-import org.drools.event.rule.BeforeActivationFiredEvent;
-import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.WorkingMemoryEntryPoint;
@@ -44,8 +42,6 @@ public class ExpirationTest {
 
     @Test
     public void testExpiration() throws InterruptedException {
-        DebugAgendaEventListener debugListener = new DebugAgendaEventListener();
-        session.addEventListener(debugListener);
         for(int i=0; i<1000; i++) {
             stream.insert(new CalculableMemory("Foo", 0.9, System.currentTimeMillis()));
             Thread.sleep(1);
@@ -105,17 +101,5 @@ public class ExpirationTest {
     public void releaseDroolsSession() {
         if (session != null)
             session.dispose();
-    }
-
-    class DebugAgendaEventListener extends DefaultAgendaEventListener {
-        boolean fired = false;
-
-        public void beforeActivationFired(BeforeActivationFiredEvent event) {
-            fired = true;
-        }
-
-        public boolean hasFired() {
-            return fired;
-        }
     }
 }
