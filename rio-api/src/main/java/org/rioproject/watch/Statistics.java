@@ -120,7 +120,7 @@ public class Statistics {
     /**
      * Get the mode
      * 
-     * @return double the value with the highest number of occurences
+     * @return double the value with the highest number of occurrences
      */     
     public double mode() {
         if(v.isEmpty()) return(0.0D / 0.0D); //NaN
@@ -130,7 +130,7 @@ public class Statistics {
     /**
      * Get the occurrences of the mode
      * 
-     * @return int count of the value with the highest number of occurences
+     * @return int count of the value with the highest number of occurrences
      */     
     public int modeOccurrenceCount() {
         if(v.isEmpty()) return(0);
@@ -140,12 +140,11 @@ public class Statistics {
     /**
      * Get the mode or occurrences of the mode
      * 
-     * @return Object the value with the highest number of occurences
+     * @return Object the value with the highest number of occurrences
      * @param returnMode boolean true to return the mode, false occurrences
      */    
     private Object mode0(boolean returnMode) {
-        Map<Object, Integer> hashtable = new Hashtable<Object, Integer>(v.size(),
-                                                                        1.0f);
+        Map<Object, Integer> hashTable = new Hashtable<Object, Integer>(v.size(), 1.0f);
         Object obj;
         Integer occurrences = 0;
         int modeCnt;
@@ -153,24 +152,13 @@ public class Statistics {
 
         for (Double aV : v) {
             obj = aV;
-            if (hashtable.containsKey(obj)) {
-                modeCnt = (hashtable.get(obj)) + 1;
+            if (hashTable.containsKey(obj)) {
+                modeCnt = (hashTable.get(obj)) + 1;
             } else {
                 modeCnt = 1;
             }
-            hashtable.put(obj, modeCnt);
+            hashTable.put(obj, modeCnt);
         }
-        /*
-        it = v.iterator();
-        while(it.hasNext()) {
-            obj = it.next();
-            cnt = (Integer)hashtable.get(obj);
-            if((cnt.intValue()) > modeCnt) {
-                mode = (Double)obj;
-                occurrences = cnt;
-            }
-        }
-        */
         if(returnMode) {
             return mode;
         } else {
