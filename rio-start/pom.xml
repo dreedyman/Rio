@@ -73,6 +73,7 @@
 						    <Rio-Build>${maven.build.timestamp}</Rio-Build>
 						    <Class-Path>rio-platform-${project.version}.jar start-${river.version}.jar</Class-Path>
 						    <Premain-Class>org.rioproject.start.AgentHook</Premain-Class>
+                            <Agent-Class>org.rioproject.start.AgentHook</Agent-Class>
 						</manifestEntries>
                     </archive>
                 </configuration>

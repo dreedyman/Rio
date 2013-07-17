@@ -23,13 +23,11 @@ manager {
     String rioHome = System.getProperty("RIO_HOME")
     StringBuilder classPath = new StringBuilder()
     File rioLib = new File(rioHome+'/lib/')
-    String rioStartJar = null
     for(File file : rioLib.listFiles()) {
         if(file.name.startsWith("rio-start")) {
             if(classPath.length()>0)
                 classPath.append(File.pathSeparator)
             classPath.append(file.path)
-            rioStartJar = file.path
         } else if(file.name.startsWith("groovy-all")) {
             if(classPath.length()>0)
                 classPath.append(File.pathSeparator)
@@ -51,7 +49,7 @@ manager {
     log = "${rootLogDir}/${name}/logs/${logExt}/"
 
     jvmOptions =
-        '-javaagent:'+rioStartJar+' -Djava.protocol.handler.pkgs=org.rioproject.url '+
+        '-Djava.protocol.handler.pkgs=org.rioproject.url '+
         '-Djava.rmi.server.useCodebaseOnly=false '+
         '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs '+
         '-server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all '+

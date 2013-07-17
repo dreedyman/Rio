@@ -15,9 +15,12 @@
  */
 package org.rioproject.test.instrumentation;
 
+import com.sun.tools.attach.VirtualMachine;
 import org.rioproject.bean.Started;
+import org.rioproject.exec.VirtualMachineHelper;
 import org.rioproject.start.AgentHook;
 
+import java.io.File;
 import java.lang.instrument.Instrumentation;
 
 public class Impl implements API {
@@ -25,6 +28,23 @@ public class Impl implements API {
 
     @Started
     public void started() {
+        String myID = VirtualMachineHelper.getID();
+        String rioHome = System.getProperty("RIO_HOME");
+        File libDir = new File(rioHome, "lib");
+        String jar = null;
+        for(File f : libDir.listFiles()) {
+            if(f.getName().startsWith("rio-start")) {
+                jar = f.getPath();
+                break;
+            }
+        }
+        System.out.println("LOADING "+jar);
+        try {
+            VirtualMachine virtualMachine = VirtualMachine.attach(myID);
+            virtualMachine.loadAgent(jar);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         instrumentation = AgentHook.getInstrumentation();
     }
 

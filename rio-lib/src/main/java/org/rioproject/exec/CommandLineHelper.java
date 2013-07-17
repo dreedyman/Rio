@@ -115,15 +115,13 @@ public final class CommandLineHelper {
     /**
      * Get the standard Rio JVM arguments
      *
-     * @return The JVM arguments for javaagent, java.protocol.handler.pkgs, java.security.policy and RIO_HOME
+     * @return The JVM arguments for java.rmi.server.useCodebaseOnly, java.protocol.handler.pkgs, java.security.policy
+     * and RIO_HOME
      */
     static String getStandardJVMArgs() {
         String rioHome = System.getProperty("RIO_HOME");
-        File rioLib = new File(rioHome, "lib");
         StringBuilder argsBuilder = new StringBuilder();
 
-        argsBuilder.append("-javaagent:").append(getFiles(rioLib, "rio-start"));
-        argsBuilder.append(" ");
         argsBuilder.append(getOption("java.protocol.handler.pkgs", "org.rioproject.url"));
         argsBuilder.append(" ");
         argsBuilder.append(getOption("java.rmi.server.useCodebaseOnly", "false"));

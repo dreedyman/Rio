@@ -402,6 +402,7 @@ public class ServiceStarter {
      * @see net.jini.config.ConfigurationProvider
      */
     public static void main(String[] args) {
+        LogManagementHelper.setup();
         logger.debug("Entering {}", ServiceStarter.class.getName());
         ensureSecurityManager();
         try {

@@ -21,6 +21,8 @@ import net.jini.config.Configuration;
 import net.jini.export.ProxyAccessor;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
+import net.jini.security.policy.DynamicPolicyProvider;
+import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;
 import org.rioproject.loader.ClassAnnotator;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,17 +46,16 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * The RioServiceDescriptor class is a utility that conforms to the Jini&trade;
- * technology ServiceStarter framework, and will start a service using the
- * {@link org.rioproject.loader.CommonClassLoader} as a shared, non-activatable,
- * in-process service. Clients construct this object with the details of the 
+ * The RioServiceDescriptor class is a utility that conforms to the Apache River
+ * {@code ServiceStarter} framework, and will start a service using the
+ * {@link org.rioproject.loader.CommonClassLoader} as an in-process service.
+ * Clients construct this object with the details of the
  * service to be launched, then call <code>create</code> to launch the service in 
  * invoking object's VM.
  * <P>
  * This class provides separation of the import codebase (where the server
  * classes are loaded from) from the export codebase (where clients should load
- * classes from for stubs, etc.) as well as providing an independent security
- * policy file for each service object. This functionality allows multiple
+ * classes from for proxies, etc.). This functionality allows multiple
  * service objects to be placed in the same VM, with each object maintaining a
  * distinct codebase and policy.
  * <P>
@@ -93,7 +95,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             return false;
         }
     };
-
+    private static AggregatePolicyProvider globalPolicy = null;
+    private static Policy initialGlobalPolicy = null;
     /**
      * Object returned by
      * {@link RioServiceDescriptor#create(net.jini.config.Configuration)
@@ -143,7 +146,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             throw new IllegalArgumentException("Codebase, policy, classpath, and implementation cannot be null");
         this.codebase = codebase;
         this.policy = policy;
-        this.classpath = setClasspath(classpath);
+        //this.classpath = setClasspath(classpath);
+        this.classpath = classpath;
         this.implClassName = implClassName;
         this.serverConfigArgs = serverConfigArgs;
         this.lifeCycle = (lifeCycle == null) ? NoOpLifeCycle : lifeCycle;
@@ -312,6 +316,19 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                                                               "servicePreparer",
                                                                               ProxyPreparer.class,
                                                                               new BasicProxyPreparer());
+        synchronized(RioServiceDescriptor.class) {
+            /* supplant global policy 1st time through */
+            if(globalPolicy == null) {
+                initialGlobalPolicy = Policy.getPolicy();
+                globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
+                Policy.setPolicy(globalPolicy);
+                logger.trace("Global policy set: {}", globalPolicy.toString());
+            }
+            DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(getPolicy()));
+            LoaderSplitPolicyProvider splitServicePolicy =
+                new LoaderSplitPolicyProvider(serviceCL, service_policy, new DynamicPolicyProvider(initialGlobalPolicy));
+            globalPolicy.setPolicy(serviceCL, splitServicePolicy);
+        }
         Object impl;
         try {
             Class<?> implClass;
