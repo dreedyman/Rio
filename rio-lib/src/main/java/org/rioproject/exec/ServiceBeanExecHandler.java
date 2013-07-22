@@ -66,8 +66,7 @@ public class ServiceBeanExecHandler {
     private ProcessManager manager;
     /** The amount of time to wait for a forked service to be created */
     private int forkedServiceWaitTime = 60; // number of seconds
-    private static final String CONFIG_COMPONENT = "service.load";
-    private static final String COMPONENT = "org.rioproject.cybernode";
+    private static final String COMPONENT = "org.rioproject.exec";
     private static final Logger logger = LoggerFactory.getLogger(ServiceBeanExecHandler.class);
 
     public ServiceBeanExecHandler(final ServiceElement sElem, final Configuration config, final Uuid uuid) {
@@ -76,7 +75,7 @@ public class ServiceBeanExecHandler {
         this.uuid = uuid;
         try {
             forkedServiceWaitTime = Config.getIntEntry(config,
-                                                       CONFIG_COMPONENT,
+                                                       COMPONENT,
                                                        "forkedServiceWaitTime",
                                                        60,    //default is 1 minute
                                                        5,     //minimum of 5 second wait
@@ -176,7 +175,8 @@ public class ServiceBeanExecHandler {
             } catch (ConfigurationException e) {
                 logger.warn("Cannot get shell template from configuration, continue with default");
             }
-            logger.info("Invoke PosixShell.exec for {}, working directory {}", CybernodeLogUtil.logName(sElem), exDesc.getWorkingDirectory());
+            logger.info("Invoke {}.exec for {}, working directory {}",
+                        shell.getClass().getName(), CybernodeLogUtil.logName(sElem), exDesc.getWorkingDirectory());
             manager = shell.exec(exDesc);
             forkedServiceListener.setName(serviceBindName);
             forkedServiceListener.setRegistryPort(regPort);
