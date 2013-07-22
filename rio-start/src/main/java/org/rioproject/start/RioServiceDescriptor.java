@@ -59,7 +59,7 @@ import java.util.jar.Manifest;
  * service objects to be placed in the same VM, with each object maintaining a
  * distinct codebase and policy.
  * <P>
- * Services need to implement the following "non-activatable constructor":
+ * Services need to implement the following constructor:
  * <blockquote>
  * 
  * <pre>
@@ -80,7 +80,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     static String COMPONENT = RioServiceDescriptor.class.getPackage().getName();
     static Logger logger = LoggerFactory.getLogger(COMPONENT);
     /**
-     * The parameter types for the "activation constructor".
+     * The parameter types for the constructor.
      */
     private static final Class[] actTypes = {String[].class, LifeCycle.class};
     private final String codebase;
