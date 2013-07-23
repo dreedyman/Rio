@@ -16,7 +16,6 @@
 package org.rioproject.examples.events.service;
 
 import org.rioproject.associations.Association;
-import org.rioproject.bean.PreDestroy;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
@@ -26,6 +25,8 @@ import org.rioproject.examples.events.HelloEvent;
 import org.rioproject.watch.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PreDestroy;
 
 /**
  * The HelloEventConsumer example

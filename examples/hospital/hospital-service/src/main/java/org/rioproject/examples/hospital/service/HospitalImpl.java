@@ -17,7 +17,6 @@ package org.rioproject.examples.hospital.service;
 
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationServiceListener;
-import org.rioproject.bean.Started;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.examples.hospital.*;
 import org.rioproject.examples.hospital.Doctor.Status;
@@ -25,6 +24,7 @@ import org.rioproject.watch.CounterWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +49,7 @@ public class HospitalImpl implements Hospital {
         context.getWatchRegistry().register(availableBeds);
     }
 
-    @Started
+    @PostConstruct
     @SuppressWarnings("unused") /* Injection point for Rio */
     public void started() {
         Association<Bed> association = context.getAssociationManagement().getAssociation(Bed.class,

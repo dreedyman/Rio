@@ -23,7 +23,6 @@ import net.jini.core.transaction.server.TransactionManager;
 import net.jini.space.JavaSpace;
 import org.rioproject.associations.AssociationProxyUtil;
 import org.rioproject.bean.PreAdvertise;
-import org.rioproject.bean.PreDestroy;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.CounterWatch;
@@ -32,6 +31,7 @@ import org.rioproject.watch.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
