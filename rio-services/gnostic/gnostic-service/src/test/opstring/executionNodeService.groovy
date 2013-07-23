@@ -21,10 +21,10 @@ deployment(name:'executionNodeService',  debug: 'true') {
      */
     service(name: 'ExecutionNodeService', fork: 'no') { //fork yes, works only in unix machines
         interfaces {
-            classes 'org.rioproject.gnostic.test.ExecutionNodeService'
+            classes 'org.rioproject.gnostic.service.test.ExecutionNodeService'
             artifact ref:'test'
         }
-        implementation(class:'org.rioproject.gnostic.test.ExecutionNodeServiceImpl') {
+        implementation(class:'org.rioproject.gnostic.service.test.ExecutionNodeServiceImpl') {
             artifact ref:'test'
         }
         maintain 1

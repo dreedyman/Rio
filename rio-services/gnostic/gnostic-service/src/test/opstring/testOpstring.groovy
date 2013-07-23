@@ -24,10 +24,10 @@ deployment(name: 'Test Deploy') {
 
     service(name: 'S1') {
         interfaces {
-            classes 'org.rioproject.gnostic.test.TestService'
+            classes 'org.rioproject.gnostic.service.test.TestService'
             resources 'test-classes/'
         }
-        implementation(class: 'org.rioproject.gnostic.test.TestServiceImpl') {
+        implementation(class: 'org.rioproject.gnostic.service.test.TestServiceImpl') {
              resources 'test-classes/'
         }
 

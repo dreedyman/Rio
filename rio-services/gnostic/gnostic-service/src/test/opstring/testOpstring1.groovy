@@ -28,10 +28,10 @@ deployment(name: 'Test Deploy 2') {
 
     service(name: 'S2') {
         interfaces {
-            classes 'org.rioproject.gnostic.test.TestService'
+            classes 'org.rioproject.gnostic.service.test.TestService'
             resources 'test-classes/'
         }
-        implementation(class: 'org.rioproject.gnostic.test.TestServiceImpl') {
+        implementation(class: 'org.rioproject.gnostic.service.test.TestServiceImpl') {
              resources 'test-classes/'
         }
 
@@ -44,10 +44,10 @@ deployment(name: 'Test Deploy 2') {
 
     service(name: 'S3') {
         interfaces {
-            classes 'org.rioproject.gnostic.test.TestService'
+            classes 'org.rioproject.gnostic.service.test.TestService'
             resources 'test-classes/'
         }
-        implementation(class: 'org.rioproject.gnostic.test.TestServiceImpl') {
+        implementation(class: 'org.rioproject.gnostic.service.test.TestServiceImpl') {
              resources 'test-classes/'
         }
 

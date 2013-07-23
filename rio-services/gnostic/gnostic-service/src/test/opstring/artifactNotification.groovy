@@ -16,11 +16,11 @@ deployment(name: 'Notification Using Artifact Test') {
     
     service(name: 'Test') {
         interfaces {
-            classes 'org.rioproject.gnostic.test.TestService'
+            classes 'org.rioproject.gnostic.service.test.TestService'
             artifact ref: 'test'
         }
 
-        implementation(class: 'org.rioproject.gnostic.test.TestServiceImpl') {
+        implementation(class: 'org.rioproject.gnostic.service.test.TestServiceImpl') {
             artifact ref: 'test'
         }
 
