@@ -132,15 +132,15 @@ public class BeanHelper {
         return (result);
     }
 
-    public static Class getMethodFirstParamType(final String methodName, final Object o) {
-        Class firstParamType = null;
+    public static Class<?> getMethodFirstParamType(final String methodName, final Object o) {
+        Class<?> firstParamType = null;
         Method[] methods = o.getClass().getMethods();
         for (Method method : methods) {
             if (method.getName().equals(methodName)) {
                 firstParamType = getMethodFirstParamType(method);
             }
         }
-        return (firstParamType);
+        return firstParamType;
     }
 
     public static Class getMethodFirstParamType(final Method method) {
@@ -151,6 +151,20 @@ public class BeanHelper {
 
         }
         return (firstParamType);
+    }
+
+    public static boolean hasAnnotation(final Object bean, final Class<? extends Annotation> annClass) {
+        boolean hasAnnotation = false;
+        if(bean!=null && annClass!=null) {
+            Method[] methods = bean.getClass().getMethods();
+            for (Method method : methods) {
+                if(method.getAnnotation(annClass)!=null) {
+                    hasAnnotation = true;
+                    break;
+                }
+            }
+        }
+        return hasAnnotation;
     }
 
     public static Method getAnnotatedMethod(final Object bean, final Class<? extends Annotation> annClass) {

@@ -31,8 +31,10 @@ import org.rioproject.resources.servicecore.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.management.*;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.rmi.Remote;
 import java.util.Arrays;
@@ -173,7 +175,9 @@ public class BeanAdapter extends ServiceBeanAdapter {
         logger.trace("The bean [{}], is in the process of being instantiated: {}",
                      bean.getClass().getName(), (rioStarting==null?"false":rioStarting));
         if(!(rioStarting!=null && rioStarting)) {
-            BeanHelper.invokeLifeCycle(Started.class, "postStart", bean);
+            Class<? extends Annotation> annotation = BeanHelper.hasAnnotation(bean, PostConstruct.class)?
+                                                     PostConstruct.class:Started.class;
+            BeanHelper.invokeLifeCycle(annotation, "postStart", bean);
         }
         return(o);
     }
@@ -316,7 +320,9 @@ public class BeanAdapter extends ServiceBeanAdapter {
     @Override
     public void destroy() {
         try {
-            BeanHelper.invokeLifeCycle(PreDestroy.class, "preDestroy", bean);
+            Class<? extends Annotation> annotation = BeanHelper.hasAnnotation(bean, javax.annotation.PreDestroy.class)?
+                                                     javax.annotation.PreDestroy.class:PreDestroy.class;
+            BeanHelper.invokeLifeCycle(annotation, "preDestroy", bean);
         } catch(Exception e) {
             String s = bean==null?"<unknown:null>":bean.getClass().getName();
             logger.warn("Invoking Bean [{}] preDestroy()", s, e);

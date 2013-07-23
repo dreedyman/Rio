@@ -31,7 +31,9 @@ import java.lang.annotation.*;
  * </ul>
  *
  * @author Dennis Reedy
+ * @deprecated Use {@link javax.annotation.PreDestroy} instead
  */
+@Deprecated
 @Documented
 @Retention (RetentionPolicy.RUNTIME)
 @Target (value= ElementType.METHOD)
