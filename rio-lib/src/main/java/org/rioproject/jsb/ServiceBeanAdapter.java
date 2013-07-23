@@ -44,7 +44,7 @@ import org.rioproject.config.ConfigHelper;
 import org.rioproject.config.Constants;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.core.jsb.*;
-import org.rioproject.cybernode.CybernodeLogUtil;
+import org.rioproject.cybernode.ServiceLogUtil;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.entry.OperationalStringEntry;
@@ -136,13 +136,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     private Exporter exporter;
     /** A reference to the compute resource for this ServiceBean */
     protected ComputeResource computeResource;
-    /**
-     * Observe the ComputeResource object associated with this ServiceBean. As
-     * this object changes the ComputeResourceUtilizationEntry will be changed
-     * to reflect a change in the quantitative and/or qualitative mechanisms
-     * reflected by the ComputeResource object
-     */
-    //protected ComputeResourceObserver computeResourceObserver;
     /** Thread that will do snapshots */
     protected SnapshotThread snapshotter;
     /** Manages persistence of the ServiceBeanContext */
@@ -270,7 +263,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
                 throw (ServiceBeanInstantiationException)cause;
             } else {
                 String message = String.format("ServiceBean %s instantiation failed",
-                                               CybernodeLogUtil.logName(context.getServiceElement()));
+                                               ServiceLogUtil.logName(context.getServiceElement()));
                 throw new ServiceBeanInstantiationException(message, t, true);
             }
         }

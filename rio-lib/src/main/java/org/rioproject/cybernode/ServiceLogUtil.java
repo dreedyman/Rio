@@ -22,8 +22,8 @@ import org.rioproject.opstring.ServiceElement;
 /**
  * Provides utilities for dealing with common logging formats for services being instantiated.
  */
-public final class CybernodeLogUtil {
-    private CybernodeLogUtil() {
+public final class ServiceLogUtil {
+    private ServiceLogUtil() {
     }
     
     public static String logName(final ServiceProvisionEvent event) {

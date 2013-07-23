@@ -24,7 +24,7 @@ import net.jini.jeri.BasicILFactory;
 import net.jini.jeri.BasicJeriExporter;
 import org.rioproject.config.ExporterConfig;
 import org.rioproject.core.jsb.DiscardManager;
-import org.rioproject.cybernode.CybernodeLogUtil;
+import org.rioproject.cybernode.ServiceLogUtil;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
@@ -176,7 +176,7 @@ public class ServiceBeanExecHandler {
                 logger.warn("Cannot get shell template from configuration, continue with default");
             }
             logger.info("Invoke {}.exec for {}, working directory {}",
-                        shell.getClass().getName(), CybernodeLogUtil.logName(sElem), exDesc.getWorkingDirectory());
+                        shell.getClass().getName(), ServiceLogUtil.logName(sElem), exDesc.getWorkingDirectory());
             manager = shell.exec(exDesc);
             forkedServiceListener.setName(serviceBindName);
             forkedServiceListener.setRegistryPort(regPort);
@@ -305,7 +305,7 @@ public class ServiceBeanExecHandler {
             if(manager!=null) {
                 serviceRecord.setPid(manager.getPid());
             }
-            logger.debug("Instantiation notification for {}", CybernodeLogUtil.logName(sElem));
+            logger.debug("Instantiation notification for {}", ServiceLogUtil.logName(sElem));
         }
 
         public void serviceDiscarded(final ServiceRecord record) {

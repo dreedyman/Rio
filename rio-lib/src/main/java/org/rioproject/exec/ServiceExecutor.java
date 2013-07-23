@@ -261,8 +261,8 @@ public class ServiceExecutor {
                                                         "matches that as found on the " +
                                                         "executing platform. If the " +
                                                         "ServiceExec is a result of " +
-                                                        "software downloading make sure " +
-                                                        "that all installation is " +
+                                                        "software downloading, make sure " +
+                                                        "that the installation is " +
                                                         "correct and that downloaded " +
                                                         "software has been extracted");
         exec();

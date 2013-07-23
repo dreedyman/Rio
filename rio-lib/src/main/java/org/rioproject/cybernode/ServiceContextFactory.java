@@ -29,24 +29,21 @@ import net.jini.config.Configuration;
  *
  * @author Dennis Reedy
  */
-public class JSBContextFactory implements ServiceBeanContextFactory {
+public class ServiceContextFactory implements ServiceBeanContextFactory {
     /**
      * @see org.rioproject.core.jsb.ServiceBeanContextFactory#create
      */
-    public ServiceBeanContext create(ServiceElement sElem,
-                                     ServiceBeanManager serviceBeanManager,
-                                     ComputeResource computeResource,
+    public ServiceBeanContext create(final ServiceElement sElem,
+                                     final ServiceBeanManager serviceBeanManager,
+                                     final ComputeResource computeResource,
                                      /* Optional */
-                                     Configuration sharedConfig) {
+                                     final Configuration sharedConfig) {
         if(sElem == null)
             throw new IllegalArgumentException("sElem is null");
         if(serviceBeanManager == null)
             throw new IllegalArgumentException("serviceBeanManager is null");
         if(computeResource == null)
             throw new IllegalArgumentException("computeResource is null");
-        return(new JSBContext(sElem,
-                              serviceBeanManager,
-                              computeResource,
-                              sharedConfig));
+        return(new JSBContext(sElem, serviceBeanManager, computeResource, sharedConfig));
     }
 }
