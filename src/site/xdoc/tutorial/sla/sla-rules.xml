@@ -150,7 +150,7 @@ end</pre>
             </p>
             <p>
                 Each rule has a <tt>global
-                <a href="../../apidocs/org/rioproject/gnostic/DeployedServiceContext.html">org.rioproject.gnostic.DeployedServiceContext</a></tt> set,
+                <a href="../../apidocs/org/rioproject/gnostic/DeployedServiceContext.html">org.rioproject.gnostic.service.DeployedServiceContext</a></tt> set,
                 providing context on deployed services. The <tt>DeployedServiceContext</tt> class
                 provides the support for the RHS of the rule to interface with Rio, and/or obtain
                 a proxy for an associated service enabling the RHS to invoke methods on specific
@@ -162,7 +162,7 @@ end</pre>
                 the <tt>DeployedServiceContext</tt> is used to increment (scale), the number of available Beds.
             </p>
 <pre name="code">
-global org.rioproject.gnostic.DeployedServiceContext context;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 
 declare Calculable
     @role(event)

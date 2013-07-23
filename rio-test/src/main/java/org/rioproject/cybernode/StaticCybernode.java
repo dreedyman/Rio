@@ -18,6 +18,9 @@ package org.rioproject.cybernode;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
+import org.rioproject.cybernode.service.Environment;
+import org.rioproject.cybernode.service.ServiceBeanContainerImpl;
+import org.rioproject.cybernode.service.ServiceBeanDelegateImpl;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.opstring.*;
@@ -62,7 +65,7 @@ import java.util.*;
  * @author Dennis Reedy
  */
 public class StaticCybernode {
-    private JSBContainer instantiator;
+    private ServiceBeanContainerImpl instantiator;
     //private final Map<Object, Object> serviceMap = new HashMap<Object, Object>();
     private final Set<ActivatedService> serviceSet = new HashSet<ActivatedService>();
 
@@ -91,7 +94,7 @@ public class StaticCybernode {
         }
         try {
             Configuration config = EmptyConfiguration.INSTANCE;
-            instantiator = new JSBContainer(config);
+            instantiator = new ServiceBeanContainerImpl(config);
             ComputeResource cr = new ComputeResource();
             String provisionRoot = Environment.setupProvisionRoot(true, config);
             cr.setPersistentProvisioningRoot(provisionRoot);
@@ -128,8 +131,8 @@ public class StaticCybernode {
             instantiator.activate(makeServiceElement(classname),
                                   null,  // OperationalStringManager
                                   null); // EventHandler (slas)
-        JSBDelegate delegate =
-            (JSBDelegate) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
+        ServiceBeanDelegateImpl delegate =
+            (ServiceBeanDelegateImpl) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
         Object impl = delegate.getImpl();
         serviceSet.add(new ActivatedService(impl, delegate.getProxy(), delegate));
         return impl;
@@ -299,7 +302,7 @@ public class StaticCybernode {
         ServiceBeanInstance instance = instantiator.activate(elem,
                                                              null,  // OperationalStringManager
                                                              null); // EventHandler (slas)
-        JSBDelegate delegate = (JSBDelegate) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
+        ServiceBeanDelegateImpl delegate = (ServiceBeanDelegateImpl) instantiator.getServiceBeanDelegate(instance.getServiceBeanID());
         Object impl = delegate.getImpl();
         serviceSet.add(new ActivatedService(impl, delegate.getProxy(), delegate));
         return impl;
@@ -326,9 +329,9 @@ public class StaticCybernode {
     private static class ActivatedService {
         private Object impl;
         private Object proxy;
-        private JSBDelegate delegate;
+        private ServiceBeanDelegateImpl delegate;
 
-        private ActivatedService(Object impl, Object proxy, JSBDelegate delegate) {
+        private ActivatedService(Object impl, Object proxy, ServiceBeanDelegateImpl delegate) {
             this.impl = impl;
             this.proxy = proxy;
             this.delegate = delegate;

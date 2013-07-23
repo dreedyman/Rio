@@ -16,6 +16,8 @@
 package org.rioproject.cybernode;
 
 import com.sun.jini.config.Config;
+import com.sun.jini.start.AggregatePolicyProvider;
+import com.sun.jini.start.LoaderSplitPolicyProvider;
 import net.jini.admin.Administrable;
 import net.jini.config.Configuration;
 import net.jini.id.ReferentUuid;
@@ -23,6 +25,8 @@ import net.jini.id.Uuid;
 import net.jini.io.MarshalledInstance;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
+import net.jini.security.policy.DynamicPolicyProvider;
+import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.bean.BeanAdapter;
@@ -55,8 +59,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Policy;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,7 +76,15 @@ public class ServiceBeanLoader {
     private static final String CONFIG_COMPONENT = "service.load";
     /** A Logger */
     private static Logger logger = LoggerFactory.getLogger(ServiceBeanLoader.class.getName());
-    private static final Map<String, AtomicInteger> counterTable = new ConcurrentHashMap<String, AtomicInteger>();
+    private final static AggregatePolicyProvider globalPolicy;
+    private final static Policy initialGlobalPolicy;
+    static {
+        initialGlobalPolicy = Policy.getPolicy();
+        globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
+        Policy.setPolicy(globalPolicy);
+    }
+    private static final Map<String, AtomicInteger> counterTable =
+        Collections.synchronizedMap(new HashMap<String, AtomicInteger>());
     private static final List<ProvisionedResources> provisionedResources =
         Collections.synchronizedList(new ArrayList<ProvisionedResources>());
     private final static ExecutorService service = Executors.newCachedThreadPool();
@@ -166,6 +178,8 @@ public class ServiceBeanLoader {
      * @param elem The ServiceElement to use as a reference
      */
     public static void unload(final ClassLoader loader, final ServiceElement elem) {
+        if(globalPolicy!=null)
+            globalPolicy.setPolicy(loader, null);
         checkAndMaybeCleanProvisionedResources(elem);
         service.submit(new Runnable() {
             @Override
@@ -260,7 +274,7 @@ public class ServiceBeanLoader {
                 implJARs = implPR.getJars();
             } catch(Exception e) {
                 throw new ServiceBeanInstantiationException("Unable to provision JARs for " +
-                                                            "service "+ CybernodeLogUtil.logName(sElem), e);
+                                                            "service "+ ServiceLogUtil.logName(sElem), e);
             }
         }
 
@@ -320,6 +334,32 @@ public class ServiceBeanLoader {
                              className, buffer.toString(), jsbCL.getClassAnnotation());
             }
 
+            /* Get the servicePolicyFile from the environment. If the
+             * property has not been set use the policy set for the VM */
+            String servicePolicyFile = System.getProperty("rio.service.security.policy",
+                                                          System.getProperty("java.security.policy"));
+            logger.trace("{} Service security policy file {}",
+                         ServiceLogUtil.logName(sElem), servicePolicyFile);
+            if(servicePolicyFile!=null) {
+                logger.trace("Set {} service security to LoaderSplitPolicyProvider", ServiceLogUtil.logName(sElem));
+
+                DynamicPolicyProvider service_policy =
+                    new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
+                LoaderSplitPolicyProvider splitServicePolicy =
+                    new LoaderSplitPolicyProvider(jsbCL,
+                                                  service_policy,
+                                                  new DynamicPolicyProvider(initialGlobalPolicy));
+                /*
+                 * Grant "this" code enough permission to do its work under the
+                 * service policy, which takes effect (below) after the context
+                 * loader is (re)set.
+                 *//*
+                splitServicePolicy.grant(ServiceBeanLoader.class,
+                                         null, *//* Principal[] *//*
+                                         new Permission[]{new AllPermission()});*/
+                globalPolicy.setPolicy(jsbCL, splitServicePolicy);
+            }
+
             /* Reload the shared configuration using the service's classloader */
             //String[] configFiles = container.getSharedConfigurationFiles().toArray(new String[sharedConfigurationFiles.size()]);
             Configuration sharedConfiguration = container.getSharedConfiguration();
@@ -330,7 +370,7 @@ public class ServiceBeanLoader {
                                                                   CONFIG_COMPONENT,
                                                                   "serviceBeanContextFactory",
                                                                   ServiceBeanContextFactory.class,
-                                                                  new JSBContextFactory());
+                                                                  new ServiceContextFactory());
             /* Create the ServiceBeanContext */
             context = serviceBeanContextFactory.create(sElem,
                                                        jsbManager,
@@ -366,7 +406,7 @@ public class ServiceBeanLoader {
                                                            ServiceBeanFactory.class,
                                                            new JSBLoader());
             logger.trace("service = {}, serviceBeanFactory = {}",
-                          CybernodeLogUtil.logName(sElem), serviceBeanFactory);
+                          ServiceLogUtil.logName(sElem), serviceBeanFactory);
             created = serviceBeanFactory.create(context);
             logger.trace("Created ServiceBeanFactory.Created {}", created);
             Object impl = created.getImpl();
@@ -382,7 +422,7 @@ public class ServiceBeanLoader {
             }
 
             /* Get the ProxyPreparer */
-            logger.trace("Get the ProxyPreparer for {}", CybernodeLogUtil.logName(sElem));
+            logger.trace("Get the ProxyPreparer for {}", ServiceLogUtil.logName(sElem));
             
             ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(context.getConfiguration(),
                                                                                   CONFIG_COMPONENT,
@@ -566,7 +606,7 @@ public class ServiceBeanLoader {
 
         if(logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Service ").append(CybernodeLogUtil.logName(elem)).append(" ");
+            sb.append("Service ").append(ServiceLogUtil.logName(elem)).append(" ");
             if(implArtifact!=null)
                 sb.append("impl artifact: [").append(implPR.getArtifact()).append("] ");
             sb.append("impl jars: ");

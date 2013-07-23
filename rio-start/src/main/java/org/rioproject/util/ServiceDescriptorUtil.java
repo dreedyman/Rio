@@ -259,7 +259,7 @@ public final class ServiceDescriptorUtil {
     public static ServiceDescriptor getCybernode(final String policy, final String... cybernodeConfig) throws IOException {
         String cybernodeClasspath = getCybernodeClasspath();
         String cybernodeCodebase = "artifact:org.rioproject.cybernode/cybernode-proxy/"+ RioVersion.VERSION;
-        String implClass = "org.rioproject.cybernode.CybernodeImpl";
+        String implClass = "org.rioproject.cybernode.service.CybernodeImpl";
         return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
     }
 
@@ -317,7 +317,7 @@ public final class ServiceDescriptorUtil {
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
-        String implClass = "org.rioproject.monitor.ProvisionMonitorImpl";
+        String implClass = "org.rioproject.monitor.service.ProvisionMonitorImpl";
         String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
 
         return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
