@@ -43,12 +43,9 @@ class StartMonitorConfig {
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('RIO_HOME')
 
-        def websterRoots = [rioHome+'/lib-dl', ';',
-                            rioHome+'/lib',    ';',
-                            rioHome+'/deploy', ';',
-                            m2Repo]
+        def websterRoots = [rioHome+'/deploy', ';', m2Repo]
 
-        String policyFile = rioHome+'/policy/policy.all'
+        String policyFile = rioHome+'/policy/rio.policy'
 
         def serviceDescriptors = [
             ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),

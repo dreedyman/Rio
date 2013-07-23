@@ -67,6 +67,7 @@
             <directory>${basedir}/src/main/policy</directory>
             <includes>
                 <include>policy.all</include>
+                <include>rio.policy</include>
             </includes>
             <fileMode>0644</fileMode>
             <outputDirectory>/policy</outputDirectory>

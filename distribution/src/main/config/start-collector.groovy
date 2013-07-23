@@ -36,7 +36,7 @@ class StartCollectorConfig {
         ServiceDescriptorUtil.checkForLoopback()
         String rioHome = System.getProperty('RIO_HOME')
 
-        String policyFile = rioHome+'/policy/policy.all'
+        String policyFile = rioHome+'/policy/rio.policy'
 
         StringBuilder pathBuilder = new StringBuilder()
         pathBuilder.append(rioHome).append(File.separator).append("lib").append(File.separator).append("event-collector-service.jar")

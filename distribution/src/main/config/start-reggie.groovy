@@ -31,7 +31,7 @@ class StartReggieConfig {
         String rioHome = System.getProperty('RIO_HOME')
         def websterRoots = [rioHome+'/lib-dl', ';', rioHome+'/lib']
 
-        String policyFile = rioHome+'/policy/policy.all'
+        String policyFile = rioHome+'/policy/rio.policy'
         def reggieConfig = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']
 
         def serviceDescriptors = [
