@@ -39,7 +39,7 @@ deployment(name: 'Tomcat Deploy') {
          * overwrite: 'no', removeOnDestroy: false
          */
         software(name: 'Tomcat', version: '6.0.16', removeOnDestroy: true) {
-            install source: 'https://elastic-grid.s3.amazonaws.com/tomcat/apache-tomcat-6.0.16.zip',
+            install source: 'http://rio-project.org/examples/tomcat/apache-tomcat-6.0.16.zip',
                     target: '${RIO_HOME}/system/external/tomcat',
                     unarchive: true
             postInstall(removeOnCompletion: false) {
