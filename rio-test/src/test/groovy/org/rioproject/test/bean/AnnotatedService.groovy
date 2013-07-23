@@ -1,17 +1,12 @@
 package org.rioproject.test.bean
 
-import org.rioproject.bean.Initialized
-import org.rioproject.bean.Started
-import org.rioproject.bean.PreDestroy
 import net.jini.config.Configuration
-import org.rioproject.bean.SetConfiguration
-import org.rioproject.bean.SetServiceBeanContext
-import org.rioproject.core.jsb.ServiceBeanContext
-import org.rioproject.bean.PreAdvertise
-import org.rioproject.bean.PostUnAdvertise
-import org.rioproject.bean.SetParameters
-import org.rioproject.bean.SetServiceBean
+import org.rioproject.bean.*
 import org.rioproject.core.jsb.ServiceBean
+import org.rioproject.core.jsb.ServiceBeanContext
+
+import javax.annotation.PostConstruct
+import javax.annotation.PreDestroy
 
 /**
  * Test bean annotations
@@ -34,7 +29,7 @@ public class AnnotatedService {
         order.add("initialized")
     }
 
-    @Started
+    @PostConstruct
     public void started() {
         startedInvoked = true
         order.add("started")

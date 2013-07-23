@@ -177,26 +177,26 @@ public class Webster implements Runnable {
         boolean parsedPort = false;
         for(int i = 0; i < options.length; i++) {
             String option = options[i];
-            if(option.equals("-port")) {
+            if("-port".equals(option)) {
                 i++;
                 this.port = Integer.parseInt(options[i]);
                 parsedPort = true;
-            } else if(option.equals("-portRange")) {
+            } else if("-portRange".equals(option)) {
                 if(parsedPort)
                     throw new IllegalArgumentException("both -port and -portRange " +
                                                        "cannot be provided, choose one or the other");
                 i++;
                 socketFactory = parsePortRange(options[i]);
-            } else if(option.equals("-roots")) {
+            } else if("-roots".equals(option)) {
                 i++;
                 roots = options[i];
-            } else if(option.equals("-bindAddress")) {
+            } else if("-bindAddress".equals(option)) {
                 i++;
                 bindAddress = options[i];
-            } else if(option.equals("-maxThreads")) {
+            } else if("-maxThreads".equals(option)) {
                 i++;
                 maxThreads = Integer.parseInt(options[i]);
-            } else if(option.equals("-soTimeout")) {
+            } else if("-soTimeout".equals(option)) {
                 i++;
                 soTimeout = Integer.parseInt(options[i]);
             } else {
@@ -279,17 +279,17 @@ public class Webster implements Runnable {
             System.out.println("Webster listening on port : " + port);
         if(logger.isDebugEnabled())
             logger.debug("Webster listening on port : " + port);
-        try {
+        //try {
             pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
             //new ThreadPool("Webster", minThreads, maxThreads);
             if(debug)
                 System.out.println("Webster maxThreads ["+maxThreads+"]");
             if(logger.isDebugEnabled())
                 logger.debug("Webster maxThreads [{}]", maxThreads);
-        } catch(Exception e) {
-            logger.error("Could not create ThreadPool", e);
-            throw new RuntimeException("Could not create Thread Pool");
-        }
+        //} catch(Exception e) {
+        //    logger.error("Could not create ThreadPool", e);
+        //    throw new RuntimeException("Could not create Thread Pool");
+        //}
         if(soTimeout>0) {
             if(debug)
                 System.out.println("Webster Socket SO_TIMEOUT set to ["+soTimeout+"] millis");
@@ -464,13 +464,13 @@ public class Webster implements Runnable {
                         fileName = tokenizer.nextToken();
                         if (fileName.startsWith("/"))
                             fileName = fileName.substring(1);
-                        if (token.equals("GET")) {
+                        if ("GET".equals(token)) {
                             header.setProperty("GET", fileName);
-                        } else if (token.equals("PUT")) {
+                        } else if ("PUT".equals(token)) {
                             header.setProperty("PUT", fileName);
-                        } else if (token.equals("DELETE")) {
+                        } else if ("DELETE".equals(token)) {
                             header.setProperty("DELETE", fileName);
-                        } else if (token.equals("HEAD")) {
+                        } else if ("HEAD".equals(token)) {
                             header.setProperty("HEAD", fileName);
                         }
                         while (tokenizer.hasMoreTokens()) {
@@ -640,8 +640,8 @@ public class Webster implements Runnable {
     }
 
     class Head implements Runnable {
-        private Socket client;
-        private String fileName;
+        private final Socket client;
+        private final String fileName;
 
         Head(Socket s, String fileName) {
             client = s;
@@ -717,7 +717,7 @@ public class Webster implements Runnable {
                 clientStream.writeBytes(header);
                 clientStream.flush();
                 close(clientStream);
-            } catch(Exception e) {
+            } catch(IOException e) {
                 logger.warn("Error closing Socket", e);
             } finally {
                 try {
@@ -730,8 +730,8 @@ public class Webster implements Runnable {
     }
 
     class GetFile implements Runnable {
-        private Socket client;
-        private String fileName;
+        private final Socket client;
+        private final String fileName;
         private int fileLength;
 
         GetFile(Socket s, String fileName) {
@@ -833,7 +833,7 @@ public class Webster implements Runnable {
                     logger.debug(logData.toString());
                 clientStream.flush();
                 clientStream.close();
-            } catch(Exception e) {
+            } catch(IOException e) {
                 logger.warn("Closing Socket", e);
             } finally {
                 try {
@@ -846,8 +846,8 @@ public class Webster implements Runnable {
         } // end of GetFile
     }
     class PutFile implements Runnable {
-        private Socket client;
-        private String fileName;
+        private final Socket client;
+        private final String fileName;
         private Properties rheader;
 
         PutFile(Socket s, String fileName, Properties header) {
@@ -895,7 +895,7 @@ public class Webster implements Runnable {
                 clientStream.flush();
                 close(requestedFile);
                 close(clientStream);
-            } catch(Exception e) {
+            } catch(IOException e) {
                 logger.warn("Closing Socket", e);
             } finally {
                 try {
@@ -919,8 +919,8 @@ public class Webster implements Runnable {
     } // end of PutFile
     
     class DelFile implements Runnable {
-        private Socket client;
-        private String fileName;
+        private final Socket client;
+        private final String fileName;
 
         DelFile(Socket s, String fileName) {
             client = s;
@@ -955,7 +955,7 @@ public class Webster implements Runnable {
                 clientStream.writeBytes(header);
                 clientStream.flush();
                 close(clientStream);
-            } catch(Exception e) {
+            } catch(IOException e) {
                 logger.warn("Closing Socket", e);
             } finally {
                 try {

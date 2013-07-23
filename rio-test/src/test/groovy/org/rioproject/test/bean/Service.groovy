@@ -16,13 +16,9 @@
 package org.rioproject.test.bean
 
 import net.jini.config.Configuration
-import org.rioproject.bean.Initialized
-import org.rioproject.bean.PreAdvertise
-import org.rioproject.bean.Started
-import org.rioproject.bean.PreDestroy
-import org.rioproject.bean.CreateProxy
-import org.rioproject.bean.SetConfiguration
-import org.rioproject.bean.SetParameters
+import org.rioproject.bean.*
+
+import javax.annotation.PreDestroy
 
 public class Service implements ServiceInterface {
     boolean initializedInvoked = false

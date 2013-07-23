@@ -67,6 +67,7 @@ public class ForkedServicePreDestroyTest {
                 Thread.sleep(interval);
                 waited += interval;
             }
+            Assert.assertFalse("The marker file should not exist", marker.exists());
             long t1 = System.currentTimeMillis();
             System.err.println("Elapsed time to marker being removed: "+((double)(t1-t0)/1000));
         } catch(Exception e) {

@@ -22,7 +22,7 @@ import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
 import org.junit.Test;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.cybernode.JSBContextFactory;
+import org.rioproject.cybernode.ServiceContextFactory;
 import org.rioproject.jsb.JSBManager;
 import org.rioproject.opstring.GroovyDSLOpStringParser;
 import org.rioproject.opstring.OpString;
@@ -57,7 +57,7 @@ public class LoadConfigurationAsHttpResourceTest {
                                                         null);    // loadPath
         ServiceElement serviceElement = opStrings.get(0).getServices()[0];
 
-        ServiceBeanContext context = new JSBContextFactory().create(serviceElement,
+        ServiceBeanContext context = new ServiceContextFactory().create(serviceElement,
                                                                     new JSBManager(serviceElement,
                                                                                    InetAddress.getLocalHost().getHostName(),
                                                                                    InetAddress.getLocalHost().getHostAddress(),

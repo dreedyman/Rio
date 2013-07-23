@@ -15,13 +15,13 @@
  */
 package org.rioproject.test.simple;
 
-import org.rioproject.bean.PreDestroy;
-import org.rioproject.bean.Started;
 import org.rioproject.core.jsb.ServiceBeanContext;
 import org.rioproject.exec.ExecDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -67,7 +67,7 @@ public class ForkImpl implements Fork {
         return true;
     }
 
-    @Started
+    @PostConstruct
     public void createMarker() throws IOException {
         File marker = getMarkerFile();
         if(!marker.exists() && marker.createNewFile())
