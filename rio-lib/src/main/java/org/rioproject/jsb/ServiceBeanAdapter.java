@@ -732,6 +732,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if(context instanceof JSBContext) {
             attrList.addAll(((JSBContext)context).getAttributes());
         }
+        attrList.addAll(context.getServiceBeanConfig().getAdditionalEntries());
 
         if(logger.isTraceEnabled())
             logger.trace("[{}] do the join", ServiceElementUtil.getLoggingName(context));

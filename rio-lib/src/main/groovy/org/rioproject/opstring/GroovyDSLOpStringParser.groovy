@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 package org.rioproject.opstring
-
 import net.jini.core.discovery.LookupLocator
+import net.jini.core.entry.Entry
 import org.rioproject.RioVersion
 import org.rioproject.associations.AssociationDescriptor
 import org.rioproject.deploy.StagedData
@@ -39,14 +39,13 @@ import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 import org.slf4j.LoggerFactory
 
+import javax.annotation.processing.Processor
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.Manifest
 import java.util.logging.Level
-import javax.annotation.processing.Processor
 
 import static org.rioproject.opstring.OpStringParserGlobals.*
-
 /**
  * A parser that handles the Groovy Domain Specific Language support for Rio
  *
@@ -316,6 +315,10 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 } else {
                     currentService.getComponentBundle().setArtifact(opStringArtifacts.get(refId))
                 }
+            }
+
+            emc.attributes = { Entry... entries ->
+                currentService.getServiceBeanConfig().addAdditionalEntries(entries)
             }
 
             emc.resources = { String... resources ->
@@ -692,7 +695,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                     exportBundle.artifact = "org.rioproject.gnostic:gnostic-api:${RioVersion.VERSION}"
 
                     ClassBundle componentBundle = new ClassBundle()
-                    componentBundle.className = 'org.rioproject.gnostic.GnosticImpl'
+                    componentBundle.className = 'org.rioproject.gnostic.service.GnosticImpl'
                     componentBundle.artifact = "org.rioproject.gnostic:gnostic-service:${RioVersion.VERSION}"
 
                     currentService.componentBundle = componentBundle
