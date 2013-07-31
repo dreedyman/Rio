@@ -62,6 +62,7 @@ import org.rioproject.logging.ServiceLogEventHandler;
 import org.rioproject.logging.ServiceLogEventHandlerHelper;
 import org.rioproject.logging.ServiceLogEventPublisherImpl;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.resolver.Artifact;
 import org.rioproject.resources.persistence.PersistentStore;
 import org.rioproject.resources.servicecore.Joiner;
 import org.rioproject.resources.servicecore.LandlordLessor;
@@ -823,18 +824,14 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
 
     private String getVersionFromArtifact(final String a) {
         String version = null;
-        String[] parts = a.split(":");
-        if(parts.length<3 )
-            return null;
-        if (parts.length > 3) {
-            version = parts[3];
-        } else {
-            if (parts.length > 2)
-                version = parts[2];
+        try {
+            Artifact artifact = new Artifact(a);
+            version =  artifact.getVersion();
+        } catch(IllegalArgumentException e) {
+            logger.warn("Unable to determine artifact version for {}", a);
         }
         return version;
     }
-
 
     /**
      * @see org.rioproject.jsb.ServiceBeanAdapterMBean#unadvertise
