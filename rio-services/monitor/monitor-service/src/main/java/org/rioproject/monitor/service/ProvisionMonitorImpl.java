@@ -294,11 +294,12 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         }
         if(build==null)
             build="0";
-        return(new ServiceInfo(context.getServiceElement().getName(),
-                               "",
-                               "",
-                               "v"+ RioVersion.VERSION+" Build "+build,
-                               "",""));
+        return new ServiceInfo(context.getServiceElement().getName(),
+                               "Asarian Technologies LLC",
+                               "Rio Project",
+                               RioVersion.VERSION,
+                               "Build "+build,
+                               "");
     }
 
     /*

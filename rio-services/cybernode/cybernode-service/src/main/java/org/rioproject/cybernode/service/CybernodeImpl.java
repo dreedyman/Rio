@@ -1022,12 +1022,12 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         }
         if(build==null)
             build="0";
-        return(new ServiceInfo(context.getServiceElement().getName(),
-                               "",
+        return new ServiceInfo(context.getServiceElement().getName(),
+                               "Asarian Technologies LLC",
                                "Rio Project",
-                               RioVersion.VERSION+" Build "+build,
-                               "",
-                               ""));
+                               RioVersion.VERSION,
+                               "Build "+build,
+                               "");
     }
 
     private URL[] getUIJars() throws MalformedURLException {
