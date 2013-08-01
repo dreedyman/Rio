@@ -32,16 +32,6 @@ import org.rioproject.opstring.ServiceElement;
  * matching does not allow one to match services based on specific attribute
  * values, this additional matching mechanism can be exploited by the entity
  * to match on specific service configuration attributes.
- * <p>
- * Concrete implementations of this interface are obtained during the
- * provisioning of services and declared as part of the
- * <tt>&lt;Association&gt;</tt> element.
- * <p>
- * <tt>
- * &lt;Association&gt; Name="..." Type="..."&gt;<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;management filter="foo.bar.Baz"/&gt;<br>
- * &lt;/Association&gt;<br>
- * </tt>
  *
  * @author Dennis Reedy
  */
