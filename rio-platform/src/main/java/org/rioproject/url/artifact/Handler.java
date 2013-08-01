@@ -74,7 +74,13 @@ public class Handler extends URLStreamHandler {
     private final ConcurrentMap<Artifact, URL> cache = new ConcurrentHashMap<Artifact, URL>();
 
     public Handler() {
-        ScheduledExecutorService snapshotReaper = Executors.newScheduledThreadPool(1);
+        ScheduledExecutorService snapshotReaper = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+            @Override public Thread newThread(Runnable runnable) {
+                Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
         snapshotReaper.scheduleAtFixedRate(new SnapShotReaper(), 3, 3, TimeUnit.HOURS);
     }
 
