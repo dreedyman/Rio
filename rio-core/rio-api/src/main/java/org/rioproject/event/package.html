@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Event Framework</title>
+</head>
+<body>
+<p>Provides classes and interfaces which enable support for distributed
+events. The distributed event model found within Rio extends Jini&trade;
+events
+providing an easier to use model with increased semantics. The Rio
+event model makes it easy to implement Jini events. The Rio event model
+provides a straightforward producer-consumer model with built in
+leasing.</p>
+<p>The Rio Event Model provides the basis to craft a loosely coupled
+architecture that allows event producers to advertise event attributes,
+and event clients to discover event producers that produce the event(s)
+they are interested in.&nbsp; </p>
+<p>This capability enables a peer-to-peer semantic allowing the
+exchange of event objects that indicate a change in state in the
+distributed system. Event consumers construct leased event
+registrations and are notified of the change in state by event
+producers.&nbsp; </p>
+<p>By using a loosely coupled architecture, it becomes easier to adapt
+to changes. Interdependencies found in tightly coupled RPC oriented
+environments are removed with loosely coupled architectures. We can
+replace (or add) implementations at either end (event producer or event
+consumer) without altering existing components. By using a loosely
+coupled architecture we are able to more easily adapt to an unforeseen
+forward fit, replace defective component(s) online and scale a system
+dynamically. Overall these capabilities greatly minimize total
+development risk and cost. <br>
+</p>
+<p>The following event mechanisms are discussed below:<br>
+</p>
+<ul>
+  <li><a href="#Event_Descriptors">Event Descriptors</a></li>
+  <li><a href="#Event_Producers_">Event Producers</a></li>
+  <li><a href="#Event_Consumer_">Event Consumers</a></li>
+  <li><a href="#Configuring_the_Event_Consumer">Configuring the Event Consumer</a></li>
+</ul>
+<br>
+<p> </p>
+<p><b><font size="+1"><a name="Event_Descriptors"></a>Event Descriptors</font></b>
+<br>
+A {@link org.rioproject.event.EventDescriptor} provides a simple semantic
+for
+specifying and
+discovering event producers of a specific kind of event. A {@link
+org.rioproject.event.EventDescriptor} is an attribute, part of the
+description
+of an <a href="#Event_Producers_">Event Producer</a> that is producing
+an event object described by a {@link
+org.rioproject.event.EventDescriptor}.&nbsp; </p>
+Event objects may be simple to just indicate that an event has
+occurred or be rich containing other information about the event. For
+example, a snapshot of an object's state may be included with the event
+as it is delivered.<br>
+<p>EventDescriptor&#8217;s may also be used for matching events for
+consumption. This will be explained in the <a href="#Event_Consumer_">Event
+Consumer</a> section
+below.&nbsp; </p>
+<p><b><font size="+1"><a name="Event_Producers_"></a>Event Producers</font></b>
+<br>
+Any service can be an Event Producer, that is. a service that has a
+zero-to-many dependency between objects so that when its state changes
+all its dependents are notified. This semantic is also known as the
+observer-observable and/or publish-subscribe pattern.&nbsp; </p>
+<p>Rio adds to this capability by providing the notion that event
+producers have the flexibility to choose a notification policy, that is
+to say. event producers dictate event distribution mechanisms.&nbsp; </p>
+Event distribution mechanisms are based on an abstract EventHandler
+framework allowing the creation of multiple event dispatch mechanisms.<br>
+<ul>
+  <li> <b>DispatchEventHandler</b></li>
+A change of state in a DispatchEventHandler causes all of its valid
+event registrants&nbsp;(remote event listeners) to be notified.
+The EventProducer invokes the DispatchEventHandler&#8217;s fire() method to
+fire the event object reflecting the change in state of the
+EventProducer. The order in which notifications will be delivered is
+the order in which they registered interest&nbsp; <br>
+&nbsp; <li> <b>RoundRobinEventHandler</b></li>
+A change of state in a RoundRobinEventHandler causes a single valid
+event registrant to be notified of the change in a round-robin fashion.
+The EventProducer invokes the RoundRobinEventHandler&#8217;s fire() method to
+fire the event object reflecting the change in state of the
+EventProducer. The order in which notifications will be delivered is
+the order in which they registered interest&nbsp;
+  <p>For each subsequent notification the next event registrant
+in the list will be notified. If event registrants are removed from the
+collection of event registrants and the notification ordinal references
+the removed event registrant, then the notification ordinal will
+reference the next event registrant in the collection</p>
+</ul>
+<br>
+<font size="+1"><a name="Event_Consumer_"></a>Event Consumer</font> <br>
+The recipients of an EventProducer&#8217;s event object are {@link
+org.rioproject.event.EventConsumer} instances.
+The EventConsumer framework provides helper classes that manage the
+discovery of EventProducer instances that provide support for user
+defined events. <a href="#Configuring_the_Event_Consumer"><br>
+</a>
+<ul>
+  <li> <b>BasicEventConsumer</b></li>
+The {@link org.rioproject.event.BasicEventConsumer} implements the{@link
+org.rioproject.event.EventConsumer}&nbsp; interface, which
+extends the Jini {@link net.jini.core.event.RemoteEventListener}. The
+{@link org.rioproject.event.BasicEventConsumer}, used as a
+local utility, manages the event registration and leasing of event
+registrations on behalf of a client. In this manner, clients wishing to
+easily register (subscribe) for the notification of an event in the
+distributed system need not be overly concerned with the underlying
+semantics and management of event registrations, leases and
+events&nbsp; <span style="font-weight: bold;"><br>
+  </span>
+</ul>
+<ul>
+  <li> <b>DynamicEventConsumer</b></li>
+The DynamicEventConsumer extends the BasicEventConsumer and provides
+the capability to discover when new EventProducer instances that
+produce interested events appear on the network and to recognize when
+EventProducer instances that produce interested events leave the
+network&nbsp; <br>
+&nbsp; <li> <b>PooledEventConsumer</b></li>
+The PooledEventConsumer extends DynamicEventConsumer and provides the
+capability to use a Thread Pool to simultaneously handle multiple
+events.
+</ul>
+<br>
+<span style="font-weight: bold;"><a
+ name="Configuring_the_Event_Consumer"></a>Configuring the Event
+Consumer<br>
+</span>The <span style="font-family: monospace;">BasicEventConsumer</span>
+(and it's specializations) support the following configuration
+entries;
+where
+the configuration entry name are associated with the component name
+<span style="font-family: monospace;">org.rioproject.event</span><br>
+<br>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">eventConsumerExporter</span><br
+ style="font-weight: bold; font-family: courier new,courier,monospace;">
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
+          </td>
+          <td style="vertical-align: top; font-family: monospace;">Exporter
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;"><code> new <code>BasicJeriExporter</code>(<code>TcpServerEndpoint.getInstance</code>(0),<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; new <code>BasicILFactory</code>(),<br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; false, false)</code> </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">The exporter used to export
+the <span style="font-family: monospace;">BasicEventConsumer</span> as
+a remote event listener. A new exporter is obtained every
+time a <span style="font-family: monospace;">BasicEventConsumer </span>needs
+to export itself</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">eventLeasePreparer</span>
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
+          </td>
+          <td style="vertical-align: top;"> <code>ProxyPreparer</code></td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;"><code>new <code>BasicProxyPreparer</code>()</code>
+          </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;"> Preparer for the leases
+returned when a <span style="font-family: monospace;">BasicEventConsumer</span>
+registers with the event mechanism of any of the services</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><span
+ style="font-weight: bold; font-family: courier new,courier,monospace;">eventLeaseDuration</span>
+    <table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+      <tbody>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Type:<br>
+          </td>
+          <td style="vertical-align: top;"> <code>long</code></td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
+          </td>
+          <td style="vertical-align: top;"><code>30 seconds</code> </td>
+        </tr>
+        <tr>
+          <td
+ style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
+          </td>
+          <td style="vertical-align: top;">The length (in milliseconds)
+the EventRegistration lease duration should be. This value should not
+be too small as it will result in frequent network traffic</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+&nbsp;<br>
+&nbsp;
+<p> </p>
+<p> </p>
+</body>
+</html>
