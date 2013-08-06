@@ -16,7 +16,7 @@
 package org.rioproject.util;
 
 /**
- * Interface allowing ascii banner to b displayed
+ * Interface allowing ascii banner to be displayed
  */
 public interface BannerProvider {
     /**
