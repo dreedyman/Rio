@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.resources.util;
+package org.rioproject.util;
 
 import com.sun.jini.constants.ThrowableConstants;
 import org.rioproject.deploy.ServiceBeanInstantiationException;

@@ -17,7 +17,7 @@ package org.rioproject.resources.servicecore;
 
 import com.sun.jini.admin.DestroyAdmin;
 import net.jini.admin.Administrable;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 
 import java.io.PrintStream;
 import java.rmi.RemoteException;

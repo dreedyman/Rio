@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.resources.util;
+package org.rioproject.util;
 
 import java.io.InputStream;
 import java.io.IOException;

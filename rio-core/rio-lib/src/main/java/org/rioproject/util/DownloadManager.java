@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.resources.util;
+package org.rioproject.util;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -682,7 +682,7 @@ public class DownloadManager {
         try {
             if(args.length < 2) {
                 System.out.println(
-                    "Usage: org.rioproject.resources.util.DownloadManager " +
+                    "Usage: org.rioproject.util.DownloadManager " +
                     "download-URL install-root");
                 System.exit(-1);
             }
