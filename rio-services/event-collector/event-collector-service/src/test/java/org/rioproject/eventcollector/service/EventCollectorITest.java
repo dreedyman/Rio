@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.eventcollector.api.EventCollector;
 import org.rioproject.eventcollector.api.EventCollectorRegistration;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.FileUtils;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;

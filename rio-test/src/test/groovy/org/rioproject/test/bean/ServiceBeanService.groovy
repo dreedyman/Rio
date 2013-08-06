@@ -15,21 +15,16 @@
  */
 package org.rioproject.test.bean
 
-import org.rioproject.jsb.ServiceBeanAdapter
-import org.rioproject.bean.Initialized
-import org.rioproject.bean.Started
-import org.rioproject.bean.PreDestroy
-import org.rioproject.bean.SetConfiguration
 import net.jini.config.Configuration
-import org.rioproject.bean.SetParameters
-import org.rioproject.bean.CreateProxy
-import net.jini.id.UuidFactory
 import net.jini.id.Uuid
-import org.rioproject.resources.servicecore.AbstractProxy
-import java.util.concurrent.atomic.AtomicInteger
-import org.rioproject.bean.SetServiceBeanContext
+import net.jini.id.UuidFactory
+import org.rioproject.bean.*
 import org.rioproject.core.jsb.ServiceBeanContext
+import org.rioproject.jsb.ServiceBeanAdapter
+import org.rioproject.proxy.service.AbstractProxy
 
+import javax.annotation.PreDestroy
+import java.util.concurrent.atomic.AtomicInteger
 
 class ServiceBeanService extends ServiceBeanAdapter implements ServiceBeanServiceInterface {
     AtomicInteger count = new AtomicInteger(0)

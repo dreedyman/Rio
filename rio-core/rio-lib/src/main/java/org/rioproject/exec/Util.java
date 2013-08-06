@@ -15,7 +15,7 @@
  */
 package org.rioproject.exec;
 
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.FileUtils;
 
 import java.io.*;
 import java.lang.reflect.Method;

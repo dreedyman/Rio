@@ -20,7 +20,7 @@ import org.rioproject.opstring.OAR;
 import org.rioproject.opstring.OARException;
 import org.rioproject.opstring.OARUtil;
 import org.rioproject.opstring.OperationalString;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

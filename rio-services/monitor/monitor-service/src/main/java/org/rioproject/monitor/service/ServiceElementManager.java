@@ -64,7 +64,7 @@ import org.rioproject.opstring.ServiceElement.ProvisionType;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
 import org.rioproject.resources.servicecore.ServiceResource;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.rioproject.sla.SLA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

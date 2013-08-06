@@ -17,8 +17,8 @@ package org.rioproject.opstring;
 
 import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.deploy.StagedData;
-import org.rioproject.resources.util.DownloadManager;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.DownloadManager;
+import org.rioproject.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

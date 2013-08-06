@@ -28,7 +28,7 @@ import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -31,7 +31,7 @@ import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
 

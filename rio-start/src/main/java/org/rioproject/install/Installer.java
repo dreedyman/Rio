@@ -72,7 +72,7 @@ public final class Installer {
             /* Install Rio main (parent) pom */
             File pomDir = new File(rioHome + File.separator + "config" + File.separator + "poms");
             Artifact rioParent = new Artifact("org.rioproject:main:" + RioVersion.VERSION);
-            install(rioParent, new File(pomDir, "rio-main.pom"), null, aetherServiceInstance);
+            install(rioParent, FileHelper.find(pomDir, "rio-main"), null, aetherServiceInstance);
 
             File libDir = new File(rioHome + File.separator + "lib");
 
@@ -92,6 +92,7 @@ public final class Installer {
             formatAndAddToMap("org.rioproject.gnostic:gnostic-api", "gnostic-api", rioArtifactJars);
             formatAndAddToMap("org.rioproject.monitor:monitor-proxy", "monitor-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject:rio-api", "rio-api", rioArtifactJars);
+            formatAndAddToMap("org.rioproject:rio-proxy", "rio-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject:watch-ui", "watch-ui", rioArtifactJars);
 
             formatAndAddToMap("org.rioproject.event-collector:event-collector-api", "event-collector-api", rioArtifactJars);
@@ -105,7 +106,7 @@ public final class Installer {
 
             /* Install the Gnostic service and the Gnostic pom */
             Artifact gnosticParent = new Artifact("org.rioproject:gnostic:" + RioVersion.VERSION);
-            install(gnosticParent, new File(pomDir, "rio-gnostic.pom"), null, aetherServiceInstance);
+            install(gnosticParent, FileHelper.find(pomDir, "rio-gnostic"), null, aetherServiceInstance);
             Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
             install(gnosticService, null, FileHelper.find(libDir, "gnostic-service"), aetherServiceInstance);
 
@@ -119,14 +120,14 @@ public final class Installer {
             Artifact jskPlatform = createArtifact("net.jini:jsk-platform", jskPlatformJar);
             Artifact jmxLookup = createArtifact("net.jini.lookup:jmx-lookup", jmxLookupJar);
             Artifact jskDL = createArtifact("net.jini:jsk-dl", jskDLJar);
-            Artifact reggieDL = createArtifact("com.sun.jini:reggie-dl", reggieDLJar);
+            Artifact reggieDL = createArtifact("org.apache.river:reggie-dl", reggieDLJar);
             Artifact serviceUI = createArtifact("net.jini.lookup:serviceui", serviceUIJar);
 
-            install(jskPlatform, new File(pomDir, "jsk-platform.pom"), jskPlatformJar, aetherServiceInstance);
-            install(jmxLookup, new File(pomDir, "jmx-lookup.pom"), jmxLookupJar, aetherServiceInstance);
-            install(jskDL, new File(pomDir, "jsk-dl.pom"), jskDLJar, aetherServiceInstance);
-            install(reggieDL, new File(pomDir, "reggie-dl.pom"), reggieDLJar, aetherServiceInstance);
-            install(serviceUI, new File(pomDir, "serviceui.pom"), serviceUIJar, aetherServiceInstance);
+            install(jskPlatform, FileHelper.find(pomDir, "jsk-platform"), jskPlatformJar, aetherServiceInstance);
+            install(jmxLookup, FileHelper.find(pomDir, "jmx-lookup"), jmxLookupJar, aetherServiceInstance);
+            install(jskDL, FileHelper.find(pomDir, "jsk-dl"), jskDLJar, aetherServiceInstance);
+            install(reggieDL, FileHelper.find(pomDir, "reggie-dl"), reggieDLJar, aetherServiceInstance);
+            install(serviceUI, FileHelper.find(pomDir, "serviceui"), serviceUIJar, aetherServiceInstance);
 
         } catch (ResolverException e) {
             logger.error("Could not install artifacts", e);

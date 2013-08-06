@@ -16,7 +16,6 @@
 package org.rioproject.monitor.service;
 
 import org.rioproject.associations.AssociationDescriptor;
-import org.rioproject.associations.AssociationMatchFilter;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.jsb.ServiceElementUtil;
 import org.rioproject.opstring.ServiceElement;
@@ -232,7 +231,7 @@ public class AssociationMatcher {
     }
 
     /**
-     * Determine if the Association's AssociationMatchFilter matches a
+     * Determine if the ServiceAssociationMatchFilter matches a
      * ServiceElement
      *
      * @param descriptor The AssociationDescriptor
@@ -241,7 +240,7 @@ public class AssociationMatcher {
      */
     static boolean matches(final AssociationDescriptor descriptor, final ServiceElement[] elems) {
         boolean matches = false;
-        AssociationMatchFilter filter = getAssociationMatchFilter(descriptor);
+        ServiceAssociationMatchFilter filter = new ServiceAssociationMatchFilter();
         for (ServiceElement elem : elems) {
             if (filter.check(descriptor, elem)) {
                 matches = true;
@@ -249,27 +248,6 @@ public class AssociationMatcher {
             }
         }
         return (matches);
-    }
-
-    /*
-     * Get the AssociationMatchFilter for an AssociationDescriptor
-     */
-    private static AssociationMatchFilter getAssociationMatchFilter(final AssociationDescriptor descriptor) {
-        AssociationMatchFilter defaultFilter = new DefaultAssociationMatchFilter();
-        AssociationMatchFilter filter;
-        try {
-            String matchFilter = descriptor.getAssociationMatchFilter();
-            if(matchFilter!=null) {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                filter = (AssociationMatchFilter)cl.loadClass(matchFilter).newInstance();
-            } else {
-                filter = defaultFilter;
-            }
-        } catch(Exception e) {
-            filter = defaultFilter;
-            logger.warn("Getting AssociationMatchFilter for association ["+descriptor.toString()+"]", e);
-        }
-        return(filter);
     }
 
     /*
@@ -295,10 +273,9 @@ public class AssociationMatcher {
     }
 
     /**
-     * Default association match filter, used during colocation and opposed
-     * matching
+     * Service association match filter, used during co-location and opposed matching
      */
-    static class DefaultAssociationMatchFilter implements AssociationMatchFilter {
+    static class ServiceAssociationMatchFilter {
 
         public boolean check(final AssociationDescriptor descriptor, final ServiceElement element) {
             return(ServiceElementUtil.matchesServiceElement(element,

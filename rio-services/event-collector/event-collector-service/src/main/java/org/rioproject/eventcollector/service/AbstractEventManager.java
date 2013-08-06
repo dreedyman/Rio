@@ -30,7 +30,7 @@ import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

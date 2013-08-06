@@ -45,7 +45,7 @@ import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.servicecore.LeaseListener;
 import org.rioproject.resources.servicecore.LeaseListenerAdapter;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.util.BannerProvider;
 import org.rioproject.util.BannerProviderImpl;

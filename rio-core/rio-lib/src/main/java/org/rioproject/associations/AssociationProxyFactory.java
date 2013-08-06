@@ -63,15 +63,6 @@ public class AssociationProxyFactory {
             Thread.currentThread().setContextClassLoader(loader);
 
             Class aProxyClass = loader.loadClass(proxyClassName);
-            AssociationProxyType aProxyType =
-                (AssociationProxyType) aProxyClass.getAnnotation(AssociationProxyType.class);
-            boolean createJdkProxy;
-            if(aProxyType!=null) {
-                createJdkProxy = aProxyType.type().equals(AssociationProxyType.Type.JDK);
-            } else {
-                createJdkProxy =
-                    association.getAssociationDescriptor().getProxyType().equals(AssociationDescriptor.JDK_PROXY);
-            }
             AssociationProxy aProxy = (AssociationProxy)aProxyClass.newInstance();
 
             List<Class> list = loadAssociatedInterfaces(association.getAssociationDescriptor(), loader);
@@ -86,11 +77,7 @@ public class AssociationProxyFactory {
             }
 
             Class[] interfaces = list.toArray(new Class[list.size()]);
-            if (createJdkProxy) {
-                proxy = Proxy.newProxyInstance(loader, interfaces, aProxy.getInvocationHandler(association));
-            } else {
-                throw new IllegalArgumentException("CGLIB no longer supported");
-            }
+            proxy = Proxy.newProxyInstance(loader, interfaces, aProxy.getInvocationHandler(association));
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }

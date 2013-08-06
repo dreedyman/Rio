@@ -20,7 +20,6 @@ import org.rioproject.associations.strategy.FailOver;
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * <p>
  * Annotation to indicate an association to another service.
@@ -80,18 +79,6 @@ public @interface ServiceAssociation {
      * @return The type of the association. 
      */
     AssociationType type() default AssociationType.USES;
-
-    /**
-     * The dynamic proxy to create. When association injection occurs the
-     * injected service is actually a generated dynamic proxy. The dynamic
-     * proxy is used as a way to manage a collection of discovered services. 
-     *
-     * @return The class to create for association, defaults to
-     * {@link AssociationProxySupport}
-     *
-     * @see AssociationProxyType
-     */
-    Class proxy() default AssociationProxySupport.class;
 
     /**
      * A strategy that determines how services in the collection of
@@ -171,5 +158,12 @@ public @interface ServiceAssociation {
      * @return The unit of time that the {@link #timeout} is configured for.
      */
     TimeUnit timeoutUnits() default TimeUnit.SECONDS;
+
+    /**
+     * The version of the service to associate to.
+     *
+     * @return The version of the service to associate to.
+     */
+    String version() default "";
 }
 

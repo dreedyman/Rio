@@ -19,7 +19,7 @@ import org.rioproject.exec.AbstractShell;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.FileUtils;
 import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

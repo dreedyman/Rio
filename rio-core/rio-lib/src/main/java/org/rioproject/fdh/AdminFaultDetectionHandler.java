@@ -19,7 +19,7 @@ import com.sun.jini.config.Config;
 import net.jini.admin.Administrable;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

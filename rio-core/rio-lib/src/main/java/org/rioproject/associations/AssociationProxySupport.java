@@ -17,7 +17,7 @@ package org.rioproject.associations;
 
 import net.jini.core.discovery.LookupLocator;
 import org.rioproject.associations.strategy.FailOver;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

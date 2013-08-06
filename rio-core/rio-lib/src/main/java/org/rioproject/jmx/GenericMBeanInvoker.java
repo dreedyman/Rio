@@ -15,7 +15,7 @@
  */
 package org.rioproject.jmx;
 
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

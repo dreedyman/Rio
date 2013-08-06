@@ -22,7 +22,7 @@ import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
 import org.junit.Test;
 import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.cybernode.ServiceContextFactory;
+import org.rioproject.container.ServiceContextFactory;
 import org.rioproject.jsb.JSBManager;
 import org.rioproject.opstring.GroovyDSLOpStringParser;
 import org.rioproject.opstring.OpString;

@@ -24,7 +24,7 @@ import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceItemFilter;
 import org.rioproject.jmx.JMXUtil;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

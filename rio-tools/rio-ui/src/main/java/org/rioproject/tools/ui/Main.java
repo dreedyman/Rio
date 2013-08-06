@@ -49,7 +49,7 @@ import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.tools.discovery.RecordingDiscoveryListener;

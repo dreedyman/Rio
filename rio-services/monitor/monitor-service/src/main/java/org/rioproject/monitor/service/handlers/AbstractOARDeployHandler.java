@@ -19,7 +19,7 @@ import org.rioproject.config.Constants;
 import org.rioproject.monitor.service.DeploymentVerifier;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

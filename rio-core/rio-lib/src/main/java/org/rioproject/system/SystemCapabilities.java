@@ -20,7 +20,7 @@ import net.jini.config.ConfigurationException;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;
 import org.rioproject.costmodel.ResourceCostModel;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.util.FileUtils;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.PlatformCapabilityLoader;
 import org.rioproject.system.capability.connectivity.TCPConnectivity;

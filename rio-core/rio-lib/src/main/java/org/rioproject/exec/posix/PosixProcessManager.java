@@ -17,8 +17,8 @@ package org.rioproject.exec.posix;
 
 import org.rioproject.exec.ProcessManager;
 import org.rioproject.exec.Util;
-import org.rioproject.resources.util.FileUtils;
-import org.rioproject.resources.util.StreamRedirector;
+import org.rioproject.util.FileUtils;
+import org.rioproject.util.StreamRedirector;
 import org.rioproject.system.OperatingSystemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

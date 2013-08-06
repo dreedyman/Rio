@@ -32,7 +32,7 @@ import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.config.ExporterConfig;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.rioproject.util.TimeConstants;
 import org.rioproject.util.TimeUtil;
 import org.rioproject.watch.StopWatch;

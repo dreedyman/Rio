@@ -40,7 +40,7 @@ import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resources.client.DiscoveryManagementPool
 import org.rioproject.resources.client.JiniClient
 import org.rioproject.resources.servicecore.ServiceStopHandler
-import org.rioproject.resources.util.FileUtils
+import org.rioproject.util.FileUtils
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster

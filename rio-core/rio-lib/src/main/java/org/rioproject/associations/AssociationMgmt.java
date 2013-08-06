@@ -50,7 +50,7 @@ import org.rioproject.resources.client.DiscoveryManagementPool;
 import org.rioproject.resources.client.JiniClient;
 import org.rioproject.resources.client.LookupCachePool;
 import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1106,6 +1106,13 @@ public class AssociationMgmt implements AssociationManagement {
                 logger.warn("[{}] serviceAdded [{}], service is null, abort notification",
                             clientName, association.getName());
                 return;
+            }
+            if(aDesc.getAssociationMatchFilter()!=null) {
+                if(!aDesc.getAssociationMatchFilter().check(aDesc, item)) {
+                    logger.warn("[{}] serviceAdded [{}], service not accepted by AssociationMatchFilter, abort notification",
+                                clientName, association.getName());
+                    return;
+                }
             }
             if(callerCL.equals(ClassLoader.getSystemClassLoader())) {
                 doServiceDiscovered(item);

@@ -1,3 +1,4 @@
+package opstrings
 /*
  * Copyright to the original author or authors.
  *
@@ -13,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.watch;
 
-/**
- * Used to archive {@link org.rioproject.watch.Calculable} entries
- * added to a ${@link org.rioproject.watch.WatchDataSource}.
- *
- * @deprecated Use {@link WatchDataReplicator} instead
- */
-public interface Archivable extends WatchDataReplicator {
+deployment(name:'Hello World Example') {
 
-    /**
-     * Archive a record from the WatchDataSource history
-     * 
-     * @param calculable the Calculable record to archive
-     */
-    void archive(Calculable calculable);
+    service(name: 'Hello') {
+        interfaces {
+            classes 'bean.Hello'
+        }
+        implementation(class: 'bean.service.HelloImpl')
+
+        parameters {
+            parameter name:'parm', value: 'foo,bar'
+        }
+
+        maintain 1
+
+    }
 }

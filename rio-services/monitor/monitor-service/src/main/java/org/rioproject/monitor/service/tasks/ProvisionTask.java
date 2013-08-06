@@ -28,7 +28,7 @@ import org.rioproject.monitor.service.ServiceProvisioner;
 import org.rioproject.monitor.service.managers.PendingManager;
 import org.rioproject.monitor.service.util.LoggingUtil;
 import org.rioproject.resources.servicecore.ServiceResource;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

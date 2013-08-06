@@ -22,7 +22,7 @@ import net.jini.core.lease.Lease;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.MonitorableService;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.util.ThrowableUtil;
 import org.rioproject.util.TimeUtil;
 
 import java.rmi.RemoteException;
