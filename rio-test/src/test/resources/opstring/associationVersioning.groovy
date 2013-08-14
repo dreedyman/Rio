@@ -26,8 +26,35 @@ deployment(name:'association stuff') {
         maintain 1
     }
 
-    service(name: 'Other Darrel') {
+    service(name: 'His Brother Darrel') {
         attributes(new VersionEntry("2.1"))
+
+        interfaces {
+            classes('org.rioproject.test.associations.Dummy')
+            resources 'test-classes/'
+        }
+        implementation(class: 'org.rioproject.test.associations.DummyImpl') {
+            resources 'test-classes/'
+        }
+
+        maintain 1
+    }
+
+    service(name: 'His Other Brother Darrel') {
+        attributes(new VersionEntry("2.2, 3.1"))
+
+        interfaces {
+            classes('org.rioproject.test.associations.Dummy')
+            resources 'test-classes/'
+        }
+        implementation(class: 'org.rioproject.test.associations.DummyImpl') {
+            resources 'test-classes/'
+        }
+
+        maintain 1
+    }
+
+    service(name: 'His Other Brother Darrel Jr') {
 
         interfaces {
             classes('org.rioproject.test.associations.Dummy')

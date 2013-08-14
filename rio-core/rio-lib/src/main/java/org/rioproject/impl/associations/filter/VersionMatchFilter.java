@@ -84,8 +84,10 @@ public class VersionMatchFilter implements AssociationMatchFilter {
         for(Entry entry : serviceItem.attributeSets) {
             if(entry instanceof VersionEntry) {
                 matches = versionMatcher.versionSupported(configuredVersion, ((VersionEntry) entry).version);
-                logger.info("requiredVersion: {}, publishedVersion: {}, matched? {}",
-                            configuredVersion, entry, matches);
+                if(logger.isDebugEnabled()) {
+                    logger.debug("requiredVersion: {}, publishedVersion: {}, matched? {}",
+                                 configuredVersion, entry, matches);
+                }
                 if(matches)
                     break;
             }

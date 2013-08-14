@@ -220,11 +220,6 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 parent = oldParent
             }
 
-            emc.interface = { Map attributes ->
-                currentService.exportBundles << new ClassBundle(attributes.class)
-                cl()
-            }
-
             /* The DSL must support the declaration of an implementation with no resources (RIO-145) */
             emc.implementation = { Map attributes ->
                 currentService.componentBundle = new ClassBundle(attributes.class)

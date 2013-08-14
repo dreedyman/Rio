@@ -39,6 +39,7 @@ import org.rioproject.associations.*;
 import org.rioproject.config.Constants;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceRecord;
+import org.rioproject.impl.associations.filter.VersionMatchFilter;
 import org.rioproject.impl.client.DiscoveryManagementPool;
 import org.rioproject.impl.client.JiniClient;
 import org.rioproject.impl.client.LookupCachePool;
@@ -408,11 +409,11 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 AssociationHandler[] handlers = getAssociationHandlers();
                 for (AssociationDescriptor aRemDesc : remDesc) {
                     for (AssociationHandler handler : handlers) {
-                        if (handler.aDesc.equals(aRemDesc)) {
+                        if (handler.associationDescriptor.equals(aRemDesc)) {
                             logger.trace("[{}] During update: terminate AssociationHandler for {}",
-                                         clientName, handler.aDesc.toString());
+                                         clientName, handler.associationDescriptor.toString());
                             handler.terminate();
-                            if (handler.aDesc.getAssociationType()== AssociationType.REQUIRES) {
+                            if (handler.associationDescriptor.getAssociationType()== AssociationType.REQUIRES) {
                                 numRequires.decrementAndGet();
                                 listener.requiredAssociations.remove(handler.association);
                             }
@@ -530,7 +531,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         ArrayList<AssociationDescriptor> list = new ArrayList<AssociationDescriptor>();
         synchronized(associationHandlers) {
             for (AssociationHandler ah : associationHandlers) {
-                list.add(ah.aDesc);
+                list.add(ah.associationDescriptor);
             }
         }
         return(list.toArray(new AssociationDescriptor[list.size()]));
@@ -564,7 +565,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      */
     protected AssociationHandler createAssociationHandler(final AssociationDescriptor aDesc) {
         if(aDesc == null)
-            throw new IllegalArgumentException("aDesc is null");
+            throw new IllegalArgumentException("associationDescriptor is null");
         return(new AssociationHandler(aDesc));
     }
 
@@ -638,7 +639,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         AssociationHandler aHandler = null;
         synchronized(associationHandlers) {
             for (AssociationHandler ah : associationHandlers) {
-                if (ah.aDesc.equals(aDesc)) {
+                if (ah.associationDescriptor.equals(aDesc)) {
                     aHandler = ah;
                     break;
                 }
@@ -942,7 +943,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      */
     public class AssociationHandler extends ServiceDiscoveryAdapter implements FaultDetectionListener <ServiceID> {
         /** The AssociationDescriptor */
-        private final AssociationDescriptor aDesc;
+        private final AssociationDescriptor associationDescriptor;
         /** Number of instances of the associated service */
         private int instances;
         /**
@@ -967,13 +968,21 @@ public class DefaultAssociationManagement implements AssociationManagement {
          * attributes of the Association
          */
         public AssociationHandler(final AssociationDescriptor assocDesc) {
-            aDesc = assocDesc;
-            association = new DefaultAssociation(aDesc);
+            associationDescriptor = assocDesc;
+            association = new DefaultAssociation(associationDescriptor);
+            /* If the association has a version declared and no AssociationMatchFilter, add a VersionMatchFilter */
+            if(associationDescriptor.getVersion()!=null && associationDescriptor.getAssociationMatchFilter()==null) {
+                associationDescriptor.setAssociationMatchFilter(new VersionMatchFilter());
+                if(logger.isInfoEnabled()) {
+                    logger.info("[{}] Added a {}, for  [{}]",
+                                 clientName, VersionMatchFilter.class.getName(), association.getName());
+                }
+            }
             logger.trace("DefaultAssociationManagement created for [{}], [{}]", clientName, assocDesc);
         }
 
         AssociationDescriptor getAssociationDescriptor() {
-            return aDesc;
+            return associationDescriptor;
         }
 
         /**
@@ -981,7 +990,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          */
         @SuppressWarnings("unchecked")
         protected void exec() {
-            if(!aDesc.isLazyInject()) {
+            if(!associationDescriptor.isLazyInject()) {
                 listener.getAssociationInjector().injectEmpty(association);
                 listener.addRequiredAssociation(association);
                 listener.checkAdvertise();
@@ -989,7 +998,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             try {
                 boolean lookupService = false;
                 /* See if the association is a lookup service */
-                String[] iFaces = aDesc.getInterfaceNames();
+                String[] iFaces = associationDescriptor.getInterfaceNames();
                 for (String iFace : iFaces) {
                     if (iFace.equals("net.jini.core.lookup.ServiceRegistrar")) {
                         lookupService = true;
@@ -1016,18 +1025,18 @@ public class DefaultAssociationManagement implements AssociationManagement {
                         proxyPreparer = new BasicProxyPreparer();
                     }
                     logger.trace("Association [{}]  ProxyPreparer : {}",
-                                 aDesc.getName(), proxyPreparer.getClass().getName());
-                    template = JiniClient.getServiceTemplate(aDesc, callerCL);
+                                 associationDescriptor.getName(), proxyPreparer.getClass().getName());
+                    template = JiniClient.getServiceTemplate(associationDescriptor, callerCL);
                     logger.trace("Created ServiceTemplate {}", template.toString());
                     LookupCachePool lcPool = LookupCachePool.getInstance();
-                    String sharedName = aDesc.getOperationalStringName();
+                    String sharedName = associationDescriptor.getOperationalStringName();
 
-                    lCache = lcPool.getLookupCache(sharedName, aDesc.getGroups(), aDesc.getLocators(), template);
+                    lCache = lcPool.getLookupCache(sharedName, associationDescriptor.getGroups(), associationDescriptor.getLocators(), template);
                     lCache.addListener(this);
                     logger.debug("DefaultAssociationManagement for [{}], obtained LookupCache for [{}]",
-                                 clientName, aDesc.getName());
+                                 clientName, associationDescriptor.getName());
                 } else {
-                    lookupServiceHandler = new LookupServiceHandler(aDesc, this, getConfiguration());
+                    lookupServiceHandler = new LookupServiceHandler(associationDescriptor, this, getConfiguration());
                 }
             } catch(IllegalStateException e) {
                 logger.warn("Creating an AssociationHandler, {}", e.getMessage());
@@ -1113,12 +1122,8 @@ public class DefaultAssociationManagement implements AssociationManagement {
                             clientName, association.getName());
                 return;
             }
-            logger.info("[{}] serviceAdded [{}], has a filter? {}",
-                        clientName, association.getName(), aDesc.getAssociationMatchFilter());
-            if(aDesc.getAssociationMatchFilter()!=null) {
-                if(!aDesc.getAssociationMatchFilter().check(aDesc, item)) {
-                    logger.warn("[{}] serviceAdded [{}], service not accepted by AssociationMatchFilter, abort notification",
-                                clientName, association.getName());
+            if(associationDescriptor.getAssociationMatchFilter()!=null) {
+                if(!associationDescriptor.getAssociationMatchFilter().check(associationDescriptor, item)) {
                     return;
                 }
             }
@@ -1280,7 +1285,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             if(fdh==null) {
                 logger.debug("Create FDH to monitor external service [{}]", association.getName());
                 ClassLoader cl = service.getClass().getClassLoader();
-                fdh = FaultDetectionHandlerFactory.getFaultDetectionHandler(aDesc, cl);
+                fdh = FaultDetectionHandlerFactory.getFaultDetectionHandler(associationDescriptor, cl);
             }
             registerFaultDetectionHandler(service, serviceID, fdh);
         }
@@ -1341,7 +1346,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             for (ServiceBeanInstance instance : instances) {
                 Object service = instance.getService();
                 //check name
-                if (aHandler.aDesc.matchOnName()) {
+                if (aHandler.associationDescriptor.matchOnName()) {
                     boolean hailMaryCheck = false;
                     if (service instanceof Administrable) {
                         Administrable admin = (Administrable) service;

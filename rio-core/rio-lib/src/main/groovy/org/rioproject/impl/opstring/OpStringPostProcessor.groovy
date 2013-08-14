@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 package org.rioproject.impl.opstring
-
 import org.rioproject.associations.AssociationDescriptor
-import org.rioproject.impl.associations.filter.VersionMatchFilter
 import org.rioproject.opstring.ClassBundle
 import org.rioproject.opstring.ServiceElement
 import org.rioproject.servicecore.Service
-
 /**
  * Handles post processing of a parsed OperationalString.
  *
@@ -71,11 +68,6 @@ class OpStringPostProcessor {
                 if (assocOpStringName == null) {
                     if (associationDescriptor.interfaceNames.length == 0)
                         throw new IllegalArgumentException("Invalid AssociationDescriptor : Unknown service interface")
-                }
-
-                /* If the association has a version declared and no AssociationMatchFilter, add a VersionMatchFilter */
-                if(associationDescriptor.version!=null && associationDescriptor.associationMatchFilter==null) {
-                    associationDescriptor.associationMatchFilter = new VersionMatchFilter()
                 }
 
                 /*

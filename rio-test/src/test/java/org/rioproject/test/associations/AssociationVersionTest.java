@@ -22,21 +22,18 @@ import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationManagement;
 import org.rioproject.impl.associations.DefaultAssociationManagement;
-import org.rioproject.impl.associations.filter.VersionMatchFilter;
 import org.rioproject.test.RioTestRunner;
-import org.rioproject.test.SetTestManager;
-import org.rioproject.test.TestManager;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Dennis Reedy
  */
 @RunWith(RioTestRunner.class)
 public class AssociationVersionTest {
-    @SetTestManager
-    static TestManager testManager;
 
     @Test
     public void testVersionedAssociations() throws ExecutionException, InterruptedException, IOException {
@@ -44,11 +41,58 @@ public class AssociationVersionTest {
         AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy", Dummy.class, System.getProperty("org.rioproject.groups"));
         descriptor.setMatchOnName(false);
         descriptor.setVersion("2.1");
-        descriptor.setAssociationMatchFilter(new VersionMatchFilter());
+        Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
+        Dummy dummy = association.getServiceFuture().get();
+        Assert.assertNotNull(dummy);
+        Assert.assertEquals("Expected 1 got " + association.getServiceCount(), 1, association.getServiceCount());
+        Assert.assertTrue("Expected \'His Brother Darrel\', got " + dummy.getName(), "His Brother Darrel".equals(dummy.getName()));
+    }
+
+    @Test
+    public void testVersionedAssociationRange() throws ExecutionException, InterruptedException, IOException {
+        AssociationManagement aMgr = new DefaultAssociationManagement();
+        AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy", Dummy.class, System.getProperty("org.rioproject.groups"));
+        descriptor.setMatchOnName(false);
+        descriptor.setVersion("2.8");
         Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
         Dummy dummy = association.getServiceFuture().get();
         Assert.assertNotNull(dummy);
         Assert.assertEquals("Expected 1 got "+association.getServiceCount(), 1, association.getServiceCount());
-        Assert.assertTrue("Expected \'Other Darrel\', got "+dummy.getName(), "Other Darrel".equals(dummy.getName()));
+        Assert.assertTrue("Expected \'His Other Brother Darrel\', got "+dummy.getName(), "His Other Brother Darrel".equals(dummy.getName()));
+    }
+
+    @Test
+    public void testVersionedAssociationNoMatches() throws ExecutionException, InterruptedException, IOException {
+        AssociationManagement aMgr = new DefaultAssociationManagement();
+        AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy", Dummy.class, System.getProperty("org.rioproject.groups"));
+        descriptor.setMatchOnName(false);
+        descriptor.setVersion("1.0");
+        Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
+        Dummy dummy = null;
+        try {
+            dummy = association.getServiceFuture().get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            System.out.println("Received expected TimeoutException");
+        }
+        Assert.assertNull(dummy);
+        Assert.assertEquals("Expected 0 got "+association.getServiceCount(), 0, association.getServiceCount());
+    }
+
+    @Test
+    public void testVersionedAssociationMatchesAll() throws ExecutionException, InterruptedException, IOException {
+        AssociationManagement aMgr = new DefaultAssociationManagement();
+        AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy", Dummy.class, System.getProperty("org.rioproject.groups"));
+        descriptor.setMatchOnName(false);
+        Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
+        Dummy dummy = null;
+        TimeoutException timeoutException = null;
+        try {
+            dummy = association.getServiceFuture().get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            timeoutException = e;
+        }
+        Assert.assertNull(timeoutException);
+        Assert.assertNotNull(dummy);
+        Assert.assertEquals("Expected 4 got "+association.getServiceCount(), 4, association.getServiceCount());
     }
 }
