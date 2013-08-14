@@ -17,7 +17,7 @@ package org.rioproject.monitor;
 
 import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.deploy.ServiceBeanInstantiator;
-import org.rioproject.resources.servicecore.Service;
+import org.rioproject.servicecore.Service;
 
 import java.io.Serializable;
 import java.rmi.MarshalledObject;
@@ -31,7 +31,8 @@ import java.util.Collection;
  *
  * @author Dennis Reedy
  */
-public interface ProvisionMonitor extends ProvisionManager, Service {
+public interface
+    ProvisionMonitor extends ProvisionManager, Service {
 
     /**
      * Assign the ProvisionMonitor as a backup for another ProvisionMonitor

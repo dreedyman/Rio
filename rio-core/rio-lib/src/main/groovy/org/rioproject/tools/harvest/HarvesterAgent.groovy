@@ -15,7 +15,7 @@
  */
 package org.rioproject.tools.harvest
 
-import org.rioproject.bean.Started
+import org.rioproject.annotation.Started
 import org.rioproject.util.PropertyHelper
 
 /**

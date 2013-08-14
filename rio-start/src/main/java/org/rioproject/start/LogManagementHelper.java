@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  *
  * @author Dennis Reedy
  */
-public class LogManagementHelper {
+public final class LogManagementHelper {
     private static final org.slf4j.Logger stdOutLogger = LoggerFactory.getLogger("std.out");
     private static final org.slf4j.Logger stdErrLogger = LoggerFactory.getLogger("std.err");
 

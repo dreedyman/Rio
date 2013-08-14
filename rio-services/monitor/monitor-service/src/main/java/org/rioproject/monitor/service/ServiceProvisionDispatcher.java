@@ -15,7 +15,7 @@
  */
 package org.rioproject.monitor.service;
 
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 
 /**
  * Provides support to dispatch {@link ProvisionRequest}s

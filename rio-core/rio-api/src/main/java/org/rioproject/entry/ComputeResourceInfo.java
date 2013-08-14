@@ -34,7 +34,7 @@ import java.net.UnknownHostException;
  * @author Dennis Reedy
  */
 public class ComputeResourceInfo extends AbstractEntry implements ServiceControlled {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     public String osName;
     public String osVersion;
     public String arch;

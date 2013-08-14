@@ -10,7 +10,7 @@ deployment(name: 'Gnostic') {
             classes 'org.rioproject.gnostic.Gnostic'
             artifact ref: 'service-api'
         }
-        implementation(class: 'org.rioproject.gnostic.GnosticImpl') {
+        implementation(class: 'org.rioproject.gnostic.service.GnosticImpl') {
             artifact ref: 'service'
         }
         maintain 1

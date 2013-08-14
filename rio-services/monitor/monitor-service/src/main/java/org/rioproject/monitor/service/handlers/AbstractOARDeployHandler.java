@@ -16,10 +16,11 @@
 package org.rioproject.monitor.service.handlers;
 
 import org.rioproject.config.Constants;
+import org.rioproject.impl.opstring.*;
 import org.rioproject.monitor.service.DeploymentVerifier;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.util.FileUtils;
+import org.rioproject.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

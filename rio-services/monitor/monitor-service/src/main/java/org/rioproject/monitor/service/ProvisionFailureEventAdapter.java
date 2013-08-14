@@ -17,7 +17,7 @@ package org.rioproject.monitor.service;
 
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.UnknownEventException;
-import org.rioproject.event.EventNotificationAdapter;
+import org.rioproject.impl.event.EventNotificationAdapter;
 import org.rioproject.monitor.ProvisionFailureEvent;
 
 import javax.management.MBeanNotificationInfo;
@@ -52,7 +52,7 @@ public class ProvisionFailureEventAdapter extends EventNotificationAdapter {
      * Transforms the notification of a ProvisionFailureEvent to a JMX
      * notification
      *
-     * @see org.rioproject.event.EventNotificationAdapter#notify(net.jini.core.event.RemoteEvent)
+     * @see org.rioproject.impl.event.EventNotificationAdapter#notify(net.jini.core.event.RemoteEvent)
      */
     public void notify(final RemoteEvent theEvent) throws UnknownEventException, RemoteException {
         if(theEvent==null)
@@ -79,7 +79,7 @@ public class ProvisionFailureEventAdapter extends EventNotificationAdapter {
     /**
      * Get the MBeanNotificationInfo for the transformed ProvisionFailureEvent
      *
-     * @see org.rioproject.event.EventNotificationAdapter#getNotificationInfo()
+     * @see org.rioproject.impl.event.EventNotificationAdapter#getNotificationInfo()
      */
     public MBeanNotificationInfo getNotificationInfo() {
         return NOTIFICATION_INFO;

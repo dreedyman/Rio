@@ -16,7 +16,7 @@
 package org.rioproject.test.bean
 
 import net.jini.config.Configuration
-import org.rioproject.bean.*
+import org.rioproject.annotation.*
 
 import javax.annotation.PreDestroy
 

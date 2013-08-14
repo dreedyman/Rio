@@ -66,11 +66,11 @@ public interface ResourceCostModel extends Serializable {
         /** Indicates the boundary has been provided in days */
         public static final int DAYS = HOURS * 24;
         /** The boundary */
-        private long boundary;
+        private final long boundary;
         /** The boundary type */
-        private int type;
+        private final int type;
         /** The multiplier */
-        private double multiplier;
+        private final double multiplier;
 
         /**
          * Create a TimeBoundary. A TimeBoundary defines a boundary and a
@@ -86,7 +86,7 @@ public interface ResourceCostModel extends Serializable {
          * the costPerUnit if the duration is greater then or equal to the
          * boundary value
          */
-        public TimeBoundary(long boundary, double multiplier) {
+        public TimeBoundary(final long boundary, final double multiplier) {
             this(boundary, multiplier, MILLIS);
         }
 
@@ -105,7 +105,7 @@ public interface ResourceCostModel extends Serializable {
          * @param type Determines the type (MILLIS, SECONDS, ...) of the
          * boundary value
          */
-        public TimeBoundary(long boundary, double multiplier, int type) {
+        public TimeBoundary(final long boundary, final double multiplier, final int type) {
             if(type != MILLIS
                && type != SECONDS
                && type != MINUTES
@@ -144,7 +144,7 @@ public interface ResourceCostModel extends Serializable {
          * 
          * @param o Object to compare to
          */
-        public int compareTo(Object o) {
+        public int compareTo(final Object o) {
             /* Will throw a ClassCastException if the obj is not the right type */
             TimeBoundary that = (TimeBoundary)o;
             if(this.getBoundary() == that.getBoundary())
@@ -158,7 +158,7 @@ public interface ResourceCostModel extends Serializable {
          * A TimeBoundary is equal to another TimeBoundary if their boundary
          * attributes are equal
          */
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if(this == o)
                 return (true);
             if(!(o instanceof TimeBoundary))

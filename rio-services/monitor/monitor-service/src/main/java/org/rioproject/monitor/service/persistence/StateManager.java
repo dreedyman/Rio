@@ -18,8 +18,8 @@ package org.rioproject.monitor.service.persistence;
 import org.rioproject.monitor.service.OpStringManager;
 import org.rioproject.monitor.service.OpStringMangerController;
 import org.rioproject.opstring.OperationalStringException;
-import org.rioproject.resources.persistence.PersistentStore;
-import org.rioproject.resources.persistence.StoreException;
+import org.rioproject.impl.persistence.PersistentStore;
+import org.rioproject.impl.persistence.StoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

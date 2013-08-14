@@ -20,7 +20,8 @@ import java.io.IOException;
 /**
  * Dummy interface
  */
-public interface Dummy {    
+public interface Dummy {
+    String getName() throws IOException;
     int getIndex() throws IOException;
     int getIndexFromAnotherDummy() throws IOException;
 }

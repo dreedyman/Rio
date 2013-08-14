@@ -37,41 +37,52 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
-import org.rioproject.config.ExporterConfig;
-import org.rioproject.core.jsb.DiscardManager;
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.core.jsb.ServiceBeanManager;
-import org.rioproject.cybernode.*;
+import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.proxy.CybernodeProxy;
 import org.rioproject.deploy.*;
 import org.rioproject.entry.BasicStatus;
 import org.rioproject.entry.UIDescriptorFactory;
 import org.rioproject.event.EventDescriptor;
-import org.rioproject.jmx.JMXUtil;
-import org.rioproject.jmx.MBeanServerFactory;
-import org.rioproject.jsb.JSBManager;
-import org.rioproject.jsb.ServiceBeanActivation;
-import org.rioproject.jsb.ServiceBeanActivation.LifeCycleManager;
-import org.rioproject.jsb.ServiceBeanAdapter;
+import org.rioproject.impl.client.DiscoveryManagementPool;
+import org.rioproject.impl.client.JiniClient;
+import org.rioproject.impl.config.ExporterConfig;
+import org.rioproject.impl.container.*;
+import org.rioproject.impl.jmx.JMXUtil;
+import org.rioproject.impl.jmx.MBeanServerFactory;
+import org.rioproject.impl.opstring.OpStringLoader;
+import org.rioproject.impl.opstring.OpStringManagerProxy;
+import org.rioproject.impl.persistence.PersistentStore;
+import org.rioproject.impl.persistence.SnapshotHandler;
+import org.rioproject.impl.servicebean.JSBManager;
+import org.rioproject.impl.servicebean.ServiceBeanActivation;
+import org.rioproject.impl.servicebean.ServiceBeanActivation.LifeCycleManager;
+import org.rioproject.impl.servicebean.ServiceBeanAdapter;
+import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.impl.system.SystemCapabilities;
+import org.rioproject.impl.system.measurable.MeasurableCapability;
+import org.rioproject.impl.util.BannerProvider;
+import org.rioproject.impl.util.BannerProviderImpl;
+import org.rioproject.impl.watch.ThreadDeadlockMonitor;
+import org.rioproject.impl.watch.ThresholdListener;
+import org.rioproject.impl.watch.ThresholdWatch;
+import org.rioproject.impl.watch.WatchInjector;
 import org.rioproject.net.HostUtil;
-import org.rioproject.opstring.*;
-import org.rioproject.resources.client.DiscoveryManagementPool;
-import org.rioproject.resources.client.JiniClient;
-import org.rioproject.resources.persistence.PersistentStore;
-import org.rioproject.resources.persistence.SnapshotHandler;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.serviceui.UIComponentFactory;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
-import org.rioproject.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
-import org.rioproject.system.SystemCapabilities;
 import org.rioproject.system.capability.PlatformCapability;
-import org.rioproject.system.measurable.MeasurableCapability;
-import org.rioproject.util.BannerProvider;
-import org.rioproject.util.BannerProviderImpl;
 import org.rioproject.util.RioManifest;
 import org.rioproject.util.TimeUtil;
-import org.rioproject.watch.*;
+import org.rioproject.watch.Calculable;
+import org.rioproject.watch.ThresholdType;
+import org.rioproject.watch.ThresholdValues;
+import org.rioproject.watch.WatchDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +108,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Implementation of a Cybernode
  *
- * @link {org.rioproject.jmx.ThreadDeadlockMonitor#ID}
+ * @link {org.rioproject.impl.jmx.ThreadDeadlockMonitor#ID}
  *
  * @author Dennis Reedy
  */
@@ -553,7 +564,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     }
 
     /**
-     * @see org.rioproject.core.jsb.ServiceBean#initialize
+     * @see org.rioproject.servicebean.ServiceBean#initialize
      */
     public void initialize(ServiceBeanContext context) throws Exception {
         /*
@@ -1159,9 +1170,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                         loaderLogger.trace("Get OpStringManagerProxy for {}", ServiceLogUtil.logName(event));
                     try {
                         opMgr = OpStringManagerProxy.getProxy(
-                            event.getServiceElement().getOperationalStringName(),
-                            event.getOperationalStringManager(),
-                            context.getDiscoveryManagement());
+                                                                 event.getServiceElement().getOperationalStringName(),
+                                                                 event.getOperationalStringManager(),
+                                                                 context.getDiscoveryManagement());
                         if(loaderLogger.isTraceEnabled())
                             loaderLogger.trace("Got OpStringManagerProxy for {}", ServiceLogUtil.logName(event));
                     } catch (Exception e) {
@@ -1413,18 +1424,6 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      */
     public void enlist() {
         doEnlist();
-    }
-
-    @Deprecated
-    public void enlist(Schedule s) {
-        logger.warn("Schedule is ignored for enlisting");
-        doEnlist();
-    }
-
-    @Deprecated
-    public Schedule getSchedule() {
-        logger.warn("Returning null for Schedule, operation no longer supported");
-        return null;
     }
 
     /*

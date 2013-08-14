@@ -82,7 +82,7 @@
                             <breakiterator>true</breakiterator>
                             <top><![CDATA[<h2>Rio Project ${project.version} API Documentation</h2>]]></top>
                             <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
-                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.resources.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.test</excludePackageNames>
+                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.impl.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.test</excludePackageNames>
                         </configuration>
                         <reports>
                             <report>aggregate</report>
@@ -404,8 +404,9 @@
     <modules>
         <module>rio-logging-support</module>
         <module>rio-start</module>
-        <module>rio-api</module>
-        <module>rio-lib</module>
+        <module>rio-core/rio-api</module>
+        <module>rio-core/rio-proxy</module>
+        <module>rio-core/rio-lib</module>
         <module>rio-platform</module>
         <module>rio-resolver/resolver-api</module>
         <module>rio-resolver/resolver-aether</module>

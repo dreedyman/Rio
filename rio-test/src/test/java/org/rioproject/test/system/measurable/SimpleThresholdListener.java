@@ -15,6 +15,7 @@
  */
 package org.rioproject.test.system.measurable;
 
+import org.rioproject.impl.watch.ThresholdListener;
 import org.rioproject.watch.*;
 
 /**

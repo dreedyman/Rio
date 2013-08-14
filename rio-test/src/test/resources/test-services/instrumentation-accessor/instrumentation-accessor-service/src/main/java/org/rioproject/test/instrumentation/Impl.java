@@ -16,8 +16,8 @@
 package org.rioproject.test.instrumentation;
 
 import com.sun.tools.attach.VirtualMachine;
-import org.rioproject.bean.Started;
-import org.rioproject.exec.VirtualMachineHelper;
+import org.rioproject.annotation.Started;
+import org.rioproject.impl.exec.VirtualMachineHelper;
 import org.rioproject.start.AgentHook;
 
 import java.io.File;

@@ -20,7 +20,7 @@ deployment(name:'association stuff') {
             association(name: 'Add', type: 'requires', property: 'add') {
                 management inject: 'eager',
                            proxy: "net.foo.space.SomeProxy",
-                           strategy: 'org.rioproject.associations.strategy.Utilization',
+                           strategy: 'org.rioproject.impl.associations.strategy.Utilization',
                            serviceDiscoveryTimeout: 15,
                            serviceDiscoveryTimeoutUnits: TimeUnit.SECONDS
             }

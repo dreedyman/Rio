@@ -23,19 +23,19 @@ import org.drools.io.ResourceFactory;
 import org.drools.io.impl.ResourceChangeScannerImpl;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
-import org.rioproject.associations.AssociationMgmt;
+import org.rioproject.impl.associations.DefaultAssociationManagement;
 import org.rioproject.associations.AssociationType;
-import org.rioproject.bean.Initialized;
-import org.rioproject.bean.Started;
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.annotation.Initialized;
+import org.rioproject.annotation.Started;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.gnostic.Gnostic;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.resources.client.JiniClient;
+import org.rioproject.impl.client.JiniClient;
 import org.rioproject.sla.RuleMap;
-import org.rioproject.util.StringUtil;
+import org.rioproject.impl.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +78,8 @@ public class GnosticImpl implements Gnostic {
     @SuppressWarnings("unused")
     public void setServiceBeanContext(ServiceBeanContext context) {
         this.context = context;
-        AssociationMgmt associationMgmt =
-            (AssociationMgmt) context.getAssociationManagement();
+        DefaultAssociationManagement associationMgmt =
+            (DefaultAssociationManagement) context.getAssociationManagement();
         boolean createCoreAssociations = true;
         String s = (String)context.getInitParameter("create-core-associations");
         if(s!=null && s.equals("no"))

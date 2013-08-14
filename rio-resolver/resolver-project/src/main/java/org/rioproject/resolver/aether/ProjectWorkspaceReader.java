@@ -17,7 +17,7 @@ package org.rioproject.resolver.aether;
 
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.sonatype.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.Artifact;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 

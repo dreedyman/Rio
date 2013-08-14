@@ -36,7 +36,7 @@ deployment(name:'Muves') {
                  name: 'Task Space', property: 'taskSpace') {
 
         management proxy: "net.gomez.provider.space.SpaceProxy",
-                   strategy: 'org.rioproject.associations.strategy.Utilization',
+                   strategy: 'org.rioproject.impl.associations.strategy.Utilization',
                    serviceDiscoveryTimeout: 1, serviceDiscoveryTimeoutUnits: 'seconds'
     }
 
@@ -50,7 +50,7 @@ deployment(name:'Muves') {
     association (type: "opposed", serviceType: JavaSpace05.name,
                  name: "Result Space") {
         management proxy: "net.gomez.provider.space.SpaceProxy",
-                   strategy: 'org.rioproject.associations.strategy.Utilization'
+                   strategy: 'org.rioproject.impl.associations.strategy.Utilization'
     }
 
     /*

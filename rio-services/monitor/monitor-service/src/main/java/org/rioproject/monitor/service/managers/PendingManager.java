@@ -20,7 +20,7 @@ import org.rioproject.monitor.service.ServiceProvisionContext;
 import org.rioproject.monitor.service.selectors.Selector;
 import org.rioproject.monitor.service.util.FailureReasonFormatter;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

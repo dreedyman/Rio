@@ -15,8 +15,8 @@
  */
 package org.rioproject.gnostic.service.test;
 
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.watch.GaugeWatch;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.impl.watch.GaugeWatch;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;

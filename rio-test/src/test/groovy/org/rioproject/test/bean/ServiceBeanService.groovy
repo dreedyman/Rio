@@ -18,9 +18,9 @@ package org.rioproject.test.bean
 import net.jini.config.Configuration
 import net.jini.id.Uuid
 import net.jini.id.UuidFactory
-import org.rioproject.bean.*
-import org.rioproject.core.jsb.ServiceBeanContext
-import org.rioproject.jsb.ServiceBeanAdapter
+import org.rioproject.annotation.*
+import org.rioproject.servicebean.ServiceBeanContext
+import org.rioproject.impl.servicebean.ServiceBeanAdapter
 import org.rioproject.proxy.service.AbstractProxy
 
 import javax.annotation.PreDestroy

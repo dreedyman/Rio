@@ -26,13 +26,13 @@ import java.io.Serializable;
  * @author Dennis Reedy
  */
 public class MeasuredResource implements Serializable {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     /** Identifier for the measurable resource */
-    private String identifier;
+    private final String identifier;
     /** The measured value */
-    private double value;
+    private final double value;
     /** ThresholdValues */
-    private ThresholdValues tValues;
+    private final ThresholdValues tValues;
 
     /**
      * Construct a MeasuredResource with parameters
@@ -41,7 +41,7 @@ public class MeasuredResource implements Serializable {
      * @param value The measured value
      * @param tVals ThresholdValues for the MeasurableResource
      */
-    public MeasuredResource(String identifier, double value, ThresholdValues tVals) {
+    public MeasuredResource(final String identifier, final double value, final ThresholdValues tVals) {
         if(identifier==null)
             throw new IllegalArgumentException("identifier is null");
         if(tVals==null)
@@ -99,7 +99,7 @@ public class MeasuredResource implements Serializable {
      * @return boolean true if the MeasuredResource can meet the criteria
      * specified by the ThresholdValues object, otherwise false
      */
-    public boolean evaluate(ThresholdValues thresholdValue) {
+    public boolean evaluate(final ThresholdValues thresholdValue) {
         double low = thresholdValue.getLowThreshold();
         double high = thresholdValue.getHighThreshold();
         return value >= low && value <= high;
@@ -112,7 +112,7 @@ public class MeasuredResource implements Serializable {
      * @return true if the objects are equal
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if(obj instanceof MeasuredResource) {
             if(getIdentifier() == null && ((MeasuredResource)obj).getIdentifier() == null)
                 return (true);

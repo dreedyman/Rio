@@ -21,7 +21,7 @@ import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.discovery.DiscoveryManagement;
-import org.rioproject.event.DynamicEventConsumer;
+import org.rioproject.impl.event.DynamicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.eventcollector.api.EventCollector;
@@ -31,7 +31,7 @@ import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.util.ThrowableUtil;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.tools.ui.ChainedRemoteEventListener;
 

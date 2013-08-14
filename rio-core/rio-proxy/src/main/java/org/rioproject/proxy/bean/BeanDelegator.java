@@ -15,7 +15,7 @@
  */
 package org.rioproject.proxy.bean;
 
-import org.rioproject.resources.servicecore.Service;
+import org.rioproject.servicecore.Service;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
@@ -33,14 +33,14 @@ import java.util.Set;
  */
 public final class BeanDelegator implements InvocationHandler, Serializable {
     private static final long serialVersionUID = 1L;
-    private Set<PackagedMethod> methodSet = new HashSet<PackagedMethod>();
-    private Object service;
-    private Object bean;
+    private final Set<PackagedMethod> methodSet = new HashSet<PackagedMethod>();
+    private final Object service;
+    private final Object bean;
 
     /*
      * Private constructor, instantiable only from the static factory
      */
-    private BeanDelegator(Object service, Object bean, ClassLoader loader) throws ClassNotFoundException {
+    private BeanDelegator(final Object service, final Object bean, final ClassLoader loader) throws ClassNotFoundException {
         this.service = service;
         this.bean = bean;
         String interfaceName = Service.class.getName();
@@ -66,7 +66,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
      * zero length
      * @throws ClassNotFoundException If the class cannot be loaded
      */
-    public static Object getInstance(Object service, Object bean, Class[] interfaces) throws ClassNotFoundException {
+    public static Object getInstance(final Object service, final Object bean, final Class[] interfaces) throws ClassNotFoundException {
         return getInstance(service, bean, interfaces, bean.getClass().getClassLoader());
     }
 
@@ -84,7 +84,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
      * length
      * @throws ClassNotFoundException If the class cannot be loaded
      */
-    public static Object getInstance(Object service, Object bean, Class[] interfaces, ClassLoader loader) 
+    public static Object getInstance(final Object service, final Object bean, final Class[] interfaces, final ClassLoader loader)
         throws ClassNotFoundException {
         if(service == null)
             throw new IllegalArgumentException("service is null");
@@ -104,7 +104,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
      * @see InvocationHandler#invoke(Object, java.lang.reflect.Method, Object[])
      */
     @SuppressWarnings("unchecked")
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         PackagedMethod template = null;
         try {
             template = new PackagedMethod(method);

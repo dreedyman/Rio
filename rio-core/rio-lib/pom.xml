@@ -206,7 +206,7 @@
                     <systemProperties>
                         <property>
                             <name>java.security.policy</name>
-                            <value>${basedir}/../distribution/src/main/policy/policy.all</value>
+                            <value>${basedir}/../../distribution/src/main/policy/policy.all</value>
                         </property>
                     </systemProperties>
                     <includes>

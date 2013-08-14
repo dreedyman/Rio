@@ -6,7 +6,7 @@ import org.rioproject.examples.hospital.Doctor.Status;
 import org.rioproject.examples.hospital.RuleServiceHelper;
 import java.util.List;
 import java.lang.Exception;
-global org.rioproject.gnostic.DeployedServiceContext context;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 
 declare Calculable
     @role(event)

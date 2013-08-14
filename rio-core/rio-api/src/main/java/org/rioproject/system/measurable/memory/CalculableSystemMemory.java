@@ -28,12 +28,12 @@ public class CalculableSystemMemory  extends Calculable {
      * Holds value of property containing details about system memory
      * utilization
      */
-    private SystemMemoryUtilization memoryUtilization;
+    private final SystemMemoryUtilization memoryUtilization;
 
-    public CalculableSystemMemory(String id,
-                                  double value,
-                                  long when,
-                                  SystemMemoryUtilization memoryUtilization) {
+    public CalculableSystemMemory(final String id,
+                                  final double value,
+                                  final long when,
+                                  final SystemMemoryUtilization memoryUtilization) {
         super(id, value, when);
         this.memoryUtilization = memoryUtilization;
     }

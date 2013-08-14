@@ -25,12 +25,12 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
-import org.rioproject.event.BasicEventConsumer;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.util.ThrowableUtil;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

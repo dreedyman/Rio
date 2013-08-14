@@ -17,15 +17,15 @@ package org.rioproject.examples.events.service;
 
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import org.rioproject.bean.CreateProxy;
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.event.DispatchEventHandler;
+import org.rioproject.annotation.CreateProxy;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.event.EventHandler;
 import org.rioproject.event.NoEventConsumerException;
 import org.rioproject.examples.events.Hello;
 import org.rioproject.examples.events.HelloEvent;
-import org.rioproject.watch.GaugeWatch;
-import org.rioproject.watch.StopWatch;
+import org.rioproject.impl.watch.GaugeWatch;
+import org.rioproject.impl.watch.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -12,13 +12,13 @@
         <file>
             <source>${basedir}/../pom.xml</source>
             <outputDirectory>/config/poms</outputDirectory>
-            <destName>rio-main.pom</destName>
+            <destName>rio-main-${project.version}.pom</destName>
         </file>
         <!-- Copy the Gnostic pom so we can correctly install Gnostic jars into the local repository -->
         <file>
             <source>${basedir}/../rio-services/gnostic/pom.xml</source>
             <outputDirectory>/config/poms</outputDirectory>
-            <destName>rio-gnostic.pom</destName>
+            <destName>rio-gnostic-${project.version}.pom</destName>
         </file>
     </files>
     <fileSets>
@@ -117,6 +117,7 @@
                 <exclude>org.rioproject.monitor:monitor-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
                 <exclude>org.rioproject:rio-api:jar</exclude>
+                <exclude>org.rioproject:rio-proxy:jar</exclude>
                 <exclude>org.rioproject:watch-ui</exclude>
                 <exclude>org.rioproject:rio-logging-support:jar</exclude>
                 <exclude>junit:junit</exclude>
@@ -128,11 +129,22 @@
                 <!-- The following exclusions are for the resolver(s) and it's dependencies -->
                 <exclude>org.rioproject.resolver:resolver-aether</exclude>
                 <exclude>org.rioproject.resolver:resolver-project</exclude>
-                <exclude>org.sonatype.*</exclude>
+                <exclude>org.eclipse.*</exclude>
                 <exclude>org.apache.maven:*</exclude>
                 <exclude>org.apache.maven.wagon:*</exclude>
+                <exclude>org.apache.httpcomponents:*</exclude>
                 <exclude>org.codehaus.plexus:*</exclude>
+                <exclude>org.sonatype.plexus:*</exclude>
+                <exclude>aopalliance:*</exclude>
+                <exclude>commons-codec:*</exclude>
+                <exclude>asm:*</exclude>
                 <exclude>nekohtml:*</exclude>
+                <exclude>javax.annotation:*:*</exclude>
+                <exclude>javax.enterprise:*:*</exclude>
+                <exclude>javax.inject:*:*</exclude>
+                <exclude>org.sonatype.sisu:*:*</exclude>
+                <exclude>com.google.guava:*:*</exclude>
+                <exclude>com.google.code.findbugs:*</exclude>
                 <!-- The following exclusions are for gnostic and it's dependencies -->
                 <exclude>org.codehaus.janino:*</exclude>
                 <exclude>org.drools:*</exclude>
@@ -170,6 +182,7 @@
                 <include>org.rioproject.event-collector:event-collector-api:jar</include>
                 <include>org.rioproject.event-collector:event-collector-proxy:jar</include>
                 <include>org.rioproject:rio-api:jar</include>
+                <include>org.rioproject:rio-proxy:jar</include>
                 <include>org.rioproject:watch-ui</include>
             </includes>
             <outputDirectory>lib-dl</outputDirectory>
@@ -181,11 +194,15 @@
             <includes>
                 <include>org.rioproject.resolver:resolver-aether</include>
                 <include>org.rioproject.resolver:resolver-project</include>
-                <include>org.sonatype.*</include>
+                <include>org.eclipse.*</include>
                 <include>org.apache.maven:*</include>
                 <include>org.apache.maven.wagon:*</include>
                 <include>org.codehaus.plexus:*</include>
+                <include>org.sonatype.plexus:*</include>
                 <include>nekohtml:*</include>
+                <include>org.apache.httpcomponents:*</include>
+                <include>org.slf4j:jcl-over-slf4j:*</include>
+                <include>commons-codec:*</include>
             </includes>
             <outputDirectory>lib/resolver</outputDirectory>
         </dependencySet>

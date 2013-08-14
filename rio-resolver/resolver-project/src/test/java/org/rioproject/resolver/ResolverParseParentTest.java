@@ -18,7 +18,7 @@ package org.rioproject.resolver;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sonatype.aether.installation.InstallationException;
+import org.eclipse.aether.installation.InstallationException;
 import java.io.IOException;
 
 /**

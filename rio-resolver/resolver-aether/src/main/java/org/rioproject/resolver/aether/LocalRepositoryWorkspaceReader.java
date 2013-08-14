@@ -16,10 +16,10 @@
 package org.rioproject.resolver.aether;
 
 import org.apache.maven.settings.building.SettingsBuildingException;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.repository.WorkspaceReader;
+import org.eclipse.aether.repository.WorkspaceRepository;
 import org.rioproject.resolver.aether.util.SettingsUtil;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.repository.WorkspaceReader;
-import org.sonatype.aether.repository.WorkspaceRepository;
 
 import java.io.File;
 import java.util.ArrayList;

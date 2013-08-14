@@ -16,7 +16,7 @@
 package org.rioproject.monitor.service;
 
 import net.jini.config.Configuration;
-import org.rioproject.event.DispatchEventHandler;
+import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.event.EventHandler;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.monitor.service.tasks.ProvisionMonitorEventTask;

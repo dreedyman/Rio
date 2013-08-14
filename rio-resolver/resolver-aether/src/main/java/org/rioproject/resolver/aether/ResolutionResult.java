@@ -15,8 +15,9 @@
  */
 package org.rioproject.resolver.aether;
 
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.resolution.ArtifactResult;
+
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.resolution.ArtifactResult;
 
 import java.util.List;
 

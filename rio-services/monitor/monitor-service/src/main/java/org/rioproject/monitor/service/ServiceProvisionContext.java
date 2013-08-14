@@ -19,8 +19,8 @@ package org.rioproject.monitor.service;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.event.EventHandler;
 import org.rioproject.monitor.service.selectors.ServiceResourceSelector;
-import org.rioproject.resources.servicecore.ServiceResource;
-import org.rioproject.watch.GaugeWatch;
+import org.rioproject.impl.service.ServiceResource;
+import org.rioproject.impl.watch.GaugeWatch;
 
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;

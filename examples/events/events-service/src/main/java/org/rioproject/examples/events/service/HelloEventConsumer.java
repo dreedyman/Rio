@@ -16,13 +16,13 @@
 package org.rioproject.examples.events.service;
 
 import org.rioproject.associations.Association;
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.event.BasicEventConsumer;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.examples.events.Hello;
 import org.rioproject.examples.events.HelloEvent;
-import org.rioproject.watch.StopWatch;
+import org.rioproject.impl.watch.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

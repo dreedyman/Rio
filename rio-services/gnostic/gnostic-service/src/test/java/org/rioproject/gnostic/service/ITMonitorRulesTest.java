@@ -20,7 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.associations.AssociationDescriptor;
-import org.rioproject.associations.AssociationMgmt;
+import org.rioproject.impl.associations.DefaultAssociationManagement;
 import org.rioproject.gnostic.Gnostic;
 import org.rioproject.gnostic.service.test.TestService;
 import org.rioproject.sla.RuleMap;
@@ -254,12 +254,12 @@ public class ITMonitorRulesTest {
 
     public class AssociationHelper<T> implements Callable<Iterable<T>> {
         Iterable<T> services;
-        AssociationMgmt mgr;
+        DefaultAssociationManagement mgr;
         String serviceName;
 
         AssociationHelper(String serviceName, Class<T> serviceClass, String... groups) {
             this.serviceName = serviceName;
-            mgr = new AssociationMgmt();
+            mgr = new DefaultAssociationManagement();
             services = mgr.addAssociationDescriptor(AssociationDescriptor.create(serviceName,
                                                                                  null,
                                                                                  serviceClass,

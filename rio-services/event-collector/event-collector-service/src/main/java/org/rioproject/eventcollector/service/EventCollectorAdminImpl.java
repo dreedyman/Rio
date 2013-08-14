@@ -18,7 +18,7 @@ package org.rioproject.eventcollector.service;
 import net.jini.export.Exporter;
 import net.jini.id.UuidFactory;
 import org.rioproject.admin.ServiceAdmin;
-import org.rioproject.admin.ServiceAdminImpl;
+import org.rioproject.impl.admin.ServiceAdminImpl;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.eventcollector.api.EventCollectorAdmin;
 import org.rioproject.eventcollector.proxy.EventCollectorAdminProxy;

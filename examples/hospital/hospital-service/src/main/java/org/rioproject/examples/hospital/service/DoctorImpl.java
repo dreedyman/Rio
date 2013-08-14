@@ -16,10 +16,10 @@
 package org.rioproject.examples.hospital.service;
 
 import net.jini.config.ConfigurationException;
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.examples.hospital.Doctor;
 import org.rioproject.examples.hospital.Patient;
-import org.rioproject.watch.GaugeWatch;
+import org.rioproject.impl.watch.GaugeWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

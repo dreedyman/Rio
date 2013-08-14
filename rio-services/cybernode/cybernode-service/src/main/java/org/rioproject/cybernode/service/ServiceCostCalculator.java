@@ -15,12 +15,12 @@
  */
 package org.rioproject.cybernode.service;
 
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.deploy.DownloadRecord;
-import org.rioproject.system.ComputeResource;
+import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.system.capability.PlatformCapability;
-import org.rioproject.system.measurable.MeasurableCapability;
+import org.rioproject.impl.system.measurable.MeasurableCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

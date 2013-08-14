@@ -15,6 +15,7 @@
  */
 package org.rioproject.resolver.aether;
 
+import org.eclipse.aether.repository.RemoteRepository;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,7 +23,6 @@ import org.junit.Test;
 import org.rioproject.resolver.FileUtils;
 import org.rioproject.resolver.Utils;
 import org.rioproject.resolver.maven2.Repository;
-import org.sonatype.aether.repository.RemoteRepository;
 
 import java.io.File;
 import java.io.IOException;

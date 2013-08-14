@@ -21,7 +21,7 @@ import org.rioproject.config.Component
  * Cybernode that created it. If the forked service detects that it's parent
  * Cybernode has orphaned it, it will terminate.
  */
-@Component('org.rioproject.fdh.JMXFaultDetectionHandler')
+@Component('org.rioproject.impl.fdh.JMXFaultDetectionHandler')
 class JMXFaultDetectionHandlerConfig {
     /*
      * Set the invocation delay (in milliseconds) to be 5 seconds. Default is 60 seconds.

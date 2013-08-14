@@ -1,8 +1,8 @@
 package org.rioproject.resolver.aether
 
-import org.sonatype.aether.collection.DependencySelector
-import org.sonatype.aether.graph.Dependency
-import org.sonatype.aether.collection.DependencyCollectionContext
+import org.eclipse.aether.collection.DependencySelector
+import org.eclipse.aether.graph.Dependency
+import org.eclipse.aether.collection.DependencyCollectionContext
 
 /**
  * A dependency selector that excludes all optional dependencies

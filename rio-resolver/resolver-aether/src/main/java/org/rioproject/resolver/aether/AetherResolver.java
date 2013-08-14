@@ -16,18 +16,18 @@
 package org.rioproject.resolver.aether;
 
 import org.apache.maven.settings.building.SettingsBuildingException;
+import org.eclipse.aether.RepositoryException;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.ArtifactRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.aether.RepositoryException;
-import org.sonatype.aether.repository.ArtifactRepository;
-import org.sonatype.aether.repository.RepositoryPolicy;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -156,7 +156,7 @@ public class AetherResolver implements Resolver {
     public URL getLocation(String artifact, String artifactType, RemoteRepository[] repositories) throws ResolverException {
         URL location;
         try {
-            List<org.sonatype.aether.repository.RemoteRepository> remoteRepositories =
+            List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories =
                 transformRemoteRepository(repositories);
             location = service.getLocation(artifact, artifactType, remoteRepositories);
         } catch (ArtifactResolutionException e) {
@@ -173,10 +173,10 @@ public class AetherResolver implements Resolver {
      */
     @Override
     public Collection<RemoteRepository> getRemoteRepositories() {
-        List<org.sonatype.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();
+        List<org.eclipse.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();
         List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
 
-        for(org.sonatype.aether.repository.RemoteRepository r : repos)
+        for(org.eclipse.aether.repository.RemoteRepository r : repos)
             remoteRepositories.add(transformAetherRemoteRepository(r));
 
         for(RemoteRepository rr : cachedRemoteRepositories) {
@@ -191,25 +191,25 @@ public class AetherResolver implements Resolver {
         return service;
     }
 
-    protected List<org.sonatype.aether.repository.RemoteRepository> transformRemoteRepository(RemoteRepository[] repositories) {
+    protected List<org.eclipse.aether.repository.RemoteRepository> transformRemoteRepository(RemoteRepository[] repositories) {
         if(repositories==null)
             throw new IllegalArgumentException("repositories must not be null");
-        List<org.sonatype.aether.repository.RemoteRepository> remoteRepositories =
-            new ArrayList<org.sonatype.aether.repository.RemoteRepository>();
+        List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories =
+            new ArrayList<org.eclipse.aether.repository.RemoteRepository>();
         for(RemoteRepository rr : repositories) {
-            RepositoryPolicy releasePolicy = new RepositoryPolicy();
-            releasePolicy.setChecksumPolicy(rr.getReleaseChecksumPolicy());
-            releasePolicy.setUpdatePolicy(rr.getReleaseUpdatePolicy());
+            RepositoryPolicy releasePolicy = new RepositoryPolicy(true,
+                                                                  rr.getReleaseUpdatePolicy(),
+                                                                  rr.getReleaseChecksumPolicy());
+            RepositoryPolicy snapshotPolicy = new RepositoryPolicy(true,
+                                                                   rr.getSnapshotUpdatePolicy(),
+                                                                   rr.getSnapshotChecksumPolicy());
 
-            RepositoryPolicy snapshotPolicy = new RepositoryPolicy();
-            snapshotPolicy.setChecksumPolicy(rr.getSnapshotChecksumPolicy());
-            snapshotPolicy.setUpdatePolicy(rr.getSnapshotUpdatePolicy());
+            org.eclipse.aether.repository.RemoteRepository.Builder repoBuilder =
+                new org.eclipse.aether.repository.RemoteRepository.Builder(rr.getId(), "default", rr.getUrl());
+            repoBuilder.setSnapshotPolicy(snapshotPolicy);
+            repoBuilder.setReleasePolicy(releasePolicy);
 
-            org.sonatype.aether.repository.RemoteRepository repository =
-                new org.sonatype.aether.repository.RemoteRepository(rr.getId(), "default", rr.getUrl());
-            repository.setPolicy(true, snapshotPolicy);
-            repository.setPolicy(false, releasePolicy);
-            remoteRepositories.add(repository);
+            remoteRepositories.add(repoBuilder.build());
         }
         return remoteRepositories;
     }
@@ -219,8 +219,8 @@ public class AetherResolver implements Resolver {
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
             classPath.add(artifactResult.getArtifact().getFile().getAbsolutePath());
             ArtifactRepository r = artifactResult.getRepository();
-            if(r instanceof org.sonatype.aether.repository.RemoteRepository) {
-                RemoteRepository rr = transformAetherRemoteRepository((org.sonatype.aether.repository.RemoteRepository)r);
+            if(r instanceof org.eclipse.aether.repository.RemoteRepository) {
+                RemoteRepository rr = transformAetherRemoteRepository((org.eclipse.aether.repository.RemoteRepository)r);
                 if(!cachedRemoteRepositories.contains(rr))
                     cachedRemoteRepositories.add(rr);
             }
@@ -248,7 +248,7 @@ public class AetherResolver implements Resolver {
         logger.debug(String.format("Artifact resolution for %s:%s", result.getArtifact(), newLine+resolvedList.toString()));
     }
 
-    protected RemoteRepository transformAetherRemoteRepository(org.sonatype.aether.repository.RemoteRepository r) {
+    protected RemoteRepository transformAetherRemoteRepository(org.eclipse.aether.repository.RemoteRepository r) {
         RemoteRepository rr = new RemoteRepository();
         rr.setId(r.getId());
         rr.setUrl(r.getUrl());
@@ -293,7 +293,7 @@ public class AetherResolver implements Resolver {
 
         public String[] call() throws ResolverException {
             String[] classPath;
-            List<org.sonatype.aether.repository.RemoteRepository> remoteRepositories = null;
+            List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories = null;
             if(request.getRepositories()!=null) {
                 remoteRepositories = transformRemoteRepository(request.getRepositories());
             }

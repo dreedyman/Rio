@@ -20,7 +20,7 @@ import net.jini.id.UuidFactory;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.admin.ServiceAdmin;
-import org.rioproject.admin.ServiceAdminImpl;
+import org.rioproject.impl.admin.ServiceAdminImpl;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.monitor.ProvisionMonitor.PeerInfo;
 import org.rioproject.monitor.ProvisionMonitorAdmin;
@@ -28,7 +28,7 @@ import org.rioproject.monitor.proxy.ProvisionMonitorAdminProxy;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.resources.persistence.SnapshotHandler;
+import org.rioproject.impl.persistence.SnapshotHandler;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.ResourceCapability;
 

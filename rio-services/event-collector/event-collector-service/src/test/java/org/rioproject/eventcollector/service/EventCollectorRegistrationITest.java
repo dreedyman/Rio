@@ -25,8 +25,8 @@ import org.rioproject.eventcollector.api.EventCollector;
 import org.rioproject.eventcollector.api.EventCollectorRegistration;
 import org.rioproject.eventcollector.api.UnknownEventCollectorRegistration;
 import org.rioproject.eventcollector.proxy.Registration;
-import org.rioproject.util.FileUtils;
-import org.rioproject.util.TimeConstants;
+import org.rioproject.impl.util.FileUtils;
+import org.rioproject.impl.util.TimeConstants;
 
 import java.io.File;
 import java.io.IOException;

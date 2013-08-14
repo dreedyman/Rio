@@ -18,6 +18,8 @@ package org.rioproject.test.system
 import net.jini.config.Configuration
 import net.jini.config.EmptyConfiguration
 import org.rioproject.deploy.SystemComponent
+import org.rioproject.impl.system.measurable.disk.DiskSpace
+import org.rioproject.impl.system.measurable.memory.Memory
 
 /**
  * Test measurables
@@ -28,8 +30,8 @@ class MeasurablesTest extends GroovyTestCase {
 
     void testMemory() {
         Configuration config = EmptyConfiguration.INSTANCE
-        org.rioproject.system.measurable.memory.Memory memMeasurable =
-            new org.rioproject.system.measurable.memory.Memory(config)
+        Memory memMeasurable =
+            new Memory(config)
 
         org.rioproject.system.capability.platform.Memory memCapability =
             new org.rioproject.system.capability.platform.Memory()
@@ -104,8 +106,8 @@ class MeasurablesTest extends GroovyTestCase {
 
     void testDiskSpace() {
         Configuration config = EmptyConfiguration.INSTANCE
-        org.rioproject.system.measurable.disk.DiskSpace diskMeasurable =
-            new org.rioproject.system.measurable.disk.DiskSpace(config)
+        DiskSpace diskMeasurable =
+            new DiskSpace(config)
 
         org.rioproject.system.capability.platform.StorageCapability storageCapability =
             new org.rioproject.system.capability.platform.StorageCapability()

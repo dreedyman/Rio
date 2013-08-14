@@ -17,9 +17,9 @@ package org.rioproject.test.simple;
 
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import org.rioproject.bean.Initialized;
-import org.rioproject.bean.PreDestroy;
+import org.rioproject.annotation.Initialized;
 
+import javax.annotation.PreDestroy;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Random;

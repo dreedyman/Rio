@@ -16,9 +16,9 @@
 
 package org.rioproject.test.bean;
 
-import org.rioproject.bean.PostUnAdvertise;
-import org.rioproject.bean.PreAdvertise;
-import org.rioproject.bean.SetParameters;
+import org.rioproject.annotation.PostUnAdvertise;
+import org.rioproject.annotation.PreAdvertise;
+import org.rioproject.annotation.SetParameters;
 
 import java.util.HashMap;
 import java.util.Map;

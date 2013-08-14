@@ -17,6 +17,8 @@ package org.rioproject.tools.cli;
 
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.impl.opstring.OAR;
+import org.rioproject.impl.opstring.OpStringLoader;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.RemoteRepository;

@@ -22,6 +22,7 @@ import org.rioproject.costmodel.ZeroCostModel;
 import org.rioproject.deploy.DownloadRecord;
 import org.rioproject.deploy.StagedSoftware;
 import org.rioproject.deploy.SystemComponent;
+import org.rioproject.version.VersionMatcher;
 
 import java.io.Serializable;
 import java.util.*;
@@ -143,6 +144,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     /** Classpath for the PlatformCapability */
     private String[] classpath;
     private static final Map<Integer, AtomicInteger> usageMap = new HashMap<Integer, AtomicInteger>();
+    private final VersionMatcher versionMatcher = new VersionMatcher();
     /** Meta chars for regex matching */
     private static final String[] META_CHARS = {"*", "(", "[", "\\", "^",
                                                 "$", "|", ")", "?", "+"};
@@ -294,7 +296,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
                     if (myMapping instanceof String &&
                         theirMapping instanceof String) {
                         if (key.equals(VERSION)) {
-                            if (!(versionSupported((String) theirMapping, (String) myMapping))) {
+                            if (!(versionMatcher.versionSupported((String) theirMapping, (String) myMapping))) {
                                 supports = false;
                                 break;
                             }
@@ -374,89 +376,6 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
         else
             matches = matcher.matches();
         return (matches);
-    }
-
-    /**
-     * Determine if versions are supported
-     *
-     * @param requiredVersion The required version, specified as a string. Must
-     * not be <code>null</code>
-     * @param configuredVersion  The configured version value
-     * @return <code>true</code> if, and only if, the request version can be
-     * supported
-     */
-    protected boolean versionSupported(final String requiredVersion, final String configuredVersion) {
-        if(requiredVersion == null)
-            throw new IllegalArgumentException("requiredVersion is null");
-        if(configuredVersion == null)
-            throw new IllegalArgumentException("configuredVersion is null");
-        boolean supported;
-
-        String versionRequired = requiredVersion;
-        if(versionRequired.endsWith("*") || versionRequired.endsWith("+")) {
-            boolean minorVersionSupport = versionRequired.endsWith("*");
-            versionRequired = versionRequired.substring(0, versionRequired.length()-1);
-            int[] required;
-            int[] configured;
-            try {
-                required = toIntArray(versionRequired.split("\\D"));
-                configured = toIntArray(configuredVersion.split("\\D"));
-            } catch(NumberFormatException e) {
-                return (false);
-            }
-            if(required.length == 0)
-                return (true);
-
-            /* Minor version support */
-            if(minorVersionSupport) {
-                supported = true;
-                for(int i = 0; i < required.length; i++) {
-                    if(configured.length >= (i+1)) {
-                        if(configured[i] != required[i]) {
-                            supported = false;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                supported = true;
-                /* Major version support */
-                for(int i = 0; i < required.length; i++) {
-                    if(configured.length >= (i+1)) {
-                        if(configured[i] > required[i]) {
-                            break;
-                        }
-                        if(configured[i] == required[i]) {
-                            continue;
-                        }
-                        if(configured[i] < required[i]) {
-                            supported = false;
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            supported = configuredVersion.equals(versionRequired);
-        }
-        return (supported);
-    }
-
-    /**
-     * Convert a String array into an int array
-     * @param a String array
-     * @return An int array
-     * @throws NumberFormatException if the value in the array is not a number
-     */
-    private int[] toIntArray(final String[] a) throws NumberFormatException {
-        int[] array = new int[a.length];
-        for(int i = 0; i < array.length; i++) {
-            if(a[i].length() == 0)
-                array[i] = Integer.parseInt("0");
-            else
-                array[i] = Integer.parseInt(a[i]);
-        }
-        return (array);
     }
 
     /**

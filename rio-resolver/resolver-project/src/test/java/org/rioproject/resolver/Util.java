@@ -17,7 +17,7 @@ package org.rioproject.resolver;
 
 import org.junit.Assert;
 import org.rioproject.resolver.maven2.Repository;
-import org.sonatype.aether.installation.InstallationException;
+import org.eclipse.aether.installation.InstallationException;
 
 import java.io.BufferedWriter;
 import java.io.File;

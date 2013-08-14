@@ -16,7 +16,7 @@
 package org.rioproject.monitor.service.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 
 import java.util.LinkedList;
 
@@ -29,8 +29,8 @@ import java.util.LinkedList;
  * selected. This class must be registered with the <code>LandlordLessor</code>,
  * and will be notified as resources are lease, updated or removed
  * 
- * @see org.rioproject.resources.servicecore.LandlordLessor
- * @see org.rioproject.resources.servicecore.ResourceLessor
+ * @see org.rioproject.impl.service.LandlordLessor
+ * @see org.rioproject.impl.service.ResourceLessor
  *
  * @author Dennis Reedy
  */

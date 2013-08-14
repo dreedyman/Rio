@@ -15,7 +15,7 @@
  */
 package org.rioproject.test.simple;
 
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.exec.ExecDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

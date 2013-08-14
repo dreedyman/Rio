@@ -18,17 +18,17 @@ package org.rioproject.cybernode.service;
 import net.jini.config.Configuration;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import org.rioproject.cybernode.ServiceBeanContainer;
-import org.rioproject.cybernode.ServiceBeanContainerListener;
-import org.rioproject.cybernode.ServiceBeanDelegate;
-import org.rioproject.cybernode.ServiceLogUtil;
+import org.rioproject.impl.container.ServiceBeanContainer;
+import org.rioproject.impl.container.ServiceBeanContainerListener;
+import org.rioproject.impl.container.ServiceBeanDelegate;
+import org.rioproject.impl.container.ServiceLogUtil;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.event.EventHandler;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.system.ComputeResource;
+import org.rioproject.impl.system.ComputeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#getSharedConfiguration()
+     * @see org.rioproject.impl.container.ServiceBeanContainer#getSharedConfiguration()
      */
     public Configuration getSharedConfiguration() {
         return (config);
@@ -91,7 +91,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#getComputeResource()
+     * @see org.rioproject.impl.container.ServiceBeanContainer#getComputeResource()
      */
     public ComputeResource getComputeResource() {
         return (computeResource);
@@ -123,7 +123,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#getServiceRecords
+     * @see org.rioproject.impl.container.ServiceBeanContainer#getServiceRecords
      */
     public ServiceRecord[] getServiceRecords() {
         List<ServiceRecord> list = new ArrayList<ServiceRecord>();
@@ -142,7 +142,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#getServiceCounter()
+     * @see org.rioproject.impl.container.ServiceBeanContainer#getServiceCounter()
      */
     public synchronized int getServiceCounter() {
         int size;
@@ -153,14 +153,14 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#getActivationInProcessCount()
+     * @see org.rioproject.impl.container.ServiceBeanContainer#getActivationInProcessCount()
      */
     public int getActivationInProcessCount() {
         return activationInProcessCount.get();
     }
     
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#activate
+     * @see org.rioproject.impl.container.ServiceBeanContainer#activate
      */
     public ServiceBeanInstance activate(ServiceElement sElem,
                                         OperationalStringManager opStringMgr,
@@ -214,7 +214,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
     
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#update
+     * @see org.rioproject.impl.container.ServiceBeanContainer#update
      */
     public void update(ServiceElement[] elements,  OperationalStringManager opStringMgr) {
         if(elements==null) {
@@ -239,7 +239,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#getServiceBeanInstances
+     * @see org.rioproject.impl.container.ServiceBeanContainer#getServiceBeanInstances
      */
     public ServiceBeanInstance[] getServiceBeanInstances(ServiceElement element) {
         List<ServiceBeanInstance> list = new ArrayList<ServiceBeanInstance>();
@@ -279,7 +279,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#started(Object)
+     * @see org.rioproject.impl.container.ServiceBeanContainer#started(Object)
      */
     public void started(Object identifier) {
         ServiceBeanDelegate delegate;
@@ -299,7 +299,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#discarded(Object)
+     * @see org.rioproject.impl.container.ServiceBeanContainer#discarded(Object)
      */
     public void discarded(Object identifier) {
         ServiceBeanDelegate delegate;
@@ -312,7 +312,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#remove(Object)
+     * @see org.rioproject.impl.container.ServiceBeanContainer#remove(Object)
      */
     public void remove(Object identifier) {
         if(shutdownSequence.get())
@@ -323,7 +323,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#addListener
+     * @see org.rioproject.impl.container.ServiceBeanContainer#addListener
      */
     public synchronized void addListener(ServiceBeanContainerListener l) {
         if(!listeners.contains(l))
@@ -331,7 +331,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     }
 
     /**
-     * @see org.rioproject.cybernode.ServiceBeanContainer#addListener
+     * @see org.rioproject.impl.container.ServiceBeanContainer#addListener
      */
     public synchronized void removeListener(ServiceBeanContainerListener l) {
         listeners.remove(l);

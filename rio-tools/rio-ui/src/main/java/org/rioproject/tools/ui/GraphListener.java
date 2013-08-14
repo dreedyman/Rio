@@ -21,7 +21,7 @@ import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.ui.Util;
 import org.rioproject.tools.ui.serviceui.ServiceAdminManager;

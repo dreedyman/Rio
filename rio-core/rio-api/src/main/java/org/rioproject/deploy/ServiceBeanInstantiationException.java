@@ -134,6 +134,7 @@ public class ServiceBeanInstantiationException extends Exception {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     public synchronized Throwable getCause() {
         if(exDesc==null)
             return super.getCause();

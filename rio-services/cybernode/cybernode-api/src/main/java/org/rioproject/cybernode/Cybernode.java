@@ -16,8 +16,7 @@
 package org.rioproject.cybernode;
 
 import org.rioproject.deploy.ServiceBeanInstantiator;
-import org.rioproject.opstring.Schedule;
-import org.rioproject.resources.servicecore.Service;
+import org.rioproject.servicecore.Service;
 
 import java.rmi.RemoteException;
 
@@ -31,8 +30,6 @@ import java.rmi.RemoteException;
  * @author Dennis Reedy
  */
 public interface Cybernode extends ServiceBeanInstantiator, Service {
-    @Deprecated
-    Schedule getSchedule() throws RemoteException;
 
     /**
      * Have the Cybernode add itself as a resource which can be used to
@@ -46,12 +43,6 @@ public interface Cybernode extends ServiceBeanInstantiator, Service {
      * @throws RemoteException If communication errors occur
      */
     void enlist() throws RemoteException;
-
-    /**
-     * @deprecated Use enlist() instead
-     */
-    @Deprecated
-    void enlist(Schedule schedule) throws RemoteException;
 
     /**
      * Have the Cybernode remove itself as a resource which that can be used

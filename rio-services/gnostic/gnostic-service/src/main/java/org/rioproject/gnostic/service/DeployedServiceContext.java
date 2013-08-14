@@ -21,7 +21,7 @@ import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.util.ThrowableUtil;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +30,8 @@ import java.util.*;
 
 /**
  * Context for operating with deployed services
+ *
+ * @author Dennis Reedy
  */
 @SuppressWarnings("unused")
 public class DeployedServiceContext {

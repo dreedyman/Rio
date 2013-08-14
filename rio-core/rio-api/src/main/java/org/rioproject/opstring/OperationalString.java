@@ -139,10 +139,4 @@ public interface OperationalString {
      * mechanism
      */
     URL loadedFrom();
-
-    /**
-     * @deprecated No Longer supported
-     */
-    @Deprecated
-    Schedule getSchedule();
 }

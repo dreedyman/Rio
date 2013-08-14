@@ -23,7 +23,7 @@ import java.lang.instrument.Instrumentation;
  * @author Dennis Reedy
  */
 @SuppressWarnings("unused")
-public class AgentHook {
+public final class AgentHook {
     static Instrumentation instrumentation;
 
     private AgentHook() {}

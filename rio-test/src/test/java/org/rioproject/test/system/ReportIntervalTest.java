@@ -20,10 +20,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.system.ComputeResource;
+import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.system.ResourceCapability;
-import org.rioproject.system.ResourceCapabilityChangeListener;
-import org.rioproject.system.measurable.MeasurableCapability;
+import org.rioproject.impl.system.ResourceCapabilityChangeListener;
+import org.rioproject.impl.system.measurable.MeasurableCapability;
 import org.rioproject.test.Utils;
 
 import java.net.UnknownHostException;

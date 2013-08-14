@@ -16,10 +16,10 @@
 package org.rioproject.cybernode.service;
 
 import net.jini.config.ConfigurationException;
-import org.rioproject.config.AggregateConfig;
+import org.rioproject.impl.config.AggregateConfig;
 import org.rioproject.config.GroovyConfig;
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.jsb.JSBContext;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.impl.servicebean.JSBContext;
 import org.rioproject.log.LoggerConfig;
 
 import java.lang.reflect.Field;

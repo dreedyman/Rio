@@ -61,7 +61,7 @@ public interface MonitorableService {
      * property
      * 
      * <pre>
-     * org.rioproject.fdh.HeartbeatFaultDetectionHandler.heartbeatServer
+     * org.rioproject.impl.fdh.HeartbeatFaultDetectionHandler.heartbeatServer
      * </pre>
      * 
      * @param configArgs Configuration attributes the Service will use to

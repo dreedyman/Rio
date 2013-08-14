@@ -29,7 +29,7 @@ import net.jini.security.proxytrust.TrustEquivalence;
 import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.resources.servicecore.AbstractProxy;
+import org.rioproject.proxy.service.AbstractProxy;
 import org.rioproject.system.ResourceCapability;
 
 import java.io.IOException;

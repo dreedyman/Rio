@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.cybernode.StaticCybernode;
 import org.rioproject.gnostic.Gnostic;
-import org.rioproject.gnostic.service.GnosticImpl;
 
 
 /**

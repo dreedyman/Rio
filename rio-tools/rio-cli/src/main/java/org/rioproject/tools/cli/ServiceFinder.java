@@ -36,9 +36,9 @@ import net.jini.security.ProxyPreparer;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.resources.client.DiscoveryManagementPool;
-import org.rioproject.tools.discovery.RecordingDiscoveryListener;
-import org.rioproject.tools.discovery.ReggieStat;
+import org.rioproject.impl.client.DiscoveryManagementPool;
+import org.rioproject.impl.discovery.RecordingDiscoveryListener;
+import org.rioproject.impl.discovery.ReggieStat;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

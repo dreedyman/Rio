@@ -28,12 +28,12 @@ import java.util.Date;
  * @author Dennis Reedy
  */
 public class ResourceCost implements Serializable {
-    static final long serialVersionUID = 1L;
-    private String resourceName;
-    private Date date;
-    private String costModelDescription;
-    private double cost;
-    private double units;
+    private static final long serialVersionUID = 1L;
+    private final String resourceName;
+    private final Date date;
+    private final String costModelDescription;
+    private final double cost;
+    private final double units;
 
     /**
      * Create a ResourceCost
@@ -45,11 +45,11 @@ public class ResourceCost implements Serializable {
      * {@link ResourceCostModel} used to compute the cost
      * @param date The date the cost had been computed
      */
-    public ResourceCost(String resourceName, 
-                        double cost, 
-                        double units,
-                        String costModelDescription, 
-                        Date date) {
+    public ResourceCost(final String resourceName,
+                        final double cost,
+                        final double units,
+                        final String costModelDescription,
+                        final Date date) {
         if(resourceName == null)
             throw new IllegalArgumentException("resourceName is null");
         if(costModelDescription == null)

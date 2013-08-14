@@ -15,14 +15,10 @@
  */
 package org.rioproject.test.bean
 
-import org.rioproject.bean.Initialized
-import org.rioproject.bean.Started
-import org.rioproject.bean.PreDestroy
-import org.rioproject.bean.SetConfiguration
 import net.jini.config.Configuration
-import org.rioproject.bean.SetParameters
-import org.rioproject.bean.CreateProxy
-import org.rioproject.bean.PreAdvertise
+import org.rioproject.annotation.*
+
+import javax.annotation.PreDestroy
 
 /**
  * Test that if lifecycle methods throw exceptions (checked or unchecked) the service creation fails.

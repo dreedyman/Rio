@@ -19,7 +19,7 @@
  */
 import org.rioproject.config.Component
 import org.rioproject.watch.ThresholdValues
-import org.rioproject.system.measurable.memory.pool.MemoryPool
+import org.rioproject.impl.system.measurable.memory.pool.MemoryPool
 import net.jini.config.Configuration
 import java.lang.management.MemoryPoolMXBean
 import java.lang.management.ManagementFactory

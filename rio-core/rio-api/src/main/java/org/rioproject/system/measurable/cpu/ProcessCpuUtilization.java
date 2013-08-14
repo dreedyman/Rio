@@ -24,11 +24,11 @@ import java.io.Serializable;
  * Measured process CPU utilization
  */
 public class ProcessCpuUtilization extends MeasuredResource implements Serializable {
-    static final long serialVersionUID = 1L;
-    private long system = -1;
-    private long user = -1;
-    private double total = -1;
-    private double totalPercentage = -1;
+    private static final long serialVersionUID = 1L;
+    private final long system;
+    private final long user;
+    private final double total;
+    private final double totalPercentage;
     /**
      * Construct a ProcessCpuUtilization with parameters
      *
@@ -36,11 +36,14 @@ public class ProcessCpuUtilization extends MeasuredResource implements Serializa
      * @param totalPercentage The total system cpu utilization percentage
      * @param tVals ThresholdValues for the ProcessCpuUtilization
      */
-    public ProcessCpuUtilization(String identifier,
-                                 double totalPercentage,
-                                 ThresholdValues tVals) {
+    public ProcessCpuUtilization(final String identifier,
+                                 final double totalPercentage,
+                                 final ThresholdValues tVals) {
         super(identifier, totalPercentage, tVals);
         this.totalPercentage = totalPercentage;
+        this.system = -1;
+        this.user = -1;
+        this.total = -1;
     }
 
     /**
@@ -52,11 +55,11 @@ public class ProcessCpuUtilization extends MeasuredResource implements Serializa
      * @param user The cpu user usage
      * @param tVals ThresholdValues for the ProcessCpuUtilization
      */
-    public ProcessCpuUtilization(String identifier,
-                                 double totalPercentage,
-                                 long system,
-                                 long user,
-                                 ThresholdValues tVals) {
+    public ProcessCpuUtilization(final String identifier,
+                                 final double totalPercentage,
+                                 final long system,
+                                 final long user,
+                                 final ThresholdValues tVals) {
         super(identifier, totalPercentage, tVals);
         this.system = system;
         this.user = user;

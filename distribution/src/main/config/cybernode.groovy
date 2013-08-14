@@ -19,7 +19,7 @@
  */
 import org.rioproject.config.Component
 
-import org.rioproject.resources.client.JiniClient
+import org.rioproject.impl.client.JiniClient
 
 import net.jini.core.discovery.LookupLocator
 import org.rioproject.config.Constants

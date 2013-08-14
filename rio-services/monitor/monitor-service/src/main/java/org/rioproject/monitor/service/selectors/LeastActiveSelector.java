@@ -17,7 +17,7 @@ package org.rioproject.monitor.service.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
 import org.rioproject.monitor.service.InstantiatorResource;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

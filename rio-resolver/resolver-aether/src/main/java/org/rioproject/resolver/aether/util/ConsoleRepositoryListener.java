@@ -15,10 +15,10 @@
  */
 package org.rioproject.resolver.aether.util;
 
+import org.eclipse.aether.AbstractRepositoryListener;
+import org.eclipse.aether.RepositoryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.aether.AbstractRepositoryListener;
-import org.sonatype.aether.RepositoryEvent;
 
 import java.io.PrintStream;
 

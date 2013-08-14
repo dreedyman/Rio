@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.event.BasicEventConsumer;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.monitor.ProvisionMonitor;

@@ -15,7 +15,7 @@
  */
 package org.rioproject.cybernode.service;
 
-import org.rioproject.jsb.ServiceBeanAdapterMBean;
+import org.rioproject.impl.servicebean.ServiceBeanAdapterMBean;
 
 import java.io.IOException;
 

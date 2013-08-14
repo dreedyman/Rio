@@ -29,7 +29,6 @@ import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.gnostic.service.Constants;
 import org.rioproject.system.measurable.cpu.CalculableCPU;
 
 import java.util.Properties;

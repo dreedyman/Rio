@@ -23,8 +23,8 @@ import org.rioproject.watch.Calculable;
  * @author Dennis Reedy
  */
 public class CalculableDiskSpace extends Calculable {
-    static final long serialVersionUID = 1L;
-    private DiskSpaceUtilization diskSpaceUtilization;
+    private static final long serialVersionUID = 1L;
+    private final DiskSpaceUtilization diskSpaceUtilization;
 
     /** 
      * Creates new CalculableDiskSpace

@@ -28,7 +28,7 @@ import net.jini.id.Uuid;
 import org.rioproject.admin.MonitorableService;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventProducer;
-import org.rioproject.resources.servicecore.Service;
+import org.rioproject.servicecore.Service;
 import org.rioproject.watch.WatchDataSource;
 import org.rioproject.watch.Watchable;
 

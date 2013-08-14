@@ -17,10 +17,10 @@ package org.rioproject.cybernode.service;
 
 import net.jini.admin.Administrable;
 import net.jini.admin.JoinAdmin;
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.core.jsb.ServiceElementChangeListener;
-import org.rioproject.jsb.ServiceBeanSLAManager;
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceElementChangeListener;
+import org.rioproject.impl.servicebean.ServiceBeanSLAManager;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.ServiceLevelAgreements;
@@ -50,7 +50,7 @@ public class ServiceElementChangeManager implements ServiceElementChangeListener
     }
 
     /* (non-Javadoc)
-    * @see org.rioproject.core.jsb.ServiceElementChangeListener#changed
+    * @see org.rioproject.core.servicebean.ServiceElementChangeListener#changed
     */
     public void changed(ServiceElement preElem, ServiceElement postElem) {
         if (logger.isTraceEnabled())

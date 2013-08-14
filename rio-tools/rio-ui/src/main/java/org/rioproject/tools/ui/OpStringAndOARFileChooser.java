@@ -16,7 +16,7 @@
 package org.rioproject.tools.ui;
 
 import org.rioproject.resolver.Artifact;
-import org.rioproject.system.OperatingSystemType;
+import org.rioproject.impl.system.OperatingSystemType;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

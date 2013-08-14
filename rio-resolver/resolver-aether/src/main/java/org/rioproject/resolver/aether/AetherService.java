@@ -15,13 +15,38 @@
  */
 package org.rioproject.resolver.aether;
 
-import org.apache.maven.repository.internal.DefaultServiceLocator;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.SettingsBuildingException;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.DependencyCollectionException;
+import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
+import org.eclipse.aether.deployment.DeployRequest;
+import org.eclipse.aether.deployment.DeploymentException;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyFilter;
+import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.installation.InstallRequest;
+import org.eclipse.aether.installation.InstallationException;
+import org.eclipse.aether.repository.*;
+import org.eclipse.aether.resolution.*;
+import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
+import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.transport.file.FileTransporterFactory;
+import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.artifact.SubArtifact;
+import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.eclipse.aether.util.repository.AuthenticationBuilder;
+import org.eclipse.aether.util.repository.DefaultMirrorSelector;
 import org.rioproject.resolver.aether.filters.ClassifierFilter;
 import org.rioproject.resolver.aether.filters.ExcludePlatformFilter;
 import org.rioproject.resolver.aether.util.ConsoleRepositoryListener;
@@ -29,29 +54,6 @@ import org.rioproject.resolver.aether.util.ConsoleTransferListener;
 import org.rioproject.resolver.aether.util.SettingsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.collection.CollectRequest;
-import org.sonatype.aether.collection.DependencyCollectionException;
-import org.sonatype.aether.connector.wagon.WagonProvider;
-import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
-import org.sonatype.aether.deployment.DeployRequest;
-import org.sonatype.aether.deployment.DeploymentException;
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.graph.DependencyFilter;
-import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManagerFactory;
-import org.sonatype.aether.installation.InstallRequest;
-import org.sonatype.aether.installation.InstallationException;
-import org.sonatype.aether.repository.*;
-import org.sonatype.aether.resolution.*;
-import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
-import org.sonatype.aether.spi.localrepo.LocalRepositoryManagerFactory;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
-import org.sonatype.aether.util.artifact.JavaScopes;
-import org.sonatype.aether.util.artifact.SubArtifact;
-import org.sonatype.aether.util.filter.DependencyFilterUtils;
-import org.sonatype.aether.util.repository.DefaultMirrorSelector;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -114,15 +116,16 @@ public final class AetherService {
     }
 
     private static RepositorySystem newRepositorySystem() {
-        DefaultServiceLocator locator = new DefaultServiceLocator();
-        locator.setServices(WagonProvider.class, new ManualWagonProvider());
-        locator.addService(RepositoryConnectorFactory.class, WagonRepositoryConnectorFactory.class);
+        /*
+         * Aether's components implement org.eclipse.aether.spi.locator.Service to ease manual wiring and using the
+         * prepopulated DefaultServiceLocator, we only need to register the repository connector and transporter
+         * factories.
+         */
+        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+        locator.addService( RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class );
+        locator.addService( TransporterFactory.class, FileTransporterFactory.class );
+        locator.addService( TransporterFactory.class, HttpTransporterFactory.class );
 
-        /*locator.addService(VersionResolver.class, DefaultVersionResolver.class);
-        locator.addService(VersionRangeResolver.class, DefaultVersionRangeResolver.class);
-        locator.addService(ArtifactDescriptorReader.class, DefaultArtifactDescriptorReader.class);*/
-
-        locator.setService(LocalRepositoryManagerFactory.class, SimpleLocalRepositoryManagerFactory.class);
         return locator.getService(RepositorySystem.class);
     }
 
@@ -130,13 +133,14 @@ public final class AetherService {
                                                final WorkspaceReader workspaceReader,
                                                final String repositoryLocation)
         throws SettingsBuildingException {
-        MavenRepositorySystemSession session = new MavenRepositorySystemSession();
+        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+
+        LocalRepository localRepo = new LocalRepository(repositoryLocation);
+        session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
         session.setTransferListener(new ConsoleTransferListener());
         session.setRepositoryListener(new ConsoleRepositoryListener());
         if(workspaceReader!=null)
             session.setWorkspaceReader(workspaceReader);
-        LocalRepository localRepository = new LocalRepository(repositoryLocation);
-        session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
         return session;
     }
 
@@ -218,11 +222,11 @@ public final class AetherService {
             myRepositories = repositories;
 
         setMirrorSelector(myRepositories);
-        applyAuthentication(myRepositories);
+        List<RemoteRepository> repositoriesToUse = applyAuthentication(myRepositories);
 
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(dependency);
-        collectRequest.setRepositories(myRepositories);
+        collectRequest.setRepositories(repositoriesToUse);
 
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, getDependencyFilter(artifact));
         dependencyRequest.setCollectRequest(collectRequest);
@@ -330,10 +334,10 @@ public final class AetherService {
             deployRequest = deployRequest.addArtifact(pomArtifact);
         }
 
-        RemoteRepository repository = new RemoteRepository(repositoryId, "default", repositoryURL );
+        RemoteRepository repository = new RemoteRepository.Builder(repositoryId, "default", repositoryURL).build();
         setMirrorSelector(asList(repository));
-        applyAuthentication(asList(repository));
-        deployRequest.setRepository(repository);
+        List<RemoteRepository> applied = applyAuthentication(asList(repository));
+        deployRequest.setRepository(applied.get(0));
 
         repositorySystem.deploy(repositorySystemSession, deployRequest);
     }
@@ -411,14 +415,14 @@ public final class AetherService {
             logger.debug("Get location of {} using repositories {}", artifactCoordinates, builder.toString());
         }
         setMirrorSelector(myRepositories);
-        applyAuthentication(myRepositories);
+        List<RemoteRepository> repositoriesToUse = applyAuthentication(myRepositories);
 
         DefaultArtifact a = new DefaultArtifact(artifactCoordinates);
         String extension = artifactExt==null? "jar":artifactExt;
         ArtifactRequest artifactRequest = new ArtifactRequest();
         DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), extension, a.getVersion());
         artifactRequest.setArtifact(artifact);
-        artifactRequest.setRepositories(myRepositories);
+        artifactRequest.setRepositories(repositoriesToUse);
         ArtifactResult artifactResult = repositorySystem.resolveArtifact(repositorySystemSession, artifactRequest);
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
@@ -436,12 +440,11 @@ public final class AetherService {
                 if(profile.getId().equals(activeProfile)) {
                     for(org.apache.maven.settings.Repository r : profile.getRepositories()) {
                         if(!alreadyHaveRepository(myRepositories, r.getId())) {
-                            RemoteRepository remoteRepository = new RemoteRepository(r.getId(), "default", r.getUrl());
                             RepositoryPolicy snapShotPolicy = createRepositoryPolicy(r.getSnapshots());
                             RepositoryPolicy releasesPolicy = createRepositoryPolicy(r.getReleases());
-
-                            remoteRepository.setPolicy(true, snapShotPolicy);
-                            remoteRepository.setPolicy(false, releasesPolicy);
+                            RemoteRepository.Builder builder = new RemoteRepository.Builder(r.getId(), "default", r.getUrl());
+                            builder.setSnapshotPolicy(snapShotPolicy).setReleasePolicy(releasesPolicy);
+                            RemoteRepository remoteRepository = builder.build();
                             myRepositories.add(remoteRepository);
                         }
                     }
@@ -451,31 +454,45 @@ public final class AetherService {
         }
 
         if(!alreadyHaveRepository(myRepositories, "central")) {
-            RemoteRepository central = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2/");
+            RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/").build();
             myRepositories.add(central);
         }
         return Collections.unmodifiableList(myRepositories);
     }
 
     /**
-     * Apply and authentication required for the provided repositories
+     * Apply any authentication required for the provided repositories
      *
      * @param repositories The {@code List} of repositories
+     *
+     * @return A {@code List} of {@code RemoteRepository}s with authentication applied
      */
-    private void applyAuthentication(final List<RemoteRepository> repositories) {
+    private List<RemoteRepository> applyAuthentication(final List<RemoteRepository> repositories) {
+        if(effectiveSettings.getServers().isEmpty())
+            return repositories;
+        List<RemoteRepository> appliedRepositories = new ArrayList<RemoteRepository>();
         for(Server server : effectiveSettings.getServers()) {
             for(RemoteRepository remoteRepository : repositories) {
                 if(server.getId().equals(remoteRepository.getId())) {
                     if(server.getUsername()!=null) {
-                        Authentication authentication = new Authentication(server.getUsername(),
-                                                                           server.getPassword(),
-                                                                           server.getPrivateKey(),
-                                                                           server.getPassphrase());
-                        remoteRepository.setAuthentication(authentication);
+                        Authentication authentication =
+                            new AuthenticationBuilder()
+                                .addUsername(server.getUsername())
+                                .addPassword(server.getPassword())
+                                .addPrivateKey(server.getPassword(), server.getPrivateKey()).build();
+                        RemoteRepository.Builder builder =
+                            new RemoteRepository.Builder(remoteRepository.getId(), "default", remoteRepository.getUrl());
+                        builder.setAuthentication(authentication);
+                        appliedRepositories.add(builder.build());
+                    } else {
+                        appliedRepositories.add(remoteRepository);
                     }
+                } else {
+                    appliedRepositories.add(remoteRepository);
                 }
             }
         }
+        return appliedRepositories;
     }
 
     /**
@@ -485,7 +502,7 @@ public final class AetherService {
      */
     private void setMirrorSelector(final List<RemoteRepository> repositories) {
         MirrorSelector mirrorSelector = getMirrorSelector(repositories);
-        ((MavenRepositorySystemSession)repositorySystemSession).setMirrorSelector(mirrorSelector);
+        ((DefaultRepositorySystemSession)repositorySystemSession).setMirrorSelector(mirrorSelector);
     }
 
     /**
@@ -510,10 +527,10 @@ public final class AetherService {
                                    false,
                                    mirror.getMirrorOf(),
                                    "*");
-                repositoryMirrors.add(new RemoteRepository(mirror.getId(), "default", mirror.getUrl()));
+                repositoryMirrors.add(new RemoteRepository.Builder(mirror.getId(), "default", mirror.getUrl()).build());
             }
 
-            for (RemoteRepository mirror : repositoryMirrors) {
+            /*for (RemoteRepository mirror : repositoryMirrors) {
                 List<RemoteRepository> mirroredRepositories = new ArrayList<RemoteRepository>();
                 for(RemoteRepository r : repositories) {
                     if(mirrorSelector.getMirror(r)!=null) {
@@ -522,7 +539,7 @@ public final class AetherService {
                     }
                 }
                 mirror.setMirroredRepositories(mirroredRepositories);
-            }
+            }*/
         }
         return mirrorSelector;
     }

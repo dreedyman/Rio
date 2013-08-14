@@ -15,11 +15,11 @@
  */
 package org.rioproject.cybernode.service;
 
-import org.rioproject.cybernode.ServiceBeanDelegate;
+import org.rioproject.impl.container.ServiceBeanDelegate;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceRecord;
-import org.rioproject.system.ComputeResource;
+import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.system.ResourceCapability;
 
 import java.util.ArrayList;
@@ -32,13 +32,13 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class CybernodeAdapter {
-    private ServiceBeanInstantiator instantiator;
-    private CybernodeImpl impl;
-    private ComputeResource computeResource;
+    private final ServiceBeanInstantiator instantiator;
+    private final CybernodeImpl impl;
+    private final ComputeResource computeResource;
 
-    public CybernodeAdapter(ServiceBeanInstantiator instantiator,
-                            CybernodeImpl impl,
-                            ComputeResource computeResource) {
+    public CybernodeAdapter(final ServiceBeanInstantiator instantiator,
+                            final CybernodeImpl impl,
+                            final ComputeResource computeResource) {
         if (instantiator == null)
             throw new IllegalArgumentException("instantiator is null");
         if (impl == null)

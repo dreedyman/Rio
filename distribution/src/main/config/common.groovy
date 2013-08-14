@@ -17,9 +17,9 @@
 import net.jini.export.Exporter
 import net.jini.jeri.BasicILFactory
 import net.jini.jeri.BasicJeriExporter
-import org.rioproject.bean.BeanInvocationLayerFactory
+import org.rioproject.impl.bean.BeanInvocationLayerFactory
 import org.rioproject.config.Component
-import org.rioproject.config.ExporterConfig
+import org.rioproject.impl.config.ExporterConfig
 
 /*
  * Configuration for core system properties

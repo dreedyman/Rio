@@ -16,7 +16,7 @@
 package org.rioproject.monitor.service;
 
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 
 import java.util.*;
 

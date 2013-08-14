@@ -21,8 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
-import org.rioproject.associations.AssociationManagement;
-import org.rioproject.associations.AssociationMgmt;
+import org.rioproject.impl.associations.DefaultAssociationManagement;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -52,7 +51,7 @@ public class ITCalculatorClientTest extends ITAbstractCalculatorTest {
                                                                         Calculator.class,
                                                                         testManager.getGroups());
         /* Create association management and get the Future. */
-        AssociationManagement aMgr = new AssociationMgmt();
+        org.rioproject.associations.AssociationManagement aMgr = new DefaultAssociationManagement();
         Association<Calculator> association = aMgr.addAssociationDescriptor(descriptor);
         future = association.getServiceFuture();
     }

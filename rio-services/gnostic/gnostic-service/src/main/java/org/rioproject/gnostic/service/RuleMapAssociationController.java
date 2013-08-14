@@ -19,6 +19,7 @@ import org.drools.agent.KnowledgeAgent;
 import org.drools.impl.KnowledgeBaseImpl;
 import org.drools.reteoo.ReteooRuleBase;
 import org.rioproject.associations.*;
+import org.rioproject.impl.associations.DefaultAssociationManagement;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.sla.RuleMap;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RuleMapAssociationController {
     private static final Logger logger = LoggerFactory.getLogger(RuleMapAssociationController.class.getName());
     private final RuleMap ruleMap;
-    private final AssociationMgmt associationMgmt;
+    private final DefaultAssociationManagement associationMgmt;
     private final List<Association<Object>> associations = new ArrayList<Association<Object>>();
     private final KnowledgeAgent kAgent;
     //private final KnowledgeBase kBase;
@@ -54,7 +55,7 @@ public class RuleMapAssociationController {
         if(kAgent==null)
             throw new IllegalArgumentException("kAgent is null");
         this.ruleMap = ruleMap;
-        associationMgmt = new AssociationMgmt();
+        associationMgmt = new DefaultAssociationManagement();
         associationMgmt.setBackend(this);
         this.kAgent = kAgent;
         this.monitor = monitor;
@@ -68,7 +69,7 @@ public class RuleMapAssociationController {
                                  String[] groups,
                                  ClassLoader ruleLoader) {
         this.ruleMap = ruleMap;
-        associationMgmt = new AssociationMgmt();
+        associationMgmt = new DefaultAssociationManagement();
         associationMgmt.setBackend(this);
         this.kBase = kBase;
         this.monitor = monitor;

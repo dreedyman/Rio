@@ -15,7 +15,7 @@
  */
 package org.rioproject.monitor.service.managers;
 
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.monitor.*;
 import org.rioproject.monitor.service.InstantiatorResource;
 import org.rioproject.monitor.service.ProvisionException;
@@ -24,7 +24,7 @@ import org.rioproject.monitor.service.ServiceProvisionContext;
 import org.rioproject.monitor.service.tasks.ProvisionFailureEventTask;
 import org.rioproject.monitor.service.tasks.ProvisionTask;
 import org.rioproject.monitor.service.util.LoggingUtil;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

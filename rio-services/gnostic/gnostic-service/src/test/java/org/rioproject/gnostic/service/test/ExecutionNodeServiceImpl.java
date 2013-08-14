@@ -1,7 +1,7 @@
 package org.rioproject.gnostic.service.test;
 
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.watch.CounterWatch;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.impl.watch.CounterWatch;
 
 /**
  * Test service implementation

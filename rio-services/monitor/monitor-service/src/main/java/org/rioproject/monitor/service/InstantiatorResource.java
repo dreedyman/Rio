@@ -19,7 +19,7 @@ import net.jini.id.Uuid;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.deploy.*;
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.monitor.service.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.ServiceLevelAgreements;
@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * {@code ServiceResource}, and represents an available {@link ServiceBeanInstantiator} service
  * that can be used to instantiate a service.
  * 
- * @see org.rioproject.core.jsb.ServiceBean
+ * @see org.rioproject.servicebean.ServiceBean
  * @see org.rioproject.deploy.ServiceBeanInstantiator
  *
  * @author Dennis Reedy

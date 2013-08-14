@@ -15,6 +15,9 @@
  */
 package org.rioproject.test.associations;
 
+import org.rioproject.annotation.SetServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContext;
+
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -29,13 +32,18 @@ public class DummyImpl implements Dummy, Serializable {
     public DummyImpl() {
     }
 
-    DummyImpl(int index) {
+    public DummyImpl(int index) {
         this.index = index;
     }
 
-    DummyImpl(int index, String name) {
+    public DummyImpl(int index, String name) {
         this.index = index;
         this.name = name;
+    }
+
+    @SetServiceBeanContext
+    public void setSBC(ServiceBeanContext context) {
+        this.name = context.getServiceElement().getName();
     }
 
     public int getIndex() {
@@ -44,6 +52,10 @@ public class DummyImpl implements Dummy, Serializable {
 
     public void setDummy(Dummy dummy) {
         this.anotherDummy = dummy;
+    }
+
+    public String getName() throws IOException {
+        return name;
     }
 
     public int getIndexFromAnotherDummy() throws IOException {

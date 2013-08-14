@@ -15,21 +15,13 @@
  */
 package org.rioproject.resolver
 
-import org.rioproject.resolver.aether.AetherResolver
-
-import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector
-import org.sonatype.aether.util.graph.selector.ScopeDependencySelector
-import org.sonatype.aether.util.graph.selector.AndDependencySelector
-import org.sonatype.aether.collection.DependencySelector
-import org.apache.maven.repository.internal.MavenRepositorySystemSession
-import org.sonatype.aether.util.artifact.JavaScopes
-import org.rioproject.resolver.aether.ZeroOptionalDependencySelector
-import org.rioproject.resolver.aether.TestDependencySelector
-import org.rioproject.resolver.aether.TestDependencyFilter
-
-import org.rioproject.resolver.aether.AetherService
-
-import org.rioproject.resolver.aether.ProjectWorkspaceReader
+import org.eclipse.aether.DefaultRepositorySystemSession
+import org.eclipse.aether.collection.DependencySelector
+import org.eclipse.aether.util.artifact.JavaScopes
+import org.eclipse.aether.util.graph.selector.AndDependencySelector
+import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector
+import org.eclipse.aether.util.graph.selector.ScopeDependencySelector
+import org.rioproject.resolver.aether.*
 
 /**
  * Resolves artifacts from within (or among) a project (module).
@@ -51,7 +43,7 @@ class ProjectModuleResolver extends AetherResolver {
                            new ZeroOptionalDependencySelector(),
                            new ExclusionDependencySelector())
         DependencySelector depFilter = new AndDependencySelector(selectors)
-        ((MavenRepositorySystemSession)aetherService.repositorySystemSession).setDependencySelector(depFilter)
+        ((DefaultRepositorySystemSession)aetherService.repositorySystemSession).setDependencySelector(depFilter)
         aetherService.dependencyFilterScope = JavaScopes.TEST
         aetherService.addDependencyFilter(new TestDependencyFilter())
     }

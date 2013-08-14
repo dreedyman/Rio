@@ -29,8 +29,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import net.jini.discovery.DiscoveryGroupManagement;
 import net.jini.discovery.DiscoveryManagement;
-import org.rioproject.tools.discovery.RecordingDiscoveryListener;
-import org.rioproject.tools.discovery.ReggieStat;
+import org.rioproject.impl.discovery.RecordingDiscoveryListener;
+import org.rioproject.impl.discovery.ReggieStat;
 
 /**
  * Discovery group selector

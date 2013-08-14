@@ -17,10 +17,10 @@ package org.rioproject.examples.hospital.service;
 
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationServiceListener;
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.examples.hospital.*;
 import org.rioproject.examples.hospital.Doctor.Status;
-import org.rioproject.watch.CounterWatch;
+import org.rioproject.impl.watch.CounterWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -19,7 +19,7 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
 import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.OpStringUtil;
+import org.rioproject.impl.opstring.OpStringUtil;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;

@@ -2,10 +2,10 @@ package org.rioproject.gnostic;
 
 import org.rioproject.system.measurable.cpu.CalculableCPU;
 import org.rioproject.system.measurable.memory.CalculableMemory;
-import org.rioproject.gnostic.test.TestService;
-import org.rioproject.gnostic.test.TestService.Status;
+import org.rioproject.gnostic.service.test.TestService;
+import org.rioproject.gnostic.service.test.TestService.Status;
 
-global org.rioproject.gnostic.DeployedServiceContext context;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 
 declare CalculableCPU
     @role(event)

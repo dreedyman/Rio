@@ -15,7 +15,7 @@
  */
 package org.rioproject.monitor.service;
 
-import org.rioproject.jsb.ServiceBeanAdapterMBean;
+import org.rioproject.impl.servicebean.ServiceBeanAdapterMBean;
 
 import javax.management.openmbean.TabularData;
 import java.net.MalformedURLException;

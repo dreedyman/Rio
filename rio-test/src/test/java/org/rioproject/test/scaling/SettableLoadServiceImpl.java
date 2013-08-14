@@ -15,9 +15,9 @@
  */
 package org.rioproject.test.scaling;
 
-import org.rioproject.core.jsb.ServiceBeanContext;
-import org.rioproject.jsb.ServiceBeanAdapter;
-import org.rioproject.watch.GaugeWatch;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.impl.servicebean.ServiceBeanAdapter;
+import org.rioproject.impl.watch.GaugeWatch;
 
 
 /**

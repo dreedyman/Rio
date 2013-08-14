@@ -21,11 +21,11 @@ import net.jini.id.UuidFactory;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.admin.ServiceAdmin;
-import org.rioproject.admin.ServiceAdminImpl;
+import org.rioproject.impl.admin.ServiceAdminImpl;
 import org.rioproject.cybernode.CybernodeAdmin;
-import org.rioproject.cybernode.ServiceBeanDelegate;
+import org.rioproject.impl.container.ServiceBeanDelegate;
 import org.rioproject.cybernode.proxy.CybernodeAdminProxy;
-import org.rioproject.resources.persistence.SnapshotHandler;
+import org.rioproject.impl.persistence.SnapshotHandler;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.ResourceCapability;
 

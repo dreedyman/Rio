@@ -50,21 +50,22 @@ import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.deploy.*;
 import org.rioproject.entry.ComputeResourceInfo;
-import org.rioproject.fdh.FaultDetectionHandler;
-import org.rioproject.fdh.FaultDetectionHandlerFactory;
-import org.rioproject.fdh.FaultDetectionListener;
-import org.rioproject.jsb.ServiceElementUtil;
-import org.rioproject.loader.ClassBundleLoader;
+import org.rioproject.impl.fdh.FaultDetectionHandler;
+import org.rioproject.impl.fdh.FaultDetectionHandlerFactory;
+import org.rioproject.impl.fdh.FaultDetectionListener;
+import org.rioproject.impl.opstring.OpStringFilter;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
+import org.rioproject.impl.loader.ClassBundleLoader;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.monitor.service.ServiceChannel.ServiceChannelEvent;
 import org.rioproject.monitor.service.util.LoggingUtil;
 import org.rioproject.opstring.*;
 import org.rioproject.opstring.ServiceElement.ProvisionType;
-import org.rioproject.resources.client.DiscoveryManagementPool;
-import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.resources.servicecore.ServiceResource;
-import org.rioproject.util.ThrowableUtil;
+import org.rioproject.impl.client.DiscoveryManagementPool;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
+import org.rioproject.impl.service.ServiceResource;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.sla.SLA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /** Whether this ServiceElementManager has been started */
     private final AtomicBoolean svcManagerStarted = new AtomicBoolean(false);
     /** The OperationalStringManager for the ServiceElementManager */
-    private OperationalStringManager opStringMgr;
+    private final OperationalStringManager opStringMgr;
     /** Is informed that a service has been provisioned successfully */
     private final ProvisionListener listener = new ServiceBeanProvisionListener();
     /** Is informed if a service is detected to have failed */
@@ -151,7 +152,7 @@ public class ServiceElementManager implements InstanceIDManager {
     private ProvisionMonitor eventSource;
     /** Event processor */
     private ProvisionMonitorEventProcessor eventProcessor;
-    private InstanceIDManager instanceIDMgr;
+    private final InstanceIDManager instanceIDMgr;
     /** Collection of known/allocated instance IDs.  */
     private final List<Long> instanceIDs = Collections.synchronizedList(new ArrayList<Long>());
     /** A ProxyPreparer for discovered services */
@@ -319,6 +320,10 @@ public class ServiceElementManager implements InstanceIDManager {
 
                     for (Map.Entry<String, Object> e : initParms.entrySet()) {
                         newConfig.addInitParameter(e.getKey(), e.getValue());
+                    }
+                    if(!sbc.getAdditionalEntries().isEmpty()) {
+                        List<Entry> entries = sbc.getAdditionalEntries();
+                        newConfig.addAdditionalEntries(entries.toArray(new Entry[entries.size()]));
                     }
                     sbi.setServiceBeanConfig(newConfig);
                 }
@@ -1909,7 +1914,7 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     class ServiceFaultListener implements FaultDetectionListener<ServiceID> {
         /**
-         * @see org.rioproject.fdh.FaultDetectionListener#serviceFailure(Object, Object)
+         * @see org.rioproject.impl.fdh.FaultDetectionListener#serviceFailure(Object, Object)
          */
         public synchronized void serviceFailure(final Object proxy, final ServiceID sID) {
             if(shutdown.get())

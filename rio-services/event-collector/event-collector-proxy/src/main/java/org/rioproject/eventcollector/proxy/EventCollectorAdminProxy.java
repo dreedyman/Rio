@@ -16,9 +16,9 @@
 package org.rioproject.eventcollector.proxy;
 
 import net.jini.id.Uuid;
-import org.rioproject.admin.ServiceAdminProxy;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.eventcollector.api.EventCollectorAdmin;
+import org.rioproject.proxy.admin.ServiceAdminProxy;
 
 import java.io.IOException;
 import java.io.Serializable;

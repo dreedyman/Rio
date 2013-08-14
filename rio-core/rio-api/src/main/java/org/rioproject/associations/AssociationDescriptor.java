@@ -25,13 +25,58 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The AssociationDescriptor defines the attributes needed to create, manage and
- * monitor <code>Association</code> instances.
+ * monitor {@code Association} instances.
+ *
+ * <br>
+ * When setting the {@code version} property, behavior is as follows. The
+ * {@code version} property value can use the asterisk (*) or plus (+) symbols to
+ * determine version matching. Version matching is done using service published {@link org.rioproject.entry.VersionEntry}
+ * attributes&nbsp; <br>
+ * <br>
+ * <table cellpadding="2" cellspacing="2" border="1"
+ * style="text-align: left; width: 100%;">
+ * <tbody>
+ * <tr>
+ * <th style="vertical-align: top;">Requirement<br>
+ * </th>
+ * <th style="vertical-align: top;">Support Criteria<br>
+ * </th>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top;">1.2.7<br>
+ * </td>
+ * <td style="vertical-align: top;">Specifies an exact version<br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top;">2*<br>
+ * </td>
+ * <td style="vertical-align: top;">Supported for all minor versions of 2 <br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top;">3.4*<br>
+ * </td>
+ * <td style="vertical-align: top;">Supported for all minor versions of 3.4, including 3.4<br>
+ * </td>
+ * </tr>
+ * <tr>
+ * <td style="vertical-align: top;">1.2+<br>
+ * </td>
+ * <td style="vertical-align: top;">Supported for version 1.2 or
+ * above&nbsp; </td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <br>
+ * Version requirements are expected to be a "." separated String of
+ * integers. Character values are ignored. For example;&nbsp; a version
+ * declaration of "2.0-M3" will be processed as "2.0.0.3"<br>
  *
  * @author Dennis Reedy
  */
 public class AssociationDescriptor implements Serializable {
-    @SuppressWarnings("unused")
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     /**
      * If an AssociationDescriptor is created with a null for the name
      * property, the AssociationDescriptor name property will be set to this
@@ -80,15 +125,11 @@ public class AssociationDescriptor implements Serializable {
      * The proxy to create
      */
     private String proxyClass;
-    public static final String JDK_PROXY="jdk";
+
     /**
-     * The proxy type, default is JDK proxy
+     * The {@code AssociationMatchFilter}
      */
-    private String proxyType = JDK_PROXY;
-    /**
-     * The association match filter
-     */
-    private String associationMatchFilter;
+    private AssociationMatchFilter associationMatchFilter;
 
     /**
      * The ServiceSelectionStrategy class
@@ -107,6 +148,10 @@ public class AssociationDescriptor implements Serializable {
      * The number of units service discovery timeout is for
      */
     private TimeUnit serviceDiscoveryTimeUnits = TimeUnit.MINUTES;
+    /**
+     * Version to match
+     */
+    private String version;
 
     /**
      * Create an AssociationDescriptor     
@@ -408,51 +453,20 @@ public class AssociationDescriptor implements Serializable {
     }
 
     /**
-     * Set the proxy type to create for the Association
-     *
-     * @param proxyType The type of proxy to generate. May be null. If not
-     * null, must be {@link AssociationDescriptor#JDK_PROXY} .
-     *
-     * @throws IllegalArgumentException if the proxyType is not {@link AssociationDescriptor#JDK_PROXY}
-     */
-    @Deprecated
-    @SuppressWarnings("unused")
-    public void setProxyType(final String proxyType) {
-        if(proxyType==null) {
-            this.proxyType = null;
-        } else {
-            if(proxyType.equals(JDK_PROXY)) {
-                this.proxyType = proxyType;
-            } else {
-                throw new IllegalArgumentException("unknown proxy type: "+proxyType);
-            }
-        }
-    }
-
-    /**
-     * Get the proxy type to create for the Association
-     *
-     * @return The type of proxy to generate
-     */
-    public String getProxyType() {
-        return proxyType;
-    }
-
-    /**
      * Set the association match filter class name
      *
      * @param associationMatchFilter The classname of the <code>AssociationMatchFilter</code>
      */
-    public void setAssociationMatchFilter(final String associationMatchFilter) {
+    public void setAssociationMatchFilter(final AssociationMatchFilter associationMatchFilter) {
         this.associationMatchFilter = associationMatchFilter;
     }
 
     /**
      * Get the association match filter class name
      *
-     * @return The classname of the <code>AssociationMatchFilter</code>
+     * @return The {@code AssociationMatchFilter}
      */
-    public String getAssociationMatchFilter() {
+    public AssociationMatchFilter getAssociationMatchFilter() {
         return associationMatchFilter;
     }
 
@@ -597,6 +611,24 @@ public class AssociationDescriptor implements Serializable {
     }
 
     /**
+     * Get the version to match.
+     *
+     * @return The version to match, may be {@code null}
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Set the version to match.
+     *
+     * @param version The version to match
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
      * Override hashCode to return the hashCode of the name, opStringName
      * and {@link AssociationType} hashCodes
      */
@@ -620,36 +652,31 @@ public class AssociationDescriptor implements Serializable {
      */
     public boolean equals(final Object obj) {
         if(this == obj)
-            return (true);
+            return true;
         if(!(obj instanceof AssociationDescriptor))
-            return (false);
+            return false;
         AssociationDescriptor that = (AssociationDescriptor)obj;
         if(this.type.equals(that.type) && this.getName().equals(that.getName())) {
             boolean matched = false;
             /* Check propertyName attributes */
-            if(this.opStringName!=null &&
-               that.opStringName!=null) {
-                if(this.opStringName.equals(
-                    that.opStringName))
-                    matched = true;
+            if(this.opStringName!=null && that.opStringName!=null && this.opStringName.equals(that.opStringName)) {
+                matched = true;
             }
-            if(this.opStringName==null &&
-               that.opStringName==null)
+            if(this.opStringName==null && that.opStringName==null)
                 matched = true;
 
             if(!matched)
-                return(matched);
+                return matched;
 
             if (!Arrays.equals(this.interfaceNames, that.interfaceNames))
                 return false;
 
             /* Check propertyName attributes */
-            if(this.propertyName!=null && that.propertyName!=null) {
-                if(this.propertyName.equals(that.propertyName))
-                    return(true);
+            if(this.propertyName!=null && that.propertyName!=null && this.propertyName.equals(that.propertyName)) {
+                return true;
             }
             if(this.propertyName==null && that.propertyName==null)
-                return(true);
+                return true;
 
         }
         return (false);
@@ -691,12 +718,12 @@ public class AssociationDescriptor implements Serializable {
                "Name="+getName()+", "+
                "Interfaces="+iFaces+", "+
                "Groups="+gps+", "+
+               "Version="+version+", "+
                "MatchOnName="+matchOnName+", "+
                "OperationalString="+ops+", "+
                "Property="+propertyName+", "+
                "associationMatchFilter="+associationMatchFilter+", "+
                "proxyClass="+proxyClass+", "+
-               "proxyType="+proxyType+", "+
                "serviceStrategyClass="+serviceStrategyClass+", "+
                "lazyInject="+lazyInject+", "+
                "serviceDiscoveryTimeout="+serviceDiscoveryTimeout+", "+

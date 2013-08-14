@@ -21,7 +21,7 @@ import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.TreeTableNode;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
-import org.rioproject.jmx.JMXUtil;
+import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.tools.ui.Constants;
 import org.rioproject.tools.ui.GraphViewAdapter;
 import org.rioproject.tools.ui.UtilizationColumnManager;

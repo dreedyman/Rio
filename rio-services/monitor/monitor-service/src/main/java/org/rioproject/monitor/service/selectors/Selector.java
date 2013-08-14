@@ -18,12 +18,12 @@ package org.rioproject.monitor.service.selectors;
 import org.rioproject.monitor.service.InstantiatorResource;
 import org.rioproject.monitor.service.ProvisionException;
 import org.rioproject.monitor.service.ProvisionRequest;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Select a {@link org.rioproject.resources.servicecore.ServiceResource} based on a {@link org.rioproject.opstring.ServiceElement}
+ * Select a {@link org.rioproject.impl.service.ServiceResource} based on a {@link org.rioproject.opstring.ServiceElement}
  */
 public class Selector {
     private static final Logger logger = LoggerFactory.getLogger(Selector.class);

@@ -25,7 +25,7 @@ import net.jini.entry.AbstractEntry;
  * @author Dennis Reedy
  */
 public class OperationalStringEntry extends AbstractEntry {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     public String name;
 
     /**

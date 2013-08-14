@@ -22,10 +22,10 @@ import org.rioproject.watch.ThresholdValues;
  * Measured JMX memory pool utilization
  */
 public class MemoryPoolUtilization extends MeasuredResource {
-    private long committed;
-    private long init;
-    private long max;
-    private long used;
+    private final long committed;
+    private final long init;
+    private final long max;
+    private final long used;
 
     /**
      * Create a {@code MemoryPoolUtilization} instance
@@ -39,13 +39,13 @@ public class MemoryPoolUtilization extends MeasuredResource {
      * @param used The amount of used memory in bytes.
      * @param thresholdValues {@code ThresholdValues} that have been applied.
      */
-    public MemoryPoolUtilization(String identifier,
-                                 double value,                                 
-                                 long committed,
-                                 long init,
-                                 long max,
-                                 long used,
-                                 ThresholdValues thresholdValues) {
+    public MemoryPoolUtilization(final String identifier,
+                                 final double value,
+                                 final long committed,
+                                 final long init,
+                                 final long max,
+                                 final long used,
+                                 final ThresholdValues thresholdValues) {
         super(identifier, value, thresholdValues);
         this.committed = committed;
         this.init = init;

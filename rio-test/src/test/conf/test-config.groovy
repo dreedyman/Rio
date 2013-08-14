@@ -23,6 +23,15 @@ AssociationManagementTest {
     autoDeploy = true
 }
 
+AssociationVersionTest {
+    groups = "AssociationVersionTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/opstring/associationVersioning.groovy'
+    autoDeploy = true
+}
+
 SLAThresholdEventNotificationTest {
     groups = "SLAThresholdEventNotificationTest"
     //locators = ''

@@ -8,7 +8,7 @@ deployment(name: 'Notification Using Artifact Test') {
 
     artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.0-M4'
     artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.0-M4'
-    artifact id: 'test', 'org.rioproject.gnostic:test:1.0'
+    artifact id: 'test', 'org.rioproject.gnostic.service:test:1.0'
 
     logging {
         logger 'org.rioproject.gnostic', Level.FINE
@@ -32,7 +32,7 @@ deployment(name: 'Notification Using Artifact Test') {
     rules {
         rule{
             resource 'file:'+System.getProperty('user.dir')+'/src/test/resources/CounterNotification'
-            ruleClassPath 'org.rioproject.gnostic:test:1.0'
+            ruleClassPath 'org.rioproject.gnostic.service:test:1.0'
             serviceFeed(name: "Test") {
                 watches "notification"
             }

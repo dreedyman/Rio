@@ -24,34 +24,32 @@ import net.jini.config.ConfigurationException;
 import net.jini.id.Uuid;
 import org.rioproject.admin.ServiceBeanControlException;
 import org.rioproject.associations.Association;
-import org.rioproject.associations.AssociationManagement;
-import org.rioproject.associations.AssociationMgmt;
+import org.rioproject.impl.associations.DefaultAssociationManagement;
 import org.rioproject.associations.AssociationType;
-import org.rioproject.bean.BeanHelper;
-import org.rioproject.bean.Initialized;
-import org.rioproject.bean.Started;
+import org.rioproject.impl.bean.BeanHelper;
+import org.rioproject.annotation.Initialized;
+import org.rioproject.annotation.Started;
 import org.rioproject.config.Constants;
-import org.rioproject.core.jsb.DiscardManager;
-import org.rioproject.core.jsb.ServiceBeanContext;
+import org.rioproject.impl.container.*;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.costmodel.ResourceCost;
-import org.rioproject.cybernode.*;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.event.EventHandler;
-import org.rioproject.exec.ServiceBeanExecHandler;
-import org.rioproject.exec.ServiceExecutor;
-import org.rioproject.jmx.JMXUtil;
-import org.rioproject.jmx.MBeanServerFactory;
-import org.rioproject.jsb.JSBContext;
-import org.rioproject.jsb.JSBManager;
-import org.rioproject.jsb.ServiceBeanSLAManager;
-import org.rioproject.jsb.ServiceElementUtil;
-import org.rioproject.opstring.OpStringManagerProxy;
+import org.rioproject.impl.exec.ServiceBeanExecHandler;
+import org.rioproject.impl.exec.ServiceExecutor;
+import org.rioproject.impl.jmx.JMXUtil;
+import org.rioproject.impl.jmx.MBeanServerFactory;
+import org.rioproject.impl.servicebean.JSBContext;
+import org.rioproject.impl.servicebean.JSBManager;
+import org.rioproject.impl.servicebean.ServiceBeanSLAManager;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
+import org.rioproject.impl.opstring.OpStringManagerProxy;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.sla.SLAThresholdEvent;
-import org.rioproject.system.ComputeResource;
+import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.capability.PlatformCapability;
 import org.slf4j.Logger;
@@ -69,7 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The ServiceBeanDelegateImpl provides loading and management services for a service
- * which has been instantiated by a {@link org.rioproject.cybernode.ServiceBeanContainer}
+ * which has been instantiated by a {@link org.rioproject.impl.container.ServiceBeanContainer}
  *
  * @author Dennis Reedy
  */
@@ -316,8 +314,8 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
             if (association.getAssociationType()== AssociationType.REQUIRES) {
                 logger.debug("{} has at least one requires Association, advertisement managed by AssociationManagement",
                              sElem.getName());
-                if(context.getAssociationManagement() instanceof AssociationMgmt) {
-                    ((AssociationMgmt)context.getAssociationManagement()).checkAdvertise();
+                if(context.getAssociationManagement() instanceof DefaultAssociationManagement) {
+                    ((DefaultAssociationManagement)context.getAssociationManagement()).checkAdvertise();
                 }
                 return;
             }
@@ -515,7 +513,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                         */
                         loadResult = ServiceBeanLoader.load(sElem, serviceID, jsbManager, container);
 
-                        AssociationManagement associationManagement;
+                        org.rioproject.associations.AssociationManagement associationManagement;
                         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
                         try {
                             ClassLoader jsbCL = loadResult.getImpl().getClass().getClassLoader();
@@ -539,15 +537,15 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                          * the ServiceBean */
                         registerPlatformCapabilities();
 
-                        if(context.getAssociationManagement() instanceof AssociationMgmt) {
-                            ((AssociationMgmt)context.getAssociationManagement()).setBackend(loadResult.getImpl());
+                        if(context.getAssociationManagement() instanceof DefaultAssociationManagement) {
+                            ((DefaultAssociationManagement)context.getAssociationManagement()).setBackend(loadResult.getImpl());
+                            ((DefaultAssociationManagement)associationManagement).setServiceBeanContainer(container);
+                            ((DefaultAssociationManagement)associationManagement).setServiceBeanContext(context);
                         } else {
                             logger.warn("The service's AssociationManagement is not an instance of {}, " +
                                         "failed to invoke setBackend method on [{}] impl",
                                         context.getAssociationManagement(), sElem.getName());
                         }
-                        associationManagement.setServiceBeanContainer(container);
-                        associationManagement.setServiceBeanContext(context);
 
                         if(context instanceof JSBContext) {
                             EventHandler eH = ((JSBContext)context).getEventTable().get(SLAThresholdEvent.ID);
@@ -768,7 +766,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
     class JSBDiscardManager implements DiscardManager, LifeCycle {
 
         /**
-         * @see org.rioproject.core.jsb.DiscardManager#discard
+         * @see org.rioproject.impl.container.DiscardManager#discard
          */
         public void discard() {
             if(terminated.get())

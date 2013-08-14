@@ -20,23 +20,22 @@ import net.jini.core.constraint.MethodConstraints;
 import net.jini.core.constraint.RemoteMethodControl;
 import net.jini.core.event.UnknownEventException;
 import net.jini.id.Uuid;
+import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ProxyTrustIterator;
 import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
-import net.jini.security.TrustVerifier;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.deploy.*;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.Schedule;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.servicecore.AbstractProxy;
+import org.rioproject.proxy.service.AbstractProxy;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.net.InetAddress;
+import java.rmi.RemoteException;
 
 /**
  * A <code>CybernodeProxy</code> is a proxy for the Cybernode server. This is
@@ -79,16 +78,6 @@ public class CybernodeProxy extends AbstractProxy implements Cybernode, Serializ
     /** @see Cybernode#enlist()  */
     public void enlist() throws RemoteException {
         cybernodeProxy.enlist();
-    }
-
-    @Deprecated
-    public void enlist(Schedule s) throws RemoteException {
-        cybernodeProxy.enlist();
-    }
-
-    @Deprecated
-    public Schedule getSchedule() throws RemoteException {
-        return null;
     }
 
     /** @see Cybernode#release(boolean) */

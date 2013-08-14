@@ -20,7 +20,7 @@ import org.rioproject.monitor.service.OpStringManager;
 import org.rioproject.monitor.service.OpStringMangerController;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
-import org.rioproject.resources.persistence.SnapshotHandler;
+import org.rioproject.impl.persistence.SnapshotHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

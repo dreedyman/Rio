@@ -13,7 +13,7 @@ deployment(name:'executionNodeService',  debug: 'true') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    artifact id: 'test', 'org.rioproject.gnostic:test:1.0'
+    artifact id: 'test', 'org.rioproject.gnostic.service:test:1.0'
 
     /*
      * Declare the service to be deployed. The number of instances deployed
@@ -34,7 +34,7 @@ deployment(name:'executionNodeService',  debug: 'true') {
     rules {
         rule{
             resource 'SLAKsessions'
-            ruleClassPath 'org.rioproject.gnostic:test:1.0'
+            ruleClassPath 'org.rioproject.gnostic.service:test:1.0'
             serviceFeed(name: "ExecutionNodeService") {
                 watches "kSessionCounter"
                 //, ${SystemWatchID.SYSTEM_CPU}, ${SystemWatchID.JVM_MEMORY}"

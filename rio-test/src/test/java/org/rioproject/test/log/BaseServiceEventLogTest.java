@@ -22,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.deploy.DeployAdmin;
-import org.rioproject.event.BasicEventConsumer;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.log.ServiceLogEvent;

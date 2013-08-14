@@ -18,7 +18,7 @@ package org.rioproject.test.sla;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.event.DynamicEventConsumer;
+import org.rioproject.impl.event.DynamicEventConsumer;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;

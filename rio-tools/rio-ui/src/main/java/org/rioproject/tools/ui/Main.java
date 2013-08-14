@@ -38,21 +38,23 @@ import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.entry.OperationalStringEntry;
-import org.rioproject.event.BasicEventConsumer;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.eventcollector.api.EventCollector;
+import org.rioproject.impl.opstring.OAR;
+import org.rioproject.impl.opstring.OpStringLoader;
 import org.rioproject.install.Installer;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
-import org.rioproject.resources.client.JiniClient;
-import org.rioproject.resources.client.ServiceDiscoveryAdapter;
-import org.rioproject.util.ThrowableUtil;
+import org.rioproject.impl.client.JiniClient;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
-import org.rioproject.tools.discovery.RecordingDiscoveryListener;
+import org.rioproject.impl.discovery.RecordingDiscoveryListener;
 import org.rioproject.tools.ui.browser.Browser;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.discovery.GroupSelector;
@@ -981,7 +983,7 @@ public class Main extends JFrame {
                     try {
                         remoteEventTable.addEventCollector((EventCollector)item.service);
                     } catch(Exception e) {
-                        org.rioproject.ui.Util.showError(e, frame, "Cannot add Event Collector");
+                        Util.showError(e, frame, "Cannot add Event Collector");
                     }
                 }
                 if(item.service instanceof ProvisionMonitor) {

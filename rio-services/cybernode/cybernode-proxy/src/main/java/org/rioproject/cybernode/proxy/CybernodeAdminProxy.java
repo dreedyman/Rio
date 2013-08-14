@@ -23,8 +23,8 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ProxyTrustIterator;
 import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
-import org.rioproject.admin.ServiceAdminProxy;
 import org.rioproject.cybernode.CybernodeAdmin;
+import org.rioproject.proxy.admin.ServiceAdminProxy;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.ResourceCapability;
 

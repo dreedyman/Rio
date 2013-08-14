@@ -8,7 +8,7 @@ import java.lang.Exception;
 import java.lang.System;
 import java.util.Date;
 
-global org.rioproject.gnostic.DeployedServiceContext context;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 
 declare CalculableMemory
     @role(event)

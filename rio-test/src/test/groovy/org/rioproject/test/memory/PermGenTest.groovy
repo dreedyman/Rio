@@ -16,14 +16,15 @@
 package org.rioproject.test.memory;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.runner.RunWith
+import org.rioproject.util.TimeUtil;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import static org.junit.Assert.*
 
 import org.rioproject.opstring.OperationalStringManager
-import org.rioproject.resources.servicecore.Service
+import org.rioproject.servicecore.Service
 import org.rioproject.cybernode.Cybernode
 import org.rioproject.watch.WatchDataSource
 import net.jini.core.lookup.ServiceItem
@@ -135,7 +136,7 @@ class PermGenTest {
             Thread.sleep(1000)
             iteration++
         }
-        println "Time to unload classes: ${org.rioproject.util.TimeUtil.format(System.currentTimeMillis()-start)}"
+        println "Time to unload classes: ${TimeUtil.format(System.currentTimeMillis()-start)}"
         println "apiStillLoaded: ${apiStillLoaded}, implStillLoaded: ${implStillLoaded} "+(apiStillLoaded && implStillLoaded)
         return apiStillLoaded && implStillLoaded
     }

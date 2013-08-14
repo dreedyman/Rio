@@ -19,9 +19,9 @@ import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.system.measurable.SigarHelper;
+import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.test.system.measurable.SimpleThresholdListener;
-import org.rioproject.system.measurable.memory.Memory;
+import org.rioproject.impl.system.measurable.memory.Memory;
 import org.rioproject.watch.ThresholdValues;
 
 /**

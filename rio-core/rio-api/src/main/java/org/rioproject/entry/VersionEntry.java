@@ -25,14 +25,19 @@ import net.jini.lookup.entry.ServiceControlled;
  */
 public class VersionEntry extends AbstractEntry implements ServiceControlled {
     private static final long serialVersionUID = 1l;
-    public final String version;
+    public String version;
 
-    @SuppressWarnings("unused")
     public VersionEntry() {
-        this(null);
+        super();
     }
 
     public VersionEntry(final String version) {
+        super();
         this.version = version;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("VersionEntry version=%s", version);
     }
 }

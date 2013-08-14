@@ -1,7 +1,7 @@
 package org.rioproject.gnostic;
 import org.rioproject.watch.Calculable;
-import org.rioproject.gnostic.test.TestService;
-global org.rioproject.gnostic.DeployedServiceContext context;
+import org.rioproject.gnostic.service.test.TestService;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 declare Calculable
     @role(event)
     @timestamp(date)

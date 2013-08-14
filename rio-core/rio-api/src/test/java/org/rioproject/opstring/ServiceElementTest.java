@@ -28,7 +28,7 @@ public class ServiceElementTest {
     @Test
     public void testEquality() {
         ServiceBeanConfig sbc = new ServiceBeanConfig(new HashMap<String, Object>(), new String[]{"-"});
-        ClassBundle export1 = new ClassBundle("org.rioproject.resources.servicecore.Service");
+        ClassBundle export1 = new ClassBundle("org.rioproject.service.Service");
         export1.addJAR("rio-api.jar");
         export1.addJAR("service-dl.jar");
         export1.setCodebase("http://10.1.1.3:9000");
@@ -36,7 +36,7 @@ public class ServiceElementTest {
         impl.addJAR("rio.jar");
         impl.addJAR("service.jar");
         impl.setCodebase("http://10.1.1.3:9000");
-        String fdh = "org.rioproject.fdh.LeaseFaultDetectionHandler";
+        String fdh = "org.rioproject.impl.fdh.LeaseFaultDetectionHandler";
         ServiceElement s1 = new ServiceElement(ServiceElement.ProvisionType.DYNAMIC,
                                                sbc,
                                                new ServiceLevelAgreements(),
@@ -44,7 +44,7 @@ public class ServiceElementTest {
                                                new ClassBundle(fdh),
                                                impl);
 
-        ClassBundle export2 = new ClassBundle("org.rioproject.resources.servicecore.Service");
+        ClassBundle export2 = new ClassBundle("org.rioproject.service.Service");
         export2.addJAR("rio-api.jar");
         export2.addJAR("service-dl.jar");
         export2.setCodebase("http://10.1.1.3:9000");

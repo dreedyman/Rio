@@ -1,9 +1,9 @@
 package org.rioproject.test.bean
 
 import net.jini.config.Configuration
-import org.rioproject.bean.*
-import org.rioproject.core.jsb.ServiceBean
-import org.rioproject.core.jsb.ServiceBeanContext
+import org.rioproject.annotation.*
+import org.rioproject.servicebean.ServiceBean
+import org.rioproject.servicebean.ServiceBeanContext
 
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy

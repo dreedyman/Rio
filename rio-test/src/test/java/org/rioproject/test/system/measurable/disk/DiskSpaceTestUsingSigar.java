@@ -20,9 +20,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.measurable.SigarHelper;
+import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.test.system.measurable.SimpleThresholdListener;
-import org.rioproject.system.measurable.disk.DiskSpace;
+import org.rioproject.impl.system.measurable.disk.DiskSpace;
 import org.rioproject.system.measurable.disk.DiskSpaceUtilization;
 import org.rioproject.watch.ThresholdValues;
 

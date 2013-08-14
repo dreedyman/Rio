@@ -22,9 +22,9 @@ import org.rioproject.monitor.service.InstantiatorResource;
 import org.rioproject.monitor.service.ProvisionException;
 import org.rioproject.monitor.service.ProvisionRequest;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.servicecore.LandlordLessor;
-import org.rioproject.resources.servicecore.LeaseListener;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.LandlordLessor;
+import org.rioproject.impl.service.LeaseListener;
+import org.rioproject.impl.service.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

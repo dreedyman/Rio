@@ -18,7 +18,7 @@ package org.rioproject.gnostic.service;
 import org.junit.Assert;
 import org.rioproject.gnostic.Gnostic;
 import org.rioproject.resolver.maven2.Repository;
-import org.rioproject.resources.util.FileUtils;
+import org.rioproject.impl.util.FileUtils;
 import org.rioproject.sla.RuleMap;
 
 import java.io.*;
@@ -115,7 +115,7 @@ public class Util {
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>").append("\n");
         sb.append("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">").append("\n");
         sb.append("<modelVersion>4.0.0</modelVersion>").append("\n");
-        sb.append("<groupId>org.rioproject.gnostic</groupId>").append("\n");
+        sb.append("<groupId>org.rioproject.gnostic.service</groupId>").append("\n");
         sb.append("<artifactId>test</artifactId>").append("\n");
         sb.append("<version>1.0</version>").append("\n");
         sb.append("</project>").append("\n");

@@ -21,6 +21,7 @@ import net.jini.space.JavaSpace05;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.associations.*;
+import org.rioproject.impl.associations.*;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -41,9 +42,8 @@ public class AssociationFutureTest {
     
     @Test
     public void testSimpleFuture() {
-        AssociationManagement aMgr = new AssociationMgmt();
-        Association<Dummy> association =
-            aMgr.addAssociationDescriptor(AssociationDescriptor.create("Dummy", Dummy.class));
+        AssociationManagement aMgr = new DefaultAssociationManagement();
+        Association<Dummy> association = aMgr.addAssociationDescriptor(AssociationDescriptor.create("Dummy", Dummy.class));
         Future<Dummy> future = association.getServiceFuture();
         association.addServiceItem(AssociationUtils.makeServiceItem(0));
         Dummy dummy = null;
@@ -62,7 +62,7 @@ public class AssociationFutureTest {
 
     @Test
     public void testContinuousGets() {
-        AssociationManagement aMgr = new AssociationMgmt();
+        org.rioproject.associations.AssociationManagement aMgr = new DefaultAssociationManagement();
         Association<Dummy> association =
             aMgr.addAssociationDescriptor(AssociationDescriptor.create("Dummy", Dummy.class));
         Future<Dummy> future = association.getServiceFuture();
@@ -84,7 +84,7 @@ public class AssociationFutureTest {
 
     @Test
     public void testMultipleFutures() {
-        AssociationManagement aMgr = new AssociationMgmt();
+        org.rioproject.associations.AssociationManagement aMgr = new DefaultAssociationManagement();
         List<Future<Dummy>> futures = new ArrayList<Future<Dummy>>();
         for(int i=0; i<100; i++) {
             Association<Dummy> association =
@@ -112,7 +112,7 @@ public class AssociationFutureTest {
 
     @Test
     public void testWait() {
-        final AssociationManagement aMgr = new AssociationMgmt();
+        final org.rioproject.associations.AssociationManagement aMgr = new DefaultAssociationManagement();
         final Association<Dummy> association =
             aMgr.addAssociationDescriptor(AssociationDescriptor.create("Dummy", Dummy.class));
         Future<Dummy> future = association.getServiceFuture();
@@ -143,7 +143,7 @@ public class AssociationFutureTest {
 
     @Test
     public void testForceTerminateWithException() {
-        final AssociationManagement aMgr = new AssociationMgmt();
+        final org.rioproject.associations.AssociationManagement aMgr = new DefaultAssociationManagement();
         Association<Dummy> association =
             aMgr.addAssociationDescriptor(AssociationDescriptor.create("Dummy", Dummy.class));
         Future<Dummy> future = association.getServiceFuture();
@@ -174,7 +174,7 @@ public class AssociationFutureTest {
         TargetDummy target = new TargetDummy();
         AssociationInjector<Dummy> ai = new AssociationInjector<Dummy>(target);
         AssociationDescriptor ad = AssociationDescriptor.create("Dummy", "dummy", Dummy.class);
-        Association<Dummy> a = new Association<Dummy>(ad);
+        Association<Dummy> a = new DefaultAssociation<Dummy>(ad);
         a.addServiceItem(AssociationUtils.makeServiceItem(0));
         ai.discovered(a, new DummyImpl(0));
         Dummy dummy = null;
@@ -196,7 +196,7 @@ public class AssociationFutureTest {
         TargetDummy target = new TargetDummy();
         AssociationDescriptor ad = AssociationDescriptor.create("Dummy", "dummy", Dummy.class);
         ad.setLazyInject(false);
-        final AssociationMgmt aMgr = new AssociationMgmt();
+        final DefaultAssociationManagement aMgr = new DefaultAssociationManagement();
         aMgr.setBackend(target);
         final Association<Dummy> a = aMgr.addAssociationDescriptor(ad);
         Dummy dummy = null;
@@ -232,7 +232,7 @@ public class AssociationFutureTest {
 
         testManager.deploy(opstring);
         AssociationDescriptor ad = AssociationDescriptor.create("Spaced Out", JavaSpace05.class, "AssociationFutureTest");
-        AssociationMgmt mgr = new AssociationMgmt();
+        DefaultAssociationManagement mgr = new DefaultAssociationManagement();
         Association<JavaSpace05> a = mgr.addAssociationDescriptor(ad);
         Future<JavaSpace05> future = a.getServiceFuture();
         Throwable thrown = null;

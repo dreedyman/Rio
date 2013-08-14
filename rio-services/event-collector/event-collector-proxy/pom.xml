@@ -23,6 +23,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.rioproject.event-collector</groupId>
             <artifactId>event-collector-api</artifactId>
             <version>${project.version}</version>

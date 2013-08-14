@@ -29,7 +29,7 @@ import net.jini.lookup.entry.StatusType;
  * @author Dennis Reedy
  */
 public class BasicStatus extends Status {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Create a BasicStatus

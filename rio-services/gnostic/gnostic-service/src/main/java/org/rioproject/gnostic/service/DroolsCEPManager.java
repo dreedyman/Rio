@@ -26,7 +26,7 @@ import org.drools.runtime.rule.WorkingMemoryEntryPoint;
 import org.drools.template.ObjectDataCompiler;
 import org.rioproject.sla.RuleMap;
 import org.rioproject.sla.SLA;
-import org.rioproject.util.StringUtil;
+import org.rioproject.impl.util.StringUtil;
 import org.rioproject.watch.Calculable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

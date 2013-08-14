@@ -26,12 +26,12 @@ public class CalculableMemoryPool extends Calculable {
      * Holds value of property containing details about memory utilization for a
      * memory pool.
      */
-    private MemoryPoolUtilization memoryPoolUtilization;
+    private final MemoryPoolUtilization memoryPoolUtilization;
 
-    public CalculableMemoryPool(String id,
-                                double value,
-                                long when,
-                                MemoryPoolUtilization memoryPoolUtilization) {
+    public CalculableMemoryPool(final String id,
+                                final double value,
+                                final long when,
+                                final MemoryPoolUtilization memoryPoolUtilization) {
         super(id, value, when);
         this.memoryPoolUtilization = memoryPoolUtilization;
     }

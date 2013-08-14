@@ -28,7 +28,7 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class StandardServiceType extends ServiceType {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     public String   name="";
     public String   description="";
     public  URL     iconURL=null;

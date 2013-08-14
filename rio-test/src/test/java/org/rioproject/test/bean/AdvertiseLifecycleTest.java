@@ -24,9 +24,10 @@ import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.event.BasicEventConsumer;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
+import org.rioproject.impl.opstring.OpString;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
@@ -214,7 +215,7 @@ public class AdvertiseLifecycleTest {
                                            new String[]{System.getProperty("user.dir")+"/target/test-classes/"},
                                            "file://");
         elem.setComponentBundle(main);
-        ClassBundle export = new ClassBundle(org.rioproject.resources.servicecore.Service.class.getName(),
+        ClassBundle export = new ClassBundle(org.rioproject.servicecore.Service.class.getName(),
                                              new String[]{System.getProperty("user.dir")+"/target/test-classes/"},
                                              "file://");
 

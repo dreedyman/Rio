@@ -27,7 +27,7 @@ deployment(name:'association stuff') {
                         type: 'requires',
                         property: 'dummy') {
                 management inject: 'eager',
-                           strategy: 'org.rioproject.associations.strategy.Utilization',
+                           strategy: 'org.rioproject.impl.associations.strategy.Utilization',
                            serviceDiscoveryTimeout: 15,
                            serviceDiscoveryTimeoutUnits: TimeUnit.SECONDS
             }

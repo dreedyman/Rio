@@ -43,12 +43,12 @@ import org.rioproject.monitor.service.tasks.ProvisionTask;
 import org.rioproject.monitor.service.util.FailureReasonFormatter;
 import org.rioproject.monitor.service.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resources.servicecore.LandlordLessor;
-import org.rioproject.resources.servicecore.LeaseListenerAdapter;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.LandlordLessor;
+import org.rioproject.impl.service.LeaseListenerAdapter;
+import org.rioproject.impl.service.ServiceResource;
 import org.rioproject.system.ResourceCapability;
-import org.rioproject.util.TimeConstants;
-import org.rioproject.watch.GaugeWatch;
+import org.rioproject.impl.util.TimeConstants;
+import org.rioproject.impl.watch.GaugeWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

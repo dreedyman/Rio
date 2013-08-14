@@ -16,7 +16,7 @@
 package org.rioproject.eventcollector.api;
 
 import net.jini.core.lease.LeaseDeniedException;
-import org.rioproject.resources.servicecore.Service;
+import org.rioproject.servicecore.Service;
 
 import java.io.IOException;
 

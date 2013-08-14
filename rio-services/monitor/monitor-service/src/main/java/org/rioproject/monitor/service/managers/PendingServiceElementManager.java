@@ -16,7 +16,7 @@
 package org.rioproject.monitor.service.managers;
 
 import org.rioproject.deploy.ServiceProvisionListener;
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.monitor.service.ProvisionRequest;
 import org.rioproject.monitor.service.util.LoggingUtil;
 import org.rioproject.opstring.ServiceElement;

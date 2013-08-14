@@ -22,7 +22,7 @@ import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.SystemWatchID;
 import org.rioproject.watch.Calculable;
-import org.rioproject.watch.ThresholdListener;
+import org.rioproject.impl.watch.ThresholdListener;
 import org.rioproject.watch.ThresholdType;
 import org.rioproject.watch.ThresholdValues;
 import org.slf4j.Logger;

@@ -2,7 +2,7 @@ package org.rioproject.gnostic;
 
 import org.rioproject.watch.Calculable;
 
-global org.rioproject.gnostic.DeployedServiceContext context;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 
 declare Calculable
     @role(event)

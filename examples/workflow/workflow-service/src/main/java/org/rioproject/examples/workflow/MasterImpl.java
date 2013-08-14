@@ -17,7 +17,7 @@ package org.rioproject.examples.workflow;
 
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
-import org.rioproject.bean.PreAdvertise;
+import org.rioproject.annotation.PreAdvertise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

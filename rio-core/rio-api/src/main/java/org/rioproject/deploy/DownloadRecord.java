@@ -29,19 +29,19 @@ public class DownloadRecord implements Serializable {
     /**
      * The location of the artifact
      */
-    private URL location;
+    private final URL location;
     /**
      * The canonical path in the file system where the file was downloaded
      */
-    private String path;
+    private final String path;
     /**
      * The name of the downloaded file
      */
-    private String name;
+    private final String name;
     /**
      * Whether or not to unarchive the downloaded software
      */
-    private boolean unarchived;
+    private final boolean unarchived;
     /**
      * When the artifact was downloaded
      */
@@ -49,23 +49,23 @@ public class DownloadRecord implements Serializable {
     /**
      * The size of the downloaded artifact
      */
-    private int downloadedSize;
+    private final int downloadedSize;
     /**
      * The size of the extracted artifact
      */
-    private int extractedSize;
+    private final int extractedSize;
     /**
      * Where the file was extracted to
      */
-    private String extractedPath;
+    private final String extractedPath;
     /**
      * The time (in millis) to perform the artifact
      */
-    private long downloadTime;
+    private final long downloadTime;
     /**
      * The time (in millis) to perform the unarchive (extraction)
      */
-    private long unarchiveTime;
+    private final long unarchiveTime;
     /**
      * Whether the parent directory was created
      */

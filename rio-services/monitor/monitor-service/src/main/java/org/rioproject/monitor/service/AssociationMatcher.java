@@ -17,7 +17,7 @@ package org.rioproject.monitor.service;
 
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
-import org.rioproject.jsb.ServiceElementUtil;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.opstring.ServiceElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

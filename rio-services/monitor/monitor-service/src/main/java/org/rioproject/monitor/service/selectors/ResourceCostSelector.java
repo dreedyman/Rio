@@ -17,7 +17,7 @@ package org.rioproject.monitor.service.selectors;
 
 import com.sun.jini.landlord.LeasedResource;
 import org.rioproject.monitor.service.InstantiatorResource;
-import org.rioproject.resources.servicecore.ServiceResource;
+import org.rioproject.impl.service.ServiceResource;
 import org.rioproject.system.ResourceCapability;
 
 import java.util.Comparator;
@@ -34,9 +34,9 @@ import java.util.TreeSet;
  * This class must be registered with the <code>LandlordLessor</code>, and
  * will be notified as resources are lease, updated or removed <br>
  * 
- * @see org.rioproject.resources.servicecore.LandlordLessor
- * @see org.rioproject.resources.servicecore.ResourceLessor
- * @see org.rioproject.system.ComputeResource
+ * @see org.rioproject.impl.service.LandlordLessor
+ * @see org.rioproject.impl.service.ResourceLessor
+ * @see org.rioproject.impl.system.ComputeResource
  * @see org.rioproject.system.ResourceCapability
  *
  * @author Dennis Reedy

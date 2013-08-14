@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.rioproject.resolver.aether.AetherResolver;
-import org.sonatype.aether.installation.InstallationException;
+import org.eclipse.aether.installation.InstallationException;
 
 import java.io.IOException;
 

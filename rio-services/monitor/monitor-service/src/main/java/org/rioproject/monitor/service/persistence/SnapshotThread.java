@@ -1,7 +1,7 @@
 package org.rioproject.monitor.service.persistence;
 
 import com.sun.jini.reliableLog.LogException;
-import org.rioproject.resources.persistence.PersistentStore;
+import org.rioproject.impl.persistence.PersistentStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -24,7 +24,7 @@ import net.jini.core.event.UnknownEventException;
 import net.jini.export.Exporter;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import org.rioproject.config.ExporterConfig;
+import org.rioproject.impl.config.ExporterConfig;
 import org.rioproject.log.ServiceLogEvent;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitorEvent;

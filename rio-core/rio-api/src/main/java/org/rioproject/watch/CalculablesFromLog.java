@@ -30,7 +30,8 @@ import java.util.List;
  * @author Dennis Reedy
  */
 @SuppressWarnings("unused")
-public class CalculablesFromLog {
+public final class CalculablesFromLog {
+    private CalculablesFromLog() {}
 
     /**
      * Parse a location for {@code Calculable}s.

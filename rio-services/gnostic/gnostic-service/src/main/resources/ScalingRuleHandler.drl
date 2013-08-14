@@ -11,8 +11,8 @@ opStringName
 package org.rioproject.gnostic;
 
 import org.rioproject.watch.Calculable;
-import function org.rioproject.gnostic.DeployedServiceContext.getServiceCount;
-global org.rioproject.gnostic.DeployedServiceContext context;
+import function org.rioproject.gnostic.service.DeployedServiceContext.getServiceCount;
+global org.rioproject.gnostic.service.DeployedServiceContext context;
 
 declare Calculable
     @role(event)

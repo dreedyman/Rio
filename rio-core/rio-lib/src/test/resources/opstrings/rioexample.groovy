@@ -17,7 +17,7 @@ deployment(name:'Echo') {
         }
         logging {
             logger 'tutorial', Level.ALL
-            logger 'org.rioproject.jsb', Level.ALL
+            logger 'org.rioproject.impl.servicebean', Level.ALL
         }
         serviceLevelAgreements {
             systemRequirements ref: 'Spring'
