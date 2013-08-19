@@ -30,7 +30,7 @@ public class Accumulator {
     /** Holds reference to the statistical formulae implementor */
     private Statistics statistics = new Statistics();
     /** Holds value of property source. */
-    private WatchDataSource source;
+    private final WatchDataSource source;
 
     /**
      * Creates new Accumulator
@@ -192,14 +192,5 @@ public class Accumulator {
      */
     public WatchDataSource getSource() {
         return (source);
-    }
-
-    /**
-     * Setter for property source.
-     * 
-     * @param source New value of property source.
-     */
-    public void setSource(WatchDataSource source) {
-        this.source = source;
     }
 }

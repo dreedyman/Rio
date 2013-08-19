@@ -45,7 +45,7 @@ class StartServiceBeanExecConfig {
         String codebase = ServiceDescriptorUtil.getCybernodeCodebase()
         String classpath = ServiceDescriptorUtil.getCybernodeClasspath()
 
-        String policyFile = rioHome + '/policy/rio.policy'
+        String policyFile = rioHome + '/policy/policy.all'
         def configArgs = getConfigArgs(rioHome)
 
         def serviceDescriptors = [

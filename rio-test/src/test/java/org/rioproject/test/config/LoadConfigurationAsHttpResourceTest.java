@@ -21,9 +21,9 @@ import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
 import org.junit.Test;
+import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.impl.container.ServiceContextFactory;
-import org.rioproject.impl.servicebean.JSBManager;
 import org.rioproject.impl.opstring.GroovyDSLOpStringParser;
 import org.rioproject.impl.opstring.OpString;
 import org.rioproject.impl.opstring.OpStringParser;
@@ -58,7 +58,7 @@ public class LoadConfigurationAsHttpResourceTest {
         ServiceElement serviceElement = opStrings.get(0).getServices()[0];
 
         ServiceBeanContext context = new ServiceContextFactory().create(serviceElement,
-                                                                    new JSBManager(serviceElement,
+                                                                    new DefaultServiceBeanManager(serviceElement,
                                                                                    InetAddress.getLocalHost().getHostName(),
                                                                                    InetAddress.getLocalHost().getHostAddress(),
                                                                                    UuidFactory.generate()),

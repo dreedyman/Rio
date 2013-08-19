@@ -53,7 +53,7 @@ import org.rioproject.impl.opstring.OpStringLoader;
 import org.rioproject.impl.opstring.OpStringManagerProxy;
 import org.rioproject.impl.persistence.PersistentStore;
 import org.rioproject.impl.persistence.SnapshotHandler;
-import org.rioproject.impl.servicebean.JSBManager;
+import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.impl.servicebean.ServiceBeanActivation.LifeCycleManager;
 import org.rioproject.impl.servicebean.ServiceBeanAdapter;
@@ -532,7 +532,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
          */
         try {
             MarshalledInstance mi = new MarshalledInstance(proxy);
-            ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(mi);
+            ((DefaultServiceBeanManager)context.getServiceBeanManager()).setMarshalledInstance(mi);
         } catch (IOException e) {
             logger.warn("Unable to create MarshalledInstance for Cybernode proxy, non-fatal error, continuing ...", e);
         }        

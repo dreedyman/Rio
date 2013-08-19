@@ -16,10 +16,10 @@
 package org.rioproject.impl.bean.spring;
 
 import org.rioproject.impl.bean.BeanFactory;
+import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.impl.servicebean.JSBManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,9 +153,9 @@ public class SpringBeanFactory extends BeanFactory {
         ctx_refresh.invoke(ctx, (Object[])null);
 
         ServiceBeanManager mgr = context.getServiceBeanManager();
-        if(mgr instanceof JSBManager) {
+        if(mgr instanceof DefaultServiceBeanManager) {
             SpringDiscardManager sdm = new SpringDiscardManager(ctx, context.getServiceBeanManager().getDiscardManager());
-            ((JSBManager)mgr).setDiscardManager(sdm);
+            ((DefaultServiceBeanManager)mgr).setDiscardManager(sdm);
         } else {
             logger.warn("Unable to set Spring DiscardManager, unrecognized ServiceBeanManager");
         }

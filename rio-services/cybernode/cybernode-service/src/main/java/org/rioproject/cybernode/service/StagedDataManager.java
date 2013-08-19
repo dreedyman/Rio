@@ -20,7 +20,7 @@ import org.rioproject.deploy.StagedData;
 import org.rioproject.deploy.StagedSoftware;
 import org.rioproject.deploy.SystemComponent;
 import org.rioproject.impl.exec.Util;
-import org.rioproject.impl.servicebean.JSBContext;
+import org.rioproject.impl.servicebean.DefaultServiceBeanContext;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.impl.util.DownloadManager;
 import org.rioproject.impl.util.FileUtils;
@@ -306,8 +306,8 @@ public class StagedDataManager {
                     computeResource.getPlatformCapabilityNameTable();
                 className = pCapMap.get(sysComp.getName());
             }
-            PlatformCapability pCap = JSBContext.createPlatformCapability(className,
-                                                                          sysComp.getAttributes());
+            PlatformCapability pCap = DefaultServiceBeanContext.createPlatformCapability(className,
+                                                                                         sysComp.getAttributes());
             installedPlatformCapabilities.add(pCap);
             StagedSoftware staged = sysComp.getStagedSoftware();
             if(staged!=null) {

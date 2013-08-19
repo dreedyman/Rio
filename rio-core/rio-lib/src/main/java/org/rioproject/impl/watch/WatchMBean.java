@@ -15,6 +15,8 @@
  */
 package org.rioproject.impl.watch;
 
+import org.rioproject.watch.WatchDataSource;
+
 import javax.management.openmbean.TabularData;
 
 /**
@@ -46,4 +48,6 @@ public interface WatchMBean {
      * @return All Calculable values as TabularData
      */
     TabularData getCalculables();
+
+    WatchDataSource getWatchDataSource();
 }

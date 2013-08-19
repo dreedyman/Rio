@@ -45,7 +45,7 @@ class StartMonitorConfig {
 
         def websterRoots = [rioHome+'/deploy', ';', m2Repo]
 
-        String policyFile = rioHome+'/policy/rio.policy'
+        String policyFile = rioHome+'/policy/policy.all'
 
         def serviceDescriptors = [
             ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),

@@ -262,7 +262,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
                     break;
                 }
             }
-            if(isSystemWatch) {
+            if(isSystemWatch && context!=null) {
                 Watch w = context.getComputeResourceManager().getComputeResource().getMeasurableCapability(id);
                 if(w!=null)
                     wds = w.getWatchDataSource();

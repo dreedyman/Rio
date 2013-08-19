@@ -21,6 +21,7 @@ import net.jini.config.ConfigurationProvider;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.discovery.DiscoveryManagement;
+import org.rioproject.associations.AssociationManagement;
 import org.rioproject.config.Constants;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
@@ -31,6 +32,7 @@ import org.rioproject.impl.config.AggregateConfig;
 import org.rioproject.impl.config.ConfigHelper;
 import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.impl.system.measurable.MeasurableCapability;
+import org.rioproject.impl.watch.Watch;
 import org.rioproject.impl.watch.WatchDataSourceRegistry;
 import org.rioproject.impl.watch.WatchRegistry;
 import org.rioproject.loader.CommonClassLoader;
@@ -41,8 +43,10 @@ import org.rioproject.servicebean.ComputeResourceManager;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.sla.SLA;
+import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.software.SoftwareSupport;
+import org.rioproject.watch.WatchDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,11 +57,11 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * JSBContext implements the ServiceBeanContext interface
+ * DefaultServiceBeanContext implements the ServiceBeanContext interface
  *
  * @author Dennis Reedy
  */
-public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
+public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeResourceManager {
     /** The ServiceElement */
     private ServiceElement sElem;
     /**
@@ -65,7 +69,7 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * obtain a DiscardManager, and request it's ServiceElement be updated to
      * known OperationalStringManager instance(s)
      */
-    private ServiceBeanManager serviceBeanManager;    
+    private ServiceBeanManager serviceBeanManager;
     /** Get the ServiceBean's join specifics */
     private DiscoveryManagement serviceDiscoMgmt;
     /** The ComputeResource this ServiceBean has been instantiated on */
@@ -78,11 +82,11 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /** List of PlatformCapability instances that were created */
     private final List<PlatformCapability> platformList = new ArrayList<PlatformCapability>();
     /** DefaultAssociationManagement for the ServiceBean */
-    private org.rioproject.associations.AssociationManagement associationManagement;
+    private AssociationManagement associationManagement;
     /** Shared Configuration for the ServiceBean to use*/
-    private Configuration sharedConfig;
+    private final Configuration sharedConfig;
     /** WatchRegistry for storing watches and corresponding WatchDataSources */
-    private WatchRegistry watchRegistry;
+    private final WatchRegistry watchRegistry;
     /**
      * The eventTable associates an EventHandler to an EventDescriptor for the
      * ServiceProvider. Event registration requests for events this
@@ -101,10 +105,10 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
     /** Component name for logging and configuration property retrieval */
     private static final String COMPONENT="org.rioproject.impl.servicebean";
     /** A Logger instance for this component */
-    private static Logger logger = LoggerFactory.getLogger(JSBContext.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(DefaultServiceBeanContext.class.getName());
 
     /**
-     * Create a JSBContext
+     * Create a DefaultServiceBeanContext
      * 
      * @param sElem The ServiceElement
      * @param serviceBeanManager The ServiceBeanManager
@@ -113,9 +117,9 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * @param sharedConfig Configuration from the "platform" which will be used
      * as the shared configuration with an AggregateConfig
      */
-    public JSBContext(final ServiceElement sElem,
-                      final ServiceBeanManager serviceBeanManager,
-                      final ComputeResource computeResource,
+    public DefaultServiceBeanContext(final ServiceElement sElem,
+                                     final ServiceBeanManager serviceBeanManager,
+                                     final ComputeResource computeResource,
                       /* Optional */
                       final Configuration sharedConfig) {
         if(sElem == null)
@@ -128,6 +132,13 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
         this.serviceBeanManager = serviceBeanManager;
         this.computeResource = computeResource;
         this.sharedConfig = sharedConfig;
+        watchRegistry = new WatchDataSourceRegistry();
+        Map<String, WatchDataSource> systemWatches = new HashMap<String, WatchDataSource>();
+        for(String id : SystemWatchID.IDs) {
+            Watch watch = computeResource.getMeasurableCapability(id);
+            systemWatches.put(id, watch.getWatchDataSource());
+        }
+
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
         if(cCL instanceof ServiceClassLoader) {
             ServiceClassLoader scl = (ServiceClassLoader)cCL;
@@ -169,8 +180,8 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
             throw new IllegalArgumentException("sElem is null");
         boolean update = (sElem != null);
         sElem = newElem;        
-        if(serviceBeanManager instanceof JSBManager)
-            ((JSBManager)serviceBeanManager).setServiceElement(sElem);
+        if(serviceBeanManager instanceof DefaultServiceBeanManager)
+            ((DefaultServiceBeanManager)serviceBeanManager).setServiceElement(sElem);
         if(update && associationManagement!=null) {
             if(associationManagement instanceof DefaultAssociationManagement) {
                 ((DefaultAssociationManagement)associationManagement).setServiceBeanContext(this);
@@ -388,17 +399,14 @@ public class JSBContext implements ServiceBeanContext, ComputeResourceManager {
      * @see org.rioproject.servicebean.ServiceBeanContext#getWatchRegistry
      */
     public WatchRegistry getWatchRegistry() {
-        if(watchRegistry==null) {
-            try {
-                Configuration config = getConfiguration();
-                watchRegistry = (WatchRegistry)config.getEntry(COMPONENT,
-                                                               "watchRegistry",
-                                                               WatchRegistry.class,
-                                                               new WatchDataSourceRegistry());
-                watchRegistry.setServiceBeanContext(this);
-            } catch(Exception e) {
-                logger.warn("Getting watchRegistry", e);
+        try {
+            watchRegistry.setServiceBeanContext(this);
+            Map<String, WatchDataSource> systemWatches = new HashMap<String, WatchDataSource>();
+            for(String id : SystemWatchID.IDs) {
+                Watch watch = computeResource.getMeasurableCapability(id);
             }
+        } catch(Exception e) {
+            logger.warn("Getting watchRegistry", e);
         }
         return(watchRegistry);
     }

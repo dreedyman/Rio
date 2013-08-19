@@ -27,6 +27,7 @@ import net.jini.id.UuidFactory;
 import net.jini.lookup.JoinManager;
 import org.rioproject.admin.ServiceAdmin;
 import org.rioproject.admin.ServiceBeanControlException;
+import org.rioproject.impl.servicebean.DefaultServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.impl.container.ServiceAdvertiser;
 import org.rioproject.impl.servicebean.ServiceBeanAdapter;
@@ -164,10 +165,10 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public void setServiceElement(ServiceElement sElem) {
         try {
             ServiceBeanContext sbc = service.getServiceBeanContext();
-            if(sbc instanceof org.rioproject.impl.servicebean.JSBContext)
-                ((org.rioproject.impl.servicebean.JSBContext)sbc).setServiceElement(sElem);
+            if(sbc instanceof DefaultServiceBeanContext)
+                ((DefaultServiceBeanContext)sbc).setServiceElement(sElem);
             else
-                logger.warn("ServiceBeanContext {} not an instance of JSBContext. Unable to set ServiceElement",
+                logger.warn("ServiceBeanContext {} not an instance of DefaultServiceBeanContext. Unable to set ServiceElement",
                             sbc.toString());
         } catch (Throwable t) {
             logger.warn("Setting ServiceElement", t);

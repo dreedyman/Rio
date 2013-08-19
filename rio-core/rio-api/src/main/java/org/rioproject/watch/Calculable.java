@@ -48,7 +48,7 @@ public class Calculable implements Serializable {
      * @param id The identifier for the Calculable
      * @param value The value for the Calculable
      */
-    public Calculable(String id, double value) {
+    public Calculable(final String id, final double value) {
         this.id = id;
         this.value = value;
         this.when = System.currentTimeMillis();
@@ -61,7 +61,7 @@ public class Calculable implements Serializable {
      * @param value The value for the Calculable Record
      * @param when The time when the recorded value was captured
      */
-    public Calculable(String id, double value, long when) {
+    public Calculable(final String id, final double value, final long when) {
         this(id, value);
         this.when = when;
     }
@@ -89,7 +89,7 @@ public class Calculable implements Serializable {
      * 
      * @param value New value of property value.
      */
-    public void setValue(double value) {
+    public void setValue(final double value) {
         this.value = value;
     }
 
@@ -115,7 +115,7 @@ public class Calculable implements Serializable {
         return detail;
     }
 
-    public void setDetail(String detail) {
+    public void setDetail(final String detail) {
         this.detail = detail;
     }
 
@@ -125,7 +125,7 @@ public class Calculable implements Serializable {
      * @param obj the object to compare to this one
      * @return true if the objects are equal
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if(obj instanceof Calculable) {
             if(getId() == null && ((Calculable)obj).getId() == null)
                 return (true);

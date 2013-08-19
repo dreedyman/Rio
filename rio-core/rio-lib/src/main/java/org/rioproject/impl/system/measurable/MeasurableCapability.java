@@ -99,7 +99,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
                                                 MAX_COLLECTION_SIZE);
         } catch(ConfigurationException e) {
             if(logger.isTraceEnabled())
-            logger.trace("Getting WatchDataSource collection size", e);
+                logger.trace("Getting WatchDataSource collection size", e);
             collectionSize = DEFAULT_COLLECTION_SIZE;
         }
         try {
@@ -111,9 +111,9 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
                 doSetWatchDataSource(wds);
             }
         } catch (ConfigurationException e) {
-            logger.error("Getting WatchDataSource Size", e); 
+            logger.error("Getting WatchDataSource Size", e);
         }
-        if(localRef!=null) 
+        if(localRef!=null)
             localRef.setMaxSize(collectionSize);
     }
 
@@ -146,15 +146,6 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
     private void checkEnabled() {
         if(!isEnabled.get())
             throw new IllegalStateException("The MeasurableCapability ["+getId()+"] is not enabled");
-    }
-
-    /**
-     * Get the Configuration property
-     *
-     * @return The configuration for the MeasurableCapability
-     */
-    public Configuration getConfiguration() {
-        return(config);
     }
     
     /**

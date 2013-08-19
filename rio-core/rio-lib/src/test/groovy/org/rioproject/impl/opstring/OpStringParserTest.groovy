@@ -20,7 +20,6 @@ import org.rioproject.associations.AssociationType
 import org.rioproject.deploy.StagedSoftware
 import org.rioproject.deploy.SystemComponent
 import org.rioproject.deploy.SystemRequirements
-import org.rioproject.impl.associations.filter.VersionMatchFilter
 import org.rioproject.impl.associations.strategy.Utilization
 import org.rioproject.impl.exec.ServiceExecutor
 import org.rioproject.impl.sla.SLAPolicyHandler
@@ -51,8 +50,6 @@ class OpStringParserTest extends GroovyTestCase {
         ServiceElement serviceElement = opstring.services[0]
         assertEquals 1, serviceElement.associationDescriptors.length
         assertEquals "2.1", serviceElement.associationDescriptors[0].version
-        assertTrue serviceElement.associationDescriptors[0].associationMatchFilter!=null
-        assertTrue serviceElement.associationDescriptors[0].associationMatchFilter.getClass().name.equals(VersionMatchFilter.class.name)
     }
 
     void testAddedAttributes() {

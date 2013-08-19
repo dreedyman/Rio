@@ -45,7 +45,7 @@ import java.util.List;
  * @author Dennis Reedy
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
-public class JSBManager implements ServiceBeanManager {
+public class DefaultServiceBeanManager implements ServiceBeanManager {
     private static final String COMPONENT="org.rioproject.impl.servicebean";
     private static Logger logger = LoggerFactory.getLogger(COMPONENT);
     private DiscardManager discardManager;
@@ -70,7 +70,7 @@ public class JSBManager implements ServiceBeanManager {
     private final NotificationBroadcasterSupport notificationBroadcasterSupport = new NotificationBroadcasterSupport();
 
     /**
-     * Create a JSBManager
+     * Create a DefaultServiceBeanManager
      *
      * @param sElem The ServiceElement
      * @param hostName The host name the service bean was instantiated on
@@ -79,12 +79,12 @@ public class JSBManager implements ServiceBeanManager {
      *
      * @throws IllegalArgumentException if the sElem hostName, or hostAddress parameters are null
      */
-    public JSBManager(final ServiceElement sElem, final String hostName, final String hostAddress, final Uuid cybernodeUuid) {
+    public DefaultServiceBeanManager(final ServiceElement sElem, final String hostName, final String hostAddress, final Uuid cybernodeUuid) {
        this(sElem, null, hostName, hostAddress, cybernodeUuid);
     }
 
     /**
-     * Create a JSBManager
+     * Create a DefaultServiceBeanManager
      *
      * @param sElem The ServiceElement
      * @param opStringManager The OperationalStringManager
@@ -94,11 +94,11 @@ public class JSBManager implements ServiceBeanManager {
      *
      * @throws IllegalArgumentException if the sElem hostName, or hostAddress parameters are null
      */
-    public JSBManager(final ServiceElement sElem,
-                      final OperationalStringManager opStringManager,
-                      final String hostName,
-                      final String hostAddress,
-                      final Uuid cybernodeUuid) {
+    public DefaultServiceBeanManager(final ServiceElement sElem,
+                                     final OperationalStringManager opStringManager,
+                                     final String hostName,
+                                     final String hostAddress,
+                                     final Uuid cybernodeUuid) {
         super();
         if(sElem==null)
             throw new IllegalArgumentException("sElem is null");

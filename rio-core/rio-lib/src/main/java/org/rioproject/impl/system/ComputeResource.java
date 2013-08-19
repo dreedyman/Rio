@@ -208,7 +208,7 @@ public class ComputeResource {
      *
      * @return The description
      */
-    public String getDescription() {
+    private String getDescription() {
         return(description);
     }    
     
@@ -507,7 +507,7 @@ public class ComputeResource {
      * ResourceCapability component, used to communicate the resource utilization, 
      * platform and measurable capabilities attributes of the ComputeResource
      */
-    public void stateChange() {
+    private void stateChange() {
         if(initializing)
             return;
         logger.trace("Notify listeners of a state change");

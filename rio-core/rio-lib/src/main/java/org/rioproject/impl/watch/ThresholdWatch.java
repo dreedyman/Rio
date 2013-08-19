@@ -17,9 +17,7 @@
 package org.rioproject.impl.watch;
 
 import net.jini.config.Configuration;
-import org.rioproject.watch.Calculable;
-import org.rioproject.watch.ThresholdValues;
-import org.rioproject.watch.WatchDataSource;
+import org.rioproject.watch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

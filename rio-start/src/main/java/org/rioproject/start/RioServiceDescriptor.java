@@ -21,7 +21,6 @@ import net.jini.config.Configuration;
 import net.jini.export.ProxyAccessor;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
-import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;
@@ -269,7 +268,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             }
 
             String platformDir = (String)config.getEntry(COMPONENT, "platformDir", String.class, defaultDir);
-            logger.debug("Platform directory set as {}", platformDir);
+            if(logger.isDebugEnabled())
+                logger.debug("Platform directory set as {}", platformDir);
             caps = platformLoader.parsePlatform(platformDir);
             for (PlatformCapabilityConfig cap : caps) {
                 if (cap.getCommon()) {
@@ -285,7 +285,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             throw new RuntimeException("No commonJARs have been defined");
         */
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
-        logger.debug("Created {}", commonCL.getClass().getName());
+        if(logger.isDebugEnabled())
+            logger.debug("Created {}", commonCL.getClass().getName());
         if(logger.isTraceEnabled()) {
             StringBuilder buffer = new StringBuilder();
             for(int i=0; i<commonJARs.length; i++) {
@@ -305,7 +306,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             new ServiceClassLoader(ServiceClassLoader.getURIs(ClassLoaderUtil.getClasspathURLs(getClasspath())),
                                    annotator,
                                    commonCL);
-        logger.debug("Created {}", serviceCL);
+        if(logger.isDebugEnabled())
+            logger.debug("Created {}", serviceCL);
         if(logger.isTraceEnabled())
             ClassLoaderUtil.displayClassLoaderTree(serviceCL);
         
@@ -319,26 +321,31 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         synchronized(RioServiceDescriptor.class) {
             /* supplant global policy 1st time through */
             if(globalPolicy == null) {
-                initialGlobalPolicy = Policy.getPolicy();
+                //initialGlobalPolicy = Policy.getPolicy();
+                initialGlobalPolicy = new PolicyFileProvider(getPolicy());
                 globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
                 Policy.setPolicy(globalPolicy);
-                logger.trace("Global policy set: {}", globalPolicy.toString());
+                if(logger.isTraceEnabled())
+                    logger.trace("Global policy set: {}", globalPolicy.toString());
             }
-            DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(getPolicy()));
+            /*DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(getPolicy()));
             LoaderSplitPolicyProvider splitServicePolicy =
                 new LoaderSplitPolicyProvider(serviceCL, service_policy, new DynamicPolicyProvider(initialGlobalPolicy));
-            globalPolicy.setPolicy(serviceCL, splitServicePolicy);
+            globalPolicy.setPolicy(serviceCL, splitServicePolicy);*/
         }
         Object impl;
         try {
             Class<?> implClass;
             implClass = Class.forName(getImplClassName(), false, serviceCL);
-            logger.trace("Attempting to get implementation constructor");
+            if(logger.isTraceEnabled())
+                logger.trace("Attempting to get implementation constructor");
             Constructor constructor = implClass.getDeclaredConstructor(actTypes);
-            logger.trace("Obtained implementation constructor: {}", constructor.toString());
+            if(logger.isTraceEnabled())
+                logger.trace("Obtained implementation constructor: {}", constructor.toString());
             constructor.setAccessible(true);
             impl = constructor.newInstance(getServerConfigArgs(), lifeCycle);
-            logger.trace("Obtained implementation instance: {}", impl.toString());
+            if(logger.isTraceEnabled())
+                logger.trace("Obtained implementation instance: {}", impl.toString());
             if(impl instanceof ServiceProxyAccessor) {
                 proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
             } else if(impl instanceof ProxyAccessor) {
@@ -349,7 +356,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            logger.trace("Proxy:  {}", proxy==null?"<NULL>":proxy.toString());
+            if(logger.isTraceEnabled())
+                logger.trace("Proxy:  {}", proxy==null?"<NULL>":proxy.toString());
             currentThread.setContextClassLoader(currentClassLoader);
         } catch(InvocationTargetException e) {
             Throwable t = e.getCause()==null? e.getTargetException(): e.getCause();
@@ -368,7 +376,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * manifest setting. If there is, append the settings to the classpath
      */
     private String setClasspath(final String cp) {
-        logger.debug("Create classpath from [{}]", cp);
+        if(logger.isDebugEnabled())
+            logger.debug("Create classpath from [{}]", cp);
         StringBuilder buff = new StringBuilder();
         for(String s : toArray(cp, "," + File.pathSeparator)) {
             if(buff.length()>0 && !buff.toString().endsWith(File.pathSeparator))
@@ -380,7 +389,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 if(!jarPath.endsWith(File.separator)) {
                     jarPath = jarPath+File.separator;
                 }
-                logger.debug("Creating jar file path from [{}]", f.getCanonicalPath());
+                if(logger.isDebugEnabled())
+                    logger.debug("Creating jar file path from [{}]", f.getCanonicalPath());
                 JarFile jar = new JarFile(f);
                 Manifest man = jar.getManifest();
                 if (man == null) {
@@ -407,7 +417,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 logger.warn("While trying to create classpath", e);
             }
         }
-        logger.debug("Classpath created [{}]", buff.toString());
+        if(logger.isDebugEnabled())
+            logger.debug("Classpath created [{}]", buff.toString());
         return buff.toString();
     }
 

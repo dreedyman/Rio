@@ -18,8 +18,8 @@ package org.rioproject.cybernode.service;
 import net.jini.config.ConfigurationException;
 import org.rioproject.impl.config.AggregateConfig;
 import org.rioproject.config.GroovyConfig;
+import org.rioproject.impl.servicebean.DefaultServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanContext;
-import org.rioproject.impl.servicebean.JSBContext;
 import org.rioproject.log.LoggerConfig;
 
 import java.lang.reflect.Field;
@@ -54,8 +54,8 @@ public class ServiceTerminationHelper {
                     if (ac.getOuterConfiguration() instanceof GroovyConfig) {
                         ((GroovyConfig) ac.getOuterConfiguration()).clear();
                     }
-                    if (context instanceof JSBContext)
-                        ((JSBContext) context).setConfiguration(null);
+                    if (context instanceof DefaultServiceBeanContext)
+                        ((DefaultServiceBeanContext) context).setConfiguration(null);
                 }
             } catch (ConfigurationException e) {
                 /* */

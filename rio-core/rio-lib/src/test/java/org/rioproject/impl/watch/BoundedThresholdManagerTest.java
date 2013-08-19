@@ -18,8 +18,6 @@ package org.rioproject.impl.watch;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.rioproject.impl.watch.BoundedThresholdManager;
-import org.rioproject.impl.watch.ThresholdListener;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdType;
 import org.rioproject.watch.ThresholdValues;

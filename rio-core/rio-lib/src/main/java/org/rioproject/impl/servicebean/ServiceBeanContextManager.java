@@ -182,8 +182,8 @@ public class ServiceBeanContextManager {
             ObjectInputStream oistream = new ObjectInputStream(in);
             if(!logDirName.equals(oistream.readUTF()))
                 throw new IOException("log from wrong implementation");
-            JSBContext jsbContext = (JSBContext)oistream.readObject();
-            ServiceElement sElem = jsbContext.getServiceElement();
+            DefaultServiceBeanContext serviceBeanContext = (DefaultServiceBeanContext)oistream.readObject();
+            ServiceElement sElem = serviceBeanContext.getServiceElement();
             ServiceBeanConfig sAttr = sElem.getServiceBeanConfig();
             try {
                 String[] groups = (String[])oistream.readObject();
@@ -194,8 +194,8 @@ public class ServiceBeanContextManager {
                 logger.error("Couldnt get groups or locators", t);
             }
             sElem.setServiceBeanConfig(sAttr);
-            jsbContext.setServiceElement(sElem);
-            restoredContext = jsbContext;
+            serviceBeanContext.setServiceElement(sElem);
+            restoredContext = serviceBeanContext;
         }
 
         /**

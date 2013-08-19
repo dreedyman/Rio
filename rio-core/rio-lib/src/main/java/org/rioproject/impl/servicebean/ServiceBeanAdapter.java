@@ -242,8 +242,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             if (loginContext != null) {
                 loginContext.login();
                 try {
-                    if(context instanceof JSBContext)
-                        ((JSBContext)context).setSubject(loginContext.getSubject());
+                    if(context instanceof DefaultServiceBeanContext)
+                        ((DefaultServiceBeanContext)context).setSubject(loginContext.getSubject());
                     Subject.doAsPrivileged(loginContext.getSubject(), doStart, null);
                 } catch (PrivilegedActionException e) {
                     throw e.getCause();
@@ -302,10 +302,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             /* Set the WatchRegistry for this ServiceProvider */
             setWatchRegistry(context.getWatchRegistry());
             /* Set the event table for this ServiceProvider */
-            if(context instanceof JSBContext)
-                setEventTable(((JSBContext)context).getEventTable());
+            if(context instanceof DefaultServiceBeanContext)
+                setEventTable(((DefaultServiceBeanContext)context).getEventTable());
             else
-                logger.warn("Cannot set EventTable, context not a JSBContext");
+                logger.warn("Cannot set EventTable, context not a DefaultServiceBeanContext");
             exporter = getExporter(context.getConfiguration());
             serviceBeanRemoteRef = exportDo(exporter);
             /* Initialize the ServiceBean */
@@ -359,7 +359,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             snapshotter = new SnapshotThread(this.getClass().getName());
             ServiceBeanContext restoredContext = contextMgr.restoreContext(store);
             this.context = (restoredContext == null ? context : restoredContext);
-            ((JSBContext) this.context).setServiceBeanManager(jsbManager);
+            ((DefaultServiceBeanContext) this.context).setServiceBeanManager(jsbManager);
             snapshotter.start();
         } else {
             this.context = context;
@@ -730,8 +730,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             attrList.add(sInfo);
 
         /* Get any attribute added to the context*/
-        if(context instanceof JSBContext) {
-            attrList.addAll(((JSBContext)context).getAttributes());
+        if(context instanceof DefaultServiceBeanContext) {
+            attrList.addAll(((DefaultServiceBeanContext)context).getAttributes());
         }
         attrList.addAll(context.getServiceBeanConfig().getAdditionalEntries());
 
@@ -993,8 +993,8 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         }
 
         /* If any PlatformCapability instances were added, remove them */
-        if(context instanceof JSBContext)
-            ((JSBContext)context).removePlatformCapabilities();
+        if(context instanceof DefaultServiceBeanContext)
+            ((DefaultServiceBeanContext)context).removePlatformCapabilities();
 
 
         /* If we're sending heartbeats, stop them */
@@ -1110,10 +1110,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if (uuid == null) {
             logger.debug("UUID is unknown, generate new UUID");
             uuid = UuidFactory.generate();
-            if (mgr instanceof JSBManager) {
-                ((JSBManager)mgr).setServiceID(uuid);
+            if (mgr instanceof DefaultServiceBeanManager) {
+                ((DefaultServiceBeanManager)mgr).setServiceID(uuid);
             } else {
-                logger.debug("ServiceBeanManager is not a JSBManager, cannot set UUID");
+                logger.debug("ServiceBeanManager is not a DefaultServiceBeanManager, cannot set UUID");
             }
         }
         return (uuid);

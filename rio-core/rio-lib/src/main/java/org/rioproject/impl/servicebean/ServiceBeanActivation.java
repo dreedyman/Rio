@@ -219,17 +219,17 @@ public class ServiceBeanActivation {
         ComputeResource computeResource = new ComputeResource(config);
 
         Uuid serviceID = UuidFactory.generate();
-        JSBManager jsbManager = new JSBManager(sElem,
+        DefaultServiceBeanManager serviceBeanManager = new DefaultServiceBeanManager(sElem,
                                                computeResource.getHostName(),
                                                computeResource.getAddress().getHostAddress(),
                                                serviceID);
-        jsbManager.setDiscardManager(sbLifeCycleManager);
-        jsbManager.setServiceID(serviceID);
-        JSBContext jsbContext = new JSBContext(sElem, jsbManager, computeResource, null); /* Shared Configuration */
-        jsbContext.setConfiguration(config);
-        jsbContext.setConfigurationFiles(configArgs);
+        serviceBeanManager.setDiscardManager(sbLifeCycleManager);
+        serviceBeanManager.setServiceID(serviceID);
+        DefaultServiceBeanContext serviceBeanContext = new DefaultServiceBeanContext(sElem, serviceBeanManager, computeResource, null); /* Shared Configuration */
+        serviceBeanContext.setConfiguration(config);
+        serviceBeanContext.setConfigurationFiles(configArgs);
         logger.debug("Leaving getServiceBeanContext");
-        return (jsbContext);
+        return (serviceBeanContext);
     }
 
     /**
@@ -385,8 +385,8 @@ public class ServiceBeanActivation {
                         Object adminObject = admin.getAdmin();
                         if(adminObject instanceof DestroyAdmin) {
                             Subject subject = null;
-                            if(context instanceof JSBContext)
-                                subject = ((JSBContext)context).getSubject();
+                            if(context instanceof DefaultServiceBeanContext)
+                                subject = ((DefaultServiceBeanContext)context).getSubject();
                             registrationMap.put((DestroyAdmin)adminObject, subject);
                         }
                     }

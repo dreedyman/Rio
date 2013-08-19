@@ -31,6 +31,8 @@ import org.rioproject.annotation.Initialized;
 import org.rioproject.annotation.Started;
 import org.rioproject.config.Constants;
 import org.rioproject.impl.container.*;
+import org.rioproject.impl.servicebean.DefaultServiceBeanContext;
+import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.costmodel.ResourceCost;
 import org.rioproject.deploy.ServiceBeanInstance;
@@ -41,8 +43,6 @@ import org.rioproject.impl.exec.ServiceBeanExecHandler;
 import org.rioproject.impl.exec.ServiceExecutor;
 import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.jmx.MBeanServerFactory;
-import org.rioproject.impl.servicebean.JSBContext;
-import org.rioproject.impl.servicebean.JSBManager;
 import org.rioproject.impl.servicebean.ServiceBeanSLAManager;
 import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.impl.opstring.OpStringManagerProxy;
@@ -245,16 +245,16 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                 logger.warn("No instanceID for [{}] to update", sElem.getName());
             }
 
-            if(context instanceof JSBContext) {
-                ((JSBContext)context).setServiceElement(sElem);
+            if(context instanceof DefaultServiceBeanContext) {
+                ((DefaultServiceBeanContext)context).setServiceElement(sElem);
             } else {
                 logger.warn("Cannot update [{}], Unknown ServiceBeanContext type [{}]",
                             ServiceLogUtil.logName(sElem), context.getClass().getName());
                 return(false);
             }
 
-            if(context.getServiceBeanManager() instanceof JSBManager) {
-                JSBManager jsbMgr = (JSBManager)context.getServiceBeanManager();
+            if(context.getServiceBeanManager() instanceof DefaultServiceBeanManager) {
+                DefaultServiceBeanManager jsbMgr = (DefaultServiceBeanManager)context.getServiceBeanManager();
                 OperationalStringManager mgr = jsbMgr.getOperationalStringManager();
                 if(mgr!=null &&
                    !(mgr instanceof OpStringManagerProxy.OpStringManager)) {
@@ -426,8 +426,8 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                 ServiceBeanLoader.unload(loadResult, sElem);
                 loadResult = null;
             }
-            if(context!=null && context.getServiceBeanManager() instanceof JSBManager)
-                ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(null);
+            if(context!=null && context.getServiceBeanManager() instanceof DefaultServiceBeanManager)
+                ((DefaultServiceBeanManager)context.getServiceBeanManager()).setMarshalledInstance(null);
             context = null;
         }
     }
@@ -501,17 +501,17 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                         JSBDiscardManager discardManager = new JSBDiscardManager();
 
                         /* Create the ServiceBeanManager */
-                        JSBManager jsbManager = new JSBManager(sElem,
+                        DefaultServiceBeanManager serviceBeanManager = new DefaultServiceBeanManager(sElem,
                                                                opStringMgr,
                                                                computeResource.getHostName(),
                                                                computeResource.getAddress().getHostAddress(),
                                                                container.getUuid());
-                        jsbManager.setDiscardManager(discardManager);
-                        jsbManager.setServiceID(serviceID);
+                        serviceBeanManager.setDiscardManager(discardManager);
+                        serviceBeanManager.setServiceID(serviceID);
                         /*
                         * Load and start the ServiceBean
                         */
-                        loadResult = ServiceBeanLoader.load(sElem, serviceID, jsbManager, container);
+                        loadResult = ServiceBeanLoader.load(sElem, serviceID, serviceBeanManager, container);
 
                         org.rioproject.associations.AssociationManagement associationManagement;
                         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
@@ -547,8 +547,8 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                                         context.getAssociationManagement(), sElem.getName());
                         }
 
-                        if(context instanceof JSBContext) {
-                            EventHandler eH = ((JSBContext)context).getEventTable().get(SLAThresholdEvent.ID);
+                        if(context instanceof DefaultServiceBeanContext) {
+                            EventHandler eH = ((DefaultServiceBeanContext)context).getEventTable().get(SLAThresholdEvent.ID);
                             if(eH!=null) {
                                 slaEventHandler = eH;
                                 logger.debug("Set EventHandler [{}] for SLAManagement for service {}",

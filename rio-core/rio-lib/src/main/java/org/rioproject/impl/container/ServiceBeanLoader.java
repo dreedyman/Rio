@@ -29,17 +29,15 @@ import net.jini.security.policy.DynamicPolicyProvider;
 import net.jini.security.policy.PolicyFileProvider;
 import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceBeanControl;
-import org.rioproject.impl.bean.BeanAdapter;
 import org.rioproject.config.Constants;
-import org.rioproject.servicebean.ServiceBeanContext;
-import org.rioproject.servicebean.ServiceBeanContextFactory;
-import org.rioproject.servicebean.ServiceBeanFactory;
-import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.impl.servicebean.JSBLoader;
-import org.rioproject.impl.servicebean.JSBManager;
+import org.rioproject.impl.bean.BeanAdapter;
+import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
+import org.rioproject.impl.servicebean.DefaultServiceBeanFactory;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.impl.servicebean.ServiceElementUtil;
+import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.impl.system.capability.PlatformCapabilityLoader;
 import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
@@ -51,9 +49,11 @@ import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.rmi.ResolvingLoader;
-import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContextFactory;
+import org.rioproject.servicebean.ServiceBeanFactory;
+import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.system.capability.PlatformCapability;
-import org.rioproject.impl.system.capability.PlatformCapabilityLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,7 +212,9 @@ public class ServiceBeanLoader {
             AtomicInteger count = counterTable.get(pr.getArtifact());
             if(count!=null) {
                 int using = count.decrementAndGet();
-                logger.trace("Number of [{}] artifacts still active={}", pr.getArtifact(), using);
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Number of [{}] artifacts still active={}", pr.getArtifact(), using);
+                }
                 if(using==0) {
                     provisionedResources.remove(pr);
                 } else {
@@ -329,33 +331,28 @@ public class ServiceBeanLoader {
                     }
                 }
                 String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
-                logger.debug("Create ServiceClassLoader for {}, classpath {}, codebase {}",
-                             className, buffer.toString(), jsbCL.getClassAnnotation());
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Create ServiceClassLoader for {}, classpath {}, codebase {}",
+                                 className, buffer.toString(), jsbCL.getClassAnnotation());
+                }
             }
 
             /* Get the servicePolicyFile from the environment. If the
              * property has not been set use the policy set for the VM */
             String servicePolicyFile = System.getProperty("rio.service.security.policy",
                                                           System.getProperty("java.security.policy"));
-            logger.trace("{} Service security policy file {}",
-                         ServiceLogUtil.logName(sElem), servicePolicyFile);
+            if(logger.isTraceEnabled()) {
+                logger.trace("{} Service security policy file {}",
+                             ServiceLogUtil.logName(sElem), servicePolicyFile);
+            }
             if(servicePolicyFile!=null) {
-                logger.trace("Set {} service security to LoaderSplitPolicyProvider", ServiceLogUtil.logName(sElem));
-
-                DynamicPolicyProvider service_policy =
-                    new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
-                LoaderSplitPolicyProvider splitServicePolicy =
-                    new LoaderSplitPolicyProvider(jsbCL,
-                                                  service_policy,
-                                                  new DynamicPolicyProvider(initialGlobalPolicy));
-                /*
-                 * Grant "this" code enough permission to do its work under the
-                 * service policy, which takes effect (below) after the context
-                 * loader is (re)set.
-                 *//*
-                splitServicePolicy.grant(ServiceBeanLoader.class,
-                                         null, *//* Principal[] *//*
-                                         new Permission[]{new AllPermission()});*/
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Set {} service security to LoaderSplitPolicyProvider", ServiceLogUtil.logName(sElem));
+                }
+                DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
+                LoaderSplitPolicyProvider splitServicePolicy = new LoaderSplitPolicyProvider(jsbCL,
+                                                                                             service_policy,
+                                                                                             new DynamicPolicyProvider(initialGlobalPolicy));
                 globalPolicy.setPolicy(jsbCL, splitServicePolicy);
             }
 
@@ -403,9 +400,11 @@ public class ServiceBeanLoader {
                                                            CONFIG_COMPONENT,
                                                            "serviceBeanFactory",
                                                            ServiceBeanFactory.class,
-                                                           new JSBLoader());
-            logger.trace("service = {}, serviceBeanFactory = {}",
-                          ServiceLogUtil.logName(sElem), serviceBeanFactory);
+                                                           new DefaultServiceBeanFactory());
+            if(logger.isTraceEnabled()) {
+                logger.trace("service = {}, serviceBeanFactory = {}",
+                             ServiceLogUtil.logName(sElem), serviceBeanFactory);
+            }
             created = serviceBeanFactory.create(context);
             logger.trace("Created ServiceBeanFactory.Created {}", created);
             Object impl = created.getImpl();
@@ -421,33 +420,45 @@ public class ServiceBeanLoader {
             }
 
             /* Get the ProxyPreparer */
-            logger.trace("Get the ProxyPreparer for {}", ServiceLogUtil.logName(sElem));
+            if(logger.isTraceEnabled()) {
+                logger.trace("Get the ProxyPreparer for {}", ServiceLogUtil.logName(sElem));
+            }
             
             ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(context.getConfiguration(),
                                                                                   CONFIG_COMPONENT,
                                                                                   "servicePreparer",
                                                                                   ProxyPreparer.class,
                                                                                   new BasicProxyPreparer());
-            logger.trace("Getting the proxy");
+            if(logger.isTraceEnabled()) {
+                logger.trace("Getting the proxy");
+            }
             Object proxy = created.getProxy();
-            logger.trace("Obtained the proxy %s", proxy);
+            if(logger.isTraceEnabled()) {
+                logger.trace("Obtained the proxy %s", proxy);
+            }
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            logger.trace("Proxy {}, prepared? {}", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
+            if(logger.isTraceEnabled()) {
+                logger.trace("Proxy {}, prepared? {}", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
+            }
             /*
              * Set the MarshalledInstance into the ServiceBeanManager
              */
-            logger.trace("Set the MarshalledInstance into the ServiceBeanManager");
+            if(logger.isTraceEnabled()) {
+                logger.trace("Set the MarshalledInstance into the ServiceBeanManager");
+            }
             marshalledProxy = new MarshalledInstance(proxy);
-            ((JSBManager)context.getServiceBeanManager()).setMarshalledInstance(marshalledProxy);
+            ((DefaultServiceBeanManager)context.getServiceBeanManager()).setMarshalledInstance(marshalledProxy);
             /*
              * The service may have created it's own serviceID
              */
             if(proxy instanceof ReferentUuid) {
                 serviceIDToUse = ((ReferentUuid)proxy).getReferentUuid();
-                logger.debug("Service has provided Uuid: {}", serviceIDToUse);
-                ((JSBManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Service has provided Uuid: {}", serviceIDToUse);
+                }
+                ((DefaultServiceBeanManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
             }
             
             /*
@@ -461,15 +472,19 @@ public class ServiceBeanLoader {
                     context.getAssociationManagement().setServiceBeanControl((ServiceBeanControl)adminObject);
                 }                    
             }
-            logger.trace("Proxy =  {}", proxy);
-        } catch(Throwable t) {
-            ServiceBeanInstantiationException e;
-            logger.trace("Loading ServiceBean", t);
-            if(t instanceof ServiceBeanInstantiationException)
-                e = (ServiceBeanInstantiationException)t;
+            if(logger.isTraceEnabled()) {
+                logger.trace("Proxy =  {}", proxy);
+            }
+        } catch(Exception e) {
+            ServiceBeanInstantiationException sbe;
+            if(logger.isTraceEnabled()) {
+                logger.trace("Loading ServiceBean", e);
+            }
+            if(e instanceof ServiceBeanInstantiationException)
+                sbe = (ServiceBeanInstantiationException)e;
             else
-                e = new ServiceBeanInstantiationException(t.getClass().getName()+ ": "+ t.getLocalizedMessage(), t);
-            throw e;
+                sbe = new ServiceBeanInstantiationException(e.getClass().getName()+ ": "+ e.getLocalizedMessage(), e);
+            throw sbe;
         } finally {                
             currentThread.setContextClassLoader(currentClassLoader);
         }
@@ -507,8 +522,10 @@ public class ServiceBeanLoader {
                                 }
                                 builder.append(repository.getUrl());
                             }
-                            logger.info("Resolve {} using these repositories [{}]",
-                                        elem.getComponentBundle().getArtifact(), builder.toString());
+                            if(logger.isInfoEnabled()) {
+                                logger.info("Resolve {} using these repositories [{}]",
+                                            elem.getComponentBundle().getArtifact(), builder.toString());
+                            }
                             jars = ResolverHelper.resolve(elem.getComponentBundle().getArtifact(),
                                                           resolver,
                                                           elem.getRemoteRepositories());
@@ -659,7 +676,9 @@ public class ServiceBeanLoader {
                 else
                     count.incrementAndGet();
                 counterTable.put(pr.getArtifact(), count);
-                logger.trace("Counter for [{}] is now {}", pr.getArtifact(), count.get());
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Counter for [{}] is now {}", pr.getArtifact(), count.get());
+                }
             }
         }
     }

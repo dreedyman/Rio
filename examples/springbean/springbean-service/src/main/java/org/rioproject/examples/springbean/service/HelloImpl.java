@@ -18,9 +18,25 @@ package org.rioproject.examples.springbean.service;
 import org.rioproject.examples.springbean.Hello;
 
 import java.rmi.RemoteException;
+import java.security.CodeSource;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Policy;
+import java.util.Enumeration;
 
 public class HelloImpl implements Hello {
     int visitorNumber = 1;
+
+    public HelloImpl() {
+        System.out.println("Policy: "+ Policy.getPolicy().getClass().getName());
+        CodeSource cs = HelloImpl.class.getProtectionDomain().getCodeSource();
+        PermissionCollection pCollection = Policy.getPolicy().getPermissions(cs);
+        Enumeration<Permission> elements = pCollection.elements();
+        System.out.println("Permissions");
+        while (elements.hasMoreElements()) {
+            System.out.println("\t"+elements.nextElement());
+        }
+    }
 
     public String hello(String message) throws RemoteException {
         System.out.println("Client says hello : "+message);

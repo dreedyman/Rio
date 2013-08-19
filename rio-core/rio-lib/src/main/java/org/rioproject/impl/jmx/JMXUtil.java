@@ -218,8 +218,7 @@ public class JMXUtil {
         if(context==null)
             throw new IllegalArgumentException("context is null");
         Uuid uuid = context.getServiceBeanManager().getServiceID();
-        Map<String, Object> configParms =
-            context.getServiceBeanConfig().getConfigurationParameters();
+        Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
         String jmxName = (String)configParms.get(ServiceBeanConfig.JMX_NAME);
         ClassBundle[] exports = context.getServiceElement().getExportBundles();        
         String type = "Service";

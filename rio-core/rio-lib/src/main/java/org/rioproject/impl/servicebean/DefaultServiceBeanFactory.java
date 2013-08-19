@@ -33,11 +33,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * The JSBLoader will load and create a ServiceBean.
+ * The DefaultServiceBeanFactory will load and create a ServiceBean.
  *
  * @author Dennis Reedy
  */
-public class JSBLoader implements ServiceBeanFactory {
+public class DefaultServiceBeanFactory implements ServiceBeanFactory {
     /** Component name logging */
     static String COMPONENT = "org.rioproject.impl.servicebean";
     /** A Logger */

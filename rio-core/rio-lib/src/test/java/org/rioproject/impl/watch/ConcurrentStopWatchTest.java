@@ -17,13 +17,9 @@ package org.rioproject.impl.watch;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.rioproject.impl.watch.StopWatch;
 import org.rioproject.watch.Calculable;
-import org.rioproject.watch.Statistics;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -39,22 +35,14 @@ public class ConcurrentStopWatchTest {
         new Thread(new StopWatchRunner(stopWatch, 100, countDownLatch)).start();
         new Thread(new StopWatchRunner(stopWatch, 50, countDownLatch)).start();
         countDownLatch.await();
-        List<Double> runner1 = new ArrayList<Double>();
-        List<Double> runner2 = new ArrayList<Double>();
         for(Calculable c : stopWatch.getWatchDataSource().getCalculable()) {
             if(c.getValue()<100) {
-                runner1.add(c.getValue());
                 /* Allow for some variance in the recorded time */
                 Assert.assertTrue("Expected value to be "+c.getValue()+" < 100", c.getValue()<100);
             } else {
-                runner2.add(c.getValue());
                 Assert.assertTrue("Expected value to be "+c.getValue()+" < 200", c.getValue()<200);
             }
         }
-        Statistics stats1 = new Statistics(runner1);
-        Statistics stats2 = new Statistics(runner2);
-        System.out.println("Runner 1 stats: mean="+stats1.mean()+",  low="+stats1.min()+",  high="+stats1.max());
-        System.out.println("Runner 2 stats: mean="+stats2.mean()+", low="+stats2.min()+", high="+stats2.max());
     }
 
     private class StopWatchRunner implements Runnable {

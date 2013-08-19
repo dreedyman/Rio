@@ -19,13 +19,13 @@ import org.rioproject.servicebean.ServiceBeanContextFactory;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.impl.servicebean.JSBContext;
+import org.rioproject.impl.servicebean.DefaultServiceBeanContext;
 import org.rioproject.impl.system.ComputeResource;
 import net.jini.config.Configuration;
 
 /**
  * A {@link org.rioproject.servicebean.ServiceBeanContextFactory} which creates
- * a {@link org.rioproject.impl.servicebean.JSBContext}
+ * a {@link org.rioproject.impl.servicebean.DefaultServiceBeanContext}
  *
  * @author Dennis Reedy
  */
@@ -44,6 +44,6 @@ public class ServiceContextFactory implements ServiceBeanContextFactory {
             throw new IllegalArgumentException("serviceBeanManager is null");
         if(computeResource == null)
             throw new IllegalArgumentException("computeResource is null");
-        return(new JSBContext(sElem, serviceBeanManager, computeResource, sharedConfig));
+        return(new DefaultServiceBeanContext(sElem, serviceBeanManager, computeResource, sharedConfig));
     }
 }
