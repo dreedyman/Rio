@@ -158,11 +158,12 @@ public class ConfigHelper {
                     list.add(fileName);
                     continue;
                 }
-                if(!fileName.startsWith(File.separator)) {
+                File f = new File(fileName);
+                if(!f.isAbsolute()) {
                     fileName = System.getProperty("user.dir")+File.separator+fileName;
+                    f = new File(fileName);
                 }
 
-                File f = new File(fileName);
                 if(!f.exists())
                     throw new FileNotFoundException("Unable to load declared configuration " +
                                                     "file ["+fileArg+"], resolved " +
