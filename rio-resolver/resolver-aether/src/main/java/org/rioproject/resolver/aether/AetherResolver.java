@@ -42,11 +42,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AetherResolver implements Resolver {
     protected AetherService service;
     private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<ResolutionRequest, Future<String[]>>();
-    private final ExecutorService resolverExecutor = Executors.newCachedThreadPool();
+    private ExecutorService resolverExecutor;
     private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
     private static final Logger logger = LoggerFactory.getLogger(AetherResolver.class.getName());
 
     public AetherResolver() {
+        resolverExecutor = Executors.newScheduledThreadPool(1, new ThreadFactory() {
+            @Override public Thread newThread(Runnable runnable) {
+                Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
         service = AetherService.getDefaultInstance();
     }
 
