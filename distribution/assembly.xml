@@ -194,15 +194,6 @@
             <includes>
                 <include>org.rioproject.resolver:resolver-aether</include>
                 <include>org.rioproject.resolver:resolver-project</include>
-                <include>org.eclipse.*</include>
-                <include>org.apache.maven:*</include>
-                <include>org.apache.maven.wagon:*</include>
-                <include>org.codehaus.plexus:*</include>
-                <include>org.sonatype.plexus:*</include>
-                <include>nekohtml:*</include>
-                <include>org.apache.httpcomponents:*</include>
-                <include>org.slf4j:jcl-over-slf4j:*</include>
-                <include>commons-codec:*</include>
             </includes>
             <outputDirectory>lib/resolver</outputDirectory>
         </dependencySet>

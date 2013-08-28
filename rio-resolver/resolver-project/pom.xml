@@ -157,14 +157,12 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
                         <manifestEntries>
                             <Implementation-Title>Rio Project</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
                             <Rio-Version>${project.version}</Rio-Version>
                             <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                            <Class-Path>resolver-aether-${project.version}.jar</Class-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>
