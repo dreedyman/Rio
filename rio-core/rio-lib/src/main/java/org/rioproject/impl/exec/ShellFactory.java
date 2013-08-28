@@ -23,7 +23,7 @@ import org.rioproject.impl.exec.windows.WindowsShell;
  *
  * @author Dennis Reedy
  */
-public class ShellFactory {
+public final class ShellFactory {
     private ShellFactory(){}
 
     /**

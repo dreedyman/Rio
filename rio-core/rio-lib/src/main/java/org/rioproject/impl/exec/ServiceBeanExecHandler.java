@@ -102,15 +102,18 @@ public class ServiceBeanExecHandler {
     public ServiceBeanInstance exec(final OperationalStringManager opStringMgr,
                                     final DiscardManager discardManager,
                                     final PlatformCapability[] installedPlatformCapabilities,
-                                    String classPath) throws Exception {
+                                    final String classPath) throws Exception {
         ExecDescriptor exDesc = new ExecDescriptor();
 
         String rioHome = System.getProperty("RIO_HOME");
         if(rioHome==null)
             throw new ServiceBeanInstantiationException(String.format("Cannot exec service [%s], unknown RIO_HOME system property",
                                                                       sElem.getName()));
+        String classPathToUse;
         if(classPath==null)
-            classPath = CommandLineHelper.generateRioStarterClassPath();
+            classPathToUse = CommandLineHelper.generateRioStarterClassPath();
+        else
+            classPathToUse = classPath;
 
         /* Create a normalized service name, translating " " to "_" and
          * appending the instance ID to the name. This will be used for the
@@ -132,7 +135,7 @@ public class ServiceBeanExecHandler {
 
         /* Create input args */
         StringBuilder inputArgsBuilder = new StringBuilder();
-        inputArgsBuilder.append(CommandLineHelper.getClassPath(classPath));
+        inputArgsBuilder.append(CommandLineHelper.getClassPath(classPathToUse));
         String jvmOptions = (sElem.getExecDescriptor()==null? null: sElem.getExecDescriptor().getInputArgs());
         inputArgsBuilder.append(CommandLineHelper.createInputArgs(normalizedServiceName,
                                                                   serviceBindName,

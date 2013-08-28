@@ -32,7 +32,6 @@ import org.rioproject.impl.config.AggregateConfig;
 import org.rioproject.impl.config.ConfigHelper;
 import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.impl.system.measurable.MeasurableCapability;
-import org.rioproject.impl.watch.Watch;
 import org.rioproject.impl.watch.WatchDataSourceRegistry;
 import org.rioproject.impl.watch.WatchRegistry;
 import org.rioproject.loader.CommonClassLoader;
@@ -43,10 +42,8 @@ import org.rioproject.servicebean.ComputeResourceManager;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.sla.SLA;
-import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.software.SoftwareSupport;
-import org.rioproject.watch.WatchDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,8 +99,6 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
     private String[] configurationFiles;
     /* The Subject used to authenticate the service */
     private Subject subject;
-    /** Component name for logging and configuration property retrieval */
-    private static final String COMPONENT="org.rioproject.impl.servicebean";
     /** A Logger instance for this component */
     private static Logger logger = LoggerFactory.getLogger(DefaultServiceBeanContext.class.getName());
 
@@ -120,8 +115,8 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
     public DefaultServiceBeanContext(final ServiceElement sElem,
                                      final ServiceBeanManager serviceBeanManager,
                                      final ComputeResource computeResource,
-                      /* Optional */
-                      final Configuration sharedConfig) {
+                                     /* Optional */
+                                     final Configuration sharedConfig) {
         if(sElem == null)
             throw new IllegalArgumentException("sElem is null");
         if(serviceBeanManager == null)
@@ -133,12 +128,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
         this.computeResource = computeResource;
         this.sharedConfig = sharedConfig;
         watchRegistry = new WatchDataSourceRegistry();
-        Map<String, WatchDataSource> systemWatches = new HashMap<String, WatchDataSource>();
-        for(String id : SystemWatchID.IDs) {
-            Watch watch = computeResource.getMeasurableCapability(id);
-            systemWatches.put(id, watch.getWatchDataSource());
-        }
-
+        watchRegistry.setServiceBeanContext(this);
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
         if(cCL instanceof ServiceClassLoader) {
             ServiceClassLoader scl = (ServiceClassLoader)cCL;
@@ -258,6 +248,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
         System.arraycopy(configFiles, 0, configurationFiles, 0, configFiles.length);
     }
 
+    @SuppressWarnings("unused")
     public String[] getConfigurationFiles() {
         return configurationFiles;
     }
@@ -399,16 +390,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ServiceBeanContext#getWatchRegistry
      */
     public WatchRegistry getWatchRegistry() {
-        try {
-            watchRegistry.setServiceBeanContext(this);
-            Map<String, WatchDataSource> systemWatches = new HashMap<String, WatchDataSource>();
-            for(String id : SystemWatchID.IDs) {
-                Watch watch = computeResource.getMeasurableCapability(id);
-            }
-        } catch(Exception e) {
-            logger.warn("Getting watchRegistry", e);
-        }
-        return(watchRegistry);
+        return watchRegistry;
     }
 
     /**

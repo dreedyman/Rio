@@ -37,6 +37,7 @@ import java.util.logging.LogRecord;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceLogEventPublisherImpl implements ServiceLogEventPublisher {
     private final EventHandler eventHandler;
     private final EventProducer eventProducer;

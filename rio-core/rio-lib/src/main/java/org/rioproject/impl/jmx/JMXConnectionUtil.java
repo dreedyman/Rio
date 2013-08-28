@@ -34,6 +34,7 @@ import java.lang.management.ManagementFactory;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class JMXConnectionUtil {
     static final Logger logger = LoggerFactory.getLogger(JMXConnectionUtil.class);
 
