@@ -17,12 +17,18 @@
 /*
  * Configuration for a ComputeResource
  */
-import org.rioproject.config.Component
-import org.rioproject.watch.ThresholdValues
-import org.rioproject.impl.system.measurable.memory.pool.MemoryPool
+
 import net.jini.config.Configuration
-import java.lang.management.MemoryPoolMXBean
+import org.rioproject.config.Component
+import org.rioproject.impl.system.OperatingSystemType
+import org.rioproject.impl.system.measurable.MeasurableMonitor
+import org.rioproject.impl.system.measurable.memory.MemInfoMonitor
+import org.rioproject.impl.system.measurable.memory.ProcessMemoryMonitor
+import org.rioproject.impl.system.measurable.memory.pool.MemoryPool
+import org.rioproject.watch.ThresholdValues
+
 import java.lang.management.ManagementFactory
+import java.lang.management.MemoryPoolMXBean
 import java.lang.management.MemoryType
 
 /*
@@ -140,6 +146,14 @@ class MeasurableMemory extends BasicMeasurable {
  */
 @Component('org.rioproject.system.measurable.systemMemory')
 class MeasurableSystemMemory extends BasicMeasurable {
+
+    MeasurableMonitor getMonitor() {
+        if(OperatingSystemType.isLinux())
+            return new MemInfoMonitor()
+        else
+            return new ProcessMemoryMonitor();
+    }
+
     /*
      * Memory utilization should be capped at 95%
      */
