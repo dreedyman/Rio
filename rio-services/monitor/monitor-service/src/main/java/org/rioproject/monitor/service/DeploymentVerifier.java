@@ -15,11 +15,16 @@
  */
 package org.rioproject.monitor.service;
 
+import net.jini.admin.Administrable;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
+import net.jini.core.lookup.ServiceRegistrar;
+import net.jini.discovery.DiscoveryGroupManagement;
+import net.jini.discovery.DiscoveryManagement;
+import net.jini.lookup.DiscoveryAdmin;
 import org.rioproject.config.Constants;
-import org.rioproject.opstring.ClassBundle;
 import org.rioproject.impl.opstring.OpStringUtil;
+import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
@@ -30,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,27 +47,31 @@ import java.util.List;
 public class DeploymentVerifier {
     static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
     private final List<RemoteRepository> additionalRepositories = new ArrayList<RemoteRepository>();
+    private final DiscoveryManagement discoveryManagement;
 
-    public DeploymentVerifier(Configuration config) {
+    public DeploymentVerifier(final Configuration config, final DiscoveryManagement discoveryManagement) {
         try {
-            RemoteRepository[]  remoteRepositories = (RemoteRepository[]) config.getEntry("org.rioproject.monitor",
-                                                                                          "remoteRepositories",
-                                                                                          RemoteRepository[].class,
-                                                                                          new RemoteRepository[0]);
-            Collections.addAll(additionalRepositories, remoteRepositories);
-            logger.debug("Configured {} additional repositories", additionalRepositories);
+            RemoteRepository[] remoteRepositories = (RemoteRepository[]) config.getEntry("org.rioproject.monitor",
+                                                                                         "remoteRepositories",
+                                                                                         RemoteRepository[].class,
+                                                                                         new RemoteRepository[0]);
+            if(remoteRepositories.length>0) {
+                Collections.addAll(additionalRepositories, remoteRepositories);
+                logger.debug("Configured {} additional repositories", additionalRepositories);
+            }
         } catch (ConfigurationException e) {
             logger.warn("Getting RemoteRepositories", e);
         }
+        this.discoveryManagement = discoveryManagement;
     }
 
-    public void verifyDeploymentRequest(DeployRequest request) throws ResolverException, IOException {
+    public void verifyDeploymentRequest(final DeployRequest request) throws ResolverException, IOException {
         for(OperationalString o : request.getOperationalStrings()) {
             verifyOperationalString(o, request.getRepositories());
         }
     }
 
-    public void verifyOperationalString(OperationalString opString, RemoteRepository[] repositories)
+    public void verifyOperationalString(final OperationalString opString, final RemoteRepository[] repositories)
         throws ResolverException, IOException {
         Resolver resolver = ResolverHelper.getResolver();
         for(ServiceElement service : opString.getServices()) {
@@ -73,7 +83,9 @@ public class DeploymentVerifier {
             verifyOperationalString(nested, repositories);
     }
 
-    void verifyOperationalStringService(ServiceElement service, Resolver resolver, RemoteRepository[] repositories)
+    public void verifyOperationalStringService(final ServiceElement service,
+                                               final Resolver resolver,
+                                               final RemoteRepository[] repositories)
         throws IOException, ResolverException {
         /* Check the component bundle for deployment as an artifact, easier check this way */
         if(service.getComponentBundle().getArtifact()!=null) {
@@ -81,9 +93,12 @@ public class DeploymentVerifier {
         } else {
             OpStringUtil.checkCodebase(service, System.getProperty(Constants.CODESERVER));
         }
+        ensureGroups(service);
     }
 
-    void resolveOperationalStringService(ServiceElement service, Resolver resolver, RemoteRepository[] repositories)
+    private void resolveOperationalStringService(final ServiceElement service,
+                                                 final Resolver resolver,
+                                                 final RemoteRepository[] repositories)
         throws ResolverException {
         StringBuilder sb = new StringBuilder();
         StringBuilder sb1 = new StringBuilder();
@@ -109,7 +124,9 @@ public class DeploymentVerifier {
         logger.debug("{} derived classpath for loading artifact {}", service.getName(), sb.toString());
     }
 
-    void resolve(ClassBundle bundle, Resolver resolver, RemoteRepository[] repositories) throws ResolverException {
+    private void resolve(final ClassBundle bundle,
+                         final Resolver resolver,
+                         final RemoteRepository[] repositories) throws ResolverException {
         logger.trace("Artifact: {}, resolver: {}", bundle.getArtifact(), resolver.getClass().getName());
         String artifact = bundle.getArtifact();
         if (artifact != null) {
@@ -128,7 +145,7 @@ public class DeploymentVerifier {
         }
     }
 
-    RemoteRepository[] mergeRepositories(RemoteRepository[] r1, RemoteRepository[] r2) {
+    RemoteRepository[] mergeRepositories(final RemoteRepository[] r1, final RemoteRepository[] r2) {
         List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
         Collections.addAll(remoteRepositories, r1);
         for(RemoteRepository r : r2) {
@@ -144,5 +161,40 @@ public class DeploymentVerifier {
             }
         }
         return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+    }
+
+    void ensureGroups(final ServiceElement serviceElement) throws IOException {
+        if(serviceElement.getServiceBeanConfig().getGroups()==DiscoveryGroupManagement.ALL_GROUPS) {
+            throw new IOException(String.format("Service %s has been declared for ALL_GROUPS", serviceElement.getName()));
+        }
+        for(ServiceRegistrar registrar : discoveryManagement.getRegistrars()) {
+            try {
+                List<String> toAdd = new ArrayList<String>();
+                DiscoveryAdmin admin = (DiscoveryAdmin) ((Administrable)registrar).getAdmin();
+                String[] knownGroups = admin.getMemberGroups();
+                for(String serviceGroup : serviceElement.getServiceBeanConfig().getGroups()) {
+                    boolean found = false;
+                    for(String known : knownGroups) {
+                        if(serviceGroup.equals(known)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found) {
+                        toAdd.add(serviceGroup);
+                    }
+                }
+                if(!toAdd.isEmpty()) {
+                    admin.addMemberGroups(toAdd.toArray(new String[toAdd.size()]));
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("Added {} to ServiceRegistrar at {}:{}",
+                                     toAdd, registrar.getLocator().getHost(), registrar.getLocator().getPort());
+                    }
+                }
+
+            } catch (RemoteException e) {
+                logger.warn("While trying to ensure groups", e);
+            }
+        }
     }
 }

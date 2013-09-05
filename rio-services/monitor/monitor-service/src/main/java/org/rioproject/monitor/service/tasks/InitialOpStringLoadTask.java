@@ -16,8 +16,8 @@
 package org.rioproject.monitor.service.tasks;
 
 import org.rioproject.deploy.DeployAdmin;
-import org.rioproject.monitor.service.OpStringMangerController;
 import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.monitor.service.OpStringMangerController;
 import org.rioproject.monitor.service.peer.ProvisionMonitorPeer;
 import org.rioproject.monitor.service.persistence.StateManager;
 import org.slf4j.Logger;
@@ -33,18 +33,18 @@ import java.util.TimerTask;
  * Scheduled Task which will load configured OperationalString files
  */
 public class InitialOpStringLoadTask extends TimerTask {
-    private ProvisionMonitorPeer provisionMonitorPeer;
-    private StateManager stateManager;
-    private DeployAdmin deployAdmin;
-    private OpStringMangerController opStringMangerController;
-    private String[] initialOpStrings;
-    static Logger logger = LoggerFactory.getLogger(InitialOpStringLoadTask.class.getName());
+    private final ProvisionMonitorPeer provisionMonitorPeer;
+    private final StateManager stateManager;
+    private final DeployAdmin deployAdmin;
+    private final OpStringMangerController opStringMangerController;
+    private final String[] initialOpStrings;
+    static final Logger logger = LoggerFactory.getLogger(InitialOpStringLoadTask.class.getName());
 
-    public InitialOpStringLoadTask(String[] initialOpStrings,
-                                   DeployAdmin deployAdmin,
-                                   ProvisionMonitorPeer provisionMonitorPeer,
-                                   OpStringMangerController opStringMangerController,
-                                   StateManager stateManager) {
+    public InitialOpStringLoadTask(final String[] initialOpStrings,
+                                   final DeployAdmin deployAdmin,
+                                   final ProvisionMonitorPeer provisionMonitorPeer,
+                                   final OpStringMangerController opStringMangerController,
+                                   final StateManager stateManager) {
         this.initialOpStrings = initialOpStrings;
         this.provisionMonitorPeer = provisionMonitorPeer;
         this.deployAdmin = deployAdmin;

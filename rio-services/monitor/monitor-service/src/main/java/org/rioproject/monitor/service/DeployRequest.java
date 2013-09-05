@@ -29,20 +29,14 @@ public class DeployRequest {
     private final Collection<OperationalString> operationalStrings = new ArrayList<OperationalString>();
     private final Collection<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
 
-    public DeployRequest(OperationalString opString, Collection<RemoteRepository> repositories) {
-        operationalStrings.add(opString);
-        if(repositories!=null)
-            this.repositories.addAll(repositories);
-    }
-
-    public DeployRequest(OperationalString opString, RemoteRepository[] repositories) {
+    public DeployRequest(final OperationalString opString, final RemoteRepository[] repositories) {
         operationalStrings.add(opString);
         if(repositories!=null) {
             Collections.addAll(this.repositories, repositories);
         }
     }
 
-    public DeployRequest(OperationalString[] opStrings, Collection<RemoteRepository> repositories) {
+    public DeployRequest(final OperationalString[] opStrings, final Collection<RemoteRepository> repositories) {
         Collections.addAll(operationalStrings, opStrings);
         if(repositories!=null)
             this.repositories.addAll(repositories);

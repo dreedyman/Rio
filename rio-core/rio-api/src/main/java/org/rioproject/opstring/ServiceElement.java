@@ -197,7 +197,7 @@ public class ServiceElement implements Serializable {
      * @return The provision type
      */
     public ProvisionType getProvisionType() {
-        return (provisionType);
+        return provisionType;
     }
 
     /**
@@ -251,7 +251,7 @@ public class ServiceElement implements Serializable {
      * the network
      */
     public int getPlanned() {
-        return (planned);
+        return planned;
     }
 
     /**
@@ -269,7 +269,7 @@ public class ServiceElement implements Serializable {
      * @return The actualt number of discovered instances
      */
     public int getActual() {
-        return (actual);
+        return actual;
     }
 
     /**
@@ -296,7 +296,7 @@ public class ServiceElement implements Serializable {
      * will be -1
      */
     public int getMaxPerMachine() {
-        return (maxPerMachine);
+        return maxPerMachine;
     }
 
     /**
@@ -318,7 +318,7 @@ public class ServiceElement implements Serializable {
      * the {@link ServiceElement#maxPerMachine} property
      */
     public MachineBoundary getMachineBoundary() {
-        return(machineBoundary);
+        return machineBoundary;
     }
     
     /**
@@ -363,7 +363,7 @@ public class ServiceElement implements Serializable {
      * FaultDetectionHandler to use
      */
     public ClassBundle getFaultDetectionHandlerBundle() {
-        return (fdhBundle);
+        return fdhBundle;
     }
        
     /**
@@ -385,7 +385,7 @@ public class ServiceElement implements Serializable {
      * @return The ServiceBeanConfig object for this ServiceElement
      */
     public ServiceBeanConfig getServiceBeanConfig() {
-        return(sbConfig);
+        return sbConfig;
     }    
     
     /**
@@ -396,7 +396,7 @@ public class ServiceElement implements Serializable {
     public String getOperationalStringName() {
         if(sbConfig==null)
             return null;
-        return(sbConfig.getOperationalStringName());
+        return sbConfig.getOperationalStringName();
     }
 
     /**
@@ -440,7 +440,7 @@ public class ServiceElement implements Serializable {
      * instantiated
      */
     public boolean getAutoAdvertise() {
-        return(autoAdvertise);
+        return autoAdvertise;
     }    
     
     /**
@@ -474,7 +474,7 @@ public class ServiceElement implements Serializable {
      * pool of available DiscoveryManagement instances
      */
     public boolean getDiscoveryManagementPooling() {
-        return(discoPool);
+        return discoPool;
     }
 
     /**
@@ -500,7 +500,7 @@ public class ServiceElement implements Serializable {
      * method
      */
     public boolean getMatchOnName() {
-        return (matchOnName);
+        return matchOnName;
     }
     
     /**
@@ -520,7 +520,7 @@ public class ServiceElement implements Serializable {
      * load the ServiceBean
      */
     public ClassBundle getComponentBundle() {
-        return (componentBundle);
+        return componentBundle;
     }
 
     /**
@@ -550,7 +550,7 @@ public class ServiceElement implements Serializable {
         } else {
             bundle = new ClassBundle[0];
         }
-        return (bundle);
+        return bundle;
     }
 
     /**
@@ -573,7 +573,7 @@ public class ServiceElement implements Serializable {
                 }
             }
         }
-        return (list.toArray(new URL[list.size()]));
+        return list.toArray(new URL[list.size()]);
     }
   
     /**
@@ -659,7 +659,7 @@ public class ServiceElement implements Serializable {
         synchronized(provisionableCapabilities) {
             collection.addAll(provisionableCapabilities);
         }
-        return (collection);
+        return collection;
     }
 
     /**
@@ -757,9 +757,9 @@ public class ServiceElement implements Serializable {
      */
     public boolean equals(Object obj) {
         if(this == obj)
-            return(true);
+            return true;
         if(!(obj instanceof ServiceElement)) {
-            return(false);
+            return false;
         }
         ServiceElement that = (ServiceElement)obj;        
         if(this.getName().equals(that.getName()) && 
@@ -767,7 +767,7 @@ public class ServiceElement implements Serializable {
             /* If they exportBundles are different lengths, then the ServiceElements 
              * are not equal */            
             if(this.exportBundles.length!=that.exportBundles.length) {
-                return(false);
+                return false;
             }
             /* The ServiceElements should have the same export jar names */
             for (ClassBundle exportBundle1 : this.exportBundles) {
@@ -777,20 +777,20 @@ public class ServiceElement implements Serializable {
                         matched = true;
                 }
                 if (!matched) {
-                    return (false);
+                    return false;
                 }
             }
             /* If we've matched the exports and both ServiceElements dont have 
              * components bundles they are the same */
             if(this.componentBundle==null && that.componentBundle==null)
-                return(true);
+                return true;
             /* If the ServiceElements do have components, make sure the component
              * jar names are equal */
             if(this.componentBundle!=null && that.componentBundle!=null) {
-                return(this.componentBundle.equals(that.componentBundle));
+                return this.componentBundle.equals(that.componentBundle);
             }
         }        
-        return(false);
+        return false;
     }  
 
     @Override

@@ -43,15 +43,15 @@ public class ServiceProvisionContext {
     private final EventHandler failureHandler;
     private final AtomicInteger serviceProvisionEventSequenceNumber;
 
-    public ServiceProvisionContext(ServiceResourceSelector selector,
-                                   ThreadPoolExecutor provisioningPool,
-                                   List<ServiceElement> inProcess,
-                                   Object eventSource,
-                                   GaugeWatch watch,
-                                   ServiceProvisionDispatcher dispatcher,
-                                   ThreadPoolExecutor provisionFailurePool,
-                                   EventHandler failureHandler,
-                                   AtomicInteger serviceProvisionEventSequenceNumber) {
+    public ServiceProvisionContext(final ServiceResourceSelector selector,
+                                   final ThreadPoolExecutor provisioningPool,
+                                   final List<ServiceElement> inProcess,
+                                   final Object eventSource,
+                                   final GaugeWatch watch,
+                                   final ServiceProvisionDispatcher dispatcher,
+                                   final ThreadPoolExecutor provisionFailurePool,
+                                   final EventHandler failureHandler,
+                                   final AtomicInteger serviceProvisionEventSequenceNumber) {
         this.selector = selector;
         this.provisioningPool = provisioningPool;
         this.inProcess = inProcess;
@@ -63,11 +63,11 @@ public class ServiceProvisionContext {
         this.serviceProvisionEventSequenceNumber = serviceProvisionEventSequenceNumber;
     }
 
-    public void setProvisionRequest(ProvisionRequest request) {
+    public void setProvisionRequest(final ProvisionRequest request) {
         this.request = request;
     }
 
-    public void setServiceResource(ServiceResource svcResource) {
+    public void setServiceResource(final ServiceResource svcResource) {
         this.svcResource = svcResource;
     }
 

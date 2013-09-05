@@ -115,7 +115,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     private ProvisionMonitorEventProcessor eventProcessor;
     private final OpStringMangerController opStringMangerController;
     private StateManager stateManager;
-    private final DeploymentVerifier deploymentVerifier;
     private ServiceProvisioner provisioner;
     private Uuid uuid;
 
@@ -153,8 +152,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             logger.warn("Getting opStringManager Exporter", e);
         }
 
-        deploymentVerifier = new DeploymentVerifier(myConfig);
-
         proxy = (OperationalStringManager) exporter.export(this);
         this.opString = opString;
         this.active.set(mode);
@@ -179,15 +176,15 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         return oar;
     }
 
-    void setServiceProxy(ProvisionMonitor serviceProxy) {
+    void setServiceProxy(final ProvisionMonitor serviceProxy) {
         this.serviceProxy = serviceProxy;
     }
 
-    void setEventProcessor(ProvisionMonitorEventProcessor eventProcessor) {
+    void setEventProcessor(final ProvisionMonitorEventProcessor eventProcessor) {
         this.eventProcessor = eventProcessor;
     }
 
-    void setStateManager(StateManager stateManager) {
+    void setStateManager(final StateManager stateManager) {
         this.stateManager = stateManager;
     }
 
@@ -205,7 +202,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param newActive the new mode
      */
-    public void setActive(boolean newActive) {
+    public synchronized void setActive(final boolean newActive) {
         synchronized (this) {
             if (active.get() != newActive) {
                 active.set(newActive);
@@ -244,17 +241,13 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @return The active property
      */
     public boolean isActive() {
-        boolean mode;
-        //synchronized(this) {
-        mode = active.get();
-        //}
-        return (mode);
+        return active.get();
     }
 
     /**
      * @see org.rioproject.opstring.OperationalStringManager#setManaging(boolean)
      */
-    public void setManaging(boolean newActive) {
+    public void setManaging(final boolean newActive) {
         setActive(newActive);
     }
 
@@ -262,20 +255,20 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see org.rioproject.opstring.OperationalStringManager#isManaging
      */
     public boolean isManaging() {
-        return (isActive());
+        return isActive();
     }
 
     /**
      * @see org.rioproject.opstring.OperationalStringManager#getDeploymentDates
      */
     public Date[] getDeploymentDates() {
-        return (deployDateList.toArray(new Date[deployDateList.size()]));
+        return deployDateList.toArray(new Date[deployDateList.size()]);
     }
 
     /**
      * @see OpStringManager#setDeploymentStatus(int)
      */
-    public void setDeploymentStatus(int status) {
+    public void setDeploymentStatus(final int status) {
         opString.setDeployed(status);
         deployStatus = status;
         if (deployStatus == OperationalString.UNDEPLOYED) {
@@ -292,7 +285,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#addDeploymentDate(java.util.Date)
      */
-    public void addDeploymentDate(Date date) {
+    public void addDeploymentDate(final Date date) {
         if (date != null)
             deployDateList.add(date);
     }
@@ -315,10 +308,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *         are no errors
      * @throws Exception if there are unrecoverable errors
      */
-    Map<String, Throwable> init(boolean mode,
-                                ServiceProvisioner provisioner,
-                                Uuid uuid,
-                                ServiceProvisionListener listener) throws Exception {
+    Map<String, Throwable> init(final boolean mode,
+                                final ServiceProvisioner provisioner,
+                                final Uuid uuid,
+                                final ServiceProvisionListener listener) throws Exception {
         this.active.set(mode);
         this.provisioner = provisioner;
         this.uuid = uuid;
@@ -358,7 +351,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *                 
      * @throws java.rmi.RemoteException If the DeployAdmin cannot be obtained
      */
-    void startManager(ServiceProvisionListener listener) throws RemoteException {
+    void startManager(final ServiceProvisionListener listener) throws RemoteException {
         startManager(listener, new HashMap());
     }
 
@@ -373,7 +366,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * 
      * @throws java.rmi.RemoteException If the DeployAdmin cannot be obtained
      */
-    void startManager(ServiceProvisionListener listener, Map knownInstanceMap) throws RemoteException {
+    void startManager(final ServiceProvisionListener listener, final Map knownInstanceMap) throws RemoteException {
         addDeploymentDate(new Date(System.currentTimeMillis()));
         setDeploymentStatus(OperationalString.DEPLOYED);
         ServiceElementManager[] mgrs = getServiceElementManagers();
@@ -407,9 +400,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *                 provisioned at OperationalString deployment time
      * @throws Exception if the ServiceElementManager cannot be created
      */
-    void createServiceElementManager(ServiceElement sElem,
-                                     boolean start,
-                                     ServiceProvisionListener listener) throws Exception {
+    void createServiceElementManager(final ServiceElement sElem,
+                                     final boolean start,
+                                     final ServiceProvisionListener listener) throws Exception {
         ServiceElementManager svcElemMgr =
             new ServiceElementManager(sElem, proxy, provisioner, uuid, isActive(), config);
         /* Set event attributes */
@@ -428,7 +421,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see org.rioproject.opstring.OperationalStringManager#update(OperationalString)
      */
-    public Map<String, Throwable> update(OperationalString newOpString) throws OperationalStringException, RemoteException {
+    public Map<String, Throwable> update(final OperationalString newOpString) throws OperationalStringException, RemoteException {
 
         if (!isActive()) {
             OperationalStringManager primary = opStringMangerController.getPrimary(getName());
@@ -441,7 +434,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             }
         }
         try {
-            deploymentVerifier.verifyOperationalString(newOpString, getRemoteRepositories());
+            opStringMangerController.getDeploymentVerifier().verifyOperationalString(newOpString, getRemoteRepositories());
         } catch (Exception e) {
             throw new OperationalStringException("Verifying deployment for [" + newOpString.getName() + "]", e);
         }
@@ -463,7 +456,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#doUpdateOperationalString(org.rioproject.opstring.OperationalString)
      */
-    public Map<String, Throwable> doUpdateOperationalString(OperationalString newOpString) {
+    public Map<String, Throwable> doUpdateOperationalString(final OperationalString newOpString) {
         if (newOpString == null)
             throw new IllegalArgumentException("OperationalString cannot be null");
 
@@ -539,7 +532,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         return rents;
     }
 
-    private void stateChanged(boolean remove) {
+    private void stateChanged(final boolean remove) {
         if(stateManager!=null)
             stateManager.stateChanged(this, remove);
     }
@@ -552,7 +545,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @param listener A ServiceProvisionListener that will be notified
      *                 of services if they are provisioned.
      */
-    public void verify(ServiceProvisionListener listener) {
+    public void verify(final ServiceProvisionListener listener) {
         for (ServiceElementManager mgr : svcElemMgrs) {
             mgr.verify(listener);
         }
@@ -569,7 +562,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param elements Array of ServiceElement instances to update
      */
-    void updateServiceElements(ServiceElement[] elements) {
+    void updateServiceElements(final ServiceElement[] elements) {
         if (!isActive())
             return;
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
@@ -617,7 +610,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#terminate(boolean)
      */
-    public OperationalString[] terminate(boolean killServices) {
+    public OperationalString[] terminate(final boolean killServices) {
         List<OperationalString> terminated = new ArrayList<OperationalString>();
         terminated.add(doGetOperationalString());
         /* Cancel all scheduled Tasks */
@@ -675,8 +668,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#addServiceElement
     */
-    public void addServiceElement(ServiceElement sElem,
-                                  ServiceProvisionListener listener)
+    public void addServiceElement(final ServiceElement sElem,
+                                  final ServiceProvisionListener listener)
         throws OperationalStringException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
@@ -707,7 +700,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
     * @see OpStringManager#doAddServiceElement(ServiceElement, ServiceProvisionListener)
     */
-    public void doAddServiceElement(ServiceElement sElem, ServiceProvisionListener listener) throws Exception {
+    public void doAddServiceElement(final ServiceElement sElem, final ServiceProvisionListener listener) throws Exception {
         if (sElem.getExportBundles().length > 0) {
 
             /*File pomFile = null;
@@ -715,9 +708,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 File dir = new File(oar.getDeployDir());
                 pomFile = OARUtil.find("pom.xml", dir);
             }*/
-            deploymentVerifier.verifyOperationalStringService(sElem,
-                                                              ResolverHelper.getResolver(),
-                                                              getRemoteRepositories());
+            opStringMangerController.getDeploymentVerifier().verifyOperationalStringService(sElem,
+                                                                                            ResolverHelper.getResolver(),
+                                                                                            getRemoteRepositories());
             createServiceElementManager(sElem, true, listener);
             opString.addService(sElem);
             stateChanged(true);
@@ -729,7 +722,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#removeServiceElement
     */
-    public void removeServiceElement(ServiceElement sElem, boolean destroy)
+    public void removeServiceElement(final ServiceElement sElem, final boolean destroy)
         throws OperationalStringException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
@@ -754,7 +747,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#doRemoveServiceElement(ServiceElement, boolean)
      */
-    public void doRemoveServiceElement(ServiceElement sElem, boolean destroy)throws OperationalStringException {
+    public void doRemoveServiceElement(final ServiceElement sElem, final boolean destroy)throws OperationalStringException {
         ServiceElementManager svcElemMgr = getServiceElementManager(sElem);
         if (svcElemMgr == null)
             throw new OperationalStringException("OperationalStringManager for [" + opString.getName() + "], " +
@@ -776,7 +769,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#update
     */
-    public void update(ServiceElement sElem)
+    public void update(final ServiceElement sElem)
         throws OperationalStringException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
@@ -796,7 +789,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#doUpdateServiceElement(ServiceElement)
      */
-    public void doUpdateServiceElement(ServiceElement sElem) throws Exception {
+    public void doUpdateServiceElement(final ServiceElement sElem) throws Exception {
 
         ServiceElementManager svcElemMgr = getServiceElementManager(sElem);
         if (svcElemMgr == null) {
@@ -812,7 +805,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see org.rioproject.opstring.OperationalStringManager#relocate
      */
-    public void relocate(ServiceBeanInstance instance, ServiceProvisionListener listener, Uuid uuid)
+    public void relocate(final ServiceBeanInstance instance, final ServiceProvisionListener listener, final Uuid uuid)
         throws OperationalStringException, RemoteException {
         if (instance == null)
             throw new IllegalArgumentException("instance is null");
@@ -842,7 +835,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see org.rioproject.opstring.OperationalStringManager#update
      */
-    public void update(ServiceBeanInstance instance)
+    public void update(final ServiceBeanInstance instance)
         throws OperationalStringException {
         if (instance == null)
             throw new IllegalArgumentException("instance is null");
@@ -862,7 +855,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#doUpdateServiceBeanInstance(ServiceBeanInstance)
      */
-    public ServiceElement doUpdateServiceBeanInstance(ServiceBeanInstance instance)
+    public ServiceElement doUpdateServiceBeanInstance(final ServiceBeanInstance instance)
         throws OperationalStringException {
 
         ServiceElementManager svcElemMgr = getServiceElementManager(instance);
@@ -875,7 +868,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#increment
     */
-    public synchronized void increment(ServiceElement sElem, boolean permanent, ServiceProvisionListener listener)
+    public synchronized void increment(final ServiceElement sElem, final boolean permanent, final ServiceProvisionListener listener)
         throws OperationalStringException, RemoteException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
@@ -908,7 +901,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#getPendingCount
     */
-    public int getPendingCount(ServiceElement sElem) {
+    public int getPendingCount(final ServiceElement sElem) {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
         int numPending = -1;
@@ -921,7 +914,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#trim
     */
-    public int trim(ServiceElement sElem, int trimUp) throws OperationalStringException {
+    public int trim(final ServiceElement sElem, final int trimUp) throws OperationalStringException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
         if (!isActive())
@@ -953,7 +946,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#decrement
     */
-    public void decrement(ServiceBeanInstance instance, boolean recommended, boolean destroy)
+    public void decrement(final ServiceBeanInstance instance, final boolean recommended, final boolean destroy)
         throws OperationalStringException {
         if (instance == null)
             throw new IllegalArgumentException("instance is null");
@@ -996,7 +989,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#getServiceElement
     */
-    public ServiceElement getServiceElement(Object proxy) {
+    public ServiceElement getServiceElement(final Object proxy) {
         if (proxy == null)
             throw new IllegalArgumentException("proxy is null");
         ServiceElementManager mgr = null;
@@ -1018,7 +1011,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#getServiceBeanInstances
     */
-    public ServiceBeanInstance[] getServiceBeanInstances(ServiceElement sElem) throws OperationalStringException {
+    public ServiceBeanInstance[] getServiceBeanInstances(final ServiceElement sElem) throws OperationalStringException {
         if (sElem == null)
             throw new IllegalArgumentException("ServiceElement is null");
         try {
@@ -1039,8 +1032,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * @see org.rioproject.opstring.OperationalStringManager#getServiceElement
     */
-    public ServiceElement getServiceElement(String[] interfaces,
-                                            String name) {
+    public ServiceElement getServiceElement(final String[] interfaces,
+                                            final String name) {
         if (interfaces == null)
             throw new IllegalArgumentException("interfaces cannot be null");
         for (ServiceElementManager mgr : svcElemMgrs) {
@@ -1091,11 +1084,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see org.rioproject.opstring.OperationalStringManager#redeploy(ServiceElement,
      *      ServiceBeanInstance, boolean, boolean, long, ServiceProvisionListener)
      */
-    public void redeploy(ServiceElement sElem,
-                         ServiceBeanInstance instance,
-                         boolean clean,
-                         long delay,
-                         ServiceProvisionListener listener)
+    public void redeploy(final ServiceElement sElem,
+                         final ServiceBeanInstance instance,
+                         final boolean clean,
+                         final long delay,
+                         final ServiceProvisionListener listener)
         throws OperationalStringException {
         redeploy(sElem, instance, clean, true, delay, listener);
     }
@@ -1104,12 +1097,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see org.rioproject.opstring.OperationalStringManager#redeploy(ServiceElement,
      *      ServiceBeanInstance, boolean, long, ServiceProvisionListener)
      */
-    public void redeploy(ServiceElement sElem,
-                         ServiceBeanInstance instance,
-                         boolean clean,
-                         boolean sticky,
-                         long delay,
-                         ServiceProvisionListener listener) throws OperationalStringException {
+    public void redeploy(final ServiceElement sElem,
+                         final ServiceBeanInstance instance,
+                         final boolean clean,
+                         final boolean sticky,
+                         final long delay,
+                         final ServiceProvisionListener listener) throws OperationalStringException {
 
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
@@ -1158,7 +1151,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * Redeploy the OperationalString  
     */
-    public void doRedeploy(boolean clean, boolean sticky, ServiceProvisionListener listener) throws OperationalStringException {
+    public void doRedeploy(final boolean clean, final boolean sticky, final ServiceProvisionListener listener) throws OperationalStringException {
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
         for (ServiceElementManager mgr : svcElemMgrs.toArray(new ServiceElementManager[svcElemMgrs.size()]))
@@ -1168,11 +1161,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * Redeploy a ServiceElement or a ServiceBeanInstance  
     */
-    public void doRedeploy(ServiceElement sElem,
-                           ServiceBeanInstance instance,
-                           boolean clean,
-                           boolean sticky,
-                           ServiceProvisionListener listener)
+    public void doRedeploy(final ServiceElement sElem,
+                           final ServiceBeanInstance instance,
+                           final boolean clean,
+                           final boolean sticky,
+                           final ServiceProvisionListener listener)
         throws OperationalStringException {
 
         if (!isActive())
@@ -1219,12 +1212,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#doScheduleRedeploymentTask(long, ServiceElement, ServiceBeanInstance, boolean, boolean, ServiceProvisionListener)
      */
-    public void doScheduleRedeploymentTask(long delay,
-                                           ServiceElement sElem,
-                                           ServiceBeanInstance instance,
-                                           boolean clean,
-                                           boolean sticky,
-                                           ServiceProvisionListener listener) throws OperationalStringException {
+    public void doScheduleRedeploymentTask(final long delay,
+                                           final ServiceElement sElem,
+                                           final ServiceBeanInstance instance,
+                                           final boolean clean,
+                                           final boolean sticky,
+                                           final ServiceProvisionListener listener) throws OperationalStringException {
         RedeploymentTask scheduledTask = getScheduledRedeploymentTask(sElem, instance);
         if (scheduledTask != null) {
             long exec = (scheduledTask.scheduledExecutionTime() - System.currentTimeMillis()) / 1000;
@@ -1261,7 +1254,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @param instance The corresponding ServiceBeanInstance
      * @return The scheduled RedeploymentTask, or null if not found
      */
-    RedeploymentTask getScheduledRedeploymentTask(ServiceElement sElem, ServiceBeanInstance instance) {
+    RedeploymentTask getScheduledRedeploymentTask(final ServiceElement sElem, final ServiceBeanInstance instance) {
         TimerTask[] tasks = getTasks();
         RedeploymentTask scheduledTask = null;
         for (TimerTask task : tasks) {
@@ -1296,7 +1289,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#getServiceElementManager(ServiceElement)
      */
-    public ServiceElementManager getServiceElementManager(ServiceElement sElem) {
+    public ServiceElementManager getServiceElementManager(final ServiceElement sElem) {
         for (ServiceElementManager mgr : svcElemMgrs) {
             ServiceElement sElem1 = mgr.getServiceElement();
             if (sElem.equals(sElem1)) {
@@ -1314,7 +1307,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *         managing the ServiceElement. If no ServiceElementManager is found,
      *         null is returned
      */
-    ServiceElementManager getServiceElementManager(ServiceBeanInstance instance) {
+    ServiceElementManager getServiceElementManager(final ServiceBeanInstance instance) {
         for (ServiceElementManager mgr : svcElemMgrs) {
             if (mgr.hasServiceBeanInstance(instance))
                 return (mgr);
@@ -1332,7 +1325,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @throws IOException If the service proxy from a ServiceBeanInstance
      *                     returned from a ServiceElementManager cannot be unmarshalled
      */
-    ServiceElementManager getServiceElementManager(Object proxy) throws IOException {
+    ServiceElementManager getServiceElementManager(final Object proxy) throws IOException {
         for (ServiceElementManager mgr : svcElemMgrs) {
             ServiceBeanInstance[] instances = mgr.getServiceBeanInstances();
             for (ServiceBeanInstance instance : instances) {
@@ -1350,7 +1343,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * @see OpStringManager#addNested(OpStringManager)
      */
-    public void addNested(OpStringManager nestedMgr) {
+    public void addNested(final OpStringManager nestedMgr) {
         nestedManagers.add(nestedMgr);
         nestedMgr.addParent(this);
     }
@@ -1360,7 +1353,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param nestedMgr The nested OpStringManager to remove
      */
-    public void removeNested(OpStringManager nestedMgr) {
+    public void removeNested(final OpStringManager nestedMgr) {
         nestedManagers.remove(nestedMgr);
     }
 
@@ -1370,7 +1363,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param parent The parent for this OpStringManager.
      */
-    public void addParent(OpStringManager parent) {
+    public void addParent(final OpStringManager parent) {
         if (parents.contains(parent))
             return;
         parents.add(parent);
@@ -1381,7 +1374,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param parent The parent to remove
      */
-    public void removeParent(OpStringManager parent) {
+    public void removeParent(final OpStringManager parent) {
         parents.remove(parent);
     }
 
@@ -1417,7 +1410,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param task The TimerTask to add
      */
-    public void addTask(TimerTask task) {
+    public void addTask(final TimerTask task) {
         if (task != null)
             scheduledTaskList.add(task);
     }
@@ -1428,7 +1421,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param task The TimerTask to remove
      */
-    public void removeTask(TimerTask task) {
+    public void removeTask(final TimerTask task) {
         if (task != null)
             scheduledTaskList.remove(task);
     }

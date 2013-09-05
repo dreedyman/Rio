@@ -20,6 +20,7 @@ import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
+import net.jini.config.EmptyConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,6 +244,34 @@ public class ServiceStarter {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new RMISecurityManager());
         }
+    }
+
+    /**
+     * Start services declared in a configuration. The <tt>args</t> argument is
+     * passed directly to <tt>ConfigurationProvider.getInstance()</t> in order
+     * to obtain a <tt>Configuration</tt> object.
+     *
+     * <p>This configuration object is then queried for the
+     * <tt>org.rioproject.start.serviceDescriptors</tt> entry, which
+     * is assumed to be a <tt>ServiceDescriptor[]</tt>.
+     *
+     * <p>The <tt>create()</tt> method is then called on each of the array
+     * elements.
+     *
+     * @param descriptors {@code ServiceDescriptor}s to start.
+     *
+     * @return An immutable list of <tt>ServiceReference</tt> objects, one for
+     * each transient service started. If there are no transient services
+     * started, a zero-length list is returned. A new list is allocated each
+     * time.
+     *
+     * @throws Exception If there are errors starting the services
+     */
+    public static List<ServiceReference> start(ServiceDescriptor... descriptors) throws Exception {
+        Result[] results = create(descriptors, EmptyConfiguration.INSTANCE);
+        checkResultFailures(results);
+        List<ServiceReference> serviceRefs = getServiceReferences(results);
+        return Collections.unmodifiableList(serviceRefs);
     }
 
     /**

@@ -100,7 +100,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     private ProvisionMonitor serviceProxy;
     private ProvisionMonitorEventProcessor eventProcessor;
     private OpStringMangerController opStringMangerController;
-    private DeploymentVerifier deploymentVerifier;
 
     public void initialize() throws Exception {
         if(config==null)
@@ -118,8 +117,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                                                            "peerProxyPreparer",
                                                            ProxyPreparer.class,
                                                            new BasicProxyPreparer());
-        deploymentVerifier = new DeploymentVerifier(config);
-
         /* Create the PeerInfo object */
         java.util.Random rand = new java.util.Random(System.currentTimeMillis());
         long randomNumber = rand.nextLong();
@@ -135,7 +132,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     }
 
 
-    public void setOpStringMangerController(OpStringMangerController opStringMangerController) {
+    public void setOpStringMangerController(final OpStringMangerController opStringMangerController) {
         this.opStringMangerController = opStringMangerController;
     }
 
@@ -143,7 +140,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
         this.eventProcessor = eventProcessor;
     }
 
-    public void setDiscoveryManagement(DiscoveryManagement dm) {
+    public void setDiscoveryManagement(final DiscoveryManagement dm) {
         this.dm = dm;
     }
 
@@ -151,15 +148,15 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
         return serviceProxy;
     }
 
-    public void setServiceProxy(ProvisionMonitor serviceProxy) {
+    public void setServiceProxy(final ProvisionMonitor serviceProxy) {
         this.serviceProxy = serviceProxy;
     }
 
-    public void setConfig(Configuration config) {
+    public void setConfig(final Configuration config) {
         this.config = config;
     }
 
-    public void setComputeResource(ComputeResource computeResource) {
+    public void setComputeResource(final ComputeResource computeResource) {
         this.computeResource = computeResource;
     }
 
@@ -184,7 +181,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param primary The ProvisionMonitor to be the backup for
      * @return True if added to the collection, false if not
      */
-    public boolean addAsBackupFor(ProvisionMonitor primary) {
+    public boolean addAsBackupFor(final ProvisionMonitor primary) {
         boolean assigned;
         int listSize;
         synchronized(backupList) {
@@ -214,7 +211,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param primary The ProvisionMonitor to remove
      * @return True if removed from the collection, false if not
      */
-    public boolean removeAsBackupFor(ProvisionMonitor primary) {
+    public boolean removeAsBackupFor(final ProvisionMonitor primary) {
         boolean removed;
         int listSize;
         synchronized(backupList) {
@@ -261,7 +258,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      *
      * @param peer The PeerInfo
      */
-    public void peerUpdated(ProvisionMonitor.PeerInfo peer) {
+    public void peerUpdated(final ProvisionMonitor.PeerInfo peer) {
         if(peer == null) {
             peerLogger.debug("updatePeer(): Unknown ProvisionMonitor");
             return;
@@ -281,7 +278,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param item The ServiceItem for the ProvisionMonitor
      * @return The PeerInfo object
      */
-    ProvisionMonitor.PeerInfo addProvisioner(ServiceItem item) {
+    ProvisionMonitor.PeerInfo addProvisioner(final ServiceItem item) {
         ProvisionMonitor.PeerInfo peer = null;
         try {
             if(getServiceProxy().equals(item.service))
@@ -305,7 +302,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      *
      * @param sdEvent The ServiceDiscoveryEvent
      */
-    public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
+    public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
         ServiceItem item = sdEvent.getPostEventServiceItem();
         /* prepare the newly discovered proxy */
         try {
@@ -361,7 +358,8 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             return;
         }
         if(actualVersionNumber<5) {
-            peerLogger.warn("Discovered ProvisionMonitor with version {}, unsupported for {}, will not register with peer", versionNumber, RioVersion.VERSION);
+            peerLogger.warn("Discovered ProvisionMonitor with version {}, unsupported for {}, will not register with peer",
+                            versionNumber, RioVersion.VERSION);
             return;
         }
         /* Check if we already know about this guy. If so, just return */
@@ -410,7 +408,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     /**
      * A ProvisionMonitor has failed
      */
-    public void serviceFailure(Object service, ServiceID serviceID) {
+    public void serviceFailure(final Object service, final ServiceID serviceID) {
         /* Clean up the event consumer, dont explictly cancel the lease since
          * the remote peer may be unreachable, this could block on the
          * remote method invocation on the lease itself */
@@ -494,7 +492,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      *
      * @param info PeerInfo
      */
-    void notifyPeers(ProvisionMonitor.PeerInfo info) {
+    void notifyPeers(final ProvisionMonitor.PeerInfo info) {
         new Thread(new PeerNotificationTask(getProvisionMonitorPeers(),
                                             info)).start();
     }
@@ -543,7 +541,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      *
      * @return true if assignment succeeded
      */
-    boolean doAssignment(ProvisionMonitor.PeerInfo peer) {
+    boolean doAssignment(final ProvisionMonitor.PeerInfo peer) {
         boolean assigned = false;
         try {
             backup = peer.getService();
@@ -594,7 +592,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param monitor The ProvisionMonitor instance
      * @return The PeerInfo instance or null if not found
      */
-    ProvisionMonitor.PeerInfo getPeerInfo(ProvisionMonitor monitor) {
+    ProvisionMonitor.PeerInfo getPeerInfo(final ProvisionMonitor monitor) {
         ProvisionMonitor.PeerInfo[] peers = getPeers();
         ProvisionMonitor.PeerInfo peer = null;
         for (ProvisionMonitor.PeerInfo peer1 : peers) {
@@ -609,7 +607,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     /**
      * @see org.rioproject.event.RemoteServiceEventListener#notify
      */
-    public void notify(RemoteServiceEvent event) {
+    public void notify(final RemoteServiceEvent event) {
         try {
             Object eventSource = event.getSource();
             if(!(eventSource instanceof ProvisionMonitor)) {
@@ -873,7 +871,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param service The ProvisionMonitor's proxy
      * @param serviceID The serviceID of the ProvisionMonitor
      */
-    void setFaultDetectionHandler(Object service, ServiceID serviceID) {
+    void setFaultDetectionHandler(final Object service, final ServiceID serviceID) {
         try {
             if(serviceID == null) {
                 peerLogger.info("No ServiceID for newly discovered ProvisionMonitor, cant setup FDH");
@@ -897,7 +895,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      *
      * @param peer The peer ProvisionMonitor service
      */
-    void importOperationalStrings(ProvisionMonitor peer) {
+    void importOperationalStrings(final ProvisionMonitor peer) {
         try {
             DeployAdmin peerDeployAdmin = (DeployAdmin)peer.getAdmin();
             OperationalStringManager[] mgrs = peerDeployAdmin.getOperationalStringManagers();
@@ -922,10 +920,10 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param peerDeployAdmin The peer ProvisionMonitor DeployAdmin
      * @param repositories A collection of {@code RemoteRepository} instances to use for the resolution of artifacts
      */
-    void opStringProcessor(OperationalString opString, 
-                           ProvisionMonitor peer, 
-                           DeployAdmin peerDeployAdmin, 
-                           RemoteRepository[] repositories) {
+    void opStringProcessor(final OperationalString opString,
+                           final ProvisionMonitor peer,
+                           final DeployAdmin peerDeployAdmin,
+                           final RemoteRepository[] repositories) {
         try {
             addPeerOpString(opString, peer, peerDeployAdmin, repositories);
             OperationalString[] nested = opString.getNestedOperationalStrings();
@@ -944,17 +942,18 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param peerDeployAdmin The peer ProvisionMonitor DeployAdmin
      * @param repositories A collection of {@code RemoteRepository} instances to use for the resolution of artifacts                        
      */
-    synchronized void addPeerOpString(OperationalString opString, 
-                                      ProvisionMonitor peer, 
-                                      DeployAdmin peerDeployAdmin,
-                                      RemoteRepository[] repositories) {
+    synchronized void addPeerOpString(final OperationalString opString,
+                                      final ProvisionMonitor peer,
+                                      final DeployAdmin peerDeployAdmin,
+                                      final RemoteRepository[] repositories) {
         Map<String, Throwable> map = new HashMap<String, Throwable>();
         try {
             boolean resolveConflict = false;
             if(!opStringMangerController.opStringExists(opString.getName())) {
                 peerLogger.debug("Adding OpString [{}] from Peer {}", opString.getName(), peer.toString());
 
-                deploymentVerifier.verifyDeploymentRequest(new DeployRequest(opString, repositories));
+                opStringMangerController.getDeploymentVerifier().verifyDeploymentRequest(new DeployRequest(opString,
+                                                                                                           repositories));
 
                 OpStringManager opMgr =
                     opStringMangerController.addOperationalString(opString, map, null, peerDeployAdmin, null);
@@ -993,7 +992,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param peer The ProvisionMonitor that is also managing
      * @param peerDeployAdmin The peer's DeployAdmin
      */
-    void resolveConflict(OperationalString opString, ProvisionMonitor peer, DeployAdmin peerDeployAdmin) {
+    void resolveConflict(final OperationalString opString,
+                         final ProvisionMonitor peer,
+                         final DeployAdmin peerDeployAdmin) {
         boolean addAsBackup = false;
         OpStringManager localMgr = null;
         OperationalStringManager peerMgr;

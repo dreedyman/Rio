@@ -217,8 +217,6 @@ public class ServiceElementManager implements InstanceIDManager {
      * @throws Exception if there are errors setting the element
      */
     void setServiceElement(final ServiceElement newElem) throws Exception {
-        if(newElem==null)
-            throw new IllegalArgumentException("sElem is null");
         boolean update = (this.svcElement != null);
         ServiceElement preElem = svcElement;
         this.svcElement = newElem;

@@ -18,6 +18,7 @@ package org.rioproject.monitor.service;
 import com.sun.jini.config.Config;
 import com.sun.jini.start.LifeCycle;
 import net.jini.config.Configuration;
+import net.jini.config.ConfigurationException;
 import net.jini.core.event.EventRegistration;
 import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.LeaseDeniedException;
@@ -29,46 +30,48 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
-import org.rioproject.impl.opstring.OAR;
-import org.rioproject.impl.opstring.OpStringLoader;
-import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.DeployedService;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.deploy.ServiceProvisionListener;
-import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
+import org.rioproject.impl.client.JiniClient;
+import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.jmx.MBeanServerFactory;
+import org.rioproject.impl.opstring.OAR;
+import org.rioproject.impl.opstring.OpStringLoader;
+import org.rioproject.impl.service.ServiceResource;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.impl.servicebean.ServiceBeanActivation.LifeCycleManager;
 import org.rioproject.impl.servicebean.ServiceBeanAdapter;
+import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.impl.util.BannerProvider;
+import org.rioproject.impl.util.BannerProviderImpl;
+import org.rioproject.impl.watch.GaugeWatch;
+import org.rioproject.impl.watch.PeriodicWatch;
+import org.rioproject.impl.watch.ThreadDeadlockMonitor;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.monitor.proxy.ProvisionMonitorProxy;
 import org.rioproject.monitor.service.handlers.DeployHandler;
 import org.rioproject.monitor.service.handlers.DeployHandlerMonitor;
 import org.rioproject.monitor.service.handlers.FileSystemOARDeployHandler;
 import org.rioproject.monitor.service.peer.ProvisionMonitorPeer;
 import org.rioproject.monitor.service.persistence.StateManager;
-import org.rioproject.monitor.proxy.ProvisionMonitorProxy;
 import org.rioproject.monitor.service.tasks.InitialOpStringLoadTask;
 import org.rioproject.monitor.service.tasks.TaskTimer;
-import org.rioproject.opstring.*;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
+import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.resolver.*;
-import org.rioproject.impl.client.JiniClient;
-import org.rioproject.impl.service.ServiceResource;
-import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.system.ResourceCapability;
-import org.rioproject.impl.util.BannerProvider;
-import org.rioproject.impl.util.BannerProviderImpl;
 import org.rioproject.util.RioManifest;
 import org.rioproject.util.TimeUtil;
-import org.rioproject.impl.watch.GaugeWatch;
-import org.rioproject.impl.watch.PeriodicWatch;
-import org.rioproject.impl.watch.ThreadDeadlockMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +89,7 @@ import java.rmi.registry.Registry;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The ProvisionMonitor service provides the capability to deploy and monitor
@@ -803,7 +807,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 super.initialize(context);
             }
             Configuration config = context.getConfiguration();
-            deploymentVerifier = new DeploymentVerifier(config);
+            deploymentVerifier = new DeploymentVerifier(config, context.getDiscoveryManagement());
             eventProcessor = new ProvisionMonitorEventProcessor(config);
             provisionWatch = new GaugeWatch("Provision Clock", config);
             getWatchRegistry().register(provisionWatch);
@@ -827,6 +831,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             opStringMangerController.setUuid(getUuid());
             opStringMangerController.setStateManager(stateManager);
             opStringMangerController.setServiceProxy(getEventProxy());
+            opStringMangerController.setDeploymentVerifier(deploymentVerifier);
 
             if(System.getProperty(Constants.CODESERVER)==null) {
                 System.setProperty(Constants.CODESERVER, context.getExportCodebase());
@@ -878,7 +883,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             /*
              * Setup the DeployHandlerMonitor with DeployHandlers
              */
-            long deployMonitorPeriod = 1000*30;
+            long deployMonitorPeriod = TimeUnit.SECONDS.toMillis(30);
             try {
                 deployMonitorPeriod = Config.getLongEntry(config,
                                                           CONFIG_COMPONENT,
@@ -886,10 +891,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                                           deployMonitorPeriod,
                                                           -1,
                                                           Long.MAX_VALUE);
-            } catch(Throwable t) {
+            } catch(ConfigurationException e) {
                 logger.warn("Non-fatal exception getting deployMonitorPeriod, using default value of [{}] " +
                             "milliseconds. Continuing on with initialization.",
-                            deployMonitorPeriod, t);
+                            deployMonitorPeriod, e);
             }
             if(logger.isDebugEnabled())
                 logger.debug("Configured to scan for OAR deployments every {}", TimeUtil.format(deployMonitorPeriod));
@@ -913,7 +918,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 logger.info("OAR hot deploy capabilities have been disabled");
             }
             /* Get the timeout value for loading OperationalStrings */
-            long initialOpStringLoadDelay = 1000*5;
+            long initialOpStringLoadDelay = TimeUnit.SECONDS.toMillis(5);
             try {
                 initialOpStringLoadDelay = Config.getLongEntry(config,
                                                                CONFIG_COMPONENT,
@@ -921,8 +926,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                                                initialOpStringLoadDelay,
                                                                1,
                                                                Long.MAX_VALUE);
-            } catch(Throwable t) {
-                logger.warn("Exception getting initialOpStringLoadDelay", t);
+            } catch(ConfigurationException e) {
+                logger.warn("Exception getting initialOpStringLoadDelay", e);
             }
 
             String[] initialOpStrings = new String[]{};
@@ -931,8 +936,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                                               "initialOpStrings",
                                                               String[].class,
                                                               initialOpStrings);
-            } catch(Throwable t) {
-                logger.warn("Exception getting initialOpStrings", t);
+            } catch(ConfigurationException e) {
+                logger.warn("Exception getting initialOpStrings", e);
             }
             if(logger.isDebugEnabled()) {
                 StringBuilder builder = new StringBuilder();

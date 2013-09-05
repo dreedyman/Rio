@@ -21,27 +21,30 @@ import org.rioproject.impl.servicebean.ServiceElementUtil;
 import java.util.*;
 
 /**
- * The ServiceChannel provides a local channel for service instances that have
+ * The ServiceChannel provides a local notification channel for service instances that have
  * been provisioned or failed
  *
  * @author Dennis Reedy
  */
-public class ServiceChannel {
+public final class ServiceChannel {
     private final List<Registration> registrations = new ArrayList<Registration>();
     private static final ServiceChannel instance = new ServiceChannel();
 
     public static ServiceChannel getInstance() {
-        return(instance);
+        return instance;
     }
 
-    public void subscribe(ServiceChannelListener listener, String name, String[] interfaces, String opStringName) {
+    public void subscribe(final ServiceChannelListener listener,
+                          final String name,
+                          final String[] interfaces,
+                          final String opStringName) {
         Registration reg = new Registration(listener, name, interfaces, opStringName);
         if(!registrations.contains(reg)) {
             registrations.add(reg);
         }
     }
 
-    public void unsubscribe(ServiceChannelListener listener) {
+    public void unsubscribe(final ServiceChannelListener listener) {
         Registration[] regs = getRegistrations();
         for (Registration r : regs) {
             if (r.getServiceChannelListener().equals(listener)) {
@@ -50,7 +53,7 @@ public class ServiceChannel {
         }
     }
 
-    public void broadcast(ServiceChannelEvent event) {
+    public void broadcast(final ServiceChannelEvent event) {
         Object[] arrLocal = getRegistrations();
         for (Object anArrLocal : arrLocal) {
             Registration r = (Registration) anArrLocal;

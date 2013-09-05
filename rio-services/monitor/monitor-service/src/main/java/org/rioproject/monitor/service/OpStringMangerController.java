@@ -52,6 +52,7 @@ public class OpStringMangerController {
     private ServiceProvisioner serviceProvisioner;
     private Uuid uuid;
     private static Logger logger = LoggerFactory.getLogger(OpStringMangerController.class.getName());
+    private DeploymentVerifier deploymentVerifier;
 
     void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {
         this.serviceProvisioner = serviceProvisioner;
@@ -81,6 +82,14 @@ public class OpStringMangerController {
         this.stateManager = stateManager;
     }
 
+    public DeploymentVerifier getDeploymentVerifier() {
+        return deploymentVerifier;
+    }
+
+    public void setDeploymentVerifier(DeploymentVerifier deploymentVerifier) {
+        this.deploymentVerifier = deploymentVerifier;
+    }
+
     /**
      * Get all OperationalString objects from the Collection of OpStringManagers
      *
@@ -103,7 +112,7 @@ public class OpStringMangerController {
                 logger.warn("Getting all OperationalString instances", e);
             }
         }
-        return (os);
+        return os;
     }
 
     /**
@@ -133,7 +142,7 @@ public class OpStringMangerController {
                 }
             }
         }
-        return (mgr);
+        return mgr;
     }
 
     /**
@@ -162,7 +171,7 @@ public class OpStringMangerController {
                 logger.warn("Getting the primary OperationalStringManager for [" + name + "]", e);
             }
         }
-        return(mgr);
+        return mgr;
     }
 
     /**
@@ -195,7 +204,7 @@ public class OpStringMangerController {
                 /* ignore */
             }
         }
-        return(primary);
+        return primary;
     }
 
     /**
@@ -203,7 +212,7 @@ public class OpStringMangerController {
      *
      * @param opStringManager The OpStringManager to remove
      */
-    public void remove(OpStringManager opStringManager) {
+    public void remove(final OpStringManager opStringManager) {
         synchronized (opStringManagers) {
             opStringManagers.remove(opStringManager);
         }
@@ -255,7 +264,6 @@ public class OpStringMangerController {
                 }
 
                 Map<String, Throwable> errorMap = opMgr.init(active, serviceProvisioner, uuid, listener);
-                //Map errorMap = opMgr.init(active, listener);
                 synchronized(opStringManagers) {
                     opStringManagers.add(opMgr);
                 }
