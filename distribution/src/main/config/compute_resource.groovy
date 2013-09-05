@@ -23,7 +23,7 @@ import org.rioproject.config.Component
 import org.rioproject.impl.system.OperatingSystemType
 import org.rioproject.impl.system.measurable.MeasurableMonitor
 import org.rioproject.impl.system.measurable.memory.MemInfoMonitor
-import org.rioproject.impl.system.measurable.memory.ProcessMemoryMonitor
+import org.rioproject.impl.system.measurable.memory.SystemMemoryMonitor
 import org.rioproject.impl.system.measurable.memory.pool.MemoryPool
 import org.rioproject.watch.ThresholdValues
 
@@ -151,7 +151,7 @@ class MeasurableSystemMemory extends BasicMeasurable {
         if(OperatingSystemType.isLinux())
             return new MemInfoMonitor()
         else
-            return new ProcessMemoryMonitor();
+            return new SystemMemoryMonitor();
     }
 
     /*
