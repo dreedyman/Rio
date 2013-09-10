@@ -662,7 +662,7 @@ class TestManager {
         String logDir = null        
         String mainClass = "${config.manager.mainClass}"
         if(config.manager.log.size()>0) {
-            logDir = config.manager.log
+            logDir = "${config.manager.log}${File.separator}${testConfig.component}"
             File f = new File(logDir)
             if(!f.exists()) {
                 f.mkdirs()

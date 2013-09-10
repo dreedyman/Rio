@@ -50,9 +50,8 @@ class MonitorConfig {
     String jmxName = 'org.rioproject.monitor:type=Monitor'
 
     String[] getInitialLookupGroups() {
-        def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                      System.getProperty('user.name'))]
-        return groups as String[]
+        String groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
+        return groups.split(",")
     }
 
     RemoteRepository[] getRemoteRepositories() {

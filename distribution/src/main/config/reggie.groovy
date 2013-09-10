@@ -27,9 +27,8 @@ class ReggieConfig {
     //int initialUnicastDiscoveryPort = 10500
 
     String[] getInitialMemberGroups() {
-        def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                                         System.getProperty('user.name'))]
-        return groups as String[]
+        String groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
+        return groups.split(",")
     }
 
     String getUnicastDiscoveryHost() {

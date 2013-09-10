@@ -36,9 +36,8 @@ class CybernodeConfig {
     //long provisionerLeaseDuration = 1000*60
 
     String[] getInitialLookupGroups() {
-        def groups = [System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                      System.getProperty('user.name'))]
-        return groups as String[]
+        String groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
+        return groups.split(",")
     }
 
     LookupLocator[] getInitialLookupLocators() {

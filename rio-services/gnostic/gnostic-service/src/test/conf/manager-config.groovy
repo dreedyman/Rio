@@ -41,12 +41,11 @@ manager {
     inheritOptions = true
 
     /* Get the directory that the logging FileHandler will create the service log.  */
-    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
     String opSys = System.getProperty('os.name')
     String rootLogDir = opSys.startsWith("Windows")?'${java.io.tmpdir}':'/tmp'
     String name = System.getProperty('user.name')
 
-    log = "${rootLogDir}/${name}/logs/${logExt}/"
+    log = "${rootLogDir}/${name}/logs"
 
     jvmOptions =
         '-Djava.protocol.handler.pkgs=org.rioproject.url '+

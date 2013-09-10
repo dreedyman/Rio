@@ -42,12 +42,11 @@ manager {
     inheritOptions = true
 
     /* Get the directory that the logging FileHandler will create the service log.  */
-    String logExt = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
     String opSys = System.getProperty('os.name')
     String rootLogDir = opSys.startsWith("Windows")?System.getProperty("java.io.tmpdir"):'/tmp'
     String name = System.getProperty('user.name')
 
-    log = "${rootLogDir}${File.separator}${name}${File.separator}logs${File.separator}${logExt}/"
+    log = "${rootLogDir}${File.separator}${name}${File.separator}logs"
 
     String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
     System.setProperty("hostAddress", address)
