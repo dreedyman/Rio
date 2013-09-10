@@ -261,7 +261,7 @@ public class ServiceBeanExecHandler {
         File serviceLogDir = new File(rootDir, "service_logs");
         FileUtils.checkDirectory(serviceLogDir, "service logs");
 
-        String s = opstringName.replaceAll(" ", "_");
+        String s = opstringName.replaceAll(" ", "_").replaceAll("\\(", "" ).replaceAll("\\)", "" );
         File opstringDir = new File(serviceLogDir, s);
         FileUtils.checkDirectory(opstringDir, "opstring log root");
         return opstringDir.getAbsolutePath();
