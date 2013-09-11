@@ -66,10 +66,7 @@ class ServiceBrowser extends JFrame {
         // center in parent frame
         Rectangle bounds = browser.getBounds();
         Dimension dialogSize = getPreferredSize();
-        int xpos = bounds.x + (bounds.width - dialogSize.width) / 2;
-        int ypos = bounds.y + (bounds.height - dialogSize.height) / 2;
-        setLocation((xpos < 0) ? 0 : xpos,
-                    (ypos < 0) ? 0 : ypos);
+        setLocationRelativeTo(browser);
     }
 
 
@@ -245,8 +242,7 @@ class ServiceBrowser extends JFrame {
     }
 
     private void higlightSelection(MouseEvent anEvent) {
-        attrPanel.tree.setSelectionPath(attrPanel.tree.getPathForLocation(
-                                                                             anEvent.getX(), anEvent.getY()));
+        attrPanel.tree.setSelectionPath(attrPanel.tree.getPathForLocation(anEvent.getX(), anEvent.getY()));
     }
 
     private ServiceBrowser.UIDescriptorPopup uiDescriptorPopup() {

@@ -127,6 +127,7 @@ class ServiceEditor extends JPanel {
         Dimension dialogSize = getPreferredSize();
         int xpos = bounds.x + (bounds.width - dialogSize.width) / 2;
         int ypos = bounds.y + (bounds.height - dialogSize.height) / 2;
+
         setLocation((xpos < 0) ? 0 : xpos,
                     (ypos < 0) ? 0 : ypos);
     }
@@ -483,8 +484,7 @@ class ServiceEditor extends JPanel {
                     // cancel notify while adding an attribute
                     cancelNotify();
 
-                    ((JoinAdmin) admin).modifyLookupAttributes(
-                                                                  new Entry[]{template}, new Entry[]{attr});
+                    ((JoinAdmin) admin).modifyLookupAttributes(new Entry[]{template}, new Entry[]{attr});
 
                     setupNotify();
 
@@ -626,7 +626,7 @@ class ServiceEditor extends JPanel {
             }
         }
 
-        private Entry cloneEntry(Entry attr) {
+        private Entry cloneEntry(final Entry attr) {
             try {
                 Class realClass = attr.getClass();
                 Entry template = (Entry) realClass.newInstance();
@@ -646,7 +646,7 @@ class ServiceEditor extends JPanel {
         }
 
         // from EntryRep
-        private boolean usableField(Field field) {
+        private boolean usableField(final Field field) {
             Class desc = field.getDeclaringClass();
 
             if (desc.isPrimitive()) {
@@ -661,11 +661,11 @@ class ServiceEditor extends JPanel {
         class DoubleClicker extends MouseAdapter {
             AttributeTreePanel parent;
 
-            public DoubleClicker(AttributeTreePanel parent) {
+            public DoubleClicker(final AttributeTreePanel parent) {
                 this.parent = parent;
             }
 
-            public void mouseClicked(MouseEvent ev) {
+            public void mouseClicked(final MouseEvent ev) {
                 if (ev.getClickCount() >= 2) {
                     JTree tree = (JTree) ev.getSource();
                     TreePath path = tree.getPathForLocation(ev.getX(), ev.getY());
@@ -707,7 +707,7 @@ class ServiceEditor extends JPanel {
         private JButton removeButton;
         private JButton closeButton;
 
-        public ListerFrame(String title) {
+        public ListerFrame(final String title) {
             super(title);
 
             getContentPane().setLayout(new BorderLayout());
@@ -783,14 +783,7 @@ class ServiceEditor extends JPanel {
         public void showFrame() {
             // init list data
             resetListModel();
-
-            // center in parent frame
-            Rectangle bounds = ServiceEditor.this.getBounds();
-            Dimension dialogSize = getPreferredSize();
-
-            setLocation(bounds.x + (bounds.width - dialogSize.width) / 2,
-                        bounds.y + (bounds.height - dialogSize.height) / 2);
-
+            setLocationRelativeTo(browser);
             setVisible(true);
         }
 
@@ -821,7 +814,7 @@ class ServiceEditor extends JPanel {
 
     class GroupLister extends ListerFrame {
 
-        public GroupLister(String title) {
+        public GroupLister(final String title) {
             super(title);
         }
 
@@ -844,7 +837,7 @@ class ServiceEditor extends JPanel {
             return "Enter adding group(s)";
         }
 
-        protected String getRemoveMessage(Object[] items) {
+        protected String getRemoveMessage(final Object[] items) {
             StringBuffer msg = new StringBuffer();
             if (items.length > 1)
                 msg.append("Remove these groups : ");
@@ -853,12 +846,12 @@ class ServiceEditor extends JPanel {
             for (int i = 0; i < items.length; i++) {
                 if (i != 0)
                     msg.append(", ");
-                msg.append(((GroupItem) items[i]).toString());
+                msg.append((items[i]).toString());
             }
             return msg.toString();
         }
 
-        protected void addItems(String[] items) {
+        protected void addItems(final String[] items) {
             // check "public"
             String[] grps = new String[items.length];
             for (int i = 0; i < items.length; i++)
@@ -871,7 +864,7 @@ class ServiceEditor extends JPanel {
             }
         }
 
-        protected void removeItems(Object[] items) {
+        protected void removeItems(final Object[] items) {
             String[] grps = new String[items.length];
             for (int i = 0; i < items.length; i++)
                 grps[i] = ((GroupItem) items[i]).group;
@@ -886,7 +879,7 @@ class ServiceEditor extends JPanel {
 
     class MemberGroupLister extends ListerFrame {
 
-        public MemberGroupLister(String title) {
+        public MemberGroupLister(final String title) {
             super(title);
         }
 
@@ -905,7 +898,7 @@ class ServiceEditor extends JPanel {
             return "Enter adding group(s)";
         }
 
-        protected String getRemoveMessage(Object[] items) {
+        protected String getRemoveMessage(final Object[] items) {
             StringBuilder msg = new StringBuilder();
             if (items.length > 1)
                 msg.append("Remove these groups : ");
@@ -914,12 +907,12 @@ class ServiceEditor extends JPanel {
             for (int i = 0; i < items.length; i++) {
                 if (i != 0)
                     msg.append(", ");
-                msg.append(((GroupItem) items[i]).toString());
+                msg.append((items[i]).toString());
             }
             return msg.toString();
         }
 
-        protected void addItems(String[] items) {
+        protected void addItems(final String[] items) {
             // check "public"
             String[] grps = new String[items.length];
             for (int i = 0; i < items.length; i++)
@@ -932,7 +925,7 @@ class ServiceEditor extends JPanel {
             }
         }
 
-        protected void removeItems(Object[] items) {
+        protected void removeItems(final Object[] items) {
             String[] grps = new String[items.length];
             for (int i = 0; i < items.length; i++)
                 grps[i] = ((GroupItem) items[i]).group;
@@ -948,7 +941,7 @@ class ServiceEditor extends JPanel {
     class GroupItem {
         public String group;
 
-        public GroupItem(String group) {
+        public GroupItem(final String group) {
             if (group.equals("public"))
                 this.group = "";
             else
@@ -965,7 +958,7 @@ class ServiceEditor extends JPanel {
 
     class LocatorLister extends ListerFrame {
 
-        public LocatorLister(String title) {
+        public LocatorLister(final String title) {
             super(title);
         }
 
@@ -988,8 +981,8 @@ class ServiceEditor extends JPanel {
             return "Enter a new locator's URL";
         }
 
-        protected String getRemoveMessage(Object[] items) {
-            StringBuffer msg = new StringBuffer();
+        protected String getRemoveMessage(final Object[] items) {
+            StringBuilder msg = new StringBuilder();
             if (items.length > 1)
                 msg.append("Remove these locators : ");
             else
@@ -1002,7 +995,7 @@ class ServiceEditor extends JPanel {
             return msg.toString();
         }
 
-        protected void addItems(String[] items) {
+        protected void addItems(final String[] items) {
             LookupLocator[] locs = new LookupLocator[items.length];
             for (int i = 0; i < items.length; i++) {
                 try {
@@ -1024,7 +1017,7 @@ class ServiceEditor extends JPanel {
             }
         }
 
-        protected void removeItems(Object[] items) {
+        protected void removeItems(final Object[] items) {
             LookupLocator[] locs = new LookupLocator[items.length];
             for (int i = 0; i < items.length; i++)
                 locs[i] = (LookupLocator) items[i];
@@ -1058,7 +1051,7 @@ class ServiceEditor extends JPanel {
             setLightWeightPopupEnabled(true);
         }
 
-        public void actionPerformed(ActionEvent anEvent) {
+        public void actionPerformed(final ActionEvent anEvent) {
 
             UIDescriptor uiDescriptor = getSelectedUIDescriptor();
 
@@ -1068,16 +1061,16 @@ class ServiceEditor extends JPanel {
             ServiceUIHelper.handle(uiDescriptor, serviceItem, dialog);
         }
 
-        public void popupMenuWillBecomeVisible(PopupMenuEvent ev) {
+        public void popupMenuWillBecomeVisible(final PopupMenuEvent ev) {
         }
 
-        public void popupMenuWillBecomeInvisible(PopupMenuEvent ev) {
+        public void popupMenuWillBecomeInvisible(final PopupMenuEvent ev) {
         }
 
-        public void popupMenuCanceled(PopupMenuEvent ev) {
+        public void popupMenuCanceled(final PopupMenuEvent ev) {
         }
 
-        public void setServiceItem(ServiceItem anItem) {
+        public void setServiceItem(final ServiceItem anItem) {
             serviceItem = anItem;
         }
     }
@@ -1087,13 +1080,13 @@ class ServiceEditor extends JPanel {
         private ServiceEditor.UIDescriptorPopup popup;
         private ServiceItem serviceItem;
 
-        public MouseReceiver(ServiceItem aServiceItem,
-                             ServiceEditor.UIDescriptorPopup popup) {
+        public MouseReceiver(final ServiceItem aServiceItem,
+                             final ServiceEditor.UIDescriptorPopup popup) {
             this.popup = popup;
             serviceItem = aServiceItem;
         }
 
-        public void mouseReleased(MouseEvent ev) {
+        public void mouseReleased(final MouseEvent ev) {
 
             higlightSelection(ev);
 
@@ -1115,7 +1108,7 @@ class ServiceEditor extends JPanel {
             popup.show(ev.getComponent(), ev.getX(), ev.getY());
         }
 
-        public void mousePressed(MouseEvent ev) {
+        public void mousePressed(final MouseEvent ev) {
 
             higlightSelection(ev);
 
@@ -1156,9 +1149,8 @@ class ServiceEditor extends JPanel {
         }
     }
 
-    private void higlightSelection(MouseEvent event) {
-        attrPanel.tree.setSelectionPath(attrPanel.tree.getPathForLocation(
-                                                                             event.getX(), event.getY()));
+    private void higlightSelection(final MouseEvent event) {
+        attrPanel.tree.setSelectionPath(attrPanel.tree.getPathForLocation(event.getX(), event.getY()));
     }
 
     private ServiceEditor.UIDescriptorPopup uiDescriptorPopup() {
