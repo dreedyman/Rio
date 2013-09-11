@@ -546,7 +546,7 @@ public class ServiceFinder {
         /*
          * Set the hostname
          */
-        void setHost(String h) {
+        void setHost(final String h) {
             host = h;
         }
 
@@ -816,25 +816,6 @@ public class ServiceFinder {
     public Object getPreparedAdmin(final Object proxy) throws RemoteException {
         Object admin = ((Administrable)proxy).getAdmin();
         return(adminProxyPreparer.prepareProxy(admin));
-        /*
-        if(CLI.getResolver().getLoginContext()!=null) {
-            final Object temp = admin;
-               try {
-                admin =
-                    Subject.doAsPrivileged(
-                        CLI.getResolver().getLoginContext().getSubject(),
-                        new PrivilegedExceptionAction() {
-                            public Object run() throws Exception {
-                                return(adminProxyPreparer.prepareProxy(temp));
-                            }
-                        },
-                        null);
-            } catch (PrivilegedActionException e) {
-                e.printStackTrace();
-            }
-        }
-        return(admin);
-        */
     }
 
 }

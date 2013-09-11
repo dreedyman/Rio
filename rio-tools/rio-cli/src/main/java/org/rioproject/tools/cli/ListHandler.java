@@ -38,7 +38,6 @@ public class ListHandler implements OptionHandler {
         StringTokenizer tok = new StringTokenizer(modifiableInput);
         /* first token is "list" */
         String cmd = tok.nextToken();
-        int options = 0;
         modifiableInput = modifiableInput.substring((modifiableInput.length()==cmd.length()?
                                  cmd.length():cmd.length()+1));
         String lookfor = getWhatToLookFor(modifiableInput);
@@ -82,15 +81,15 @@ public class ListHandler implements OptionHandler {
         } else if(lookfor.equals(CYBERNODE)) {
             items = CLI.getInstance().finder.findCybernodes(null, attrs);
             genericLister = false;
-            Formatter.cybernodeLister(items, options, br, out);
+            Formatter.cybernodeLister(items, br, out);
         } else if(lookfor.equals(MONITOR)) {
             items = CLI.getInstance().finder.findMonitors(null, attrs);
             genericLister = false;
-            Formatter.provisionManagerLister(items, options, br, out);
+            Formatter.provisionManagerLister(items, br, out);
         }
         if(items!=null && items.length>0) {
             if(genericLister) {
-                String[] array = Formatter.formattedArray(items, options);
+                String[] array = Formatter.formattedArray(items);
                 for(int i=0, lineCounter=1; i<array.length; i++,lineCounter++) {
                     if(lineCounter % listLength==0 && array.length > lineCounter) {
                         Formatter.promptMore(br, out);
@@ -110,7 +109,7 @@ public class ListHandler implements OptionHandler {
      *
      * @return Valid returns will be "all", "monitor" or "cybernode"
      */
-    String getWhatToLookFor(String input) {
+    String getWhatToLookFor(final String input) {
         String lookFor = "all";
         StringTokenizer tok = new StringTokenizer(input);
         if(tok.countTokens()>0) {

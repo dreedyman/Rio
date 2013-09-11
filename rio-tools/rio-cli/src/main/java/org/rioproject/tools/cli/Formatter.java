@@ -40,14 +40,10 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Reedy
  */
 public class Formatter {
-    static final int MAX_ITEM_LENGTH = 30;
+    static final int MAX_ITEM_LENGTH = 60;
 
-    public static String asList(ServiceItem[] items) {
-        return(asList(items, 0));
-    }
-
-    public static String asList(ServiceItem[] items, int options) {
-        String[] array = formattedArray(items, options);
+    public static String asList(final ServiceItem[] items) {
+        String[] array = formattedArray(items);
         StringBuilder buffer = new StringBuilder();
         for(int i=0; i<array.length; i++) {
             if(i>0)
@@ -57,19 +53,15 @@ public class Formatter {
         return(buffer.toString());
     }
 
-    public static String asChoices(ServiceItem[] items) {
-        return(asChoices(items, 0));
-    }
-
-    public static String asChoices(ServiceItem[] items, int options) {
-        StringBuilder buffer = new StringBuilder(asList(items, options));
+    public static String asChoices(final ServiceItem[] items) {
+        StringBuilder buffer = new StringBuilder(asList(items));
         buffer.append(String.format("%n%-5s all",
                                     (Object[])
                                     new String[] {"["+(items.length+1)+"]"}));
         return(buffer.toString());
     }
 
-    public static String[] formattedArray(ServiceItem[] items, int options) {
+    public static String[] formattedArray(final ServiceItem[] items) {
         List<OutputInfo> list = new ArrayList<OutputInfo>();
         ServiceInfo[] serviceInfo = CLI.getInstance().finder.getServiceInfo();
         for(int i=0; i<items.length; i++) {
@@ -109,22 +101,22 @@ public class Formatter {
             oi.option2 = optionValues[2].trim();
             list.add(oi);
         }
-        OutputInfo[] oi = list.toArray(new OutputInfo[list.size()]);
+        OutputInfo[] outputInfos = list.toArray(new OutputInfo[list.size()]);
         List<String> output = new ArrayList<String>();
         int[] widths = new int[]{0, 0, 0, 0, 0, 0, 0};
-        for (OutputInfo anOi : oi) {
-            widths[0] = getLongest(anOi.itemNum, widths[0]);
-            widths[1] = getLongest(anOi.name, widths[1]);
-            widths[2] = getLongest(anOi.groups, widths[2]);
-            widths[3] = getLongest(anOi.host, widths[3]);
-            widths[4] = getLongest(anOi.option0, widths[4]);
-            widths[5] = getLongest(anOi.option1, widths[5]);
-            widths[6] = getLongest(anOi.option2, widths[6]);
+        for (OutputInfo outputInfo : outputInfos) {
+            widths[0] = getLongest(outputInfo.itemNum, widths[0]);
+            widths[1] = getLongest(outputInfo.name, widths[1]);
+            widths[2] = getLongest(outputInfo.groups, widths[2]);
+            widths[3] = getLongest(outputInfo.host, widths[3]);
+            widths[4] = getLongest(outputInfo.option0, widths[4]);
+            widths[5] = getLongest(outputInfo.option1, widths[5]);
+            widths[6] = getLongest(outputInfo.option2, widths[6]);
         }
         /* add some padding */
         widths[0]+=2; widths[1]+=2; widths[2]+=2; widths[3]+=2;
 
-        for (OutputInfo anOi : oi) {
+        for (OutputInfo anOi : outputInfos) {
             output.add(String.format("%-" + widths[0] + "s " +
                                      "%-" + widths[1] + "s " +
                                      "%-" + widths[2] + "s " +
@@ -168,14 +160,14 @@ public class Formatter {
     /*
      * Get the longest length element
      */
-    private static int getLongest(String s, int i) {
+    private static int getLongest(final String s, final int i) {
         return(Math.max(s.length(), i));
     }
 
     /*
      * Get the format string
      */
-    private static String getFormatString(int w) {
+    private static String getFormatString(final int w) {
         return((w==0?"%s":"%-"+w+"s"));
     }
 
@@ -183,17 +175,14 @@ public class Formatter {
      * Produce output for an array of Cybernodes
      * 
      * @param items Array of ServiceItems
-     * @param options Options to use
-     * @param br A BufferredReader, allows for the user to press enter for more
+     * @param br A BufferedReader, allows for the user to press enter for more
      * @param out The output PrintStream
      */
-    public static void cybernodeLister(ServiceItem[] items,
-                                       int options,
-                                       BufferedReader br,
-                                       PrintStream out) {
-        Integer listLength =
-            (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
-        String[] cybernodes = Formatter.formattedArray(items, options);
+    public static void cybernodeLister(final ServiceItem[] items,
+                                       final BufferedReader br,
+                                       final PrintStream out) {
+        Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
+        String[] cybernodes = Formatter.formattedArray(items);
         for(int i=0, lineCounter=1; i<cybernodes.length; i++,lineCounter++) {
             if(lineCounter % listLength==0 && cybernodes.length > lineCounter) {
                 out.println(cybernodes[i]);
@@ -278,16 +267,14 @@ public class Formatter {
      * Produce output for an array of Provision Managers
      * 
      * @param items Array of ServiceItems
-     * @param options Options
      * @param br A BufferredReader, allows for the user to press enter for more
      * @param out The output PrintStream
      */
     public static void provisionManagerLister(final ServiceItem[] items,
-                                              final int options,
                                               final BufferedReader br,
                                               final PrintStream out) {
         Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
-        String[] provisioners = Formatter.formattedArray(items, options);
+        String[] provisioners = Formatter.formattedArray(items);
         for(int i=0, lineCounter=1; i<provisioners.length; i++,lineCounter++) {
             if(lineCounter % listLength==0)
                 promptMore(br, out);
@@ -338,9 +325,6 @@ public class Formatter {
             ServiceElement[] sElems = opMgr.getOperationalString().getServices();
 
             for (ServiceElement sElem : sElems) {
-                String tabs = "\t";
-                if (sElem.getName().length() < 10)
-                    tabs = tabs + "\t";
                 String pending = "pending=";
                 if (role.equals("backup")) {
                     pending = pending + "<n/a>";
@@ -356,11 +340,6 @@ public class Formatter {
                                           sElem.getPlanned(),
                                           sElem.getActual(),
                                           pending));
-                /*out.println("\t" + pad +
-                            sElem.getName() + tabs +
-                            "planned=" + sElem.getPlanned() + "\t" +
-                            "actual=" + sElem.getActual() + "\t" +
-                            pending);*/
                 counter++;
                 ServiceBeanInstance[] instances = opMgr.getServiceBeanInstances(sElem);
                 for (ServiceBeanInstance instance : instances) {
@@ -368,9 +347,6 @@ public class Formatter {
                     if(counter % listLength==0)
                         promptMore(br, out);
                     out.println(String.format("\t%s%sid=%-3s\t%s", pad, pad, id, instance.getHostName()));
-                    /*out.println("\t" + pad + pad +
-                                "id=" + id + "\t\t" +
-                                instance.getHostName());*/
                     counter++;
                 }
             }

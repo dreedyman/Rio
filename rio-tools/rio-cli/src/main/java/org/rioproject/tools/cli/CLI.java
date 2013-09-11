@@ -249,7 +249,7 @@ public class CLI {
         return output;
     }
 
-    private static Object[] toArray(String s) {
+    private static Object[] toArray(final String s) {
         return toArray(s, null);
     }
 
