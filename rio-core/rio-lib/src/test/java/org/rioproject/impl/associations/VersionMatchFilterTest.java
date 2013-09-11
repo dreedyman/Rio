@@ -71,6 +71,12 @@ public class VersionMatchFilterTest {
         Assert.assertFalse(versionMatchFilter.check(makeAssociationDescriptor("2.0-SNAPSHOT"), makeServiceItem("1.0", "1.1", "1.2")));
     }
 
+    @Test
+    public void testVersionMatchFilter7() {
+        VersionMatchFilter versionMatchFilter = new VersionMatchFilter();
+        Assert.assertTrue(versionMatchFilter.check(makeAssociationDescriptor("dev-3.24.0"), makeServiceItem("dev-3.23.10, dev-3.24.0")));
+    }
+
     ServiceItem makeServiceItem(String... versions) {
         UUID uuid = UUID.randomUUID();
         ServiceID sid = new ServiceID(uuid.getMostSignificantBits(),
