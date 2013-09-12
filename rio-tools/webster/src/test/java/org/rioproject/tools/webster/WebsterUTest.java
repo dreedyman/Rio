@@ -17,6 +17,7 @@ package org.rioproject.tools.webster;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.rioproject.net.HostUtil;
 import org.rioproject.net.PortRangeServerSocketFactory;
 
 import java.io.BufferedReader;
@@ -178,7 +179,7 @@ public class WebsterUTest {
     }
 
     private List<String> get(int port) throws IOException {
-        URL url = new URL("http://" + InetAddress.getLocalHost().getHostAddress() + ":" + port);
+        URL url = new URL("http://" + HostUtil.getInetAddress().getHostAddress() + ":" + port);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestMethod("GET");
