@@ -18,18 +18,16 @@
 package org.rioproject.tools.ui.browser;
 
 import net.jini.core.entry.Entry;
-import java.lang.reflect.Field;
-import java.lang.reflect.Array;
-import java.awt.Component;
-import java.awt.BorderLayout;
-import java.util.logging.Level;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.JLabel;
+import net.jini.lookup.entry.ServiceControlled;
+
+import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
-import javax.swing.plaf.metal.MetalLookAndFeel;
+import java.awt.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.logging.Level;
 
 /**
  * @version 0.2 06/04/98
@@ -105,24 +103,22 @@ abstract class EntryTreePanel extends JPanel {
 
   protected void initTree() {
     Entry[] entries = getEntryArray();
-    if(entries == null)
-      entries = new Entry[0];
 
-    for(int i = 0; i < entries.length; i++){
-      // check controllability
-      boolean nodeControllable = false;
-      if(isControllable && ! (entries[i] instanceof net.jini.lookup.entry.ServiceControlled)) {
-	nodeControllable = true;
-      }
+      for (Entry entry : entries) {
+          // check controllability
+          boolean nodeControllable = false;
+          if (isControllable && !(entry instanceof ServiceControlled)) {
+              nodeControllable = true;
+          }
 
-      ObjectNode node = new ObjectNode(entries[i], nodeControllable);
-      root.add(node);
-      try {
-	recursiveObjectTree(node);
-      } catch(IllegalAccessException e){
-	Browser.logger.log(Level.INFO, "entry access failed", e);
+          ObjectNode node = new ObjectNode(entry, nodeControllable);
+          root.add(node);
+          try {
+              recursiveObjectTree(node);
+          } catch (IllegalAccessException e) {
+              Browser.logger.log(Level.INFO, "entry access failed", e);
+          }
       }
-    }
   }
 
   public void refreshPanel() {
@@ -145,58 +141,56 @@ abstract class EntryTreePanel extends JPanel {
     //Field[] fields = obj.getClass().getDeclaredFields();
     Field[] fields = obj.getClass().getFields();
 
-    for(int i = 0; i < fields.length; i++){
-      Field f = fields[i];
+      for (Field f : fields) {
+          if (Introspector.isHidden(f))
+              continue;
 
-      if(Introspector.isHidden(f))
-	continue;
+          Class clazz = f.getType();
+          ObjectNode child = null;
+          String fname = f.getName();
+          if (clazz.isPrimitive()) {
+              String clazzName = clazz.toString();
+              Object fobj = null;
+              if ("int".equals(clazzName)) {
+                  fobj = f.getInt(obj);
+              } else if ("boolean".equals(clazzName)) {
+                  fobj = f.getBoolean(obj);
+              } else if ("byte".equals(clazzName)) {
+                  fobj = f.getByte(obj);
+              } else if ("char".equals(clazzName)) {
+                  fobj = f.getChar(obj);
+              } else if ("double".equals(clazzName)) {
+                  fobj = f.getDouble(obj);
+              } else if ("float".equals(clazzName)) {
+                  fobj = f.getFloat(obj);
+              } else if ("long".equals(clazzName)) {
+                  fobj = f.getLong(obj);
+              }
 
-      Class clazz = f.getType();
-      ObjectNode child = null;
-      String fname = f.getName();
-      if(clazz.isPrimitive()){
-	String clazzName = clazz.toString();
-	Object fobj = null;
-	if("int".equals(clazzName)){
-	  fobj = Integer.valueOf(f.getInt(obj));
-	} else if("boolean".equals(clazzName)){
-	  fobj = new Boolean(f.getBoolean(obj));
-	} else if("byte".equals(clazzName)){
-	  fobj = Byte.valueOf(f.getByte(obj));
-	} else if("char".equals(clazzName)){
-	  fobj = Character.valueOf(f.getChar(obj));
-	} else if("double".equals(clazzName)){
-	  fobj = new Double(f.getDouble(obj));
-	} else if("float".equals(clazzName)){
-	  fobj = new Float(f.getFloat(obj));
-	} else if("long".equals(clazzName)){
-	  fobj = Long.valueOf(f.getLong(obj));
-	}
+              child = new ObjectNode(fobj, clazz, fname, true);
+          } else if (Introspector.isWrapper(clazz) || Introspector.isString(clazz)) {
+              child = new ObjectNode(f.get(obj), clazz, fname, true);
+          } else if (clazz.isArray()) {
+              child = new ObjectNode(f.get(obj), clazz, fname, false);
+              child.setAdministrable(node.isAdministrable());
+              child.setControllable(node.isControllable());
+              recursiveArrayTree(child, f);
+          } else {
+              // unknown type
+              Object subobj = f.get(obj);
 
-	child = new ObjectNode(fobj, clazz, fname, true);
-      } else if(Introspector.isWrapper(clazz) || Introspector.isString(clazz)) {
-	child = new ObjectNode(f.get(obj), clazz, fname, true);
-      } else if(clazz.isArray()){
-	child = new ObjectNode(f.get(obj), clazz, fname, false);
-	child.setAdministrable(node.isAdministrable());
-	child.setControllable(node.isControllable());
-	recursiveArrayTree(child, f);
-      } else {
-	// unknown type
-	Object subobj = f.get(obj);
-
-	// check if sub object has a viewable members.
-	if(countViewableFields(clazz) > 0){
-	  child = new ObjectNode(subobj, clazz, fname, false);
-	  child.setAdministrable(node.isAdministrable());
-	  child.setControllable(node.isControllable());
-	  recursiveObjectTree(child);
-	} else {
-	  child = new ObjectNode(subobj, clazz, fname, true);
-	}
+              // check if sub object has a viewable members.
+              if (countViewableFields(clazz) > 0) {
+                  child = new ObjectNode(subobj, clazz, fname, false);
+                  child.setAdministrable(node.isAdministrable());
+                  child.setControllable(node.isControllable());
+                  recursiveObjectTree(child);
+              } else {
+                  child = new ObjectNode(subobj, clazz, fname, true);
+              }
+          }
+          node.add(child);
       }
-      node.add(child);
-    }
   }
 
   private int countViewableFields(Class clazz) {
@@ -205,14 +199,12 @@ abstract class EntryTreePanel extends JPanel {
     //Field[] fields = obj.getClass().getDeclaredFields();
     //Field[] fields = obj.getClass().getFields();
     Field[] fields = clazz.getFields();
-    for(int i = 0; i < fields.length; i++){
-      Field f = fields[i];
+      for (Field f : fields) {
+          if (Introspector.isHidden(f))
+              continue;
 
-      if(Introspector.isHidden(f))
-	continue;
-
-      count++;
-    }
+          count++;
+      }
 
     return count;
   }
