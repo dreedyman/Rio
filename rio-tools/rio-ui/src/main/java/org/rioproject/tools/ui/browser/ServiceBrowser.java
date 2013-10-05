@@ -120,7 +120,7 @@ class ServiceBrowser extends JFrame {
             } catch (Throwable t) {
                 Browser.logger.log(Level.INFO, "lookup failed", t);
             }
-            return null;
+            return new Entry[0];
         }
     }
 
