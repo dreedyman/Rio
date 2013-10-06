@@ -16,6 +16,16 @@
 package org.rioproject.impl.opstring
 import net.jini.core.discovery.LookupLocator
 import net.jini.core.entry.Entry
+import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.stmt.BlockStatement
+import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.ast.stmt.Statement
+import org.codehaus.groovy.classgen.GeneratorContext
+import org.codehaus.groovy.control.CompilationFailedException
+import org.codehaus.groovy.control.CompilePhase
+import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.SourceUnit
+import org.codehaus.groovy.control.customizers.CompilationCustomizer
 import org.rioproject.RioVersion
 import org.rioproject.associations.AssociationDescriptor
 import org.rioproject.deploy.StagedData
@@ -67,6 +77,23 @@ class GroovyDSLOpStringParser implements OpStringParser {
 
         def parent = null
 
+        def compilerConfig = new CompilerConfiguration()
+        compilerConfig.addCompilationCustomizers(
+                new CompilationCustomizer(CompilePhase.CONVERSION) {
+                    @Override
+                    void call(SourceUnit sourceUnit,
+                              GeneratorContext generatorContext,
+                              ClassNode classNode) throws CompilationFailedException {
+                        BlockStatement blockStatement = sourceUnit.getAST().getStatementBlock();
+                        List<Statement> statements = blockStatement.getStatements();
+                        UsesVisitor visitor = new UsesVisitor(sourceUnit.classLoader, statements)
+                        for(Statement statement : statements) {
+                            if(!(statement instanceof ExpressionStatement))
+                                continue;
+                            statement.visit(visitor);
+                        }
+                    }
+                })
         URL sourceLocation = null
         GroovyCodeSource groovyCodeSource
         if(source instanceof URL) {
@@ -83,13 +110,12 @@ class GroovyDSLOpStringParser implements OpStringParser {
 
         Script dslScript
         if(loader==null)
-            dslScript = new GroovyShell().parse(groovyCodeSource)
+            dslScript = new GroovyShell(compilerConfig).parse(groovyCodeSource)
         else
-            dslScript = new GroovyShell(loader).parse(groovyCodeSource)
+            dslScript = new GroovyShell(loader, null, compilerConfig).parse(groovyCodeSource)
 
         def opStrings = []
         OpStringParserHelper helper = new OpStringParserHelper()
-
 
         /* Global settings referenced for all services being parsed and built */
         Map<String, String> opStringArtifacts = new HashMap<String, String>()
@@ -109,6 +135,12 @@ class GroovyDSLOpStringParser implements OpStringParser {
         dslScript.metaClass = createEMC(dslScript.class, { ExpandoMetaClass emc ->
             String opStringName = null
             OpString opString = null
+
+            emc.uses = { String... s ->
+            }
+
+            emc.using = { String... s ->
+            }
 
             emc.deployment = { Map attributes, Closure cl ->
                 opStringName = attributes.name
