@@ -15,6 +15,7 @@
  */
 package org.rioproject.tools.cli;
 
+import groovy.lang.GroovyClassLoader;
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.impl.opstring.OAR;
@@ -662,7 +663,7 @@ public class MonitorControl {
         OperationalString deploy = null;
         File deployFile = getDeploymentFile(deployment);
         if (deployFile.exists()) {
-            OpStringLoader opStringLoader = new OpStringLoader(CLI.class.getClassLoader());
+            OpStringLoader opStringLoader = new OpStringLoader(new GroovyClassLoader(CLI.class.getClassLoader()));
             OperationalString[] opstrings = opStringLoader.parseOperationalString(deployFile);
             deploy = opstrings[0];
         }

@@ -17,7 +17,6 @@
 package org.rioproject.impl.opstring;
 
 import org.rioproject.config.Constants;
-import org.rioproject.impl.opstring.OpStringParser;
 import org.rioproject.opstring.OperationalString;
 
 import java.io.BufferedReader;
@@ -41,7 +40,7 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class OpStringLoader {
-    private final ClassLoader loader;
+    private ClassLoader loader;
     private String[] exportJars;
     private String[] groups;
     /** Path location of an OperationalString loaded from the file system */

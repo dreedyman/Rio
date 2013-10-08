@@ -157,7 +157,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * PlatformCapability is installed
      */
     public void setPath(final String path) {
-        this.path = path;
+        this.path = handleWindows(path);
     }
 
     /**
@@ -168,7 +168,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * PlatformCapability is installed
      */
     public String getPath() {
-        return(path);
+        return path;
     }
 
     /**
@@ -177,7 +177,10 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      * @param classpath The classpath for the PlatformCapability
      */
     public void setClassPath(final String[] classpath) {
-        this.classpath = classpath;
+        this.classpath = new String[classpath.length];
+        for(int i=0; i<classpath.length; i++) {
+            this.classpath[i] = handleWindows(classpath[i]);
+        }
     }
 
     /**
@@ -188,6 +191,17 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      */
     public String[] getClassPath() {
         return classpath;
+    }
+
+    /*
+      * Convert windows path names if needed
+      */
+    private String handleWindows(final String s) {
+        String newString = s;
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            newString = s.replace('\\', '/');
+        }
+        return newString;
     }
 
     /**
@@ -348,7 +362,6 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
        }
        return(supports);
     }
-
 
     /**
      * Matching semantics are accomplished using pattern matching with
