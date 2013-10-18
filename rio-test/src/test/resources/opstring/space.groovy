@@ -1,3 +1,5 @@
+package opstring
+
 import org.rioproject.config.Constants
 
 deployment(name: 'Spaced') {

@@ -1,3 +1,5 @@
+package opstring
+
 import org.rioproject.tools.harvest.Harvester
 import org.rioproject.config.Constants
 

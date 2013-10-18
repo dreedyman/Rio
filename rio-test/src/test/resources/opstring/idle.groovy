@@ -3,27 +3,31 @@ package opstring
 import org.rioproject.config.Constants
 import org.rioproject.net.HostUtil
 
+import java.util.concurrent.TimeUnit
+
 def String getCodebase() {
     return 'http://'+HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)+":9010"
 }
 
-deployment(name:'Out Of Memory') {
+deployment(name:'Idle Service Test') {
 
     codebase getCodebase()
 
     groups System.getProperty('org.rioproject.groups')
 
-    service(name: 'OOME', fork:'yes') {
+    undeploy idle:10, TimeUnit.SECONDS
+
+    service(name: 'Idle') {
+
         interfaces {
-            classes 'org.rioproject.test.memory.OutOfMemory'
+            classes 'org.rioproject.test.idle.Idle'
             resources 'test-classes/'
         }
-        implementation(class: 'org.rioproject.test.memory.OutOfMemoryServiceImpl') {
+        implementation(class: 'org.rioproject.test.idle.IdleImpl') {
             resources 'test-classes/'
         }
 
-        //faultDetectionHandler HeartbeatFaultDetectionHandler.class.getName()
+        maintain 3
         
-        maintain 1
     }
 }

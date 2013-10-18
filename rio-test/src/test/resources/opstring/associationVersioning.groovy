@@ -1,3 +1,5 @@
+package opstring
+
 import org.rioproject.config.Constants
 import org.rioproject.entry.VersionEntry
 import org.rioproject.net.HostUtil

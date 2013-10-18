@@ -1,3 +1,5 @@
+package opstring
+
 import org.rioproject.net.HostUtil
 
 def getAddressAndPort() {

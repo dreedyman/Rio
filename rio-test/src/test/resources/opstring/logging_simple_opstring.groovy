@@ -1,3 +1,4 @@
+package opstring
 
 deployment(name:'ServiceLogEvent Test') {
 

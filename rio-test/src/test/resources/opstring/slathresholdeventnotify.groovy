@@ -1,3 +1,5 @@
+package opstring
+
 import java.util.logging.Level
 import org.rioproject.config.Constants
 import org.rioproject.net.HostUtil
