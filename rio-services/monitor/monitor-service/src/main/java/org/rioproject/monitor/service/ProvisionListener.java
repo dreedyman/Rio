@@ -28,11 +28,10 @@ public interface ProvisionListener  {
      * Notify listener that the Service described by the ServiceBeanInstance has
      * been provision successfully
      * 
-     * @param jsbInstance The ServiceBeanInstance
+     * @param serviceBeanInstance The ServiceBeanInstance
      * @param resource The InstantiatorResource that instantiated the service
      */
-    void serviceProvisioned(ServiceBeanInstance jsbInstance,
-                            InstantiatorResource resource);
+    void serviceProvisioned(ServiceBeanInstance serviceBeanInstance, InstantiatorResource resource);
 
     /**
      * Notify listener that the Service described by the ServiceBeanInstance is

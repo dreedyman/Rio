@@ -91,7 +91,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     static final String COMPONENT = "org.rioproject.event";
     /** The Logger */
     static Logger logger = LoggerFactory.getLogger(BasicEventConsumer.class);
-    private Configuration config;
+    private final Configuration config;
     private final ExecutorService service;
 
     /**
@@ -164,9 +164,11 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
                               final Configuration config) throws Exception {
         ProxyPreparer basicLeasePreparer = new BasicProxyPreparer();
 
-        this.config = config;
-        if(this.config == null)
+
+        if(config == null)
             this.config = EmptyConfiguration.INSTANCE;
+        else
+            this.config = config;
 
         leaseDuration = Config.getLongEntry(this.config,
                                             COMPONENT,

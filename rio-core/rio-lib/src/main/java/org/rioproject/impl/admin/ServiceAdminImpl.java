@@ -57,7 +57,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
     /** The ServiceAdminProxy */
     protected ServiceAdminProxy adminProxy;
     /** A snapshot handler */
-    private SnapshotHandler snapshotHandler;
+    private final SnapshotHandler snapshotHandler;
     /** The time the service was started */
     private final long started;
     /** A Logger */

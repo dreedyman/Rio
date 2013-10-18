@@ -38,6 +38,7 @@ import org.rioproject.log.LoggerConfig
 import org.rioproject.opstring.ClassBundle
 import org.rioproject.opstring.ServiceBeanConfig
 import org.rioproject.opstring.ServiceElement
+import org.rioproject.opstring.UndeployOption
 import org.rioproject.resolver.Resolver
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.sla.RuleMap
@@ -53,6 +54,7 @@ import org.rioproject.watch.WatchDescriptor
 import org.slf4j.LoggerFactory
 
 import javax.annotation.processing.Processor
+import java.util.concurrent.TimeUnit
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.Manifest
@@ -112,7 +114,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
         if(loader==null)
             dslScript = new GroovyShell(compilerConfig).parse(groovyCodeSource)
         else
-            dslScript = new GroovyShell(loader, null, compilerConfig).parse(groovyCodeSource)
+            dslScript = new GroovyShell(loader, new Binding(), compilerConfig).parse(groovyCodeSource)
 
         def opStrings = []
         OpStringParserHelper helper = new OpStringParserHelper()
@@ -139,6 +141,9 @@ class GroovyDSLOpStringParser implements OpStringParser {
             emc.uses = { String... s ->
             }
 
+            emc.using = { String s ->
+            }
+
             emc.using = { String... s ->
             }
 
@@ -148,6 +153,16 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 opString = new OpString(opStringName, sourceLocation)
                 cl()
                 opStrings << opString
+            }
+
+            emc.undeploy = { Map attributes ->
+                Long when = attributes.get("idle")
+                opString.undeployOption = new UndeployOption(when, UndeployOption.Type.WHEN_IDLE)
+            }
+
+            emc.undeploy = { Map attributes, TimeUnit timeUnit ->
+                Long when = attributes.get("idle")
+                opString.undeployOption = new UndeployOption(when, UndeployOption.Type.WHEN_IDLE, timeUnit)
             }
 
             emc.groups = { String... groups ->
@@ -351,6 +366,10 @@ class GroovyDSLOpStringParser implements OpStringParser {
             }
 
             emc.attributes = { Entry... entries ->
+                currentService.getServiceBeanConfig().addAdditionalEntries(entries)
+            }
+
+            emc.attributes = { Entry[] entries, Closure cl ->
                 currentService.getServiceBeanConfig().addAdditionalEntries(entries)
             }
 

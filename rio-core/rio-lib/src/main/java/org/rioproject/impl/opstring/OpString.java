@@ -18,6 +18,7 @@ package org.rioproject.impl.opstring;
 
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.opstring.UndeployOption;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -36,12 +37,12 @@ public class OpString implements OperationalString, Serializable {
     /** Collection of services within the OperationalString */
     private final List<ServiceElement> services = new ArrayList<ServiceElement>();
     /** Collection of nested OperationalString */
-    private final List<OperationalString> nestedOpStrings =
-        new ArrayList<OperationalString>();
+    private final List<OperationalString> nestedOpStrings = new ArrayList<OperationalString>();
     /** The deployed state of the OperationalString */
     private int deployedStatus = OperationalString.UNDEPLOYED;
     /** The URL OperationalString was loaded from */
     private URL loadedFrom;
+    private UndeployOption undeployOption;
 
     /** 
      * Create an OpString 
@@ -347,6 +348,14 @@ public class OpString implements OperationalString, Serializable {
      */
     public void setLoadedFrom(URL loadedFrom) {
         this.loadedFrom = loadedFrom;
+    }
+
+    public UndeployOption getUndeployOption() {
+        return undeployOption;
+    }
+
+    public void setUndeployOption(UndeployOption undeployOption) {
+        this.undeployOption = undeployOption;
     }
 }
 

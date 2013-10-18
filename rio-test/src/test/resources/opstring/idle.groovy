@@ -18,7 +18,6 @@ deployment(name:'Idle Service Test') {
     undeploy idle:10, TimeUnit.SECONDS
 
     service(name: 'Idle') {
-
         interfaces {
             classes 'org.rioproject.test.idle.Idle'
             resources 'test-classes/'

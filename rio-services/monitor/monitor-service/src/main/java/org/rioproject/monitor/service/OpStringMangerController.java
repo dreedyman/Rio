@@ -90,6 +90,21 @@ public class OpStringMangerController {
         this.deploymentVerifier = deploymentVerifier;
     }
 
+    public void undeploy(final OpStringManager opStringManager, final boolean terminate) {
+        opStringManager.setDeploymentStatus(OperationalString.UNDEPLOYED);
+        OperationalString opString = opStringManager.doGetOperationalString();
+        logger.trace("Terminating Operational String [{}]", opString.getName());
+        OperationalString[] terminated = opStringManager.terminate(terminate);
+        logger.info("Undeployed Operational String [{}]", opString.getName());
+        for(OperationalString os : terminated) {
+            eventProcessor.processEvent(new ProvisionMonitorEvent(serviceProxy,
+                                                                  ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED,
+                                                                  os));
+        }
+        if(stateManager!=null)
+            stateManager.stateChanged(opStringManager, true);
+    }
+
     /**
      * Get all OperationalString objects from the Collection of OpStringManagers
      *

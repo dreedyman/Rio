@@ -45,27 +45,31 @@ import net.jini.lookup.entry.Name;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.MonitorableService;
+import org.rioproject.admin.ServiceActivityProvider;
 import org.rioproject.admin.ServiceBeanAdmin;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationType;
 import org.rioproject.deploy.*;
 import org.rioproject.entry.ComputeResourceInfo;
+import org.rioproject.impl.client.DiscoveryManagementPool;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 import org.rioproject.impl.fdh.FaultDetectionHandler;
 import org.rioproject.impl.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.impl.fdh.FaultDetectionListener;
-import org.rioproject.impl.opstring.OpStringFilter;
-import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.impl.loader.ClassBundleLoader;
+import org.rioproject.impl.opstring.OpStringFilter;
+import org.rioproject.impl.service.ServiceResource;
+import org.rioproject.impl.servicebean.ServiceElementUtil;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.monitor.service.ServiceChannel.ServiceChannelEvent;
+import org.rioproject.monitor.service.channel.ServiceChannel;
+import org.rioproject.monitor.service.channel.ServiceChannelEvent;
+import org.rioproject.monitor.service.channel.ServiceChannelListener;
+import org.rioproject.monitor.service.managers.IdleServiceManager;
 import org.rioproject.monitor.service.util.LoggingUtil;
 import org.rioproject.opstring.*;
 import org.rioproject.opstring.ServiceElement.ProvisionType;
-import org.rioproject.impl.client.DiscoveryManagementPool;
-import org.rioproject.impl.client.ServiceDiscoveryAdapter;
-import org.rioproject.impl.service.ServiceResource;
-import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.sla.SLA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +83,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * ServiceElementManager is used to manage the discovery and dispatch
@@ -110,7 +115,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /** A collection of known services */
     private final List<Object> services = Collections.synchronizedList(new ArrayList<Object>());
     /** A table of services that have been provisioned, but whose proxies
-     * (or stubs) do not support the MonitorableService interface */
+     * (or stubs) do not support the ReferentUuid interface */
     private final Map<Object, String> ambiguousServices = new Hashtable<Object, String>();
     /** Whether this ServiceElementManager has been started */
     private final AtomicBoolean svcManagerStarted = new AtomicBoolean(false);
@@ -126,7 +131,7 @@ public class ServiceElementManager implements InstanceIDManager {
     private final List<ServiceBeanInstance> serviceBeanList = new ArrayList<ServiceBeanInstance>();
     /** A List of ServiceBeanInstances which have been decremented and are not
      * part of the list of ServiceBeanInstances. If a service is decremented,
-     * the ServiceBeanInstance decremented is taken from the seviceBeanList
+     * the ServiceBeanInstance decremented is taken from the serviceBeanList
      * and placed onto this list until that service has terminated, upon which
      * the instance will be 'cleaned' from the system */
     private final List<ServiceBeanInstance> decrementedServiceBeanList = new ArrayList<ServiceBeanInstance>();
@@ -143,9 +148,12 @@ public class ServiceElementManager implements InstanceIDManager {
     /** Configuration object passed from ProvisionMonitor */
     private Configuration config;
     /** The Uuid of the ProvisionMonitorImpl. If the uuid of a discovered
-     * service matches our uuid, dont spend the overhead of creating a
+     * service matches our uuid, don't spend the overhead of creating a
      * FaultDetectionHandler */
     private final Uuid myUuid;
+    /** The idle time to check. */
+    private long idleTime;
+    private final AtomicReference<IdleServiceManager> idleServiceManager = new AtomicReference<IdleServiceManager>();
     /** LookupCache listener */
     private ServiceElementManagerServiceListener sElemListener;
     /** Event source */
@@ -157,7 +165,7 @@ public class ServiceElementManager implements InstanceIDManager {
     private final List<Long> instanceIDs = Collections.synchronizedList(new ArrayList<Long>());
     /** A ProxyPreparer for discovered services */
     private ProxyPreparer proxyPreparer;
-    private final ServiceChannelClient serviceChannelClient = new ServiceChannelClient();
+    private final LocalServiceChannelClient localServiceChannelClient = new LocalServiceChannelClient();
     /** Logger instance */
     private static final Logger logger = LoggerFactory.getLogger(ServiceElementManager.class);
     /** Logger instance for ServiceElementManager details */
@@ -222,14 +230,10 @@ public class ServiceElementManager implements InstanceIDManager {
         this.svcElement = newElem;
 
         ServiceChannel channel = ServiceChannel.getInstance();
-        channel.unsubscribe(serviceChannelClient);
-        AssociationDescriptor[] aDesc = svcElement.getAssociationDescriptors();
-        for (AssociationDescriptor anADesc : aDesc) {
-            if (anADesc.getAssociationType() == AssociationType.COLOCATED) {
-                channel.subscribe(serviceChannelClient,
-                                  anADesc.getName(),
-                                  anADesc.getInterfaceNames(),
-                                  anADesc.getOperationalStringName());
+        channel.unsubscribe(localServiceChannelClient);
+        for (AssociationDescriptor aDesc : svcElement.getAssociationDescriptors()) {
+            if (aDesc.getAssociationType() == AssociationType.COLOCATED) {
+                channel.subscribe(localServiceChannelClient, aDesc, ServiceChannelEvent.Type.PROVISIONED);
             }
         }
 
@@ -381,10 +385,14 @@ public class ServiceElementManager implements InstanceIDManager {
         }
     }
 
+    void setIdleTime(long idleTime) {
+        this.idleTime = idleTime;
+    }
+
     /*
-     * Get the ServiceStatement, including all ServiceRecords, for the
-     * ServiceElement being managed
-     */
+         * Get the ServiceStatement, including all ServiceRecords, for the
+         * ServiceElement being managed
+         */
     ServiceStatement getServiceStatement() {
         ServiceStatement statement = new ServiceStatement(svcElement);
         InstantiatorResource[] resources = provisioner.getServiceResourceSelector().getInstantiatorResources(svcElement);
@@ -1210,8 +1218,12 @@ public class ServiceElementManager implements InstanceIDManager {
      */
     public void stopManager(final boolean destroyServices) {
         shutdown.set(true);
+        if(idleServiceManager.get()!=null) {
+            idleServiceManager.get().terminate();
+            idleServiceManager.set(null);
+        }
         /* Unsubscribe from the service channel */
-        ServiceChannel.getInstance().unsubscribe(serviceChannelClient);
+        ServiceChannel.getInstance().unsubscribe(localServiceChannelClient);
         /* Remove services from manager */
         if(svcElement.getProvisionType()==ProvisionType.DYNAMIC) {
             provisioner.getPendingManager().removeServiceElement(svcElement);
@@ -1497,6 +1509,9 @@ public class ServiceElementManager implements InstanceIDManager {
         */
         services.remove(proxy);
         fdhTable.remove(new ServiceID(serviceUuid.getMostSignificantBits(), serviceUuid.getLeastSignificantBits()));
+        if(idleServiceManager.get()!=null && proxy instanceof ServiceActivityProvider) {
+            idleServiceManager.get().removeService((ServiceActivityProvider)proxy);
+        }
         StringBuffer buff = new StringBuffer();
         buff.append("[").append(LoggingUtil.getLoggingName(svcElement)).append("] ");
         buff.append("cleanService():\n");
@@ -1682,6 +1697,10 @@ public class ServiceElementManager implements InstanceIDManager {
         instanceIDLog(buff);
     }
 
+    boolean isTrackingIdleBehavior() {
+        return idleServiceManager.get()!=null;
+    }
+
     @SuppressWarnings("unchecked")
     private void addServiceProxy(final Object proxy) {
         services.add(proxy);
@@ -1762,6 +1781,16 @@ public class ServiceElementManager implements InstanceIDManager {
                 try {
                     Thread.currentThread().setContextClassLoader(proxy.getClass().getClassLoader());
                     proxy = new MarshalledObject(proxy).get();
+                    if(proxy instanceof ServiceActivityProvider && idleTime>0) {
+                        synchronized (idleServiceManager) {
+                            if(idleServiceManager.get()==null) {
+                                idleServiceManager.set(new IdleServiceManager(idleTime, svcElement));
+                            }
+                        }
+                        idleServiceManager.get().addService((ServiceActivityProvider)proxy);
+                        logger.info("Check service [{}] idle time", LoggingUtil.getLoggingName(svcElement));
+                    }
+
                     if(proxy instanceof RemoteMethodControl)
                         proxy = proxyPreparer.prepareProxy(proxy);
 
@@ -1811,17 +1840,17 @@ public class ServiceElementManager implements InstanceIDManager {
                                                                     instance);
             processEvent(event);
             ServiceChannel channel = ServiceChannel.getInstance();
-            channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.PROVISIONED));
+            channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.Type.PROVISIONED));
         }
     }
 
     /**
      * Handle internal service notifications for associated service transitions
      */
-    class ServiceChannelClient implements ServiceChannel.ServiceChannelListener {
+    class LocalServiceChannelClient implements ServiceChannelListener {
 
         public void notify(final ServiceChannelEvent event) {
-            if(getActive() && event.getType()==ServiceChannelEvent.PROVISIONED) {
+            if(getActive()) {
                 if(provisioner.getPendingManager().getCount(svcElement)>0) {
                     provisioner.getPendingManager().process();
                 }
@@ -1919,7 +1948,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 return;
             ServiceBeanInstance instance;
             Uuid uuid = UuidFactory.create(sID.getMostSignificantBits(), sID.getLeastSignificantBits());
-            mgrLogger.warn("********************************\n[{}] service failure, type: {}, proxy: {}, active monitor? {}\n********",
+            mgrLogger.warn("\n********************************\n[{}] service failure, type: {}, proxy: {}, active monitor? {}\n********",
                            LoggingUtil.getLoggingName(svcElement),
                            svcElement.getProvisionType(),
                            proxy.getClass().getName(),
@@ -1960,7 +1989,7 @@ public class ServiceElementManager implements InstanceIDManager {
                                                                             instance);
                     processEvent(event);
                     ServiceChannel channel = ServiceChannel.getInstance();
-                    channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.FAILED));
+                    channel.broadcast(new ServiceChannelEvent(this, svcElement, ServiceChannelEvent.Type.FAILED));
                 }
                 mgrLogger.trace("Redeployment ProvisionRequest for [{}] obtained: {}",
                                  LoggingUtil.getLoggingName(svcElement),
@@ -2044,7 +2073,6 @@ public class ServiceElementManager implements InstanceIDManager {
             return(config);
         }
 
-
         /*
          * Get a ProvisionRequest created from a redeploy invocation. If not 
          * found return null
@@ -2082,7 +2110,7 @@ public class ServiceElementManager implements InstanceIDManager {
 
         /**
          * Notify listener that the Service described by the ServiceBeanInstance has
-         * been provisioned succesfully
+         * been provisioned successfully
          *
          * @param jsbInstance The ServiceBeanInstance
          */
@@ -2220,13 +2248,10 @@ public class ServiceElementManager implements InstanceIDManager {
         SLA[] slas = svcElement.getServiceLevelAgreements().getServiceSLAs();
         int count = -1;
         for (SLA sla : slas) {
-            //String handler = sla.getSlaPolicyHandler();
-            //if (handler.indexOf("ScalingPolicyHandler") != -1) {
-                int x = (sla.getMaxServices()==SLA.UNDEFINED?
-                         Integer.MAX_VALUE:sla.getMaxServices());
-                if (x > count)
-                    count = x;
-            //}
+            int x = (sla.getMaxServices()==SLA.UNDEFINED?
+                     Integer.MAX_VALUE:sla.getMaxServices());
+            if (x > count)
+                count = x;
         }
         return (count);
     }

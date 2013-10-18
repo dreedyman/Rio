@@ -25,7 +25,7 @@ import java.util.EventListener;
  *
  * @author Dennis Reedy
  */
-public interface RemoteServiceEventListener extends EventListener {
+public interface RemoteServiceEventListener <T extends RemoteServiceEvent> extends EventListener {
     /**
      * The notify method is invoked on a <code>RemoteServiceEventListener</code>
      * for {@link RemoteServiceEvent}s that the listener has registered
@@ -37,5 +37,5 @@ public interface RemoteServiceEventListener extends EventListener {
      * 
      * @param event A RemoteServiceEvent object
      */
-    void notify(RemoteServiceEvent event);
+    void notify(T event);
 }

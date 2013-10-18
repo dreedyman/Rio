@@ -3,14 +3,31 @@ import org.rioproject.test.TestConfig
 /*
 * Configuration file for Rio test cases
 */
-SimpleDeployTest {
-    groups = "SimpleDeployTest"
+
+CustomAttributesTest {
+    groups = "CustomAttributesTest"
     //locators = ''
     numCybernodes = 1
     numMonitors = 1
     numLookups = 1
+    opstring = 'src/test/resources/opstring/simple_opstring_extra_attributes.groovy'
+    autoDeploy = true
+}
+
+IdleServiceTest {
+    groups = "IdleServiceTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/opstring/idle.groovy'
+}
+
+SimpleDeployTest {
+    groups = "SimpleDeployTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
     opstring = 'src/test/resources/opstring/simple_opstring.groovy'
-    //harvest = true
     //testManager = new org.rioproject.test.TestManager(true)
 }
 

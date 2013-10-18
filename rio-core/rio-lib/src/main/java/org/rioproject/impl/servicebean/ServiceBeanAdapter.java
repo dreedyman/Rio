@@ -94,6 +94,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The ServiceBeanAdapter implements the ServiceBean interface and provides the
@@ -150,7 +151,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /** The state of the ServiceBean */
     protected int state = 0;
     /** Indicates the ServiceBean is being shutdown */
-    private boolean inShutdown = false;
+    protected final AtomicBoolean inShutdown = new AtomicBoolean(false);
     /**
      * The ServiceElementChangeManager listens for updates to the
      * ServiceElement by the ServiceBeanManager
@@ -539,7 +540,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @return The ServiceBeanContext for the ServiceBean
      */
     public ServiceBeanContext getServiceBeanContext() {
-        return (context);
+        return context;
     }
 
     /**
@@ -943,9 +944,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     public void destroy(final boolean force) {
         if(logger.isInfoEnabled())
             logger.info("Destroy {}", ServiceElementUtil.getLoggingName(context));
-        if (inShutdown)
+        if (inShutdown.get())
             return;
-        inShutdown = true;
+        inShutdown.set(true);
         if (snapshotter != null)
             snapshotter.interrupt();
 

@@ -369,7 +369,7 @@ class TestManager {
      * @return The OperationalStringManager that is managing the OperationalString
      */
     OperationalStringManager deploy(File opstring) {
-        return deploy(opstring.toURL())
+        return deploy(opstring.toURI().toURL())
     }
 
     /**
@@ -807,7 +807,7 @@ class TestManager {
      *
      * @throws TimeoutException is the service is not discovered in 60 seconds
      */
-    def waitForService(Class type) {
+    public <T> T waitForService(Class<T> type) {
         return waitForService(type, null)
     }
 
@@ -834,7 +834,7 @@ class TestManager {
      *
      * @throws TimeoutException is the service is not discovered in 60 seconds
      */
-    def waitForService(Class type, String name) {
+    public <T> T waitForService(Class<T> type, String name) {
         def classes = null
         if(type!=null)
             classes = [type]

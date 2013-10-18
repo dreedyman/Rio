@@ -38,23 +38,25 @@ import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.entry.OperationalStringEntry;
-import org.rioproject.impl.event.BasicEventConsumer;
-import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.eventcollector.api.EventCollector;
+import org.rioproject.impl.client.JiniClient;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
+import org.rioproject.impl.discovery.RecordingDiscoveryListener;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.impl.opstring.OAR;
 import org.rioproject.impl.opstring.OpStringLoader;
+import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.install.Installer;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.opstring.*;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.Artifact;
-import org.rioproject.impl.client.JiniClient;
-import org.rioproject.impl.client.ServiceDiscoveryAdapter;
-import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
-import org.rioproject.impl.discovery.RecordingDiscoveryListener;
 import org.rioproject.tools.ui.browser.Browser;
 import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.discovery.GroupSelector;
@@ -1084,15 +1086,10 @@ public class Main extends JFrame {
     /**
      * Handler for ProvisionMonitorEvent utilities
      */
-    class ProvisionClientEventConsumer implements RemoteServiceEventListener {
+    class ProvisionClientEventConsumer implements RemoteServiceEventListener<ProvisionMonitorEvent> {
         final List<ProvisionMonitorEvent> eventQ = new LinkedList<ProvisionMonitorEvent>();
 
-        public void notify(RemoteServiceEvent event) {
-            ProvisionMonitorEvent pme = (ProvisionMonitorEvent) event;
-            handleEvent(pme);
-        }
-
-        void handleEvent(ProvisionMonitorEvent pme) {
+        public void notify(ProvisionMonitorEvent pme) {
             ProvisionMonitorEvent.Action action = pme.getAction();
             ProvisionMonitor monitor = (ProvisionMonitor)pme.getSource();
             switch (action) {

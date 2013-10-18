@@ -24,7 +24,7 @@ import java.io.IOException;
  * being used (no activity), the service is considered inactive.
  *
  * <p>Service inactivity can be used to determine when a service (and constituent services in an
- * {@link org.rioproject.opstring.OperationalString} can (or should be) undeployed.
+ * {@link org.rioproject.opstring.OperationalString}) can (or should be) undeployed.
  *
  * @author Dennis Reedy
  */

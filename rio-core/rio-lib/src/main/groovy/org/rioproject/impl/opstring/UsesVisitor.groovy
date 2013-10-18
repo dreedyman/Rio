@@ -47,8 +47,9 @@ class UsesVisitor extends CodeVisitorSupport {
                     resolve(value, classLoader)
                 }
             }
+        } else {
+            super.visitMethodCallExpression(call);
         }
-        super.visitMethodCallExpression(call);
     }
 
     private String findValue(final String reference, final List<Statement> statements) {
@@ -62,7 +63,6 @@ class UsesVisitor extends CodeVisitorSupport {
                 new URL(items[0]);
                 value = items[0];
             } catch (MalformedURLException e) {
-
                 String[] parts = reference.split("\\.");
                 for(Statement statement : statements) {
                     Expression expression = ((ExpressionStatement) statement).getExpression();
@@ -90,11 +90,19 @@ class UsesVisitor extends CodeVisitorSupport {
     }
 
     void resolve(final String value, final GroovyClassLoader classLoader) {
-        String[] classPath = ResolverHelper.getResolver().getClassPathFor(value);
-        for(String item : classPath) {
-            URL url = new File(item).toURI().toURL();
-            if(!hasURL(classLoader.getURLs(), url))
-                classLoader.addURL(url);
+        if(Artifact.isArtifact(value))  {
+            String[] classPath = ResolverHelper.getResolver().getClassPathFor(value);
+            for(String item : classPath) {
+                URL url = new File(item).toURI().toURL();
+                if(!hasURL(classLoader.getURLs(), url)) {
+                    classLoader.addURL(url)
+                }
+            }
+        } else {
+            URL url = new URL(value)
+            if(!hasURL(classLoader.getURLs(), url)) {
+                classLoader.addURL(url)
+            }
         }
     }
 

@@ -112,7 +112,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     private GaugeWatch provisionWatch;
     /** Handles discovery and synchronization with other ProvisionMonitors */
     private ProvisionMonitorPeer provisionMonitorPeer;
-    private ProvisionMonitorEventProcessor eventProcessor;
     private final OpStringMangerController opStringMangerController = new OpStringMangerController();
     private DeploymentVerifier deploymentVerifier;
     private StateManager stateManager;
@@ -213,6 +212,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     @Override
     public Object getAdmin() {
+        if(inShutdown.get())
+            return null;
         Object adminProxy = null;
         try {
             if (admin == null) {
@@ -224,7 +225,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 else
                     admin = new ProvisionMonitorAdminImpl(this, adminExporter);
             }
-            admin.setServiceBeanContext(getServiceBeanContext());
             adminProxy = admin.getServiceAdmin();
         } catch (Throwable t) {
             logger.warn("Getting ProvisionMonitorAdminImpl", t);
@@ -608,26 +608,13 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             }
 
         } else {
-            opMgr.setDeploymentStatus(OperationalString.UNDEPLOYED);
-            OperationalString opString = opMgr.doGetOperationalString();
-            logger.trace("Terminating Operational String [{}]", opString.getName());
-            OperationalString[] terminated = opMgr.terminate(terminate);
-            logger.info("Undeployed Operational String [{}]", opString.getName());
-            if(stateManager!=null)
-                stateManager.stateChanged(opMgr, true);
+            opStringMangerController.undeploy(opMgr, terminate);
             undeployed = true;
-            for(OperationalString os : terminated) {
-                eventProcessor.processEvent(new ProvisionMonitorEvent(getEventProxy(),
-                                                                      ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED,
-                                                                      os));
-            }
-
         }
         if(!undeployed) {
             throw new OperationalStringException(String.format("No deployment for [%s] found", opStringName));
         }
-
-        return (true);
+        return true;
     }
 
     /*
@@ -808,7 +795,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             }
             Configuration config = context.getConfiguration();
             deploymentVerifier = new DeploymentVerifier(config, context.getDiscoveryManagement());
-            eventProcessor = new ProvisionMonitorEventProcessor(config);
+            ProvisionMonitorEventProcessor eventProcessor = new ProvisionMonitorEventProcessor(config);
             provisionWatch = new GaugeWatch("Provision Clock", config);
             getWatchRegistry().register(provisionWatch);
 

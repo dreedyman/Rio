@@ -34,20 +34,23 @@ import org.rioproject.admin.ServiceBeanAdmin;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
-import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
+import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.impl.fdh.FaultDetectionHandler;
 import org.rioproject.impl.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.impl.fdh.FaultDetectionListener;
-import org.rioproject.monitor.*;
+import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.monitor.ProvisionMonitor;
+import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.monitor.service.*;
+import org.rioproject.monitor.service.channel.ServiceChannel;
+import org.rioproject.monitor.service.channel.ServiceChannelEvent;
 import org.rioproject.monitor.service.tasks.PeerNotificationTask;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.impl.client.ServiceDiscoveryAdapter;
-import org.rioproject.impl.system.ComputeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -287,8 +290,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             synchronized(peerSet) {
                 peerSet.add(peer);
             }
-            peerLogger.debug("Import OperationalStrings from: address={}, id={}",
-                             peer.getAddress(), peer.getID().toString());
             importOperationalStrings(((ProvisionMonitor)item.service));
             eventConsumer.register(item);
         } catch(Exception e) {
@@ -810,9 +811,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     mgr.importServiceBeanInstance(instance);
 
                     ServiceChannel channel = ServiceChannel.getInstance();
-                    channel.broadcast(new ServiceChannel.ServiceChannelEvent(this,
-                                                                             sElem,
-                                                                             ServiceChannel.ServiceChannelEvent.PROVISIONED));
+                    channel.broadcast(new ServiceChannelEvent(this, sElem, ServiceChannelEvent.Type.PROVISIONED));
                     break;
 
                 case REDEPLOY_REQUEST:

@@ -22,7 +22,7 @@ import java.net.URL;
  * and/or infrastructure software services that when put together provide a
  * coarse-grained service, typically distributed through the network.
  *
- * <p>The OperationalString is the unit of deployment in Rio, and
+ * <p>The {@code OperationalString} is the unit of deployment in Rio, and
  * provides the capability to declare, monitor and manage the availability
  * of enclosed services.
  *
@@ -139,4 +139,6 @@ public interface OperationalString {
      * mechanism
      */
     URL loadedFrom();
+
+    UndeployOption getUndeployOption();
 }

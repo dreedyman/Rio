@@ -19,7 +19,6 @@ package org.rioproject.test.monitor;
 import junit.framework.Assert;
 import net.jini.lookup.ServiceDiscoveryManager;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.monitor.ProvisionMonitor;
@@ -307,16 +306,17 @@ public class BackupTest  {
         logger.info("Stopping the busy Cybernode ...");
         testManager.stopCybernode(cybernode);
         logger.info("The busy Cybernode has been stopped");
-        cyMon.waitFor(1);
         
         // 15. ASSERTION: THE SERVICE SHOULD NOT APPEAR
         // (BECAUSE THERE ARE NO MORE PROVISION MONITORS)
         simpleMon.waitFor(0);
 
+        for(Cybernode c : cyMon.getServices()) {
+            testManager.stopCybernode(c);
+        }
+        cyMon.waitFor(0);
+
         logger.info("\n*******************\nScenario B completed\n*******************");
     }
 
-    public static void main(String... args) {
-        JUnitCore.main(BackupTest.class.getName());
-    }
 }

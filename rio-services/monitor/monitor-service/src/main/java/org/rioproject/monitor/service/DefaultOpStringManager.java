@@ -25,19 +25,22 @@ import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import org.rioproject.impl.config.ExporterConfig;
 import org.rioproject.deploy.*;
+import org.rioproject.impl.config.ExporterConfig;
 import org.rioproject.impl.opstring.OAR;
 import org.rioproject.impl.opstring.OpString;
+import org.rioproject.impl.service.ServiceResource;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
+import org.rioproject.monitor.service.channel.ServiceChannel;
+import org.rioproject.monitor.service.channel.ServiceChannelEvent;
+import org.rioproject.monitor.service.channel.ServiceChannelListener;
 import org.rioproject.monitor.service.persistence.StateManager;
 import org.rioproject.monitor.service.tasks.RedeploymentTask;
 import org.rioproject.monitor.service.tasks.TaskTimer;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.RemoteRepository;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.impl.service.ServiceResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -370,17 +373,51 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         addDeploymentDate(new Date(System.currentTimeMillis()));
         setDeploymentStatus(OperationalString.DEPLOYED);
         ServiceElementManager[] mgrs = getServiceElementManagers();
+        IdleServiceListener idleServiceListener = null;
+        UndeployOption undeployOption = opString.getUndeployOption();
+        if(undeployOption!=null && undeployOption.getType().equals(UndeployOption.Type.WHEN_IDLE)) {
+            idleServiceListener = new IdleServiceListener(this);
+        }
         for (ServiceElementManager mgr : mgrs) {
             ServiceElement elem = mgr.getServiceElement();
             ServiceBeanInstance[] instances = (ServiceBeanInstance[]) knownInstanceMap.get(elem);
             try {
                 int alreadyRunning = mgr.startManager(listener, instances);
                 if (alreadyRunning > 0) {
-                    updateServiceElements(new ServiceElement[]{
-                                                                  mgr.getServiceElement()});
+                    updateServiceElements(new ServiceElement[]{mgr.getServiceElement()});
+                }
+                if(idleServiceListener !=null) {
+                    logger.info("when: {}, timeUnit: {}", undeployOption.getWhen(), undeployOption.getTimeUnit());
+                    mgr.setIdleTime(undeployOption.getTimeUnit().toMillis(undeployOption.getWhen()));
+                    ServiceChannel.getInstance().subscribe(idleServiceListener, elem, ServiceChannelEvent.Type.IDLE);
                 }
             } catch (Exception e) {
                 logger.warn("Starting ServiceElementManager", e);
+            }
+        }
+
+    }
+
+    class IdleServiceListener implements ServiceChannelListener {
+        final OpStringManager manager;
+        final Map<ServiceElement, Boolean> tracking = new HashMap<ServiceElement, Boolean>();
+
+        IdleServiceListener(OpStringManager manager) {
+            this.manager = manager;
+        }
+
+        public void notify(ServiceChannelEvent event) {
+            boolean undeploy = true;
+            tracking.put(event.getServiceElement(), true);
+            for(ServiceElementManager manager : getServiceElementManagers()) {
+                if(manager.isTrackingIdleBehavior() && !tracking.containsKey(event.getServiceElement())) {
+                    undeploy = false;
+                    break;
+                }
+            }
+            if(undeploy) {
+                logger.info("Terminating [{}] due to idle services", getName());
+                opStringMangerController.undeploy(manager, true);
             }
         }
     }

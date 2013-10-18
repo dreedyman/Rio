@@ -186,13 +186,13 @@ public interface OpStringManager  {
     void setDeploymentStatus(int status);
 
     /**
-     * Shutdown the monitoring for this OperationalString
+     * Undeploy the OperationalString
      *
      * @param killServices If true destroy the services being managed
      * @return Array of terminated OperationalStrings. If the
      *         managed OperationalString has no nested OperationalStrings, return
      *         just the OperationalString that was being managed. If nested
-     *         OperationalStrings were also terminated, return those as well. A
+     *         OperationalStrings were also undeployed, return those as well. A
      *         new array is allocated each time.
      */
     OperationalString[] terminate(boolean killServices);

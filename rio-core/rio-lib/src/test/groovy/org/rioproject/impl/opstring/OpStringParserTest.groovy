@@ -26,6 +26,7 @@ import org.rioproject.impl.sla.SLAPolicyHandler
 import org.rioproject.impl.sla.ScalingPolicyHandler
 import org.rioproject.opstring.ServiceElement
 import org.rioproject.opstring.ServiceElement.MachineBoundary
+import org.rioproject.opstring.UndeployOption
 import org.rioproject.sla.SLA
 import org.rioproject.sla.ServiceLevelAgreements
 import org.rioproject.system.SystemWatchID
@@ -33,6 +34,8 @@ import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 
 import java.lang.management.ManagementFactory
+import java.util.concurrent.TimeUnit
+
 /**
  * Test groovy parsing
  *
@@ -60,6 +63,19 @@ class OpStringParserTest extends GroovyTestCase {
         ServiceElement serviceElement = opstring.services[0]
         assertEquals "There should be 2 additional entries", 2,
                      serviceElement.getServiceBeanConfig().getAdditionalEntries().size()
+    }
+
+    void testUndeployOption() {
+        File file = new File("src/test/resources/opstrings/attributes.groovy")
+        def opstrings = dslParser.parse(file, null, null, null, null)
+        assertEquals "There should be one and only one opstring", 1, opstrings.size()
+        OpString opstring = opstrings[0]
+        assertEquals "There should be an UndeployOption for IDLE", UndeployOption.Type.WHEN_IDLE,
+                     opstring.undeployOption.type
+        assertEquals "The UndeployOption IDLE option should be 30", 30,
+                     opstring.undeployOption.when
+        assertEquals "The UndeployOption IDLE option should be in SECONDS", TimeUnit.SECONDS,
+                     opstring.undeployOption.timeUnit
     }
 
     void testAssociationWithNoOpStringFiltering() {
