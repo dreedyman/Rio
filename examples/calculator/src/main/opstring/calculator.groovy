@@ -15,6 +15,8 @@
  */
 import org.rioproject.config.Constants
 
+def artifactTable = ["api":"org.rioproject.examples.calculator:calculator-api:2.1",
+                     "service":"org.rioproject.examples.calculator:calculator-service:2.1"]
 /**
  * The deployment configuration for the Calculator example
  *
@@ -23,17 +25,14 @@ import org.rioproject.config.Constants
 deployment(name:'Calculator') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
-    
-    artifact id:'service', 'org.rioproject.examples.calculator:calculator-service:2.1'
-    artifact id:'service-dl', 'org.rioproject.examples.calculator:calculator-api:2.1'
 
     service(name: 'Calculator') {
         interfaces {
             classes 'org.rioproject.examples.calculator.Calculator'
-            artifact ref:'service-dl'
+            artifact artifactTable.api
         }
         implementation(class:'org.rioproject.examples.calculator.service.CalculatorImpl') {
-            artifact ref:'service'
+            artifact artifactTable.service
         }
         associations {
             ['Add', 'Subtract', 'Multiply', 'Divide'].each { s ->
@@ -47,10 +46,10 @@ deployment(name:'Calculator') {
         service(name: s) {
             interfaces {
                 classes "org.rioproject.examples.calculator.$s"
-                artifact ref:'service-dl'
+                artifact artifactTable.api
             }
             implementation(class: "org.rioproject.examples.calculator.service.${s}Impl") {
-                artifact ref:'service'
+                artifact artifactTable.service
             }
             maintain 1
         }
