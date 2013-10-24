@@ -15,7 +15,6 @@
  */
 package org.rioproject.impl.opstring;
 
-import org.rioproject.impl.opstring.RepositoryDecoder;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.resolver.RemoteRepository;
 
@@ -33,27 +32,43 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * Represents an OperationalString Archive (OAR).
+ * An OperationalString Archive ({@code OAR}) contains information about a deployment (an {@link OperationalString}).
  *
  * @author Dennis Reedy
  */
 public class OAR implements Serializable {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private String name;
     private String version;
     private String opStringName;
     private URL url;
     private String deployDir;
     private String activationType;
-    private String artifacts;
     private final Set<RemoteRepository> repositories = new HashSet<RemoteRepository>();
 
+    /**
+     * Manifest header identifying the name of the deployment
+     */
     public static final String OAR_NAME = "OAR-Name";
+    /**
+     * Manifest header indicating the version of the {@code OAR}
+     */
     public static final String OAR_VERSION = "OAR-Version";
+    /**
+     * Manifest header identifying the embedded {@link OperationalString}
+     */
     public static final String OAR_OPSTRING = "OAR-OperationalString";
+    /**
+     * Manifest header identifying the type of activation
+     */
     public static final String OAR_ACTIVATION = "OAR-Activation";
-    public static final String OAR_ARTIFACTS = "OAR-Artifacts";
+    /**
+     * Manifest header indicating that the {@code OAR} be deployed automatically when scanned by the {@code ProvisionMonitor}
+     */
     public static final String AUTOMATIC="Automatic";
+    /**
+     * Manifest header indicating that the {@code OAR} be deployed manually
+     */
     public static final String MANUAL="Manual";
     
     /**
@@ -163,7 +178,6 @@ public class OAR implements Serializable {
         activationType = attrs.getValue(OAR_ACTIVATION);
         if(activationType==null)
             fillInAndThrow(OAR_ACTIVATION);
-        artifacts = attrs.getValue(OAR_ARTIFACTS);
     }
 
     /**
@@ -189,10 +203,6 @@ public class OAR implements Serializable {
 
     public String getVersion() {
         return version;
-    }
-
-    public String getArtifacts() {
-        return artifacts;
     }
 
     /**
@@ -287,14 +297,8 @@ public class OAR implements Serializable {
     }
 
     public String toString() {
-        return "OAR {" +
-               "name='" + name + '\'' +
-               ", version='" + version + '\'' +
-               ", opStringName='" + opStringName + '\'' +
-               ", url=" + (url==null?"uknown": url.toExternalForm()) +
-               ", deployDir='" + deployDir + '\'' +
-               ", activationType='" + activationType + '\'' +
-               '}';
+        return String.format("OAR [name=%s, version=%s, opStringName=%s, url=%s, deployDir=%s, activationType=%s]",
+                             name, version, opStringName, (url==null?"unknown": url.toExternalForm()), deployDir, activationType);
     }
 
     private void loadRepositories(JarFile jarFile) throws IOException {
