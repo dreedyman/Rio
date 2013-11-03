@@ -71,42 +71,48 @@ class GroovyConfig implements Configuration {
     }
 
     def traverseInputs(String[] args, ClassLoader loader) {
+        ClassLoader cCL = Thread.currentThread().getContextClassLoader()
         if(loader==null)
-            loader = Thread.currentThread().getContextClassLoader()
+            loader = cCL
         GroovyClassLoader gcl = new GroovyClassLoader(loader)
-        for(String arg : args) {
-            String groovySource = arg
-            long t0 = System.currentTimeMillis()
-            try {
-                GroovyCodeSource groovyCodeSource
-                if(groovySource.startsWith("jar:")) {
-                    String resource = groovySource
-                    int ndx = groovySource.indexOf("!")
-                    if(ndx!=-1)
-                        resource = groovySource.substring(ndx+2)
-                    groovyCodeSource = new GroovyCodeSource(loader.getResource(resource))
-                } else {
-                    if(groovySource.startsWith("file:") || groovySource.startsWith("http:") || groovySource.startsWith("https:")) {
-                        groovyCodeSource = new GroovyCodeSource(new URL(groovySource))
+        Thread.currentThread().setContextClassLoader(gcl)
+        try {
+            for(String arg : args) {
+                String groovySource = arg
+                long t0 = System.currentTimeMillis()
+                try {
+                    GroovyCodeSource groovyCodeSource
+                    if(groovySource.startsWith("jar:")) {
+                        String resource = groovySource
+                        int ndx = groovySource.indexOf("!")
+                        if(ndx!=-1)
+                            resource = groovySource.substring(ndx+2)
+                        groovyCodeSource = new GroovyCodeSource(loader.getResource(resource))
                     } else {
-                        File groovyFile = new File(groovySource)
-                        if (groovyFile.exists()) {
-                            groovyCodeSource = new GroovyCodeSource(groovyFile)
+                        if(groovySource.startsWith("file:") || groovySource.startsWith("http:") || groovySource.startsWith("https:")) {
+                            groovyCodeSource = new GroovyCodeSource(new URL(groovySource))
                         } else {
-                            groovyCodeSource = new GroovyCodeSource((String)groovySource, "DynamicGroovyConfig", "groovy/script")
+                            File groovyFile = new File(groovySource)
+                            if (groovyFile.exists()) {
+                                groovyCodeSource = new GroovyCodeSource(groovyFile)
+                            } else {
+                                groovyCodeSource = new GroovyCodeSource((String)groovySource, "DynamicGroovyConfig", "groovy/script")
+                            }
                         }
                     }
+                    parseAndLoad(groovyCodeSource, gcl)
+                } catch (FileNotFoundException e) {
+                    throw new ConfigurationNotFoundException("The configuration file [${groovySource}] does not exist", e)
+                } catch(Throwable t) {
+                    throw new ConfigurationException("The configuration file [${groovySource}] could not be parsed", t)
+                } finally {
+                    log.debug "Time to parse ${groovySource} : ${(System.currentTimeMillis()-t0)} milliseconds"
                 }
-                parseAndLoad(groovyCodeSource, gcl)
-            } catch (FileNotFoundException e) {
-                throw new ConfigurationNotFoundException("The configuration file [${groovySource}] does not exist", e)
-            } catch(Throwable t) {
-                throw new ConfigurationException("The configuration file [${groovySource}] could not be parsed", t)
-            } finally {
-                log.debug "Time to parse ${groovySource} : ${(System.currentTimeMillis()-t0)} milliseconds"
             }
+        } finally {
+            Thread.currentThread().setContextClassLoader(cCL)
+            gcl = null
         }
-        gcl = null
     }
 
     def clear() {

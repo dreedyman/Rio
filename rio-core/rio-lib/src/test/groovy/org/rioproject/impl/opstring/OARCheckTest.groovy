@@ -15,15 +15,11 @@
  */
 package org.rioproject.impl.opstring
 
-import org.rioproject.impl.opstring.OAR
-import org.rioproject.impl.opstring.OARException
 import org.rioproject.opstring.OperationalString
+import org.rioproject.test.utils.JarUtil
 
 import java.util.jar.Attributes
 import java.util.jar.Manifest
-
-import org.rioproject.test.utils.JarUtil
-
 /**
  * Check OAR construction.
  */
@@ -91,7 +87,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_NAME, "test")
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, "test.groovy")
-        manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.AUTOMATIC)
+        manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.MANUAL)
         File oarFile = createOAR(manifest, "from-url.oar")
         OAR oar = null
         try {
@@ -105,7 +101,7 @@ class OARCheckTest extends GroovyTestCase {
         assertEquals "test", oar.name
         assertEquals "1.0", oar.version
         assertEquals "test.groovy", oar.opStringName
-        assertEquals OAR.AUTOMATIC, oar.activationType
+        assertEquals OAR.MANUAL, oar.activationType
         assertTrue oar.repositories.size()==2
     }
 
