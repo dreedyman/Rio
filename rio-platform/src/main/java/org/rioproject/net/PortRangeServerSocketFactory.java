@@ -26,7 +26,9 @@ import java.util.Random;
  * A {@link javax.net.ServerSocketFactory} that allocates {@link java.net.ServerSocket}s within a port range.
  *
  * <p>NOTE: The IANA recommends the range 49152-65535, as indicated by the following document:
- * http://www.iana.org/assignments/port-numbers
+ * http://www.iana.org/assignments/port-numbers.
+ *
+ * @author Dennis Reedy
  */
 public class PortRangeServerSocketFactory extends ServerSocketFactory {
     private final int start;
