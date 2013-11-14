@@ -1,4 +1,4 @@
 
 set RIO_EXEC="rio.exec"
 
-/C start /B ${commandLine}
+cmd.exe /C start /B ${commandLine}
