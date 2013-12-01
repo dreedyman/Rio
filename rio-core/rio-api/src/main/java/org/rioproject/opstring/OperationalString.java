@@ -140,5 +140,10 @@ public interface OperationalString {
      */
     URL loadedFrom();
 
+    /**
+     * Get undeployment option
+     *
+     * @return The {@code UndeployOption} if any. May return {@code null}.
+     */
     UndeployOption getUndeployOption();
 }
