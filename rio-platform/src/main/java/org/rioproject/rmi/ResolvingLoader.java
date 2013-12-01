@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.RMIClassLoaderSpi;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,6 +73,10 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     public Class<?> loadClass(final String codebase,
                               final String name,
                               final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
+        if(logger.isTraceEnabled()) {
+            logger.trace("codebase: {}, name: {}, defaultLoader: {}",
+                         codebase, name, defaultLoader==null?"NULL":defaultLoader.getClass().getName());
+        }
         String resolvedCodebase = resolveCodebase(codebase);
         if(codebase!=null && codebase.startsWith("artifact:") && classAnnotationMap.get(name)==null) {
             classAnnotationMap.put(name, codebase);
@@ -85,6 +90,10 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     public Class<?> loadProxyClass(final String codebase,
                                    final String[] interfaces,
                                    final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
+        if(logger.isTraceEnabled()) {
+            logger.trace("codebase: {}, interfaces: {}, defaultLoader: {}",
+                         codebase, Arrays.toString(interfaces), defaultLoader==null?"NULL":defaultLoader.getClass().getName());
+        }
         String resolvedCodebase = resolveCodebase(codebase);
         if(logger.isTraceEnabled()) {
             StringBuilder builder = new StringBuilder();
@@ -102,6 +111,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     @Override
     public ClassLoader getClassLoader(String codebase) throws MalformedURLException {
+        if(logger.isTraceEnabled()) {
+            logger.trace("codebase: {}", codebase);
+        }
         String resolvedCodebase = resolveCodebase(codebase);
         return loader.getClassLoader(resolvedCodebase);
     }
