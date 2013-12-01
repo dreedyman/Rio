@@ -26,7 +26,7 @@ import java.lang.reflect.Constructor
  * @author Dennis Reedy
  */
 @Slf4j
-class GroovyConfig implements Configuration {
+class GroovyConfig implements net.jini.config.Configuration {
     private Map<String, GroovyObject> groovyConfigs = new HashMap<String, GroovyObject>()
     private ConfigurationFile configFile
     private List <String> visited = new ArrayList<String>()
