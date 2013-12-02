@@ -143,6 +143,8 @@ public class ServiceAdvertiser {
                         logger.warn("Name not found, cannot add a Name Entry", e);
                     }
 
+                    addList.addAll(context.getServiceBeanConfig().getAdditionalEntries());
+
                     /* If any additional attributes (including the
                      * OperationalString and Name entry already processed) are
                      * passed in, include them as well */
