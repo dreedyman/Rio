@@ -51,7 +51,7 @@ public class Artifact {
     public Artifact(String artifact) {
         if(artifact==null)
             throw new IllegalArgumentException("artifact is null");
-        Pattern p = Pattern.compile("([^: /]+):([^: /]+)(:([^: /]*)(:([^: /]+))?)?:([^: /]+)" );
+        Pattern p = Pattern.compile("([^: /\\\\]+):([^: /\\\\]+)(:([^: /\\\\]*)(:([^: /\\\\]+))?)?:([^: /\\\\]+)" );
         Matcher m = p.matcher( artifact );
         if (!m.matches() ) {
             throw new IllegalArgumentException( "Bad artifact coordinates " + artifact

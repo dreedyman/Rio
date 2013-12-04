@@ -33,6 +33,11 @@ public class ArtifactCreationTest {
         new Artifact("org/foo.foo:bar:2.0");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void createBadArtifact3() throws Exception {
+        new Artifact("C:\\dir\\file.jar;C:\\dir\\file2.jar");
+    }
+
     @Test
     public void createGoodArtifact() {
         Artifact a = new Artifact("org.foo:bar:2.0");
