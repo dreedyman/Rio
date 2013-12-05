@@ -146,7 +146,7 @@ public final class CommandLineHelper {
      *
      * @return A String suitable for to pass to the JVM for starting a service bean in it's own JVM.
      */
-    static String createInputArgs(final String normalizedServiceName,
+    public static String createInputArgs(final String normalizedServiceName,
                                   final String serviceBindName,
                                   final String sRegPort,
                                   final String declaredJVMOptions,
@@ -190,7 +190,7 @@ public final class CommandLineHelper {
      *
      * @return The classname used as the service starter
      */
-    static String getStarterClass() {
+    public static String getStarterClass() {
         return "org.rioproject.start.ServiceStarter";
     }
 

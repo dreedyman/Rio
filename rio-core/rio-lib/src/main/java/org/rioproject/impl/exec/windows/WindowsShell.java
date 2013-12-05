@@ -50,9 +50,9 @@ public class WindowsShell extends AbstractShell {
             String stdOutFileName = PropertyHelper.expandProperties(execDescriptor.getStdOutFileName());
             redirection.append(" > ").append(stdOutFileName);
         }
-        if (execDescriptor.getStdErrFileName() != null) {
+        /*if (execDescriptor.getStdErrFileName() != null) {
             redirection.append(" 2>&1");
-        }
+        }*/
         return redirection.toString();
     }
 
@@ -62,6 +62,7 @@ public class WindowsShell extends AbstractShell {
         String commandLine = buildCommandLine(execDescriptor);
 
         File generatedCommandScript = File.createTempFile("start-", ".cmd");
+        generatedCommandScript.deleteOnExit();
 
         /* Delete the generated file on exit */
         //generatedCommandScript.deleteOnExit();
@@ -71,21 +72,27 @@ public class WindowsShell extends AbstractShell {
         StringBuilder sb = new StringBuilder();
         BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
         String str;
+        String commandLineToExecute = null;
         while ((str = in.readLine()) != null) {
-            str = Util.replace(str, "${commandLine}", commandLine);
-            sb.append(str).append("\n");
+            String filtered = Util.replace(str, "${commandLine}", commandLine);
+            if(!str.equals(filtered)) {
+                commandLineToExecute = filtered;
+            }
+            sb.append(filtered).append("\n");
         }
         in.close();
 
         Util.writeFile(sb.toString(), generatedCommandScript);
 
         String toExec = FileUtils.getFilePath(generatedCommandScript);
-        logger.debug("Generated command line: [{}]", commandLine);
+        logger.info("Generated command line: [{}]", commandLineToExecute);
 
-        ProcessBuilder processBuilder = createProcessBuilder(workingDirectory, execDescriptor, "cmd", "/C", toExec);
+        //ProcessBuilder processBuilder = createProcessBuilder(workingDirectory, execDescriptor, "cmd.exe", "/C", toExec);
+        ProcessBuilder processBuilder = createProcessBuilder(workingDirectory,
+                                                             execDescriptor,
+                                                             "cmd.exe", "/C", commandLineToExecute);
         Process process = processBuilder.start();
 
         return new WindowsProcessManager(process, 1);
     }
-
 }

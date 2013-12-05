@@ -32,8 +32,6 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class PosixProcessManager extends ProcessManager {
-    private StreamRedirector outputStream;
-    private StreamRedirector errorStream;
     private ProcessListener processListener;
     private boolean terminated = false;
     private File commandFile;
@@ -192,22 +190,6 @@ public class PosixProcessManager extends ProcessManager {
         Util.writeFile(sb.toString(), killFile);
         Util.chmodX(killFile);
         return killFile;
-    }
-
-    private void handleRedirects(String stdOutFileName,
-                                 String stdErrFileName) {
-        if (stdOutFileName == null) {
-            /*System.out*/
-            outputStream = new StreamRedirector(getProcess().getInputStream(),
-                                                System.out);
-            outputStream.start();
-        }
-        if (stdErrFileName == null) {
-            /*System.err*/
-            errorStream = new StreamRedirector(getProcess().getErrorStream(),
-                                               System.err);
-            errorStream.start();
-        }        
     }
 
     /**

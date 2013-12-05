@@ -16,6 +16,7 @@
 package org.rioproject.impl.exec.windows;
 
 import org.rioproject.impl.exec.ProcessManager;
+import org.rioproject.impl.exec.Util;
 
 import java.io.IOException;
 
@@ -34,6 +35,7 @@ public class WindowsProcessManager extends ProcessManager {
      */
     public WindowsProcessManager(Process process, int pid) {
         super(process, pid);
+        handleRedirects(null, null);
     }
 
     @Override
@@ -43,6 +45,14 @@ public class WindowsProcessManager extends ProcessManager {
 
     @Override
     public void destroy(boolean includeChildren) {
+        if (outputStream != null)
+            outputStream.interrupt();
+        if (errorStream != null)
+            errorStream.interrupt();
+
+        Util.close(getProcess().getOutputStream());
+        Util.close(getProcess().getInputStream());
+        Util.close(getProcess().getErrorStream());
         getProcess().destroy();
     }
 }

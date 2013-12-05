@@ -15,6 +15,8 @@
  */
 package org.rioproject.impl.exec;
 
+import org.rioproject.impl.util.StreamRedirector;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,8 @@ public abstract class ProcessManager {
     private Process process;
     private int pid;
     private final List<Listener> listeners = new ArrayList<Listener>();
+    protected StreamRedirector outputStream;
+    protected StreamRedirector errorStream;
 
     /**
      * Create a ProcessManager
@@ -82,6 +86,22 @@ public abstract class ProcessManager {
     public void unregisterListener(Listener l) {
         synchronized(listeners) {
             listeners.remove(l);
+        }
+    }
+
+    protected void handleRedirects(final String stdOutFileName,
+                                   final String stdErrFileName) {
+        if (stdOutFileName == null) {
+            /*System.out*/
+            outputStream = new StreamRedirector(getProcess().getInputStream(),
+                                                System.out);
+            outputStream.start();
+        }
+        if (stdErrFileName == null) {
+            /*System.err*/
+            errorStream = new StreamRedirector(getProcess().getErrorStream(),
+                                               System.err);
+            errorStream.start();
         }
     }
 
