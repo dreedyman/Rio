@@ -387,7 +387,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                     updateServiceElements(new ServiceElement[]{mgr.getServiceElement()});
                 }
                 if(idleServiceListener !=null) {
-                    logger.info("when: {}, timeUnit: {}", undeployOption.getWhen(), undeployOption.getTimeUnit());
+                    logger.info("Deployment {} has an IDLE undeploy option; when: {}, timeUnit: {}",
+                                opString.getName(), undeployOption.getWhen(), undeployOption.getTimeUnit());
                     mgr.setIdleTime(undeployOption.getTimeUnit().toMillis(undeployOption.getWhen()));
                     ServiceChannel.getInstance().subscribe(idleServiceListener, elem, ServiceChannelEvent.Type.IDLE);
                 }

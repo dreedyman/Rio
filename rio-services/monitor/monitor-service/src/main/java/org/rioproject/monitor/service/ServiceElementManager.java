@@ -244,6 +244,7 @@ public class ServiceElementManager implements InstanceIDManager {
         MethodConstraints serviceListenerConstraints=
                 new BasicMethodConstraints(new InvocationConstraints(new ConnectionRelativeTime(30000), null));
         ProxyPreparer defaultProxyPreparer =  new BasicProxyPreparer(false, serviceListenerConstraints, null);
+
         if(args==null) {
             proxyPreparer = defaultProxyPreparer;
         } else {
@@ -1747,8 +1748,10 @@ public class ServiceElementManager implements InstanceIDManager {
                 }
                 synchronized(serviceBeanList) {
                     /* Prepare the proxy */
-                    if(proxy instanceof RemoteMethodControl)
+                   if(proxy instanceof RemoteMethodControl) {
                         proxy = proxyPreparer.prepareProxy(proxy);
+                        logger.trace("Prepared proxy for [{}]", LoggingUtil.getLoggingName(svcElement));
+                    }
 
                     addServiceProxy(proxy);
 
@@ -1781,6 +1784,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 try {
                     Thread.currentThread().setContextClassLoader(proxy.getClass().getClassLoader());
                     proxy = new MarshalledObject(proxy).get();
+
                     if(proxy instanceof ServiceActivityProvider && idleTime>0) {
                         synchronized (idleServiceManager) {
                             if(idleServiceManager.get()==null) {
@@ -1788,11 +1792,7 @@ public class ServiceElementManager implements InstanceIDManager {
                             }
                         }
                         idleServiceManager.get().addService((ServiceActivityProvider)proxy);
-                        logger.info("Check service [{}] idle time", LoggingUtil.getLoggingName(svcElement));
                     }
-
-                    if(proxy instanceof RemoteMethodControl)
-                        proxy = proxyPreparer.prepareProxy(proxy);
 
                     if(proxy instanceof MonitorableService) {
                         Uuid uuid = instance.getServiceBeanID();
@@ -1806,7 +1806,6 @@ public class ServiceElementManager implements InstanceIDManager {
                         setFaultDetectionHandler(proxy, serviceID);
                     } else {
                         StringBuilder sb = new StringBuilder();
-                        sb.append("Proxy interfaces: ");
                         for(Class c : proxy.getClass().getInterfaces()) {
                             if(sb.length()>0)
                                 sb.append(", ");
@@ -1815,7 +1814,8 @@ public class ServiceElementManager implements InstanceIDManager {
                         /* An ambiguous service is a service that we cannot
                          * get the serviceID of */
                         mgrLogger.debug("Could not get the serviceID of [{}], [proxy={}] provisioned to [{}]. " +
-                                        "Attempts will be made to resolve the serviceID of this service. {}",
+                                        "Attempts will be made to resolve the serviceID of this service. " +
+                                        "Proxy interfaces: \n{}",
                                         LoggingUtil.getLoggingName(svcElement),
                                         proxy.getClass().getName(),
                                         hostName,

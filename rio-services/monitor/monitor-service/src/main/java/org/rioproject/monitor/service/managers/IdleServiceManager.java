@@ -51,10 +51,10 @@ public class IdleServiceManager {
         this.serviceElement = serviceElement;
         long delay = TimeUtil.computeLeaseRenewalTime(maxIdleTime);
         if(logger.isDebugEnabled()) {
-            logger.debug("Service [{}] idle time: {}, computed delay time for checking idle status: {}",
-                         LoggingUtil.getLoggingName(serviceElement), maxIdleTime, delay);
+            logger.debug("Service [{}] idle time: {}, computed delay time for checking idle status: {}.",
+                         LoggingUtil.getLoggingName(serviceElement), TimeUtil.format(maxIdleTime), TimeUtil.format(delay));
         }
-        scheduledExecutorService.scheduleWithFixedDelay(new IdleChecker(), delay, delay, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(new IdleChecker(delay), delay, delay, TimeUnit.MILLISECONDS);
     }
 
     public void addService(final ServiceActivityProvider service) {
@@ -70,6 +70,11 @@ public class IdleServiceManager {
     }
 
     class IdleChecker implements Runnable {
+        final long delay;
+
+        IdleChecker(long delay) {
+            this.delay = delay;
+        }
 
         public void run() {
             try {
@@ -97,14 +102,24 @@ public class IdleServiceManager {
                         }
                     }
                 }
-                logger.info("Service [{}] has {} idle instances", LoggingUtil.getLoggingName(serviceElement), idleServices.size());
+
                 if (idleServices.size() == serviceElement.getPlanned()) {
+                    logger.info("Service [{}] has {} / {} idle instances. Notify for undeploy.",
+                                LoggingUtil.getLoggingName(serviceElement),
+                                idleServices.size(),
+                                serviceElement.getPlanned());
                     ServiceChannel.getInstance().broadcast(new ServiceChannelEvent(this,
                                                                                    serviceElement,
                                                                                    ServiceChannelEvent.Type.IDLE));
                     for (ServiceActivityProvider remove : idleServices) {
                         removeService(remove);
                     }
+                } else {
+                    logger.info("Service [{}] has {} / {} idle instances. Next check in {}.",
+                                LoggingUtil.getLoggingName(serviceElement),
+                                idleServices.size(),
+                                serviceElement.getPlanned(),
+                                TimeUtil.format(delay));
                 }
 
             } catch (Exception e) {
