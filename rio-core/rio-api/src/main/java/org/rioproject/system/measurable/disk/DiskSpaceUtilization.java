@@ -25,7 +25,7 @@ import java.io.Serializable;
  */
 public class DiskSpaceUtilization extends MeasuredResource
     implements Serializable {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private double used = 0;
     private double available = 0;
     private double capacity = 0;
@@ -65,4 +65,7 @@ public class DiskSpaceUtilization extends MeasuredResource
         return capacity;
     }
 
+    @Override public String toString() {
+        return String.format("used= %s, available=%s, capacity=%s", used, available, capacity);
+    }
 }
