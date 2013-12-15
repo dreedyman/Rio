@@ -114,8 +114,7 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
                 synchronized (updateLock) {
                     try {
                         process = Runtime.getRuntime().exec("df -k");
-                        outputParser =
-                            new DFOutputParser(process.getInputStream());
+                        outputParser = new DFOutputParser(process.getInputStream());
                         outputParser.start();
                         updateLock.wait();
                     } catch (InterruptedException e) {
@@ -170,7 +169,6 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
             BufferedReader br = null;
             try {
                 String fileSep = System.getProperty("file.separator");
-                File root = new File(fileSep);
                 List<String> list = new ArrayList<String>();
                 InputStreamReader isr = new InputStreamReader(in);
                 br = new BufferedReader(isr);
@@ -195,12 +193,11 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
                      */
                     if (list.size() == 1)
                         continue;
-
                     /*
                     * Get the mount point
                     */
-                    String mountPoint = list.get(5);
-                    if (root.getCanonicalPath().startsWith(mountPoint)) {
+                    String mountPoint = list.get(list.size()-1);
+                    if (mountPoint.equals(fileSep)) {
                         used = Double.parseDouble(list.get(2));
                         available = Double.parseDouble(list.get(3));
                     }

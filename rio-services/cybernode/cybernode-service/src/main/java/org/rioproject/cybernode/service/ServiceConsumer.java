@@ -35,12 +35,12 @@ import org.rioproject.deploy.ProvisionManager;
 import org.rioproject.deploy.ServiceBeanInstantiator;
 import org.rioproject.impl.client.LookupCachePool;
 import org.rioproject.impl.client.ServiceDiscoveryAdapter;
-import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.impl.system.ResourceCapabilityChangeListener;
+import org.rioproject.impl.util.ThrowableUtil;
+import org.rioproject.impl.util.TimeConstants;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.ResourceCapability;
-import org.rioproject.impl.system.ResourceCapabilityChangeListener;
-import org.rioproject.impl.util.TimeConstants;
 import org.rioproject.util.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -373,21 +373,24 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 logger.trace("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: {}",
                              deployedServices.size());
                 mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
-            } catch (Throwable t) {
-                logger.warn("Updating ProvisionManager", t);
+            } catch (Exception e) {
+                logger.warn("Failed updating ProvisionManager", e);
                 boolean connected = false;
 
+                StringBuilder logMessage = new StringBuilder();
                 /* Determine if we should even try to reconnect */
-                final int category = ThrowableConstants.retryable(t);
+                final int category = ThrowableConstants.retryable(e);
                 if (category == ThrowableConstants.INDEFINITE ||
                     category == ThrowableConstants.UNCATEGORIZED) {
                     connected = mgr.reconnect();
-                    logger.warn("Attempted reconnect after failure. Are we connected? {}", connected);
+                    String reconnection = connected?"succeeded. ":"failed. ";
+                    logMessage.append("Attempted reconnect after failure: ").append(reconnection);
                 }
 
                 if (!connected) {
                     removeProvisionManager(mgr.provisioner, mgr.serviceID);
                 }
+                logger.warn("{}Now connected to [{}] ProvisionMonitor instances. ", logMessage.toString(), leaseTable.size());
             }
         }
     }
@@ -455,7 +458,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         /* If we're not connected, set lease to null and return */
         if(!connected)
             lease=null;                    
-        return(lease);
+        return lease;
     }        
 
     /**
@@ -520,19 +523,14 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             }
             lease = null;
             keepAlive = false;
-            interrupt();           
         }
 
         public void run() {
             long leaseRenewalTime = TimeUtil.computeLeaseRenewalTime(leaseTime);
                        
-            while(!interrupted()) {
-                if(!keepAlive) {
-                    logger.trace("Breaking out of Lease renewal thread");
-                    return;
-                }                
+            while(keepAlive) {
                 try {
-                    sleep(leaseRenewalTime);
+                    Thread.sleep(leaseRenewalTime);
                 } catch(InterruptedException ie) {
                     /* should not happen */
                 } catch(IllegalArgumentException iae) {
@@ -570,13 +568,13 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 }
             }
                         
-            /* Broken out of loop, make sure we are removed from the 
+            /* Broken out of loop, make sure we are removed from the
              * leaseManagerTable */
             Object removed = leaseTable.remove(provisioner);
             if(removed!=null) {
                 logger.debug("Remove ProvisionLeaseManager from leaseManagerTable");
             }
-        }   
+        }
         
         /**
          * Attempt to reconnect to the ProvisionMonitor
@@ -593,7 +591,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 keepAlive=false;
             else
                 this.leaseTime = lease.getExpiration() - System.currentTimeMillis();
-            return(connected);
+            return connected;
         }        
     }
     
@@ -602,9 +600,9 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * component and updates known Provisioners of the change in state
      */
     class ComputeResourceObserver implements ResourceCapabilityChangeListener {
-        ComputeResource computeResource;
+        final ComputeResource computeResource;
 
-        ComputeResourceObserver(ComputeResource computeResource) {
+        ComputeResourceObserver(final ComputeResource computeResource) {
             this.computeResource = computeResource;
             computeResource.addListener(this);
         }
@@ -614,7 +612,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
          * ResourceCapability object. Get the updated ResourceCapability and notify
          * all provisioners
          */
-        public void update(ResourceCapability resourceCapability) {
+        public void update(final ResourceCapability resourceCapability) {
             if(!destroyed) {
                 updateMonitors(resourceCapability, getServiceDeployments());
             } else {

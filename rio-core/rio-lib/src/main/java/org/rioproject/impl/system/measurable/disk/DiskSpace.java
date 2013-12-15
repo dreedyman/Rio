@@ -143,8 +143,7 @@ public class DiskSpace extends MeasurableCapability implements DiskSpaceMBean {
         count++;
         if(monitor==null)
             return;
-        DiskSpaceUtilization dsUtilization =
-            (DiskSpaceUtilization)monitor.getMeasuredResource();
+        DiskSpaceUtilization dsUtilization = (DiskSpaceUtilization)monitor.getMeasuredResource();
         tempUtilization += dsUtilization.getValue();
         if(count==sampleSize) {
             utilization = tempUtilization/sampleSize;
