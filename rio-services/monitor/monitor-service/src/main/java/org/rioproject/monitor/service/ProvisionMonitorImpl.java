@@ -112,7 +112,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     private GaugeWatch provisionWatch;
     /** Handles discovery and synchronization with other ProvisionMonitors */
     private ProvisionMonitorPeer provisionMonitorPeer;
-    private final OpStringMangerController opStringMangerController = new OpStringMangerController();
+    private final OpStringManagerController opStringMangerController = new OpStringManagerController();
     private DeploymentVerifier deploymentVerifier;
     private StateManager stateManager;
     /** A Timer used to schedule load tasks */

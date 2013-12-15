@@ -102,7 +102,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     private ComputeResource computeResource;
     private ProvisionMonitor serviceProxy;
     private ProvisionMonitorEventProcessor eventProcessor;
-    private OpStringMangerController opStringMangerController;
+    private OpStringManagerController opStringMangerController;
 
     public void initialize() throws Exception {
         if(config==null)
@@ -135,7 +135,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     }
 
 
-    public void setOpStringMangerController(final OpStringMangerController opStringMangerController) {
+    public void setOpStringMangerController(final OpStringManagerController opStringMangerController) {
         this.opStringMangerController = opStringMangerController;
     }
 

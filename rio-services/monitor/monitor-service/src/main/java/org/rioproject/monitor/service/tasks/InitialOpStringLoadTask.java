@@ -17,7 +17,7 @@ package org.rioproject.monitor.service.tasks;
 
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
-import org.rioproject.monitor.service.OpStringMangerController;
+import org.rioproject.monitor.service.OpStringManagerController;
 import org.rioproject.monitor.service.peer.ProvisionMonitorPeer;
 import org.rioproject.monitor.service.persistence.StateManager;
 import org.slf4j.Logger;
@@ -36,14 +36,14 @@ public class InitialOpStringLoadTask extends TimerTask {
     private final ProvisionMonitorPeer provisionMonitorPeer;
     private final StateManager stateManager;
     private final DeployAdmin deployAdmin;
-    private final OpStringMangerController opStringMangerController;
+    private final OpStringManagerController opStringMangerController;
     private final String[] initialOpStrings;
     static final Logger logger = LoggerFactory.getLogger(InitialOpStringLoadTask.class.getName());
 
     public InitialOpStringLoadTask(final String[] initialOpStrings,
                                    final DeployAdmin deployAdmin,
                                    final ProvisionMonitorPeer provisionMonitorPeer,
-                                   final OpStringMangerController opStringMangerController,
+                                   final OpStringManagerController opStringMangerController,
                                    final StateManager stateManager) {
         this.initialOpStrings = initialOpStrings;
         this.provisionMonitorPeer = provisionMonitorPeer;

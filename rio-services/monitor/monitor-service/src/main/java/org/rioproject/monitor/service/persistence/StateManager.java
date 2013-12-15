@@ -16,7 +16,7 @@
 package org.rioproject.monitor.service.persistence;
 
 import org.rioproject.monitor.service.OpStringManager;
-import org.rioproject.monitor.service.OpStringMangerController;
+import org.rioproject.monitor.service.OpStringManagerController;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.impl.persistence.PersistentStore;
 import org.rioproject.impl.persistence.StoreException;
@@ -36,7 +36,7 @@ public class StateManager {
     /** Snapshot thread */
     SnapshotThread snapshotter;
 
-    public StateManager(String logDirName, OpStringMangerController opStringMangerController) throws StoreException, IOException {
+    public StateManager(String logDirName, OpStringManagerController opStringMangerController) throws StoreException, IOException {
         opStringLogHandler = new OpStringLogHandler();
         opStringLogHandler.setOpStringMangerController(opStringMangerController);
         store = new PersistentStore(logDirName, opStringLogHandler, opStringLogHandler);

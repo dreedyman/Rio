@@ -38,7 +38,7 @@ import java.util.*;
 /**
  * This class manages interactions with {@link OpStringManager} classes.
  */
-public class OpStringMangerController {
+public class OpStringManagerController {
     /** Collection for all OperationalString OpStringManager instances */
     private final List<OpStringManager> opStringManagers = new ArrayList<OpStringManager>();
     /** Collection for all pending (in process) OperationalString
@@ -51,7 +51,7 @@ public class OpStringMangerController {
     private StateManager stateManager;
     private ServiceProvisioner serviceProvisioner;
     private Uuid uuid;
-    private static Logger logger = LoggerFactory.getLogger(OpStringMangerController.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(OpStringManagerController.class.getName());
     private DeploymentVerifier deploymentVerifier;
 
     void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {

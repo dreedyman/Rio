@@ -17,7 +17,7 @@ package org.rioproject.monitor.service.persistence;
 
 import com.sun.jini.reliableLog.LogHandler;
 import org.rioproject.monitor.service.OpStringManager;
-import org.rioproject.monitor.service.OpStringMangerController;
+import org.rioproject.monitor.service.OpStringManagerController;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.impl.persistence.SnapshotHandler;
@@ -51,7 +51,7 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
     /** Log File must contain this many records before a snapshot is allowed */
     // TODO - allow this to be a user configurable parameter
     int logToSnapshotThresh = 10;
-    OpStringMangerController opStringMangerController;
+    OpStringManagerController opStringMangerController;
     SnapshotThread snapshotter;
 
     /** Log format version */
@@ -59,7 +59,7 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
 
     static Logger logger = LoggerFactory.getLogger(OpStringLogHandler.class.getName());
 
-    void setOpStringMangerController(OpStringMangerController opStringMangerController) {
+    void setOpStringMangerController(OpStringManagerController opStringMangerController) {
         this.opStringMangerController = opStringMangerController;
     }
 

@@ -116,10 +116,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     private ProvisionMonitor serviceProxy;
     private final Configuration config;
     private ProvisionMonitorEventProcessor eventProcessor;
-    private final OpStringMangerController opStringMangerController;
+    private final OpStringManagerController opStringMangerController;
     private StateManager stateManager;
     private ServiceProvisioner provisioner;
     private Uuid uuid;
+    private final boolean standAlone;
 
     /**
      * Create an DefaultOpStringManager, making it available to receive incoming
@@ -136,7 +137,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                   final OpStringManager parent,
                                   final boolean mode,
                                   final Configuration config,
-                                  final OpStringMangerController opStringMangerController) throws IOException {
+                                  final OpStringManagerController opStringMangerController) throws IOException {
 
         this.config = config;
         this.opStringMangerController = opStringMangerController;
@@ -161,7 +162,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (parent != null) {
             addParent(parent);
             parent.addNested(this);
+            standAlone = false;
+        } else {
+            standAlone = opString.getNestedOperationalStrings().length==0;
         }
+        logger.info("Manager for {} standAlone: {}", opString.getName(), standAlone);
         if (opString.loadedFrom() != null &&
             opString.loadedFrom().toExternalForm().startsWith("file") &&
             opString.loadedFrom().toExternalForm().endsWith(".oar")) {
@@ -278,7 +283,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             if (!nestedManagers.isEmpty()) {
                 OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[nestedManagers.size()]);
                 for (OpStringManager nestedMgr : nestedMgrs) {
-                    if (nestedMgr.getParentCount() == 1)
+                    if (nestedMgr.getParentCount() == 1 && !nestedMgr.isStandAlone())
                         nestedMgr.setDeploymentStatus(OperationalString.UNDEPLOYED);
                 }
             }
@@ -682,7 +687,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         for (OpStringManager nestedMgr : nestedMgrs) {
             /* If the nested DefaultOpStringManager has only 1 parent, then
              * terminate (undeploy) that DefaultOpStringManager as well */
-            if (nestedMgr.getParentCount() == 1) {
+            if (nestedMgr.getParentCount() == 1 && !nestedMgr.isStandAlone()) {
                 terminated.add(nestedMgr.doGetOperationalString());
                 nestedMgr.terminate(killServices);
             } else {
@@ -1423,6 +1428,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      */
     public int getParentCount() {
         return (parents.size());
+    }
+
+    public boolean isStandAlone() {
+        return standAlone;
     }
 
     /**

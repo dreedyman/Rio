@@ -100,7 +100,7 @@ public interface OpStringManager  {
     /**
      * Get the collection of parent for the OpStringManager
      *
-     * @return A Collection od parents, if there are jno aprents return a zero-length collection.
+     * @return A Collection od parents, if there are no parents return a zero-length collection.
      * A new collection is created each time.
      */
     Collection<OpStringManager> getParents();
@@ -265,6 +265,7 @@ public interface OpStringManager  {
 
     /**
      * Schedule a redeploy task
+     *
      * @param delay If > 0, the delay
      * @param sElem The service to redeploy
      * @param instance The ServiceBeanInstance
@@ -280,4 +281,11 @@ public interface OpStringManager  {
                                     boolean clean,
                                     boolean sticky,
                                     ServiceProvisionListener listener) throws OperationalStringException;
+
+    /**
+     * Determine if this OperationalString was deployed as stand-alone.
+     *
+     * @return {@code true} if the OperationalString was deployed without any nested or parent relationships
+     */
+    boolean isStandAlone();
 }
