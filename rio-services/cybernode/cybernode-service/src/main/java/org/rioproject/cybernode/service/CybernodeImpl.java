@@ -411,10 +411,9 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @param serviceRecord The ServiceRecord
      */
     public void serviceDiscarded(ServiceRecord serviceRecord) {
-        if(serviceRecord==null)
+        if(serviceRecord==null) {
             logger.warn("ServiceRecord is null when discarding ServiceBean");
-
-        else {
+        } else {
             ServiceStatement statement = serviceStatementManager.get(serviceRecord.getServiceElement());
             if(statement!=null) {
                 if(serviceRecord.getType()!=ServiceRecord.INACTIVE_SERVICE_RECORD) {
@@ -435,6 +434,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             }
             //setChanged(StatusType.NORMAL);
         }
+        svcConsumer.updateMonitors();
     }
 
     private int getInstantiatedServiceCount() {
