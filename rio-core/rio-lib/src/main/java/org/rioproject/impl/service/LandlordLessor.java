@@ -157,7 +157,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      *
      * @throws RemoteException if errors occur setting up infrastructure
      */
-    public LandlordLessor(Configuration config) throws RemoteException {
+    public LandlordLessor(final Configuration config) throws RemoteException {
         this(config, null);
     }
 
@@ -171,7 +171,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      *
      * @throws RemoteException if errors occur setting up infrastructure
      */
-    public LandlordLessor(Configuration config, LeasePeriodPolicy leasePolicy) throws RemoteException {
+    public LandlordLessor(final Configuration config, final LeasePeriodPolicy leasePolicy) throws RemoteException {
         super();
         if (config == null)
             throw new IllegalArgumentException("config is null");
@@ -222,7 +222,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      *
      * @return True or false if the unexport was successful
      */
-    public boolean stop(boolean force) {
+    public boolean stop(final boolean force) {
         super.stop();
         boolean unexported = false;
         try {
@@ -232,7 +232,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
                 logger.trace("Unexporting LandlordLessor", e);
             }
         }
-        return (unexported);
+        return unexported;
     }
 
     /**
@@ -240,13 +240,13 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * 
      * @see ResourceLessor#newLease
      */
-    public Lease newLease(LeasedResource resource, long duration) throws LeaseDeniedException {
+    public Lease newLease(final LeasedResource resource, final long duration) throws LeaseDeniedException {
         LeasePeriodPolicy.Result leasePeriod = leasePolicy.grant(resource, duration);
         Lease lease = leaseFactory.newLease(resource.getCookie(), leasePeriod.expiration);
         resource.setExpiration(leasePeriod.expiration);
         addLeasedResource(resource);
         notifyLeaseRegistration(resource);
-        return (lease);
+        return lease;
     }
 
     /**
@@ -257,7 +257,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * <code>Lease.renew()</code> call
      * @return The new duration the lease should have
      */
-    public long renew(Uuid cookie, long extension) throws LeaseDeniedException, UnknownLeaseException {
+    public long renew(final Uuid cookie, final long extension) throws LeaseDeniedException, UnknownLeaseException {
         LeasedResource resource = getLeasedResource(cookie);
         long granted;
         if (resource == null)
@@ -276,7 +276,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
         granted = leasePeriod.duration;
         addLeasedResource(resource);
         notifyLeaseRenewal(resource);
-        return (granted);        
+        return granted;
     }
 
     /**
@@ -287,7 +287,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * @param extension The duration argument for each lease from the map
      * @return The results of the renew
      */
-    public Landlord.RenewResults renewAll(Uuid[] cookie, long[] extension) {
+    public Landlord.RenewResults renewAll(final Uuid[] cookie, final long[] extension) {
         int size = cookie.length;
         long[] granted = new long[size];
         Exception[] denied = new Exception[size];
@@ -299,7 +299,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
                 denied[i] = e;
             }
         }
-        return (new Landlord.RenewResults(granted, denied));
+        return new Landlord.RenewResults(granted, denied);
     }
 
     /**
@@ -307,7 +307,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * 
      * @param cookie Associated with the lease when it was created
      */
-    public void cancel(Uuid cookie) throws UnknownLeaseException {
+    public void cancel(final Uuid cookie) throws UnknownLeaseException {
         if (!remove(cookie))
             throw new UnknownLeaseException("No lease for cookie: " + cookie);
     }
@@ -318,7 +318,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
      * 
      * @param cookies Associated with the lease when it was created <br>
      */
-    public Map cancelAll(Uuid[] cookies) {
+    public Map<Uuid, Exception> cancelAll(final Uuid[] cookies) {
         Map<Uuid, Exception> exceptionMap = null;
         for (Uuid cookie : cookies) {
             try {
@@ -336,7 +336,7 @@ public class LandlordLessor extends ResourceLessor implements Landlord,
          * maps the corresponding cookie object to an exception describing the
          * failure.
          */
-        return (exceptionMap);
+        return exceptionMap;
     }
 
     public TrustVerifier getProxyVerifier() throws RemoteException {
