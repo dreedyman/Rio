@@ -148,8 +148,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
     public static final String INVOCATION_DELAY_KEY = "invocationDelay";
     private long invocationDelay = DEFAULT_INVOCATION_DELAY;
     /** Component name, used for config and logger */
-    private static final String COMPONENT =
-        "org.rioproject.impl.fdh.AdminFaultDetectionHandler";
+    private static final String COMPONENT =  AdminFaultDetectionHandler.class.getName();
     /** A Logger */
     static Logger logger = LoggerFactory.getLogger(COMPONENT);
 
@@ -193,7 +192,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 logger.trace(buffer.toString());
             }
         } catch(ConfigurationException e) {
-            logger.error("Setting Configuration", e);
+            logger.warn("Setting Configuration", e);
         }
     }
 
@@ -224,10 +223,8 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
          * Create a ServiceLeaseManager
          */
         ServiceAdminManager() {
-            super("ServiceAdminManager:"
-                  + proxy.getClass().getName()
-                  + ":"
-                  + System.currentTimeMillis());
+            super(String.format("ServiceAdminManager: %s:%d",
+                                proxy.getClass().getName(), System.currentTimeMillis()));
             setDaemon(true);
             start();
         }
@@ -258,12 +255,10 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
             boolean verified = false;
             try {
                 if(logger.isTraceEnabled())
-                        logger.trace("Invoke getAdmin() on : "
-                                      + proxy.getClass().getName());
-                    ((Administrable)proxy).getAdmin();
-                    if(logger.isTraceEnabled())
-                        logger.trace("Invocation to getAdmin() on : "
-                                      + proxy.getClass().getName()+" returned");
+                    logger.trace("Invoke getAdmin() on : {}", proxy.getClass().getName());
+                ((Administrable)proxy).getAdmin();
+                if(logger.isTraceEnabled())
+                    logger.trace("Invocation to getAdmin() on : {} returned", proxy.getClass().getName());
                 verified = true;
             } catch(RemoteException e) {
                 if(logger.isDebugEnabled())
@@ -296,12 +291,10 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 }
                 try {
                     if(logger.isTraceEnabled())
-                        logger.trace("Invoke getAdmin() on : "
-                                      + proxy.getClass().getName());
+                        logger.trace("Invoke getAdmin() on : {}", proxy.getClass().getName());
                     ((Administrable)proxy).getAdmin();
                     if(logger.isTraceEnabled())
-                        logger.trace("Invocation to getAdmin() on : "
-                                      + proxy.getClass().getName()+" returned");
+                        logger.trace("Invocation to getAdmin() on : {} returned", proxy.getClass().getName());
                 } catch(Exception e) {
                     if(!ThrowableUtil.isRetryable(e)) {
                         keepAlive = false;
