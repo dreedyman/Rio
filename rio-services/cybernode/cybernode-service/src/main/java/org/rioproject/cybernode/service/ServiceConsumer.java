@@ -551,7 +551,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                              * re-establish communications to the ProvisionManager and get
                              * another Lease
                              */
-                            logger.warn("Could not renew, attempt to reconnect");
+                            logger.warn("Could not renew, attempt to reconnect", e);
                             boolean connected = reconnect();
                             if(!connected) {
                                 logger.warn("Unable to recover ProvisionManager registration, exiting");
