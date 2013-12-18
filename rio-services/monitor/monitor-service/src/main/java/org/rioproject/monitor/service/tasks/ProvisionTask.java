@@ -93,14 +93,7 @@ public class ProvisionTask implements Runnable {
                     context.getDispatcher().dispatch(context.getProvisionRequest());
                     return;
                 } else {
-                    if (pendingManager != null) {
-                        if (context.getProvisionRequest().getType() == ProvisionRequest.Type.PROVISION) {
-                            pendingManager.addProvisionRequest(context.getProvisionRequest(), index);
-                            logger.debug("Re-submitted [{}] to {}",
-                                        LoggingUtil.getLoggingName(context.getProvisionRequest()),
-                                        pendingManager.getType());
-                        }
-                    }
+                    resubmit();
                 }
                 /* Send a ProvisionFailureEvent */
                 if (thrown != null || result != 0) {
@@ -139,6 +132,7 @@ public class ProvisionTask implements Runnable {
                         logger.debug("{} at [{}] did not allocate [{}], service limit assumed to have been met",
                                      name, addr, LoggingUtil.getLoggingName(context.getProvisionRequest()));
                     }
+                    resubmit();
                     return;
                 }
                 /* Notify ServiceProvisionListener of success */
@@ -274,5 +268,16 @@ public class ProvisionTask implements Runnable {
      */
     void processProvisionFailure(ProvisionFailureEvent event) {
         context.getProvisionFailurePool().execute(new ProvisionFailureEventTask(event, context.getFailureHandler()));
+    }
+
+    void resubmit() {
+        if (pendingManager != null) {
+            if (context.getProvisionRequest().getType() == ProvisionRequest.Type.PROVISION) {
+                pendingManager.addProvisionRequest(context.getProvisionRequest(), index);
+                logger.debug("Re-submitted [{}] to {}",
+                             LoggingUtil.getLoggingName(context.getProvisionRequest()),
+                             pendingManager.getType());
+            }
+        }
     }
 }
