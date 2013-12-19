@@ -33,6 +33,7 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
+import net.jini.lookup.entry.Host;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.DeployAdmin;
@@ -44,8 +45,6 @@ import org.rioproject.impl.client.JiniClient;
 import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 import org.rioproject.impl.discovery.RecordingDiscoveryListener;
 import org.rioproject.impl.event.BasicEventConsumer;
-import org.rioproject.impl.opstring.OAR;
-import org.rioproject.impl.opstring.OpStringLoader;
 import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.install.Installer;
 import org.rioproject.monitor.ProvisionMonitor;
@@ -54,7 +53,6 @@ import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resolver.Artifact;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.tools.ui.browser.Browser;
@@ -62,12 +60,8 @@ import org.rioproject.tools.ui.cybernodeutilization.CybernodeUtilizationPanel;
 import org.rioproject.tools.ui.discovery.GroupSelector;
 import org.rioproject.tools.ui.multicast.MulticastMonitor;
 import org.rioproject.tools.ui.prefs.PreferencesDialog;
-import org.rioproject.tools.ui.progresspanel.WaitingDialog;
 import org.rioproject.tools.ui.servicenotification.RemoteEventTable;
 import org.rioproject.tools.ui.serviceui.ServiceAdminManager;
-import org.rioproject.tools.ui.serviceui.UndeployPanel;
-import org.rioproject.tools.ui.util.SwingDeployHelper;
-import org.rioproject.tools.ui.util.SwingWorker;
 import org.rioproject.tools.ui.util.TabLabel;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
@@ -102,7 +96,6 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class Main extends JFrame {
     private final static long startTime = System.currentTimeMillis();
-    private final JSplitPane splitPane;
     private File lastDir = new File(System.getProperty("user.dir"));
     private final Configuration config;
     /** A DiscoveryListener that will record lookup service discovery/discard times */
@@ -118,23 +111,30 @@ public class Main extends JFrame {
     private ScheduledExecutorService scheduler;
     private ExecutorService service;
     private LookupCache monitorCache;
-    private JButton deploy;
-    private final GraphView graphView;
+    /*private JButton deploy;*/
+    //private final GraphView graphView;
     private final Main frame;
     private final ColorManager colorManager;
     private final UtilizationColumnManager utilizationColumnManager;
-    private final ImageIcon westIcon;
-    private final ImageIcon westSelectedIcon;
-    private final ImageIcon northIcon;
-    private final ImageIcon northSelectedIcon;
     private int cybernodeRefreshRate;
     private String lastArtifact = null;
     private BasicEventConsumer clientEventConsumer;
     final String AS_SERVICE_UI = "as.service.ui";
     private final RemoteEventTable remoteEventTable;
+    private final Map<String, ImageIcon> toolBarImageMap = new HashMap<String, ImageIcon>();
+    private final JTabbedPane monitorTabs = new JTabbedPane();
+    private final JTabbedPane mainTabs = new JTabbedPane();;
+    private final Map<ProvisionMonitor, ProvisionMonitorPanel> monitorPanelMap =
+            new HashMap<ProvisionMonitor, ProvisionMonitorPanel>();
+    private int orientation;
+    private final ProgressPanel progressPanel;
+    private final JComponent glassPaneComponent;
 
     public Main(final Configuration config, final boolean exitOnClose, final Properties startupProps) throws ExportException, ConfigurationException {
         this.config = config;
+
+        progressPanel = new ProgressPanel(config);
+        glassPaneComponent = new GlassPaneContainer(progressPanel);
         String lastArtifactName = startupProps.getProperty(Constants.LAST_ARTIFACT);
         if(lastArtifactName!=null)
             lastArtifact = lastArtifactName;
@@ -142,21 +142,16 @@ public class Main extends JFrame {
         if(lastDirName!=null)
             lastDir = new File(lastDirName);
 
-        JTabbedPane mainTabs = new JTabbedPane();
-
         ServiceAdminManager.getInstance().setAdminFrameProperties(startupProps);
         colorManager = new ColorManager(startupProps);
         utilizationColumnManager = new UtilizationColumnManager(startupProps);
-        int orientation = Integer.parseInt(startupProps.getProperty(Constants.GRAPH_ORIENTATION,
-                                                                    Constants.GRAPH_ORIENTATION_WEST));
-        graphView = new GraphView(this, config, colorManager, orientation);
+        orientation = Integer.parseInt(startupProps.getProperty(Constants.GRAPH_ORIENTATION,
+                                                                Constants.GRAPH_ORIENTATION_WEST));
 
         String defaultRefreshRate = Integer.toString(Constants.DEFAULT_CYBERNODE_REFRESH_RATE);
         String refreshRate = startupProps.getProperty(Constants.CYBERNODE_REFRESH_RATE, defaultRefreshRate);
         cybernodeRefreshRate = Integer.parseInt(refreshRate);
 
-        deploy = new JButton("Deploy ...");
-        deploy.setEnabled(false);
         try {
             String title = (String)config.getEntry(Constants.COMPONENT, "title", String.class, null);
             if(title!=null)
@@ -166,95 +161,13 @@ public class Main extends JFrame {
         }
 
         frame = this;
-        deploy.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                OpStringAndOARFileChooser chooser = new OpStringAndOARFileChooser(frame, lastDir, lastArtifact);
-                final String chosen = chooser.getName();
-                if(chosen==null)
-                    return;
-                boolean isArtifact = false;
-                try {
-                    new Artifact(chosen);
-                    isArtifact = true;
-                    lastArtifact = chosen;
-                } catch(Exception e) {
-                    /* don't need to print stack trace here */
-                }
 
-                /* If deploying an artifact or the oar is http based, deploy */
-                if(isArtifact || chosen.startsWith("http")) {
-                    final ServiceItem item = monitorCache.lookup(null);
-                    SwingDeployHelper.deploy(chosen, item, frame);
-                } else {
-                    File opStringFile = new File(chosen);
-                    if(opStringFile.exists()) {
-                        lastDir = chooser.getCurrentDirectory();
-                        final ServiceItem item = monitorCache.lookup(null);
-                        final OperationalString[] opstrings;
-                        try {
-                            if(opStringFile.getName().endsWith("oar")) {
-                                OAR oar = new OAR(opStringFile);
-                                opstrings = oar.loadOperationalStrings();
-                                // TODO: embed webster and stream the OAR
-                            } else {
-                                opstrings = parseOperationalString(opStringFile);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Util.showError(e, frame, "Failure parsing "+ opStringFile.getName());
-                            return;
-                        }
-                        SwingDeployHelper.deploy(opstrings, item, frame, chosen);
-                    } else {
-                        JOptionPane.showMessageDialog(frame,
-                                                      "The OperationalString file "+chosen+" does not exist",
-                                                      "Deployment Failure",
-                                                      JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-        JButton undeploy = new JButton("Undeploy");
-        undeploy.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                String[] names = graphView.getOpStringNames();
-                JDialog dialog = new JDialog((JFrame)null, "Undeploy OperationalString", true);
-                UndeployPanel u = new UndeployPanel(names, dialog);
-                Container contentPane = dialog.getContentPane();
-                contentPane.add(u, BorderLayout.CENTER);
-                int width = 380;
-                int height = 225;
-                dialog.setSize(new Dimension(width, height));
-                dialog.setLocationRelativeTo(frame);
-                dialog.setVisible(true);
-                final String name = u.getSelectedOpStringName();
-                if(name==null)
-                    return;
-                final GraphNode node = graphView.getOpStringNode(name);
-                final JDialog waitDialog = new WaitingDialog(frame, "Undeploying "+name+"...", 500);
-                SwingWorker worker = new SwingWorker() {
-                    public Object construct() {
-                        try {
-                            DeployAdmin dAdmin = (DeployAdmin)node.getProvisionMonitor().getAdmin();
-                            dAdmin.undeploy(name);
-                        } catch(OperationalStringException e) {
-                            graphView.removeOpString(name);
-                        } catch(Exception e) {
-                            System.err.println("OUCH");
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    public void finished() {
-                        waitDialog.dispose();
-                    }
-                };
-                worker.start();
-            }
-        });
+        toolBarImageMap.put("refreshIcon", Util.getImageIcon("org/rioproject/tools/ui/images/view-refresh.png"));
+        toolBarImageMap.put("fitIcon", Util.getImageIcon("org/rioproject/tools/ui/images/view-fullscreen.png"));
+        toolBarImageMap.put("westIcon", Util.getScaledImageIcon("org/rioproject/tools/ui/images/west.png", 22, 22));
+        toolBarImageMap.put("westSelectedIcon", Util.getScaledImageIcon("org/rioproject/tools/ui/images/west-selected.png", 22, 22));
+        toolBarImageMap.put("northIcon", Util.getScaledImageIcon("org/rioproject/tools/ui/images/north.png", 22, 22));
+        toolBarImageMap.put("northSelectedIcon", Util.getScaledImageIcon("org/rioproject/tools/ui/images/north-selected.png", 22, 22));
 
         final JButton colorChooser = new JButton("Color ...");
         colorChooser.addActionListener(new ActionListener() {
@@ -262,99 +175,6 @@ public class Main extends JFrame {
                 JColorChooser.showDialog(colorChooser, "Colors", colorChooser.getForeground());
             }
         });
-
-        JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
-        toolBar.setFloatable(false);
-        toolBar.setRollover(true);
-        toolBar.setBorderPainted(false);
-
-        ImageIcon refreshIcon = Util.getImageIcon("org/rioproject/tools/ui/images/view-refresh.png");
-        ImageIcon fitIcon = Util.getImageIcon("org/rioproject/tools/ui/images/view-fullscreen.png");
-        westIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/west.png", 22, 22);
-        westSelectedIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/west-selected.png", 22, 22);
-        northIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/north.png", 22, 22);
-        northSelectedIcon = Util.getScaledImageIcon("org/rioproject/tools/ui/images/north-selected.png", 22, 22);
-        /*
-        JButton zoomOut = new JButton(zoomOutIcon);
-        zoomOut.getAccessibleContext().setAccessibleName("zoom-out");
-        zoomOut.setToolTipText("Zoom-out the display area");
-        zoomOut.setPreferredSize(new Dimension(22, 22));
-        zoomOut.setMaximumSize(new Dimension(22, 22));
-        zoomOut.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                graphView.zoom(0.98);
-            }
-        });
-        JButton zoomIn = new JButton(zoomInIcon);
-        zoomIn.getAccessibleContext().setAccessibleName("zoom-in");
-        zoomIn.setToolTipText("Zoom-in the display area");
-        zoomIn.setPreferredSize(new Dimension(22, 22));
-        zoomIn.setMaximumSize(new Dimension(22, 22));
-        zoomIn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                graphView.zoom(1.1);
-            }
-        });
-        */
-        final JButton fit = new JButton(fitIcon);
-        fit.getAccessibleContext().setAccessibleName("fit display");
-        fit.setToolTipText("Fit the graph into the display area");
-        fit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                graphView.zoomToFit();
-            }
-        });
-        final JButton refresh = new JButton(refreshIcon);
-        refresh.getAccessibleContext().setAccessibleName("refresh display");
-        refresh.setToolTipText("Refresh the display");
-        refresh.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                graphView.refresh();
-            }
-        });
-
-        final JButton west = new JButton((orientation==prefuse.Constants.ORIENT_LEFT_RIGHT? westSelectedIcon:westIcon));
-        west.getAccessibleContext().setAccessibleName("root on left");
-        west.setToolTipText("Root on the left");
-
-        final JButton north = new JButton((orientation==prefuse.Constants.ORIENT_TOP_BOTTOM? northSelectedIcon:northIcon));
-        west.getAccessibleContext().setAccessibleName("root at top");
-        north.setToolTipText("Root at the top");
-
-        west.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                graphView.setOrientation(prefuse.Constants.ORIENT_LEFT_RIGHT);
-                west.setIcon(westSelectedIcon);
-                north.setIcon(northIcon);
-            }
-        });
-
-        north.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                graphView.setOrientation(prefuse.Constants.ORIENT_TOP_BOTTOM);
-                north.setIcon(northSelectedIcon);
-                west.setIcon(westIcon);
-            }
-        });
-        //toolBar.add(zoomIn);
-        toolBar.add(fit);
-        toolBar.add(refresh);
-        toolBar.add(west);
-        toolBar.add(north);
-        toolBar.setMinimumSize(new Dimension(8, 24));
-
-        JPanel controls = new JPanel();
-        controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
-        controls.setBorder(BorderFactory.createEtchedBorder());
-        //controls.add(colorChooser);
-        controls.add(toolBar);
-        controls.add(deploy);
-        controls.add(undeploy);
-
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(Color.WHITE);
-        p.add(controls, BorderLayout.NORTH);        
-        p.add(graphView, BorderLayout.CENTER);
 
         try {
             String bannerIcon = (String)config.getEntry(Constants.COMPONENT, "bannerIcon", String.class, null);
@@ -377,20 +197,11 @@ public class Main extends JFrame {
         UtilitiesPanel utilities = new UtilitiesPanel(cup);
 
         final JPanel utilitiesPanel = makeUtilitiesPanel(utilities);
-        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
-
-        //splitPane.setTopComponent(topTabs);
-        splitPane.setTopComponent(new GlassPaneContainer(p));
-        //splitPane.setBottomComponent(utilitiesPanel);
-        splitPane.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        splitPane.setDividerSize(8);
 
         setJMenuBar(createMenu());
-        
         Container content = getContentPane();
 
-        //content.add(splitPane);
-        mainTabs.add("Deployments", splitPane);
+        mainTabs.add("Deployments", monitorTabs);
         mainTabs.add("Utilization", utilitiesPanel);
         remoteEventTable = new RemoteEventTable(config, startupProps);
         JLabel label = TabLabel.create("Service Event Notifications", remoteEventTable);
@@ -398,12 +209,6 @@ public class Main extends JFrame {
         mainTabs.setTabComponentAt(2, label);
 
         content.add(mainTabs);
-
-        Dimension dim = splitPane.getTopComponent().getSize();
-        dim.height = dim.height- controls.getSize().height;
-        graphView.setPreferredSize(dim);
-        graphView.setSize(dim);
-        graphView.showProgressPanel();
 
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -413,20 +218,13 @@ public class Main extends JFrame {
                     terminate();
             }
         });
+        //progressPanel.showProgressPanel();
     }
 
     void setStartupLocations(final Properties startupProps) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                int dividerLocation;
-                String s = startupProps.getProperty(Constants.FRAME_DIVIDER);
-                if(s==null) {
-                    dividerLocation = splitPane.getHeight()/2;
-                } else {
-                    dividerLocation = Integer.parseInt(s);
-                }
-                splitPane.setDividerLocation(dividerLocation);
                 remoteEventTable.init(startupProps);
             }
         });
@@ -437,7 +235,10 @@ public class Main extends JFrame {
     }
 
     GraphView getGraphView() {
-        return graphView;
+        System.out.println("TAB COUNT: "+monitorTabs.getTabCount());
+        if(monitorTabs.getTabCount()>0)
+            return ((ProvisionMonitorPanel) monitorTabs.getSelectedComponent()).getGraphView();
+        return null;
     }
 
     Configuration getConfiguration() {
@@ -470,7 +271,7 @@ public class Main extends JFrame {
             JMenuItem preferencesMenuItem = fileMenu.add(new JMenuItem("Preferences"));
             preferencesMenuItem.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    PreferencesDialog prefs = new PreferencesDialog(frame, graphView, cup);
+                    PreferencesDialog prefs = new PreferencesDialog(frame, getGraphView(), cup);
                     prefs.setVisible(true);
                 }
             });
@@ -552,9 +353,9 @@ public class Main extends JFrame {
                     new RioAboutBox(frame);
                 }
             });
-        } else {
-			MacUIHelper.setUIHandler(this, graphView, cup);
-		}
+        } /*else {
+			MacUIHelper.setUIHandler(this, getGraphView(), cup);
+		}*/
         if (fileMenu!=null)
             menuBar.add(fileMenu);
         menuBar.add(discoMenu);
@@ -721,13 +522,11 @@ public class Main extends JFrame {
 
         Dimension dim = getSize();
         Point point = getLocation();
-        int divider = splitPane.getDividerLocation();
         Properties props = new Properties();
 
         props.put(Constants.USE_EVENT_COLLECTOR, Boolean.toString(remoteEventTable.getUseEventCollector()));
         props.put(Constants.EVENTS_DIVIDER, Integer.toString(remoteEventTable.getDividerLocation()));
 
-        props.put(Constants.FRAME_DIVIDER, Integer.toString(divider));
         props.put(Constants.FRAME_HEIGHT, Integer.toString(dim.height));
         props.put(Constants.FRAME_WIDTH, Integer.toString(dim.width));
         props.put(Constants.FRAME_X_POS, Double.toString(point.getX()));
@@ -758,7 +557,8 @@ public class Main extends JFrame {
             ServiceAdminManager.getInstance().getLastAdminWindowLayout();
         props.put(Constants.ADMIN_FRAME_WINDOW_LAYOUT, lastAdminWindowLayout);
 
-        props.put(Constants.GRAPH_ORIENTATION, Integer.toString(graphView.getOrientation()));
+        if(getGraphView()!=null)
+            props.put(Constants.GRAPH_ORIENTATION, Integer.toString(getGraphView().getOrientation()));
 
         props.put(Constants.CYBERNODE_REFRESH_RATE, Integer.toString(getCybernodeRefreshRate()));
 
@@ -819,11 +619,6 @@ public class Main extends JFrame {
         terminate();
         if(System.getProperty(AS_SERVICE_UI)==null)
             System.exit(0);
-    }
-
-    private OperationalString[] parseOperationalString(File file) throws Exception {
-        OpStringLoader loader = new OpStringLoader();
-        return(loader.parseOperationalString(file));
     }
 
     public int getCybernodeRefreshRate() {
@@ -940,10 +735,11 @@ public class Main extends JFrame {
     }
 
     void addProvisionMonitor(ServiceItem item) throws RemoteException, OperationalStringException {
-        graphView.systemUp();
-        deploy.setEnabled(true);
-        clientEventConsumer.register(item);
+        progressPanel.systemUp();
         ProvisionMonitor monitor = (ProvisionMonitor) item.service;
+        ProvisionMonitorPanel pmp = addProvisionMonitorPanel(item);
+        clientEventConsumer.register(item);
+
         //failureEventConsumer.register(item);
         DeployAdmin da = (DeployAdmin)monitor.getAdmin();
         OperationalStringManager[] opStringMgrs = da.getOperationalStringManagers();
@@ -952,25 +748,50 @@ public class Main extends JFrame {
         }
         for (OperationalStringManager opStringMgr : opStringMgrs) {
             OperationalString ops = opStringMgr.getOperationalString();
-            if(graphView.getOpStringNode(ops.getName())!=null)
+            if(getGraphView().getOpStringNode(ops.getName())!=null)
                 return;
-            graphView.addOpString(monitor, ops);
+            getGraphView().addOpString(monitor, ops);
             ServiceElement[] elems = ops.getServices();
             for(ServiceElement elem : elems) {
                 ServiceBeanInstance[] instances = opStringMgr.getServiceBeanInstances(elem);
                 for(ServiceBeanInstance instance : instances) {
                     GraphNode node =
-                        graphView.serviceUp(elem, instance);
+                            getGraphView().serviceUp(elem, instance);
                     if(node!=null)
-                        ServiceItemFetchQ.write(node);
+                        ServiceItemFetchQ.write(node, pmp.getGraphView());
                     else {
                         System.err.println("### Cant get GraphNode for ["+elem.getName()+"], " +
                                            "instance ["+instance.getServiceBeanConfig().getInstanceID()+"]");
                     }
                 }
             }
-            graphView.setOpStringState(ops.getName());
+            getGraphView().setOpStringState(ops.getName());
         }
+    }
+
+    private ProvisionMonitorPanel addProvisionMonitorPanel(ServiceItem item) {
+        /*if(mainTabs.getTabComponentAt(0).equals(glassPaneComponent)) {
+            mainTabs.setTabComponentAt(0, monitorTabs);
+        }*/
+        ProvisionMonitor monitor = (ProvisionMonitor) item.service;
+        ProvisionMonitorPanel pmp = new ProvisionMonitorPanel(monitor,
+                                                              monitorCache,
+                                                              frame,
+                                                              colorManager,
+                                                              toolBarImageMap,
+                                                              config,
+                                                              orientation);
+        String host = "<unknown>";
+        for(Entry entry : item.attributeSets) {
+            if(entry instanceof Host) {
+                host = ((Host)entry).hostName;
+                break;
+            }
+        }
+        monitorPanelMap.put(monitor, pmp);
+        monitorTabs.addTab(host, pmp);
+        //progressPanel.systemUp();
+        return pmp;
     }
 
     /**
@@ -989,30 +810,29 @@ public class Main extends JFrame {
                     }
                 }
                 if(item.service instanceof ProvisionMonitor) {
-                    graphView.systemUp();
-                    deploy.setEnabled(true);
                     ProvisionMonitor monitor = (ProvisionMonitor) item.service;
+                    ProvisionMonitorPanel pmp = addProvisionMonitorPanel(item);
+
                     clientEventConsumer.register(item);
 
                     //failureEventConsumer.register(item);
                     DeployAdmin da = (DeployAdmin)monitor.getAdmin();
-                    OperationalStringManager[] opStringMgrs =
-                        da.getOperationalStringManagers();
-                    if (opStringMgrs == null || opStringMgrs.length == 0) {
+                    OperationalStringManager[] opStringMgrs = da.getOperationalStringManagers();
+                    if (opStringMgrs.length == 0) {
                         return;
                     }
                     for (OperationalStringManager opStringMgr : opStringMgrs) {
                         OperationalString ops = opStringMgr.getOperationalString();
-                        if(graphView.getOpStringNode(ops.getName())!=null)
+                        if(pmp.getGraphView().getOpStringNode(ops.getName())!=null)
                            return;
-                        graphView.addOpString(monitor, ops);
+                        pmp.getGraphView().addOpString(monitor, ops);
                         ServiceElement[] elems = ops.getServices();
                         for(ServiceElement elem : elems) {
                             ServiceBeanInstance[] instances = opStringMgr.getServiceBeanInstances(elem);
                             for(ServiceBeanInstance instance : instances) {
-                                GraphNode node = graphView.serviceUp(elem, instance);
+                                GraphNode node = pmp.getGraphView().serviceUp(elem, instance);
                                 if(node!=null)
-                                    ServiceItemFetchQ.write(node);
+                                    ServiceItemFetchQ.write(node, pmp.getGraphView());
                                 else {
                                     System.err.println("### Cant get GraphNode " +
                                                        "for ["+elem.getName()+"], " +
@@ -1020,7 +840,7 @@ public class Main extends JFrame {
                                 }
                             }
                         }
-                        graphView.setOpStringState(ops.getName());
+                        pmp.getGraphView().setOpStringState(ops.getName());
                     }
                 }
                 if(item.service instanceof Cybernode) {
@@ -1046,10 +866,12 @@ public class Main extends JFrame {
             ServiceItem item = sdEvent.getPreEventServiceItem();
             if(item.service instanceof ProvisionMonitor) {
                 monitorCache.discard(item.service);
+                ProvisionMonitorPanel pmp = monitorPanelMap.get(item.service);
+                monitorTabs.removeTabAt(monitorTabs.indexOfComponent(pmp));
                 if(monitorCache.lookup(null, Integer.MAX_VALUE).length==0) {
-                    deploy.setEnabled(false);
-                    graphView.removeAllOpStrings();
-                    graphView.systemDown();
+                    //deploy.setEnabled(false);
+                    //graphView.removeAllOpStrings();
+                    //graphView.systemDown();
                 }
             }
 
@@ -1092,11 +914,12 @@ public class Main extends JFrame {
         public void notify(ProvisionMonitorEvent pme) {
             ProvisionMonitorEvent.Action action = pme.getAction();
             ProvisionMonitor monitor = (ProvisionMonitor)pme.getSource();
+            GraphView graphView = monitorPanelMap.get(monitor).getGraphView();
             switch (action) {
                 case SERVICE_ELEMENT_UPDATED:
                 case SERVICE_BEAN_INCREMENTED:
                     graphView.serviceIncrement(pme.getServiceElement());
-                    processQueued(pme.getOperationalStringName());
+                    processQueued(pme.getOperationalStringName(), graphView);
                     break;
                 case SERVICE_BEAN_DECREMENTED:
                     graphView.serviceDecrement(pme.getServiceElement(), pme.getServiceBeanInstance());
@@ -1110,7 +933,7 @@ public class Main extends JFrame {
                     }
                     graphView.addServiceElement(pme.getServiceElement(),
                                                 monitor);
-                    processQueued(pme.getOperationalStringName());
+                    processQueued(pme.getOperationalStringName(), graphView);
                     break;
                 case SERVICE_ELEMENT_REMOVED:
                     if(pme.getServiceElement()==null) {
@@ -1126,7 +949,7 @@ public class Main extends JFrame {
                     break;
                 case OPSTRING_DEPLOYED:
                     graphView.addOpString(monitor, pme.getOperationalString());
-                    processQueued(pme.getOperationalStringName());
+                    processQueued(pme.getOperationalStringName(), graphView);
                     graphView.setOpStringState(pme.getOperationalStringName());
                     break;
                 case OPSTRING_UNDEPLOYED:
@@ -1134,7 +957,7 @@ public class Main extends JFrame {
                     break;
                 case SERVICE_PROVISIONED:
                 case EXTERNAL_SERVICE_DISCOVERED:
-                    handleServiceProvisioned(pme);
+                    handleServiceProvisioned(pme, graphView);
                     graphView.setOpStringState(pme.getOperationalStringName());
                     refreshCybernodes(pme);
                     break;
@@ -1147,7 +970,7 @@ public class Main extends JFrame {
             }
         }
 
-        void handleServiceProvisioned(ProvisionMonitorEvent pme) {
+        void handleServiceProvisioned(ProvisionMonitorEvent pme, GraphView graphView) {
             if(graphView.getOpStringNode(pme.getOperationalStringName())==null) {
                 eventQ.add(pme);
             } else {
@@ -1157,15 +980,15 @@ public class Main extends JFrame {
                     if(node==null)
                         eventQ.add(pme);
                 } finally {
-                    ServiceItemFetchQ.write(node);
+                    ServiceItemFetchQ.write(node, graphView);
                 }
             }
         }
 
-        void processQueued(String opStringName) {
+        void processQueued(String opStringName, GraphView graphView) {
             ProvisionMonitorEvent[] events = getEvents(opStringName);
             for(ProvisionMonitorEvent e : events) {
-                handleServiceProvisioned(e);
+                handleServiceProvisioned(e, graphView);
             }
         }
 
@@ -1260,9 +1083,10 @@ public class Main extends JFrame {
         public void run() {
             long id = Thread.currentThread().getId();
             while (true) {
-                GraphNode node;
+                ServiceItemFetchQ.Request request;
                 try {
-                    node = ServiceItemFetchQ.take();
+                    request = ServiceItemFetchQ.take();
+                    GraphNode node = request.node;
                     if(node.getInstance()!=null) {
                         Uuid uuid = node.getInstance().getServiceBeanID();
                         ServiceID serviceID = new ServiceID(uuid.getMostSignificantBits(),
@@ -1270,12 +1094,12 @@ public class Main extends JFrame {
                         ServiceTemplate template = new ServiceTemplate(serviceID, null, null);
                         ServiceItem item = sdm.lookup(template, null, 1000);
                         if(item!=null) {
-                            graphView.setGraphNodeServiceItem(node, item);
+                            request.graphView.setGraphNodeServiceItem(node, item);
                         } else {
-                            ServiceItemFetchQ.write(node);
+                            ServiceItemFetchQ.write(request);
                         }
                     } else {
-                        ServiceItemFetchQ.write(node);
+                        ServiceItemFetchQ.write(request);
                     }
                 } catch (InterruptedException e) {
                     System.err.println("ServiceItemFetcher ["+id+"] InterruptedException, exiting");

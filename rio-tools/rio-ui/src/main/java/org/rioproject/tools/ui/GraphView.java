@@ -106,16 +106,19 @@ public class GraphView extends Display {
     private SingleComponentInfiniteProgress progressPanel;
     private final Configuration config;
     private final ColorManager colorManager;
+    private final ProvisionMonitor monitor;
     private static final String COMPONENT = GraphView.class.getPackage().getName();
 
     public GraphView(final JFrame frame,
                      final Configuration config,
                      final ColorManager colorManager,
+                     final ProvisionMonitor monitor,
                      final int orientation) {
         super(new Visualization());
         this.frame = frame;
         this.config = config;
         this.colorManager = colorManager;
+        this.monitor = monitor;
         this.orientation = orientation;
         g = new Graph(true);
         g.addColumn(VisualItem.LABEL, String.class);
@@ -308,7 +311,7 @@ public class GraphView extends Display {
         return colorManager;
     }
 
-    public void showProgressPanel() {
+    /*public void showProgressPanel() {
         if(progressPanel==null) {
             progressPanel = new SingleComponentInfiniteProgress(false);
             GlassPaneContainer.findGlassPaneContainerFor(getParent())
@@ -340,6 +343,14 @@ public class GraphView extends Display {
         if(progressPanel!=null) {
             progressPanel.stop();
         }
+        synchronized(vis) {
+            vis.cancel("filter");
+            vis.setVisible(Constants.TREE_NODES, rootFilter, true);
+            vis.run("filter");
+        }
+    }*/
+
+    public void systemUp() {
         synchronized(vis) {
             vis.cancel("filter");
             vis.setVisible(Constants.TREE_NODES, rootFilter, true);
@@ -509,7 +520,7 @@ public class GraphView extends Display {
                                                                  instance);
                             if(n!=null) {
                                 n.setInstance(instance);
-                                ServiceItemFetchQ.write(n);
+                                ServiceItemFetchQ.write(n, this);
                                 if(n.getTableNode()!=null) {
                                     n.getTableNode().set(Constants.STATE,
                                                          Constants.ACTIVE_NO_SERVICE_ITEM);

@@ -24,14 +24,27 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Dennis Reedy
  */
 public class ServiceItemFetchQ  {
-    private static BlockingQueue<GraphNode> serviceItemFetchQ =
-        new LinkedBlockingQueue<GraphNode>();
+    private static final BlockingQueue<Request> serviceItemFetchQ = new LinkedBlockingQueue<Request>();
 
-    public static void write(GraphNode node) {
-        serviceItemFetchQ.add(node);
+    public static void write(GraphNode node, GraphView graphView) {
+        serviceItemFetchQ.add(new Request(node, graphView));
     }
 
-    public static GraphNode take() throws InterruptedException {
+    public static void write(Request request) {
+        serviceItemFetchQ.add(request);
+    }
+
+    public static Request take() throws InterruptedException {
         return serviceItemFetchQ.take();
+    }
+
+    static class Request {
+        final GraphNode node;
+        final GraphView graphView;
+
+        Request(GraphNode node, GraphView graphView) {
+            this.node = node;
+            this.graphView = graphView;
+        }
     }
 }

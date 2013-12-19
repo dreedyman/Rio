@@ -41,8 +41,7 @@ public class GraphViewAdapter {
         if(sElemNode==null) {
             return null;
         }
-        GraphNode serviceNode =
-            main.getGraphView().getServiceBeanInstance(sElemNode, uuid);
+        GraphNode serviceNode = main.getGraphView().getServiceBeanInstance(sElemNode, uuid);
         if(serviceNode==null) {
             return null;
         }
