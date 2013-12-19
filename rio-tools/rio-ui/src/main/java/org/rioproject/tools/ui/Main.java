@@ -201,7 +201,7 @@ public class Main extends JFrame {
         setJMenuBar(createMenu());
         Container content = getContentPane();
 
-        mainTabs.add("Deployments", monitorTabs);
+        mainTabs.add("Deployments", glassPaneComponent);
         mainTabs.add("Utilization", utilitiesPanel);
         remoteEventTable = new RemoteEventTable(config, startupProps);
         JLabel label = TabLabel.create("Service Event Notifications", remoteEventTable);
@@ -218,7 +218,7 @@ public class Main extends JFrame {
                     terminate();
             }
         });
-        //progressPanel.showProgressPanel();
+        progressPanel.showProgressPanel();
     }
 
     void setStartupLocations(final Properties startupProps) {
@@ -770,9 +770,10 @@ public class Main extends JFrame {
     }
 
     private ProvisionMonitorPanel addProvisionMonitorPanel(ServiceItem item) {
-        /*if(mainTabs.getTabComponentAt(0).equals(glassPaneComponent)) {
-            mainTabs.setTabComponentAt(0, monitorTabs);
-        }*/
+        if(mainTabs.getComponentAt(0).equals(glassPaneComponent)) {
+            progressPanel.systemUp();
+            mainTabs.setComponentAt(0, monitorTabs);
+        }
         ProvisionMonitor monitor = (ProvisionMonitor) item.service;
         ProvisionMonitorPanel pmp = new ProvisionMonitorPanel(monitor,
                                                               monitorCache,
@@ -790,7 +791,6 @@ public class Main extends JFrame {
         }
         monitorPanelMap.put(monitor, pmp);
         monitorTabs.addTab(host, pmp);
-        //progressPanel.systemUp();
         return pmp;
     }
 
@@ -869,9 +869,9 @@ public class Main extends JFrame {
                 ProvisionMonitorPanel pmp = monitorPanelMap.get(item.service);
                 monitorTabs.removeTabAt(monitorTabs.indexOfComponent(pmp));
                 if(monitorCache.lookup(null, Integer.MAX_VALUE).length==0) {
-                    //deploy.setEnabled(false);
-                    //graphView.removeAllOpStrings();
-                    //graphView.systemDown();
+                    progressPanel.systemDown();
+                    mainTabs.setComponentAt(0, glassPaneComponent);
+                    mainTabs.repaint();
                 }
             }
 

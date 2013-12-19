@@ -39,8 +39,9 @@ public class ProgressPanel extends JPanel {
     public void showProgressPanel() {
         if(progressPanel==null) {
             progressPanel = new SingleComponentInfiniteProgress(false);
-            GlassPaneContainer glassPaneContainer = new GlassPaneContainer();
-            glassPaneContainer.setGlassPane(progressPanel);
+            GlassPaneContainer.findGlassPaneContainerFor(getParent()).setGlassPane(progressPanel);
+            /*GlassPaneContainer glassPaneContainer = new GlassPaneContainer();
+            glassPaneContainer.setGlassPane(progressPanel);*/
         }
         String waitMessage = "Waiting to discover the Rio system ...";
         try {
