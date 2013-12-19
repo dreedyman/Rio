@@ -388,6 +388,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             ServiceBeanInstance[] instances = (ServiceBeanInstance[]) knownInstanceMap.get(elem);
             try {
                 int alreadyRunning = mgr.startManager(listener, instances);
+                if(logger.isTraceEnabled()) {
+                    logger.trace("{} ServiceElementManager has {} instances already running {}",
+                                opString.getName(), elem.getName(), alreadyRunning);
+                }
                 if (alreadyRunning > 0) {
                     updateServiceElements(new ServiceElement[]{mgr.getServiceElement()});
                 }
@@ -401,7 +405,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 logger.warn("Starting ServiceElementManager", e);
             }
         }
-
+        if(logger.isTraceEnabled()) {
+            logger.info("Started managers for {}", opString.getName());
+        }
     }
 
     class IdleServiceListener implements ServiceChannelListener {

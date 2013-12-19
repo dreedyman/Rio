@@ -780,12 +780,7 @@ public class ServiceElementManager implements InstanceIDManager {
         boolean terminated = false;
         boolean forceClean = false;
         try {
-            logger.trace("Obtaining DestroyAdmin for [{}]", LoggingUtil.getLoggingName(svcElement));
-            Administrable admin = (Administrable)service;
-            DestroyAdmin destroyAdmin = (DestroyAdmin)admin.getAdmin();
-            logger.trace("DestroyAdmin obtained, destroy the service [{}]", LoggingUtil.getLoggingName(svcElement));
-            destroyAdmin.destroy();
-            logger.trace("The service [{}] has been destroyed", LoggingUtil.getLoggingName(svcElement));
+            doDestroyService(service, serviceUuid, clean);
             terminated = true;
         } catch(Exception e) {
             if(mgrLogger.isTraceEnabled()) {
@@ -793,9 +788,23 @@ public class ServiceElementManager implements InstanceIDManager {
             }
             
             if(!ThrowableUtil.isRetryable(e)) {
-                mgrLogger.debug("Force clean for [{}] ServiceBeanInstance [{}]",
-                               LoggingUtil.getLoggingName(svcElement), serviceUuid.toString());
+                mgrLogger.debug("Exception {}:{} is not retryable, force clean for [{}] ServiceBeanInstance [{}]",
+                               e.getClass().getName(),
+                               e.getMessage(),
+                               LoggingUtil.getLoggingName(svcElement),
+                               serviceUuid.toString());
                 forceClean = true;
+            } else {
+                try {
+                    doDestroyService(service, serviceUuid, clean);
+                } catch (RemoteException e1) {
+                    mgrLogger.debug("Retried service destroy and it failed. {}:{}, force clean for [{}] ServiceBeanInstance [{}]",
+                                    e1.getClass().getName(),
+                                    e1.getMessage(),
+                                    LoggingUtil.getLoggingName(svcElement),
+                                    serviceUuid.toString());
+                    forceClean = true;
+                }
             }
         }
         ServiceBeanInstance instance;
@@ -812,6 +821,24 @@ public class ServiceElementManager implements InstanceIDManager {
                                                                 instance);
         processEvent(event);
         return(terminated);
+    }
+
+    /**
+     * Destroy a service
+     *
+     * @param service The ServiceItem of the service to destroy
+     * @param serviceUuid The service Uuid
+     * @param clean remove service references
+     *
+     * @return True if the service is destroyed
+     */
+    void doDestroyService(final Object service, final Uuid serviceUuid, boolean clean) throws RemoteException {
+        logger.trace("Obtaining DestroyAdmin for [{}]", LoggingUtil.getLoggingName(svcElement));
+        Administrable admin = (Administrable)service;
+        DestroyAdmin destroyAdmin = (DestroyAdmin)admin.getAdmin();
+        logger.trace("DestroyAdmin obtained, destroy the service [{}]", LoggingUtil.getLoggingName(svcElement));
+        destroyAdmin.destroy();
+        logger.trace("The service [{}] has been destroyed", LoggingUtil.getLoggingName(svcElement));
     }
 
     /**

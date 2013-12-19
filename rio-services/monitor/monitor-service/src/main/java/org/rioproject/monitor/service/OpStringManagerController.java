@@ -310,15 +310,30 @@ public class OpStringManagerController {
                 if(stateManager!=null)
                     stateManager.stateChanged(opMgr, false);
                 OperationalString[] nestedStrings = opString.getNestedOperationalStrings();
+                if(logger.isTraceEnabled()) {
+                    logger.trace("[{}] nested OperationalString count: [{}]", opString.getName(), nestedStrings.length);
+                }
                 for (OperationalString nestedString : nestedStrings) {
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("Processing nested OperationalString [{}]", nestedString.getName());
+                    }
                     addOperationalString(nestedString, map, opMgr, dAdmin, listener);
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("Completed processing nested OperationalString [{}]", nestedString.getName());
+                    }
                 }
             } else {
+                if(logger.isTraceEnabled()) {
+                    logger.trace("OperationalString [{}] exists, check for parent [{}]", opString.getName(), parent);
+                }
                 if(parent != null) {
                     OpStringManager mgr = getOpStringManager(opString.getName());
                     if(mgr != null) {
                         parent.addNested(mgr);
                     }
+                }
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Completed processing OperationalString [{}] exists", opString.getName());
                 }
             }
         } finally {
@@ -334,7 +349,9 @@ public class OpStringManagerController {
                 event.setRemoteRepositories(opMgr.getRemoteRepositories());
             eventProcessor.processEvent(event);
         }
-        return (opMgr);
+        if(logger.isTraceEnabled())
+            logger.trace("Return from add OperationalString [{}]", opString.getName());
+        return opMgr;
     }
 
     public void shutdownAllManagers() {
