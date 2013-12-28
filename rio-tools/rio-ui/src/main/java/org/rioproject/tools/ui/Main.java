@@ -235,7 +235,6 @@ public class Main extends JFrame {
     }
 
     GraphView getGraphView() {
-        System.out.println("TAB COUNT: "+monitorTabs.getTabCount());
         if(monitorTabs.getTabCount()>0)
             return ((ProvisionMonitorPanel) monitorTabs.getSelectedComponent()).getGraphView();
         return null;
@@ -770,10 +769,6 @@ public class Main extends JFrame {
     }
 
     private ProvisionMonitorPanel addProvisionMonitorPanel(ServiceItem item) {
-        if(mainTabs.getComponentAt(0).equals(glassPaneComponent)) {
-            progressPanel.systemUp();
-            mainTabs.setComponentAt(0, monitorTabs);
-        }
         ProvisionMonitor monitor = (ProvisionMonitor) item.service;
         ProvisionMonitorPanel pmp = new ProvisionMonitorPanel(monitor,
                                                               monitorCache,
@@ -791,6 +786,11 @@ public class Main extends JFrame {
         }
         monitorPanelMap.put(monitor, pmp);
         monitorTabs.addTab(host, pmp);
+        if(mainTabs.getComponentAt(0).equals(glassPaneComponent)) {
+            progressPanel.systemUp();
+            mainTabs.setComponentAt(0, monitorTabs);
+            monitorTabs.setSelectedIndex(0);
+        }
         return pmp;
     }
 
