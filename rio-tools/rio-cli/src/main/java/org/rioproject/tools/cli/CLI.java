@@ -422,7 +422,10 @@ public class CLI {
         while (true) {
             try {
                 String input = br.readLine();
-                if(input != null && input.length()>0) {
+                if (input == null)
+                    //end of stream
+                    input = "exit";
+                if (input.length() > 0) {
                     if(input.equals("q") || input.equals("quit") || input.equals("exit")) {
                         try {
                             br.close();
