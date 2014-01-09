@@ -129,7 +129,7 @@ public class CybernodeUtilizationPanel extends JPanel {
             private void showPopup(MouseEvent e, int row) {
                 CybernodeNode cNode = utilizationModel.getCybernodeNode(row);
                 ServiceNode sNode = null;
-                String label;
+                final String label;
                 boolean showJConsoleOption = true;
                 if(cNode == null) {
                     sNode = utilizationModel.getServiceNode(row);
@@ -158,6 +158,14 @@ public class CybernodeUtilizationPanel extends JPanel {
                         jconsole.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent ae) {
                                 String jmxConn = JMXUtil.getJMXConnection(serviceItem.attributeSets);
+                                if(jmxConn==null) {
+                                    JOptionPane.showMessageDialog(null,
+                                                                  "There is no JMX connectivity information for ["+label+"], " +
+                                                                  "unable to start a JConsole",
+                                                                  "Missing JMX Entries",
+                                                                  JOptionPane.WARNING_MESSAGE);
+                                    return;
+                                }
                                 try {
                                     Runtime.getRuntime().exec("jconsole "+jmxConn);
                                 } catch (IOException e1) {
@@ -167,7 +175,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                         });
                     } else {
                         JOptionPane.showMessageDialog(null,
-                                                      "There is no ServiceItem for []",
+                                                      "There is no ServiceItem for ["+label+"]",
                                                       "Missing ServiceItem",
                                                       JOptionPane.WARNING_MESSAGE);
                     }
