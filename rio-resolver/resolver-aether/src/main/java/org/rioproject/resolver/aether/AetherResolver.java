@@ -110,16 +110,8 @@ public class AetherResolver implements Resolver {
             if(future==null) {
                 future = resolverExecutor.submit(new ResolvingRequestTask(request));
                 resolvingMap.put(request, future);
-                if(logger.isDebugEnabled()) {
-                    StringBuilder builder = new StringBuilder();
-                    for(RemoteRepository repository : repositories) {
-                        if(builder.length()>0)
-                            builder.append(", ");
-                        builder.append(repository.getUrl());
-                    }
-                    logger.debug(String.format("Created and set new ResolvingRequestTask for %s with repositories %s",
-                                              artifact, builder));
-                }
+                logger.debug("Created and set new ResolvingRequestTask for {} with repositories {}",
+                        artifact, repositories);
             } else {
                 request = getResolutionRequest(request);
             }
