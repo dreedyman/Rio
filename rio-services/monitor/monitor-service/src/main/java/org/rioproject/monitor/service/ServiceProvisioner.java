@@ -330,7 +330,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             throw new UnknownLeaseException("Update failed, there are no known leases.");
         }
         boolean updated = false;
-
+        ServiceResource couldNotEnsureLease = null;
         for(ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             logger.trace("Checking for InstantiatorResource match");
@@ -340,8 +340,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                              deployedServices.size(),
                              serviceLimit);
                 logger.trace("Matched InstantiatorResource");
-                if(!landlord.ensure(svcResource))
-                    throw new UnknownLeaseException("No matching Lease found");
+                if(!landlord.ensure(svcResource)) {
+                    couldNotEnsureLease = svcResource;
+                    break;
+                }
                 updated = true;
                 logger.trace("Set updated resource capabilities");
                 ir.setResourceCapability(updatedCapabilities);
@@ -364,6 +366,11 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             }
         }
 
+        if(couldNotEnsureLease!=null) {
+            selector.dropServiceResource(couldNotEnsureLease);
+            throw new UnknownLeaseException("Could not ensure lease. Lease expiration: "+couldNotEnsureLease.getExpiration()+", " +
+                                            "current time: "+System.currentTimeMillis());
+        }
         if(!updated) {
             logger.warn("Update failed, no matching registration found for {}", resource.getName());
             throw new UnknownLeaseException("Update failed, no matching registration found");
