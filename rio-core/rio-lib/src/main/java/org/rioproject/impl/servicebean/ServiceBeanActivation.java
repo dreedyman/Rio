@@ -372,7 +372,7 @@ public class ServiceBeanActivation {
                     throw new IllegalArgumentException("sbProxy is null");
                 if(context == null)
                     throw new IllegalArgumentException("context is null");
-                ServiceAdvertiser.advertise(sbProxy, context);
+                ServiceAdvertiser.advertise(sbProxy, context, false);
 
                 try {
                     ProxyPreparer prep = (ProxyPreparer)context.getConfiguration().getEntry(BOOT_COMPONENT,

@@ -25,9 +25,10 @@ import net.jini.discovery.LookupDiscovery;
 import net.jini.lookup.entry.Host;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.admin.ServiceBeanControlException;
-import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.entry.OperationalStringEntry;
+import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,9 @@ public class ServiceAdvertiser {
      * @param context The ServiceBeanContext
      * @throws ServiceBeanControlException If the service bean cannot be advertised
      */
-    public static void advertise(Object serviceProxy, ServiceBeanContext context) throws ServiceBeanControlException {
+    public static void advertise(final Object serviceProxy,
+                                 final ServiceBeanContext context,
+                                 final boolean forked) throws ServiceBeanControlException {
         if (serviceProxy == null)
             throw new IllegalArgumentException("serviceProxy is null");
         if (context == null)
@@ -141,6 +144,12 @@ public class ServiceAdvertiser {
 
                     } catch (Exception e) {
                         logger.warn("Name not found, cannot add a Name Entry", e);
+                    }
+
+                    /* If running forked, add JMX connection entries */
+                    logger.warn("Service: {}, forked? {}", serviceName, forked);
+                    if(forked) {
+                        Collections.addAll(addList, JMXUtil.getJMXConnectionEntries());
                     }
 
                     addList.addAll(context.getServiceBeanConfig().getAdditionalEntries());
@@ -347,6 +356,14 @@ public class ServiceAdvertiser {
      */
     private static void addAttributes(Entry[] attrs, JoinAdmin joinAdmin) {
         try {
+            StringBuilder builder = new StringBuilder();
+            for(Entry a : attrs) {
+                if(builder.length()>0) {
+                    builder.append(", ");
+                }
+                builder.append("[").append(a).append("]");
+            }
+            logger.warn("Adding {}", builder.toString());
             joinAdmin.addLookupAttributes(attrs);
         } catch (Exception e) {
             logger.warn("Unable to add Entry attributes", e);

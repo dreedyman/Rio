@@ -321,7 +321,8 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
             }
         }
         try {
-            ServiceAdvertiser.advertise(serviceProxy, context);
+
+            ServiceAdvertiser.advertise(serviceProxy, context, runningForked());
             logger.debug("{}: advertised", ServiceLogUtil.logName(sElem));
         } catch(ServiceBeanControlException e) {
             logger.warn("Could not advertise {}", sElem.getName());
