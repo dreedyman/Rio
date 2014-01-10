@@ -147,7 +147,8 @@ public class ServiceAdvertiser {
                     }
 
                     /* If running forked, add JMX connection entries */
-                    logger.warn("Service: {}, forked? {}", serviceName, forked);
+                    if(logger.isTraceEnabled())
+                        logger.trace("Service: {}, forked? {}", serviceName, forked);
                     if(forked) {
                         Collections.addAll(addList, JMXUtil.getJMXConnectionEntries());
                     }
@@ -363,7 +364,8 @@ public class ServiceAdvertiser {
                 }
                 builder.append("[").append(a).append("]");
             }
-            logger.warn("Adding {}", builder.toString());
+            if(logger.isTraceEnabled())
+                logger.trace("Adding {}", builder.toString());
             joinAdmin.addLookupAttributes(attrs);
         } catch (Exception e) {
             logger.warn("Unable to add Entry attributes", e);
