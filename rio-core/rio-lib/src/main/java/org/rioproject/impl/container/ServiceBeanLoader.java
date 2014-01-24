@@ -31,9 +31,8 @@ import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.config.Constants;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.impl.bean.BeanAdapter;
-import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
 import org.rioproject.impl.servicebean.DefaultServiceBeanFactory;
+import org.rioproject.impl.servicebean.DefaultServiceBeanManager;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.impl.servicebean.ServiceElementUtil;
 import org.rioproject.impl.system.ComputeResource;
@@ -90,66 +89,6 @@ public class ServiceBeanLoader {
     private final static ExecutorService service = Executors.newCachedThreadPool();
 
     /**
-     * Trivial class used as the return value by the 
-     * <code>load</code> method. This class aggregates
-     * the results of a service creation attempt: 
-     * proxy and associated ServiceBeanContext. 
-     */
-    public static class Result {
-        /** The service impl */
-        private final Object impl;
-        /** The proxy as a MarshalledInstance */
-        private final MarshalledInstance mi;
-        /** Associated <code>ServiceBeanContext</code> object */
-        private final ServiceBeanContext context;
-        /** Uuid of the service */
-        private final Uuid serviceID;
-        /* The wrapping BeanAdapter, may be null */
-        private final BeanAdapter beanAdapter;
-
-        /**
-         * Trivial constructor. Simply assigns each argument
-         * to the appropriate field.
-         *
-         * @param c The ServiceBeanContext
-         * @param o The resulting loaded implementation
-         * @param m The proxy as a MarshalledInstance
-         * @param s The id of the service
-         */
-        public Result(final ServiceBeanContext c,
-                      final Object o,
-                      final BeanAdapter beanAdapter,
-                      final MarshalledInstance m,
-                      final Uuid s) {
-            context = c;
-            impl = o;
-            this.beanAdapter = beanAdapter;
-            mi = m;
-            serviceID = s;
-        }
-
-        public Object getImpl() {
-            return impl;
-        }
-
-        public MarshalledInstance getMarshalledInstance() {
-            return mi;
-        }
-
-        public ServiceBeanContext getServiceBeanContext() {
-            return context;
-        }
-
-        public Uuid getServiceID() {
-            return serviceID;
-        }
-
-        public BeanAdapter getBeanAdapter() {
-            return beanAdapter;
-        }
-    }
-
-    /**
      * Clean up resources
      * <br>
      * <li>
@@ -158,11 +97,11 @@ public class ServiceBeanLoader {
      * <li>Remove any downloaded jars
      * </ul>
      *
-     * @param result The Result object to unload
+     * @param result The ServiceBeanLoaderResult object to unload
      * @param elem The ServiceElement to use as a reference
      */
-    public static void unload(final Result result, final ServiceElement elem) {
-        unload(result.impl.getClass().getClassLoader(), elem);
+    public static void unload(final ServiceBeanLoaderResult result, final ServiceElement elem) {
+        unload(result.getImpl().getClass().getClassLoader(), elem);
     }
 
     /**
@@ -231,17 +170,17 @@ public class ServiceBeanLoader {
      * @param serviceID Uuid for the service
      * @param jsbManager The ServiceBeanManager
      * @param container The ServiceBeanContainer
-     * 
-     * @return A Result object with attributes to access the instantiated
+     *
+     * @return A ServiceBeanLoaderResult object with attributes to access the instantiated
      * service
-     * 
+     *
      * @throws org.rioproject.deploy.ServiceBeanInstantiationException If errors occur while creating the
      * service bean
      */
-    public static Result load(final ServiceElement sElem,
-                              final Uuid serviceID,
-                              final ServiceBeanManager jsbManager,
-                              final ServiceBeanContainer container) throws ServiceBeanInstantiationException {
+    public static ServiceBeanLoaderResult load(final ServiceElement sElem,
+                                               final Uuid serviceID,
+                                               final ServiceBeanManager jsbManager,
+                                               final ServiceBeanContainer container) throws ServiceBeanInstantiationException {
         ServiceBeanFactory.Created created = null;
         MarshalledInstance marshalledProxy = null;
         ServiceBeanContext context;
@@ -488,7 +427,7 @@ public class ServiceBeanLoader {
         } finally {                
             currentThread.setContextClassLoader(currentClassLoader);
         }
-        return(new Result(context, created.getImpl(), created.getBeanAdapter(), marshalledProxy, serviceIDToUse));
+        return(new ServiceBeanLoaderResult(context, created.getImpl(), created.getBeanAdapter(), marshalledProxy, serviceIDToUse));
     }  
 
     static synchronized Map<String, ProvisionedResources> provisionService(final ServiceElement elem,
@@ -587,7 +526,10 @@ public class ServiceBeanLoader {
          */
         if(exportArtifact==null && implArtifact==null) {
             String localCodebase = System.getProperty(Constants.CODESERVER);
-            String[] requisiteExports = new String[]{"rio-dl-"+RioVersion.VERSION+".jar", "jsk-dl-2.2.1.jar", "jmx-lookup-2.1.jar"};
+            /*File serviceUiJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");
+            File jskDlJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");*/
+
+            String[] requisiteExports = new String[]{"rio-dl-"+RioVersion.VERSION+".jar", "jsk-dl-2.2.1.jar"};
             for(String export : requisiteExports) {
                 boolean found = false;
                 for(URL u : dlPR.getJars()) {

@@ -117,7 +117,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
     /** Logger */
     private final static Logger logger = LoggerFactory.getLogger(ServiceBeanDelegateImpl.class.getName());
     /** Result from loading the service */
-    protected ServiceBeanLoader.Result loadResult;
+    protected ServiceBeanLoaderResult loadResult;
     private AtomicBoolean isDiscarded = new AtomicBoolean(false);
 
     /**
@@ -690,7 +690,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
         return serviceProxy;
     }
 
-    public ServiceBeanLoader.Result getLoadedServiceResult() {
+    public ServiceBeanLoaderResult getLoadedServiceResult() {
         return loadResult;
     }
 

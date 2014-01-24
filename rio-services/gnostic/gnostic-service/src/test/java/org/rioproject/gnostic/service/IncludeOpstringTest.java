@@ -34,7 +34,7 @@ public class IncludeOpstringTest {
         String baseDir = System.getProperty("user.dir");
         File file = new File(baseDir, "../src/main/opstring/gnostic.groovy");
         GroovyDSLOpStringParser parser = new GroovyDSLOpStringParser();
-        List<OpString> opStrings = parser.parse(file, null, null, null, null);
+        List<OpString> opStrings = parser.parse(file, null, null, null);
         Assert.assertEquals(1, opStrings.size());
     }
 
@@ -43,6 +43,6 @@ public class IncludeOpstringTest {
         String baseDir = System.getProperty("user.dir");
         File file = new File(baseDir, "src/test/opstring/testOpString.groovy");
         GroovyDSLOpStringParser parser = new GroovyDSLOpStringParser();
-        List<OpString> opStrings = parser.parse(file, null, null, null, null);
+        List<OpString> opStrings = parser.parse(file, null, null, null);
     }
 }
