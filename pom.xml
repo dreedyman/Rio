@@ -30,10 +30,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:https://github.com/dreedyman/Rio
+        <connection>scm:git:https://github.com/dreedyman/Rio
         </connection>
-        <developerConnection>scm:https://github.com/dreedyman/Rio
-        </developerConnection>
+        <developerConnection>scm:git:https://github.com/dreedyman/Rio</developerConnection>
         <url>https://github.com/dreedyman/Rio</url>
     </scm>
 
@@ -247,12 +246,6 @@
                 <artifactId>serviceui</artifactId>
                 <version>${river.version}</version>
             </dependency>
-            
-            <dependency>
-                <groupId>net.jini.lookup</groupId>
-                <artifactId>jmx-lookup</artifactId>
-                <version>2.1</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -438,7 +431,7 @@
         <junit.version>4.8.2</junit.version>
         <rio.version>5.0-M4</rio.version>
         <rio.plugin.version>5.0</rio.plugin.version>
-        <river.version>2.2.1</river.version>
+        <river.version>2.2.2</river.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>

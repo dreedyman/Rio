@@ -111,20 +111,17 @@ public final class Installer {
             install(gnosticService, null, FileHelper.find(libDir, "gnostic-service"), aetherServiceInstance);
 
             File jskPlatformJar = FileHelper.find(libDir, "jsk-platform");
-            File jmxLookupJar = FileHelper.find(libDlDir, "jmx-lookup");
             File jskDLJar = FileHelper.find(libDlDir, "jsk-dl");
             File reggieDLJar = FileHelper.find(libDlDir, "reggie-dl");
             File serviceUIJar = FileHelper.find(libDlDir, "serviceui");
 
             /* Install third party jars */
             Artifact jskPlatform = createArtifact("net.jini:jsk-platform", jskPlatformJar);
-            Artifact jmxLookup = createArtifact("net.jini.lookup:jmx-lookup", jmxLookupJar);
             Artifact jskDL = createArtifact("net.jini:jsk-dl", jskDLJar);
             Artifact reggieDL = createArtifact("org.apache.river:reggie-dl", reggieDLJar);
             Artifact serviceUI = createArtifact("net.jini.lookup:serviceui", serviceUIJar);
 
             install(jskPlatform, FileHelper.find(pomDir, "jsk-platform"), jskPlatformJar, aetherServiceInstance);
-            install(jmxLookup, FileHelper.find(pomDir, "jmx-lookup"), jmxLookupJar, aetherServiceInstance);
             install(jskDL, FileHelper.find(pomDir, "jsk-dl"), jskDLJar, aetherServiceInstance);
             install(reggieDL, FileHelper.find(pomDir, "reggie-dl"), reggieDLJar, aetherServiceInstance);
             install(serviceUI, FileHelper.find(pomDir, "serviceui"), serviceUIJar, aetherServiceInstance);

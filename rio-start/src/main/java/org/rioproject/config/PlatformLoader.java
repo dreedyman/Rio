@@ -136,10 +136,19 @@ public class PlatformLoader {
         if(!rioHomeDir.exists())
             throw new Exception(rioHome+" does not exist");
 
-        File rioJar = new File(rioHomeDir, "lib"+File.separator+String.format("rio-lib-%s.jar", RioVersion.VERSION));
+        File rioApiJar = new File(rioHomeDir, "lib-dl"+File.separator+String.format("rio-api-%s.jar", RioVersion.VERSION));
+        File rioProxyJar = new File(rioHomeDir, "lib-dl"+File.separator+String.format("rio-proxy-%s.jar", RioVersion.VERSION));
+        File serviceUiJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");
+        File rioLibJar = new File(rioHomeDir, "lib"+File.separator+String.format("rio-lib-%s.jar", RioVersion.VERSION));
+        StringBuilder pathBuilder = new StringBuilder();
+        pathBuilder.append(rioLibJar.getAbsolutePath()).append(File.pathSeparator);
+        pathBuilder.append(rioProxyJar.getAbsolutePath()).append(File.pathSeparator);
+        pathBuilder.append(rioApiJar.getAbsolutePath()).append(File.pathSeparator);
+        pathBuilder.append(serviceUiJar.getAbsolutePath());
+
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig("Rio",
                                                                        RioVersion.VERSION,
-                                                                       rioJar.getAbsolutePath());
+                                                                       pathBuilder.toString());
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");
 

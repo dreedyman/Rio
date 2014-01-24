@@ -38,11 +38,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>net.jini.lookup</groupId>
-            <artifactId>jmx-lookup</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
     </dependencies>
   
     <build>
@@ -62,7 +58,7 @@
                                 <includes>
                                     <include>org.rioproject.cybernode:cybernode-api</include>
                                     <include>org.rioproject.monitor:monitor-api</include>
-                                    <include>net.jini.lookup:jmx-lookup</include>
+                                    <include>net.jini.lookup:*</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

@@ -105,7 +105,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <excludes>
                 <exclude>net.jini:jsk-dl</exclude>
-                <exclude>net.jini.lookup:jmx-lookup</exclude>
                 <exclude>net.jini.lookup:serviceui</exclude>
                 <exclude>org.apache.river:reggie-dl</exclude>
                 <exclude>org.rioproject.cybernode:cybernode-api:jar</exclude>
@@ -157,12 +156,11 @@
             <outputDirectory>lib</outputDirectory>
         </dependencySet>
 
-        <!-- Get jsk-dl.jar, jmx-lookup.jar, reggie-dl.jar and serviceui.jar into the lib-dl directory -->
+        <!-- Get jsk-dl.jar, reggie-dl.jar and serviceui.jar into the lib-dl directory -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>net.jini:jsk-dl</include>
-                <include>net.jini.lookup:jmx-lookup</include>
                 <include>net.jini.lookup:serviceui</include>
                 <include>org.apache.river:reggie-dl</include>
             </includes>

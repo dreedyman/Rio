@@ -104,7 +104,7 @@
                                     <include>org.rioproject:rio-start</include>
                                     <include>org.rioproject:webster</include>
                                     <include>org.rioproject.event-collector:event-collector-api</include>
-                                    <include>net.jini.lookup:jmx-lookup</include>
+                                    <include>net.jini.lookup:*</include>
                                     <include>net.jini.lookup:serviceui</include>
                                     <include>net.jini:jsk-lib</include>
                                     <include>net.jini:jsk-platform</include>

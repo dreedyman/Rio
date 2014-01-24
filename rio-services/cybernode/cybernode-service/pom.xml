@@ -42,11 +42,6 @@
 
         <dependency>
 		    <groupId>net.jini.lookup</groupId>
-		    <artifactId>jmx-lookup</artifactId>
-        </dependency>
-
-        <dependency>
-		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
         </dependency>
 
