@@ -52,7 +52,6 @@ public class LoadConfigurationAsHttpResourceTest {
         File file = new File("src/test/resources/opstring/simple_opstring_with_http_config.groovy");
         List<OpString> opStrings = opStringParser.parse(file,   // opstring
                                                         null,     // parent classloader
-                                                        null,     // defaultExportJars
                                                         null,     // defaultGroups
                                                         null);    // loadPath
         ServiceElement serviceElement = opStrings.get(0).getServices()[0];

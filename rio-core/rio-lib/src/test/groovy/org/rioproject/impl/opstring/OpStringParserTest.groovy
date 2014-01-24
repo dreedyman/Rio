@@ -47,7 +47,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testAssociationVersion() {
         File file = new File("src/test/resources/opstrings/association_version.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         ServiceElement serviceElement = opstring.services[0]
@@ -57,7 +57,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testAddedAttributes() {
         File file = new File("src/test/resources/opstrings/attributes.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         ServiceElement serviceElement = opstring.services[0]
@@ -67,7 +67,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testUndeployOption() {
         File file = new File("src/test/resources/opstrings/attributes.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "There should be an UndeployOption for IDLE", UndeployOption.Type.WHEN_IDLE,
@@ -80,7 +80,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testAssociationWithNoOpStringFiltering() {
         File file = new File("src/test/resources/opstrings/monitorAssociation.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         ServiceElement serviceElement = opstring.services[0]
@@ -91,7 +91,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testRangeParsing() {
         File file = new File("src/test/resources/opstrings/servicebeanRange.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals 50, opstring.services.length
@@ -99,7 +99,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testSlaExample() {
         File file = new File("src/test/resources/opstrings/slaexample.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
 
@@ -116,7 +116,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testAssociationEmpty() {
         File file = new File("src/test/resources/opstrings/association_empty.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
 
@@ -134,7 +134,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testAssociationInjectProperty() {
         File file = new File("src/test/resources/opstrings/association_lazy.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
 
@@ -156,7 +156,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/external.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -171,7 +170,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/locators.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -193,7 +191,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/parameters.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -210,7 +207,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/systemRequirements_declarations.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -325,7 +321,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/bean_empty.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -344,7 +339,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/springDM.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -394,7 +388,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/outer.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -414,7 +407,6 @@ class OpStringParserTest extends GroovyTestCase {
         File  file = new File("src/test/resources/opstrings/download.groovy")
         def opstrings = dslParser.parse(file,   // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -442,7 +434,6 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/outer_multi.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -464,7 +455,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnSimpleBeanExample() {
         File file = new File("src/test/resources/opstrings/bean.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Hello World Example', opstring.name
@@ -487,7 +478,7 @@ class OpStringParserTest extends GroovyTestCase {
     }
 
     def doTestParserOnCalculatorExampleOnFile(parser, file) {
-        def opstrings = parser.parse(file, null, null, null, null)
+        def opstrings = parser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Calculator', opstring.name
@@ -561,7 +552,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnEventsExample() {
         File file = new File("src/test/resources/opstrings/events.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Events Example', opstring.name
@@ -598,7 +589,7 @@ class OpStringParserTest extends GroovyTestCase {
         testParserOnServiceBeanExampleFromFile dslParser, new File("src/test/resources/opstrings/servicebean.groovy")
     }
     void testParserOnServiceBeanExampleFromFile(parser, file) {
-        def opstrings = parser.parse(file, null, null, null, null)
+        def opstrings = parser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'ServiceBean Example', opstring.name
@@ -616,7 +607,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnSpringBeanExample() {
         File file = new File("src/test/resources/opstrings/springbean.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Hello World Example', opstring.name
@@ -634,7 +625,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnTomcatDeployment() {
         File file = new File("src/test/resources/opstrings/tomcat.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Tomcat Deploy', opstring.name
@@ -678,7 +669,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnOutriggerLite() {
         File file = new File("src/test/resources/opstrings/outrigger_lite.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Space', opstring.name
@@ -714,7 +705,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnOutrigger() {
         File file = new File("src/test/resources/opstrings/outrigger.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Outrigger', opstring.name
@@ -747,7 +738,7 @@ class OpStringParserTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/rioexample.groovy")
         System.setProperty('org.rioproject.codeserver', 'http://somefakedthing')
 
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Echo', opstring.name
@@ -804,7 +795,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnGridSampleForGettingStartedGuide() {
         File file = new File("src/test/resources/opstrings/grid.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Grid', opstring.name
@@ -827,7 +818,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnTerracotaServerDeployment() {
         File file = new File("src/test/resources/opstrings/terracottaServer.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Terracotta-Server Group', opstring.name
@@ -853,7 +844,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnTerracotaClientDeployment() {
         File file = new File("src/test/resources/opstrings/terracottaClient.groovy")
-        def opstrings = dslParser.parse(file, null, null, null, null)
+        def opstrings = dslParser.parse(file, null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Terracotta-SharedEditor', opstring.name
@@ -876,7 +867,7 @@ class OpStringParserTest extends GroovyTestCase {
 
     void testParserOnMuves() {
         def opstrings = dslParser.parse(new File("src/test/resources/opstrings/muves.rio.groovy"),
-                                        null, null, null, null)
+                                        null, null, null)
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
         OpString opstring = opstrings[0]
         assertEquals "The OpString name is not valid", 'Muves', opstring.name

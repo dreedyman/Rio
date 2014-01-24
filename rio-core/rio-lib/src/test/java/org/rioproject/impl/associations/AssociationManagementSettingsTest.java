@@ -36,7 +36,7 @@ public class AssociationManagementSettingsTest {
     public void testAssociationManagementParsing() {
         File file = new File("src/test/resources/opstrings/association_management.groovy");
         OpStringParser dslParser = new GroovyDSLOpStringParser();
-        List<OpString> opstrings = dslParser.parse(file, null, null, null, null);
+        List<OpString> opstrings = dslParser.parse(file, null, null, null);
         Assert.assertEquals("There should be one and only one opstring", 1, opstrings.size());
         OpString opstring = opstrings.get(0);
         ServiceElement serviceElement = opstring.getServices()[0];

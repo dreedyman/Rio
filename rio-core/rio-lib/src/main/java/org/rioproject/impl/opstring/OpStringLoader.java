@@ -41,20 +41,13 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class OpStringLoader {
     private ClassLoader loader;
-    private String[] exportJars;
     private String[] groups;
     /** Path location of an OperationalString loaded from the file system */
     private String loadPath;
     /** Default FaultDetectionHandler */
-    public static final String DEFAULT_FDH =
-        "org.rioproject.impl.fdh.AdminFaultDetectionHandler";
+    public static final String DEFAULT_FDH = "org.rioproject.impl.fdh.AdminFaultDetectionHandler";
     private static final String OPSTRING_PARSER_SELECTION_STRATEGY_LOCATION =
         "META-INF/org/rioproject/opstring/OpStringParserSelectionStrategy";
-    /** Default array of export jar names */
-    public static final String[] DEFAULT_EXPORT_JARS = new String[]{"rio-api.jar",
-                                                                    "jsk-dl.jar",
-                                                                    "jmx-lookup.jar",
-                                                                    "serviceui.jar"};
     /**
      * Simple constructor that creates an {@code OpStringLoader}
      */
@@ -69,23 +62,9 @@ public class OpStringLoader {
      */
     public OpStringLoader(ClassLoader loader) {
         this.loader = loader;
-        this.exportJars = DEFAULT_EXPORT_JARS;
         String group = System.getProperty(Constants.GROUPS_PROPERTY_NAME);
         if (group != null)
             this.groups = new String[]{group};
-    }
-
-    /**
-     * Set an array of jar names to be always included in a service's
-     * declaration
-     *
-     * @param jars An array of jar names which will be verified as part of the
-     * services interface resources
-     */
-    public void setDefaultExportJars(String[] jars) {
-        if(jars==null)
-            return;
-        exportJars = new String[jars.length];
     }
 
     /**
@@ -183,7 +162,7 @@ public class OpStringLoader {
             //ignore
         }
         // parse the source
-        List<OpString> opstrings = parser.parse(source, loader, exportJars, groups, loadPath);
+        List<OpString> opstrings = parser.parse(source, loader, groups, loadPath);
         return opstrings.toArray(new OperationalString[opstrings.size()]);
     }
 

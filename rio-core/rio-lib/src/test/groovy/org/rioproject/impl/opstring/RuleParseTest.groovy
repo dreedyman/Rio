@@ -15,14 +15,10 @@
  */
 package org.rioproject.impl.opstring
 
-import org.rioproject.impl.opstring.GroovyDSLOpStringParser
-import org.rioproject.impl.opstring.OpString
-import org.rioproject.impl.opstring.OpStringParser
 import org.rioproject.opstring.ServiceElement
 import org.rioproject.sla.RuleMap
-import org.rioproject.sla.RuleMap.ServiceDefinition
 import org.rioproject.sla.RuleMap.RuleDefinition
-
+import org.rioproject.sla.RuleMap.ServiceDefinition
 /**
  * Test rule parsing
  */
@@ -33,7 +29,6 @@ class RuleParseTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/rules.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -72,7 +67,6 @@ class RuleParseTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/rules2.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()
@@ -111,7 +105,6 @@ class RuleParseTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/rules3.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()

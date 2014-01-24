@@ -69,9 +69,17 @@ class GroovyDSLOpStringParser implements OpStringParser {
     Map<String, List<OpString>> nestedTable = new HashMap<String, List<OpString>>()
     def logger = LoggerFactory.getLogger(getClass().name);
 
+    @Deprecated
     public List<OpString> parse(final Object source,
                                 final ClassLoader loader,
-                                final String[] defaultExportJars,
+                                String[] defaultExportJars,
+                                final String[] defaultGroups,
+                                final Object loadPath) {
+        return parse(source, loader, defaultGroups, loadPath)
+    }
+
+    public List<OpString> parse(final Object source,
+                                final ClassLoader loader,
                                 final String[] defaultGroups,
                                 final Object loadPath) {
         logger.debug "Parsing source $source"
@@ -677,7 +685,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                     throw new DSLException("Unable to resolve and include "+opStringRef)
                 def includes
                 try {
-                    includes = parse(location, loader, defaultExportJars, defaultGroups, loadPath)
+                    includes = parse(location, loader, defaultGroups, loadPath)
 
                     includes.each {
                         List<OpString> nested = nestedTable.get(opStringName)

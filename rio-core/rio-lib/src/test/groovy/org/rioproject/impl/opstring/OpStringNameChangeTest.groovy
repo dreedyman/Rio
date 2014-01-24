@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 package org.rioproject.impl.opstring
-
 import org.rioproject.associations.AssociationDescriptor
-import org.rioproject.impl.opstring.GroovyDSLOpStringParser
-import org.rioproject.impl.opstring.OpString
-import org.rioproject.impl.opstring.OpStringParser
-import org.rioproject.opstring.ServiceElement;
-
+import org.rioproject.opstring.ServiceElement
 /**
  * Test changing the name of an opstring and make sure all embedded opstring
  * name refs are changed
@@ -33,7 +28,6 @@ class OpStringNameChangeTest extends GroovyTestCase {
         File file = new File("src/test/resources/opstrings/calculator.groovy")
         def opstrings = dslParser.parse(file,     // opstring
                                         null,     // parent classloader
-                                        null,     // defaultExportJars
                                         null,     // defaultGroups
                                         null)     // loadPath
         assertEquals "There should be one and only one opstring", 1, opstrings.size()

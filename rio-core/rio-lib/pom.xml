@@ -68,11 +68,6 @@
 
         <dependency>
 		    <groupId>net.jini.lookup</groupId>
-		    <artifactId>jmx-lookup</artifactId>
-        </dependency>
-
-		<dependency>
-		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
         </dependency>
 
@@ -110,36 +105,17 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.rioproject:rio-api</include>
-                                    <include>org.rioproject:rio-proxy</include>
-                                    <include>net.jini.lookup:*</include>
-                                </includes>
-                            </artifactSet>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Implementation-Title>Rio Project</Implementation-Title>
-                                        <Implementation-Version>${project.version}</Implementation-Version>
-                                        <Rio-Version>${project.version}</Rio-Version>
-                                        <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>rio-start-${river.version}.jar jsk-lib-${river.version}.jar jsk-platform-${river.version}.jar</Class-Path>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Implementation-Title>Rio Project</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Rio-Version>${project.version}</Rio-Version>
+                            <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
 
             <plugin>

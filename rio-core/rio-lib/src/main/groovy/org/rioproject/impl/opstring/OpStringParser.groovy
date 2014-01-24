@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 package org.rioproject.impl.opstring
-
-import org.rioproject.impl.opstring.OpString
-
 /**
  * Defines the semantics for an OperationalString parser
  *
  * @author Jerome Bernard
+ * @author Dennis Reedy
  */
 interface OpStringParser {
+
+    def List<OpString> parse(source, ClassLoader loader, String[] defaultGroups, loadPath)
+
+    @Deprecated
     def List<OpString> parse(source,
                              ClassLoader loader,
                              String[] defaultExportJars,
