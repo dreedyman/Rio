@@ -58,6 +58,7 @@
                                 <includes>
                                     <include>org.rioproject.cybernode:cybernode-api</include>
                                     <include>org.rioproject.monitor:monitor-api</include>
+                                    <include>org.rioproject:rio-api</include>
                                     <include>net.jini.lookup:*</include>
                                 </includes>
                             </artifactSet>
@@ -70,7 +71,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Rio-Version>${project.version}</Rio-Version>
                                         <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                                        <Class-Path>rio-start-${project.version}.jar rio-lib-${project.version}.jar webster-${project.version}.jar groovy-all-${groovy.version}.jar</Class-Path>
+                                        <Class-Path>rio-platform-${project.version}.jar rio-lib-${project.version}.jar webster-${project.version}.jar groovy-all-${groovy.version}.jar</Class-Path>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
