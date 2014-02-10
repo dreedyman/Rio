@@ -425,7 +425,7 @@
   </modules>
 
     <properties>
-        <groovy.version>2.1.3</groovy.version>
+        <groovy.version>2.2.1</groovy.version>
         <gmaven.version>1.4</gmaven.version>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
         <junit.version>4.8.2</junit.version>
