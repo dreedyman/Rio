@@ -113,6 +113,11 @@ public class DefaultOpStringManagerTest {
         Assert.assertTrue(opStringManagerController.getOpStringManagers().length==0);
     }
 
+    @Test
+    public void concurrentCreationTest() {
+
+    }
+
     DeployAdmin createDeployAdmin() {
         return (DeployAdmin) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                                                     new Class[]{DeployAdmin.class},

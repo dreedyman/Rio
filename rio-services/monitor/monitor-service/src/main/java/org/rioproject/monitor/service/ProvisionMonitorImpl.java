@@ -226,8 +226,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                     admin = new ProvisionMonitorAdminImpl(this, adminExporter);
             }
             adminProxy = admin.getServiceAdmin();
-        } catch (Throwable t) {
-            logger.warn("Getting ProvisionMonitorAdminImpl", t);
+        } catch (Exception e) {
+            logger.warn("Getting ProvisionMonitorAdminImpl", e);
         }
         return (adminProxy);
     }
@@ -512,16 +512,16 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
 
                 for (OperationalString opString : opStrings) {
                     if (!opStringMangerController.opStringExists(opString.getName())) {
-                        logger.info("Deploying Operational String [{}]", opString.getName());
+                        logger.info("(1) Deploying Operational String [{}]", opString.getName());
                         opStringMangerController.addOperationalString(opString, map, null, null, listener);
                     } else {
                         logger.info("Operational String [{}] already deployed", opString.getName());
                     }
                 }
             }
-        } catch(Throwable t) {
-            logger.warn("Problem opening or deploying {}", opStringUrl.toExternalForm(), t);
-            throw new OperationalStringException("Deploying OperationalString", t);
+        } catch(Exception e) {
+            logger.warn("Problem opening or deploying {}", opStringUrl.toExternalForm(), e);
+            throw new OperationalStringException("Deploying OperationalString", e);
         }
         return (map);
     }
@@ -536,7 +536,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         Map<String, Throwable> map = new HashMap<String, Throwable>();
         try {
             if(!opStringMangerController.opStringExists(opString.getName())) {
-                logger.info("Deploying Operational String [{}]", opString.getName());
+                logger.info("(2) Deploying Operational String [{}]", opString.getName());
 
                 DeployRequest request = new DeployRequest(opString, (RemoteRepository[])null);
                 deploymentVerifier.verifyDeploymentRequest(request);
@@ -546,11 +546,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 if(logger.isInfoEnabled())
                     logger.info("Operational String [{}] already deployed", opString.getName());
             }
-        } catch(Throwable t) {
-            logger.warn("Deploying OperationalString [{}]", opString.getName(), t);
-            if(!(t instanceof OperationalStringException))
-                throw new OperationalStringException(String.format("Deploying OperationalString [%s]", opString.getName()), t);
-            throw (OperationalStringException)t;
+        } catch(Exception e) {
+            logger.warn("Deploying OperationalString [{}]", opString.getName(), e);
+            if(!(e instanceof OperationalStringException))
+                throw new OperationalStringException(String.format("Deploying OperationalString [%s]", opString.getName()), e);
+            throw (OperationalStringException)e;
         }
         return (map);
     }

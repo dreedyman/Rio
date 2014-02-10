@@ -40,7 +40,7 @@ import java.util.*;
  */
 public class OpStringManagerController {
     /** Collection for all OperationalString OpStringManager instances */
-    private final List<OpStringManager> opStringManagers = new ArrayList<OpStringManager>();
+    private final Set<OpStringManager> opStringManagers = new HashSet<OpStringManager>();
     /** Collection for all pending (in process) OperationalString
      * OpStringManager instances */
     private final List<OpStringManager> pendingManagers = new ArrayList<OpStringManager>();
@@ -112,7 +112,7 @@ public class OpStringManagerController {
      */
     public OperationalString[] getOperationalStrings() {
         if(opStringManagers.isEmpty())
-            return (new OperationalString[0]);
+            return new OperationalString[0];
         List<OpStringManager> list = new ArrayList<OpStringManager>();
         for(OpStringManager opMgr : getOpStringManagers()) {
             if(opMgr.isTopLevel())
@@ -253,11 +253,11 @@ public class OpStringManagerController {
      *
      * @throws Exception if an OpStringManger cannot be created
      */
-    public OpStringManager addOperationalString(final OperationalString opString,
-                                                final Map<String, Throwable> map,
-                                                final OpStringManager parent,
-                                                final DeployAdmin dAdmin,
-                                                final ServiceProvisionListener listener) throws Exception {
+    public synchronized OpStringManager addOperationalString(final OperationalString opString,
+                                                             final Map<String, Throwable> map,
+                                                             final OpStringManager parent,
+                                                             final DeployAdmin dAdmin,
+                                                             final ServiceProvisionListener listener) throws Exception {
         DefaultOpStringManager opMgr = null;
         boolean active = dAdmin==null;
         try {
@@ -278,10 +278,15 @@ public class OpStringManagerController {
                     pendingManagers.add(opMgr);
                 }
 
-                Map<String, Throwable> errorMap = opMgr.init(active, serviceProvisioner, uuid, listener);
+                boolean added;
                 synchronized(opStringManagers) {
-                    opStringManagers.add(opMgr);
+                    added = opStringManagers.add(opMgr);
                 }
+                if(!added) {
+                    logger.info("Operational String [{}] already deployed", opString.getName());
+                    return null;
+                }
+                Map<String, Throwable> errorMap = opMgr.init(active, serviceProvisioner, uuid, listener);
 
                 if(dAdmin!=null) {
                     OperationalStringManager activeMgr;
@@ -385,14 +390,13 @@ public class OpStringManagerController {
      *
      * @return true if the  OperationalString with the provided name is loaded
      */
-    public boolean opStringExists(final String opStringName) {
+    public synchronized boolean opStringExists(final String opStringName) {
         boolean exists = false;
-        synchronized(pendingManagers) {
-            for (OpStringManager mgr : pendingManagers) {
-                if (mgr.getName().equals(opStringName)) {
-                    exists = true;
-                    break;
-                }
+        OpStringManager[] pending = getPendingOpStringManagers();
+        for (OpStringManager mgr : pending) {
+            if (mgr.getName().equals(opStringName)) {
+                exists = true;
+                break;
             }
         }
         if(!exists) {
@@ -403,7 +407,6 @@ public class OpStringManagerController {
                 }
             }
         }
-
         return (exists);
     }
 

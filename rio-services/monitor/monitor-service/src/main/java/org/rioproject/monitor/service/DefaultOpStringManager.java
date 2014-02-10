@@ -1068,13 +1068,14 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             if (mgr == null)
                 throw new OperationalStringException("Unmanaged ServiceElement [" + sElem.getName() + "]", false);
             return (mgr.getServiceBeanInstances());
-        } catch (Throwable t) {
-            logger.warn("Getting ServiceBeanInstances for ServiceElement [{}]", sElem.getName(), t);
-            if (t instanceof OperationalStringException)
-                throw (OperationalStringException) t;
-            else
+        } catch (Exception e) {
+            if (e instanceof OperationalStringException) {
+                throw (OperationalStringException) e;
+            } else {
+                logger.warn("Getting ServiceBeanInstances for ServiceElement [{}]", sElem.getName(), e);
                 throw new OperationalStringException("Getting ServiceBeanInstances for ServiceElement " +
-                                                     "["+sElem.getName() + "]", t);
+                                                     "["+sElem.getName() + "]", e);
+            }
         }
     }
 
@@ -1479,5 +1480,19 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             scheduledTaskList.remove(task);
     }
 
-} // End DefaultOpStringManager
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        DefaultOpStringManager manager = (DefaultOpStringManager) o;
+        return opString.equals(manager.opString);
+    }
+
+    @Override
+    public int hashCode() {
+        return opString.hashCode();
+    }
+}
 

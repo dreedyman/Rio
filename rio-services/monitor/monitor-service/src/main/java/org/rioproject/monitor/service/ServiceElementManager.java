@@ -488,9 +488,14 @@ public class ServiceElementManager implements InstanceIDManager {
                         int toRemove = count - svcElement.getPlanned();
                         ProvisionRequest[] removed = provisioner.getPendingManager().removeServiceElement(svcElement,
                                                                                                           toRemove);
-                        for (ProvisionRequest aRemoved : removed)
+                        for (ProvisionRequest aRemoved : removed) {
+                            logger.info("===> [{}] service-element: {} service-bean-config: {}",
+                                        LoggingUtil.getLoggingName(svcElement),
+                                        aRemoved.getServiceElement(),
+                                        aRemoved.getServiceElement().getServiceBeanConfig());
                             removeInstanceID(aRemoved.getServiceElement().getServiceBeanConfig().getInstanceID(),
                                              "removal from pending testManager");
+                        }
                     } else {
                         provisioner.getPendingManager().updateProvisionRequests(svcElement, provListener);
                     }
@@ -1262,8 +1267,10 @@ public class ServiceElementManager implements InstanceIDManager {
         if(lCache!=null && sElemListener!=null) {
             try {
                 lCache.removeListener(sElemListener);
-            } catch (Throwable t) {
-                mgrLogger.warn("Terminating LookupCache", t);
+            } catch (IllegalStateException e) {
+                mgrLogger.warn("Terminating LookupCache: {}", e.getMessage());
+            } catch (Exception e) {
+                mgrLogger.warn("Terminating LookupCache", e);
             }
         }
 
@@ -1975,7 +1982,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 return;
             ServiceBeanInstance instance;
             Uuid uuid = UuidFactory.create(sID.getMostSignificantBits(), sID.getLeastSignificantBits());
-            mgrLogger.warn("\n********************************\n[{}] service failure, type: {}, proxy: {}, active monitor? {}\n********",
+            mgrLogger.warn("\n********************************\n[{}] service failure, type: {}, proxy: {}, active monitor? {}\n********************************",
                            LoggingUtil.getLoggingName(svcElement),
                            svcElement.getProvisionType(),
                            proxy.getClass().getName(),
@@ -2040,6 +2047,11 @@ public class ServiceElementManager implements InstanceIDManager {
                     provRequest.getServiceElement().setServiceBeanConfig(sbConfig);
                 }
 
+                if(shutdown.get()) {
+                    logger.warn("Cancel provision task, in the process of termination for [{}]",
+                                LoggingUtil.getLoggingName(svcElement));
+                    return;
+                }
                 provRequest.getServiceElement().setPlanned(maintain);
                 if(svcElement.getProvisionType()==ProvisionType.DYNAMIC) {
                     int pending = provisioner.getPendingManager().getCount(svcElement);
