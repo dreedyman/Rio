@@ -83,7 +83,7 @@ public class SystemCapabilitiesTest {
     @Test
     public void testGetPlatformCapabilities() throws Exception {
         PlatformCapability[] pCaps = systemCapabilities.getPlatformCapabilities(new DynamicConfiguration());
-        Assert.assertEquals("Expected 7", 7, pCaps.length);
+        Assert.assertTrue("Expected at least 7", pCaps.length>=7);
 
         ProcessorArchitecture processorArchitecture = getCapability(ProcessorArchitecture.class, pCaps);
         Assert.assertNotNull(processorArchitecture);
