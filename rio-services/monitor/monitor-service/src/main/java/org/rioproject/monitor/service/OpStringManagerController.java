@@ -227,10 +227,12 @@ public class OpStringManagerController {
      *
      * @param opStringManager The OpStringManager to remove
      */
-    public void remove(final OpStringManager opStringManager) {
+    public boolean remove(final OpStringManager opStringManager) {
+        boolean removed;
         synchronized (opStringManagers) {
-            opStringManagers.remove(opStringManager);
+            removed = opStringManagers.remove(opStringManager);
         }
+        return removed;
     }
 
     /**
@@ -258,7 +260,7 @@ public class OpStringManagerController {
                                                              final OpStringManager parent,
                                                              final DeployAdmin dAdmin,
                                                              final ServiceProvisionListener listener) throws Exception {
-        DefaultOpStringManager opMgr = null;
+        OpStringManager opMgr = null;
         boolean active = dAdmin==null;
         try {
             if(!opStringExists(opString.getName())) {
@@ -267,9 +269,9 @@ public class OpStringManagerController {
 
                 try {
                     opMgr = new DefaultOpStringManager(opString, parent, active, config, this);
-                    opMgr.setServiceProxy(serviceProxy);
-                    opMgr.setEventProcessor(eventProcessor);
-                    opMgr.setStateManager(stateManager);
+                    ((DefaultOpStringManager)opMgr).setServiceProxy(serviceProxy);
+                    ((DefaultOpStringManager)opMgr).setEventProcessor(eventProcessor);
+                    ((DefaultOpStringManager)opMgr).setStateManager(stateManager);
                 } catch (IOException e) {
                     logger.warn("Creating OpStringManager", e);
                     return(null);
@@ -286,7 +288,7 @@ public class OpStringManagerController {
                     logger.info("Operational String [{}] already deployed", opString.getName());
                     return null;
                 }
-                Map<String, Throwable> errorMap = opMgr.init(active, serviceProvisioner, uuid, listener);
+                Map<String, Throwable> errorMap = ((DefaultOpStringManager)opMgr).init(active, serviceProvisioner, uuid, listener);
 
                 if(dAdmin!=null) {
                     OperationalStringManager activeMgr;
@@ -302,12 +304,12 @@ public class OpStringManagerController {
                                 logger.warn("Getting ServiceBeanInstances from active testManager", e);
                             }
                         }
-                        opMgr.startManager(listener, elemInstanceMap);
+                        ((DefaultOpStringManager)opMgr).startManager(listener, elemInstanceMap);
                     } catch(Exception e) {
                         logger.warn("Getting active OperationalStringManager", e);
                     }
                 } else {
-                    opMgr.startManager(listener);
+                    ((DefaultOpStringManager)opMgr).startManager(listener);
                 }
 
                 if(map != null)
@@ -331,10 +333,10 @@ public class OpStringManagerController {
                 if(logger.isTraceEnabled()) {
                     logger.trace("OperationalString [{}] exists, check for parent [{}]", opString.getName(), parent);
                 }
+                opMgr = getOpStringManager(opString.getName());
                 if(parent != null) {
-                    OpStringManager mgr = getOpStringManager(opString.getName());
-                    if(mgr != null) {
-                        parent.addNested(mgr);
+                    if(opMgr != null) {
+                        parent.addNested(opMgr);
                     }
                 }
                 if(logger.isTraceEnabled()) {

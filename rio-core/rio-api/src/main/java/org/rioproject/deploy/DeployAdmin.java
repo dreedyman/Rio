@@ -21,7 +21,6 @@ import org.rioproject.opstring.OperationalStringManager;
 
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.util.Map;
 
 /**
  * DeployAdmin interface defines methods to deploy, undeploy, redeploy, query
@@ -45,15 +44,13 @@ public interface DeployAdmin {
      * @param opStringLocation The location of the OperationalString to deploy
      * (may also be an OAR, or artifact that resolves to an OAR)
      * 
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws OperationalStringException If the OperationalString parsing
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(String opStringLocation) throws OperationalStringException, RemoteException;
+    DeploymentResult deploy(String opStringLocation) throws OperationalStringException, RemoteException;
 
     /**
      * Deploy an OperationalString to the ProvisionMonitor. The
@@ -71,15 +68,13 @@ public interface DeployAdmin {
      * @param listener If not null, the ServiceProvisionListener will be
      * notified as each service is deployed
      *
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws OperationalStringException If OperationalString parsing
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(String opStringLocation, ServiceProvisionListener listener)
+    DeploymentResult deploy(String opStringLocation, ServiceProvisionListener listener)
         throws OperationalStringException, RemoteException;
 
 
@@ -97,15 +92,13 @@ public interface DeployAdmin {
      * @param opStringUrl The URL indicating the location of the
      * OperationalString to deploy
      *
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws OperationalStringException If the OperationalString parsing
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(URL opStringUrl) throws OperationalStringException, RemoteException;
+    DeploymentResult deploy(URL opStringUrl) throws OperationalStringException, RemoteException;
 
     
     /**
@@ -124,15 +117,13 @@ public interface DeployAdmin {
      * @param listener If not null, the ServiceProvisionListener will be
      * notified as each service is deployed
      *
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws OperationalStringException If OperationalString parsing
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(URL opStringUrl, ServiceProvisionListener listener)
+    DeploymentResult deploy(URL opStringUrl, ServiceProvisionListener listener)
     throws OperationalStringException, RemoteException;
     
     /**
@@ -149,15 +140,13 @@ public interface DeployAdmin {
      * 
      * @param opstring The OperationalString to deploy
      *
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws OperationalStringException If the OperationalString parsing
      * errors occur
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(OperationalString opstring)
+    DeploymentResult deploy(OperationalString opstring)
     throws OperationalStringException, RemoteException;
     
     /**
@@ -176,15 +165,12 @@ public interface DeployAdmin {
      * @param listener If not null, the ServiceProvisionListener will be
      * notified as each service is deployed
      *
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws OperationalStringException if the the entire deployment fails
      * @throws RemoteException If communication errors happen
      */
-    Map<String, Throwable> deploy(OperationalString opstring,
-                                  ServiceProvisionListener listener)
+    DeploymentResult deploy(OperationalString opstring, ServiceProvisionListener listener)
     throws OperationalStringException, RemoteException;
 
     /**

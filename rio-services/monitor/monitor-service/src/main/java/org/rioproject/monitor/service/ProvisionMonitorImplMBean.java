@@ -15,11 +15,11 @@
  */
 package org.rioproject.monitor.service;
 
+import org.rioproject.deploy.DeploymentResult;
 import org.rioproject.impl.servicebean.ServiceBeanAdapterMBean;
 
 import javax.management.openmbean.TabularData;
 import java.net.MalformedURLException;
-import java.util.Map;
 
 /**
  * MBean interface for the ProvisionMonitor
@@ -45,22 +45,20 @@ public interface ProvisionMonitorImplMBean extends ServiceBeanAdapterMBean {
      * @param opString The parameter indicating the location of the
      * OperationalString to deploy, may also be an artifact {groupId:artifactId:version}
      *
-     * @return If there are errors loading part of the OperationalString the
-     * Map will be returned with name value pairs associating the service and
-     * corresponding exceptions
+     * @return A {@code DeploymentResult}.
      *
      * @throws IllegalArgumentException if the opStringUrl is <code>null</code>
      * @throws MalformedURLException if the opStringUrl cannot be used to
      * create a <code>java.net.URL</code>
      */
-    Map deploy(String opString) throws MalformedURLException;
+    DeploymentResult deploy(String opString) throws MalformedURLException;
 
     /**
      * Undeploy and Remove an OperationalString deployed by the
      * ProvisionMonitor. The ProvisionMonitor will search for the
      * OperationalString by it's name and if found, remove the
      * OperationalString and any nested OperationalStrings that are included
-     * by the OperatinalString. As a result of undeploying the
+     * by the OperationalString. As a result of undeploying the
      * OperationalString(s), all services that have a provision type of
      * ServiceProvisionManagement.DYNAMIC or ServiceProvisionManagement.FIXED
      * will be terminated. If any DeploymentRequest or RedeploymenRequests are

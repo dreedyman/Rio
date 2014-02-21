@@ -26,6 +26,8 @@ import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.platform.OperatingSystem;
+import org.rioproject.system.capability.platform.ProcessorArchitecture;
 import org.rioproject.system.capability.platform.StorageCapability;
 import org.rioproject.watch.ThresholdValues;
 import org.slf4j.Logger;
@@ -739,7 +741,7 @@ public class InstantiatorResource {
             return(false);
         }
         if(meetsGeneralRequirements(provisionRequest) && meetsQuantitativeRequirements(provisionRequest)) {
-            Collection<SystemComponent> unsupportedReqs = meetsQualitativeRequirements(sElem.getServiceLevelAgreements());
+            Collection<SystemComponent> unsupportedReqs = meetsQualitativeRequirements(provisionRequest);
             if(unsupportedReqs.isEmpty()) {
                 logger.debug("{} meets qualitative requirements for [{}]", getName(), LoggingUtil.getLoggingName(sElem));
                 return (true);
@@ -982,26 +984,109 @@ public class InstantiatorResource {
      * This method verifies whether the ResourceCapability can support the
      * Qualitative Requirements specified by the ServiceBean
      * 
-     * @param sla The ServiceLevelAgreements object
+     * @param request The ProvisionRequest object
      * @return A Collection of SystemRequirement objects which the
      * ResourceCapability does not support. If the Collection has zero entries,
      * then the provided ResourceCapability supports the Qualitative
      * Requirements specified by the ServiceBean
      */
-    Collection<SystemComponent> meetsQualitativeRequirements(ServiceLevelAgreements sla) {
-        PlatformCapability[] platformCapabilities = resourceCapability.getPlatformCapabilities();
-        SystemComponent[] jsbRequirements = sla.getSystemRequirements().getSystemComponents();
-        ArrayList<SystemComponent> unsupportedReqs = new ArrayList<SystemComponent>();
+    Collection<SystemComponent> meetsQualitativeRequirements(final ProvisionRequest request) {
+        ServiceElement sElem = request.getServiceElement();
+        ServiceLevelAgreements sla = sElem.getServiceLevelAgreements();
+        SystemComponent[] serviceRequirements = sla.getSystemRequirements().getSystemComponents();
+        List<SystemComponent> unsupportedReqs = new ArrayList<SystemComponent>();
         /*
          * If there are no PlatformCapability requirements we can return
          * successfully
          */
-        if(jsbRequirements.length == 0)
-            return (unsupportedReqs);
+        if(serviceRequirements.length == 0)
+            return unsupportedReqs;
+
+        PlatformCapability[] platformCapabilities = resourceCapability.getPlatformCapabilities();
+        List<SystemComponent> operatingSystems = new ArrayList<SystemComponent>();
+        List<SystemComponent> architectures = new ArrayList<SystemComponent>();
+        List<SystemComponent> remaining = new ArrayList<SystemComponent>();
+
+        for (SystemComponent serviceRequirement : serviceRequirements) {
+            if(isOperatingSystem(serviceRequirement)) {
+                operatingSystems.add(serviceRequirement);
+            } else if(isArchitecture(serviceRequirement)) {
+                architectures.add(serviceRequirement);
+            } else {
+                remaining.add(serviceRequirement);
+            }
+        }
+
         /*
-         * Check each of our PlatformCapability objects for supportability
+         * Check if we have a match in one of the sought after architectures
          */
-        for (SystemComponent jsbRequirement : jsbRequirements) {
+        if(!architectures.isEmpty()) {
+            boolean supported = false;
+            ProcessorArchitecture architecture = getArchitecture();
+            for (SystemComponent serviceRequirement : architectures) {
+                if(architecture.supports(serviceRequirement)) {
+                    supported = true;
+                    break;
+                }
+            }
+            if (!supported) {
+                if(logger.isWarnEnabled()) {
+                    StringBuilder message = new StringBuilder();
+                    for (SystemComponent serviceRequirement : architectures) {
+                        if(message.length()>0)
+                            message.append(", ");
+                        message.append(serviceRequirement.getAttributes().get(ProcessorArchitecture.ARCHITECTURE));
+                    }
+                    String failureReason =
+                        String.format("The architectures being requested [%s] are not supported by the target resource's architecture [%s] for [%s]",
+                                      message.toString(),
+                                      architecture.getValue(ProcessorArchitecture.ARCHITECTURE),
+                                      LoggingUtil.getLoggingName(sElem));
+                    request.addFailureReason(failureReason);
+                    logger.warn(failureReason);
+                }
+                unsupportedReqs.addAll(architectures);
+                return unsupportedReqs;
+            }
+        }
+
+        /*
+         * Check if we have a match in one of the sought after operating systems
+         */
+        if(!operatingSystems.isEmpty()) {
+            OperatingSystem operatingSystem = getOperatingSystem();
+            boolean supported = false;
+            for (SystemComponent serviceRequirement : operatingSystems) {
+                if(operatingSystem.supports(serviceRequirement)) {
+                    supported = true;
+                    break;
+                }
+            }
+            if (!supported) {
+                if(logger.isWarnEnabled()) {
+                    StringBuilder message = new StringBuilder();
+                    for (SystemComponent serviceRequirement : operatingSystems) {
+                        if(message.length()>0)
+                            message.append(", ");
+                        message.append(serviceRequirement.getAttributes().get(OperatingSystem.NAME));
+                    }
+                    String failureReason =
+                        String.format("The operating systems being requested [%s] are not supported by the target resource's operating system [%s] for [%s]",
+                                      message.toString(),
+                                      operatingSystem.getValue(OperatingSystem.NAME),
+                                      LoggingUtil.getLoggingName(sElem));
+                    request.addFailureReason(failureReason);
+                    logger.warn(failureReason);
+                }
+                unsupportedReqs.addAll(operatingSystems);
+                return unsupportedReqs;
+            }
+        }
+
+        /*
+         * Check remaining PlatformCapability objects for supportability
+         */
+        for (SystemComponent serviceRequirement : remaining) {
             boolean supported = false;
             /*
              * Iterate through all resource PlatformCapability objects and see
@@ -1009,15 +1094,46 @@ public class InstantiatorResource {
              * are found, then we dont have a match
              */
             for (PlatformCapability platformCapability : platformCapabilities) {
-                if (platformCapability.supports(jsbRequirement)) {
+                if (platformCapability.supports(serviceRequirement)) {
                     supported = true;
                     break;
                 }
             }
-            if (!supported)
-                unsupportedReqs.add(jsbRequirement);
+            if (!supported) {
+                unsupportedReqs.add(serviceRequirement);
+            }
         }
-        return (unsupportedReqs);
+        return unsupportedReqs;
+    }
+
+    boolean isOperatingSystem(SystemComponent systemComponent) {
+        return systemComponent.getClassName().equals(OperatingSystem.class.getName());
+    }
+
+    boolean isArchitecture(SystemComponent systemComponent) {
+        return systemComponent.getClassName().equals(ProcessorArchitecture.class.getName());
+    }
+
+    ProcessorArchitecture getArchitecture () {
+        ProcessorArchitecture architecture = null;
+        for (PlatformCapability platformCapability : resourceCapability.getPlatformCapabilities()) {
+            if(platformCapability instanceof ProcessorArchitecture) {
+                architecture = (ProcessorArchitecture) platformCapability;
+                break;
+            }
+        }
+        return architecture;
+    }
+
+    OperatingSystem getOperatingSystem () {
+        OperatingSystem operatingSystem = null;
+        for (PlatformCapability platformCapability : resourceCapability.getPlatformCapabilities()) {
+            if(platformCapability instanceof OperatingSystem) {
+                operatingSystem = (OperatingSystem) platformCapability;
+                break;
+            }
+        }
+        return operatingSystem;
     }
 
     /**

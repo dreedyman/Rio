@@ -58,6 +58,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-start</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.river</groupId>
             <artifactId>reggie</artifactId>
             <version>${river.version}</version>
@@ -111,6 +118,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/DeploymentVerifierTest.java</exclude>
+                        <exclude>**/InstantiatorResourceTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -121,6 +129,7 @@
                 <configuration>
                     <includes>
                         <include>**/DeploymentVerifierTest.java</include>
+                        <include>**/InstantiatorResourceTest.java</include>
                     </includes>
                 </configuration>
                 <executions>

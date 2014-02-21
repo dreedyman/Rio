@@ -18,15 +18,11 @@ package org.rioproject.monitor.service;
 import junit.framework.Assert;
 import net.jini.config.Configuration;
 import org.junit.Test;
-import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.impl.config.DynamicConfiguration;
 import org.rioproject.impl.opstring.OpString;
 import org.rioproject.opstring.OperationalString;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +60,7 @@ public class DefaultOpStringManagerTest {
         OpStringManager manager1 = opStringManagerController.addOperationalString(opString1,
                                                                                  errorMap,
                                                                                  null,
-                                                                                 createDeployAdmin(),
+                                                                                 TestUtil.createDeployAdmin(),
                                                                                  null);
         Assert.assertTrue(manager1.isStandAlone());
         Assert.assertTrue(manager1.getParentCount()==0);
@@ -74,7 +70,7 @@ public class DefaultOpStringManagerTest {
         OpStringManager manager2 = opStringManagerController.addOperationalString(opString2,
                                                                                  errorMap,
                                                                                  null,
-                                                                                 createDeployAdmin(),
+                                                                                 TestUtil.createDeployAdmin(),
                                                                                  null);
 
         Assert.assertTrue(opStringManagerController.getOpStringManagers().length==2);
@@ -98,7 +94,7 @@ public class DefaultOpStringManagerTest {
         OpStringManager manager2 = opStringManagerController.addOperationalString(opString2,
                                                                                  errorMap,
                                                                                  null,
-                                                                                 createDeployAdmin(),
+                                                                                 TestUtil.createDeployAdmin(),
                                                                                  null);
         OpStringManager manager1 = opStringManagerController.getOpStringManager("test-1");
         Assert.assertNotNull(manager1);
@@ -113,21 +109,4 @@ public class DefaultOpStringManagerTest {
         Assert.assertTrue(opStringManagerController.getOpStringManagers().length==0);
     }
 
-    @Test
-    public void concurrentCreationTest() {
-
-    }
-
-    DeployAdmin createDeployAdmin() {
-        return (DeployAdmin) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                                                    new Class[]{DeployAdmin.class},
-                                                    new IH());
-    }
-
-    class IH implements InvocationHandler {
-        @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            System.out.println("===> "+method.getName());
-            return null;
-        }
-    }
 }

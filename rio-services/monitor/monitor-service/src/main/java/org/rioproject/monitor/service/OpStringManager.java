@@ -17,12 +17,17 @@ package org.rioproject.monitor.service;
 
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
+import org.rioproject.impl.opstring.OAR;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.resolver.RemoteRepository;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimerTask;
 
 /**
  * Extends {@link org.rioproject.opstring.OperationalStringManager} and provides additional support for
@@ -43,9 +48,35 @@ public interface OpStringManager  {
      */
     String getName();
 
+    /**
+     * Set that the {@code OpStringManager} is managing the OperationalString
+     *
+     * @param newActive If {@code true}, managing
+     */
     void setManaging(boolean newActive);
 
+    /**
+     * Get date(s) when the {@code OperationalString} was deployed
+     *
+     * @return An array of {@code Date}s when the {@code OperationalString} was deployed
+     */
     Date[] getDeploymentDates();
+
+    /**
+     * Get any repositories used for the deployment of the {@code OperationalString} when loaded from
+     * an {@code OAR}.
+     *
+     * @return An array of {@code RemoteRepository}s used for deployment. If the deployment was not done using an
+     * {@code OAR}, this method will return an empty array.
+     */
+    RemoteRepository[] getRemoteRepositories();
+
+    /**
+     * Get the {@code OAR} used to deploy
+     *
+     * @return If the deployment used an {@code OAR}, return it. Otherwise return {@code null}.
+     */
+    OAR getOAR();
 
     /**
      * Determine of this OpStringManager has any parents
@@ -288,4 +319,11 @@ public interface OpStringManager  {
      * @return {@code true} if the OperationalString was deployed without any nested or parent relationships
      */
     boolean isStandAlone();
+
+    /**
+     * Get the {@code OperationalStringManager}
+     *
+     * @return The {@code OperationalStringManager}
+     */
+    OperationalStringManager getOperationalStringManager();
 }

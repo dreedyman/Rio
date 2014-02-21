@@ -16,6 +16,7 @@
 package org.rioproject.monitor.service.handlers;
 
 import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.deploy.DeploymentResult;
 import org.rioproject.monitor.service.OpStringManager;
 import org.rioproject.monitor.service.OpStringManagerController;
 import org.rioproject.opstring.OperationalString;
@@ -77,17 +78,18 @@ public class DeployHandlerMonitor {
             for (OperationalString opstring : opstrings) {
                 String action = null;
                 try {
-                    Map<String, Throwable> result;
+                    Map<String, Throwable> errorMap;
                     if (opStringMangerController.getOpStringManager(opstring.getName())!=null) {
                         action = "update";
                         OpStringManager mgr = opStringMangerController.getOpStringManager(opstring.getName());
-                        result = mgr.doUpdateOperationalString(opstring);
+                        errorMap = mgr.doUpdateOperationalString(opstring);
                     } else {
                         action = "deploy";
-                        result = deployAdmin.deploy(opstring, null);
+                        DeploymentResult result = deployAdmin.deploy(opstring, null);
+                        errorMap = result.getErrorMap();
                     }
-                    if (!result.isEmpty()) {
-                        for (Map.Entry<String, Throwable> entry : result.entrySet()) {
+                    if (!errorMap.isEmpty()) {
+                        for (Map.Entry<String, Throwable> entry : errorMap.entrySet()) {
                             logger.warn("Deploying service [" + entry.getKey() + "] resulted in " +
                                         "the following exception",
                                         entry.getValue());

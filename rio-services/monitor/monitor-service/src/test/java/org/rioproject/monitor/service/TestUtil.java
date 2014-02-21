@@ -15,9 +15,16 @@
  */
 package org.rioproject.monitor.service;
 
+import org.rioproject.deploy.DeployAdmin;
+import org.rioproject.event.EventHandler;
+import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * @author Dennis Reedy
@@ -40,5 +47,30 @@ public class TestUtil {
         elem.setServiceBeanConfig(sbc);
         elem.setPlanned(planned);
         return elem;
+    }
+
+    public static DeployAdmin createDeployAdmin() {
+        return (DeployAdmin) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                                                    new Class[]{DeployAdmin.class},
+                                                    new IH());
+    }
+
+    public static ProvisionMonitor createProvisionMonitor() {
+        return (ProvisionMonitor) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                                                         new Class[]{ProvisionMonitor.class},
+                                                         new IH());
+    }
+
+    public static EventHandler createEventHandler() {
+        return (EventHandler) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                                                     new Class[]{EventHandler.class},
+                                                     new IH());
+    }
+
+    static class IH implements InvocationHandler {
+        @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            System.out.println("===> "+method.getName());
+            return null;
+        }
     }
 }

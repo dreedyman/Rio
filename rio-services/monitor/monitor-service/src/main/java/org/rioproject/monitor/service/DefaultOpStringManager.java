@@ -179,8 +179,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             }
         }
     }
-    
-    OAR getOAR() {
+
+    public OperationalStringManager getOperationalStringManager() {
+        return proxy;
+    }
+
+    public OAR getOAR() {
         return oar;
     }
 
@@ -675,7 +679,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 logger.debug("OperationalStringManager not unexported");
         }
         /* Remove ourselves from the collection */
-        opStringMangerController.remove(this);
+        if(opStringMangerController.remove(this)) {
+            if(logger.isDebugEnabled())
+                logger.debug("Removed [{}]", getName());
+        } else {
+            logger.warn("Did not remove [{}] when terminating", getName());
+        }
 
         /* Stop all ServiceElementManager instances */
         for (ServiceElementManager mgr : svcElemMgrs) {
@@ -1487,12 +1496,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (o == null || getClass() != o.getClass())
             return false;
         DefaultOpStringManager manager = (DefaultOpStringManager) o;
-        return opString.equals(manager.opString);
+        return opString.getName().equals(manager.opString.getName());
     }
 
     @Override
     public int hashCode() {
-        return opString.hashCode();
+        return opString.getName().hashCode();
     }
 }
 

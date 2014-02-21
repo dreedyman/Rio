@@ -23,6 +23,7 @@ import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ProxyTrustIterator;
 import net.jini.security.proxytrust.SingletonProxyTrustIterator;
 import net.jini.security.proxytrust.TrustEquivalence;
+import org.rioproject.deploy.DeploymentResult;
 import org.rioproject.deploy.ServiceProvisionListener;
 import org.rioproject.monitor.ProvisionMonitor.PeerInfo;
 import org.rioproject.monitor.ProvisionMonitorAdmin;
@@ -37,7 +38,6 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.util.*;
 
 /**
  * A <code>ProvisionMonitorAdminProxy</code> is a proxy for the 
@@ -49,7 +49,6 @@ import java.util.*;
 public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements ProvisionMonitorAdmin, Serializable {
     private static final long serialVersionUID = 2L;
     final ProvisionMonitorAdmin monitorAdminProxy;
-    List<String> pendingDeployments = Collections.synchronizedList(new ArrayList<String>());
 
     /**
      * Creates a ProvisionMonitorAdmin proxy, returning an instance that implements 
@@ -127,7 +126,6 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements Pro
         }
 
         private void writeObject(ObjectOutputStream out) throws IOException {
-            pendingDeployments.clear();
             out.writeObject(this);
         }
 
@@ -145,8 +143,6 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements Pro
                 throw new InvalidObjectException("ConstrainableProvisionMonitorAdminProxy.readObject "+
                                                  "failure : serviceAdmin does not implement constrainable functionality");
             }
-            if(pendingDeployments==null)
-                pendingDeployments = Collections.synchronizedList(new ArrayList<String>());
         }
     }
 
@@ -156,73 +152,46 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements Pro
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(final URL opStringURL) throws OperationalStringException, RemoteException {
+    public DeploymentResult deploy(final URL opStringURL) throws OperationalStringException, RemoteException {
         return deploy(opStringURL, null);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(final URL opStringURL, final ServiceProvisionListener listener)
+    public DeploymentResult deploy(final URL opStringURL, final ServiceProvisionListener listener)
     throws OperationalStringException, RemoteException {
-        Map<String, Throwable> result = new HashMap<String, Throwable>();
-        if(!pendingDeployments.contains(opStringURL.toExternalForm())) {
-            pendingDeployments.add(opStringURL.toExternalForm());
-            try {
-                result.putAll(monitorAdminProxy.deploy(opStringURL, listener));
-            } finally {
-                pendingDeployments.remove(opStringURL.toExternalForm());
-            }
-        }
-        return result;
+        return monitorAdminProxy.deploy(opStringURL, listener);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(final String location) throws OperationalStringException,RemoteException {
+    public DeploymentResult deploy(final String location) throws OperationalStringException,RemoteException {
         return deploy(location, null);
     }
 
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(final String location, final ServiceProvisionListener listener)
+    public DeploymentResult deploy(final String location, final ServiceProvisionListener listener)
         throws OperationalStringException, RemoteException {
-        Map<String, Throwable> result = new HashMap<String, Throwable>();
-        if(!pendingDeployments.contains(location)) {
-            pendingDeployments.add(location);
-            try {
-                result.putAll(monitorAdminProxy.deploy(location, listener));
-            } finally {
-                pendingDeployments.remove(location);
-            }
-        }
-        return result;
+        return monitorAdminProxy.deploy(location, listener);
     }
     
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(final OperationalString opString) throws OperationalStringException, RemoteException {
+    public DeploymentResult deploy(final OperationalString opString) throws OperationalStringException, RemoteException {
         return deploy(opString, null);
     }
     
     /**
      * @see org.rioproject.deploy.DeployAdmin#deploy
      */
-    public Map<String, Throwable> deploy(final OperationalString opString, final ServiceProvisionListener listener)
+    public DeploymentResult deploy(final OperationalString opString, final ServiceProvisionListener listener)
     throws OperationalStringException, RemoteException {
-        Map<String, Throwable> result = new HashMap<String, Throwable>();
-        if(!pendingDeployments.contains(opString.getName())) {
-            pendingDeployments.add(opString.getName());
-            try {
-                result.putAll(monitorAdminProxy.deploy(opString, listener));
-            } finally {
-                pendingDeployments.remove(opString.getName());
-            }
-        }
-        return result;
+        return monitorAdminProxy.deploy(opString, listener);
     }
 
     /**
