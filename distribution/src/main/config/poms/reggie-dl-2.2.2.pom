@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.river</groupId>
     <artifactId>reggie-dl</artifactId>
-    <version>2.2.1</version>
+    <version>2.2.2</version>
     <url>http://river.apache.org</url>
     <description>River Lookup and Registry service client download jar</description>
 	
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>net.jini</groupId>
             <artifactId>jsk-dl</artifactId>
-	    <version>2.2.1</version>
+	    <version>2.2.2</version>
         </dependency>
     </dependencies>
 

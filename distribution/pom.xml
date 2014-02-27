@@ -24,6 +24,13 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>rio-start</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>rio-lib</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
@@ -211,7 +218,7 @@
                 <executions>
                     <execution>
                         <id>create-marker</id>
-                        <phase>install</phase>
+                        <phase>integration-test</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>

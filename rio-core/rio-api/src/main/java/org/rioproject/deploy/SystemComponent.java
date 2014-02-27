@@ -26,8 +26,7 @@ import java.util.*;
  * @author Dennis Reedy
  */
 public class SystemComponent implements Serializable {
-    @SuppressWarnings("unused")
-    static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 2L;
     private final String name;
     private final String className;
     private final Map<String, Object> attributes = new HashMap<String, Object>();

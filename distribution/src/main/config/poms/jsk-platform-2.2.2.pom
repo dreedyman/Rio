@@ -3,7 +3,7 @@
   <groupId>net.jini</groupId>
   <artifactId>jsk-platform</artifactId>
   <name>Jini Starter Kit Platform Jar</name>
-  <version>2.1.1</version>
+  <version>2.2.2</version>
   <inceptionYear>2005</inceptionYear>
   <organization />
   <build />
