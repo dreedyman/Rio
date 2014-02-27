@@ -182,8 +182,9 @@ public final class Installer {
             String extension = artifactFile.getName().substring(ndx, artifactFile.getName().length());
             sb.append(jarName).append(extension);
             File jar = new File(localRepository, sb.toString());
-            if (jar.exists())
-                return;
+            if (jar.exists()) {
+                logger.info("Overwriting {}", jar.getPath());
+            }
 
             /*
              * Look for the pom in the artifact. Once we find it, read it in, then write it out as a temp file
@@ -222,8 +223,9 @@ public final class Installer {
         if(artifactFile==null) {
             sb.append(artifactId).append("-").append(version).append(".pom");
             File targetPom = new File(localRepository, sb.toString());
-            if(targetPom.exists())
-                return;
+            if(targetPom.exists()) {
+                logger.info("Overwriting {}", targetPom.getPath());
+            }
         }
 
         try {
