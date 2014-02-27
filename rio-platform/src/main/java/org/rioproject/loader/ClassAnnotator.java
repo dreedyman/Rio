@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * Provides support to annotate classes required for dynamic class loading
@@ -62,7 +63,7 @@ public class ClassAnnotator implements ClassAnnotation {
             urls = new URL[codebase.length];
             System.arraycopy(codebase, 0, urls, 0, urls.length);
             if(logger.isTraceEnabled()) {
-                logger.trace("URLs: {}", urls);
+                logger.trace("URLs: {}", Arrays.toString(urls));
             }
         }
         return (urls);
@@ -82,6 +83,9 @@ public class ClassAnnotator implements ClassAnnotation {
      * @see net.jini.loader.ClassAnnotation#getClassAnnotation
      */
     public String getClassAnnotation() {
+        if(logger.isTraceEnabled()) {
+            logger.info("Annotation: {}", exportAnnotation);
+        }
         return (exportAnnotation);
     }
 

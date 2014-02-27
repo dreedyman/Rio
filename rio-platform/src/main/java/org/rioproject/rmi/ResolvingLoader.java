@@ -123,6 +123,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         String annotation = classAnnotationMap.get(aClass.getName());
         if(annotation == null)
             annotation = loader.getClassAnnotation(aClass);
+        if(logger.isTraceEnabled())
+            logger.trace("Getting annotation for {}: {}", aClass.getName(), annotation);
         return annotation;
     }
 
