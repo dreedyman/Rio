@@ -27,10 +27,10 @@ deployment(name: 'Workflow Example') {
      * in each service bean declaration */
     artifact id: 'service-impl',   'org.rioproject.examples.workflow:workflow-service:2.1'
     artifact id: 'service-dl',     'org.rioproject.examples.workflow:workflow-api:2.1'
-    artifact id: 'outrigger-dl',   'org.apache.river:outrigger-dl:2.2.1'
-    artifact id: 'outrigger-impl', 'org.apache.river:outrigger:2.2.1'
-    artifact id: 'mahalo-dl',      'org.apache.river:mahalo-dl:2.2.1'
-    artifact id: 'mahalo-impl',    'org.apache.river:mahalo:2.2.1'
+    artifact id: 'outrigger-dl',   'org.apache.river:outrigger-dl:2.2.2'
+    artifact id: 'outrigger-impl', 'org.apache.river:outrigger:2.2.2'
+    artifact id: 'mahalo-dl',      'org.apache.river:mahalo-dl:2.2.2'
+    artifact id: 'mahalo-impl',    'org.apache.river:mahalo:2.2.2'
 
     ['New Worker'    : 'NEW',
      'Pending Worker': 'PENDING',

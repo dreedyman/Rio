@@ -52,7 +52,7 @@
         <rio.plugin.version>5.1</rio.plugin.version>
         <slf4j.version>1.7.5</slf4j.version>
         <logback.version>1.0.11</logback.version>
-        <river.version>2.2.1</river.version>
+        <river.version>2.2.2</river.version>
     </properties>
 
     <dependencyManagement>
