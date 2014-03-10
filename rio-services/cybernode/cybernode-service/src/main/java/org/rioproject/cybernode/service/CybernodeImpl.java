@@ -434,7 +434,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             }
             //setChanged(StatusType.NORMAL);
         }
-        svcConsumer.updateMonitors();
+        if (svcConsumer != null)
+            svcConsumer.updateMonitors();
     }
 
     private int getInstantiatedServiceCount() {
