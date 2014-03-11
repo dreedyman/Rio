@@ -22,8 +22,8 @@ deployment(name: 'Test Forked Space') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    artifact id: 'outrigger-dl', "org.apache.river:outrigger-dl:2.2.1"
-    artifact id: 'outrigger-impl', "org.apache.river:outrigger:2.2.1"
+    artifact id: 'outrigger-dl', "org.apache.river:outrigger-dl:2.2.2"
+    artifact id: 'outrigger-impl', "org.apache.river:outrigger:2.2.2"
 
     service(name: 'Space', fork:'yes') {
         interfaces {
