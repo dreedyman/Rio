@@ -529,7 +529,7 @@ public class ServiceBeanLoader {
             /*File serviceUiJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");
             File jskDlJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");*/
 
-            String[] requisiteExports = new String[]{"rio-dl-"+RioVersion.VERSION+".jar", "jsk-dl-2.2.1.jar"};
+            String[] requisiteExports = new String[]{"rio-dl-"+RioVersion.VERSION+".jar", "jsk-dl-2.2.2.jar"};
             for(String export : requisiteExports) {
                 boolean found = false;
                 for(URL u : dlPR.getJars()) {
