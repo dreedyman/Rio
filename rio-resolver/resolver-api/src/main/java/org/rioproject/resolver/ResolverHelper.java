@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -68,7 +70,7 @@ public final class ResolverHelper {
     }
 
     /**
-     * Resolve the classpath with the local Maven repository as the codebase
+     * Resolve the classpath of the provided artifact, returning an array of {@link URL}s.
      *
      * @param artifact The artifact to resolve
      * @param resolver The {@link Resolver} to use
@@ -78,12 +80,12 @@ public final class ResolverHelper {
      *
      * @throws ResolverException If there are exceptions resolving the artifact
      */
-    public static String[] resolve(final String artifact, final Resolver resolver, final RemoteRepository[] repositories)
+    public static URL[] resolve(final String artifact, final Resolver resolver, final RemoteRepository[] repositories)
         throws ResolverException {
 
         if(logger.isDebugEnabled())
             logger.debug(String.format("Using Resolver %s", resolver.getClass().getName()));
-        List<String> jars = new ArrayList<String>();
+        List<URL> jars = new ArrayList<URL>();
         if (artifact != null) {
             String[] artifactParts = artifact.split(" ");
             for(String artifactPart : artifactParts) {
@@ -97,16 +99,21 @@ public final class ResolverHelper {
                         logger.warn(String.format("%s NOT FOUND", jarFile.getPath()));
                     }
                     if(s!=null) {
-                        s = handleWindows(s);
-                        if(!jars.contains(s))
-                            jars.add(s);
+                        URL url = null;
+                        try {
+                            url = new URL(handleWindows(s));
+                        } catch (MalformedURLException e) {
+                            throw new ResolverException("Invalid classpath element: "+s, e);
+                        }
+                        if(!jars.contains(url))
+                            jars.add(url);
                     }
                 }
             }
         }
         if(logger.isDebugEnabled())
             logger.debug(String.format("Artifact: %s, resolved jars %s", artifact, jars));
-        return jars.toArray(new String[jars.size()]);
+        return jars.toArray(new URL[jars.size()]);
     }
 
     /**
@@ -127,10 +134,33 @@ public final class ResolverHelper {
 
     private static String getResolverJarFile() {
         String resolverJarFile = System.getProperty(RESOLVER_JAR);
-        if(resolverJarFile==null) {
+        if(resolverJarFile==null || resolverJarFile.length()==0) {
             String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
-            if(rioHome==null) {
-                throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar");
+            if(rioHome==null || rioHome.length()==0) {
+                logger.warn("RIO_HOME has not been set, try and derive location");
+                CodeSource cs = ResolverHelper.class.getProtectionDomain().getCodeSource();
+                if(cs != null && cs.getLocation() != null) {
+                    File location;
+                    try {
+                        location = new File(cs.getLocation().toURI());
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException("Unable to derive location", e);
+                    }
+                    if(location.getName().endsWith(".jar")) {
+                        if(location.getParentFile().getPath().endsWith("lib")) {
+                            rioHome = location.getParentFile().getParentFile().getPath();
+                        } else {
+                            rioHome = location.getParentFile().getPath();
+                        }
+                    } else {
+                        rioHome = location.getPath();
+                    }
+                }
+                if(rioHome==null || rioHome.length()==0) {
+                    throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar");
+                } else {
+                    logger.info("RIO_HOME derived as: " + rioHome);
+                }
             }
             String resolverJarName = "resolver-aether";
             File resolverLibDir = new File(rioHome+File.separator+"lib"+File.separator+"resolver");
@@ -144,6 +174,8 @@ public final class ResolverHelper {
                         }
                     }
                 }
+            } else {
+                throw new RuntimeException("The resolver lib directory does not exist, tried using: "+resolverLibDir.getPath());
             }
         }
         if(logger.isDebugEnabled())

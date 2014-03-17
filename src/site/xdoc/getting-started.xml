@@ -27,7 +27,7 @@
                 distribution/website before using any of them in your own environment.
             </p>
             <p>
-                The distribution includes the following third party technology: Apache River 2.2.1 (Jini),
+                The distribution includes the following third party technology: Apache River 2.2.2 (Jini),
                 Hyperic SIGAR, Commons Compress 1.0, Groovy, SLF4J, Logback and the
                 Prefuse Visualization Toolkit.
             </p>

@@ -91,7 +91,8 @@ public class ExporterConfig {
                 }
             }
         }
-        logger.debug(String.format("Created %s for %s.%s", exporter, component, entry));
+        if(logger.isTraceEnabled())
+            logger.trace(String.format("Created %s for %s.%s", exporter, component, entry));
         return exporter;
     }
 

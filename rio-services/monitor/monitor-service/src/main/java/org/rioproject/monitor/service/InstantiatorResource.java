@@ -26,6 +26,7 @@ import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.connectivity.TCPConnectivity;
 import org.rioproject.system.capability.platform.OperatingSystem;
 import org.rioproject.system.capability.platform.ProcessorArchitecture;
 import org.rioproject.system.capability.platform.StorageCapability;
@@ -757,9 +758,8 @@ public class InstantiatorResource {
                     x++;
                 }
                 String unsupportedReqsString = buffer.toString();
-                logger.debug("{} does not meet qualitative requirements for {} service [{}], "+
-                             "determine if SystemRequirement objects can be downloaded: {}",
-                             getName(), provType, LoggingUtil.getLoggingName(sElem), unsupportedReqsString);
+                logger.debug("{} does not meet requirements for {} service [{}]",
+                             getName(), provType, LoggingUtil.getLoggingName(sElem));
                 /* Determine if the resource supports persistent provisioning */
                 if(!resourceCapability.supportsPersistentProvisioning()) {
                     String failureReason =
@@ -786,9 +786,9 @@ public class InstantiatorResource {
                 }
                 if(!provisionableCaps) {
                     StringBuilder message = new StringBuilder();
-                    message.append(getName()).append(" does not meet qualitative requirements for ");
-                    message.append(provType).append(" service");
-                    message.append("[ ").append(LoggingUtil.getLoggingName(sElem)).append("] ");
+                    message.append(getName()).append(" does not meet requirements for ");
+                    message.append(provType).append(" service ");
+                    message.append("[").append(LoggingUtil.getLoggingName(sElem)).append("] ");
                     message.append("PlatformCapability objects are not configured to be downloadable: ");
                     message.append(unsupportedReqsString);
                     String failureReason = message.toString();
@@ -994,17 +994,19 @@ public class InstantiatorResource {
         ServiceElement sElem = request.getServiceElement();
         ServiceLevelAgreements sla = sElem.getServiceLevelAgreements();
         SystemComponent[] serviceRequirements = sla.getSystemRequirements().getSystemComponents();
-        List<SystemComponent> unsupportedReqs = new ArrayList<SystemComponent>();
+        List<SystemComponent> unsupportedRequirements = new ArrayList<SystemComponent>();
         /*
          * If there are no PlatformCapability requirements we can return
          * successfully
          */
         if(serviceRequirements.length == 0)
-            return unsupportedReqs;
+            return unsupportedRequirements;
 
         PlatformCapability[] platformCapabilities = resourceCapability.getPlatformCapabilities();
+
         List<SystemComponent> operatingSystems = new ArrayList<SystemComponent>();
         List<SystemComponent> architectures = new ArrayList<SystemComponent>();
+        List<SystemComponent> machineAddresses = new ArrayList<SystemComponent>();
         List<SystemComponent> remaining = new ArrayList<SystemComponent>();
 
         for (SystemComponent serviceRequirement : serviceRequirements) {
@@ -1012,6 +1014,8 @@ public class InstantiatorResource {
                 operatingSystems.add(serviceRequirement);
             } else if(isArchitecture(serviceRequirement)) {
                 architectures.add(serviceRequirement);
+            } else if(isMachineAddress(serviceRequirement)) {
+                machineAddresses.add(serviceRequirement);
             } else {
                 remaining.add(serviceRequirement);
             }
@@ -1021,32 +1025,21 @@ public class InstantiatorResource {
          * Check if we have a match in one of the sought after architectures
          */
         if(!architectures.isEmpty()) {
-            boolean supported = false;
             ProcessorArchitecture architecture = getArchitecture();
-            for (SystemComponent serviceRequirement : architectures) {
-                if(architecture.supports(serviceRequirement)) {
-                    supported = true;
-                    break;
-                }
-            }
-            if (!supported) {
+            Result result = check(architecture, architectures);
+            if (!result.supported) {
+                String failureReason = formatFailureReason(architectures,
+                                                           (String)architecture.getCapabilities().get(ProcessorArchitecture.ARCHITECTURE),
+                                                           "architecture",
+                                                           sElem,
+                                                           result.excluded.isEmpty(),
+                                                           ProcessorArchitecture.ARCHITECTURE);
                 if(logger.isWarnEnabled()) {
-                    StringBuilder message = new StringBuilder();
-                    for (SystemComponent serviceRequirement : architectures) {
-                        if(message.length()>0)
-                            message.append(", ");
-                        message.append(serviceRequirement.getAttributes().get(ProcessorArchitecture.ARCHITECTURE));
-                    }
-                    String failureReason =
-                        String.format("The architectures being requested [%s] are not supported by the target resource's architecture [%s] for [%s]",
-                                      message.toString(),
-                                      architecture.getValue(ProcessorArchitecture.ARCHITECTURE),
-                                      LoggingUtil.getLoggingName(sElem));
-                    request.addFailureReason(failureReason);
                     logger.warn(failureReason);
                 }
-                unsupportedReqs.addAll(architectures);
-                return unsupportedReqs;
+                request.addFailureReason(failureReason);
+                unsupportedRequirements.addAll(architectures);
+                return unsupportedRequirements;
             }
         }
 
@@ -1055,31 +1048,52 @@ public class InstantiatorResource {
          */
         if(!operatingSystems.isEmpty()) {
             OperatingSystem operatingSystem = getOperatingSystem();
-            boolean supported = false;
-            for (SystemComponent serviceRequirement : operatingSystems) {
-                if(operatingSystem.supports(serviceRequirement)) {
-                    supported = true;
-                    break;
-                }
-            }
-            if (!supported) {
+            Result result = check(operatingSystem, operatingSystems);
+            if (!result.supported) {
+                String failureReason = formatFailureReason(operatingSystems,
+                                                           operatingSystem.getCapabilities().get(OperatingSystem.NAME).toString(),
+                                                           "operating system",
+                                                           sElem,
+                                                           result.excluded.isEmpty(),
+                                                           OperatingSystem.NAME);
                 if(logger.isWarnEnabled()) {
-                    StringBuilder message = new StringBuilder();
-                    for (SystemComponent serviceRequirement : operatingSystems) {
-                        if(message.length()>0)
-                            message.append(", ");
-                        message.append(serviceRequirement.getAttributes().get(OperatingSystem.NAME));
-                    }
-                    String failureReason =
-                        String.format("The operating systems being requested [%s] are not supported by the target resource's operating system [%s] for [%s]",
-                                      message.toString(),
-                                      operatingSystem.getValue(OperatingSystem.NAME),
-                                      LoggingUtil.getLoggingName(sElem));
-                    request.addFailureReason(failureReason);
                     logger.warn(failureReason);
                 }
-                unsupportedReqs.addAll(operatingSystems);
-                return unsupportedReqs;
+                request.addFailureReason(failureReason);
+                unsupportedRequirements.addAll(operatingSystems);
+                return unsupportedRequirements;
+            }
+        }
+        /*
+         * Check if we have a match in one of the sought after machine addresses
+         */
+        if(!machineAddresses.isEmpty()) {
+            TCPConnectivity tcpConnectivity = getTCPConnectivity();
+            Result result = check(tcpConnectivity, machineAddresses);
+            if (!result.supported) {
+                String formattedComponents = formatSystemComponents(machineAddresses,
+                                                                    TCPConnectivity.HOST_NAME, TCPConnectivity.HOST_ADDRESS);
+                String failureReason;
+                if(result.excluded.isEmpty()) {
+                    failureReason = String.format("The machine addresses being requested [%s] do not match the " +
+                                                  "target resource's machine name/ip [%s/%s] for [%s]",
+                                                  formattedComponents,
+                                                  tcpConnectivity.getCapabilities().get(TCPConnectivity.HOST_NAME),
+                                                  tcpConnectivity.getCapabilities().get(TCPConnectivity.HOST_ADDRESS),
+                                                  LoggingUtil.getLoggingName(sElem));
+                } else {
+                    failureReason = String.format("The target resource's machine name/ip [%s/%s] is on the exclusion list of [%s] for [%s]",
+                                                  tcpConnectivity.getCapabilities().get(TCPConnectivity.HOST_NAME),
+                                                  tcpConnectivity.getCapabilities().get(TCPConnectivity.HOST_ADDRESS),
+                                                  formattedComponents,
+                                                  LoggingUtil.getLoggingName(sElem));
+                }
+                if(logger.isWarnEnabled()) {
+                    logger.warn(failureReason);
+                }
+                request.addFailureReason(failureReason);
+                unsupportedRequirements.addAll(machineAddresses);
+                return unsupportedRequirements;
             }
         }
 
@@ -1091,27 +1105,113 @@ public class InstantiatorResource {
             /*
              * Iterate through all resource PlatformCapability objects and see
              * if any of them supports the current PlatformCapability. If none
-             * are found, then we dont have a match
+             * are found, then we don't have a match
              */
             for (PlatformCapability platformCapability : platformCapabilities) {
                 if (platformCapability.supports(serviceRequirement)) {
+                    if(serviceRequirement.exclude()) {
+                        continue;
+                    }
                     supported = true;
                     break;
                 }
             }
             if (!supported) {
-                unsupportedReqs.add(serviceRequirement);
+                unsupportedRequirements.add(serviceRequirement);
             }
         }
-        return unsupportedReqs;
+        return unsupportedRequirements;
+    }
+
+    Result check(final PlatformCapability platformCapability,
+                  final List<SystemComponent> systemComponents) {
+        Result result = new Result();
+        boolean supported = false;
+        for (SystemComponent serviceRequirement : systemComponents) {
+            if(platformCapability.supports(serviceRequirement)) {
+                if(serviceRequirement.exclude()) {
+                    result.excluded.add(serviceRequirement);
+                    continue;
+                }
+                supported = true;
+                break;
+            }
+        }
+        result.supported = supported;
+        return result;
+    }
+
+    class Result {
+        boolean supported;
+        List<SystemComponent> excluded = new ArrayList<SystemComponent>();
+    }
+
+    String formatSystemComponents(final List<SystemComponent> systemComponents, final String... keys) {
+        StringBuilder builder = new StringBuilder();
+        for(String key : keys) {
+            for (SystemComponent serviceRequirement : systemComponents) {
+                if(builder.length()>0)
+                    builder.append(", ");
+                String value = (String) serviceRequirement.getAttributes().get(key);
+                if(value!=null)
+                    builder.append(value);
+            }
+        }
+        return builder.toString();
+    }
+
+    String formatFailureReason(final List<SystemComponent> systemComponents,
+                               final String capability,
+                               final String name,
+                               final ServiceElement sElem,
+                               final boolean notExcluded,
+                               final String... keys) {
+
+        String formattedComponents = formatSystemComponents(systemComponents, keys);
+        String failureReason;
+        if(notExcluded) {
+            failureReason = String.format("The %ss being requested [%s] are not supported by the " +
+                                          "target resource's %s [%s] for [%s]",
+                                          name,
+                                          formattedComponents,
+                                          name,
+                                          capability,
+                                          LoggingUtil.getLoggingName(sElem));
+        } else {
+            failureReason = String.format("The target resource's %s [%s] is on the exclusion list of [%s] for [%s]",
+                                          name,
+                                          capability,
+                                          formattedComponents,
+                                          LoggingUtil.getLoggingName(sElem));
+        }
+        return failureReason;
     }
 
     boolean isOperatingSystem(SystemComponent systemComponent) {
+        String name = systemComponent.getName();
+        String className = systemComponent.getClassName();
+        if(className==null) {
+            return name.equals(OperatingSystem.ID);
+        }
         return systemComponent.getClassName().equals(OperatingSystem.class.getName());
     }
 
     boolean isArchitecture(SystemComponent systemComponent) {
+        String name = systemComponent.getName();
+        String className = systemComponent.getClassName();
+        if(className==null) {
+            return name.equals(ProcessorArchitecture.ID);
+        }
         return systemComponent.getClassName().equals(ProcessorArchitecture.class.getName());
+    }
+
+    boolean isMachineAddress(SystemComponent systemComponent) {
+        String name = systemComponent.getName();
+        String className = systemComponent.getClassName();
+        if(className==null) {
+            return name.equals(TCPConnectivity.ID);
+        }
+        return systemComponent.getClassName().equals(TCPConnectivity.class.getName());
     }
 
     ProcessorArchitecture getArchitecture () {
@@ -1134,6 +1234,17 @@ public class InstantiatorResource {
             }
         }
         return operatingSystem;
+    }
+
+    TCPConnectivity getTCPConnectivity () {
+        TCPConnectivity tcpConnectivity = null;
+        for (PlatformCapability platformCapability : resourceCapability.getPlatformCapabilities()) {
+            if(platformCapability instanceof TCPConnectivity) {
+                tcpConnectivity = (TCPConnectivity) platformCapability;
+                break;
+            }
+        }
+        return tcpConnectivity;
     }
 
     /**

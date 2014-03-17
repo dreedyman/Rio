@@ -28,7 +28,8 @@ import org.rioproject.watch.WatchDataReplicator;
 @SuppressWarnings("unused")
 public class Memory extends ByteOrientedDevice implements WatchDataReplicator<CalculableMemory> {
     static final long serialVersionUID = 1L;
-    static final String DEFAULT_DESCRIPTION = SystemWatchID.JVM_MEMORY;
+    static final String DEFAULT_DESCRIPTION = "JVM Process Memory";
+    public static final String ID = SystemWatchID.JVM_MEMORY;
 
     /**
      * Create a Memory capability
@@ -44,7 +45,7 @@ public class Memory extends ByteOrientedDevice implements WatchDataReplicator<Ca
      */
     public Memory(String description) {
         this.description = description;
-        define(NAME, SystemWatchID.JVM_MEMORY);
+        define(NAME, ID);
     }
 
     public void addCalculable(CalculableMemory calculable) {

@@ -15,10 +15,9 @@
  */
 package org.rioproject.system.capability.connectivity;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import org.rioproject.net.HostUtil;
+
+import java.net.*;
 import java.util.Enumeration;
 
 /**
@@ -34,11 +33,14 @@ public class TCPConnectivity extends ConnectivityCapability {
     public static final String IPv6_NIC = "IPv6 NICs";
     /** Number of NetworkInterfaces */
     public static final String IPv4_NIC = "IPv4 NICs";
+    public static final String HOST_ADDRESS = "Address";
+    public static final String HOST_NAME = "Host Name";
+    public static final String ID = "Network";
 
     /** 
      * Create a TCPConnectivity 
      */
-    public TCPConnectivity() throws SocketException {
+    public TCPConnectivity() throws SocketException, UnknownHostException {
         this(DEFAULT_DESCRIPTION);
     }
 
@@ -47,8 +49,8 @@ public class TCPConnectivity extends ConnectivityCapability {
      *
      * @param description A description
      */
-    public TCPConnectivity(String description) throws SocketException {
-        super(description);
+    public TCPConnectivity(final String description) throws SocketException, UnknownHostException {
+        super(description==null?DEFAULT_DESCRIPTION:description);
         int ipv4Nics = 0;
         int ipv6Nics = 0;
         StringBuilder ipv4buff = new StringBuilder();
@@ -74,5 +76,9 @@ public class TCPConnectivity extends ConnectivityCapability {
         define(IPv4_NIC, ipv4buff.toString());
         if(ipv6Nics>0)
             define(IPv6_NIC, ipv6buff.toString());
+
+        define(NAME, ID);
+        define(HOST_ADDRESS, HostUtil.getInetAddress().getHostAddress());
+        define(HOST_NAME, InetAddress.getLocalHost().getHostName());
     }
 }

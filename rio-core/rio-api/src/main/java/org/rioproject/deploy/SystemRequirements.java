@@ -41,6 +41,12 @@ public class SystemRequirements implements Serializable {
      */
     private final Map<String, ThresholdValues> systemThresholds = new HashMap<String, ThresholdValues>();
 
+    enum Operation {EXCLUDE, INCLUDE}
+
+    /** Array of machines that have been identified as part of a cluster of
+     * machine used as targets for provisioning */
+    private final List<String> machineCluster = new ArrayList<String>();
+
     /**
      * Add a system required ThresholdValue
      *
@@ -74,7 +80,7 @@ public class SystemRequirements implements Serializable {
             Set<String> keySet = systemThresholds.keySet();
             keys = keySet.toArray(new String[keySet.size()]);
         }
-        return (keys);
+        return keys;
     }
 
     /**
@@ -94,7 +100,7 @@ public class SystemRequirements implements Serializable {
         synchronized (systemThresholds) {
             tVals = systemThresholds.get(identifier);
         }
-        return (tVals);
+        return tVals;
     }
 
     /**
@@ -138,7 +144,7 @@ public class SystemRequirements implements Serializable {
             sysComponents = systemComponents.toArray(
                 new SystemComponent[systemComponents.size()]);
         }
-        return (sysComponents);
+        return sysComponents;
     }
 
     /**
@@ -152,9 +158,9 @@ public class SystemRequirements implements Serializable {
         SystemComponent[] sysComponents = getSystemComponents();
         for (SystemComponent sysComp : sysComponents) {
             if (sysComp.getStagedSoftware()!=null)
-                return (true);
+                return true;
         }
-        return (false);
+        return false;
     }
 
     public String toString() {

@@ -16,6 +16,8 @@
  */
 package org.rioproject.system.capability.software;
 
+import org.rioproject.system.capability.PlatformCapability;
+
 /**
  * The <code>J2SESupport</code> object base class for J2SE software support
  *
@@ -29,7 +31,7 @@ public class J2SESupport extends SoftwareSupport {
      * Create a J2SESupport
      */
     public J2SESupport() {
-        this.description = DEFAULT_DESCRIPTION;
+        this(DEFAULT_DESCRIPTION);
     }
 
     /**
@@ -39,5 +41,14 @@ public class J2SESupport extends SoftwareSupport {
      */
     public J2SESupport(String description) {
         this.description = description;
+        define(PlatformCapability.VERSION, System.getProperty("java.version"));
+        String jvmName = System.getProperty("java.vm.name");
+        if(jvmName!=null) {
+            define(PlatformCapability.DESCRIPTION, jvmName);
+        }
+        define(PlatformCapability.NAME, "Java");
+        String javaHome = System.getProperty("java.home");
+        if(javaHome!=null)
+            setPath(javaHome);
     }
 }

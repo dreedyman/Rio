@@ -32,16 +32,32 @@ public class SystemComponent implements Serializable {
     private final Map<String, Object> attributes = new HashMap<String, Object>();
     private StagedSoftware stagedSoftware;
     private ExecDescriptor execDescriptor;
+    private boolean exclude = false;
 
     /**
      * Create a SystemComponent
      *
      * @param name A short name, typically the name of the class sans the
-     * package name. Must not be null
-     * @param attributes Collection of name value pairs to evaluate, optional
+     * package name. Must not be null.
      */
-    public SystemComponent(final String name, final Map<String, Object> attributes) {
-        this(name, null, attributes);
+    public SystemComponent(final String name) {
+        this(name, null, null);
+    }
+
+    /**
+     * Create a SystemComponent
+     *
+     * @param name A short name, typically the name of the class sans the
+     * package name, if null, is derived from the className parameter. Must
+     * not be null if the classname parameter is null
+     * @param className Either the class simple name or the fully qualified classname,
+     * must not be null if the name parameter is null
+     */
+    public SystemComponent(final String name, final String className) {
+        if (name == null && className == null)
+            throw new IllegalArgumentException("name and className are null");
+        this.className = className;
+        this.name = name;
     }
 
     /**
@@ -57,10 +73,7 @@ public class SystemComponent implements Serializable {
     public SystemComponent(final String name,
                            final String className,
                            final Map<String, Object> attributes) {
-        if (name == null && className == null)
-            throw new IllegalArgumentException("name and className are null");
-        this.className = className;
-        this.name = name;
+        this(name, className);
         if (attributes != null)
             this.attributes.putAll(attributes);
     }
@@ -91,6 +104,37 @@ public class SystemComponent implements Serializable {
      */
     public Map<String, Object> getAttributes() {
         return (attributes);
+    }
+
+    /**
+     * Associates the specified value with the specified key as a required attribute.
+     *
+     * @param key key with which the specified value is to be associated, ignored if {@code null}
+     * @param value value to be associated with the specified key, ignored if {@code null}
+     */
+    public void put(final String key, final Object value) {
+        if(key!=null && value!=null) {
+            attributes.put(key, value);
+        }
+    }
+
+    /**
+     * Copies all of the mappings from the specified map
+     *
+     * @param attributes map to be stored.
+     */
+    public void putAll(final Map<String, Object> attributes) {
+        if(attributes!=null) {
+            this.attributes.putAll(attributes);
+        }
+    }
+
+    public boolean exclude() {
+        return exclude;
+    }
+
+    public void setExclude(boolean exclude) {
+        this.exclude = exclude;
     }
 
     /**

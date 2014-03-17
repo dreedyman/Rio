@@ -33,6 +33,7 @@ public class ProcessorArchitecture extends PlatformCapability {
     public final static String AVAILABLE = "Available";
     /** cpu type */
     public final static String ARCHITECTURE = "Architecture";
+    public static final String ID = "Processor";
 
     /** 
      * Create a ProcessorArchitecture with the default description 
@@ -49,6 +50,8 @@ public class ProcessorArchitecture extends PlatformCapability {
     public ProcessorArchitecture(String description) {
         this.description = description;
         define(NAME, "Processor");
+        define(ARCHITECTURE, System.getProperty("os.arch"));
+        define(AVAILABLE, Integer.toString(Runtime.getRuntime().availableProcessors()));
     }
 
     /**

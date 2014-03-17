@@ -23,14 +23,15 @@ import org.rioproject.system.capability.PlatformCapability;
  * @author Dennis Reedy
  */
 public class OperatingSystem extends PlatformCapability {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "Operating System";
+    public static final String ID = "OperatingSystem";
 
     /** 
      * Create a OperatingSystem object
      */
     public OperatingSystem() {
-        this.description = DEFAULT_DESCRIPTION;
+        this(DEFAULT_DESCRIPTION);
     }
 
     /** 
@@ -38,7 +39,9 @@ public class OperatingSystem extends PlatformCapability {
      *
      * @param description The description
      */
-    public OperatingSystem(String description) {
+    public OperatingSystem(final String description) {
         this.description = description;
+        define(NAME, System.getProperty("os.name"));
+        define(VERSION, System.getProperty("os.version"));
     }
 }

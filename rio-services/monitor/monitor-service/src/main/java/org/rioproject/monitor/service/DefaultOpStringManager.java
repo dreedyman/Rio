@@ -58,10 +58,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DefaultOpStringManager implements OperationalStringManager, OpStringManager, ServerProxyTrust {
     /** Component name we use to find items in the configuration */
     static final String CONFIG_COMPONENT = "org.rioproject.monitor";
-    /** Logger */
-    static final String LOGGER = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    static Logger logger = LoggerFactory.getLogger(LOGGER);
+    static Logger logger = LoggerFactory.getLogger(DefaultOpStringManager.class);
 
     private OperationalString opString;
     /**
@@ -166,7 +164,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         } else {
             standAlone = opString.getNestedOperationalStrings().length==0;
         }
-        logger.info("Manager for {} standAlone: {}", opString.getName(), standAlone);
+        if(logger.isDebugEnabled())
+            logger.debug("Manager for {} standAlone: {}", opString.getName(), standAlone);
         if (opString.loadedFrom() != null &&
             opString.loadedFrom().toExternalForm().startsWith("file") &&
             opString.loadedFrom().toExternalForm().endsWith(".oar")) {

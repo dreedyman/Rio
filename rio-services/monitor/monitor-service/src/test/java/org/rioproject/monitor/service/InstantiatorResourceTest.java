@@ -33,6 +33,7 @@ import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.system.capability.connectivity.TCPConnectivity;
 import org.rioproject.system.capability.platform.OperatingSystem;
 import org.rioproject.system.capability.platform.ProcessorArchitecture;
 
@@ -88,8 +89,7 @@ public class InstantiatorResourceTest {
         SBI sbi = new SBI();
         List<MeasuredResource> measuredResources = new ArrayList<MeasuredResource>();
         ComputeResourceUtilization resourceUtilization = new ComputeResourceUtilization("test",
-                                                                                        sbi.inetAddress
-                                                                                            .getHostAddress(),
+                                                                                        sbi.inetAddress.getHostAddress(),
                                                                                         sbi.inetAddress.getHostName(),
                                                                                         measuredResources);
         SystemCapabilities systemCapabilities = new SystemCapabilities();
@@ -99,7 +99,7 @@ public class InstantiatorResourceTest {
                                                                        true,
                                                                        platformCapabilities,
                                                                        resourceUtilization);
-        instantiatorResource = new InstantiatorResource(/*new MarshalledObject<ServiceBeanInstantiator>(sbi)*/null,
+        instantiatorResource = new InstantiatorResource(null,
                                                         sbi,
                                                         "test",
                                                         sbi.uuid,
@@ -159,6 +159,45 @@ public class InstantiatorResourceTest {
         Assert.assertTrue(instantiatorResource.meetsQuantitativeRequirements(request));
     }
 
+    @Test
+    public void testMeetsClusterRequirements() throws UnknownHostException {
+        ProvisionRequest request = createProvisionRequest();
+        request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(false,
+                                                                                                  InetAddress.getLocalHost().getHostAddress()));
+        Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
+        Assert.assertTrue(notSupported.size()==0);
+    }
+
+    @Test
+    public void testMeetsClusterMultipleHostNameRequirements() throws UnknownHostException {
+        ProvisionRequest request = createProvisionRequest();
+        request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(false,
+                                                                                                  InetAddress.getLocalHost().getHostAddress(),
+                                                                                                  "192.168.1.9"));
+        Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
+        Assert.assertTrue(notSupported.size()==0);
+    }
+
+    @Test
+    public void testMeetsExcludeClusterRequirements() throws UnknownHostException {
+        ProvisionRequest request = createProvisionRequest();
+        request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(true,
+                                                                                                  InetAddress.getLocalHost().getHostAddress()));
+        Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
+        Assert.assertTrue(notSupported.size()==1);
+    }
+
+    @Test
+    public void testMeetsExcludeMultipleClusterRequirements() throws UnknownHostException, ProvisionException {
+        ProvisionRequest request = createProvisionRequest();
+        request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(true,
+                                                                                                  InetAddress.getLocalHost().getHostAddress(),
+                                                                                                  "192.168.1.9"));
+        //Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
+        //Assert.assertTrue(notSupported.size()==2);
+        Assert.assertFalse(instantiatorResource.canProvision(request));
+    }
+
     ServiceElement createServiceElement() {
         ServiceElement serviceElement = TestUtil.makeServiceElement("foo", "test", 1);
         serviceElement.setServiceLevelAgreements(createServiceLevelAgreements(true, true));
@@ -181,22 +220,30 @@ public class InstantiatorResourceTest {
         ServiceLevelAgreements slas = new ServiceLevelAgreements();
         SystemRequirements systemRequirements = new SystemRequirements();
         for (String architecture : architectures) {
-            Map<String, Object> attributeMap = new HashMap<String, Object>();
-            attributeMap.put(ProcessorArchitecture.NAME, "Processor");
-            attributeMap.put(ProcessorArchitecture.ARCHITECTURE, architecture);
-            SystemComponent systemComponent = new SystemComponent("Processor",
-                                                                  ProcessorArchitecture.class.getName(),
-                                                                  attributeMap);
+            SystemComponent systemComponent = new SystemComponent(ProcessorArchitecture.ID,
+                                                                  ProcessorArchitecture.class.getName());
+            systemComponent.put(ProcessorArchitecture.ARCHITECTURE, architecture);
             systemRequirements.addSystemComponent(systemComponent);
         }
         for (String opSys : operatingSystems) {
-            Map<String, Object> attributeMap = new HashMap<String, Object>();
-            attributeMap.put(OperatingSystem.NAME, opSys);
-            SystemComponent operatingSystem =
-                new SystemComponent("OperatingSystem", OperatingSystem.class.getName(), attributeMap);
+            SystemComponent operatingSystem = new SystemComponent(OperatingSystem.ID, OperatingSystem.class.getName());
+            operatingSystem.put(OperatingSystem.NAME, opSys);
             systemRequirements.addSystemComponent(operatingSystem);
         }
         slas.setServiceRequirements(systemRequirements);
+        return slas;
+    }
+
+    ServiceLevelAgreements createClusterServiceLevelAgreements(boolean exclude, String... addresses) throws UnknownHostException {
+        ServiceLevelAgreements slas = new ServiceLevelAgreements();
+        SystemRequirements systemRequirements = new SystemRequirements();
+        slas.setServiceRequirements(systemRequirements);
+        for(String address : addresses) {
+            SystemComponent cluster = new SystemComponent(TCPConnectivity.ID);
+            cluster.put(TCPConnectivity.HOST_ADDRESS, address);
+            cluster.setExclude(exclude);
+            systemRequirements.addSystemComponent(cluster);
+        }
         return slas;
     }
 

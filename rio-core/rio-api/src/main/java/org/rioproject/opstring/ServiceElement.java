@@ -106,7 +106,7 @@ public class ServiceElement implements Serializable {
     private int actual;    
     /** Array of machines that have been identified as part of a cluster of
      * machine used as targets for provisioning */
-    private String[] machineCluster;        
+    private String[] machineCluster;
     /** FaultDetectionHandler ClassBundle */
     private ClassBundle fdhBundle;
     /** ExecDescriptor, providing attributes for an external service to execute */
@@ -325,7 +325,7 @@ public class ServiceElement implements Serializable {
      * Set the machineCluster property
      * 
      * @param machineCluster The cluster of targeted machine(s) to provision
-     * the ServiceBean to. Array elements will be either the hostname or an IP
+     * the ServiceBean to. Array elements should be either the hostname or an IP
      * Address of a machine.
      */
     public void setCluster(String... machineCluster) {
@@ -340,10 +340,10 @@ public class ServiceElement implements Serializable {
      */
     public String[] getCluster() {
         if(machineCluster == null)
-            return (new String[0]);
+            return new String[0];
         String[] cluster = new String[machineCluster.length];
         System.arraycopy(machineCluster, 0, cluster, 0, machineCluster.length);
-        return (cluster);
+        return cluster;
     }
 
     /**

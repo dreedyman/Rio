@@ -452,7 +452,7 @@ public class ServiceBeanLoader {
                                                                         "does not support persistent provisioning, " +
                                                                         "and the service requires artifact resolution " +
                                                                         "for "+implArtifact);
-                        String[] jars;
+                        URL[] jars;
                         try {
                             StringBuilder builder = new StringBuilder();
                             for(RemoteRepository repository: elem.getRemoteRepositories()) {
@@ -474,12 +474,7 @@ public class ServiceBeanLoader {
                                 thrown = e.getCause();
                             throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", thrown);
                         }
-                        List<URL> urls = new ArrayList<URL>();
-                        for(String jar: jars) {
-                            if(jar!=null)
-                                urls.add(new URL(jar));
-                        }
-                        implJARs = urls.toArray(new URL[urls.size()]);
+                        implJARs = jars;
                     } else {
                         /* RIO-228 */
                         if(System.getProperty("StaticCybernode")!=null)
@@ -526,35 +521,32 @@ public class ServiceBeanLoader {
          */
         if(exportArtifact==null && implArtifact==null) {
             String localCodebase = System.getProperty(Constants.CODESERVER);
-            /*File serviceUiJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");
-            File jskDlJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");*/
-
-            String[] requisiteExports = new String[]{"rio-dl-"+RioVersion.VERSION+".jar", "jsk-dl-2.2.1.jar"};
-            for(String export : requisiteExports) {
-                boolean found = false;
-                for(URL u : dlPR.getJars()) {
-                    if(u.toExternalForm().endsWith(export)) {
-                        found = true;
-                        break;
+            if(localCodebase!=null) {
+                if(!localCodebase.endsWith("/"))
+                    localCodebase = localCodebase+"/";
+                String[] requisiteExports = new String[]{"rio-api-"+RioVersion.VERSION+".jar", "jsk-dl-2.2.2.jar"};
+                for(String export : requisiteExports) {
+                    boolean found = false;
+                    for(URL u : dlPR.getJars()) {
+                        if(u.toExternalForm().endsWith(export)) {
+                            found = true;
+                            break;
+                        }
                     }
-                }
-                if(!found) {
-                    /* We check if the impl has an artifact, not the dl. The
-                    * dl may not declare an artifact. This accounts for the
-                    * case where a service is just implemented as a pojo with
-                    * no custom remote methods, and is just exported using Rio
-                    * infrastructure support
-                    * (through the org.rioproject.service.Service
-                    * interface).
-                    *
-                    * If there is no declared artifact, we sail through since
-                    * the ServiceElement would have been constructed with the
-                    * default platform export jars as part of it's creation.
-                    */
-                    if(implPR.getArtifact()!=null) {
-                        if(localCodebase!=null) {
-                            if(!localCodebase.endsWith("/"))
-                                localCodebase = localCodebase+"/";
+                    if(!found) {
+                        /* We check if the impl has an artifact, not the dl. The
+                         * dl may not declare an artifact. This accounts for the
+                         * case where a service is just implemented as a pojo with
+                         * no custom remote methods, and is just exported using Rio
+                         * infrastructure support
+                         * (through the org.rioproject.service.Service
+                         * interface).
+                         *
+                         * If there is no declared artifact, we sail through since
+                         * the ServiceElement would have been constructed with the
+                         * default platform export jars as part of it's creation.
+                         */
+                        if(implPR.getArtifact()!=null) {
                             dlPR.addJar(new URL(localCodebase+export));
                         }
                     }

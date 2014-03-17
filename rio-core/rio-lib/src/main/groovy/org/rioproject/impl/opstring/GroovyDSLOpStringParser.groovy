@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.rioproject.impl.opstring
+
 import net.jini.core.discovery.LookupLocator
 import net.jini.core.entry.Entry
 import org.codehaus.groovy.ast.ClassNode
@@ -47,13 +48,13 @@ import org.rioproject.sla.RuleMap.ServiceDefinition
 import org.rioproject.sla.SLA
 import org.rioproject.system.SystemWatchID
 import org.rioproject.system.capability.platform.OperatingSystem
+import org.rioproject.system.capability.platform.ProcessorArchitecture
 import org.rioproject.system.capability.platform.StorageCapability
 import org.rioproject.system.capability.platform.SystemMemory
 import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 import org.slf4j.LoggerFactory
 
-import javax.annotation.processing.Processor
 import java.util.concurrent.TimeUnit
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -503,7 +504,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 Map attributeMap = [:]
                 attributeMap["Name"] = SystemWatchID.SYSTEM_MEMORY
                 attributeMap.putAll(helper.capitalizeFirstLetterOfEachKey(attributes))
-                SystemComponent memory = new SystemComponent("SystemMemory", SystemMemory.class.name, attributeMap)
+                SystemComponent memory = new SystemComponent(SystemMemory.ID, SystemMemory.class.name, attributeMap)
                 helper.addSystemComponent(parent, memory, systemRequirementsTable, currentService)
             }
 
@@ -511,7 +512,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 Map attributeMap = [:]
                 attributeMap["Name"] = SystemWatchID.DISK_SPACE
                 attributeMap.putAll(helper.capitalizeFirstLetterOfEachKey(attributes))
-                SystemComponent diskspace = new SystemComponent("StorageCapability", StorageCapability.class.name, attributeMap)
+                SystemComponent diskspace = new SystemComponent(StorageCapability.ID, StorageCapability.class.name, attributeMap)
                 helper.addSystemComponent(parent, diskspace, systemRequirementsTable, currentService)
             }
 
@@ -519,14 +520,14 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 Map attributeMap = [:]
                 attributeMap["Name"] = attributes.name
                 attributeMap["Version"] = attributes.version
-                SystemComponent operatingSystem = new SystemComponent("OperatingSystem", OperatingSystem.class.name, attributeMap)
+                SystemComponent operatingSystem = new SystemComponent(OperatingSystem.ID, OperatingSystem.class.name, attributeMap)
                 helper.addSystemComponent(parent, operatingSystem, systemRequirementsTable, currentService)
             }
 
             emc.processor = { Map attributes ->
                 Map attributeMap = [:]
                 attributeMap["Available"] = attributes.available
-                SystemComponent processor = new SystemComponent("Processor", Processor.class.name, attributeMap)
+                SystemComponent processor = new SystemComponent(ProcessorArchitecture.ID, ProcessorArchitecture.class.name, attributeMap)
                 helper.addSystemComponent(parent, processor, systemRequirementsTable, currentService)
             }
 
