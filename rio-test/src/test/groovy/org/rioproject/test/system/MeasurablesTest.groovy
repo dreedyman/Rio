@@ -20,6 +20,7 @@ import net.jini.config.EmptyConfiguration
 import org.rioproject.deploy.SystemComponent
 import org.rioproject.impl.system.measurable.disk.DiskSpace
 import org.rioproject.impl.system.measurable.memory.Memory
+import org.rioproject.system.capability.platform.StorageCapability
 
 /**
  * Test measurables
@@ -37,67 +38,77 @@ class MeasurablesTest extends GroovyTestCase {
             new org.rioproject.system.capability.platform.Memory()
         memMeasurable.addWatchDataReplicator(memCapability)
         memMeasurable.start()
-        
+
         def req = [(memCapability.CAPACITY) : '250k']
-        SystemComponent sysComp = new SystemComponent(memCapability.name, memCapability.class.name, req)
+        SystemComponent sysComp = new SystemComponent(memCapability.ID, memCapability.class.name)
+        sysComp.putAll(req)
         assertTrue 'JVM should have the capacity of 250k but does not',
                    memCapability.supports(sysComp)
 
-        req.put(memCapability.CAPACITY, '1m')
-        sysComp = new SystemComponent(memCapability.name, req)
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '1m')
         assertEquals 'Should have 3 capabilities, only have '+memCapability.getCapabilities().size(),
                      3, memCapability.capabilities.size()
         assertTrue 'JVM should have the capacity of 1m but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.MB+'m',
                    memCapability.supports(sysComp)
-         req.put(memCapability.CAPACITY, '4m')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '4m')
         assertTrue 'JVM should have the capacity of 4m but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.MB+'m',
                    memCapability.supports(sysComp)
-         req.put(memCapability.CAPACITY, '8m')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '8m')
         assertTrue 'JVM should have the capacity of 8m but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.MB+'m',
                    memCapability.supports(sysComp)
-         req.put(memCapability.CAPACITY, '16m')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '16m')
         assertTrue 'JVM should have the capacity of 16m but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.MB+'m',
                    memCapability.supports(sysComp)
-         req.put(memCapability.CAPACITY, '32m')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '32m')
         assertTrue 'JVM should have the capacity of 32m but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.MB+'m',
                    memCapability.supports(sysComp)
 
-        req.put(memCapability.CAPACITY, '1024k')
-        sysComp = new SystemComponent(memCapability.name, req)
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '1024k')
         assertTrue 'JVM should have the capacity of 1024k but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
-        req.put(memCapability.CAPACITY, '2048k')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '2048k')
         assertTrue 'JVM should have the capacity of 2048k but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
-        req.put(memCapability.CAPACITY, '4096k')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '4096k')
         assertTrue 'JVM should have the capacity of 4096k but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
-        req.put(memCapability.CAPACITY, '8192k')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '8192k')
         assertTrue 'JVM should have the capacity of 8192k but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
-        req.put(memCapability.CAPACITY, '16384k')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '16384k')
         assertTrue 'JVM should have the capacity of 16384k but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
-        req.put(memCapability.CAPACITY, '32768k')
-        sysComp = new SystemComponent(memCapability.name, req)
+
+        sysComp = new SystemComponent(memCapability.name)
+        sysComp.put(memCapability.CAPACITY, '32768k')
         assertTrue 'JVM should have the capacity of 32768k but has '+
                    memCapability.getCapabilities().get(memCapability.CAPACITY)/memCapability.KB+'kb',
                    memCapability.supports(sysComp)
@@ -106,16 +117,14 @@ class MeasurablesTest extends GroovyTestCase {
 
     void testDiskSpace() {
         Configuration config = EmptyConfiguration.INSTANCE
-        DiskSpace diskMeasurable =
-            new DiskSpace(config)
+        DiskSpace diskMeasurable = new DiskSpace(config)
 
-        org.rioproject.system.capability.platform.StorageCapability storageCapability =
-            new org.rioproject.system.capability.platform.StorageCapability()
+        StorageCapability storageCapability = new StorageCapability()
         diskMeasurable.addWatchDataReplicator(storageCapability)
         diskMeasurable.start()
 
-        def req = [(storageCapability.CAPACITY) : '250k']
-        SystemComponent sysComp = new SystemComponent(storageCapability.name, req)
+        SystemComponent sysComp = new SystemComponent(StorageCapability.ID)
+        sysComp.put(storageCapability.CAPACITY, '250k')
         assertTrue 'System should have the disk space capacity of 250k but does not',
                    storageCapability.supports(sysComp)
     }
