@@ -185,30 +185,17 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
              * Load default platform (qualitative) capabilities
              */
             ProcessorArchitecture processor = new ProcessorArchitecture();
-            processor.define(ProcessorArchitecture.ARCHITECTURE, System.getProperty("os.arch"));
-            processor.define(ProcessorArchitecture.AVAILABLE, Integer.toString(Runtime.getRuntime()
-                                                                                   .availableProcessors()));
             platforms.add(processor);
 
             PlatformCapability operatingSystem = new OperatingSystem();
-            operatingSystem.define(PlatformCapability.NAME, System.getProperty("os.name"));
-            operatingSystem.define(PlatformCapability.VERSION, System.getProperty("os.version"));
             platforms.add(operatingSystem);
 
-            PlatformCapability tcpIP = getPlatformCapability(TCPIP);
+            PlatformCapability tcpIP = new TCPConnectivity();
             platforms.add(tcpIP);
 
-            String jvmName = System.getProperty("java.vm.name");
-            if(jvmName!=null) {            
-                PlatformCapability j2se = new J2SESupport();
-                j2se.define(PlatformCapability.VERSION, System.getProperty("java.version"));
-                j2se.define(PlatformCapability.DESCRIPTION, jvmName);
-                j2se.define(PlatformCapability.NAME, "Java");
-                String javaHome = System.getProperty("java.home");
-                if(javaHome!=null)
-                    j2se.setPath(javaHome);
-                platforms.add(j2se);                
-            }
+            PlatformCapability j2se = new J2SESupport();
+            platforms.add(j2se);
+
             List<PlatformCapability> platformCapabilityList = new ArrayList<PlatformCapability>();
             PlatformCapability[] pCaps = (PlatformCapability[])config.getEntry(COMPONENT,
                                                                                "platformCapabilities",
@@ -465,8 +452,6 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 attrs.put(PlatformCapability.MANUFACTURER, caps[i].getManufacturer());
             if(caps[i].getVersion()!=null)
                 attrs.put(PlatformCapability.VERSION, caps[i].getVersion());
-            if(caps[i].getNativeLib()!=null)
-                attrs.put(PlatformCapability.NATIVE_LIBS, caps[i].getNativeLib());
             PlatformCapability pCap = (PlatformCapability)Class.forName(caps[i].getPlatformClass()).newInstance();
             pCap.defineAll(attrs);
             if(caps[i].getClasspath()!=null)

@@ -25,10 +25,11 @@ import org.rioproject.watch.WatchDataReplicator;
  * @author Dennis Reedy
  */
 public class StorageCapability extends ByteOrientedDevice implements WatchDataReplicator<CalculableDiskSpace> {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "Storage Capability";
     /** Storage media type */
     public final static String TYPE = "StorageType";
+    public final static String ID = "Disk";
 
     /**
      * Create a StorageCapability
@@ -44,7 +45,7 @@ public class StorageCapability extends ByteOrientedDevice implements WatchDataRe
      */
     public StorageCapability(String description) {
         this.description = description;
-        define(NAME, "Disk");
+        define(NAME, ID);
     }
 
     /**

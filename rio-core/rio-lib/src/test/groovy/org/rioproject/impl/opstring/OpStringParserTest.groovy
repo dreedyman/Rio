@@ -30,6 +30,10 @@ import org.rioproject.opstring.UndeployOption
 import org.rioproject.sla.SLA
 import org.rioproject.sla.ServiceLevelAgreements
 import org.rioproject.system.SystemWatchID
+import org.rioproject.system.capability.platform.OperatingSystem
+import org.rioproject.system.capability.platform.ProcessorArchitecture
+import org.rioproject.system.capability.platform.StorageCapability
+import org.rioproject.system.capability.platform.SystemMemory
 import org.rioproject.watch.ThresholdValues
 import org.rioproject.watch.WatchDescriptor
 
@@ -240,7 +244,7 @@ class OpStringParserTest extends GroovyTestCase {
         boolean checkedNativeLib = false
         for(SystemComponent sc : sysComps) {
             assertNotNull sc.attributes
-            if(sc.name.equals("SystemMemory")) {
+            if(sc.name.equals(SystemMemory.ID)) {
                 Map attrs = new HashMap()
                 attrs.put("Name", SystemWatchID.SYSTEM_MEMORY)
                 attrs.put("Available", "4g")
@@ -248,7 +252,7 @@ class OpStringParserTest extends GroovyTestCase {
                 checkSystemComponent sc, attrs
                 checkedMemory = true
             }
-            if(sc.name.equals("StorageCapability")) {
+            if(sc.name.equals(StorageCapability.ID)) {
                 Map attrs = new HashMap()
                 attrs.put("Name", SystemWatchID.DISK_SPACE)
                 attrs.put("Available", "100g")
@@ -256,14 +260,14 @@ class OpStringParserTest extends GroovyTestCase {
                 checkSystemComponent sc, attrs
                 checkedStorageCapability = true
             }
-            if(sc.name.equals("OperatingSystem")) {
+            if(sc.name.equals(OperatingSystem.ID)) {
                 Map attrs = new HashMap()
                 attrs.put("Name", "Mac OSX")
                 attrs.put("Version", "10.7*")
                 checkSystemComponent sc, attrs
                 checkedOperatingSystem = true
             }
-            if(sc.name.equals("Processor")) {
+            if(sc.name.equals(ProcessorArchitecture.ID)) {
                 Map attrs = new HashMap()
                 attrs.put("Available", 8)
                 checkSystemComponent sc, attrs

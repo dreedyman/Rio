@@ -247,7 +247,6 @@ public class ComputeResource {
     public void addPlatformCapability(PlatformCapability pCap) {
         if(!hasPlatformCapability(pCap)) {
             logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
-            pCap.loadResources();
 
             boolean stateChange;
             synchronized(platformCapabilities) {
@@ -355,7 +354,6 @@ public class ComputeResource {
                         }
                     }
                     logger.trace("Have PlatformCapability : {} load any system resources", pCap.getClass().getName());
-                    pCap.loadResources();
                     stateChange();
 
                 } catch(IOException e) {

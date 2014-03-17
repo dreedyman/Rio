@@ -127,7 +127,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     /** The type of this PlatformCapability, STATIC or PROVISIONABLE. Defaults to STATIC */
     private int type = STATIC;
     /** Map of platform capability key and values */
-    protected final Hashtable<String, Object> capabilities = new Hashtable<String, Object>();
+    protected final Map<String, Object> capabilities = new HashMap<String, Object>();
     /** A description of the PlatformCapability */
     protected String description;
     /** StagedSoftware defining where the software for this
@@ -205,7 +205,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
     }
 
     /**
-     * Allows the PlatformCapability to load any required native libraries as 
+     * Allows the PlatformCapability to load any required native libraries as
      * determined by values in the <code>NativeLibsKey</code> using the
      * <code>System.loadLibrary</code> method.
      *
@@ -221,7 +221,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
             System.loadLibrary(libName);
         }
     }
-    
+
     /**
      * Define a platform capability mapping
      *
@@ -244,10 +244,10 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
      */
     public void defineAll(final Map<String, Object> map) {
         capabilities.putAll(map);
-        for(Enumeration<String> en=capabilities.keys(); en.hasMoreElements();) {
-            String key = en.nextElement();
-            if(key.equals(DESCRIPTION)) {
-                description = capabilities.get(key).toString();
+        for(Map.Entry<String, Object> entry : map.entrySet()) {
+            if(entry.getKey().equals(DESCRIPTION)) {
+                description = (String)entry.getValue();
+                break;
             }    
         }
     }
@@ -353,7 +353,7 @@ public class PlatformCapability implements PlatformCapabilityMBean, ResourceCost
            supports = getName().equals(name);
        }
        if(!supports && className!=null) {
-           /* Check if we are equals to the simple name first. If that fails, check equality with filly
+           /* Check if we are equals to the simple name first. If that fails, check equality with fully
             * qualified classname */
            supports = getClass().getSimpleName().equals(className);
            if(!supports) {

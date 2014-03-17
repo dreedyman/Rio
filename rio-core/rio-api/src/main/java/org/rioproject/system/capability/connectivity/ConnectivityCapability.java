@@ -24,7 +24,7 @@ import org.rioproject.system.capability.PlatformCapability;
  * @author Dennis Reedy
  */
 public abstract class ConnectivityCapability extends PlatformCapability {
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     static final String DEFAULT_DESCRIPTION = "Connectivity";  
     
     /** 
@@ -41,7 +41,6 @@ public abstract class ConnectivityCapability extends PlatformCapability {
      */
     public ConnectivityCapability(String description) {
         this.description = description;
-        define(NAME, "Network");
     }
 
 }
