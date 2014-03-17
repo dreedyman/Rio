@@ -110,17 +110,20 @@ public final class Installer {
             Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
             install(gnosticService, null, FileHelper.find(libDir, "gnostic-service"), aetherServiceInstance);
 
+            File jskResourcesJar = FileHelper.find(libDir, "jsk-resources");
             File jskPlatformJar = FileHelper.find(libDir, "jsk-platform");
             File jskDLJar = FileHelper.find(libDlDir, "jsk-dl");
             File reggieDLJar = FileHelper.find(libDlDir, "reggie-dl");
             File serviceUIJar = FileHelper.find(libDlDir, "serviceui");
 
             /* Install third party jars */
+            Artifact jskResources = createArtifact("net.jini:jsk-resources", jskResourcesJar);
             Artifact jskPlatform = createArtifact("net.jini:jsk-platform", jskPlatformJar);
             Artifact jskDL = createArtifact("net.jini:jsk-dl", jskDLJar);
             Artifact reggieDL = createArtifact("org.apache.river:reggie-dl", reggieDLJar);
             Artifact serviceUI = createArtifact("net.jini.lookup:serviceui", serviceUIJar);
 
+            install(jskResources, FileHelper.find(pomDir, "jsk-resources"), jskResourcesJar, aetherServiceInstance);
             install(jskPlatform, FileHelper.find(pomDir, "jsk-platform"), jskPlatformJar, aetherServiceInstance);
             install(jskDL, FileHelper.find(pomDir, "jsk-dl"), jskDLJar, aetherServiceInstance);
             install(reggieDL, FileHelper.find(pomDir, "reggie-dl"), reggieDLJar, aetherServiceInstance);
@@ -182,8 +185,9 @@ public final class Installer {
             String extension = artifactFile.getName().substring(ndx, artifactFile.getName().length());
             sb.append(jarName).append(extension);
             File jar = new File(localRepository, sb.toString());
-            if (jar.exists())
-                return;
+            if (jar.exists()) {
+                logger.info("Overwriting {}", jar.getPath());
+            }
 
             /*
              * Look for the pom in the artifact. Once we find it, read it in, then write it out as a temp file
@@ -222,8 +226,9 @@ public final class Installer {
         if(artifactFile==null) {
             sb.append(artifactId).append("-").append(version).append(".pom");
             File targetPom = new File(localRepository, sb.toString());
-            if(targetPom.exists())
-                return;
+            if(targetPom.exists()) {
+                logger.info("Overwriting {}", targetPom.getPath());
+            }
         }
 
         try {
