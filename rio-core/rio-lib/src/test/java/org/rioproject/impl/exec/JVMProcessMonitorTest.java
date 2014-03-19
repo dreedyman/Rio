@@ -29,13 +29,18 @@ import org.rioproject.impl.exec.VirtualMachineHelper;
 public class JVMProcessMonitorTest {
 
     @Test
-    public void testJVMProcessMonitorConstruction() {
+    public void testJVMProcessMonitorConstruction() throws InterruptedException {
         Client client1 = new Client();
         Client client2 = new Client();
         Client client3 = new Client();
         new Thread(client1).start();
         new Thread(client2).start();
         new Thread(client3).start();
+        while(client1.jvmProcessMonitor==null ||
+              client2.jvmProcessMonitor==null ||
+              client3.jvmProcessMonitor==null) {
+            Thread.sleep(10);
+        }
         Assert.assertEquals(client1.jvmProcessMonitor, client2.jvmProcessMonitor);
         Assert.assertEquals(client2.jvmProcessMonitor, client3.jvmProcessMonitor);
     }
