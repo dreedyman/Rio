@@ -17,6 +17,7 @@ package org.rioproject.tools.ui;
 
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
+import net.jini.lookup.entry.Host;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.opstring.OperationalStringException;
@@ -75,13 +76,12 @@ public class GraphListener extends ControlAdapter {
         } else if (node.isServiceInstance()) {
             if(node.getInstance()!=null) {
                 buff.append("Instance ID=");
-                buff.append(node.getInstance()
-                    .getServiceBeanConfig().getInstanceID());
-                buff.append("\n");
+                buff.append(node.getInstance().getServiceBeanConfig().getInstanceID());
             }
             if (node.getServiceItem() != null) {
                 ComputeResourceInfo aInfo = getComputeResourceInfo(node.getServiceItem().attributeSets);
                 if(aInfo!=null) {
+                    buff.append("\n");
                     if (aInfo.osName != null && aInfo.osName.length() > 0) {
                         buff.append("Operating System=");
                         buff.append(aInfo.osName);
@@ -109,6 +109,12 @@ public class GraphListener extends ControlAdapter {
                     }
                     buff.append("JVM Version=");
                     buff.append(aInfo.jvmVersion);
+                } else {
+                    Host host = getHost(node.getServiceItem().attributeSets);
+                    if(host!=null) {
+                        buff.append("\n");
+                        buff.append(host.hostName);
+                    }
                 }
             } else {
                 buff.append("Active, no ServiceItem");
@@ -129,6 +135,15 @@ public class GraphListener extends ControlAdapter {
             }
         }
         return (null);
+    }
+
+    private Host getHost(final Entry[] attrs) {
+        for (Entry attr : attrs) {
+            if (attr instanceof Host) {
+                return (Host) attr;
+            }
+        }
+        return null;
     }
 
     public void itemExited(VisualItem item, MouseEvent e) {
