@@ -112,6 +112,7 @@ public class Browser extends JFrame {
     private DefaultListModel listModel;
     private DefaultListModel dummyModel = new DefaultListModel();
     private JScrollPane listScrollPane;
+    private JSplitPane splitPane;
 
     /**
      * Creates an instance of the {@code Browser}.
@@ -267,7 +268,7 @@ public class Browser extends JFrame {
 
         getContentPane().setLayout(new BorderLayout());
         int textRows = 8;
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
         if (isAdmin) {
             textRows = 4;
             JPanel bpanel = new JPanel();
@@ -300,6 +301,7 @@ public class Browser extends JFrame {
                 pack();
                 setSize(new Dimension(490, 450));
                 setVisible(true);
+                splitPane.setDividerLocation(65);
             }
         }));
         LookupListener adder = new LookupListener();
@@ -308,7 +310,6 @@ public class Browser extends JFrame {
     }
 
     private void terminate() {
-        System.out.println(getSize());
         Browser.this.dispose();
         cancelLease();
         listen.unexport();
