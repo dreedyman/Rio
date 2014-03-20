@@ -15,14 +15,14 @@
  */
 package org.rioproject.system.capability.connectivity;
 
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.net.HostUtil;
 
 import java.net.*;
 import java.util.Enumeration;
 
 /**
- * The <code>TCPConnectivity</code> object provides definition for TCP/IP
- * networks
+ * The {@code TCPConnectivity} object provides definition for TCP/IP connectivity
  *
  * @author Dennis Reedy
  */
@@ -80,5 +80,29 @@ public class TCPConnectivity extends ConnectivityCapability {
         define(NAME, ID);
         define(HOST_ADDRESS, HostUtil.getInetAddress().getHostAddress());
         define(HOST_NAME, InetAddress.getLocalHost().getHostName());
+    }
+
+    /**
+     * Override supports to ensure that requirements are supported
+     *
+     * @param requirement The requirement to test
+     * @return True if they are, false if not
+     *
+     * @see org.rioproject.system.capability.PlatformCapability#supports
+     */
+    @Override
+    public boolean supports(final SystemComponent requirement) {
+        boolean supports = hasBasicSupport(requirement.getName(), requirement.getClassName());
+        if(supports) {
+            String hostAddress = (String) requirement.getAttributes().get(HOST_ADDRESS);
+            String hostName = (String) requirement.getAttributes().get(HOST_NAME);
+
+            if(hostAddress!=null) {
+                supports = hostAddress.equals(getValue(HOST_ADDRESS));
+            } else {
+                supports = hostName.equalsIgnoreCase((String) getValue(HOST_NAME));
+            }
+        }
+        return (supports?supports:super.supports(requirement));
     }
 }
