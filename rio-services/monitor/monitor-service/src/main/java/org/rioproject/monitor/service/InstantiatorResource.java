@@ -958,7 +958,7 @@ public class InstantiatorResource {
             boolean found = false;
             for (String aMachineCluster : machineCluster) {
                 if (aMachineCluster.equals(resourceCapability.getAddress()) ||
-                    aMachineCluster.equals(resourceCapability.getHostName()))
+                    aMachineCluster.equalsIgnoreCase(resourceCapability.getHostName()))
                     found = true;
             }
             if(!found) {
