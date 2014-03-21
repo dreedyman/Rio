@@ -17,6 +17,8 @@ public class TCPConnectivityTest {
         TCPConnectivity tcpConnectivity = new TCPConnectivity();
         tcpConnectivity.define(TCPConnectivity.HOST_ADDRESS, "10.0.1.1");
         Assert.assertFalse(tcpConnectivity.supports(requirement));
+        System.out.println(tcpConnectivity);
+        System.out.println(requirement);
     }
 
     @Test
