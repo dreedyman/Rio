@@ -44,7 +44,7 @@ if (args.length<2) {
 
 StringBuilder java = new StringBuilder()
 if (javaHome == null || javaHome.length() == 0) {
-    System.err.println("The location of Java ws not set, assume java is in the path")
+    System.err.println("The location of Java was not set, assume java is in the path")
     java.append("java")
 	if(System.getProperty("os.name").startsWith("Windows"))
         java.append(".exe")
