@@ -25,7 +25,9 @@ import net.jini.discovery.LookupDiscovery;
 import net.jini.lookup.entry.Host;
 import org.rioproject.admin.ServiceBeanControl;
 import org.rioproject.admin.ServiceBeanControlException;
+import org.rioproject.config.Constants;
 import org.rioproject.entry.OperationalStringEntry;
+import org.rioproject.impl.client.JiniClient;
 import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.servicebean.ServiceBeanContext;
@@ -34,9 +36,11 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * The ServiceAdvertiser is a utility to help advertise a service with configured attributes.
@@ -71,7 +75,18 @@ public class ServiceAdvertiser {
         String serviceName = context.getServiceElement().getName();
         String opStringName = context.getServiceElement().getOperationalStringName();
         String[] groups = context.getServiceElement().getServiceBeanConfig().getGroups();
-        LookupLocator[] locators = context.getServiceElement().getServiceBeanConfig().getLocators();
+        List<LookupLocator> lookupLocators = new ArrayList<LookupLocator>();
+        if(context.getServiceElement().getServiceBeanConfig().getLocators()!=null) {
+            Collections.addAll(lookupLocators, context.getServiceElement().getServiceBeanConfig().getLocators());
+        }
+        String globalLocators = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
+        if(globalLocators!=null) {
+            try {
+                Collections.addAll(lookupLocators, JiniClient.parseLocators(globalLocators));
+            } catch (MalformedURLException e) {
+                logger.warn("Configured LookupLocators [{}] are malformed", globalLocators, e);
+            }
+        }
         String componentName = getServiceComponentName(context);
 
         final Thread currentThread = Thread.currentThread();
@@ -192,17 +207,17 @@ public class ServiceAdvertiser {
                         logger.trace("Setting groups [{}] using JoinAdmin.setLookupGroups", buff.toString());
                     }
                     joinAdmin.setLookupGroups(groups);
-                    if ((locators != null) && (locators.length > 0)) {
+                    if (!lookupLocators.isEmpty()) {
                         if (logger.isTraceEnabled()) {
                             StringBuilder buff = new StringBuilder();
-                            for (int i = 0; i < locators.length; i++) {
-                                if (i > 0)
+                            for (LookupLocator lookupLocator : lookupLocators) {
+                                if (buff.length()>0 )
                                     buff.append(",");
-                                buff.append(locators[i].toString());
+                                buff.append(lookupLocator.toString());
                             }
                             logger.trace("Setting locators [{}] using JoinAdmin.setLookupLocators", buff.toString());
                         }
-                        joinAdmin.setLookupLocators(locators);
+                        joinAdmin.setLookupLocators(lookupLocators.toArray(new LookupLocator[lookupLocators.size()]));
                     }
                 } else {
                     logger.error("Admin must implement JoinAdmin or ServiceBeanControl to be properly advertised");
