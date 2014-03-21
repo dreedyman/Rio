@@ -21,6 +21,7 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.config.EmptyConfiguration;
+import org.rioproject.config.RioProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -434,6 +435,7 @@ public class ServiceStarter {
         LogManagementHelper.setup();
         logger.debug("Entering {}", ServiceStarter.class.getName());
         ensureSecurityManager();
+        RioProperties.load();
         try {
             Result[] results = doStart(args);
             checkResultFailures(results);

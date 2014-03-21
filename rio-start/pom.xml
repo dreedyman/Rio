@@ -55,6 +55,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     
     <build>
@@ -79,7 +85,7 @@
                 </configuration>
             </plugin>
             
-            <plugin>
+            <!--<plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
                 <configuration>
@@ -103,7 +109,7 @@
                         <version>${groovy.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
