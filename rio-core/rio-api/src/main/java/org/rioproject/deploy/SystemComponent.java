@@ -179,9 +179,12 @@ public class SystemComponent implements Serializable {
      */
     public String toString() {
         StringBuilder buff = new StringBuilder();
-        buff.append("Name=").append(name == null ? "<null>" : name).append(", ");
-        buff.append("ClassName=").append(className == null ? "<null>" : className).append(", ");
-        buff.append("Attributes=").append(attributes.toString());
+        if(name!=null)
+            buff.append("Name: ").append(name).append(", ");
+        if(className!=null)
+            buff.append("ClassName: ").append(className).append(", ");
+        buff.append(attributes.toString()).append(", ");
+        buff.append("Exclude: ").append(exclude);
         return (buff.toString());
     }
 }
