@@ -19,6 +19,7 @@ import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceRegistrar;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.deploy.ServiceBeanInstance;
+import org.rioproject.deploy.SystemComponent;
 import org.rioproject.opstring.ServiceElement.ProvisionType;
 import org.rioproject.deploy.SystemRequirements;
 import org.rioproject.log.LoggerConfig;
@@ -42,6 +43,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,7 +115,7 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             }
         });
         JButton refresh = new JButton("Refresh");
-        refresh.setToolTipText("Refresh ServiceElement attrubutes");
+        refresh.setToolTipText("Refresh ServiceElement attributes");
         /* Refresh action listener */
         refresh.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
@@ -513,21 +515,32 @@ public class ServiceElementPanel extends javax.swing.JPanel {
                         addMore = false;
                     } else {
                         String[] ids = s.getSystemThresholdIDs();
-                        String[] sysThresholds = new String[ids.length];
-                        if(ids.length>0) {
+                        SystemComponent[] systemComponents = s.getSystemComponents();
+                        if(ids.length>0 || systemComponents.length>0) {
+                            java.util.List<String> sysRequirements = new ArrayList<String>();
                             StringBuilder buff = new StringBuilder();
-                            for(int j=0; j<ids.length; j++) {
-                                if(j>0)
+                            for (String id : ids) {
+                                if (buff.length() > 0) {
                                     buff.append(", ");
-                                ThresholdValues tVal = s.getSystemThresholdValue(ids[j]);
-                                sysThresholds[j] = "ID="+ids[j]+" "+
-                                                   "High="+tVal.getHighThreshold()+" "+
-                                                   "Low="+tVal.getLowThreshold();
-                                buff.append("[").append(sysThresholds[j]).append("]");
+                                }
+                                ThresholdValues tVal = s.getSystemThresholdValue(id);
+                                String val = String.format("ID: %s, High: %s, Low: %s",
+                                                           id,
+                                                           tVal.getHighThreshold(),
+                                                           tVal.getLowThreshold());
+                                sysRequirements.add(val);
+                                buff.append("[").append(val).append("]");
+                            }
+                            for (SystemComponent systemComponent : systemComponents) {
+                                if (buff.length() > 0) {
+                                    buff.append(", ");
+                                }
+                                sysRequirements.add(systemComponent.toString());
+                                buff.append("[").append(systemComponent.toString()).append("]");
                             }
                             value = buff.toString();
                             addMore = true;
-                            tableItem.detailsComponent = sysThresholds;
+                            tableItem.detailsComponent = sysRequirements;
                         } else {
                             value = NOT_DECLARED;
                             addMore = false;
@@ -816,9 +829,9 @@ public class ServiceElementPanel extends javax.swing.JPanel {
             dialog.pack();
             dialog.setSize(width, height);
             //dialog.setResizable(false);
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            int widthLoc = screenSize.width / 2 - width / 2;
-            int heightLoc = screenSize.height / 2 - height / 2;
+            //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            //int widthLoc = screenSize.width / 2 - width / 2;
+            //int heightLoc = screenSize.height / 2 - height / 2;
             dialog.setLocationRelativeTo(parent);
             dialog.setVisible(true);
 
