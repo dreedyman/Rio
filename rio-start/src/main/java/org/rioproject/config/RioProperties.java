@@ -23,7 +23,13 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 /**
- * Load properties file {@code RIO_HOME/config/rio.env} and sets system properties.
+ * Load a properties file and set system properties. Locating the properties file is doe as follows:
+ *
+ * <ol>
+ *     <li>First check the {@code org.rioproject.env} environment variable, if not found...</li>
+ *     <li>Check for {@code ~/.rio/rio.env} file, if not found...</li>
+ *     <li>Check for {@code $RIO_HOME/config/rio.env} file</li>
+ * </ol>
  *
  * @author Dennis Reedy
  */
@@ -32,28 +38,49 @@ public final class RioProperties {
     private RioProperties(){}
 
     public static void load() {
-        String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
-        if(rioHome!=null) {
-            File rioEnv = new File(rioHome, "config/rio.env");
+        File rioEnv;
+        String rioEnvFileName = System.getProperty(Constants.ENV_PROPERTY_NAME,
+                                                   System.getenv(Constants.ENV_PROPERTY_NAME));
+        if(rioEnvFileName==null) {
+            File rioRoot = new File(System.getProperty("user.home"), ".rio");
+            rioEnv = new File(rioRoot, "rio.env");
             if(rioEnv.exists()) {
-                logger.info("Loading properties from {}", rioEnv.getPath());
-                Properties properties = new Properties();
-                try {
-                    properties.load(new FileInputStream(rioEnv));
-                    for(String propertyName : properties.stringPropertyNames()) {
-                        if(logger.isDebugEnabled()) {
-                            logger.debug("Setting {}: {}", propertyName, properties.getProperty(propertyName));
-                        }
-                        System.setProperty(propertyName, properties.getProperty(propertyName));
-                    }
-                } catch (Exception e) {
-                    logger.warn("Problem reading {}", rioEnv.getPath(), e);
-                }
+                loadAndSetProperties(rioEnv);
             } else {
-                logger.info("{} not found, skipping", rioEnv.getPath());
+                String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
+                if(rioHome!=null) {
+                    rioEnv = new File(rioHome, "config/rio.env");
+                    if(rioEnv.exists()) {
+                        loadAndSetProperties(rioEnv);
+                    } else {
+                        logger.info("{} not found, skipping", rioEnv.getPath());
+                    }
+                } else {
+                    logger.info("RIO_HOME environment not set");
+                }
             }
         } else {
-            logger.info("RIO_HOME environment not set");
+            logger.debug("Loading from {}", Constants.ENV_PROPERTY_NAME);
+            rioEnv = new File(rioEnvFileName);
+            if(rioEnv.exists()) {
+                loadAndSetProperties(rioEnv);
+            }
+        }
+    }
+
+    private static void loadAndSetProperties(final File rioEnv) {
+        logger.info("Loading properties from {}", rioEnv.getPath());
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(rioEnv));
+            for(String propertyName : properties.stringPropertyNames()) {
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Setting {}: {}", propertyName, properties.getProperty(propertyName));
+                }
+                System.setProperty(propertyName, properties.getProperty(propertyName));
+            }
+        } catch (Exception e) {
+            logger.warn("Problem reading {}", rioEnv.getPath(), e);
         }
     }
 }

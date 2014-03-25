@@ -23,30 +23,36 @@ import org.junit.Test;
 import java.io.File;
 
 /**
- * test loading properties from rio.env
+ * Test loading properties from rio.env
  */
 public class RioPropertiesTest {
-    String oldRioHome;
 
-    @Before
-    public void setOldRioHome() {
-        oldRioHome = System.getProperty("RIO_HOME");
-        System.out.println("oldRioHome = ["+oldRioHome+"]");
+    @Test
+    public void testLoadFromEnv() throws Exception {
+        try {
+            System.setProperty(Constants.ENV_PROPERTY_NAME,
+                               System.getProperty("user.dir") + "/src/test/resources/config/rio.env");
+            RioProperties.load();
+            String locators = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
+            Assert.assertNotNull(locators);
+        } finally {
+            System.clearProperty(Constants.ENV_PROPERTY_NAME);
+        }
     }
 
     @Test
-    public void testLoad() throws Exception {
-        System.setProperty("RIO_HOME", System.getProperty("user.dir")+"/src/test/resources");
-        RioProperties.load();
-        String locators = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
-        Assert.assertNotNull(locators);
-    }
-
-    @After
-    public void restore() {
-        if(oldRioHome==null)
-            System.clearProperty("RIO_HOME");
-        else
-            System.setProperty("RIO_HOME", oldRioHome);
+    public void testLoadFromRioHome() throws Exception {
+        String oldRioHome = System.getProperty("RIO_HOME");
+        try {
+            System.setProperty("RIO_HOME", System.getProperty("user.dir") + "/src/test/resources");
+            RioProperties.load();
+            String locators = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
+            Assert.assertNotNull(locators);
+        } finally {
+            if (oldRioHome == null)
+                System.clearProperty("RIO_HOME");
+            else
+                System.setProperty("RIO_HOME", oldRioHome);
+        }
     }
 }

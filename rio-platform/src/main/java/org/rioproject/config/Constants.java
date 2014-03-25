@@ -57,6 +57,11 @@ public interface Constants {
      */
     static final String LOCATOR_PROPERTY_NAME = BASE_COMPONENT+".locators";
     /**
+     * System property set when to indicate a comma separated list of lookup
+     * locators
+     */
+    static final String ENV_PROPERTY_NAME = BASE_COMPONENT+".env";
+    /**
      * System property to set and check to determine address to bind to or
      * address bound to
      */
