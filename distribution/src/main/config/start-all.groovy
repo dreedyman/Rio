@@ -32,7 +32,7 @@ class StartAllConfig {
 
         def websterRoots = [rioHome+'/deploy', ';', m2Repo]
 
-        String policyFile = rioHome+'/policy/rio.policy'
+        String policyFile = rioHome+'/policy/policy.all'
         def monitorConfigs = [rioHome+'/config/common.groovy',
                               rioHome+'/config/monitor.groovy']
         def reggieConfigs = [rioHome+'/config/common.groovy',
