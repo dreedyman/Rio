@@ -155,11 +155,11 @@ class MeasurableSystemMemory extends BasicMeasurable {
     }
 
     /*
-     * Memory utilization should be capped at 95%
+     * Memory utilization should be capped at 99%
      */
     @Override
     ThresholdValues getThresholdValues() {
-        return new ThresholdValues(0.0, 0.95);
+        return new ThresholdValues(0.0, 0.99);
     }
 }
 
