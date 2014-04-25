@@ -30,7 +30,7 @@ public class MemoryPoolMXBeanMonitor implements MeasurableMonitor<MemoryPoolUtil
     private ThresholdValues thresholdValues;
     private MemoryPoolMXBean memoryPoolBean;
     
-    protected synchronized MemoryPoolMXBean getMemoryPoolMXBean() {
+    public synchronized MemoryPoolMXBean getMemoryPoolMXBean() {
         if(memoryPoolBean != null)
             return memoryPoolBean;
         for(MemoryPoolMXBean mBean : ManagementFactory.getMemoryPoolMXBeans()) {

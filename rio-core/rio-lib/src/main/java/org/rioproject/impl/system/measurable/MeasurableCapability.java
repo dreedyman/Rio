@@ -65,8 +65,6 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
      * in order to produce a result.
      */
     protected int sampleSize = 1;
-    /** Configuration object */
-    private Configuration config;
     /** Whether or not this measurable capability is enabled */
     private AtomicBoolean isEnabled = new AtomicBoolean(true);
     /** The {@link MeasurableMonitor} to use */
@@ -79,9 +77,8 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
     private int collectionSize;
     private static final Logger logger = LoggerFactory.getLogger(MeasurableCapability.class);
 
-    protected MeasurableCapability(String id, String componentName, Configuration config) {
+    protected MeasurableCapability(final String id, final String componentName, final Configuration config) {
         super(id, config);
-        this.config = config;
         try {
             isEnabled.set((Boolean) config.getEntry(componentName, "enabled", boolean.class, Boolean.TRUE));
         } catch (ConfigurationException e) {
@@ -285,7 +282,7 @@ public abstract class MeasurableCapability extends PeriodicWatch implements Reso
         this.monitor = monitor;
         this.monitor.setID(getId());
         this.monitor.setThresholdValues(getThresholdValues());
-    }    
+    }
 
     /**
      * Add a Calculable to the watch and update state

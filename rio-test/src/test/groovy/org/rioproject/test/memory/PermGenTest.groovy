@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.test.memory;
+package org.rioproject.test.memory
 
+import org.junit.Assume
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith
 import org.rioproject.util.TimeUtil;
@@ -42,6 +44,14 @@ import java.lang.management.ManagementFactory
 class PermGenTest {
     @SetTestManager
     static TestManager testManager;
+
+    @Before
+    public void checkBeforeJava1dot8() {
+        String sVersion = System.getProperty("java.version");
+        String[] parts = sVersion.split("\\.");
+        Double version = Double.parseDouble(String.format("%s.%s", parts[0], parts[1]));
+        Assume.assumeTrue(version<1.8);
+    }
 
     @Test
     public void deployThenUndeployAndCheckPermGen() {
