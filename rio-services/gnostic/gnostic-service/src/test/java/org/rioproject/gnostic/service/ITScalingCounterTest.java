@@ -16,6 +16,7 @@
 package org.rioproject.gnostic.service;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,8 @@ public class ITScalingCounterTest {
 
     @BeforeClass
     public static void createArtifact() {
+        Assume.assumeTrue(Util.getJVMVersion() < 1.8);
+
         File f = Util.createJar(NAME);
         Util.writePom(NAME);
     }

@@ -67,9 +67,10 @@
         <profile>
             <id>run-integration-test</id>
             <activation>
-                <file>
+                <!--<file>
                     <exists>${env.RIO_HOME}</exists>
-                </file>
+                </file>-->
+                <jdk>(,1.8)</jdk>
             </activation>
             <build>
                 <plugins>

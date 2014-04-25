@@ -17,9 +17,7 @@ package org.rioproject.gnostic.service;
 
 import net.jini.core.lookup.ServiceItem;
 import net.jini.space.JavaSpace;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.rioproject.gnostic.Gnostic;
 import org.rioproject.monitor.ProvisionMonitor;
@@ -40,6 +38,11 @@ public class ITSpaceUtilizationTest {
     @SetTestManager
     static TestManager testManager;
     final long WAIT=1000*30;
+
+    @BeforeClass
+    public static void check() {
+        Assume.assumeTrue(Util.getJVMVersion() < 1.8);
+    }
 
     @Test
     public void verifyGettingMetricsFromDeployedSpaceWorks() {

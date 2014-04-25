@@ -15,10 +15,7 @@
  */
 package org.rioproject.gnostic.service;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.rioproject.gnostic.Gnostic;
 import org.rioproject.opstring.OperationalStringManager;
@@ -40,6 +37,8 @@ public class ITNotificationUsingArtifactTest {
 
     @BeforeClass
     public static void createArtifact() {
+        Assume.assumeTrue(Util.getJVMVersion() < 1.8);
+
         Throwable thrown = null;
         try {
             writeRule(5, 10, "target/test-classes/EmbeddedCounterNotification.drl");

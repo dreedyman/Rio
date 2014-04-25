@@ -16,6 +16,7 @@
 package org.rioproject.gnostic.service;
 
 import junit.framework.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +53,9 @@ public class ITMonitorRulesTest {
 
     @BeforeClass
     public static void setup() throws Exception {
-        gnostic = (Gnostic)testManager.waitForService(Gnostic.class);
+        Assume.assumeTrue(Util.getJVMVersion() < 1.8);
+
+        gnostic = testManager.waitForService(Gnostic.class);
         testManager.waitForService(TestService.class, "S1");
         Assert.assertNotNull(gnostic);
     }

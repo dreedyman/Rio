@@ -8,7 +8,7 @@ declare Calculable
 end
 rule "Counter Notification Rule"
 when
-$count : Calculable(id == "notification", value > 25 && < 45) from entry-point "calculables-stream"
+$count : Calculable(id == "notification", value > 5 && < 20) from entry-point "calculables-stream"
 then
     System.out.println("===> Test has been notified : "+$count);
     TestService t = context.getService("Test", TestService.class);

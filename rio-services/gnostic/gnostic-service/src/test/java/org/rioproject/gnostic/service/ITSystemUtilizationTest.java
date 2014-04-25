@@ -16,6 +16,8 @@
 package org.rioproject.gnostic.service;
 
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.gnostic.service.test.TestService;
@@ -34,10 +36,15 @@ public class ITSystemUtilizationTest {
     static TestManager testManager;
     final long WAIT=1000*60;
 
+    @BeforeClass
+    public static void check() {
+        Assume.assumeTrue(Util.getJVMVersion() < 1.8);
+    }
+
     @Test
     public void verifyThatInvocationsOnTestServiceAreDisallowedIfUtilizationIsBreached() {
         Assert.assertNotNull(testManager);
-        TestService t = (TestService)testManager.waitForService(TestService.class);
+        TestService t = testManager.waitForService(TestService.class);
         Assert.assertNotNull(t);
         Throwable thrown = null;
         try {

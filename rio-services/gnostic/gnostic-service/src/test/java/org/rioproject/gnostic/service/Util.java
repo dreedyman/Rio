@@ -34,6 +34,12 @@ import java.util.jar.Manifest;
  */
 public class Util {
 
+    public static Double getJVMVersion() {
+        String sVersion = System.getProperty("java.version");
+        String[] parts = sVersion.split("\\.");
+        return Double.parseDouble(String.format("%s.%s", parts[0], parts[1]));
+    }
+
     public static File createJar(String name) {
         File gnosticTestDir = getGnosticTestDirectory();
         if (!gnosticTestDir.exists())
