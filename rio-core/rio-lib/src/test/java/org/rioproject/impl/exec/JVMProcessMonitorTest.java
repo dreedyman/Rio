@@ -18,8 +18,8 @@ package org.rioproject.impl.exec;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.rioproject.impl.fdh.FaultDetectionListener;
-import org.rioproject.impl.exec.JVMProcessMonitor;
-import org.rioproject.impl.exec.VirtualMachineHelper;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test {@code JVMProcessMonitor} interactions
@@ -64,6 +64,9 @@ public class JVMProcessMonitorTest {
         }
         Assert.assertNotNull(l.serviceID);
         Assert.assertEquals("-1", l.serviceID);
+        while(JVMProcessMonitor.getInstance().getMonitorReaper()!=null){
+            Thread.sleep(TimeUnit.SECONDS.toMillis(JVMProcessMonitor.getInstance().getMonitorReaper().getReapInterval()));
+        }
         Assert.assertNull(JVMProcessMonitor.getInstance().getMonitorReaper());
     }
 
@@ -81,18 +84,24 @@ public class JVMProcessMonitorTest {
         Assert.assertNotNull(JVMProcessMonitor.getInstance().getMonitorReaper());
         JVMProcessMonitor.getInstance().clear();
         while(JVMProcessMonitor.getInstance().getMonitorReaper()!=null) {
-            Thread.sleep(1000);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(JVMProcessMonitor.getInstance().getMonitorReaper().getReapInterval()));
         }
+        Assert.assertNull(JVMProcessMonitor.getInstance().getMonitorReaper());
     }
 
     @Test
-    public void testReapInterval() {
+    public void testReapInterval() throws InterruptedException {
         JVMProcessMonitor monitor = JVMProcessMonitor.getInstance();
         monitor.clear();
         System.setProperty(JVMProcessMonitor.REAP_INTERVAL, "3");
         monitor.monitor(VirtualMachineHelper.getID(), new Listener());
+        monitor.clear();
         int interval = getReapInterval(monitor);
         Assert.assertEquals(3, interval);
+        /* Wait for the created MonitorReaper to be null before returning*/
+        while(JVMProcessMonitor.getInstance().getMonitorReaper()!=null) {
+            Thread.sleep(500);
+        }
     }
 
     int getReapInterval(JVMProcessMonitor JVMProcessMonitor) {
