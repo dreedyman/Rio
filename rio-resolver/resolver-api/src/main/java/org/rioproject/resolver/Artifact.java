@@ -15,6 +15,9 @@
  */
 package org.rioproject.resolver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +27,8 @@ import java.util.regex.Pattern;
  * @author Dennis Reedy
  */
 public class Artifact {
+    final private static Logger log = LoggerFactory.getLogger(Artifact.class);
+
     private String artifactId;
     private String groupId;
     private String version;
@@ -95,7 +100,7 @@ public class Artifact {
     public String getFileName(String ext) {
         String name;
         if(classifier.length()>0) {
-            System.out.println("classifier length: "+classifier.length());
+            log.debug("classifier length: {}", classifier.length());
             name = String.format("%s-%s-%s.%s", artifactId, version, classifier, ext);
         } else {
             name = String.format("%s-%s.%s", artifactId, version, ext);
