@@ -69,6 +69,7 @@ public class Webster implements Runnable {
     private com.sun.jini.start.LifeCycle lifeCycle;
     private boolean debug = false;
     private ServerSocketFactory socketFactory;
+    private String putDirectory;
     private static String SERVER_DESCRIPTION=Webster.class.getName();
 
     /**
@@ -253,6 +254,12 @@ public class Webster implements Runnable {
         d = System.getProperty("webster.debug");
         if(d != null)
             debug = true;
+        String str = System.getProperty("webster.put.dir");
+        if (str != null) {
+            putDirectory = str;
+            if (debug)
+                System.out.println("putDirectory: " + putDirectory);
+        }
         setupRoots(roots);
         try {
             InetAddress address;
@@ -482,7 +489,14 @@ public class Webster implements Runnable {
                         if (header.getProperty("GET") != null) {
                             pool.execute(new GetFile(s, fileName));
                         } else if (header.getProperty("PUT") != null) {
-                            pool.execute(new PutFile(s, fileName, header));
+                            if(putDirectory!=null) {
+                                pool.execute(new PutFile(s, fileName, header));
+                            } else {
+                                DataOutputStream clientStream = new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
+                                clientStream.writeBytes("HTTP/1.1 405 Method Not Allowed\nWebster is in read-only mode\r\n\r\n");
+                                clientStream.flush();
+                                clientStream.close();
+                            }
                         } else if (header.getProperty("DELETE") != null) {
                             pool.execute(new DelFile(s, fileName));
                         } else if (header.getProperty("HEAD") != null) {
@@ -849,6 +863,7 @@ public class Webster implements Runnable {
         private final Socket client;
         private final String fileName;
         private Properties rheader;
+        final int BUFFER_SIZE = 4096;
 
         PutFile(Socket s, String fileName, Properties header) {
             rheader = header;
@@ -857,48 +872,81 @@ public class Webster implements Runnable {
         }
 
         public void run() {
+            DataOutputStream requestedFileOutputStream = null;
+            DataOutputStream clientStream = null;
             try {
                 // check to see if the file exists if it does the return code
-                // will be 200 if it doesn't it will be 201
-                File putFile = parseFileName(fileName);
+                // will be 200 if it dosen't it will be 201
+                File putFile = new File(putDirectory + File.separator + fileName);
+                if(debug)
+                    logger.debug("tempDir: "+putDirectory+", fileName: "+fileName+", putFile: "+putFile.getPath());
                 String header;
                 if(putFile.exists()) {
-                    header = "HTTP/1.1 200 OK\n"
+                    header = "HTTP/1.0 200 OK\n"
                              + "Allow: PUT\n"
                              + "MIME-Version: 1.0\n"
-                             + "Server : Webster: a Java HTTP Server \n"
-                             + "\n\n <H1>200 File updated</H1>\n";
+                             + "Server : SORCER Webster: a Java HTTP Server \n"
+                             + "\n\n <H1>200 PUT File "+fileName+" updated</H1>\n";
+                    if (debug)
+                        logger.debug("Updated putFile: " + putFile);
                 } else {
-                    header = "HTTP/1.1 201 Created\n"
+                    header = "HTTP/1.0 201 Created\n"
                              + "Allow: PUT\n"
                              + "MIME-Version: 1.0\n"
-                             + "Server : Webster: a Java HTTP Server \n"
-                             + "\n\n <H1>201 File Created</H1>\n";
-                }
-                FileOutputStream requestedFile = new FileOutputStream(putFile);
-                InputStream in = client.getInputStream();
-                int length = Integer.parseInt(ignoreCaseProperty(rheader, "Content-Length"));
-                try {
-                    for(int i = 0; i < length; i++) {
-                        requestedFile.write(in.read());
+                             + "Server : SORCER Webster: a Java HTTP Server \n"
+                             + "\n\n <H1>201 PUT File "+fileName+" Created</H1>\n";
+                    File parentDir = putFile.getParentFile();
+                    System.out.println("Parent: "+parentDir.getPath()+", exists? "+parentDir.exists());
+                    if(!parentDir.exists()) {
+                        if(parentDir.mkdirs() && debug) {
+                            System.out.println("Created "+parentDir.getPath());
+                        }
                     }
-                } catch(IOException e) {
-                    header = "HTTP/1.1 500 Internal Server Error\n"
+                    if(debug)
+                        logger.debug("Created putFile: " + putFile+", exists? "+putFile.exists());
+                }
+
+                int length = Integer.parseInt(ignoreCaseProperty(rheader, "Content-Length"));
+                if(debug)
+                    System.out.println(fileName + " size: " + length);
+                DataInputStream clientInputStream = new DataInputStream(client.getInputStream());
+                try {
+                    int read;
+                    long amountRead = 0;
+                    byte[] buffer = new byte[length < BUFFER_SIZE ? length : BUFFER_SIZE];
+                    requestedFileOutputStream = new DataOutputStream(new FileOutputStream(putFile));
+                    while (amountRead < length) {
+                        read = clientInputStream.read(buffer);
+                        requestedFileOutputStream.write(buffer, 0, read);
+                        amountRead += read;
+                    }
+                    requestedFileOutputStream.flush();
+                    System.out.println(putFile.getPath()+" size: "+putFile.length());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    header = "HTTP/1.0 500 Internal Server Error\n"
                              + "Allow: PUT\n"
                              + "MIME-Version: 1.0\n"
-                             + "Server: "+SERVER_DESCRIPTION+"\n"
+                             + "Server: " + SERVER_DESCRIPTION + "\n"
                              + "\n\n <H1>500 Internal Server Error</H1>\n"
                              + e;
+                } finally {
+                    if(requestedFileOutputStream!=null)
+                        requestedFileOutputStream.close();
                 }
-                DataOutputStream clientStream = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
+
+                clientStream = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
                 clientStream.writeBytes(header);
                 clientStream.flush();
-                close(requestedFile);
-                close(clientStream);
-            } catch(IOException e) {
-                logger.warn("Closing Socket", e);
+                clientStream.close();
+            } catch(Exception e) {
+                logger.warn( "Closing Socket", e);
             } finally {
                 try {
+                    if (requestedFileOutputStream != null)
+                        requestedFileOutputStream.close();
+                    if (clientStream != null)
+                        clientStream.close();
                     client.close();
                 } catch(IOException e2) {
                     logger.warn("Closing incoming socket", e2);
@@ -906,7 +954,7 @@ public class Webster implements Runnable {
             }
         }
 
-        public String ignoreCaseProperty(Properties props, String field) {
+        String ignoreCaseProperty(Properties props, String field) {
             Enumeration names = props.propertyNames();
             while (names.hasMoreElements()) {
                 String propName = (String)names.nextElement();
