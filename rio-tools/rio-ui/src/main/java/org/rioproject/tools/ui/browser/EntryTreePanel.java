@@ -33,248 +33,248 @@ import java.util.logging.Level;
  * @version 0.2 06/04/98
  */
 abstract class EntryTreePanel extends JPanel {
-  /**
-   * running mode. 
-   *
-   * @serial
-   */
-  private boolean isControllable;
+    /**
+     * running mode.
+     *
+     * @serial
+     */
+    private boolean isControllable;
 
 
-  /**
-   * @serial
-   */
+    /**
+     * @serial
+     */
 
-  private JScrollPane scrollPane;
+    private JScrollPane scrollPane;
 
-  /**
-   * @serial
-   */
-  protected JTree tree;
+    /**
+     * @serial
+     */
+    protected JTree tree;
 
-  /**
-   * @serial
-   */
-  protected ObjectNode root;
+    /**
+     * @serial
+     */
+    protected ObjectNode root;
 
-  /**
-   * @serial
-   */
-  protected DefaultTreeModel model;
+    /**
+     * @serial
+     */
+    protected DefaultTreeModel model;
 
-  /**
-   * @serial
-   */
-  private boolean showModifier = false;
+    /**
+     * @serial
+     */
+    private boolean showModifier = false;
 
-  /**
-   * @serial
-   */
-  private boolean showPackage = false;
-
-
-  public EntryTreePanel(boolean isControllable) {
-    this.isControllable = isControllable;
-
-    // Init this panel
-    setLayout(new BorderLayout());
-
-    // Init tree node and model (attribute tree nodes)
-    root = new ObjectNode(isControllable);
-    //initTree();
-    model = new DefaultTreeModel(root);
-
-    // Init tree view
-    tree = new JTree(model);
-    //tree.addMouseListener(new DoubleClicker(this));
-    tree.setRootVisible(false);
-    ObjectNodeRenderer renderer = new ObjectNodeRenderer();
-    tree.setCellRenderer(renderer);
-    tree.setRowHeight(0);	// let the renderer handle it
-    scrollPane = new JScrollPane(tree);
-    add(scrollPane, "Center");
-
-    tree.validate();
-    scrollPane.validate();
-  }
-
-  protected abstract Entry[] getEntryArray();
+    /**
+     * @serial
+     */
+    private boolean showPackage = false;
 
 
-  protected void initTree() {
-    Entry[] entries = getEntryArray();
+    public EntryTreePanel(boolean isControllable) {
+        this.isControllable = isControllable;
 
-      for (Entry entry : entries) {
-          // check controllability
-          boolean nodeControllable = false;
-          if (isControllable && !(entry instanceof ServiceControlled)) {
-              nodeControllable = true;
-          }
+        // Init this panel
+        setLayout(new BorderLayout());
 
-          ObjectNode node = new ObjectNode(entry, nodeControllable);
-          root.add(node);
-          try {
-              recursiveObjectTree(node);
-          } catch (IllegalAccessException e) {
-              Browser.logger.log(Level.INFO, "entry access failed", e);
-          }
-      }
-  }
+        // Init tree node and model (attribute tree nodes)
+        root = new ObjectNode(isControllable);
+        //initTree();
+        model = new DefaultTreeModel(root);
 
-  public void refreshPanel() {
-    // reconstruct nodes
-    root.removeAllChildren();
-    initTree();
-    
-    model.nodeStructureChanged(root);
+        // Init tree view
+        tree = new JTree(model);
+        //tree.addMouseListener(new DoubleClicker(this));
+        tree.setRootVisible(false);
+        ObjectNodeRenderer renderer = new ObjectNodeRenderer();
+        tree.setCellRenderer(renderer);
+        tree.setRowHeight(0);    // let the renderer handle it
+        scrollPane = new JScrollPane(tree);
+        add(scrollPane, "Center");
 
-    tree.validate();
-    scrollPane.validate();
-  }
-
-  protected void recursiveObjectTree(ObjectNode node)
-    throws IllegalArgumentException, IllegalAccessException {
-
-    Object obj = node.getObject();
-    if(obj == null)
-      return;
-    //Field[] fields = obj.getClass().getDeclaredFields();
-    Field[] fields = obj.getClass().getFields();
-
-      for (Field f : fields) {
-          if (Introspector.isHidden(f))
-              continue;
-
-          Class clazz = f.getType();
-          ObjectNode child = null;
-          String fname = f.getName();
-          if (clazz.isPrimitive()) {
-              String clazzName = clazz.toString();
-              Object fobj = null;
-              if ("int".equals(clazzName)) {
-                  fobj = f.getInt(obj);
-              } else if ("boolean".equals(clazzName)) {
-                  fobj = f.getBoolean(obj);
-              } else if ("byte".equals(clazzName)) {
-                  fobj = f.getByte(obj);
-              } else if ("char".equals(clazzName)) {
-                  fobj = f.getChar(obj);
-              } else if ("double".equals(clazzName)) {
-                  fobj = f.getDouble(obj);
-              } else if ("float".equals(clazzName)) {
-                  fobj = f.getFloat(obj);
-              } else if ("long".equals(clazzName)) {
-                  fobj = f.getLong(obj);
-              }
-
-              child = new ObjectNode(fobj, clazz, fname, true);
-          } else if (Introspector.isWrapper(clazz) || Introspector.isString(clazz)) {
-              child = new ObjectNode(f.get(obj), clazz, fname, true);
-          } else if (clazz.isArray()) {
-              child = new ObjectNode(f.get(obj), clazz, fname, false);
-              child.setAdministrable(node.isAdministrable());
-              child.setControllable(node.isControllable());
-              recursiveArrayTree(child, f);
-          } else {
-              // unknown type
-              Object subobj = f.get(obj);
-
-              // check if sub object has a viewable members.
-              if (countViewableFields(clazz) > 0) {
-                  child = new ObjectNode(subobj, clazz, fname, false);
-                  child.setAdministrable(node.isAdministrable());
-                  child.setControllable(node.isControllable());
-                  recursiveObjectTree(child);
-              } else {
-                  child = new ObjectNode(subobj, clazz, fname, true);
-              }
-          }
-          node.add(child);
-      }
-  }
-
-  private int countViewableFields(Class clazz) {
-
-    int count = 0;
-    //Field[] fields = obj.getClass().getDeclaredFields();
-    //Field[] fields = obj.getClass().getFields();
-    Field[] fields = clazz.getFields();
-      for (Field f : fields) {
-          if (Introspector.isHidden(f))
-              continue;
-
-          count++;
-      }
-
-    return count;
-  }
-
-  private void recursiveArrayTree(ObjectNode node, Field f)
-    throws IllegalArgumentException, IllegalAccessException {
-
-    String name = node.getFieldName();
-    Object aobj = node.getObject();
-
-    int length = Array.getLength(aobj);
-
-    Class clazz = f.getType().getComponentType();
-
-    if(clazz.isPrimitive() || Introspector.isWrapper(clazz) || Introspector.isString(clazz)){
-      // primitive, wrapper objects, string array
-      for(int i = 0; i < length; i++){
-	Object elem = Array.get(aobj, i);
-	//String fname = name + "[" + i + "]"; 
-	ObjectNode child = new ObjectNode(elem, clazz, name, i, true);
-	node.add(child);
-      }
-    } else {
-      // Object or Array (*sigh*)
-      for(int i = 0; i < length; i++){
-	Object elem = Array.get(aobj, i);
-	//String fname = name + "[" + i + "]"; 
-	ObjectNode child = new ObjectNode(elem, clazz, name, i, false);
-	recursiveObjectTree(child);
-	child.setAdministrable(node.isAdministrable());
-	child.setControllable(node.isControllable());
-
-	node.add(child);
-      }
+        tree.validate();
+        scrollPane.validate();
     }
-  }
+
+    protected abstract Entry[] getEntryArray();
 
 
-  class ObjectNodeRenderer implements TreeCellRenderer {
-    private JLabel label;
+    protected void initTree() {
+        Entry[] entries = getEntryArray();
 
-    public ObjectNodeRenderer() {
-      label = new JLabel();
-      label.setOpaque(true);
+        for (Entry entry : entries) {
+            // check controllability
+            boolean nodeControllable = false;
+            if (isControllable && !(entry instanceof ServiceControlled)) {
+                nodeControllable = true;
+            }
+
+            ObjectNode node = new ObjectNode(entry, nodeControllable);
+            root.add(node);
+            try {
+                recursiveObjectTree(node);
+            } catch (IllegalAccessException e) {
+                Browser.logger.log(Level.INFO, "entry access failed", e);
+            }
+        }
     }
-    
-    public Component getTreeCellRendererComponent(JTree tree,
-						  Object value,
-						  boolean isSelected,
-						  boolean isExpanded,
-						  boolean isLeaf,
-						  int row,
-						  boolean cellHasFocus){
 
-      //label.setFont(tree.getFont());
-      label.setForeground(tree.getForeground());
-      if(isSelected){
-	//label.setBackground(UIManager.getColor("Tree.backgroundSelectionColor"));
-	//label.setForeground(UIManager.getColor("Tree.textSelectionColor"));
-	label.setBackground(MetalLookAndFeel.getPrimaryControl());
-      } else {
-	//label.setBackground(UIManager.getColor("Tree.backgroundNonSelectionColor"));
-	//label.setForeground(UIManager.getColor("Tree.textNonSelectionColor"));
-	label.setBackground(tree.getBackground());
-      }
+    public void refreshPanel() {
+        // reconstruct nodes
+        root.removeAllChildren();
+        initTree();
 
-      ObjectNode node = (ObjectNode) value;
-      label.setText(node.getTitle());
-      label.setIcon(node.getIcon());
-      return label;
+        model.nodeStructureChanged(root);
+
+        tree.validate();
+        scrollPane.validate();
     }
-  }
+
+    protected void recursiveObjectTree(ObjectNode node)
+        throws IllegalArgumentException, IllegalAccessException {
+
+        Object obj = node.getObject();
+        if (obj == null)
+            return;
+        //Field[] fields = obj.getClass().getDeclaredFields();
+        Field[] fields = obj.getClass().getFields();
+
+        for (Field f : fields) {
+            if (Introspector.isHidden(f))
+                continue;
+
+            Class clazz = f.getType();
+            ObjectNode child = null;
+            String fname = f.getName();
+            if (clazz.isPrimitive()) {
+                String clazzName = clazz.toString();
+                Object fobj = null;
+                if ("int".equals(clazzName)) {
+                    fobj = f.getInt(obj);
+                } else if ("boolean".equals(clazzName)) {
+                    fobj = f.getBoolean(obj);
+                } else if ("byte".equals(clazzName)) {
+                    fobj = f.getByte(obj);
+                } else if ("char".equals(clazzName)) {
+                    fobj = f.getChar(obj);
+                } else if ("double".equals(clazzName)) {
+                    fobj = f.getDouble(obj);
+                } else if ("float".equals(clazzName)) {
+                    fobj = f.getFloat(obj);
+                } else if ("long".equals(clazzName)) {
+                    fobj = f.getLong(obj);
+                }
+
+                child = new ObjectNode(fobj, clazz, fname, true);
+            } else if (Introspector.isWrapper(clazz) || Introspector.isString(clazz)) {
+                child = new ObjectNode(f.get(obj), clazz, fname, true);
+            } else if (clazz.isArray()) {
+                child = new ObjectNode(f.get(obj), clazz, fname, false);
+                child.setAdministrable(node.isAdministrable());
+                child.setControllable(node.isControllable());
+                recursiveArrayTree(child, f);
+            } else {
+                // unknown type
+                Object subobj = f.get(obj);
+
+                // check if sub object has a viewable members.
+                if (countViewableFields(clazz) > 0) {
+                    child = new ObjectNode(subobj, clazz, fname, false);
+                    child.setAdministrable(node.isAdministrable());
+                    child.setControllable(node.isControllable());
+                    recursiveObjectTree(child);
+                } else {
+                    child = new ObjectNode(subobj, clazz, fname, true);
+                }
+            }
+            node.add(child);
+        }
+    }
+
+    private int countViewableFields(Class clazz) {
+
+        int count = 0;
+        //Field[] fields = obj.getClass().getDeclaredFields();
+        //Field[] fields = obj.getClass().getFields();
+        Field[] fields = clazz.getFields();
+        for (Field f : fields) {
+            if (Introspector.isHidden(f))
+                continue;
+
+            count++;
+        }
+
+        return count;
+    }
+
+    private void recursiveArrayTree(ObjectNode node, Field f)
+        throws IllegalArgumentException, IllegalAccessException {
+
+        String name = node.getFieldName();
+        Object aobj = node.getObject();
+
+        int length = aobj==null? 0 : Array.getLength(aobj);
+
+        Class clazz = f.getType().getComponentType();
+
+        if (clazz.isPrimitive() || Introspector.isWrapper(clazz) || Introspector.isString(clazz)) {
+            // primitive, wrapper objects, string array
+            for (int i = 0; i < length; i++) {
+                Object elem = Array.get(aobj, i);
+                //String fname = name + "[" + i + "]";
+                ObjectNode child = new ObjectNode(elem, clazz, name, i, true);
+                node.add(child);
+            }
+        } else {
+            // Object or Array (*sigh*)
+            for (int i = 0; i < length; i++) {
+                Object elem = Array.get(aobj, i);
+                //String fname = name + "[" + i + "]";
+                ObjectNode child = new ObjectNode(elem, clazz, name, i, false);
+                recursiveObjectTree(child);
+                child.setAdministrable(node.isAdministrable());
+                child.setControllable(node.isControllable());
+
+                node.add(child);
+            }
+        }
+    }
+
+
+    class ObjectNodeRenderer implements TreeCellRenderer {
+        private JLabel label;
+
+        public ObjectNodeRenderer() {
+            label = new JLabel();
+            label.setOpaque(true);
+        }
+
+        public Component getTreeCellRendererComponent(JTree tree,
+                                                      Object value,
+                                                      boolean isSelected,
+                                                      boolean isExpanded,
+                                                      boolean isLeaf,
+                                                      int row,
+                                                      boolean cellHasFocus) {
+
+            //label.setFont(tree.getFont());
+            label.setForeground(tree.getForeground());
+            if (isSelected) {
+                //label.setBackground(UIManager.getColor("Tree.backgroundSelectionColor"));
+                //label.setForeground(UIManager.getColor("Tree.textSelectionColor"));
+                label.setBackground(MetalLookAndFeel.getPrimaryControl());
+            } else {
+                //label.setBackground(UIManager.getColor("Tree.backgroundNonSelectionColor"));
+                //label.setForeground(UIManager.getColor("Tree.textNonSelectionColor"));
+                label.setBackground(tree.getBackground());
+            }
+
+            ObjectNode node = (ObjectNode) value;
+            label.setText(node.getTitle());
+            label.setIcon(node.getIcon());
+            return label;
+        }
+    }
 }
