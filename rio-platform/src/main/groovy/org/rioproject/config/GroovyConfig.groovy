@@ -161,8 +161,10 @@ class GroovyConfig implements net.jini.config.Configuration {
                 if(groovyClass.isAnnotationPresent(Component.class)) {
                     Component comp = groovyClass.getAnnotation(Component.class)
                     component = comp.value()
+                    log.debug("Found component: ${component} from annotation")
                 } else {
                     component = getComponentName(gO.getMetaClass())
+                    log.debug("Derived component: ${component} from metaclass")
                 }
                 if (!validQualifiedIdentifier(component)) {
                     throw new IllegalArgumentException("component must be a valid qualified identifier");
@@ -189,7 +191,7 @@ class GroovyConfig implements net.jini.config.Configuration {
     def Object getEntry(String component, String name, Class type, Object defaultValue, Object data) {
         if(configFile!=null)
             return configFile.getEntry(component, name, type, defaultValue, data)
-        log.trace("component=${component}, name=${name}, type=${type.getName()}, defautValue=${defaultValue}, data=${data}")
+        log.debug("component=${component}, name=${name}, type=${type.getName()}, defautValue=${defaultValue}, data=${data}")
         if (component == null) {
             throw new NullPointerException("component cannot be null");
         } else if (name == null) {
@@ -207,6 +209,7 @@ class GroovyConfig implements net.jini.config.Configuration {
 
         GroovyObject groovyConfig = null;
         for(Map.Entry<String, GroovyObject> entry : groovyConfigs)  {
+            log.debug("component: ${component}, found: ${entry.key}")
             if(entry.key.equals(component)) {
                 groovyConfig = entry.value;
                 break;
