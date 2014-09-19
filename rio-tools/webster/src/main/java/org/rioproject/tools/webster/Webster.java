@@ -414,21 +414,23 @@ public class Webster implements Runnable {
         }
     }
 
-    /*
-     * Read the request and return the initial request line.
-     */
-    private String getRequest(Socket sock) throws IOException {
-        BufferedInputStream in = new BufferedInputStream(sock.getInputStream(), 256);
-        StringBuffer buf = new StringBuffer(80);
-        do {
-            if(!readLine(in, buf))
-                return (null);
-        } while (buf.length() == 0);
-        String req = buf.toString();
-        do {
-            buf.setLength(0);
-        } while (readLine(in, buf) && buf.length() > 0);
-        return (req);
+    private String readRequest(InputStream inputStream) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int read;
+        int prev = -1;
+        while ((read = inputStream.read()) != -1) {
+            if (read != '\n' && read != '\r')
+                sb.append((char) read);
+            if (read == '\n' && prev == '\r') {
+                break;
+            }
+            if (read == '\r' && prev == '0') {
+                //sb.delete(0, sb.length());
+                break;
+            }
+            prev = read;
+        }
+        return sb.toString();
     }
 
     public void run() {
@@ -443,17 +445,31 @@ public class Webster implements Runnable {
                 }
                 String line;
                 Properties header = new Properties();
+                DataInputStream inputStream;
                 try {
-                    line = getRequest(s);
+                    inputStream = new DataInputStream(s.getInputStream());
+                    StringBuilder lineBuilder = new StringBuilder();
+                    StringTokenizer tokenizer;
+                    while ((line = readRequest(inputStream)).length() != 0) {
+                        if (lineBuilder.length() > 0)
+                            lineBuilder.append("\n");
+                        lineBuilder.append(line);
+                        tokenizer = new StringTokenizer(line, ":");
+                        String aToken = tokenizer.nextToken().trim();
+                        if (tokenizer.hasMoreTokens()) {
+                            header.setProperty(aToken, tokenizer.nextToken().trim());
+                        }
+                    }
+                    line = lineBuilder.toString();
                     int port = s.getPort();
-                    String from = s.getInetAddress().getHostAddress()+":"+port;
-                    if(debug) {
+                    String from = s.getInetAddress().getHostAddress() + ":" + port;
+                    if (debug) {
                         StringBuilder buff = new StringBuilder();
                         buff.append("From: ").append(from).append(", ");
-                        if(soTimeout > 0)
+                        if (soTimeout > 0)
                             buff.append("SO_TIMEOUT: ").append(soTimeout).append(", ");
                         buff.append("Request: ").append(line);
-                        System.out.println(buff.toString());
+                        System.out.println("\n"+buff.toString());
                     }
                     if(logger.isDebugEnabled()) {
                         StringBuilder buff = new StringBuilder();
@@ -463,8 +479,8 @@ public class Webster implements Runnable {
                         buff.append("Request: ").append(line);
                         logger.debug(buff.toString());
                     }
-                    if (line != null) {
-                        StringTokenizer tokenizer = new StringTokenizer(line, " ");
+                    if (line != null && line.length()>0) {
+                        tokenizer = new StringTokenizer(line, " ");
                         if (!tokenizer.hasMoreTokens())
                             break;
                         String token = tokenizer.nextToken();
@@ -490,7 +506,7 @@ public class Webster implements Runnable {
                             pool.execute(new GetFile(s, fileName));
                         } else if (header.getProperty("PUT") != null) {
                             if(putDirectory!=null) {
-                                pool.execute(new PutFile(s, fileName, header));
+                                pool.execute(new PutFile(s, fileName, header, inputStream));
                             } else {
                                 DataOutputStream clientStream = new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
                                 clientStream.writeBytes("HTTP/1.1 405 Method Not Allowed\nWebster is in read-only mode\r\n\r\n");
@@ -859,113 +875,132 @@ public class Webster implements Runnable {
             }
         } // end of GetFile
     }
+
     class PutFile implements Runnable {
-        private final Socket client;
-        private final String fileName;
+        private Socket client;
+        private String fileName;
         private Properties rheader;
+        private InputStream inputStream;
         final int BUFFER_SIZE = 4096;
 
-        PutFile(Socket s, String fileName, Properties header) {
+        PutFile(Socket s, String fileName, Properties header, InputStream fromClient) {
             rheader = header;
             client = s;
             this.fileName = fileName;
+            this.inputStream = fromClient;
         }
 
         public void run() {
-            DataOutputStream requestedFileOutputStream = null;
-            DataOutputStream clientStream = null;
-            try {
-                // check to see if the file exists if it does the return code
-                // will be 200 if it dosen't it will be 201
-                File putFile = new File(putDirectory + File.separator + fileName);
-                if(debug)
-                    logger.debug("tempDir: "+putDirectory+", fileName: "+fileName+", putFile: "+putFile.getPath());
-                String header;
-                if(putFile.exists()) {
-                    header = "HTTP/1.0 200 OK\n"
-                             + "Allow: PUT\n"
-                             + "MIME-Version: 1.0\n"
-                             + "Server : SORCER Webster: a Java HTTP Server \n"
-                             + "\n\n <H1>200 PUT File "+fileName+" updated</H1>\n";
-                    if (debug)
-                        logger.debug("Updated putFile: " + putFile);
-                } else {
-                    header = "HTTP/1.0 201 Created\n"
-                             + "Allow: PUT\n"
-                             + "MIME-Version: 1.0\n"
-                             + "Server : SORCER Webster: a Java HTTP Server \n"
-                             + "\n\n <H1>201 PUT File "+fileName+" Created</H1>\n";
-                    File parentDir = putFile.getParentFile();
-                    System.out.println("Parent: "+parentDir.getPath()+", exists? "+parentDir.exists());
-                    if(!parentDir.exists()) {
-                        if(parentDir.mkdirs() && debug) {
-                            System.out.println("Created "+parentDir.getPath());
-                        }
-                    }
-                    if(debug)
-                        logger.debug("Created putFile: " + putFile+", exists? "+putFile.exists());
-                }
 
-                int length = Integer.parseInt(ignoreCaseProperty(rheader, "Content-Length"));
-                if(debug)
-                    System.out.println(fileName + " size: " + length);
-                DataInputStream clientInputStream = new DataInputStream(client.getInputStream());
+            String s = ignoreCaseProperty(rheader, "Content-Length");
+            if (s == null) {
                 try {
-                    int read;
-                    long amountRead = 0;
-                    byte[] buffer = new byte[length < BUFFER_SIZE ? length : BUFFER_SIZE];
-                    requestedFileOutputStream = new DataOutputStream(new FileOutputStream(putFile));
-                    while (amountRead < length) {
-                        read = clientInputStream.read(buffer);
-                        requestedFileOutputStream.write(buffer, 0, read);
-                        amountRead += read;
-                    }
-                    requestedFileOutputStream.flush();
-                    System.out.println(putFile.getPath()+" size: "+putFile.length());
+                    sendResponse("HTTP/1.0 411 OK\n"
+                                 + "Allow: PUT\n"
+                                 + "MIME-Version: 1.0\n"
+                                 + "Server: " + SERVER_DESCRIPTION + "\n"
+                                 + "\n\n <H1>411 Webster refuses to accept the out request for " + fileName + " " +
+                                 "without a defined Content-Length.</H1>\n");
                 } catch (IOException e) {
                     e.printStackTrace();
-                    header = "HTTP/1.0 500 Internal Server Error\n"
-                             + "Allow: PUT\n"
-                             + "MIME-Version: 1.0\n"
-                             + "Server: " + SERVER_DESCRIPTION + "\n"
-                             + "\n\n <H1>500 Internal Server Error</H1>\n"
-                             + e;
-                } finally {
-                    if(requestedFileOutputStream!=null)
-                        requestedFileOutputStream.close();
                 }
-
-                clientStream = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
-                clientStream.writeBytes(header);
-                clientStream.flush();
-                clientStream.close();
-            } catch(Exception e) {
-                logger.warn( "Closing Socket", e);
-            } finally {
+            } else {
+                String header;
+                OutputStream requestedFileOutputStream = null;
                 try {
-                    if (requestedFileOutputStream != null)
-                        requestedFileOutputStream.close();
-                    if (clientStream != null)
-                        clientStream.close();
-                    client.close();
-                } catch(IOException e2) {
+                    // check to see if the file exists if it does the return code
+                    // will be 200 if it doesn't it will be 201
+                    File putFile = new File(putDirectory + File.separator + fileName);
+                    if (debug)
+                        System.out.println("tempDir: " + putDirectory + ", fileName: " + fileName + ", putFile: " + putFile.getPath());
+
+                    if (putFile.exists()) {
+                        header = "HTTP/1.0 200 OK\n"
+                                 + "Allow: PUT\n"
+                                 + "MIME-Version: 1.0\n"
+                                 + "Server: " + SERVER_DESCRIPTION + "\n"
+                                 + "\n\n <H1>200 PUT File " + fileName + " updated</H1>\n";
+                        if (debug)
+                            System.out.println("updated putFile: " + putFile);
+                    } else {
+                        header = "HTTP/1.0 201 Created\n"
+                                 + "Allow: PUT\n"
+                                 + "MIME-Version: 1.0\n"
+                                 + "Server: " + SERVER_DESCRIPTION + "\n"
+                                 + "\n\n <H1>201 PUT File " + fileName + " Created</H1>\n";
+                        File parentDir = putFile.getParentFile();
+                        System.out.println("Parent: " + parentDir.getPath() + ", exists? " + parentDir.exists());
+                        if (!parentDir.exists()) {
+                            if (parentDir.mkdirs() && debug) {
+                                System.out.println("Created " + parentDir.getPath());
+                            }
+                        }
+                        if (debug)
+                            System.out.println("Created putFile: " + putFile + ", exists? " + putFile.exists());
+                    }
+
+                    int length = Integer.parseInt(ignoreCaseProperty(rheader, "Content-Length"));
+                    if (debug)
+                        System.out.println("Putting " + fileName + " size: " + length + ", header: " + rheader);
+                    try {
+                        requestedFileOutputStream = new DataOutputStream(new FileOutputStream(putFile));
+                        int read;
+                        long amountRead = 0;
+                        byte[] buffer = new byte[length < BUFFER_SIZE ? length : BUFFER_SIZE];
+                        while (amountRead < length) {
+                            read = inputStream.read(buffer);
+                            requestedFileOutputStream.write(buffer, 0, read);
+                            amountRead += read;
+                        }
+                        requestedFileOutputStream.flush();
+                        System.out.println("Wrote: " + putFile.getPath() + " size: " + putFile.length());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        header = "HTTP/1.0 500 Internal Server Error\n"
+                                 + "Allow: PUT\n"
+                                 + "MIME-Version: 1.0\n"
+                                 + "Server: " + SERVER_DESCRIPTION + "\n"
+                                 + "\n\n <H1>500 Internal Server Error</H1>\n"
+                                 + e;
+                    } finally {
+                        if (requestedFileOutputStream != null)
+                            requestedFileOutputStream.close();
+                        sendResponse(header);
+                    }
+
+                } catch (Exception e) {
+                logger.warn( "Closing Socket", e);
+                } finally {
+                    try {
+                        if (requestedFileOutputStream != null)
+                            requestedFileOutputStream.close();
+                        client.close();
+                    } catch (IOException e2) {
                     logger.warn("Closing incoming socket", e2);
+                    }
                 }
             }
         }
 
-        String ignoreCaseProperty(Properties props, String field) {
-            Enumeration names = props.propertyNames();
+        void sendResponse(String header) throws IOException {
+            DataOutputStream clientStream = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()));
+            clientStream.writeBytes(header);
+            clientStream.flush();
+            clientStream.close();
+        }
+
+        public String ignoreCaseProperty(Properties props, String field) {
+            Enumeration<?> names = props.propertyNames();
             while (names.hasMoreElements()) {
-                String propName = (String)names.nextElement();
-                if(field.equalsIgnoreCase(propName)) {
+                String propName = (String) names.nextElement();
+                if (field.equalsIgnoreCase(propName)) {
                     return (props.getProperty(propName));
                 }
             }
             return (null);
         }
-    } // end of PutFile
-    
+    }
+
     class DelFile implements Runnable {
         private final Socket client;
         private final String fileName;
