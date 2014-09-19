@@ -58,10 +58,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Use Maven 3's Aether API for Maven dependency resolution.
@@ -214,7 +211,7 @@ public final class AetherService {
                                                                                       SettingsBuildingException {
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
-        Dependency dependency = new Dependency(artifact, JavaScopes.COMPILE);
+        Dependency dependency = new Dependency(artifact, JavaScopes.RUNTIME);
         List<RemoteRepository> myRepositories;
         if(repositories==null || repositories.isEmpty())
             myRepositories = getRemoteRepositories();
@@ -356,7 +353,7 @@ public final class AetherService {
         else
             filters.add(new ExcludePlatformFilter());
         filters.add(DependencyFilterUtils.classpathFilter(dependencyFilterScope==null?
-                                                          JavaScopes.COMPILE:dependencyFilterScope));
+                                                          JavaScopes.RUNTIME:dependencyFilterScope));
         for(DependencyFilter filter : dependencyFilters)
             filters.add(filter);
         return DependencyFilterUtils.andFilter(filters);
@@ -470,7 +467,7 @@ public final class AetherService {
     private List<RemoteRepository> applyAuthentication(final List<RemoteRepository> repositories) {
         if(effectiveSettings.getServers().isEmpty())
             return repositories;
-        List<RemoteRepository> appliedRepositories = new ArrayList<RemoteRepository>();
+        Set<RemoteRepository> appliedRepositories = new HashSet<RemoteRepository>();
         for(Server server : effectiveSettings.getServers()) {
             for(RemoteRepository remoteRepository : repositories) {
                 if(server.getId().equals(remoteRepository.getId())) {
@@ -492,7 +489,7 @@ public final class AetherService {
                 }
             }
         }
-        return appliedRepositories;
+        return new ArrayList<RemoteRepository>(appliedRepositories);
     }
 
     /**
