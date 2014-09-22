@@ -1557,13 +1557,17 @@ public class ServiceElementManager implements InstanceIDManager {
     private ServiceBeanInstance findServiceBeanInstance(final Object proxy,
                                                         final Uuid serviceUuid,
                                                         final ServiceBeanInstance[] instances,
-                                                        final boolean matchOnProxy) throws ClassNotFoundException, IOException {
+                                                        final boolean matchOnProxy) throws IOException {
         ServiceBeanInstance instance = null;
         for (ServiceBeanInstance sbi : instances) {
             if(matchOnProxy) {
-                if (sbi.getService().equals(proxy)) {
-                    instance = sbi;
-                    break;
+                try {
+                    if (sbi.getService().equals(proxy)) {
+                        instance = sbi;
+                        break;
+                    }
+                } catch(ClassNotFoundException e) {
+                    logger.debug("{}", e.getMessage());
                 }
             } else {
                 if (sbi.getServiceBeanID().equals(serviceUuid)) {

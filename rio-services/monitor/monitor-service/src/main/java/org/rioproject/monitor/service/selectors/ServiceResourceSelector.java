@@ -460,9 +460,11 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             resources = collection.toArray(new LeasedResource[collection.size()]);
         }
         ServiceResource[] svcResources = new ServiceResource[resources.length];
-        for(int i=0; i<svcResources.length; i++)
+        for(int i=0; i<resources.length; i++)
             svcResources[i] = (ServiceResource)resources[i];
-        return (svcResources);
+        if(logger.isTraceEnabled())
+            logger.trace("Landlord returned {} instances, ServiceResource count: {}", resources.length, svcResources.length);
+        return svcResources;
     }
 
     /**

@@ -322,6 +322,8 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         ServiceBeanInstantiator preparedResource = resource;
         if(resource instanceof RemoteMethodControl)
             preparedResource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
+        if(logger.isTraceEnabled())
+            logger.trace("Calling {}", selector.getClass().getName());
         ServiceResource[] svcResources = selector.getServiceResources();
         if(svcResources.length == 0) {
             logger.warn("{} is updating resource information, but we don't have any registered Cybernodes. " +

@@ -44,7 +44,7 @@ public abstract class ResourceLessor {
     /** Component for getting the Logger */
     private static final String COMPONENT_NAME = ResourceLessor.class.getPackage().getName();
     /** The Logger */
-    private static final Logger logger = LoggerFactory.getLogger(COMPONENT_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceLessor.class);
 
     /**
      * Check to make sure that the LeasedResource lease has not expired yet <br>
@@ -197,6 +197,8 @@ public abstract class ResourceLessor {
             Collection<LeasedResource> c = resources.values();
             leasedResources = c.toArray(new LeasedResource[c.size()]);
         }
+        if(logger.isTraceEnabled())
+            logger.trace("Number of resources: {}, returned: {}", resources.size(), leasedResources.length);
         return (leasedResources);
     }
 
