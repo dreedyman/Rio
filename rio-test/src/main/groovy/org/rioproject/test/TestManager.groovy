@@ -672,7 +672,14 @@ class TestManager {
         }
 
         jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir+' -DRIO_WATCH_LOG_DIR='+logDir
-        String cmdLine = getJava()+' '+jvmOptions+' -cp '+classpathBuilder.toString()+' '+mainClass+' '+starter
+        StringBuilder cmdLineBuilder = new StringBuilder()
+        if(System.getProperty("os.name").contains("Windows"))
+            cmdLineBuilder.append("cmd.exe /c")
+        cmdLineBuilder.append(getJava()).append(" ")
+                .append(jvmOptions)
+                .append(" -cp ").append(classpathBuilder.toString()).append(" ")
+                .append(mainClass).append(" ").append(starter)
+        String cmdLine = cmdLineBuilder.toString();
         log.info "Logging for $service will be sent to ${logDir}"
         log.info "Starting ${service}, using starter config [${starter}]"
         log.debug "Exec command line: ${cmdLine}"

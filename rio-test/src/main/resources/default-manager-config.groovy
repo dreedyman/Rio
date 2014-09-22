@@ -43,7 +43,10 @@ manager {
 
     /* Get the directory that the logging FileHandler will create the service log.  */
     String opSys = System.getProperty('os.name')
-    String rootLogDir = opSys.startsWith("Windows")?System.getProperty("java.io.tmpdir"):'/tmp'
+    String rootLogDir = opSys.startsWith("Windows")?"${rioHome}/logs/test":"/tmp"
+    File logDir = new File(rootLogDir)
+    if(!logDir.exists())
+        logDir.mkdirs()
     String name = System.getProperty('user.name')
 
     log = "${rootLogDir}${File.separator}${name}${File.separator}logs"
