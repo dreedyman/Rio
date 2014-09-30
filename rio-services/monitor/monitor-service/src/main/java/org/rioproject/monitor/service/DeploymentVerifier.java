@@ -36,9 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class is used to verify that either jars declared in an OperationalString can be served, or if the
@@ -116,8 +114,8 @@ public class DeploymentVerifier {
         }
         if(didResolve) {
             List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
-            remoteRepositories.addAll(resolver.getRemoteRepositories());
             remoteRepositories.addAll(additionalRepositories);
+            remoteRepositories.addAll(resolver.getRemoteRepositories());
             service.setRemoteRepositories(remoteRepositories);
         }
         sb.append(sb1.toString());
@@ -146,19 +144,10 @@ public class DeploymentVerifier {
     }
 
     RemoteRepository[] mergeRepositories(final RemoteRepository[] r1, final RemoteRepository[] r2) {
-        List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+        Set<RemoteRepository> remoteRepositories = new HashSet<RemoteRepository>();
         Collections.addAll(remoteRepositories, r1);
         for(RemoteRepository r : r2) {
-            boolean add = true;
-            for(RemoteRepository known : r1) {
-                if(known.getUrl().equals(r.getUrl())) {
-                    add = false;
-                    break;
-                }
-            }
-            if(add) {
-                remoteRepositories.add(r);
-            }
+            remoteRepositories.add(r);
         }
         return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
     }
