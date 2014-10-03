@@ -28,10 +28,10 @@ public class RemoteRepository implements Serializable {
     private String url;
     private boolean snapshots = true;
     private boolean releases = true;
-    private String releaseChecksumPolicy = CHECKSUM_POLICY_FAIL;
-    private String snapshotChecksumPolicy = CHECKSUM_POLICY_FAIL;
-    private String releaseUpdatePolicy = UPDATE_POLICY_DAILY;
-    private String snapshotUpdatePolicy = UPDATE_POLICY_DAILY;
+    private String releaseChecksumPolicy = CHECKSUM_POLICY_IGNORE;
+    private String snapshotChecksumPolicy = CHECKSUM_POLICY_IGNORE;
+    private String releaseUpdatePolicy = UPDATE_POLICY_ALWAYS;
+    private String snapshotUpdatePolicy = UPDATE_POLICY_ALWAYS;
     private boolean mirrored;
     /**
      * Verify checksums and fail the resolution if they do not match.
@@ -148,7 +148,7 @@ public class RemoteRepository implements Serializable {
     }
 
     @Override public String toString() {
-        return "RemoteRepository{" +
+        return "RemoteRepository {" +
                "id='" + id + '\'' +
                ", name='" + name + '\'' +
                ", url='" + url + '\'' +
