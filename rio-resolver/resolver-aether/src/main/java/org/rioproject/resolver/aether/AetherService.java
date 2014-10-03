@@ -131,6 +131,7 @@ public final class AetherService {
                                                final String repositoryLocation)
         throws SettingsBuildingException {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+        session.setUpdatePolicy(RepositoryPolicy.UPDATE_POLICY_ALWAYS);
 
         LocalRepository localRepo = new LocalRepository(repositoryLocation);
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
@@ -228,6 +229,8 @@ public final class AetherService {
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, getDependencyFilter(artifact));
         dependencyRequest.setCollectRequest(collectRequest);
 
+        ((DefaultRepositorySystemSession)repositorySystemSession).setConfigProperty("aether.updateCheckManager.sessionState",
+                                                                                    "false");
         try {
             List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(repositorySystemSession,
                                                                                         dependencyRequest).getArtifactResults();
@@ -414,6 +417,8 @@ public final class AetherService {
         setMirrorSelector(myRepositories);
         List<RemoteRepository> repositoriesToUse = applyAuthentication(myRepositories);
 
+        ((DefaultRepositorySystemSession)repositorySystemSession).setConfigProperty("aether.updateCheckManager.sessionState",
+                                                                                    "false");
         DefaultArtifact a = new DefaultArtifact(artifactCoordinates);
         String extension = artifactExt==null? "jar":artifactExt;
         ArtifactRequest artifactRequest = new ArtifactRequest();
@@ -450,10 +455,10 @@ public final class AetherService {
             }
         }
 
-        if(!alreadyHaveRepository(myRepositories, "central")) {
+        /*if(!alreadyHaveRepository(myRepositories, "central")) {
             RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/").build();
             myRepositories.add(central);
-        }
+        }*/
         return Collections.unmodifiableList(myRepositories);
     }
 

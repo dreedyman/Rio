@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <aetherVersion>0.9.0.M3</aetherVersion>
+        <aetherVersion>1.0.0.v20140518</aetherVersion>
         <mavenVersion>3.1.0</mavenVersion>
         <wagonVersion>1.0</wagonVersion>
     </properties>
@@ -51,6 +51,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>webster</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!--
         Begin aether dependencies.
@@ -59,76 +66,41 @@
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-api</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-spi</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-util</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-impl</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-connector-basic</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-wagon</artifactId>
-            <version>${aetherVersion}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-http</artifactId>
-            <version>${aetherVersion}</version>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-file</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-transport-classpath</artifactId>
+            <artifactId>aether-transport-http</artifactId>
             <version>${aetherVersion}</version>
-            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-aether-provider</artifactId>
             <version>${mavenVersion}</version>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.sisu</groupId>
-                    <artifactId>org.eclipse.sisu.plexus</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -158,6 +130,13 @@
             <version>2.2</version>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -185,6 +164,7 @@
                                     <include>org.apache.httpcomponents:*</include>
                                     <include>org.slf4j:jcl-over-slf4j:*</include>
                                     <include>commons-codec:*</include>
+                                    <include>javax:*</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -213,6 +193,7 @@
                     -->
                     <systemPropertyVariables>
                         <rio.version>4.2</rio.version>
+                        <java.util.logging.config.file>src/test/resources/test.properties</java.util.logging.config.file>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

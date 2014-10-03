@@ -45,6 +45,25 @@ public class FileUtils {
     }
 
     /**
+     * Read a file
+     */
+    public static String read(File f) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(f));
+        StringBuilder sb = new StringBuilder();
+        try {
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        return sb.toString();
+    }
+
+    /**
      * Copies one file to another
      *
      * @param src The source file
