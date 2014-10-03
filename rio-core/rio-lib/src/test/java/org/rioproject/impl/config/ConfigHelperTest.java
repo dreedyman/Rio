@@ -19,7 +19,7 @@ import junit.framework.Assert;
 import net.jini.config.Configuration;
 import org.junit.Test;
 import org.rioproject.config.GroovyConfig;
-import org.rioproject.impl.config.ConfigHelper;
+import org.rioproject.opstring.ServiceElement;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,18 +34,15 @@ import java.io.IOException;
 public class ConfigHelperTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetConfigArgsNoArgs() throws IOException {
-        ConfigHelper.getConfigArgs();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testGetConfigArgsNoCLassLoader() throws IOException {
-        ConfigHelper.getConfigArgs(new String[]{"-"}, null);
+        ConfigHelper.getConfigArgs(new ServiceElement(), null);
     }
 
     @Test
     public void testUsingConfig() throws IOException {
-        String[] args = ConfigHelper.getConfigArgs(getConfig());
+        ServiceElement service = new ServiceElement();
+        service.getServiceBeanConfig().setConfigArgs(getConfig());
+        String[] args = ConfigHelper.getConfigArgs(service);
         Assert.assertNotNull(args);
         Assert.assertEquals(1, args.length);
         File file = new File(args[0]);
@@ -56,7 +53,9 @@ public class ConfigHelperTest {
 
     @Test
     public void testUsingGroovyConfig() throws IOException {
-        String[] args = ConfigHelper.getConfigArgs(getGroovyConfig());
+        ServiceElement service = new ServiceElement();
+        service.getServiceBeanConfig().setConfigArgs(getGroovyConfig());
+        String[] args = ConfigHelper.getConfigArgs(service);
         Assert.assertNotNull(args);
         Assert.assertEquals(1, args.length);
         File file = new File(args[0]);
@@ -67,11 +66,15 @@ public class ConfigHelperTest {
 
     @Test(expected = FileNotFoundException.class)
     public void testUsingMissingGroovyFile() throws IOException {
-        String[] args = ConfigHelper.getConfigArgs("file:foo");
+        ServiceElement service = new ServiceElement();
+        service.getServiceBeanConfig().setConfigArgs("file:foo");
+        String[] args = ConfigHelper.getConfigArgs(service);
         Assert.assertNotNull(args);
         Configuration configuration = new GroovyConfig(args, Thread.currentThread().getContextClassLoader());
         Assert.assertNotNull(configuration);
     }
+
+
 
     private String getConfig() {
         return

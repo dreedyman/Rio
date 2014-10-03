@@ -1379,7 +1379,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
                         } catch(Exception e1) {
                             logger.warn("Getting Watch UI", e1);
                         }
-                        String[] args = ConfigHelper.getConfigArgs(postElem.getServiceBeanConfig().getConfigArgs());
+                        String[] args = ConfigHelper.getConfigArgs(postElem);
                         Configuration config = ConfigurationProvider.getInstance(args);
                         Entry[] serviceUIs = (Entry[])config.getEntry(serviceBeanComponent,
                                                                       "serviceUIs",

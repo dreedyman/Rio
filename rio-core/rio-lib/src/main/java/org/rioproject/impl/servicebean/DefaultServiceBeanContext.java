@@ -195,11 +195,13 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
             ClassLoader cCL = Thread.currentThread().getContextClassLoader();
             String[] args;
             try {
-                args = ConfigHelper.getConfigArgs(sElem.getServiceBeanConfig().getConfigArgs(), cCL);
+                args = ConfigHelper.getConfigArgs(sElem, cCL);
             } catch (IllegalArgumentException e) {
-                throw new ConfigurationException("Creating configuration", e);
+                throw new ConfigurationException("Could not create configuration, bad arguments " +
+                                                 "["+Arrays.toString(sElem.getServiceBeanConfig().getConfigArgs())+"]",
+                                                 e);
             } catch (IOException e) {
-                throw new ConfigurationException("Creating configuration", e);
+                throw new ConfigurationException("Could not create configuration", e);
             }
             if(logger.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder();

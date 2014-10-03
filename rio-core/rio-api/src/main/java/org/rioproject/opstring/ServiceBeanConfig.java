@@ -348,7 +348,7 @@ public class ServiceBeanConfig implements Serializable {
         return((Long)configParms.get(INSTANCE_ID));
     }
 
-    public void setConfigArgs(String[] configArgs) {
+    public void setConfigArgs(final String... configArgs) {
         if(configArgs == null)
             throw new IllegalArgumentException("configArgs is null");
         this.configArgs = new String[configArgs.length];

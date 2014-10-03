@@ -131,7 +131,8 @@ public class ServiceElement implements Serializable {
      * @param provisionType The {@link ProvisionType} for the ServiceElement
      */
     public ServiceElement(ProvisionType provisionType) {
-       this.provisionType = provisionType;
+        this.provisionType = provisionType;
+        this.sbConfig = new ServiceBeanConfig();
     }
 
 
