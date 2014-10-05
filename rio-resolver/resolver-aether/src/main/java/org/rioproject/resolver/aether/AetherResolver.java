@@ -146,6 +146,9 @@ public class AetherResolver implements Resolver {
         } catch (MalformedURLException e) {
             throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
+        } catch (SettingsBuildingException e) {
+            throw new ResolverException(String.format("Error loading settings for resolved artifact %s: %s",
+                                                      artifact, e.getLocalizedMessage()));
         }
         return location;
     }
@@ -164,6 +167,9 @@ public class AetherResolver implements Resolver {
             throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
         } catch (MalformedURLException e) {
             throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
+                                                      artifact, e.getLocalizedMessage()));
+        } catch (SettingsBuildingException e) {
+            throw new ResolverException(String.format("Error loading settings for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
         }
         return location;
