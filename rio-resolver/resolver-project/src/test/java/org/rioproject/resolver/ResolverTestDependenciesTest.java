@@ -15,6 +15,7 @@
  */
 package org.rioproject.resolver;
 
+import org.apache.maven.settings.building.SettingsBuildingException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ import java.io.IOException;
 public class ResolverTestDependenciesTest {
 
     @Before
-    public void cleanAndInstall() throws InstallationException, IOException {
+    public void cleanAndInstall() throws InstallationException, IOException, SettingsBuildingException {
         Util.cleanProjectFromRepository();
         Util.verifyAndInstall();
     }

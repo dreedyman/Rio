@@ -15,6 +15,7 @@
  */
 package org.rioproject.resolver;
 
+import org.apache.maven.settings.building.SettingsBuildingException;
 import org.junit.Assert;
 import org.rioproject.resolver.maven2.Repository;
 import org.eclipse.aether.installation.InstallationException;
@@ -29,7 +30,7 @@ import java.io.IOException;
  */
 public class Util {
 
-    static void verifyAndInstall() throws InstallationException, IOException {
+    static void verifyAndInstall() throws InstallationException, IOException, SettingsBuildingException {
         File projectPom = new File("src/test/resources/project/pom.xml");
         File projectAPIPom = new File("src/test/resources/project/project-api/pom.xml");
         File projectAPITarget = new File("src/test/resources/project/project-api/target");

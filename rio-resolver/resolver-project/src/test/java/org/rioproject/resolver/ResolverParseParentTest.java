@@ -15,6 +15,7 @@
  */
 package org.rioproject.resolver;
 
+import org.apache.maven.settings.building.SettingsBuildingException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +27,7 @@ import java.io.IOException;
  */
 public class ResolverParseParentTest {
     @Test
-    public void testVersionFromProjectParentVersion() throws IOException, ResolverException, InstallationException {
+    public void testVersionFromProjectParentVersion() throws IOException, ResolverException, InstallationException, SettingsBuildingException {
         Util.verifyAndInstall();
         ProjectModuleResolver r = new ProjectModuleResolver();
         String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0");
