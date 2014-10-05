@@ -78,20 +78,34 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                          codebase, name, defaultLoader==null?"NULL":defaultLoader.getClass().getName());
         }
         String resolvedCodebase = resolveCodebase(codebase);
-        if(codebase!=null && codebase.startsWith("artifact:") && classAnnotationMap.get(name)==null) {
-            classAnnotationMap.put(name, codebase);
-            logger.trace("class: {}, codebase: {}, size now {}", name, codebase, classAnnotationMap.size());
+        if(resolvedCodebase!=null) {
+            if (codebase != null && codebase.startsWith("artifact:") && classAnnotationMap.get(name) == null) {
+                classAnnotationMap.put(name, codebase);
+                if(logger.isDebugEnabled()) {
+                    StringBuilder b = new StringBuilder();
+                    int i=1;
+                    for(Map.Entry<String, String> e : classAnnotationMap.entrySet()) {
+                        if (b.length() > 0)
+                            b.append("\n");
+                        b.append("\t(").append(i++).append(") ").append(e.getKey()).append(": ").append(e.getValue());
+                        logger.debug("class: {}, codebase: {}\n{}", name, codebase, b.toString());
+                    }
+                }
+            }
         }
-        logger.trace("Load class {} using codebase {}, resolved to {}", name, codebase, resolvedCodebase);
-        return loader.loadClass(resolvedCodebase, name, defaultLoader);
+        Class<?> cl = loader.loadClass(resolvedCodebase, name, defaultLoader);
+        if(logger.isTraceEnabled()) {
+            logger.trace("Class {} using {}", name, cl.getClassLoader());
+        }
+        return cl;
     }
 
     @Override
     public Class<?> loadProxyClass(final String codebase,
                                    final String[] interfaces,
                                    final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
-        if(logger.isTraceEnabled()) {
-            logger.trace("codebase: {}, interfaces: {}, defaultLoader: {}",
+        if(logger.isInfoEnabled()) {
+            logger.info("codebase: {}, interfaces: {}, defaultLoader: {}",
                          codebase, Arrays.toString(interfaces), defaultLoader==null?"NULL":defaultLoader.getClass().getName());
         }
         String resolvedCodebase = resolveCodebase(codebase);
@@ -123,8 +137,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         String annotation = classAnnotationMap.get(aClass.getName());
         if(annotation == null)
             annotation = loader.getClassAnnotation(aClass);
-        if(logger.isTraceEnabled())
-            logger.trace("Getting annotation for {}: {}", aClass.getName(), annotation);
+        if(logger.isInfoEnabled())
+            logger.info("Obtained annotation for {}: {}", aClass.getName(), annotation);
         return annotation;
     }
 
