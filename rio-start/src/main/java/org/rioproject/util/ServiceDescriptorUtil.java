@@ -74,7 +74,7 @@ public final class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getWebster(final String policy, final String[] roots) throws IOException {
-        return(getWebster(policy, "0", roots));        
+        return(getWebster(policy, "0", roots));
     }
 
     /**
@@ -258,7 +258,7 @@ public final class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getCybernode(final String policy, final String... cybernodeConfig) throws IOException {
         String cybernodeClasspath = getCybernodeClasspath();
-        String cybernodeCodebase = "artifact:org.rioproject.cybernode/cybernode-proxy/"+ RioVersion.VERSION;
+        String cybernodeCodebase = getCybernodeCodebase();
         String implClass = "org.rioproject.cybernode.service.CybernodeImpl";
         return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
     }
@@ -278,8 +278,9 @@ public final class ServiceDescriptorUtil {
         return classPath.toString();
     }
 
-    public static String getCybernodeCodebase() {
-        return "artifact:org.rioproject.cybernode/cybernode-proxy/"+ RioVersion.VERSION;
+    public static String getCybernodeCodebase() throws UnknownHostException {
+        return createAnnotatedArtifactURL(String.format("artifact:org.rioproject.cybernode/cybernode-proxy/%s",
+                                                        RioVersion.VERSION));
     }
 
     static String getProjectResolverLocation(final String rioHome) {
@@ -318,9 +319,17 @@ public final class ServiceDescriptorUtil {
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
         String implClass = "org.rioproject.monitor.service.ProvisionMonitorImpl";
-        String monitorCodebase = "artifact:org.rioproject.monitor/monitor-proxy/"+ RioVersion.VERSION;
-
+        String monitorCodebase =
+            createAnnotatedArtifactURL(String.format("artifact:org.rioproject.monitor/monitor-proxy/%s",
+                                                     RioVersion.VERSION));
         return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
+    }
+
+    static String createAnnotatedArtifactURL(final String artifact) throws UnknownHostException {
+        return String.format("%s;http://%s:%s",
+                             artifact,
+                             HostUtil.getHostAddressFromProperty("java.rmi.server.hostname"),
+                             port);
     }
 
     /**
@@ -339,11 +348,13 @@ public final class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getLookup(final String policy, final String... lookupConfig) throws IOException {
         String rioHome = System.getProperty("RIO_HOME");
-        if(rioHome == null)
+        if (rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         String reggieClasspath = FileHelper.find(new File(rioHome, "lib"), "reggie").getPath();
         File reggieDL = FileHelper.find(new File(rioHome, "lib-dl"), "reggie-dl");
-        String reggieCodebase = "artifact:org.apache.river/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());
+        //String reggieCodebase = "artifact:org.apache.river/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());
+        String reggieCodebase = createAnnotatedArtifactURL(String.format("artifact:org.apache.river/reggie-dl/%s",
+                                                                         FileHelper.getJarVersion(reggieDL.getName())));
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
         return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
     }
@@ -366,7 +377,7 @@ public final class ServiceDescriptorUtil {
             LoggerFactory.getLogger("org.rioproject").warn(builder.toString());
         }
     }
-    
+
     protected static String makePath(final String dir, final String... jars) {
         StringBuilder sb = new StringBuilder();
         for(String jar : jars) {
