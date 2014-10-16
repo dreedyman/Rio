@@ -73,7 +73,7 @@ public class TestConfig {
 
         if (throwException) {
             throw new RuntimeException("Cannot load [" + location + "], it is not found or your location of the file " +
-                                       "is incorrect. Yu have declared that your test [" + testClassName +"] requires " +
+                                       "is incorrect. You have declared that your test [" + testClassName +"] requires " +
                                        "a configuration file, but the file cannot be loaded. Check the setting of the " +
                                        "org.rioproject.test.config system property");
         }
