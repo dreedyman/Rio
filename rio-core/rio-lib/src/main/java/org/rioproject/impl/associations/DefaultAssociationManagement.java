@@ -175,7 +175,10 @@ public class DefaultAssociationManagement implements AssociationManagement {
     }
 
     /**
-     * {@inheritDoc}
+     * If an association is broken, unadvertise the service.
+     *
+     * @param unadvertiseOnBroken if {@code true}, unadvertise the service if the association is broken, otherwise
+     * do not unadvertise.
      */
     public void setUnadvertiseOnBroken(final boolean unadvertiseOnBroken) {
         this.unadvertiseOnBroken.set(unadvertiseOnBroken);

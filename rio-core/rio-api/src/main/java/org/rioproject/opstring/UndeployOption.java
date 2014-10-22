@@ -49,7 +49,7 @@ public class UndeployOption implements Serializable {
      * Create an {@code UndeployOption}
      *
      * @param when The when in milliseconds.
-     * @param type The {@code Type of {@code UndeployOption}
+     * @param type The {@code Type} of {@code UndeployOption}
      * @param timeUnit The {@code TimeUnit}s the {@code when} value is in
      *
      * @throws IllegalArgumentException if the when is <= 0, type is {@code null} or {@code timeUnit} is {@code null}.

@@ -44,7 +44,8 @@ import java.util.logging.*;
  * <li>FileHandler.append specifies whether the FileHandler should append onto
  *     any existing files (defaults to false).
  * </ul>
- * <p>
+ *
+ * @author Dennis Reedy
  */
 public class FileHandler extends java.util.logging.FileHandler {
     static Configuration configuration = getConfiguration();

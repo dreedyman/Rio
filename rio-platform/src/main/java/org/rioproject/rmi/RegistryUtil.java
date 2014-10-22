@@ -69,7 +69,7 @@ import java.rmi.registry.Registry;
  </table>
  </li>
  </ul>
- <code></code>
+
  <ul>
  <li><span
  style="font-weight: bold; font-family: courier new,courier,monospace; color: rgb(0, 0, 0);"><a
@@ -125,12 +125,13 @@ public class RegistryUtil {
      * been created.
      *
      * <p>If the RMI Registry is created, this method will also set the
-     * @link org.rioproject.config.Constants#REGISTRY_PORT} system property
+     * {@link org.rioproject.config.Constants#REGISTRY_PORT} system property
      *
      * @return The port the RMI Registry was created on, or -1 if the
      * RMIRegistry could not be created
      * @throws ConfigurationException If there are errors reading the
      * configuration
+     *
      */
     public static int checkRegistry() throws ConfigurationException {
         int port;

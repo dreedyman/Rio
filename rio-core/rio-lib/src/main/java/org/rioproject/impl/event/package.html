@@ -25,7 +25,7 @@ producers.&nbsp; </p>
 <p>By using a loosely coupled architecture, it becomes easier to adapt
 to changes. Interdependencies found in tightly coupled RPC oriented
 environments are removed with loosely coupled architectures. We can
-replace (or add) implementations at either end (event producer or event
+replace (or add) impementations at either end (event producer or event
 consumer) without altering existing components. By using a loosely
 coupled architecture we are able to more easily adapt to an unforeseen
 forward fit, replace defective component(s) online and scale a system
@@ -103,10 +103,10 @@ defined events. <a href="#Configuring_the_Event_Consumer"><br>
 </a>
 <ul>
   <li> <b>BasicEventConsumer</b></li>
-The {@link org.rioproject.event.BasicEventConsumer} implements the{@link
+The {@link org.rioproject.impl.event.BasicEventConsumer} implements the{@link
 org.rioproject.event.EventConsumer}&nbsp; interface, which
 extends the Jini {@link net.jini.core.event.RemoteEventListener}. The
-{@link org.rioproject.event.BasicEventConsumer}, used as a
+{@link org.rioproject.impl.event.BasicEventConsumer}, used as a
 local utility, manages the event registration and leasing of event
 registrations on behalf of a client. In this manner, clients wishing to
 easily register (subscribe) for the notification of an event in the

@@ -17,19 +17,19 @@ a measurement of a metric. Recording can be done either locally within
 a JVM or remotely across different JVM&#8217;s. Depending on the type
 of metric being observed (watched), the type of watch differs:<br>
 <ul>
-  <li>A {@link org.rioproject.watch.CounterWatch} provides a mechanism to
+  <li>A {@link org.rioproject.impl.watch.CounterWatch} provides a mechanism to
 count a monotonically increasing non-negative value of an arbitrary
 occurance of something over time</li>
-  <li>A {@link org.rioproject.watch.GaugeWatch} provides a mechanism to
+  <li>A {@link org.rioproject.impl.watch.GaugeWatch} provides a mechanism to
 record values that can go up and down, and can be positive or negative.</li>
-  <li>A {@link org.rioproject.watch.StopWatch} is a Watch for capturing
+  <li>A {@link org.rioproject.impl.watch.StopWatch} is a Watch for capturing
 elapsed time</li>
 </ul>
 Each of these watches extend from {@link
-org.rioproject.watch.ThresholdWatch}, which contains {@link
+org.rioproject.impl.watch.ThresholdWatch}, which contains {@link
 org.rioproject.watch.ThresholdValues}, which in turn can have {@link
 org.rioproject.sla.SLA}s attached to them providing specific {@link
-org.rioproject.sla.SLAPolicyHandler}s approaches.<br>
+org.rioproject.impl.sla.SLAPolicyHandler}s approaches.<br>
 <br>
 Watches record {@link org.rioproject.watch.Calculable} objects which
 contain the value of the metric being observed and the time when the
