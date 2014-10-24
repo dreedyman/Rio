@@ -618,7 +618,7 @@ public class ServiceBeanLoader {
     }
    
     private static class ProvisionedResources {
-        List<URL> jarList = new ArrayList<URL>();
+        Set<URL> jars = new HashSet<URL>();
         String artifact;
         StringBuilder repositories = new StringBuilder();
 
@@ -627,15 +627,15 @@ public class ServiceBeanLoader {
         }
 
         void setJars(final URL[] jars) {
-            jarList.addAll(Arrays.asList(jars));
+            this.jars.addAll(Arrays.asList(jars));
         }
 
         void addJar(final URL jar) {
-            jarList.add(jar);
+            jars.add(jar);
         }
 
         URL[] getJars() {
-            return jarList.toArray(new URL[jarList.size()]);
+            return jars.toArray(new URL[jars.size()]);
         }
 
         String getArtifact() {
@@ -643,7 +643,7 @@ public class ServiceBeanLoader {
         }
 
         String getJarsAsString() {
-            return jarList.isEmpty() ? "<>" : jarList.toString();
+            return jars.isEmpty() ? "<>" : jars.toString();
         }
 
         void addRepositoryUrl(String u) {
@@ -658,7 +658,7 @@ public class ServiceBeanLoader {
         public String toString() {
             final StringBuilder sb = new StringBuilder();
             sb.append("jars=").append(
-                jarList.isEmpty() ? "<>" : jarList.toString());
+                jars.isEmpty() ? "<>" : jars.toString());
             sb.append('}');
             return sb.toString();
         }
