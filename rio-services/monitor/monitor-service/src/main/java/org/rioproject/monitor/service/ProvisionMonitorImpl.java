@@ -26,11 +26,13 @@ import net.jini.core.lease.UnknownLeaseException;
 import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import net.jini.lookup.entry.ServiceInfo;
+import net.jini.lookup.entry.ServiceType;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.deploy.*;
+import org.rioproject.entry.StandardServiceType;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
 import org.rioproject.impl.client.JiniClient;
@@ -303,6 +305,16 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                RioVersion.VERSION,
                                "Build "+build,
                                "");
+    }
+
+    @Override
+    protected ServiceType getServiceType(final String name, final String comment) {
+        StandardServiceType sType = new StandardServiceType();
+        sType.name = name;
+        if(comment!=null)
+            sType.description = comment;
+        sType.iconName = "icon/rio-service.jpg";
+        return sType;
     }
 
     /*

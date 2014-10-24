@@ -716,10 +716,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if (comment != null)
             attrList.add(new Comment(comment));
         /* 7. Create and add StandardServiceType */
-        StandardServiceType sType = new StandardServiceType();
-        sType.name = name.name;
-        if(comment!=null)
-            sType.description = comment;
+        ServiceType sType = getServiceType(name.name, comment);
         attrList.add(sType);
 
         /*
@@ -801,6 +798,14 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if(logger.isTraceEnabled())
             logger.trace("[{}] set state to ADVERTISED", ServiceElementUtil.getLoggingName(context));
         jsbState.setState(ServiceBeanState.ADVERTISED);
+    }
+
+    protected ServiceType getServiceType(final String name, final String comment) {
+        StandardServiceType sType = new StandardServiceType();
+        sType.name = name;
+        if(comment!=null)
+            sType.description = comment;
+        return sType;
     }
 
     protected ServiceInfo getServiceInfo() {

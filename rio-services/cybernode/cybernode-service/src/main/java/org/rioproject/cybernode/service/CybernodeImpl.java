@@ -29,6 +29,7 @@ import net.jini.io.MarshalledInstance;
 import net.jini.jeri.BasicILFactory;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.lookup.entry.ServiceInfo;
+import net.jini.lookup.entry.ServiceType;
 import net.jini.lookup.entry.StatusType;
 import net.jini.lookup.ui.AdminUI;
 import net.jini.security.BasicProxyPreparer;
@@ -41,6 +42,7 @@ import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.proxy.CybernodeProxy;
 import org.rioproject.deploy.*;
 import org.rioproject.entry.BasicStatus;
+import org.rioproject.entry.StandardServiceType;
 import org.rioproject.entry.UIDescriptorFactory;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.impl.client.DiscoveryManagementPool;
@@ -1040,6 +1042,16 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                RioVersion.VERSION,
                                "Build "+build,
                                "");
+    }
+
+    @Override
+    protected ServiceType getServiceType(final String name, final String comment) {
+        StandardServiceType sType = new StandardServiceType();
+        sType.name = name;
+        if(comment!=null)
+            sType.description = comment;
+        sType.iconName = "icon/rio-service.jpg";
+        return sType;
     }
 
     private URL[] getUIJars() throws MalformedURLException {

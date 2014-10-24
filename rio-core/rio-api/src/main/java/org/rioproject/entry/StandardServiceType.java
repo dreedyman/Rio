@@ -29,23 +29,24 @@ import java.net.URL;
  */
 public class StandardServiceType extends ServiceType {
     private static final long serialVersionUID = 1L;
-    public String   name="";
-    public String   description="";
-    public  URL     iconURL=null;
+    public String name="";
+    public String description="";
+    public URL iconURL;
+    public String iconName;
 
     public StandardServiceType(){
     }
 
     public StandardServiceType(String name){
-        this.name=name;
+        this.name = name;
     }
 
     public String getDisplayName(){
-        return(name);
+        return name;
     }
 
     public void setIconURL(URL iconURL){
-        this.iconURL=iconURL;
+        this.iconURL = iconURL;
     }
 
     public Image getIcon(int iconKind){
@@ -60,12 +61,18 @@ public class StandardServiceType extends ServiceType {
         if(iconURL!=null) {
             ImageIcon icon = new ImageIcon(iconURL);
             iconImage = icon.getImage();
+        } else if(iconName!=null) {
+            URL url = StandardServiceType.class.getClassLoader().getResource(iconName);
+            if(url!=null) {
+                ImageIcon icon = new ImageIcon(url);
+                iconImage = icon.getImage();
+            }
         }
-        return(iconImage);
+        return iconImage;
     }
 
     public String getShortDescription(){
-        return(description);
+        return description;
     }
 }
 
