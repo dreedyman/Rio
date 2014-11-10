@@ -27,16 +27,14 @@ import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.tools.ui.progresspanel.WaitingDialog;
 import org.rioproject.tools.ui.serviceui.UndeployPanel;
-import org.rioproject.tools.ui.util.*;
+import org.rioproject.tools.ui.util.SwingDeployHelper;
 import org.rioproject.ui.Util;
 
 import javax.swing.*;
-import javax.swing.SwingWorker;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -201,7 +199,7 @@ public class ProvisionMonitorPanel extends JPanel {
         refresh.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    SwingUtilities.invokeAndWait(new Runnable() {
+                    SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
                             graphView.refresh();
                         }
