@@ -553,6 +553,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 deploymentResult = new DeploymentResult(manager, null);
             }
         } catch(Exception e) {
+            undeploy(opString.getName());
             logger.warn("Deploying OperationalString [{}]", opString.getName(), e);
             if(!(e instanceof OperationalStringException))
                 throw new OperationalStringException(String.format("Deploying OperationalString [%s]", opString.getName()), e);

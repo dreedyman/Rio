@@ -117,10 +117,9 @@ public class OpStringUtil {
     }
 
     private static void canServe(String name, String codebase) throws IOException {
-        if(name.equals("rio-api.jar")    ||
-           name.equals("jsk-dl.jar")     ||
-           name.equals("jmx-lookup.jar") ||
-           name.equals("serviceui.jar"))
+        if(name.startsWith("rio-api")    ||
+           name.startsWith("jsk-dl")     ||
+           name.startsWith("serviceui"))
             return;
         InputStream is = null;
         URLConnection conn = null;
@@ -132,8 +131,7 @@ public class OpStringUtil {
                     if(!f.exists())
                         throw new IOException("Could not create URI from "+codebase);
                 } catch (URISyntaxException e) {
-                    throw new IOException("Could not create URI from "+codebase,
-                                          e);
+                    throw new IOException("Could not create URI from "+codebase, e);
                 }
 
             } else {
