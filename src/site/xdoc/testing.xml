@@ -235,7 +235,7 @@ manager {
 
     String rioHome = System.getProperty("RIO_HOME")
     StringBuilder classPath = new StringBuilder()
-    ["rio-start.jar", "resolver-api.jar", "start.jar", "groovy-all.jar"].each { jar ->
+    ["rio-start-5.0-M5.jar", "start-2.2.2.jar", "groovy-all-2.3.8.jar"].each { jar ->
         if(classPath.length()>0)
             classPath.append(File.pathSeparator)
         classPath.append(rioHome+'/lib/'+jar)

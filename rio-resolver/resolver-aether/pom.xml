@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M4</version>
+        <version>5.0-M5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject.resolver</groupId>
@@ -25,12 +25,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>resolver-api</artifactId>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-platform</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

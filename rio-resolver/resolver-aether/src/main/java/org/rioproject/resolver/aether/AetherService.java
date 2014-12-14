@@ -90,7 +90,7 @@ public final class AetherService {
     public static AetherService getDefaultInstance() {
         try {
             RepositorySystem repositorySystem = newRepositorySystem();
-            return new AetherService(repositorySystem, /*new LocalRepositoryWorkspaceReader()*/null);
+            return new AetherService(repositorySystem, new LocalRepositoryWorkspaceReader());
         } catch (SettingsBuildingException e) {
             throw new IllegalStateException(e);
         }
@@ -140,7 +140,9 @@ public final class AetherService {
                                                final WorkspaceReader workspaceReader,
                                                final String repositoryLocation)
         throws SettingsBuildingException {
-        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+        DefaultRepositorySystemSession session = repositorySystemSession==null?
+                                                 MavenRepositorySystemUtils.newSession():
+                                                 (DefaultRepositorySystemSession) repositorySystemSession;
 
         /* Do not expect POMs in the repository. */
         session.setArtifactDescriptorPolicy(new SimpleArtifactDescriptorPolicy(ArtifactDescriptorPolicy.IGNORE_MISSING));
@@ -240,7 +242,7 @@ public final class AetherService {
                                                      SettingsUtil.getLocalRepositoryLocation(effectiveSettings));
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, version);
-        Dependency dependency = new Dependency(artifact, JavaScopes.RUNTIME);
+        Dependency dependency = new Dependency(artifact, /*JavaScopes.RUNTIME*/dependencyFilterScope==null?JavaScopes.RUNTIME:dependencyFilterScope);
         List<RemoteRepository> myRepositories;
         if(repositories==null || repositories.isEmpty())
             myRepositories = getRemoteRepositories();
@@ -256,7 +258,6 @@ public final class AetherService {
 
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, getDependencyFilter(artifact));
         dependencyRequest.setCollectRequest(collectRequest);
-
 
         try {
             List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(session,

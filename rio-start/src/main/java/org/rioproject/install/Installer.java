@@ -76,14 +76,6 @@ public final class Installer {
 
             File libDir = new File(rioHome + File.separator + "lib");
 
-            /* Install rio-platform */
-            Artifact rioPlatform = new Artifact("org.rioproject:rio-platform:" + RioVersion.VERSION);
-            install(rioPlatform, null, FileHelper.find(libDir, "rio-platform"), aetherServiceInstance);
-
-            /* Install Rio Resolver API */
-            Artifact resolverAPI = new Artifact("org.rioproject.resolver:resolver-api:" + RioVersion.VERSION);
-            install(resolverAPI, null, FileHelper.find(libDir, "resolver-api"), aetherServiceInstance);
-
             /* Install client and proxy jars */
             formatAndAddToMap("org.rioproject.cybernode:cybernode-api", "cybernode-api", rioArtifactJars);
             formatAndAddToMap("org.rioproject.cybernode:cybernode-proxy", "cybernode-proxy", rioArtifactJars);
@@ -110,21 +102,15 @@ public final class Installer {
             Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
             install(gnosticService, null, FileHelper.find(libDir, "gnostic-service"), aetherServiceInstance);
 
-            File jskResourcesJar = FileHelper.find(libDir, "jsk-resources");
-            File jskPlatformJar = FileHelper.find(libDir, "jsk-platform");
             File jskDLJar = FileHelper.find(libDlDir, "jsk-dl");
             File reggieDLJar = FileHelper.find(libDlDir, "reggie-dl");
             File serviceUIJar = FileHelper.find(libDlDir, "serviceui");
 
             /* Install third party jars */
-            Artifact jskResources = createArtifact("net.jini:jsk-resources", jskResourcesJar);
-            Artifact jskPlatform = createArtifact("net.jini:jsk-platform", jskPlatformJar);
             Artifact jskDL = createArtifact("net.jini:jsk-dl", jskDLJar);
             Artifact reggieDL = createArtifact("org.apache.river:reggie-dl", reggieDLJar);
             Artifact serviceUI = createArtifact("net.jini.lookup:serviceui", serviceUIJar);
 
-            install(jskResources, FileHelper.find(pomDir, "jsk-resources"), jskResourcesJar, aetherServiceInstance);
-            install(jskPlatform, FileHelper.find(pomDir, "jsk-platform"), jskPlatformJar, aetherServiceInstance);
             install(jskDL, FileHelper.find(pomDir, "jsk-dl"), jskDLJar, aetherServiceInstance);
             install(reggieDL, FileHelper.find(pomDir, "reggie-dl"), reggieDLJar, aetherServiceInstance);
             install(serviceUI, FileHelper.find(pomDir, "serviceui"), serviceUIJar, aetherServiceInstance);

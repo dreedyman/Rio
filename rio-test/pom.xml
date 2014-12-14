@@ -6,19 +6,13 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M4</version>
+        <version>5.0-M5</version>
     </parent>
     <artifactId>rio-test</artifactId>
     <name>Module :: Rio Test Infrastructure</name>
     <packaging>jar</packaging>
 
     <dependencies>
-
-        <dependency>
-            <groupId>${project.groupId}.resolver</groupId>
-            <artifactId>resolver-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

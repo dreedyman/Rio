@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M4</version>
+        <version>5.0-M5</version>
     </parent>
     <artifactId>rio-platform</artifactId>
     <name>Module :: Rio Platform</name>
@@ -20,18 +20,13 @@
         <dependency>
             <groupId>net.jini</groupId>
             <artifactId>jsk-platform</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.rioproject.resolver</groupId>
-            <artifactId>resolver-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -44,7 +39,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -68,7 +62,7 @@
                             <Implementation-Version>${project.version}</Implementation-Version>
                             <Rio-Version>${project.version}</Rio-Version>
                             <Rio-Build>${maven.build.timestamp}</Rio-Build>
-                            <Class-Path>resolver-api-${project.version}.jar jsk-platform-${river.version}.jar groovy-all-${groovy.version}.jar logging/slf4j-api-${slf4j.version}.jar</Class-Path>
+                            <Class-Path>jsk-platform-${river.version}.jar groovy-all-${groovy.version}.jar logging/slf4j-api-${slf4j.version}.jar</Class-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>

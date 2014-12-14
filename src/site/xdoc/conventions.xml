@@ -4,7 +4,7 @@
         <section name="Conventions">
             <p>
                 This document describes conventions for developers
-                that create distributed services using Rio and Maven. Using
+                that create distributed services using Rio and either Gradle or Maven. Using
                 conventions for the development of services makes it easier to deploy
                 and use services. The following conventions are discussed:
 
@@ -17,7 +17,7 @@
             <h3>Project Modules</h3>
             <p>
                 In a nutshell, a service development project should be built as
-                multi-module Maven project, that reflects the basic architectural
+                multi-module project, that reflects the basic architectural
                 elements of a distributed service. Given a service artifactId name
                 of hello, the service project is composed of the following modules:
             </p>
@@ -57,7 +57,7 @@
 
             <h3>Project Files</h3>
             <p>
-                The directory and file layout for the multi-module Maven project
+                The directory and file layout for the multi-module project
                 is as you would expect. Using the example <tt>hello</tt> service from
                 above, we would have
             </p>

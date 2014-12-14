@@ -55,10 +55,10 @@ class Repository {
     }
 
     /**
-     * Get the {@link org.rioproject.resolver.RemoteRepository} items from
+     * Get the {@link RemoteRepository} items from
      * the settings file
      *
-     * @return A List of {@link org.rioproject.resolver.RemoteRepository} items,
+     * @return A List of {@link RemoteRepository} items,
      * as derived from the settings.xml file found in the local repository.
      *
      * @see #getLocalRepository

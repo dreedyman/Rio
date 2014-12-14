@@ -17,6 +17,7 @@ package org.rioproject.resolver.maven2
 
 import org.rioproject.resolver.RemoteRepository
 
+
 /**
  * Parse maven settings
  */

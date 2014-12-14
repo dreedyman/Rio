@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M4</version>
+        <version>5.0-M5</version>
 	<relativePath>../../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject.monitor</groupId>
@@ -25,6 +25,19 @@
         <dependency>
 		    <groupId>net.jini.lookup</groupId>
 		    <artifactId>serviceui</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.jini</groupId>
+            <artifactId>jsk-platform</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.rioproject</groupId>
+            <artifactId>rio-platform</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     
     </dependencies>

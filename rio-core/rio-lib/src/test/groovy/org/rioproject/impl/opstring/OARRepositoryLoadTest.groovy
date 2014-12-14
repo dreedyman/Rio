@@ -15,7 +15,6 @@
  */
 package org.rioproject.impl.opstring
 
-import org.rioproject.impl.opstring.RepositoryDecoder
 import org.rioproject.resolver.RemoteRepository
 
 /**

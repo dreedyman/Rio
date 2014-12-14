@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M4</version>
+        <version>5.0-M5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>rio-ui</artifactId>
@@ -100,7 +100,6 @@
                                     <include>org.rioproject:rio-api</include>
                                     <include>org.rioproject:rio-lib</include>
                                     <include>org.rioproject:rio-platform</include>
-                                    <include>org.rioproject.resolver:resolver-api</include>
                                     <include>org.rioproject:rio-start</include>
                                     <include>org.rioproject:webster</include>
                                     <include>org.rioproject.event-collector:event-collector-api</include>

@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M4</version>
+        <version>5.0-M5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>rio-lib</artifactId>
@@ -48,12 +48,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>${project.groupId}.resolver</groupId>
-            <artifactId>resolver-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-compress</artifactId>
@@ -79,6 +73,7 @@
         <dependency>
             <groupId>net.jini</groupId>
             <artifactId>jsk-platform</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -15,7 +15,8 @@
  */
 package org.rioproject.resolver.maven2
 
-import org.rioproject.resolver.RemoteRepository;
+import org.rioproject.resolver.RemoteRepository
+
 
 /**
  * Encapsulates parsed settings.

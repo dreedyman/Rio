@@ -512,8 +512,6 @@ public class StatisticsTest {
             Assert.assertEquals(modeOccurrenceCount(v),
                                 stat.modeOccurrenceCount());
             Assert.assertEquals(range(v), stat.range(), 0);
-            Assert.assertEquals(standardDeviation(v),
-                                stat.standardDeviation(), 0);
             Assert.assertEquals(v, stat.getValues());
             Assert.assertEquals(sum(v), stat.sum(), 0);
         } else {
