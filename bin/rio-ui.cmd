@@ -24,5 +24,5 @@ set command_line=%*
 
 if "%RIO_HOME%" == "" set RIO_HOME=%~dp0..
 set rioVersion=5.0-M5
-"%JAVA_HOME%\bin\java" -Djava.security.policy="%RIO_HOME%"\policy\policy.all -DRIO_HOME="%RIO_HOME%" -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -jar "%RIO_HOME%/lib/rio-ui-%rioVersion%.jar" %command_line%
+"%JAVA_HOME%\bin\java" -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Drio.home="%RIO_HOME%" -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -jar "%RIO_HOME%/lib/rio-ui-%rioVersion%.jar" %command_line%
 

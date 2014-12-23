@@ -53,8 +53,8 @@ if "%1"=="create-project" goto create-project
 set command_line=%*
 set launchTarget=org.rioproject.tools.cli.CLI
 set classpath=-cp "%RIO_HOME%\lib\rio-cli-%rioVersion%.jar";"%SLF4J_CLASSPATH%";
-set props="-DRIO_HOME=%RIO_HOME%"
-"%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -DRIO_HOME="%RIO_HOME%" -Djava.rmi.server.useCodebaseOnly=false -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
+set props="-Drio.home=%RIO_HOME%"
+"%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -Drio.home="%RIO_HOME%" -Djava.rmi.server.useCodebaseOnly=false -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
 goto end
 
 :create-project
