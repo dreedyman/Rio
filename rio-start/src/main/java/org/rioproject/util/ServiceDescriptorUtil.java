@@ -139,7 +139,7 @@ public final class ServiceDescriptorUtil {
                                                final String sPort,
                                                final String[] roots,
                                                final boolean debug) throws IOException {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
@@ -167,7 +167,7 @@ public final class ServiceDescriptorUtil {
                                                final String[] roots,
                                                final String[] options,
                                                final boolean debug) throws IOException {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME property not declared");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
@@ -264,12 +264,12 @@ public final class ServiceDescriptorUtil {
     }
 
     public static String getCybernodeClasspath() throws IOException {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         List<String> jarList = new ArrayList<String>();
         jarList.add(createVersionedJar("cybernode-service"));
-        if(System.getProperty("RIO_TEST_ATTACH")!=null) {
+        if(System.getProperty("rio.test.attach")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
             jarList.add(createVersionedJar("rio-test"));
         }
@@ -307,12 +307,12 @@ public final class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getMonitor(final String policy, final String... monitorConfig) throws IOException {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         List<String> jarList = new ArrayList<String>();
         jarList.add(createVersionedJar("monitor-service"));
-        if(System.getProperty("RIO_TEST_ATTACH")!=null) {
+        if(System.getProperty("rio.test.attach")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
             jarList.add(createVersionedJar("rio-test"));
         }
@@ -347,7 +347,7 @@ public final class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getLookup(final String policy, final String... lookupConfig) throws IOException {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if (rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         String reggieClasspath = FileHelper.find(new File(rioHome, "lib"), "reggie").getPath();

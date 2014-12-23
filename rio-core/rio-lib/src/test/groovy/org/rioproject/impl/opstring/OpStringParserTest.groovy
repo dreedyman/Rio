@@ -648,18 +648,18 @@ class OpStringParserTest extends GroovyTestCase {
         def StagedSoftware tomcat = softwareLoads
         assertTrue "Data should be removed on service destroy", tomcat.removeOnDestroy()
         assertEquals 'https://elastic-grid.s3.amazonaws.com/tomcat/apache-tomcat-6.0.16.zip', tomcat.location.toString()
-        assertEquals '${RIO_HOME}/system/external/tomcat', tomcat.installRoot
+        assertEquals '${rio.home}/system/external/tomcat', tomcat.installRoot
         assertTrue tomcat.unarchive()
 
-        System.setProperty("RIO_HOME", '.')
+        System.setProperty("rio.home", '.')
         def postInstall = tomcat.postInstallAttributes
         
         assertEquals '/bin/chmod', postInstall.execDescriptor.commandLine
-        assertEquals '+x ${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh', postInstall.execDescriptor.inputArgs
+        assertEquals '+x ${rio.home}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh', postInstall.execDescriptor.inputArgs
 
         def webapp = service.getStagedData()[0]
         assertEquals 'https://elastic-grid.s3.amazonaws.com/tomcat/sample.war', webapp.location.toString()
-        assertEquals '${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/webapps', webapp.installRoot
+        assertEquals '${rio.home}/system/external/tomcat/apache-tomcat-6.0.16/webapps', webapp.installRoot
         assertTrue webapp.unarchive()
         assertEquals 'ugo+rwx', webapp.perms
 

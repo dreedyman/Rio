@@ -13,7 +13,7 @@ import com.sun.jini.start.ServiceDescriptor;
 class StartWebsterConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home')
 
         def websterRoots = [rioHome+'/lib-dl', ';',
                             rioHome+'/lib',    ';',

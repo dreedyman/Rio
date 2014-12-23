@@ -18,6 +18,7 @@
  * This configuration is used to start a ProvisionMonitor, Cybernode, Webster and a Lookup Service
  */
 
+import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil
 import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
@@ -28,7 +29,7 @@ class StartAllConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         ServiceDescriptorUtil.checkForLoopback()
         String m2Repo = Repository.getLocalRepository().absolutePath
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home', RioHome.derive())
 
         def websterRoots = [rioHome+'/deploy', ';', m2Repo]
 

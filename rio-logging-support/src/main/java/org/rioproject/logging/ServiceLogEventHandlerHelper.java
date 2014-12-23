@@ -85,7 +85,7 @@ public class ServiceLogEventHandlerHelper {
     private static void addLogbackAppender() {
         /* Reflection is used here because Logback may not be in the classpath. */
         try {
-            String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
+            String rioHome = System.getProperty("rio.home", System.getenv("RIO_HOME"));
             File configuration = new File(rioHome, "config/logging/appender-config.xml");
             if(!configuration.exists())
                 return;

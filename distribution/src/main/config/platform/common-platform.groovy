@@ -23,7 +23,7 @@ class CommonPlatformConfig {
 
     def getPlatformCapabilityConfigs() {
         def configs = []
-        String libDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator
+        String libDir = System.getProperty("rio.home")+File.separator+"lib"+File.separator
 
         configs << new PlatformCapabilityConfig("Commons Compress",
                                                 "1.0",

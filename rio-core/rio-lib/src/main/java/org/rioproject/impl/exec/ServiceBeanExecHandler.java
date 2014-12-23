@@ -105,7 +105,7 @@ public class ServiceBeanExecHandler {
                                     final String classPath) throws Exception {
         ExecDescriptor exDesc = new ExecDescriptor();
 
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome==null)
             throw new ServiceBeanInstantiationException(String.format("Cannot exec service [%s], unknown RIO_HOME system property",
                                                                       sElem.getName()));
@@ -250,7 +250,7 @@ public class ServiceBeanExecHandler {
                                    final String opstringName) throws ConfigurationException, IOException {
         String logDirDefault = System.getProperty("RIO_LOG_DIR");
         if(logDirDefault==null)
-            logDirDefault = System.getProperty("RIO_HOME")+File.separator+"logs";
+            logDirDefault = System.getProperty("rio.home")+File.separator+"logs";
         String serviceLogRootDirectory = (String)config.getEntry(COMPONENT,
                                                                  "serviceLogRootDirectory",
                                                                  String.class,

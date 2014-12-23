@@ -47,7 +47,7 @@ public final class RioProperties {
             if(rioEnv.exists()) {
                 loadAndSetProperties(rioEnv);
             } else {
-                String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
+                String rioHome = System.getProperty("rio.home", System.getenv("RIO_HOME"));
                 if(rioHome!=null) {
                     rioEnv = new File(rioHome, "config/rio.env");
                     if(rioEnv.exists()) {

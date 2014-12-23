@@ -40,7 +40,7 @@ public final class CommandLineHelper {
      */
     public static String generateRioStarterClassPath() {
         StringBuilder builder = new StringBuilder();
-        File rioLib = new File(System.getProperty("RIO_HOME"), "lib");
+        File rioLib = new File(System.getProperty("rio.home"), "lib");
         builder.append(getFiles(rioLib, "rio-start", "groovy-all"));
         File javaHome = new File(System.getProperty("JAVA_HOME", System.getProperty("java.home")));
         File javaLib = new File(javaHome, "lib");
@@ -119,7 +119,7 @@ public final class CommandLineHelper {
      * and RIO_HOME
      */
     static String getStandardJVMArgs() {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         StringBuilder argsBuilder = new StringBuilder();
 
         argsBuilder.append(getOption("java.protocol.handler.pkgs", "org.rioproject.url"));
@@ -163,7 +163,7 @@ public final class CommandLineHelper {
         extendedJVMOptions.append("-XX:HeapDumpPath=").append(logDir);
         StringBuilder argsBuilder = new StringBuilder();
         String jvmInputArgs = JVMOptionChecker.getJVMInputArgs(extendedJVMOptions.toString());
-        String rioHome = buildDirectory(System.getProperty("RIO_HOME"));
+        String rioHome = buildDirectory(System.getProperty("rio.home"));
 
         /* Check logging configuration */
         argsBuilder.append(getLoggerConfig(jvmInputArgs, rioHome));
@@ -214,7 +214,7 @@ public final class CommandLineHelper {
     }
 
     private static boolean usingLogback() {
-        File rioLib = new File(System.getProperty("RIO_HOME"), "lib");
+        File rioLib = new File(System.getProperty("rio.home"), "lib");
         File rioLogging = new File(rioLib, "logging");
         String loggingJars = getFiles(rioLogging);
         return loggingJars.contains("logback");

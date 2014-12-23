@@ -46,10 +46,10 @@ public class Utils {
             System.setProperty("JAVA_HOME", javaHome);
         }
 
-        if(System.getProperty("RIO_HOME")==null) {
+        if(System.getProperty("rio.home")==null) {
             String rioHome = System.getenv().get("RIO_HOME");
             if(rioHome!=null)
-                System.setProperty("RIO_HOME", rioHome);
+                System.setProperty("rio.home", rioHome);
             else
                 System.err.println("\n============================\n"+
                                    "RIO_HOME IS NULL"+
@@ -75,11 +75,11 @@ public class Utils {
     }
 
     public static String getRioHome() {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome==null) {
             rioHome = System.getenv().get("RIO_HOME");
             if(rioHome!=null)
-                System.setProperty("RIO_HOME", rioHome);
+                System.setProperty("rio.home", rioHome);
         }
         if(rioHome==null)
             throw new RuntimeException("RIO_HOME not set. You " +
@@ -92,7 +92,7 @@ public class Utils {
     }
 
     public static String getTestClassDirectory() {
-        String rioHome = System.getProperty("RIO_HOME",
+        String rioHome = System.getProperty("rio.home",
                                             System.getProperty("user.dir"));
         StringBuilder b = new StringBuilder();
         b.append(rioHome);

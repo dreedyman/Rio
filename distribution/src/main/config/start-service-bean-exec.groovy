@@ -22,6 +22,7 @@ import org.rioproject.start.RioServiceDescriptor
 import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.util.FileHelper
+import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil
 
 @Component('org.rioproject.start')
@@ -41,7 +42,7 @@ class StartServiceBeanExecConfig {
     }
 
     ServiceDescriptor[] getServiceDescriptors() {
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home', RioHome.derive())
         String codebase = ServiceDescriptorUtil.getCybernodeCodebase()
         String classpath = ServiceDescriptorUtil.getCybernodeClasspath()
 

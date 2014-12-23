@@ -40,10 +40,10 @@ deployment(name: 'Tomcat Deploy') {
          */
         software(name: 'Tomcat', version: '6.0.16', removeOnDestroy: true) {
             install source: 'http://rio-project.org/examples/tomcat/apache-tomcat-6.0.16.zip',
-                    target: '${RIO_HOME}/system/external/tomcat',
+                    target: '${rio.home}/system/external/tomcat',
                     unarchive: true
             postInstall(removeOnCompletion: false) {
-                execute command: '/bin/chmod +x ${RIO_HOME}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
+                execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
             }
         }
 

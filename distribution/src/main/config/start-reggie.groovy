@@ -19,7 +19,7 @@
  */
 
 import org.rioproject.config.Component
-
+import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil;
 import com.sun.jini.start.ServiceDescriptor;
 
@@ -28,7 +28,7 @@ class StartReggieConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         ServiceDescriptorUtil.checkForLoopback()
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home', RioHome.derive())
         def websterRoots = [rioHome+'/lib-dl', ';', rioHome+'/lib']
 
         String policyFile = rioHome+'/policy/policy.all'

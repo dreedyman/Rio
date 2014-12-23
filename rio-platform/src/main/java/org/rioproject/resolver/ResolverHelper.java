@@ -15,16 +15,15 @@
  */
 package org.rioproject.resolver;
 
+import org.rioproject.util.RioHome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -135,27 +134,10 @@ public final class ResolverHelper {
     private static String getResolverJarFile() {
         String resolverJarFile = System.getProperty(RESOLVER_JAR);
         if(resolverJarFile==null || resolverJarFile.length()==0) {
-            String rioHome = System.getProperty("RIO_HOME", System.getenv("RIO_HOME"));
+            String rioHome = System.getProperty("rio.home", System.getenv("RIO_HOME"));
             if(rioHome==null || rioHome.length()==0) {
                 logger.warn("RIO_HOME has not been set, try and derive location");
-                CodeSource cs = ResolverHelper.class.getProtectionDomain().getCodeSource();
-                if(cs != null && cs.getLocation() != null) {
-                    File location;
-                    try {
-                        location = new File(cs.getLocation().toURI());
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException("Unable to derive location", e);
-                    }
-                    if(location.getName().endsWith(".jar")) {
-                        if(location.getParentFile().getPath().endsWith("lib")) {
-                            rioHome = location.getParentFile().getParentFile().getPath();
-                        } else {
-                            rioHome = location.getParentFile().getPath();
-                        }
-                    } else {
-                        rioHome = location.getPath();
-                    }
-                }
+                rioHome = RioHome.derive();
                 if(rioHome==null || rioHome.length()==0) {
                     throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar");
                 } else {

@@ -213,7 +213,7 @@ if [ "$start" = "1" ]; then
         $loggingConfig \
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
-        -DRIO_HOME=$RIO_HOME \
+        -Drio.home=$RIO_HOME \
         -DRIO_LOG_DIR=$RIO_HOME/logs/ \
         -Drio.script.mainClass="$launchTarget" \
         $USER_OPTS \
@@ -227,7 +227,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeVersion=5.1
 else
     # Set system properties
-    PROPS="-DRIO_HOME=$RIO_HOME"
+    PROPS="-Drio.home=$RIO_HOME"
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
     cliExt="$RIO_HOME/config/tools.groovy"
     launchTarget=org.rioproject.tools.cli.CLI

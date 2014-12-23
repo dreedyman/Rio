@@ -253,7 +253,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
 
         /* Set common JARs to the CommonClassLoader */
         String defaultDir;
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         List<URL> urlList = new ArrayList<URL>();
         if(rioHome==null) {
             logger.warn("RIO_HOME not defined, no default platformDir");

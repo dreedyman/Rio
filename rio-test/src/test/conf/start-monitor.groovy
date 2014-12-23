@@ -19,7 +19,7 @@ class StartMonitorConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         String m2Repo = Repository.getLocalRepository().absolutePath
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home')
 
         def websterRoots = [rioHome+'/lib-dl', ';',
                 rioHome+'/lib',    ';',

@@ -20,6 +20,7 @@
 
 import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.util.FileHelper
+import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil
 import org.rioproject.config.Component
 import org.rioproject.resolver.maven2.Repository
@@ -42,7 +43,7 @@ class StartCybernodeConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         String m2Repo = Repository.getLocalRepository().absolutePath
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home', RioHome.derive())
         def websterRoots = [rioHome + '/lib', ';', m2Repo]
 
         String policyFile = rioHome + '/policy/policy.all'

@@ -114,9 +114,9 @@ class TestManager {
                 logs.delete()
             }
         }
-        rioHome = System.getProperty('RIO_HOME')
+        rioHome = System.getProperty('rio.home')
         if(rioHome==null)
-            throw new IllegalStateException('The RIO_HOME system property must be set')
+            throw new IllegalStateException('The rio.home system property must be set')
         groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME)
         if(groups==null)
             throw new IllegalStateException("The ${Constants.GROUPS_PROPERTY_NAME} system "+

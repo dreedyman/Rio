@@ -42,9 +42,9 @@ public class RioPropertiesTest {
 
     @Test
     public void testLoadFromRioHome() throws Exception {
-        String oldRioHome = System.getProperty("RIO_HOME");
+        String oldRioHome = System.getProperty("rio.home");
         try {
-            System.setProperty("RIO_HOME", System.getProperty("user.dir") + "/src/test/resources");
+            System.setProperty("rio.home", System.getProperty("user.dir") + "/src/test/resources");
             RioProperties.load();
             String locators = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
             Assert.assertNotNull(locators);
@@ -52,7 +52,7 @@ public class RioPropertiesTest {
             if (oldRioHome == null)
                 System.clearProperty("RIO_HOME");
             else
-                System.setProperty("RIO_HOME", oldRioHome);
+                System.setProperty("rio.home", oldRioHome);
         }
     }
 }

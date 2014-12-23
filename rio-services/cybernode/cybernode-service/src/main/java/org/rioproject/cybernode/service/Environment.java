@@ -174,8 +174,8 @@ public class Environment {
         if(System.getProperty("org.rioproject.home")!=null) {
             rioHome = System.getProperty("org.rioproject.home");
         } else {
-            if(System.getProperty("RIO_HOME")!=null) {
-                rioHome = System.getProperty("RIO_HOME");
+            if(System.getProperty("rio.home")!=null) {
+                rioHome = System.getProperty("rio.home");
             } else {
                 rioHome = System.getenv("RIO_HOME");
             }

@@ -233,7 +233,7 @@ public void testSomethingThatTakesALongTime() {
 <pre name="code">
 manager {
 
-    String rioHome = System.getProperty("RIO_HOME")
+    String rioHome = System.getProperty("rio.home")
     StringBuilder classPath = new StringBuilder()
     ["rio-start-5.0-M5.jar", "start-2.2.2.jar", "groovy-all-2.3.8.jar"].each { jar ->
         if(classPath.length()>0)
@@ -259,7 +259,7 @@ manager {
     -Djava.protocol.handler.pkgs=org.rioproject.url
     -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs
     -server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}rio.policy
-    -DRIO_HOME=${RIO_HOME} -DRIO_TEST_ATTACH
+    -Drio.home=${RIO_HOME} -Drio.test.attach
     -Dorg.rioproject.groups=${org.rioproject.groups}
     -Dorg.rioproject.service=${service}'''
 

@@ -894,7 +894,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 logger.debug("Configured to scan for OAR deployments every {}", TimeUtil.format(deployMonitorPeriod));
 
             if(deployMonitorPeriod>0) {
-                String rioHome = System.getProperty("RIO_HOME");
+                String rioHome = System.getProperty("rio.home");
                 if(!rioHome.endsWith("/"))
                     rioHome = rioHome+"/";
                 File deployDir = new File(rioHome+"deploy");

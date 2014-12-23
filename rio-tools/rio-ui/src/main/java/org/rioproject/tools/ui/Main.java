@@ -66,6 +66,7 @@ import org.rioproject.tools.ui.util.TabLabel;
 import org.rioproject.ui.GlassPaneContainer;
 import org.rioproject.ui.Util;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
+import org.rioproject.util.RioHome;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -1112,25 +1113,12 @@ public class Main extends JFrame {
     }
 
     public static void redirect() {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome == null) {
-            String location = Main.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
-            /*
-             * Strip the file: off
-             */
-            location = location.substring(5);
-            /*
-             * Strip the /lib/rio-ui.jar off
-             */
-            int ndx = location.lastIndexOf('/');
-            location = location.substring(0, ndx);
-            ndx = location.lastIndexOf('/');
-            rioHome = location.substring(0, ndx);
-            //rioHome = System.getProperty("user.home")+File.separator+".rio";
+            rioHome = RioHome.derive();
         }
 
-        String logDirPath = System.getProperty(Constants.COMPONENT+".logDir",
-                                               rioHome+File.separator+"logs");
+        String logDirPath = System.getProperty(Constants.COMPONENT+".logDir", rioHome+File.separator+"logs");
         File logDir = new File(logDirPath);
         if(!logDir.exists())
             logDir.mkdirs();

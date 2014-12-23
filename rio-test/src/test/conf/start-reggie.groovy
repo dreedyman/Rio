@@ -13,8 +13,8 @@ import com.sun.jini.start.ServiceDescriptor;
 class StartReggieConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
-        String rioHome = System.getProperty('RIO_HOME')
-        String rioTestHome = System.getProperty('RIO_TEST_HOME')
+        String rioHome = System.getProperty('rio.home')
+        String rioTestHome = System.getProperty('rio.test.home')
 
         def websterRoots = [rioHome+'/lib-dl', ';',
                             rioHome+'/lib',    ';',

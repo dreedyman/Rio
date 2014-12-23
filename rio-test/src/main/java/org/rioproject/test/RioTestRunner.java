@@ -250,7 +250,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         sb.append(System.getProperty("JAVA_HOME"));
         sb.append("\n");
         sb.append("RIO_HOME:      ");
-        sb.append(System.getProperty("RIO_HOME"));
+        sb.append(System.getProperty("rio.home"));
         sb.append("\n");
 
         if(testConfigLocation!=null) {

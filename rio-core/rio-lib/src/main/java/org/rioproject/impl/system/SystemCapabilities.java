@@ -469,12 +469,12 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     }
 
     private String getRioHome() {
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome==null) {
             rioHome = System.getenv("RIO_HOME");
             if(rioHome!=null) {
-                System.setProperty("RIO_HOME", rioHome);
-                logger.info("Set RIO_HOME to "+System.getProperty("RIO_HOME"));
+                System.setProperty("rio.home", rioHome);
+                logger.info("Set rio.home to "+System.getProperty("rio.home"));
             }
         }
         return rioHome;

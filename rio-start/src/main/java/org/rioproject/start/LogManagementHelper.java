@@ -33,7 +33,7 @@ public final class LogManagementHelper {
     private LogManagementHelper() {}
 
     public static void setup() {
-        redirectIfNecessary();
+        //redirectIfNecessary();
         try {
             Class<?> cl = Class.forName("org.rioproject.logging.ServiceLogEventHandlerHelper");
             Method addServiceLogEventHandler = cl.getMethod("addServiceLogEventHandler");

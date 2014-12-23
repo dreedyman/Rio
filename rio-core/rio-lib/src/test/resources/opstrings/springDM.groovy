@@ -7,7 +7,7 @@ deployment(name: 'Spring DM') {
 
     serviceExec(name: 'DM Server') {
         software(name: 'Spring DM', version: '1.0.0', removeOnDestroy: true) {
-            install source: 'file://${RIO_HOME}/deploy/springsource-dm-server-1.0.0.RELEASE.zip',
+            install source: 'file://${rio.home}/deploy/springsource-dm-server-1.0.0.RELEASE.zip',
                     target: 'springsource-dm-server',
                     unarchive: true
         }

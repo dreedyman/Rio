@@ -29,7 +29,7 @@ public class Impl implements API {
     @Started
     public void started() {
         String myID = VirtualMachineHelper.getID();
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         File libDir = new File(rioHome, "lib");
         String jar = null;
         for(File f : libDir.listFiles()) {

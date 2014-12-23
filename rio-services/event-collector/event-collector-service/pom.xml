@@ -153,7 +153,7 @@
                             <forkMode>always</forkMode>
                             <systemProperties>
                                 <property>
-                                    <name>RIO_HOME</name>
+                                    <name>rio.home</name>
                                     <value>${basedir}/../../../distribution/target/rio-${project.version}</value>
                                 </property>
                                 <property>

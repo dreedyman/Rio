@@ -4,7 +4,7 @@
  */
 
 import org.rioproject.config.Component
-
+import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil;
 import com.sun.jini.start.ServiceDescriptor;
 
@@ -13,7 +13,7 @@ class StartMonitorConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         String m2Home = "${System.getProperty("user.home")}/.m2"
-        String rioHome = System.getProperty('RIO_HOME')
+        String rioHome = System.getProperty('rio.home', RioHome.derive())
         String cwd = System.getProperty('user.dir')
         
         def websterRoots = [rioHome+'/lib-dl', ';',

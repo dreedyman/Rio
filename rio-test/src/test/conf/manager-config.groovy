@@ -21,7 +21,7 @@ import org.rioproject.net.HostUtil
  * Configuration properties used to launch Rio services from the test framework
  */
 manager {
-    String rioHome = System.getProperty("RIO_HOME")
+    String rioHome = System.getProperty("rio.home")
     StringBuilder classPath = new StringBuilder()
     File rioLib = new File(rioHome+'/lib/')
     for(File file : rioLib.listFiles()) {
@@ -54,9 +54,9 @@ manager {
     jvmOptions =
         '-Djava.protocol.handler.pkgs=org.rioproject.url '+
         '-Djava.rmi.server.useCodebaseOnly=false '+
-        '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${RIO_HOME}${/}logs '+
-        '-server -Xms8m -Xmx256m -Djava.security.policy=${RIO_HOME}${/}policy${/}policy.all '+
-        '-DRIO_HOME=${RIO_HOME} -DRIO_TEST_HOME=${RIO_TEST_HOME} -DRIO_TEST_ATTACH '+
+        '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${rio.home}${/}logs '+
+        '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.home}${/}policy${/}policy.all '+
+        '-Drio.home=${rio.home} -Drio.test.home=${rio.test.home} -Drio.test.attach '+
         '-Dorg.rioproject.groups=${org.rioproject.groups} '+
         '-Dorg.rioproject.service=${service}'
 
@@ -67,17 +67,17 @@ manager {
 
     mainClass='org.rioproject.start.ServiceStarter'
 
-    reggieStarter    = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-reggie.groovy'
+    reggieStarter    = '${rio.test.home}${/}src${/}test${/}conf${/}start-reggie.groovy'
 
-    monitorStarter   = '${RIO_TEST_HOME}${/}src${/}test${/}conf${/}start-monitor.groovy'
+    monitorStarter   = '${rio.test.home}${/}src${/}test${/}conf${/}start-monitor.groovy'
 
-    cybernodeStarter = '${RIO_HOME}${/}config${/}start-cybernode.groovy'
+    cybernodeStarter = '${rio.home}${/}config${/}start-cybernode.groovy'
 
-    //config = '${RIO_HOME}${/}config${/}tools.groovy'
+    //config = '${rio.home}${/}config${/}tools.groovy'
 
-    harvesterOpString = '${RIO_TEST_HOME}${/}src${/}test${/}resources${/}harvester.groovy'
+    harvesterOpString = '${rio.test.home}${/}src${/}test${/}resources${/}harvester.groovy'
 
-    harvestDir = '${RIO_TEST_HOME}${/}target${/}failsafe-reports${/}logs'
+    harvestDir = '${rio.test.home}${/}target${/}failsafe-reports${/}logs'
 
 }
 

@@ -61,8 +61,10 @@ if (javaHome == null || javaHome.length() == 0) {
     }
 }
 if (rioHome == null || rioHome.length() == 0) {
-    System.err.println("The location of RIO_HOME must be set")
-    System.exit(2)
+    String scriptDir = new File(getClass().protectionDomain.codeSource.location.path).parent
+    rioHome = new File(scriptDir).parentFile.path
+    System.setProperty("rio.home", rioHome)
+    System.err.println("Setting the location of rio.home to ${rioHome}")
 }
 
 if(!new File(rioHome, "lib").exists()) {
@@ -112,7 +114,7 @@ println "INFO  ${formatter.format(date)} check local repository for artifacts"
 
 StringBuffer out = new StringBuffer()
 long installDate = System.currentTimeMillis()
-String install = "${java.toString()} -Djava.security.policy=${rioHome}/policy/policy.all -DRIO_HOME=$rioHome -classpath ${classPath.toString()} org.rioproject.install.Installer"
+String install = "${java.toString()} -Djava.security.policy=${rioHome}/policy/policy.all -Drio.home=$rioHome -classpath ${classPath.toString()} org.rioproject.install.Installer"
 Process process = install.execute()
 process.consumeProcessOutputStream(out)
 process.consumeProcessErrorStream(out)

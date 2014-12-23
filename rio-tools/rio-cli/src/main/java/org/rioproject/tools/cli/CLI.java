@@ -948,13 +948,13 @@ public class CLI {
         }
 
         public static String debugGetDefaultRoots() {
-            String deployDir = System.getProperty("RIO_HOME")+
+            String deployDir = System.getProperty("rio.home")+
                                File.separator+
                                "deploy";
-            String rioLibDir = System.getProperty("RIO_HOME")+
+            String rioLibDir = System.getProperty("rio.home")+
                                File.separator+
                                "lib";
-            String rioLibDLDir = System.getProperty("RIO_HOME")+
+            String rioLibDLDir = System.getProperty("rio.home")+
                                  File.separator+
                                  "lib-dl";
             return(deployDir+";"+rioLibDir+";"+rioLibDLDir);
@@ -977,13 +977,13 @@ public class CLI {
             if(out==null)
                 throw new IllegalArgumentException("Must have an output PrintStream");
             try {
-                String deployDir = System.getProperty("RIO_HOME")+
+                String deployDir = System.getProperty("rio.home")+
                                    File.separator+
                                    "deploy";
-                String rioLibDir = System.getProperty("RIO_HOME")+
+                String rioLibDir = System.getProperty("rio.home")+
                                    File.separator+
                                    "lib";
-                String rioLibDLDir = System.getProperty("RIO_HOME")+
+                String rioLibDLDir = System.getProperty("rio.home")+
                                      File.separator+
                                      "lib-dl";
 
@@ -1295,7 +1295,7 @@ public class CLI {
         settings.put(GROUPS, groups);
         settings.put(LOCATORS, locators);
         Properties props = new Properties();
-        String rioHome = System.getProperty("RIO_HOME");
+        String rioHome = System.getProperty("rio.home");
         if(rioHome == null)
             throw new RuntimeException("RIO_HOME must be set");
         props.put("java.protocol.handler.pkgs", "net.jini.url");
