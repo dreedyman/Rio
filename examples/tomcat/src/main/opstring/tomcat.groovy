@@ -40,16 +40,26 @@ deployment(name: 'Tomcat Deploy') {
          */
         software(name: 'Tomcat', version: '6.0.16', removeOnDestroy: true) {
             install source: 'http://rio-project.org/examples/tomcat/apache-tomcat-6.0.16.zip',
-                    target: '${rio.home}/system/external/tomcat',
+                    target: 'tomcat',
                     unarchive: true
             postInstall(removeOnCompletion: false) {
-                execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
+                if (!System.properties['os.name'].toLowerCase().contains('windows')) {
+                    execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
+                }
             }
         }
 
-        execute(inDirectory: 'bin', command: 'catalina.sh run') {
-            environment {
-                property name: "CATALINA_OPTS", value: "-Dcom.sun.management.jmxremote"
+        if (System.properties['os.name'].toLowerCase().contains('windows')) {
+            execute(inDirectory: 'bin', command: 'catalina.bat run') {
+                environment {
+                    property name: "CATALINA_OPTS", value: "-Dcom.sun.management.jmxremote"
+                }
+            }
+        } else {
+            execute(inDirectory: 'bin', command: 'catalina.sh run') {
+                environment {
+                    property name: "CATALINA_OPTS", value: "-Dcom.sun.management.jmxremote"
+                }
             }
         }
 
