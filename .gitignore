@@ -21,6 +21,8 @@ target
 *.ipr
 *.iml
 *.iws
+#netbeans
+nbactions.xml
 
 # OS generated files #
 ######################
