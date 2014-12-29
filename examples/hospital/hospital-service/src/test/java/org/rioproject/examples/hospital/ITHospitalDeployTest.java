@@ -32,6 +32,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Testing the hospital example using the Rio test framework
  */
@@ -77,8 +79,13 @@ public class ITHospitalDeployTest {
         }
     }
 
+    static boolean notJava8() {
+        return !System.getProperty("java.version").startsWith("1.8");
+    }
+
     @Test
     public void testDeployment() {
+        assumeTrue(notJava8());
         Throwable thrown = null;
         try {
             for(Patient p : first8Presidents()) {
