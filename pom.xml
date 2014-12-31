@@ -68,6 +68,7 @@
                 <inherited>false</inherited>
                 <configuration>
                     <aggregate>true</aggregate>
+                    <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
                 <reportSets>
                     <reportSet>
@@ -82,7 +83,6 @@
                             <top><![CDATA[<h2>Rio Project ${project.version} API Documentation</h2>]]></top>
                             <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
                             <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.impl.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.test</excludePackageNames>
-                            <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                         <reports>
                             <report>aggregate</report>
