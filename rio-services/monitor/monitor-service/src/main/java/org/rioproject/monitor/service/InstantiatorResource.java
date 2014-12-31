@@ -789,7 +789,6 @@ public class InstantiatorResource {
                     message.append(getName()).append(" does not meet requirements for ");
                     message.append(provType).append(" service ");
                     message.append("[").append(LoggingUtil.getLoggingName(sElem)).append("] ");
-                    message.append("PlatformCapability objects are not configured to be downloadable: ");
                     message.append(unsupportedReqsString);
                     String failureReason = message.toString();
                     provisionRequest.addFailureReason(failureReason);
@@ -1212,6 +1211,11 @@ public class InstantiatorResource {
             return name.equals(TCPConnectivity.ID);
         }
         return systemComponent.getClassName().equals(TCPConnectivity.class.getName());
+    }
+
+    boolean isHardwareRelated(SystemComponent systemComponent) {
+        return isArchitecture(systemComponent) || isOperatingSystem(systemComponent) || isMachineAddress(systemComponent);
+
     }
 
     ProcessorArchitecture getArchitecture () {
