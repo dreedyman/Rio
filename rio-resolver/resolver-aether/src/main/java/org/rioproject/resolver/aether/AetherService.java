@@ -490,10 +490,10 @@ public final class AetherService {
             }
         }
 
-        /*if(!alreadyHaveRepository(myRepositories, "central")) {
+        if(!alreadyHaveRepository(myRepositories, "central")) {
             RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/").build();
             myRepositories.add(central);
-        }*/
+        }
         return Collections.unmodifiableList(myRepositories);
     }
 
