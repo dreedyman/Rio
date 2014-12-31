@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.0-M5</version>
+        <version>5.0</version>
 	<relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>gnostic</artifactId>

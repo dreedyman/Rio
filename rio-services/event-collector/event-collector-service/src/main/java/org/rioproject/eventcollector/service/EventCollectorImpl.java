@@ -31,6 +31,7 @@ import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
+import org.rioproject.RioVersion;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.impl.event.EventDescriptorFactory;
@@ -193,7 +194,7 @@ public class EventCollectorImpl extends ServiceBeanAdapter implements EventColle
 
 
         final List<EventDescriptor> descList = new ArrayList<EventDescriptor>();
-        descList.addAll(EventDescriptorFactory.createEventDescriptors("org.rioproject.monitor:monitor-api:5.0-M5",
+        descList.addAll(EventDescriptorFactory.createEventDescriptors("org.rioproject.monitor:monitor-api:"+ RioVersion.VERSION,
                                                                       "org.rioproject.monitor.ProvisionFailureEvent",
                                                                       "org.rioproject.monitor.ProvisionMonitorEvent"));
         descList.add(SLAThresholdEvent.getEventDescriptor());

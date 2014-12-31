@@ -2,8 +2,8 @@
 deployment(name: 'Gnostic') {
     groups System.getProperty("org.rioproject.groups", System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.0-M5'
-    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.0-M5'
+    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.0'
+    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.0'
 
     service(name: 'Gnostic') {
         interfaces {

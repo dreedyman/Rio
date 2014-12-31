@@ -1,3 +1,4 @@
+import org.rioproject.RioVersion
 import org.rioproject.config.Constants
 
 String getConfigEntry() {
@@ -22,8 +23,8 @@ String getConfigEntry() {
 deployment(name:'Event Collector') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
 
-    artifact id: 'service-dl',   'org.rioproject.event-collector:event-collector-proxy:5.0-M5'
-    artifact id: 'service-impl', 'org.rioproject.event-collector:event-collector-service:5.0-M5'
+    artifact id: 'service-dl',   'org.rioproject.event-collector:event-collector-proxy:'+ RioVersion.VERSION
+    artifact id: 'service-impl', 'org.rioproject.event-collector:event-collector-service:'+ RioVersion.VERSION
 
     configuration getConfigEntry()
 

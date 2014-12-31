@@ -153,11 +153,7 @@
                 management of the declared service(s).
             </p>
             <br/>
-            <div id="infobox">
-                <img src="images/information.gif"/>
-                OAR artifact inclusion is only supported with Groovy based opstrings.
-            </div>
-            <br/>
+
             <div class="section">
                 <h3>Artifact URL</h3>
             </div>

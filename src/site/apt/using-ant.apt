@@ -8,7 +8,7 @@
 
 Using Ant
 
- Although the recommended project setup is to use Maven, this document reviews
+ Although the recommended project setup is to use Maven or Gradle, this document reviews
  the basic approach towards using Ant to build your services. This document is
  organized as follows:
 
