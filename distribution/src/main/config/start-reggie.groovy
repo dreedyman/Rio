@@ -28,7 +28,7 @@ class StartReggieConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         ServiceDescriptorUtil.checkForLoopback()
-        String rioHome = System.getProperty('rio.home', RioHome.derive())
+        String rioHome = RioHome.get()
         def websterRoots = [rioHome+'/lib-dl', ';', rioHome+'/lib']
 
         String policyFile = rioHome+'/policy/policy.all'

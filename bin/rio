@@ -177,7 +177,7 @@ if [ "$start" = "1" ]; then
                 libpath="-Djava.library.path=$RIO_NATIVE_DIR"
             fi
         fi
-        USER_OPTS="-DRIO_NATIVE_DIR=$RIO_NATIVE_DIR $USER_OPTS"
+        USER_OPTS="-Drio.native.dir=$RIO_NATIVE_DIR $USER_OPTS"
     fi
     classpath="-cp `toNative $RIO_LIB/rio-start-$rioVersion.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all-$groovyVersion.jar:$SLF4J_CLASSPATH`"
     agentpath="-javaagent:`toNative $RIO_LIB/rio-start-$rioVersion.jar`"

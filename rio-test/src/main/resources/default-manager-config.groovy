@@ -58,7 +58,7 @@ manager {
         '-Djava.protocol.handler.pkgs=org.rioproject.url '+
         '-Djava.rmi.server.useCodebaseOnly=false '+
         '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${rio.home}${/}logs '+
-        '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.homr}${/}policy${/}policy.all '+
+        '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.home}${/}policy${/}policy.all '+
         '-Drio.home=${rio.home} -Drio.test.attach '+
         '-Dorg.rioproject.groups=${org.rioproject.groups} '+
         '-Dorg.rioproject.service=${service}'

@@ -42,7 +42,7 @@ class StartServiceBeanExecConfig {
     }
 
     ServiceDescriptor[] getServiceDescriptors() {
-        String rioHome = System.getProperty('rio.home', RioHome.derive())
+        String rioHome = RioHome.get()
         String codebase = ServiceDescriptorUtil.getCybernodeCodebase()
         String classpath = ServiceDescriptorUtil.getCybernodeClasspath()
 

@@ -13,7 +13,7 @@ class StartMonitorConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         String m2Home = "${System.getProperty("user.home")}/.m2"
-        String rioHome = System.getProperty('rio.home', RioHome.derive())
+        String rioHome = System.getProperty('rio.home', RioHome.get())
         String cwd = System.getProperty('user.dir')
         
         def websterRoots = [rioHome+'/lib-dl', ';',

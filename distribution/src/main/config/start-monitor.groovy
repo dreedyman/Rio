@@ -41,7 +41,7 @@ class StartMonitorConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         ServiceDescriptorUtil.checkForLoopback()
         String m2Repo = Repository.getLocalRepository().absolutePath
-        String rioHome = System.getProperty('rio.home', RioHome.derive())
+        String rioHome = RioHome.get()
 
         def websterRoots = [rioHome+'/deploy', ';', m2Repo]
 

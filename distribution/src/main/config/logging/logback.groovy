@@ -41,13 +41,13 @@ def checkEndsWithFileSeparator(String s) {
 /*
  * Naming pattern for the output file:
  *
- * a) The output file is placed in the directory defined by the "RIO_LOG_DIR" System property
+ * a) The output file is placed in the directory defined by the "rio.log.dir" System property
  * b) With a name based on the "org.rioproject.service" System property.
  * c) The return value from ManagementFactory.getRuntimeMXBean().getName(). This value is expected to have the
  * following format: pid@hostname. If the return includes the @hostname, the @hostname is stripped off.
  */
 def getLogLocationAndName() {
-    String logDir = checkEndsWithFileSeparator(System.getProperty("RIO_LOG_DIR"))
+    String logDir = checkEndsWithFileSeparator(System.getProperty("rio.log.dir"))
     String name = ManagementFactory.getRuntimeMXBean().getName();
     String pid = name;
     int ndx = name.indexOf("@");
@@ -62,7 +62,7 @@ def getLogLocationAndName() {
  * the "RIO_HOME" System property appended by /logs
  */
 def getWatchLogDir() {
-    String watchLogDir = System.getProperty("RIO_WATCH_LOG_DIR")
+    String watchLogDir = System.getProperty("rio.watch.log.dir")
     if(watchLogDir==null) {
         watchLogDir = checkEndsWithFileSeparator(System.getProperty("rio.home"))+"logs"
     }

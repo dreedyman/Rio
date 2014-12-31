@@ -671,7 +671,7 @@ class TestManager {
             }
         }
 
-        jvmOptions = jvmOptions+' -DRIO_LOG_DIR='+logDir+' -DRIO_WATCH_LOG_DIR='+logDir
+        jvmOptions = jvmOptions+' -Drio.log.dir='+logDir+' -Drio.watch.log.dir='+logDir
         StringBuilder cmdLineBuilder = new StringBuilder()
         if(System.getProperty("os.name").contains("Windows"))
             cmdLineBuilder.append("cmd.exe /c")

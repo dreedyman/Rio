@@ -34,7 +34,7 @@ class StartCollectorConfig {
 
     ServiceDescriptor[] getServiceDescriptors() {
         ServiceDescriptorUtil.checkForLoopback()
-        String rioHome = System.getProperty('rio.home', RioHome.derive())
+        String rioHome = RioHome.get()
 
         String policyFile = rioHome+'/policy/policy.all'
 
