@@ -28,7 +28,7 @@ class EventConfig {
 
     Entry[] getServiceUIs(String codebase) {
         String uiClass = 'org.rioproject.examples.events.service.ui.HelloEventUI'
-        URL url = new URL("artifact:org.rioproject.examples..events:events-ui:2.1")
+        URL url = new URL("artifact:org.rioproject.examples..events:events-ui:2.2")
         def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIComponentFactory(url, uiClass))]
         return entry as Entry[]
     }
