@@ -92,7 +92,7 @@ public class FileHandler extends java.util.logging.FileHandler {
         }
         boolean append = getBooleanProperty(manager, propertyBase + ".append", false);
         String encoding = manager.getProperty(propertyBase+".encoding");
-        String logDirectory = System.getProperty("RIO_LOG_DIR");
+        String logDirectory = System.getProperty("rio.log.dir");
         String service = System.getProperty("org.rioproject.service");
         String name = ManagementFactory.getRuntimeMXBean().getName();
         String pid = name;
@@ -105,7 +105,7 @@ public class FileHandler extends java.util.logging.FileHandler {
             if(!dir.exists()) {
                 dir.mkdirs();
             }
-            pattern = replace(pattern, "${RIO_LOG_DIR}", logDirectory);
+            pattern = replace(pattern, "${rio.log.dir}", logDirectory);
         }
         if(service!=null)
             pattern = replace(pattern, "${org.rioproject.service}", service);

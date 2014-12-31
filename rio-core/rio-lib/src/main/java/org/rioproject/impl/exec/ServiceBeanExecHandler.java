@@ -248,7 +248,7 @@ public class ServiceBeanExecHandler {
 
     private String getLogDirectory(final Configuration config,
                                    final String opstringName) throws ConfigurationException, IOException {
-        String logDirDefault = System.getProperty("RIO_LOG_DIR");
+        String logDirDefault = System.getProperty("rio.log.dir");
         if(logDirDefault==null)
             logDirDefault = System.getProperty("rio.home")+File.separator+"logs";
         String serviceLogRootDirectory = (String)config.getEntry(COMPONENT,

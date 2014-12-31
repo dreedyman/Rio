@@ -18,6 +18,7 @@ package org.rioproject.cybernode.service;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import org.rioproject.deploy.ServiceStatementManager;
+import org.rioproject.util.RioHome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,19 +171,7 @@ public class Environment {
      * @return The path to the Rio home directory
      */
     static String getRioHomeDirectory() {
-        String rioHome;
-        if(System.getProperty("org.rioproject.home")!=null) {
-            rioHome = System.getProperty("org.rioproject.home");
-        } else {
-            if(System.getProperty("rio.home")!=null) {
-                rioHome = System.getProperty("rio.home");
-            } else {
-                rioHome = System.getenv("RIO_HOME");
-            }
-            if(rioHome==null)
-                rioHome = System.getProperty("user.home")+File.separator+".rio";
-        }
-        System.setProperty("org.rioproject.home", rioHome);
+        String rioHome = RioHome.get();
         File rioPath = new File(rioHome);
         if(!rioPath.exists()) {
             if(rioPath.mkdir()) {

@@ -139,9 +139,9 @@ public final class ServiceDescriptorUtil {
                                                final String sPort,
                                                final String[] roots,
                                                final boolean debug) throws IOException {
-        String rioHome = System.getProperty("rio.home");
+        String rioHome = System.getProperty("rio.home", RioHome.get());
         if(rioHome==null)
-            throw new RuntimeException("RIO_HOME property not declared");
+            throw new RuntimeException("rio.home property not declared or derivable");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
         return(getWebster(policy, sPort, roots, null, debug, webster));
 
@@ -167,9 +167,9 @@ public final class ServiceDescriptorUtil {
                                                final String[] roots,
                                                final String[] options,
                                                final boolean debug) throws IOException {
-        String rioHome = System.getProperty("rio.home");
+        String rioHome = System.getProperty("rio.home", RioHome.get());
         if(rioHome==null)
-            throw new RuntimeException("RIO_HOME property not declared");
+            throw new RuntimeException("rio.home property not declared or derivable");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
         return(getWebster(policy, sPort, roots, options, debug, webster));
 
@@ -264,9 +264,9 @@ public final class ServiceDescriptorUtil {
     }
 
     public static String getCybernodeClasspath() throws IOException {
-        String rioHome = System.getProperty("rio.home");
+        String rioHome = System.getProperty("rio.home", RioHome.get());
         if(rioHome == null)
-            throw new RuntimeException("RIO_HOME property not declared");
+            throw new RuntimeException("rio.home property not declared or derivable");
         List<String> jarList = new ArrayList<String>();
         jarList.add(createVersionedJar("cybernode-service"));
         if(System.getProperty("rio.test.attach")!=null) {
@@ -307,9 +307,9 @@ public final class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getMonitor(final String policy, final String... monitorConfig) throws IOException {
-        String rioHome = System.getProperty("rio.home");
+        String rioHome = System.getProperty("rio.home", RioHome.get());
         if(rioHome == null)
-            throw new RuntimeException("RIO_HOME property not declared");
+            throw new RuntimeException("rio.home property not declared or derivable");
         List<String> jarList = new ArrayList<String>();
         jarList.add(createVersionedJar("monitor-service"));
         if(System.getProperty("rio.test.attach")!=null) {
@@ -347,9 +347,9 @@ public final class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getLookup(final String policy, final String... lookupConfig) throws IOException {
-        String rioHome = System.getProperty("rio.home");
-        if (rioHome == null)
-            throw new RuntimeException("RIO_HOME property not declared");
+        String rioHome = System.getProperty("rio.home", RioHome.get());
+        if(rioHome == null)
+            throw new RuntimeException("rio.home property not declared or derivable");
         String reggieClasspath = FileHelper.find(new File(rioHome, "lib"), "reggie").getPath();
         File reggieDL = FileHelper.find(new File(rioHome, "lib-dl"), "reggie-dl");
         //String reggieCodebase = "artifact:org.apache.river/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());

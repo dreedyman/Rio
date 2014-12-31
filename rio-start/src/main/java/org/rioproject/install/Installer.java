@@ -51,7 +51,7 @@ public final class Installer {
      * @throws RuntimeException If the <code>RIO_HOME</code> property is not set
      */
     public static void install() throws IOException {
-        String rioHome = System.getProperty("rio.home", RioHome.derive());
+        String rioHome = System.getProperty("rio.home", RioHome.get());
         if (rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
         Map<Artifact, String> rioArtifactJars = new HashMap<Artifact, String>();

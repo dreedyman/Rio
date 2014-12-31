@@ -1115,7 +1115,7 @@ public class Main extends JFrame {
     public static void redirect() {
         String rioHome = System.getProperty("rio.home");
         if(rioHome == null) {
-            rioHome = RioHome.derive();
+            rioHome = RioHome.get();
         }
 
         String logDirPath = System.getProperty(Constants.COMPONENT+".logDir", rioHome+File.separator+"logs");

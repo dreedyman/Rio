@@ -69,6 +69,7 @@ import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.resolver.*;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.system.ResourceCapability;
+import org.rioproject.util.RioHome;
 import org.rioproject.util.RioManifest;
 import org.rioproject.util.TimeUtil;
 import org.slf4j.Logger;
@@ -894,7 +895,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 logger.debug("Configured to scan for OAR deployments every {}", TimeUtil.format(deployMonitorPeriod));
 
             if(deployMonitorPeriod>0) {
-                String rioHome = System.getProperty("rio.home");
+                String rioHome = RioHome.get();
                 if(!rioHome.endsWith("/"))
                     rioHome = rioHome+"/";
                 File deployDir = new File(rioHome+"deploy");

@@ -29,24 +29,36 @@ public class RioHome {
     static Logger logger = LoggerFactory.getLogger(RioHome.class);
 
     /**
-     * Derive the location of Rio home
+     * Get the location of Rio home if it is not set. If the location
+     * is not set (by querying the {@code rio.home} system property,
+     * defaulting to the {@code RIO_HOME} environment variable), attempt
+     * to get the location as determined by the parent directory of the
+     * jar the {@code RioHome} class is loaded from. If Rio home can be
+     * derived, the {@code rio.home} system property will be set.
      *
-     * @return The
+     * @return The location of Rio home directory, or {@code null} if it cannot be derived.
      */
-    public static String derive() {
-        Class clazz = RioHome.class;
-        String className = clazz.getSimpleName() + ".class";
-        String classPath = clazz.getResource(className).toString();
-        String rioHome = null;
-        logger.debug("classPath: {}", classPath);
-        /* Make sure we are loaded from a JAR */
-        if (classPath.startsWith("jar:file:")) {
-            String path = classPath.substring("jar:file:".length(), classPath.lastIndexOf("!"));
-            logger.debug("path: {}", path);
-            File jar = new File(path);
-            File directory = jar.getParentFile().getParentFile();
-            logger.debug("directory: {}, exists? {}", directory.getPath(), directory.exists());
-            rioHome = directory.exists()?directory.getPath():null;
+    public static String get() {
+        String rioHome = System.getProperty("rio.home", System.getenv("RIO_HOME"));
+        if(rioHome==null) {
+            Class clazz = RioHome.class;
+            String className = clazz.getSimpleName() + ".class";
+            String classPath = clazz.getResource(className).toString();
+
+            logger.debug("classPath: {}", classPath);
+            /* Make sure we are loaded from a JAR */
+            if (classPath.startsWith("jar:file:")) {
+                String path = classPath.substring("jar:file:".length(), classPath.lastIndexOf("!"));
+                logger.debug("path: {}", path);
+                File jar = new File(path);
+                File directory = jar.getParentFile().getParentFile();
+                logger.debug("directory: {}, exists? {}", directory.getPath(), directory.exists());
+                rioHome = directory.exists() ? directory.getPath() : null;
+            }
+            if(rioHome!=null) {
+                logger.info("Derived and set \"rio.home\" to {}", rioHome);
+                System.setProperty("rio.home", rioHome);
+            }
         }
         return rioHome;
     }

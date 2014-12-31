@@ -17,6 +17,7 @@ package org.rioproject.impl.exec;
 
 import org.rioproject.config.Constants;
 import org.rioproject.impl.system.OperatingSystemType;
+import org.rioproject.util.RioHome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public final class CommandLineHelper {
      */
     public static String generateRioStarterClassPath() {
         StringBuilder builder = new StringBuilder();
-        File rioLib = new File(System.getProperty("rio.home"), "lib");
+        File rioLib = new File(RioHome.get(), "lib");
         builder.append(getFiles(rioLib, "rio-start", "groovy-all"));
         File javaHome = new File(System.getProperty("JAVA_HOME", System.getProperty("java.home")));
         File javaLib = new File(javaHome, "lib");
@@ -119,7 +120,7 @@ public final class CommandLineHelper {
      * and RIO_HOME
      */
     static String getStandardJVMArgs() {
-        String rioHome = System.getProperty("rio.home");
+        String rioHome = RioHome.get();
         StringBuilder argsBuilder = new StringBuilder();
 
         argsBuilder.append(getOption("java.protocol.handler.pkgs", "org.rioproject.url"));
@@ -156,14 +157,14 @@ public final class CommandLineHelper {
         if(declaredJVMOptions!=null)
             extendedJVMOptions.append(declaredJVMOptions);
         extendedJVMOptions.append(" ");
-        extendedJVMOptions.append(getOption("RIO_LOG_DIR", logDir));
+        extendedJVMOptions.append(getOption("rio.log.dir", logDir));
         extendedJVMOptions.append(" ");
         extendedJVMOptions.append(getOption("org.rioproject.service", normalizedServiceName));
         extendedJVMOptions.append(" ");
         extendedJVMOptions.append("-XX:HeapDumpPath=").append(logDir);
         StringBuilder argsBuilder = new StringBuilder();
         String jvmInputArgs = JVMOptionChecker.getJVMInputArgs(extendedJVMOptions.toString());
-        String rioHome = buildDirectory(System.getProperty("rio.home"));
+        String rioHome = buildDirectory(RioHome.get());
 
         /* Check logging configuration */
         argsBuilder.append(getLoggerConfig(jvmInputArgs, rioHome));
@@ -214,7 +215,7 @@ public final class CommandLineHelper {
     }
 
     private static boolean usingLogback() {
-        File rioLib = new File(System.getProperty("rio.home"), "lib");
+        File rioLib = new File(RioHome.get(), "lib");
         File rioLogging = new File(rioLib, "logging");
         String loggingJars = getFiles(rioLogging);
         return loggingJars.contains("logback");

@@ -134,15 +134,10 @@ public final class ResolverHelper {
     private static String getResolverJarFile() {
         String resolverJarFile = System.getProperty(RESOLVER_JAR);
         if(resolverJarFile==null || resolverJarFile.length()==0) {
-            String rioHome = System.getProperty("rio.home", System.getenv("RIO_HOME"));
+            String rioHome = RioHome.get();
             if(rioHome==null || rioHome.length()==0) {
-                logger.warn("RIO_HOME has not been set, try and derive location");
-                rioHome = RioHome.derive();
-                if(rioHome==null || rioHome.length()==0) {
-                    throw new RuntimeException("RIO_HOME must be set in order to load the resolver-aether.jar");
-                } else {
-                    logger.info("RIO_HOME derived as: " + rioHome);
-                }
+                throw new RuntimeException("Unable to determine the location of Rio home, this must be set " +
+                                           "in order to load the resolver-aether.jar");
             }
             String resolverJarName = "resolver-aether";
             File resolverLibDir = new File(rioHome+File.separator+"lib"+File.separator+"resolver");
