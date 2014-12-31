@@ -82,7 +82,7 @@
                             <breakiterator>true</breakiterator>
                             <top><![CDATA[<h2>Rio Project ${project.version} API Documentation</h2>]]></top>
                             <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
-                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.impl.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.test</excludePackageNames>
+                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.impl.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.proxy:org.rioproject.monitor.proxy:org.rioproject.cybernode.proxy:org.rioproject.test:org.rioproject.gnostic.service:org.rioproject.impl.admin:org.rioproject.exec:org.rioproject.impl.bean:org.rioproject.impl.container:org.rioproject.impl.loader:org.rioproject.impl.util</excludePackageNames>
                         </configuration>
                         <reports>
                             <report>aggregate</report>
@@ -420,6 +420,7 @@
   </modules>
 
     <properties>
+        <additionalparam>-Xdoclint:none</additionalparam>
         <groovy.version>2.3.8</groovy.version>
         <gmaven.version>1.4</gmaven.version>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>

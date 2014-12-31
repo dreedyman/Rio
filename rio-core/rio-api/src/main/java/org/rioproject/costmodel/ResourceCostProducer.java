@@ -16,7 +16,7 @@
 package org.rioproject.costmodel;
 
 /**
- * Defines the signature for an entity to provude a {@link ResourceCost}
+ * Defines the signature for an entity to provide a {@link ResourceCost}
  *
  * @author Dennis Reedy
  */
