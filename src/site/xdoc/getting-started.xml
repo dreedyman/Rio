@@ -11,13 +11,13 @@
                 Rio is distributed under the <a href="license.html">Apache License, version 2.0</a>.
             </p>
             <p>
-                Rio requires JDK 1.6.x or greater.
+                Rio requires JDK 1.7.x or greater.
             </p>
 
             <div id="tipbox">
                 <img src="images/check.gif"/>
                 Although not required, setting the JAVA_HOME environment
-                variable to point to the home of a Java 6 (or later) installation
+                variable to point to the home of a Java 7 (or later) installation
                 is always a good idea.
             </div>
             <p>
