@@ -19,7 +19,7 @@
 # Launches the Rio UI
 #
 
-rioVersion=5.0
+rioVersion=5.1-SNAPSHOT
 
 if [ -z "$RIO_HOME" ] ; then
     rioHomeDir="$(cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>5.0</version>
+    <version>5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -425,7 +425,7 @@
         <gmaven.version>1.4</gmaven.version>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
         <junit.version>4.8.2</junit.version>
-        <rio.version>5.0</rio.version>
+        <rio.version>5.1-SNAPSHOT</rio.version>
         <rio.plugin.version>5.1</rio.plugin.version>
         <river.version>2.2.2</river.version>
         <hyperic.version>1.6.3.82</hyperic.version>

@@ -120,7 +120,7 @@ deployment(name:'Muves') {
         implementation(class: "net.gomez.fester.FesterImpl") {
             resources ref:"impl.jars"
             resources "lib/jscience.jar",
-                      "lib/activemq/activemq-core-5.0.0.jar",
+                      "lib/activemq/activemq-core-5.1-SNAPSHOT.0.jar",
                       "lib/activemq/geronimo-jms_1.1_spec-1.0.jar",
                       "lib/activemq/jaxb-api-2.0.jar",
                       "lib/activemq/jaxb-impl-2.0.3.jar",
