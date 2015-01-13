@@ -757,10 +757,12 @@ public class GraphView extends Display {
      */
     void setOpStringState(final String name) {
         GraphNode opStringNode = getOpStringNode(name);
-        if(opStringNode==null)
-            throw new IllegalStateException("Expected to obtain an opstring node for ["+name+"]");
-        GraphUtil.setOpStringState(g, opStringNode);
-        vis.run("repaint");
+        if (opStringNode != null) {
+            GraphUtil.setOpStringState(g, opStringNode);
+            vis.run("repaint");
+        } else {
+            System.err.println("Expected to obtain an opstring node for [" + name + "]");
+        }
     }
 
     void setGraphNodeServiceItem(final GraphNode node, final ServiceItem item) {
