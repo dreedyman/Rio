@@ -95,7 +95,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.1-SNAPSHOT
+rioVersion=5.0.1
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -214,7 +214,7 @@ if [ "$start" = "1" ]; then
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
         -Drio.home=$RIO_HOME \
-        -DRIO_LOG_DIR=$RIO_HOME/logs/ \
+        -Drio.log.dir=$RIO_HOME/logs/ \
         -Drio.script.mainClass="$launchTarget" \
         $USER_OPTS \
         $NETWORK $DEBUG $launchTarget $starterConfig $command_line

@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
-
 /**
  * <p>A helper that provides utilities for obtaining and working with a
  * {@link org.rioproject.resolver.Resolver}.</p>
@@ -40,7 +39,9 @@ import java.util.ServiceLoader;
  *     <li>First checking if the <code>org.rioproject.resolver.jar</code> system property has been
  *     declared. This property should contain the location of the resolver jar(s) needed to instantiate a
  *     <code>Resolver</code>.
- *     <li>If the <code>org.rioproject.resolver.jar</code> system property is not set, the default
+ *     <li>If the <code>org.rioproject.resolver.jar</code> system property is not set, the
+ *     {@link org.rioproject.resolver.ResolverConfiguration} is used to obtain the resolver jar(s). If the
+ *     {@code ResolverConfiguration} cannot be loaded, or does not contain a jar property, the
  *     <code>$RIO_HOME/lib/resolver/resolver-aether.jar</code> will be used
  * </ul>
  * <p>Refer to {@link ResolverHelper#getResolver} for details on determining the class to instantiate.</p>
@@ -51,14 +52,14 @@ import java.util.ServiceLoader;
 public final class ResolverHelper {
     private static URLClassLoader resolverLoader;
     static final Logger logger = LoggerFactory.getLogger(ResolverHelper.class.getName());
-    public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
+    private static final ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
     static {
         File resolverJar = new File(getResolverJarFile());
         try {
             resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
                                                 Thread.currentThread().getContextClassLoader());
         } catch (MalformedURLException e) {
-            logger.error(String.format("Creating ClassLoader to load %s", resolverJar.getPath()), e);
+            logger.error("Creating ClassLoader to load {}", resolverJar.getPath(), e);
         }
     }
 
@@ -83,7 +84,7 @@ public final class ResolverHelper {
         throws ResolverException {
 
         if(logger.isDebugEnabled())
-            logger.debug(String.format("Using Resolver %s", resolver.getClass().getName()));
+            logger.debug("Using Resolver {}", resolver.getClass().getName());
         List<URL> jars = new ArrayList<URL>();
         if (artifact != null) {
             String[] artifactParts = artifact.split(" ");
@@ -95,10 +96,10 @@ public final class ResolverHelper {
                     if(jarFile.exists()) {
                         s = jarFile.toURI().toString();
                     } else {
-                        logger.warn(String.format("%s NOT FOUND", jarFile.getPath()));
+                        logger.warn("{} NOT FOUND", jarFile.getPath());
                     }
                     if(s!=null) {
-                        URL url = null;
+                        URL url;
                         try {
                             url = new URL(handleWindows(s));
                         } catch (MalformedURLException e) {
@@ -111,7 +112,7 @@ public final class ResolverHelper {
             }
         }
         if(logger.isDebugEnabled())
-            logger.debug(String.format("Artifact: %s, resolved jars %s", artifact, jars));
+            logger.debug("Artifact: {}, resolved jars {}", artifact, jars);
         return jars.toArray(new URL[jars.size()]);
     }
 
@@ -132,14 +133,16 @@ public final class ResolverHelper {
     }
 
     private static String getResolverJarFile() {
-        String resolverJarFile = System.getProperty(RESOLVER_JAR);
+        String resolverJarFile = System.getProperty(ResolverConfiguration.RESOLVER_JAR);
         if(resolverJarFile==null || resolverJarFile.length()==0) {
+            String resolverJarName = resolverConfiguration.getResolverJarName();
+            if(resolverJarName==null)
+                resolverJarName = "resolver-aether";
             String rioHome = RioHome.get();
             if(rioHome==null || rioHome.length()==0) {
                 throw new RuntimeException("Unable to determine the location of Rio home, this must be set " +
-                                           "in order to load the resolver-aether.jar");
+                                           "in order to load the "+resolverJarName+".jar");
             }
-            String resolverJarName = "resolver-aether";
             File resolverLibDir = new File(rioHome+File.separator+"lib"+File.separator+"resolver");
             if(resolverLibDir.exists() && resolverLibDir.isDirectory()) {
                 File[] files = resolverLibDir.listFiles();
@@ -156,7 +159,7 @@ public final class ResolverHelper {
             }
         }
         if(logger.isDebugEnabled())
-            logger.debug(String.format("Resolver JAR file: %s", resolverJarFile));
+            logger.debug("Resolver JAR file: {}", resolverJarFile);
         return resolverJarFile;
     }
 
@@ -181,9 +184,20 @@ public final class ResolverHelper {
         try {
             r = doGetResolver(resourceLoader);
             if(logger.isDebugEnabled())
-                logger.debug(String.format("Selected Resolver: %s", (r==null?"No Resolver configuration found":r.getClass().getName())));
+                logger.debug("Selected Resolver: {}", (r==null?"No Resolver configuration found":r.getClass().getName()));
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
+            }
+            if(r instanceof SettableResolver)
+                ((SettableResolver)r).setRemoteRepositories(resolverConfiguration.getRemoteRepositories());
+            if(logger.isDebugEnabled()) {
+                StringBuilder message = new StringBuilder();
+                for(RemoteRepository rr : r.getRemoteRepositories()) {
+                    if(message.length()>0)
+                        message.append("\n");
+                    message.append(rr);
+                }
+                logger.debug("Resolver repositories: {}\n{}", r.getRemoteRepositories().size(), message.toString());
             }
         } catch (Exception e) {
             if(e instanceof ResolverException)
@@ -208,7 +222,7 @@ public final class ResolverHelper {
                 sb.append(r.getClass().getName());
                 num++;
             }            
-            logger.debug(String.format("Found %s Resolvers: [%s]", num, sb.toString()));
+            logger.debug("Found {} Resolvers: [{}]", num, sb.toString());
         }
         for(Resolver r : loader) {
             if(r!=null) {

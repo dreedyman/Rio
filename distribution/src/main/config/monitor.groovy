@@ -58,10 +58,6 @@ class MonitorConfig {
         RemoteRepository remoteRepository = new RemoteRepository();
         remoteRepository.setId(serviceName.replaceAll(" ", ""))
         remoteRepository.setUrl(System.getProperty(Constants.CODESERVER))
-        remoteRepository.setSnapshotChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE)
-        remoteRepository.setReleaseChecksumPolicy(RemoteRepository.CHECKSUM_POLICY_IGNORE)
-        remoteRepository.setReleaseUpdatePolicy(RemoteRepository.UPDATE_POLICY_ALWAYS)
-        remoteRepository.setSnapshotUpdatePolicy(RemoteRepository.UPDATE_POLICY_ALWAYS)
         def repositories = [remoteRepository]
         return repositories as RemoteRepository[]
     }

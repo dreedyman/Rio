@@ -31,23 +31,28 @@ import org.rioproject.config.GroovyConfig
 import org.rioproject.cybernode.Cybernode
 import org.rioproject.deploy.DeployAdmin
 import org.rioproject.deploy.ServiceBeanInstantiator
+import org.rioproject.impl.client.DiscoveryManagementPool
+import org.rioproject.impl.client.JiniClient
 import org.rioproject.impl.exec.JVMOptionChecker
 import org.rioproject.impl.exec.Util
 import org.rioproject.impl.opstring.OAR
 import org.rioproject.impl.opstring.OpStringLoader
 import org.rioproject.impl.opstring.OpStringManagerProxy
-import org.rioproject.monitor.ProvisionMonitor
-import org.rioproject.opstring.*
-import org.rioproject.resolver.Artifact
-import org.rioproject.resolver.ResolverHelper
-import org.rioproject.impl.client.DiscoveryManagementPool
-import org.rioproject.impl.client.JiniClient
 import org.rioproject.impl.service.ServiceStopHandler
 import org.rioproject.impl.util.FileUtils
+import org.rioproject.monitor.ProvisionMonitor
+import org.rioproject.opstring.OperationalString
+import org.rioproject.opstring.OperationalStringException
+import org.rioproject.opstring.OperationalStringManager
+import org.rioproject.opstring.ServiceElement
+import org.rioproject.resolver.Artifact
+import org.rioproject.resolver.ResolverHelper
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
 import org.rioproject.util.PropertyHelper
+
+import java.util.concurrent.ThreadPoolExecutor
 /**
  * Simplifies the running of core Rio services
  * 
@@ -68,6 +73,7 @@ class TestManager {
     def config
     boolean createShutdownHook
     TestConfig testConfig
+    ThreadPoolExecutor execPool = (ThreadPoolExecutor)java.util.concurrent.Executors.newCachedThreadPool();
 
     /**
      * Create a TestManager without installing a shutdown hook
@@ -154,8 +160,8 @@ class TestManager {
         if(testConfig.getNumLookups()>0) {
             int lookupCount = testConfig.getNumLookups()-countLookups();
             for(int i=0; i<lookupCount; i++)
-                startReggie();
-        }
+                        startReggie();
+                    }
 
         if(testConfig.getNumMonitors()>0) {
             int monitorCount = testConfig.getNumMonitors()-countMonitors();

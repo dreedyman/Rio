@@ -74,6 +74,7 @@ public final class AetherService {
     private Settings effectiveSettings;
     private String dependencyFilterScope;
     private final WorkspaceReader workspaceReader;
+    private final List<RemoteRepository> configuredRepositories = new ArrayList<RemoteRepository>();
     private final Collection<DependencyFilter> dependencyFilters =
         Collections.synchronizedCollection(new ArrayList<DependencyFilter>());
     private static final Logger logger = LoggerFactory.getLogger(AetherService.class);
@@ -457,11 +458,19 @@ public final class AetherService {
         DefaultArtifact a = new DefaultArtifact(artifactCoordinates);
         String extension = artifactExt==null? "jar":artifactExt;
         ArtifactRequest artifactRequest = new ArtifactRequest();
-        DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(), a.getArtifactId(), extension, a.getVersion());
+        DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(),
+                                                       a.getArtifactId(),
+                                                       a.getClassifier(),
+                                                       extension,
+                                                       a.getVersion());
         artifactRequest.setArtifact(artifact);
         artifactRequest.setRepositories(repositoriesToUse);
         ArtifactResult artifactResult = repositorySystem.resolveArtifact(session, artifactRequest);
         return artifactResult.getArtifact().getFile().toURI().toURL();
+    }
+
+    public void setConfiguredRepositories(List<RemoteRepository> repositories) {
+        configuredRepositories.addAll(repositories);
     }
 
     /**
@@ -472,6 +481,7 @@ public final class AetherService {
     public List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
         List<RemoteRepository> myRepositories = new ArrayList<RemoteRepository>();
+        myRepositories.addAll(configuredRepositories);
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
@@ -490,10 +500,10 @@ public final class AetherService {
             }
         }
 
-        if(!alreadyHaveRepository(myRepositories, "central")) {
+        /*if(!alreadyHaveRepository(myRepositories, "central")) {
             RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/").build();
             myRepositories.add(central);
-        }
+        }*/
         return Collections.unmodifiableList(myRepositories);
     }
 

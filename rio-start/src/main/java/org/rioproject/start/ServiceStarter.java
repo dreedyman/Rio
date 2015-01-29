@@ -82,7 +82,7 @@ public class ServiceStarter {
     /**
      * Configure logger
      */
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    static final Logger logger = LoggerFactory.getLogger(ServiceStarter.class.getPackage().getName());
     /**
      * Array of strong references to transient services
      */

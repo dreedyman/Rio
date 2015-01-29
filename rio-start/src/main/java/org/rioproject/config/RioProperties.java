@@ -74,10 +74,17 @@ public final class RioProperties {
         try {
             properties.load(new FileInputStream(rioEnv));
             for(String propertyName : properties.stringPropertyNames()) {
-                if(logger.isDebugEnabled()) {
-                    logger.debug("Setting {}: {}", propertyName, properties.getProperty(propertyName));
+                if(System.getProperty(propertyName)==null) {
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("Setting {}: {}", propertyName, properties.getProperty(propertyName));
+                    }
+                    System.setProperty(propertyName, properties.getProperty(propertyName));
+                } else {
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("Skipping {}: {}, it is already set to: {}",
+                                     propertyName, properties.getProperty(propertyName), System.getProperty(propertyName));
+                    }
                 }
-                System.setProperty(propertyName, properties.getProperty(propertyName));
             }
         } catch (Exception e) {
             logger.warn("Problem reading {}", rioEnv.getPath(), e);

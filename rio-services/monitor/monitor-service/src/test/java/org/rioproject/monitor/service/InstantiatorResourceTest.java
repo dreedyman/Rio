@@ -19,7 +19,10 @@ import net.jini.config.Configuration;
 import net.jini.core.event.UnknownEventException;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.rioproject.deploy.*;
 import org.rioproject.impl.config.DynamicConfiguration;
 import org.rioproject.impl.opstring.OpString;
@@ -27,7 +30,7 @@ import org.rioproject.impl.system.SystemCapabilities;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.resolver.ResolverConfiguration;
 import org.rioproject.sla.ServiceLevelAgreements;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
@@ -44,7 +47,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.security.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Dennis Reedy
@@ -81,7 +86,7 @@ public class InstantiatorResourceTest {
             }
         }
         junit.framework.Assert.assertNotNull(resolverJar);
-        System.setProperty(ResolverHelper.RESOLVER_JAR, resolverJar);
+        System.setProperty(ResolverConfiguration.RESOLVER_JAR, resolverJar);
     }
 
     @Before

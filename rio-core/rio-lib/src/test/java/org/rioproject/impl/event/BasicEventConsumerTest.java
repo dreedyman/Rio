@@ -31,12 +31,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rioproject.event.*;
-import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.impl.service.LandlordLessor;
 import org.rioproject.impl.service.ServiceResource;
-import org.rioproject.watch.Calculable;
 import org.rioproject.impl.watch.Watch;
 import org.rioproject.impl.watch.WatchDataSourceRegistry;
+import org.rioproject.resolver.ResolverConfiguration;
+import org.rioproject.watch.Calculable;
 
 import java.io.File;
 import java.io.Serializable;
@@ -54,7 +54,7 @@ public class BasicEventConsumerTest {
 
     @BeforeClass
     public static void setEnv() {
-        System.setProperty(ResolverHelper.RESOLVER_JAR,
+        System.setProperty(ResolverConfiguration.RESOLVER_JAR,
                            System.getProperty("user.dir")+
                            File.separator+"target"+
                            File.separator+"test-classes"+

@@ -17,7 +17,6 @@ package org.rioproject.monitor.service.peer;
 
 import net.jini.admin.Administrable;
 import net.jini.config.Configuration;
-import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
@@ -26,10 +25,8 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
-import net.jini.lookup.entry.ServiceInfo;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
-import org.rioproject.RioVersion;
 import org.rioproject.admin.ServiceBeanAdmin;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
@@ -313,56 +310,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             return;
         }
 
-        /* Get ServiceInfo, determine if we have a version conflict. */
-        ServiceInfo serviceInfo = null;
-        for(Entry entry : item.attributeSets) {
-            if(entry instanceof ServiceInfo) {
-                serviceInfo = (ServiceInfo)entry;
-                break;
-            }
-        }
-        if(serviceInfo==null) {
-            peerLogger.warn("Unknown ProvisionMonitor, no {}, will not register with peer", ServiceInfo.class.getName());
-            return;
-        }
-        if(serviceInfo.version==null || serviceInfo.version.length()==0) {
-            peerLogger.warn("Unable to determine ProvisionMonitor {} version information, will not register with peer",
-                            ServiceInfo.class.getName());
-            return;
-        }
-        String version;
-        if(serviceInfo.version.startsWith("v")) {
-            version = serviceInfo.version.substring(1, serviceInfo.version.length());
-        } else {
-            version = serviceInfo.version;
-        }
-        String[] versionParts = version.split("-");
-        if(versionParts.length==0) {
-            peerLogger.warn("Unable to determine ProvisionMonitor version information, " +
-                            "found [{}], unknown format, will not register with peer", version);
-            return;
-        }
-        String versionNumber;
-        if(versionParts[0].endsWith("-SNAPSHOT")) {
-            int ndx = versionParts[0].indexOf("-SNAPSHOT");
-            versionNumber = versionParts[0].substring(0, ndx);
-        } else {
-            versionNumber = versionParts[0];
-        }
-        double actualVersionNumber;
-        try {
-            actualVersionNumber = Double.valueOf(versionNumber);
-        } catch(NumberFormatException e) {
-            peerLogger.warn("Unable to determine ProvisionMonitor version information, " +
-                            "found [{}], unknown format, will not register with peer", versionNumber,
-                            e);
-            return;
-        }
-        if(actualVersionNumber<5) {
-            peerLogger.warn("Discovered ProvisionMonitor with version {}, unsupported for {}, will not register with peer",
-                            versionNumber, RioVersion.VERSION);
-            return;
-        }
         /* Check if we already know about this guy. If so, just return */
         ProvisionMonitor.PeerInfo peer = getPeerInfo((ProvisionMonitor)item.service);
         if(peer != null)

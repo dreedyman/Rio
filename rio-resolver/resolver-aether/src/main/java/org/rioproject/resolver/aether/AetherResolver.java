@@ -22,10 +22,7 @@ import org.eclipse.aether.repository.ArtifactRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
-import org.rioproject.resolver.Artifact;
-import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.resolver.Resolver;
-import org.rioproject.resolver.ResolverException;
+import org.rioproject.resolver.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +35,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Uses Maven 3's native dependency resolution interface, Aether.
+ *
+ * @author Dennis Reedy
  */
-public class AetherResolver implements Resolver {
+public class AetherResolver implements SettableResolver {
     protected AetherService service;
     private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<ResolutionRequest, Future<String[]>>();
     private final ExecutorService resolverExecutor;
@@ -173,6 +172,15 @@ public class AetherResolver implements Resolver {
                                                       artifact, e.getLocalizedMessage()));
         }
         return location;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SettableResolver setRemoteRepositories(Collection<RemoteRepository> repositories) {
+        service.setConfiguredRepositories(transformRemoteRepository(repositories.toArray(new RemoteRepository[repositories.size()])));
+        return this;
     }
 
     /**

@@ -32,7 +32,7 @@ import org.rioproject.impl.config.DynamicConfiguration;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
-import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.resolver.ResolverConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class DeploymentVerifierTest {
             }
         }
         Assert.assertNotNull(resolverJar);
-        System.setProperty(ResolverHelper.RESOLVER_JAR, resolverJar);
+        System.setProperty(ResolverConfiguration.RESOLVER_JAR, resolverJar);
     }
 
     @Before
