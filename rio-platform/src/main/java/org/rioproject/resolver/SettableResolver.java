@@ -26,9 +26,9 @@ import java.util.Collection;
 public interface SettableResolver extends Resolver {
 
     /**
-     * Set the @{link RemoteRepository} instances the Resolver should use
+     * Set the {@link RemoteRepository} instances the Resolver should use
      *
-     * @param repositories The @{link RemoteRepository} instances the Resolver should use.
+     * @param repositories The {@link RemoteRepository} instances the Resolver should use.
      *                     May be {@code null}.
      *
      * @return An updated instance of the {@code SettableResolver}

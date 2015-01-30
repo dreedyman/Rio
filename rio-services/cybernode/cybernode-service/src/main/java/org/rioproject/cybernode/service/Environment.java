@@ -164,20 +164,12 @@ public class Environment {
     }
 
     /**
-     * Get (and if needed create) the Rio home directory. If the environment variable
-     * <pre>org.rioproject.home</pre> is not set, the Rio home directory will default 
-     * to the <pre>.rio</pre> directory in the user's home directory 
+     * Get the Rio home directory.
      * 
      * @return The path to the Rio home directory
      */
     static String getRioHomeDirectory() {
         String rioHome = RioHome.get();
-        File rioPath = new File(rioHome);
-        if(!rioPath.exists()) {
-            if(rioPath.mkdir()) {
-                logger.debug("Created home directory [{}]", rioHome);
-            }
-        }
         if(!rioHome.endsWith(File.separator))
             rioHome = rioHome+File.separator;
         return(rioHome);

@@ -24,7 +24,8 @@
             <h4>Dynamic Container</h4>
         </p>
 
-        <p>The Dynamic Container support in Rio is called a Cybernode. Cybernodes embrace the recognition
+        <p>The Dynamic Container support in Rio is called a
+            <a href="apidocs/org/rioproject/cybernode/Cybernode.html">Cybernode</a>. Cybernodes embrace the recognition
             that the network is composed of heterogeneous compute resources with multiple architectures,
             operating systems - all with different capabilities. The Cybernode provides a lightweight
             dynamic 'agent' turning heterogeneous compute resources into services available through the

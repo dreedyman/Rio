@@ -3,7 +3,9 @@
     <body>
         <section name="OperationalString">
             <p>
-                The OperationalString is the unit of deployment in Rio. It
+                The
+                <a href="../apidocs/org/rioproject/opstring/OperationalString.html">OperationalString</a>
+                is the unit of deployment in Rio. It
                 contains definitions that provide context on how to provision,
                 manage, monitor and instantiate services through the network. An
                 OperationalString is created through the use of a Groovy DSL. This

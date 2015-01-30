@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Manual Pages</title>
+        <author email="dennis.reedy@gmail.com">Dennis Reedy</author>
+    </properties>
+    <body>
+        <p>
+            The following "manual pages" define how to configure Rio services and tools.
+        </p>
+        <ul>
+            <li><a href="./apidocs/org/rioproject/start/package-summary.html#package.description">System</a> - Describes bootstrap and initialization attributes for the Rio system.</li>
+            <li><a href="./apidocs/org/rioproject/cybernode/package-summary.html#package.description">Cybernode</a> - Lightweight Dynamic ServiceBean Container, turns a compute resource into a dynamic service on the network.</li>
+            <li><a href="./apidocs/org/rioproject/monitor/package-summary.html#package.description">Provision Monitor</a> - Provides allocation, monitoring and management of Services described in Operational Strings</li>
+            <li><a href="./apidocs/org/rioproject/impl/event/package-summary.html#package.description">Events</a> - Describes programming model and description of the Rio event approach.</li>
+            <li><a href="./apidocs/org/rioproject/impl/watch/package-summary.html#package.description">Watches</a> - Describes the watch framework, used for monitoring performance and other measurable aspects of distributed system execution using Rio.</li>
+        </ul>
+    </body>
+</document>

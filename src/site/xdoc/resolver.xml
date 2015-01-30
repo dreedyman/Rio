@@ -25,20 +25,46 @@
             </div>
             <p>
                 The Rio Resolver currently resolves artifacts using configured
-                Maven 2 repositories. Using the declaration(s) found in Maven
-                POMs and settings. The Rio Resolver is implemented using Aether,
-                and the Rio Resolver simply uses Maven repositories to obtain declared
-                artifacts and dependencies.
+                Maven 2 repositories. Using the declaration(s) found in Resolver
+                configuration, and Maven POMs and settings. The Rio Resolver is
+                implemented using Aether, and the Rio Resolver simply uses Maven
+                repositories to obtain declared artifacts and dependencies.
             </p>
+            <p>
+                The Resolver configuration by default is in <tt>${rio.home}/config/resolverConfig.groovy</tt>
+                directory. This file is used to configure the
+                <a href="apidocs/org/rioproject/resolver/SettableResolver.html">SettableResolver</a>,
+                defining the resolver jar file name as well as the remote Maven repositories that the
+                resolver will use.
+                <br/>
+                <br/>
+                <div class="source">
+                <pre>
+resolver {
+    jar = "resolver-aether"
+    repositories = ["rio"    : "http://www.rio-project.org/maven2",
+                    "central": "http://repo1.maven.org/maven2"]
+}</pre>
+                </div> <br/>
+                The resolver configuration above shows the name of the jar file to locate, as well as the
+                repositories to use. The order in which these repositories are listed is the order in which they
+                will be searched.
 
+                If you have configured repositories into your ~/.m2/settings.xml, those repositories
+                will be appended to the repositories listed in the resolverConfig.groovy file.
+            </p>
+            <br/><br/>
+            <div id="tipbox">
+                <img src="images/check.gif"/>
+                You can override the location of the resolverConfig.groovy file by using
+                the <tt>org.rioproject.resolver.config</tt> system property.
+            </div>
+            <br/>
             <p>
                 The Rio Resolver abstracts the underlying dependency
                 resolution implementation in order to give the flexibility to
                 potentially support other repository based dependency management
-                approaches.
-                <br/>
-                <br/>
-                In the future we may seek to provide support for
+                approaches. In the future we may seek to provide support for
                 <a href="http://ant.apache.org/ivy/">Ivy</a>
                 or the
                 <a href="http://www.osgi.org/Repository/HomePage">OSGi Bundle Repository</a>.
@@ -110,7 +136,7 @@
                 of artifacts in opstrings with Rio. Previously, you declared jars as
                 resources for both the interface and service implementation classes. With the
                 introduction of artifact declaration in opstrings, you now just declare the
-                <tt>ggroupId:artifactId[:type[:classifier]]:version</tt>
+                <tt>groupId:artifactId[:type[:classifier]]:version</tt>
                 instead.
             </p>
             <p>
@@ -166,8 +192,8 @@
             </div>
             <p>
                 Artifacts and dependencies are resolved from repositories. The Rio
-                resolver obtains repository configuration from POMs and from
-                your<tt>settings.xml</tt>. When service artifacts are being resolved,
+                resolver obtains repository configuration from the <tt>resolverConfig.groovy</tt> file,
+                from POMs and from your <tt>settings.xml</tt>. When service artifacts are being resolved,
                 repository configurations are lazily obtained, appending configured
                 repository definitions from POMs (if declared), and filtering them
                 against any declared mirror declarations in<tt>settings.xml</tt>.
@@ -178,8 +204,8 @@
                 <img src="images/check.gif"/>
                 It is generally a good idea that the &lt;repositories&gt;
                 section be removed from POMs, and repositories be specified only in
-                settings.xml. This makes for cleaner and predictable
-                deployments.
+                either resolverConfig.groovy or in settings.xml. This makes for cleaner
+                and predictable deployments.
             </div>
             <br/>
             <p>

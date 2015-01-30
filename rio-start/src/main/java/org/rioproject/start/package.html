@@ -7,10 +7,7 @@
     <title>Boot Environment Configuration</title></head>
 <body>
 Provides utilities to bootstrap and initialize the Rio operational
-environment. Rio uses the <a href="http://river.apache.org/">Apache River</a> Technology
-<a href="http://river.apache.org/doc/api/net/jini/config/Configuration.html">Configuration</a>
-approach to define the platform and components to create and
-initialize. This package document presents the following information:<br>
+environment. This package document presents the following information:<br>
 <ul>
     <li><a href="#ClassLoader_hierarchy">Understanding the classpath</a></li>
     <li><a href="#Configuring_Boot_Attributes">Configuring Boot Attributes</a></li>
@@ -20,15 +17,13 @@ initialize. This package document presents the following information:<br>
 </big>
 When Rio starts, the classpath is set the to the
 following: <span style="font-family: monospace;">rio-platform.jar, </span><span style="font-family: monospace;">rio-start.jar</span>
-, <span style="font-family: monospace;">resolver-api.jar</span>,&nbsp; <span style="font-family: monospace;">$JAVA_HOME/lib/tools.jar</span>,&nbsp;
+, <span style="font-family: monospace;">resolver-api.jar</span>,&nbsp; <span style="font-family: monospace;">${java.home}/lib/tools.jar</span>,&nbsp;
 <span style="font-family: monospace;">start.jar</span> ,&nbsp; <span
         style="font-family: monospace;">jsk-platform.jar</span>, and all jars found in the &nbsp; <span
-        style="font-family: monospace;">$RIO_HOME/lib/logging directory</span>.
+        style="font-family: monospace;">${rio.home}/lib/logging directory</span>.
 The remaining jars are dynamically loaded by the <span style="font-family: monospace;">CommonClassLoader</span>
-based on the <a href="#platformDir">platform configuration</a>. The <a href="#Default_Platform_Configuration">default
-    platform configuration</a>
-is loaded as a resource from boot.jar (META-INF/platform.xml) declares
-the following:<br>
+based on the <a href="#platformDir">platform configuration</a>. By default,
+the following are loaded into the platform:<br>
 <br>
 <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
     <tbody>
@@ -42,30 +37,29 @@ the following:<br>
         </td>
     </tr>
     <tr>
-        <td style="vertical-align: top;">rio-api.jar<br>
+        <td style="vertical-align: top;">rio-api-${rio.version}.jar<br>
         </td>
-        <td style="vertical-align: top;">${RIO_HOME}/lib-dl<br>
+        <td style="vertical-align: top;">${rio.home}/lib-dl<br>
         </td>
         <td style="vertical-align: top;">Rio core technology platform
             client (download) classes <br>
         </td>
     </tr>
     <tr>
-        <td style="vertical-align: top;">rio-lib.jar</td>
-        <td style="vertical-align: top;">${RIO_HOME}/lib</td>
+        <td style="vertical-align: top;">rio-lib-${rio.version}.jar</td>
+        <td style="vertical-align: top;">${rio.home}/lib</td>
         <td style="vertical-align: top;">Rio core technology platform
             classes
         </td>
     </tr>
 
     <tr>
-        <td style="vertical-align: top;">jsk-lib.jar<br>
+        <td style="vertical-align: top;">jsk-lib-${river.version}.jar<br>
         </td>
-        <td style="vertical-align: top;">${JINI_LIB}<br>
+        <td style="vertical-align: top;">${rio.home}/lib<br>
         </td>
-        <td style="vertical-align: top;">The Jini 2.1 technology required
-            platform classes. More information on Jini technology can be found <a href="http://river.apache.org/"
-                                                                                  target="_blank">here</a><br>
+        <td style="vertical-align: top;">The Apache River required
+            platform classes. More information on Apache River can be found <a href="http://river.apache.org/" target="_blank">here</a><br>
         </td>
     </tr>
     </tbody>
@@ -78,19 +72,17 @@ follows:<br>
     <li>Provides attributes for creating {@link org.rioproject.system.capability.PlatformCapability} classes and
         declaring what jars will be common across all service classloaders. If jars are common they are loaded by the
         CommonClassLoader, and are in the
-        classpath of all child class loaders. By default Rio and Jini technology jars are common across all service
+        classpath of all child class loaders. By default Rio and Apache River jars are common across all service
         classloaders.
     </li>
     <li>For platform capabilities that are not loaded by the common
         classloader, services that declare that dependency will have the
         capability loaded by the service's classloader.
     </li>
-    <li>Provides a manifest of the platform jars that can be loaded.</li>
 </ul>
 Platform configuration files are loaded when Rio starts. The contents
 of the org.rioproject.boot.platformDir directory will be scanned at
-startup time. Each .xml file will be parsed for &lt;platform&gt;
-declarations.<br>
+startup time. Each .groovy file will processed.<br>
 <br>
 It is important to understand the class loader hierarchy. The approach
 is to enable a platform oriented framework conducive towards creating a
@@ -127,21 +119,23 @@ starting Rio is as follows:<br>
 <br>
 <span style="font-weight: bold;">AppCL</span> - Contains the main()
 class of the container. Main-Class in
-manifest points to <span style="font-family: monospace;">com.sun.jini.start.ServiceStarter</span><br>
+manifest points to <span style="font-family: monospace;">org.rio.project.start.ServiceStarter</span><br>
 Classpath:&nbsp; <span style="font-family: monospace;">rio-platform.jar, </span><span style="font-family: monospace;">rio-start.jar</span>
-, <span style="font-family: monospace;">resolver-api.jar</span>,&nbsp; <span style="font-family: monospace;">$JAVA_HOME/lib/tools.jar</span>,&nbsp;
+,  <span style="font-family: monospace;">${java.home}/lib/tools.jar</span>,&nbsp;
 <span style="font-family: monospace;">start.jar</span>, <span
         style="font-family: monospace;">jsk-platform.jar</span><br>
 Codebase: none<br>
 <br>
-<span style="font-weight: bold;">CommonClassLoader</span> - Contains
-the common Rio and
-Jini technology classes (and other declared common platform JARs) to be
-made available to its children.<br>
-Classpath: Common JARs such as <span style="font-family: monospace;">rio-api.jar, rio-lib.jar</span><br>
-Codebase: Context dependent. The codebase returned is the codebase of
-the specific child CL that is the current context of the request.<br>
+<span style="font-weight: bold;">Resolver CL</span> - Contains classes for working with the <a href="">Resolver</a>.<br>
 <br>
+    <span style="font-weight: bold;">CommonClassLoader</span> - Contains
+    the common Rio and
+    Apache River classes (and other declared common platform JARs) to be
+    made available to its children.<br>
+    Classpath: Common JARs such as <span style="font-family: monospace;">rio-api.jar, rio-lib.jar</span><br>
+    Codebase: Context dependent. The codebase returned is the codebase of
+    the specific child CL that is the current context of the request.<br>
+    <br>
 <span style="font-weight: bold;">Service-nCL</span> - Contains the
 service specific implementation classes.<br>
 Classpath: serviceImpl.jar<br>
@@ -168,18 +162,15 @@ each configuration entry name is associated with the component name <span style=
                 <td style="vertical-align: top; text-align: right; font-weight: bold;">Default:<br>
                 </td>
                 <td style="vertical-align: top;"><span
-                        style="font-family: monospace;">${RIO_HOME}${/}config${/}platform</span><br>
+                        style="font-family: monospace;">${rio.home}${/}config${/}platform</span><br>
                 </td>
             </tr>
             <tr>
                 <td style="vertical-align: top; text-align: right; font-weight: bold;">Description:<br>
                 </td>
                 <td style="vertical-align: top;">The platformDir property
-                    is scanned at system startup time. For each file ending in .xml or .groovy, the
-                    file is parsed for Platform Configuration declarations. The platform
-                    element contains capability declarations that document the qualitative
-                    capabilities a compute resource will advertise and make available for
-                    services to use.<br>
+                    is scanned at system startup time. For each file ending in .groovy, the
+                    file is parsed for Platform Configuration declarations. <br>
                 </td>
             </tr>
             </tbody>
@@ -248,7 +239,7 @@ Configuration</span></big></big><br>
 The 'platform' defines the support and technology that Rio core
 services (Cybernode &amp; Provisioner) include as part of their
 environment. Configuring the platform involves working with the
-<span style="font-family: monospace;">RIO_HOME/config/platform </span>directory.<br>
+<span style="font-family: monospace;">rio.home/config/platform </span>directory.<br>
 <br>
 This directory contains platform configuration files. The Platform
 configuration file is used as follows:<br>
@@ -256,7 +247,7 @@ configuration file is used as follows:<br>
     <li>Provides attributes for creating PlatformCapability classes and
         declaring what jars will be common across all service classloaders. If
         jars are common they are loaded by the CommonClassLoader, and are in
-        the classpath of all child class loaders. By default Rio and Jini
+        the classpath of all child class loaders. By default Rio and Apache River
         technology jars are common across all service classloaders. For
         platform capabilities that are not loaded by the common classloader,
         services that declare that dependency will have the capability loaded
@@ -266,7 +257,7 @@ configuration file is used as follows:<br>
 </ul>
 
 Platform configuration files are loaded when Rio starts. The contents
-of this directory will be scanned at startup time. Each .groovy (and .xml) file will
+of this directory will be scanned at startup time. Each .groovy file will
 be parsed.<br>
 <br>
 The default platform configuration defines the core jars required for Rio. It's content is as follows:<br>
@@ -283,7 +274,7 @@ class CommonPlatformConfig {<br>
       <br>
 &nbsp;&nbsp;&nbsp; def getPlatformCapabilityConfigs() {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; def configs = []<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String libDir = System.getProperty("RIO_HOME")+File.separator+"lib"+File.separator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String libDir = System.getProperty("rio.home")+File.separator+"lib"+File.separator<br>
       <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; configs &lt;&lt; new PlatformCapabilityConfig("Commons Compress",<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
