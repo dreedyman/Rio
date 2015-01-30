@@ -61,10 +61,7 @@
                         <li>Spring</li>
                         <li>Maven based artifact resolution</li>
                     </ul>
-                    <li>
-                        <font color="blue">NEW</font>
-                        Integration with Drools for rules based SLA Management
-                    </li>
+                    <li>Integration with Drools for rules based SLA Management</li>
                 </ul>
             </div>
         </section>
