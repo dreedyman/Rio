@@ -91,7 +91,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * Object supporting remote semantics required for an
      * OperationalStringManager
      */
-    private final OperationalStringManager proxy;
+    private OperationalStringManager proxy;
     /**
      * A List of scheduled TimerTasks
      */
@@ -118,7 +118,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     private StateManager stateManager;
     private ServiceProvisioner provisioner;
     private Uuid uuid;
-    private final boolean standAlone;
+    private boolean standAlone;
+    private final OpStringManager parent;
 
     /**
      * Create an DefaultOpStringManager, making it available to receive incoming
@@ -126,26 +127,28 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param opString The OperationalString to manage
      * @param parent   The DefaultOpStringManager parent. May be null
-     * @param mode     Whether the OperationalStringManager is the active manager
      * @param config   Configuration object
      * @param opStringMangerController The managing entity for OpStringManagers
-     * @throws java.rmi.RemoteException if the DefaultOpStringManager cannot export itself
      */
     public DefaultOpStringManager(final OperationalString opString,
                                   final OpStringManager parent,
-                                  final boolean mode,
                                   final Configuration config,
-                                  final OpStringManagerController opStringMangerController) throws IOException {
+                                  final OpStringManagerController opStringMangerController) {
 
+        this.opString = opString;
+        this.parent = parent;
         this.config = config;
         this.opStringMangerController = opStringMangerController;
-        Configuration myConfig = (config == null ? EmptyConfiguration.INSTANCE : config);
+    }
+
+    public void initialize(final boolean mode) throws IOException {
         try {
             exporter = ExporterConfig.getExporter(config, CONFIG_COMPONENT, "opStringManagerExporter");
             if (logger.isDebugEnabled())
                 logger.debug("Deployment [{}] using exporter {}", opString.getName(), exporter);
 
             /* Get the ProxyPreparer for ServiceProvisionListener instances */
+            Configuration myConfig = (config == null ? EmptyConfiguration.INSTANCE : config);
             serviceProvisionListenerPreparer = (ProxyPreparer) myConfig.getEntry(CONFIG_COMPONENT,
                                                                                  "serviceProvisionListenerPreparer",
                                                                                  ProxyPreparer.class,
@@ -155,7 +158,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
 
         proxy = (OperationalStringManager) exporter.export(this);
-        this.opString = opString;
+
         this.active.set(mode);
         if (parent != null) {
             addParent(parent);
@@ -302,10 +305,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     }
 
     /**
-     * Initialize all ServiceElementManager instances
+     * Create all ServiceElementManager instances
      *
-     * @param mode Whether the ServiceElementManager should actively manage (allocate) services. This will
-     * also set the DefaultOpStringManager active Property
      * @param provisioner The ServiceProvisioner
      * @param uuid The Uuid of the ProvisionMonitorImpl. If the uuid of a
      * discovered service matches our uuid, don't spend the overhead of creating
@@ -317,13 +318,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @return A map of reasons and corresponding exceptions from creating
      *         service element manager instances. If the map has no entries there
      *         are no errors
-     * @throws Exception if there are unrecoverable errors
      */
-    Map<String, Throwable> init(final boolean mode,
-                                final ServiceProvisioner provisioner,
-                                final Uuid uuid,
-                                final ServiceProvisionListener listener) throws Exception {
-        this.active.set(mode);
+    Map<String, Throwable> createServiceElementManagers(final ServiceProvisioner provisioner,
+                                                        final Uuid uuid,
+                                                        final ServiceProvisionListener listener) {
         this.provisioner = provisioner;
         this.uuid = uuid;
         Map<String, Throwable> map = new HashMap<String, Throwable>();
@@ -346,7 +344,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                             sElem.getName(), sElem.getOperationalStringName(),
                             e);
                 map.put(sElem.getName(), cause);
-                throw e;
             }
         }
         return (map);

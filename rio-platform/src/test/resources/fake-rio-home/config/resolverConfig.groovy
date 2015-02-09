@@ -1,3 +1,5 @@
+import org.rioproject.RioVersion
+
 /* test resolver configuration*/
 
 String hostName = InetAddress.getLocalHost().getHostName()
@@ -6,7 +8,7 @@ println "hostName: ${hostName}, address: ${address}"
 boolean onEnclave = (hostName.endsWith("wpafb.af.mil") || address.startsWith("10.131"))
 
 resolver {
-    jar = "resolver-aether"
+    jar = "${System.properties['rio.home']}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
 
     if (onEnclave) {
         repositories = ["repo": "http://10.131.7.138:7001"]

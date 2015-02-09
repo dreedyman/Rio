@@ -40,12 +40,14 @@ class ResolverConfiguration {
             resolverConfig = new File(System.properties[RESOLVER_CONFIG])
         }
         if(!resolverConfig.exists())
-            logger.warn("The resolver configuration file does not exist {}", resolverConfig.path)
+            logger.warn("The resolver configuration file does not exist {}, will", resolverConfig.path)
+        else
+            logger.info("Using resolver configuration ${resolverConfig}")
     }
 
-    String getResolverJarName() {
-        String resolverJar = null
-        if(resolverConfig.exists()) {
+    String getResolverJar() {
+        String resolverJar = System.properties[RESOLVER_JAR]
+        if(resolverJar==null && resolverConfig.exists()) {
             def config = new ConfigSlurper().parse(resolverConfig.toURI().toURL())
             resolverJar = config.resolver.jar
         }

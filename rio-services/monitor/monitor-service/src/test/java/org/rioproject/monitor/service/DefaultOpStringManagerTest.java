@@ -43,9 +43,9 @@ public class DefaultOpStringManagerTest {
         OpStringManagerController opStringManagerController = new OpStringManagerController();
         DefaultOpStringManager manager = new DefaultOpStringManager(opString,
                                                                     parent,
-                                                                    active,
                                                                     config,
                                                                     opStringManagerController);
+        manager.initialize(active);
         Assert.assertTrue(manager.isStandAlone());
         Assert.assertTrue(manager.getParentCount()==0);
     }

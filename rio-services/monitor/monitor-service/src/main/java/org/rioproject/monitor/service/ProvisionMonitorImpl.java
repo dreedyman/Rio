@@ -326,24 +326,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             return (new OperationalStringManager[0]);
         ArrayList<OpStringManager> list = new ArrayList<OpStringManager>();
         list.addAll(Arrays.asList(opStringMangerController.getOpStringManagers()));
-        
-        /* Get the OperationalStringManager instances that may be initializing
-         * as well */
-        OpStringManager[] pendingMgrs = opStringMangerController.getPendingOpStringManagers();
-        
-        for(OpStringManager pendingMgr : pendingMgrs) {
-            boolean add = true;
-            for(OpStringManager mgr : list) {
-                if(mgr.getName().equals(pendingMgr.getName())) {
-                    add = false;
-                    break;
-                }
-            }
-            if(add)
-                list.add(pendingMgr);
-        }
-        //list.addAll(Arrays.asList(pendingMgrs));
-
         OperationalStringManager[] os = new OperationalStringManager[list.size()];
         int i = 0;
         for (OpStringManager opMgr : list) {
@@ -541,7 +523,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             if(!opStringMangerController.opStringExists(opString.getName())) {
                 logger.info("Deploying Operational String [{}]", opString.getName());
 
-                DeployRequest request = new DeployRequest(opString, (RemoteRepository[])null);
+                DeployRequest request = new DeployRequest(opString, null);
                 deploymentVerifier.verifyDeploymentRequest(request);
 
                 Map<String, Throwable> map = new HashMap<String, Throwable>();
@@ -651,7 +633,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
 
             TabularType tabularType = new TabularType("Deployments", "Deployments", row, new String[]{"Name"});
             tabularDataSupport = new TabularDataSupport(tabularType);
-            for (OpStringManager mgr : opStringMangerController.getPendingOpStringManagers()) {
+            for (OpStringManager mgr : opStringMangerController.getOpStringManagers()) {
                 Date deployed = null;
                 if (mgr.getDeploymentDates().length > 0) {
                     Date[] dDates = mgr.getDeploymentDates();

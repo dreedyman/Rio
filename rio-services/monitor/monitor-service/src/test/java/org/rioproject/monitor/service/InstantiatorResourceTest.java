@@ -121,9 +121,9 @@ public class InstantiatorResourceTest {
         OpStringManagerController opStringManagerController = new OpStringManagerController();
         manager = new DefaultOpStringManager(opString,
                                              parent,
-                                             active,
                                              config,
                                              opStringManagerController);
+        manager.initialize(active);
 
     }
 

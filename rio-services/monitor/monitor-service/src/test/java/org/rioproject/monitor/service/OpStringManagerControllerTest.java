@@ -63,12 +63,13 @@ public class OpStringManagerControllerTest {
 
     @Test
     public void concurrentCreationTest() throws ExecutionException, InterruptedException {
+        System.out.println("concurrentCreationTest\n----------------------");
         OpStringManagerController opStringManagerController = new OpStringManagerController();
         opStringManagerController.setConfig(new DynamicConfiguration());
         OperationalString opString = new OpString("concurrent", null);
 
         List<Future<OpStringManager>> futures = new ArrayList<Future<OpStringManager>>();
-        for(int i=0; i<50; i++) {
+        for(int i=0; i<100; i++) {
             Callable<OpStringManager> deployer = new Deployer(opStringManagerController, opString);
             FutureTask<OpStringManager> task = new FutureTask<OpStringManager>(deployer);
             futures.add(task);
@@ -89,19 +90,6 @@ public class OpStringManagerControllerTest {
         Deployer(OpStringManagerController opStringManagerController, OperationalString operationalString) {
             this.opStringManagerController = opStringManagerController;
             this.operationalString = operationalString;
-        }
-
-        public void run() {
-            Map<String, Throwable> errorMap = new HashMap<String, Throwable>();
-            try {
-                opStringManagerController.addOperationalString(operationalString,
-                                                               errorMap,
-                                                               null,
-                                                               TestUtil.createDeployAdmin(),
-                                                               null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
         public OpStringManager call() throws Exception {

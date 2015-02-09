@@ -34,16 +34,16 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class manages interactions with {@link OpStringManager} classes.
  */
 public class OpStringManagerController {
-    /** Collection for all OperationalString OpStringManager instances */
-    private final Set<OpStringManager> opStringManagers = new HashSet<OpStringManager>();
-    /** Collection for all pending (in process) OperationalString
-     * OpStringManager instances */
-    private final List<OpStringManager> pendingManagers = new ArrayList<OpStringManager>();
+    /**
+     * Collection for all OperationalString OpStringManager instances
+     */
     private ProvisionMonitorPeer provisionMonitorPeer;
     private Configuration config;
     private ProvisionMonitor serviceProxy;
@@ -53,6 +53,7 @@ public class OpStringManagerController {
     private Uuid uuid;
     private static Logger logger = LoggerFactory.getLogger(OpStringManagerController.class.getName());
     private DeploymentVerifier deploymentVerifier;
+    private final Map<String, OpStringManager> opStringManagerTable = new ConcurrentHashMap<String, OpStringManager>();
 
     void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {
         this.serviceProvisioner = serviceProvisioner;
@@ -96,12 +97,12 @@ public class OpStringManagerController {
         logger.trace("Terminating Operational String [{}]", opString.getName());
         OperationalString[] terminated = opStringManager.terminate(terminate);
         logger.info("Undeployed Operational String [{}]", opString.getName());
-        for(OperationalString os : terminated) {
+        for (OperationalString os : terminated) {
             eventProcessor.processEvent(new ProvisionMonitorEvent(serviceProxy,
                                                                   ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED,
                                                                   os));
         }
-        if(stateManager!=null)
+        if (stateManager != null)
             stateManager.stateChanged(opStringManager, true);
     }
 
@@ -111,23 +112,12 @@ public class OpStringManagerController {
      * @return Array of OperationalString objects
      */
     public OperationalString[] getOperationalStrings() {
-        if(opStringManagers.isEmpty())
-            return new OperationalString[0];
-        List<OpStringManager> list = new ArrayList<OpStringManager>();
-        for(OpStringManager opMgr : getOpStringManagers()) {
-            if(opMgr.isTopLevel())
-                list.add(opMgr);
+        List<OperationalString> list = new ArrayList<OperationalString>();
+        for(Map.Entry<String, OpStringManager> entry : opStringManagerTable.entrySet()) {
+            if (entry.getValue().isTopLevel())
+                list.add(entry.getValue().doGetOperationalString());
         }
-        OperationalString[] os = new OperationalString[list.size()];
-        int i = 0;
-        for (OpStringManager opMgr : list) {
-            try {
-                os[i++] = opMgr.doGetOperationalString();
-            } catch (Exception e) {
-                logger.warn("Getting all OperationalString instances", e);
-            }
-        }
-        return os;
+        return list.toArray(new OperationalString[list.size()]);
     }
 
     /**
@@ -138,33 +128,15 @@ public class OpStringManagerController {
      * not found
      */
     public OpStringManager getOpStringManager(final String name) {
-        if(name == null)
-            return (null);
-
-        OpStringManager mgr = null;
-        OpStringManager[] pendingMgrs = getPendingOpStringManagers();
-        for (OpStringManager pendingMgr : pendingMgrs) {
-            if (name.equals(pendingMgr.getName())) {
-                mgr = pendingMgr;
-                break;
-            }
-        }
-        if(mgr==null) {
-            for(OpStringManager opMgr : getOpStringManagers()) {
-                if(name.equals(opMgr.getName())) {
-                    mgr = opMgr;
-                    break;
-                }
-            }
-        }
-        return mgr;
+        if (name == null)
+            return null;
+        return opStringManagerTable.get(name);
     }
 
     /**
      * Get the primary OperationalStringManager for an opstring
      *
      * @param name The name of an OperationalString
-     *
      * @return The primary OperationalStringManager if found, or null if not
      */
     public OperationalStringManager getPrimary(final String name) {
@@ -203,7 +175,7 @@ public class OpStringManagerController {
             ProvisionMonitor peerMon = peer.getService();
             try {
                 DeployAdmin dAdmin = (DeployAdmin) peerMon.getAdmin();
-                if(dAdmin.hasDeployed(opStringName)) {
+                if (dAdmin.hasDeployed(opStringName)) {
                     OperationalStringManager mgr = dAdmin.getOperationalStringManager(opStringName);
                     if (mgr.isManaging()) {
                         primary = dAdmin;
@@ -228,160 +200,108 @@ public class OpStringManagerController {
      * @param opStringManager The OpStringManager to remove
      */
     public boolean remove(final OpStringManager opStringManager) {
-        boolean removed;
-        synchronized (opStringManagers) {
-            removed = opStringManagers.remove(opStringManager);
-        }
-        return removed;
+        return  opStringManagerTable.remove(opStringManager.getName())!=null;
     }
 
     /**
      * Add an OpStringManager to this ProvisionMonitor.
      *
      * @param opString The OperationalString to add
-     * @param map A Map to store any exceptions produced while loading the
-     * opString
-     * @param parent The parent of the opString. The addOperationalString
-     * method recursively processes OperationalString instances and uses this
-     * parameter to indicate a nested OperationalString
-     * @param dAdmin The managing DeployAdmin, if the OperationalString is
-     * being added in an inactive mode, as a backup. If this value is null,
-     * this ProvisionMonitor is set to be active
+     * @param map      A Map to store any exceptions produced while loading the
+     *                 opString
+     * @param parent   The parent of the opString. The addOperationalString
+     *                 method recursively processes OperationalString instances and uses this
+     *                 parameter to indicate a nested OperationalString
+     * @param dAdmin   The managing DeployAdmin, if the OperationalString is
+     *                 being added in an inactive mode, as a backup. If this value is null,
+     *                 this ProvisionMonitor is set to be active
      * @param listener A ServiceProvisionListener that will be set to the
-     * OperationalStringManager for notification of services as they are
-     * deployed initially.
-     *
+     *                 OperationalStringManager for notification of services as they are
+     *                 deployed initially.
      * @return An OpStringManager
-     *
-     * @throws Exception if an OpStringManger cannot be created
+     * @throws IOException if an OpStringManger cannot be created
      */
-    public synchronized OpStringManager addOperationalString(final OperationalString opString,
-                                                             final Map<String, Throwable> map,
-                                                             final OpStringManager parent,
-                                                             final DeployAdmin dAdmin,
-                                                             final ServiceProvisionListener listener) throws Exception {
-        OpStringManager opMgr = null;
-        boolean active = dAdmin==null;
-        try {
-            if(!opStringExists(opString.getName())) {
-                if(logger.isTraceEnabled())
-                    logger.trace("Adding OpString ["+opString.getName()+"] active ["+active+"]");
+    public  OpStringManager addOperationalString(final OperationalString opString,
+                                                final Map<String, Throwable> map,
+                                                final OpStringManager parent,
+                                                final DeployAdmin dAdmin,
+                                                final ServiceProvisionListener listener) throws IOException {
+        /* If there is no DeployAdmin active is true */
+        boolean active = dAdmin == null;
+        OpStringManager opMgr = new DefaultOpStringManager(opString, parent, config, this);
+        if (opStringManagerTable.putIfAbsent(opString.getName(), opMgr) == null) {
+            if (logger.isInfoEnabled())
+                logger.info("Adding OpString [" + opString.getName() + "] active [" + active + "]");
+            ((DefaultOpStringManager) opMgr).setServiceProxy(serviceProxy);
+            ((DefaultOpStringManager) opMgr).setEventProcessor(eventProcessor);
+            ((DefaultOpStringManager) opMgr).setStateManager(stateManager);
 
+            opMgr.initialize(active);
+            Map<String, Throwable> errorMap =
+                ((DefaultOpStringManager) opMgr).createServiceElementManagers(serviceProvisioner, uuid, listener);
+            if (dAdmin != null) {
+                OperationalStringManager activeMgr;
+                Map<ServiceElement, ServiceBeanInstance[]> elemInstanceMap = new HashMap<ServiceElement, ServiceBeanInstance[]>();
                 try {
-                    opMgr = new DefaultOpStringManager(opString, parent, active, config, this);
-                    ((DefaultOpStringManager)opMgr).setServiceProxy(serviceProxy);
-                    ((DefaultOpStringManager)opMgr).setEventProcessor(eventProcessor);
-                    ((DefaultOpStringManager)opMgr).setStateManager(stateManager);
-                } catch (IOException e) {
-                    logger.warn("Creating OpStringManager", e);
-                    return(null);
-                }
-                synchronized(pendingManagers) {
-                    pendingManagers.add(opMgr);
-                }
-
-                boolean added;
-                synchronized(opStringManagers) {
-                    added = opStringManagers.add(opMgr);
-                }
-                if(!added) {
-                    logger.info("Operational String [{}] already deployed", opString.getName());
-                    return null;
-                }
-                Map<String, Throwable> errorMap = ((DefaultOpStringManager)opMgr).init(active, serviceProvisioner, uuid, listener);
-
-                if(dAdmin!=null) {
-                    OperationalStringManager activeMgr;
-                    Map<ServiceElement, ServiceBeanInstance[]> elemInstanceMap = new HashMap<ServiceElement, ServiceBeanInstance[]>();
-                    try {
-                        activeMgr = dAdmin.getOperationalStringManager(opString.getName());
-                        ServiceElement[] elems = opString.getServices();
-                        for (ServiceElement elem : elems) {
-                            try {
-                                ServiceBeanInstance[] instances = activeMgr.getServiceBeanInstances(elem);
-                                elemInstanceMap.put(elem, instances);
-                            } catch (Exception e) {
-                                logger.warn("Getting ServiceBeanInstances from active testManager", e);
-                            }
+                    activeMgr = dAdmin.getOperationalStringManager(opString.getName());
+                    ServiceElement[] elems = opString.getServices();
+                    for (ServiceElement elem : elems) {
+                        try {
+                            ServiceBeanInstance[] instances = activeMgr.getServiceBeanInstances(elem);
+                            elemInstanceMap.put(elem, instances);
+                        } catch (Exception e) {
+                            logger.warn("Getting ServiceBeanInstances from active testManager", e);
                         }
-                        ((DefaultOpStringManager)opMgr).startManager(listener, elemInstanceMap);
-                    } catch(Exception e) {
-                        logger.warn("Getting active OperationalStringManager", e);
                     }
-                } else {
-                    ((DefaultOpStringManager)opMgr).startManager(listener);
-                }
-
-                if(map != null)
-                    map.putAll(errorMap);
-                if(stateManager!=null)
-                    stateManager.stateChanged(opMgr, false);
-                OperationalString[] nestedStrings = opString.getNestedOperationalStrings();
-                if(logger.isTraceEnabled()) {
-                    logger.trace("[{}] nested OperationalString count: [{}]", opString.getName(), nestedStrings.length);
-                }
-                for (OperationalString nestedString : nestedStrings) {
-                    if(logger.isTraceEnabled()) {
-                        logger.trace("Processing nested OperationalString [{}]", nestedString.getName());
-                    }
-                    addOperationalString(nestedString, map, opMgr, dAdmin, listener);
-                    if(logger.isTraceEnabled()) {
-                        logger.trace("Completed processing nested OperationalString [{}]", nestedString.getName());
-                    }
+                    ((DefaultOpStringManager) opMgr).startManager(listener, elemInstanceMap);
+                } catch (Exception e) {
+                    logger.warn("Getting active OperationalStringManager", e);
                 }
             } else {
-                if(logger.isTraceEnabled()) {
-                    logger.trace("OperationalString [{}] exists, check for parent [{}]", opString.getName(), parent);
-                }
-                opMgr = getOpStringManager(opString.getName());
-                if(parent != null) {
-                    if(opMgr != null) {
-                        parent.addNested(opMgr);
-                    }
-                }
-                if(logger.isTraceEnabled()) {
-                    logger.trace("Completed processing OperationalString [{}] exists", opString.getName());
-                }
+                ((DefaultOpStringManager) opMgr).startManager(listener);
             }
-        } finally {
-            synchronized(pendingManagers) {
-                pendingManagers.remove(opMgr);
+
+            if (map != null)
+                map.putAll(errorMap);
+            if (stateManager != null)
+                stateManager.stateChanged(opMgr, false);
+            OperationalString[] nestedStrings = opString.getNestedOperationalStrings();
+            if (logger.isTraceEnabled()) {
+                logger.trace("[{}] nested OperationalString count: [{}]", opString.getName(), nestedStrings.length);
+            }
+            for (OperationalString nestedString : nestedStrings) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Processing nested OperationalString [{}]", nestedString.getName());
+                }
+                addOperationalString(nestedString, map, opMgr, dAdmin, listener);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Completed processing nested OperationalString [{}]", nestedString.getName());
+                }
             }
         }
-        if(opMgr!=null && active) {
+
+        if (active) {
             ProvisionMonitorEvent event = new ProvisionMonitorEvent(serviceProxy,
                                                                     ProvisionMonitorEvent.Action.OPSTRING_DEPLOYED,
                                                                     opMgr.doGetOperationalString());
-            if(opMgr.getOAR()!=null)
+            if (opMgr.getOAR() != null)
                 event.setRemoteRepositories(opMgr.getRemoteRepositories());
             eventProcessor.processEvent(event);
         }
-        if(logger.isTraceEnabled())
-            logger.trace("Return from add OperationalString [{}]", opString.getName());
+        if (logger.isTraceEnabled())
+            logger.trace("Return from add OperationalString [{}], mgr: {}", opString.getName(), opMgr);
         return opMgr;
     }
 
     public void shutdownAllManagers() {
-        for(OpStringManager opMgr : getOpStringManagers()) {
+        for (OpStringManager opMgr : getOpStringManagers()) {
             opMgr.terminate(false);
         }
     }
 
     public OpStringManager[] getOpStringManagers() {
-        OpStringManager[] mgrs;
-        synchronized(opStringManagers) {
-            mgrs = opStringManagers.toArray(new OpStringManager[opStringManagers.size()]);
-        }
-        return mgrs;
-    }
-
-    public OpStringManager[] getPendingOpStringManagers() {
-        OpStringManager[] pendingMgrs;
-        synchronized(pendingManagers) {
-            pendingMgrs = pendingManagers.toArray(
-                new OpStringManager[pendingManagers.size()]);
-        }
-        return pendingMgrs;
+        Collection<OpStringManager> mgrs = opStringManagerTable.values();
+        return mgrs.toArray(new OpStringManager[mgrs.size()]);
     }
 
 
@@ -389,37 +309,20 @@ public class OpStringManagerController {
      * Determine if the OperationalString with the provided name is deployed
      *
      * @param opStringName The name of the OperationalString
-     *
      * @return true if the  OperationalString with the provided name is loaded
      */
     public synchronized boolean opStringExists(final String opStringName) {
-        boolean exists = false;
-        OpStringManager[] pending = getPendingOpStringManagers();
-        for (OpStringManager mgr : pending) {
-            if (mgr.getName().equals(opStringName)) {
-                exists = true;
-                break;
-            }
-        }
-        if(!exists) {
-            for(OpStringManager opMgr : getOpStringManagers()) {
-                if(opStringName.equals(opMgr.getName())) {
-                    exists = true;
-                    break;
-                }
-            }
-        }
-        return (exists);
+        return opStringManagerTable.get(opStringName)!=null;
     }
 
-     /**
+    /**
      * Dump an error map associated with the loading and/or addition of an
      * OperationalString
      *
      * @param errorMap The map containing exceptions
      */
     public void dumpOpStringError(Map errorMap) {
-        if(!errorMap.isEmpty()) {
+        if (!errorMap.isEmpty()) {
             Set keys = errorMap.keySet();
             StringBuilder sb = new StringBuilder();
             sb.append("+========================+\n");
@@ -441,8 +344,16 @@ public class OpStringManagerController {
                 }
             }
             sb.append("\n+========================+");
-            if(logger.isDebugEnabled())
+            if (logger.isDebugEnabled())
                 logger.debug(sb.toString());
+        }
+    }
+
+    class Deployer implements Callable<OpStringManager> {
+
+        @Override
+        public OpStringManager call() throws Exception {
+            return null;
         }
     }
 }

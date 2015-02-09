@@ -1,9 +1,25 @@
+/*
+ * Copyright to the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.rioproject.resolver;
 
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.rioproject.RioVersion;
 
 import java.io.File;
 import java.util.List;
@@ -35,9 +51,11 @@ public class ResolverConfigurationTest {
     @Test
     public void testGetJar() throws Exception {
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-        String jarName = resolverConfiguration.getResolverJarName();
+        String jarName = resolverConfiguration.getResolverJar();
         Assert.assertNotNull(jarName);
-        Assert.assertTrue(jarName.equals("resolver-aether"));
+        Assert.assertTrue(jarName.equals(String.format("%s/lib/resolver/resolver-aether-%s.jar",
+                                                       System.getProperty("rio.home"),
+                                                       RioVersion.VERSION)));
     }
 
     @Test
@@ -58,7 +76,7 @@ public class ResolverConfigurationTest {
         System.clearProperty("rio.home");
         System.clearProperty(ResolverConfiguration.RESOLVER_CONFIG);
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-        String jarName = resolverConfiguration.getResolverJarName();
+        String jarName = resolverConfiguration.getResolverJar();
         Assert.assertNull(jarName);
     }
 }

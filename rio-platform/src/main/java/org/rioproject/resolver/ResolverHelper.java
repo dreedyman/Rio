@@ -132,30 +132,38 @@ public final class ResolverHelper {
        return getResolver(resolverLoader);
     }
 
-    private static String getResolverJarFile() {
-        String resolverJarFile = System.getProperty(ResolverConfiguration.RESOLVER_JAR);
-        if(resolverJarFile==null || resolverJarFile.length()==0) {
-            String resolverJarName = resolverConfiguration.getResolverJarName();
-            if(resolverJarName==null)
-                resolverJarName = "resolver-aether";
+    static String getResolverJarFile() {
+        String resolverJarFile = resolverConfiguration.getResolverJar();
+        if(resolverJarFile!=null && !new File(resolverJarFile).exists()) {
+            logger.warn("The configured resolver jar file [{}] does not exist, will attempt to load default resolver",
+                        resolverJarFile);
+            resolverJarFile = null;
+        }
+        if(resolverJarFile==null) {
+            String resolverJarPrefix = "resolver-aether";
             String rioHome = RioHome.get();
-            if(rioHome==null || rioHome.length()==0) {
-                throw new RuntimeException("Unable to determine the location of Rio home, this must be set " +
-                                           "in order to load the "+resolverJarName+".jar");
+            if (rioHome == null || rioHome.length() == 0) {
+                String message = String.format("Unable to determine the location of Rio home, this must be set " +
+                                               "in order to load the default %s support", resolverJarPrefix);
+                logger.error(message);
+                throw new RuntimeException(message);
             }
-            File resolverLibDir = new File(rioHome+File.separator+"lib"+File.separator+"resolver");
-            if(resolverLibDir.exists() && resolverLibDir.isDirectory()) {
+            File resolverLibDir = new File(rioHome + File.separator + "lib" + File.separator + "resolver");
+            if (resolverLibDir.exists() && resolverLibDir.isDirectory()) {
                 File[] files = resolverLibDir.listFiles();
-                if(files!=null) {
-                    for(File file : files) {
-                        if(file.getName().startsWith(resolverJarName)) {
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.getName().startsWith(resolverJarPrefix)) {
                             resolverJarFile = file.getPath();
                             break;
                         }
                     }
                 }
             } else {
-                throw new RuntimeException("The resolver lib directory does not exist, tried using: "+resolverLibDir.getPath());
+                String message = String.format("The resolver lib directory does not exist, tried using: %s",
+                                               resolverLibDir.getPath());
+                logger.error(message);
+                throw new RuntimeException(message);
             }
         }
         if(logger.isDebugEnabled())

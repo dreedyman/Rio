@@ -24,16 +24,27 @@ import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimerTask;
 
 /**
- * Extends {@link org.rioproject.opstring.OperationalStringManager} and provides additional support for
- * working within the monitor
+ * Provides additional support for working within the monitor
  */
 public interface OpStringManager  {
+
+    /**
+     * Initialize the OpStringManager, exporting it and setting
+     * it up for service
+     *
+     * @param active  Whether the OpStringManager is the active manager
+     *
+     * @throws IOException if the OpStringManager cannot be exported.
+     */
+    void initialize(boolean active) throws IOException;
+
     /**
      * Get the active property
      *

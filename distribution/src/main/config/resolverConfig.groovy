@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.rioproject.RioVersion
 
 /*
  * This file is used to configure the org.rioproject.resolver.Resolver, defining
@@ -26,7 +27,7 @@
  * Add or remove entries as needed.
  */
 resolver {
-    jar = "resolver-aether"
+    jar = "${System.properties['rio.home']}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
 
     repositories = ["rio"    : "http://www.rio-project.org/maven2",
                     "central": "http://repo1.maven.org/maven2"]

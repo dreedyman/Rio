@@ -34,19 +34,19 @@
                 The Resolver configuration by default is in <tt>${rio.home}/config/resolverConfig.groovy</tt>
                 directory. This file is used to configure the
                 <a href="apidocs/org/rioproject/resolver/SettableResolver.html">SettableResolver</a>,
-                defining the resolver jar file name as well as the remote Maven repositories that the
+                defining the resolver jar file  as well as the remote Maven repositories that the
                 resolver will use.
                 <br/>
                 <br/>
                 <div class="source">
                 <pre>
 resolver {
-    jar = "resolver-aether"
+    jar = "${System.properties['rio.home']}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
     repositories = ["rio"    : "http://www.rio-project.org/maven2",
                     "central": "http://repo1.maven.org/maven2"]
 }</pre>
                 </div> <br/>
-                The resolver configuration above shows the name of the jar file to locate, as well as the
+                The resolver configuration above shows the jar file to use, as well as the
                 repositories to use. The order in which these repositories are listed is the order in which they
                 will be searched.
 
@@ -57,7 +57,9 @@ resolver {
             <div id="tipbox">
                 <img src="images/check.gif"/>
                 You can override the location of the resolverConfig.groovy file by using
-                the <tt>org.rioproject.resolver.config</tt> system property.
+                the <tt>org.rioproject.resolver.config</tt> system property. You can also override the
+                location of the resolver jar file by using
+                the <tt>org.rioproject.resolver.jar</tt> system property.
             </div>
             <br/>
             <p>
