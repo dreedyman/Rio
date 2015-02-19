@@ -43,7 +43,7 @@ public final class CommandLineHelper {
         StringBuilder builder = new StringBuilder();
         File rioLib = new File(RioHome.get(), "lib");
         builder.append(getFiles(rioLib, "rio-start", "groovy-all"));
-        File javaHome = new File(System.getProperty("JAVA_HOME", System.getProperty("java.home")));
+        File javaHome = new File(System.getProperty("java.home", System.getenv("JAVA_HOME")));
         File javaLib = new File(javaHome, "lib");
         logger.info("java lib: {}", javaLib.getPath());
         String toolsJar = getFiles(javaLib, "tools");
@@ -72,7 +72,7 @@ public final class CommandLineHelper {
      */
     public static String getJava() {
         StringBuilder jvmBuilder = new StringBuilder();
-        jvmBuilder.append(buildDirectory(System.getProperty("JAVA_HOME", System.getProperty("java.home")), "bin"));
+        jvmBuilder.append(buildDirectory(System.getProperty("java.home", System.getenv("JAVA_HOME")), "bin"));
         jvmBuilder.append("java");
         jvmBuilder.append(" ");
         return jvmBuilder.toString();
@@ -116,8 +116,7 @@ public final class CommandLineHelper {
     /**
      * Get the standard Rio JVM arguments
      *
-     * @return The JVM arguments for java.rmi.server.useCodebaseOnly, java.protocol.handler.pkgs, java.security.policy
-     * and RIO_HOME
+     * @return The JVM arguments for java.rmi.server.useCodebaseOnly, java.protocol.handler.pkgs, and java.security.policy
      */
     static String getStandardJVMArgs() {
         String rioHome = RioHome.get();
@@ -129,8 +128,6 @@ public final class CommandLineHelper {
         argsBuilder.append(" ");
         String policyDir = buildDirectory(rioHome, "policy");
         argsBuilder.append(getOption("java.security.policy", policyDir+"policy.all"));
-        argsBuilder.append(" ");
-        argsBuilder.append(getOption("RIO_HOME", rioHome));
         argsBuilder.append(" ");
 
         return argsBuilder.toString();
@@ -148,10 +145,10 @@ public final class CommandLineHelper {
      * @return A String suitable for to pass to the JVM for starting a service bean in it's own JVM.
      */
     public static String createInputArgs(final String normalizedServiceName,
-                                  final String serviceBindName,
-                                  final String sRegPort,
-                                  final String declaredJVMOptions,
-                                  final String logDir) {
+                                         final String serviceBindName,
+                                         final String sRegPort,
+                                         final String declaredJVMOptions,
+                                         final String logDir) {
         StringBuilder extendedJVMOptions = new StringBuilder();
         extendedJVMOptions.append(getStandardJVMArgs());
         if(declaredJVMOptions!=null)
@@ -160,6 +157,10 @@ public final class CommandLineHelper {
         extendedJVMOptions.append(getOption("rio.log.dir", logDir));
         extendedJVMOptions.append(" ");
         extendedJVMOptions.append(getOption("org.rioproject.service", normalizedServiceName));
+        extendedJVMOptions.append(" ");
+        extendedJVMOptions.append(getOption(Constants.WEBSTER, System.getProperty(Constants.WEBSTER)));
+        extendedJVMOptions.append(" ");
+        extendedJVMOptions.append(getOption(Constants.WEBSTER_ROOTS, "\""+System.getProperty(Constants.WEBSTER_ROOTS)+"\""));
         extendedJVMOptions.append(" ");
         extendedJVMOptions.append("-XX:HeapDumpPath=").append(logDir);
         StringBuilder argsBuilder = new StringBuilder();

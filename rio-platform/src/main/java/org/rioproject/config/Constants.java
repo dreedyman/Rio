@@ -22,12 +22,18 @@ package org.rioproject.config;
  */
 public interface Constants {
     static final String BASE_COMPONENT = "org.rioproject";
+    @Deprecated
+    static final String CODESERVER = BASE_COMPONENT+".webster";
     /**
      * System property set indicating the address and port of the Webster
      * instance created by this utility, in the form of :
      * <pre>http://address:port</pre>
      */
-    static final String CODESERVER = BASE_COMPONENT+".codeserver";
+    static final String WEBSTER = BASE_COMPONENT+".webster";
+    /**
+     * System property set indicating the roots that webster is serving
+     */
+    static final String WEBSTER_ROOTS = WEBSTER+".roots";
     /**
      * System property set when an RMI Registry is started
      */

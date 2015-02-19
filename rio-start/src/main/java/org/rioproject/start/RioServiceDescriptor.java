@@ -256,7 +256,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         String rioHome = System.getProperty("rio.home");
         List<URL> urlList = new ArrayList<URL>();
         if(rioHome==null) {
-            logger.warn("RIO_HOME not defined, no default platformDir");
+            logger.warn("rio.home not defined, no default platformDir");
         } else {
             defaultDir = rioHome+ File.separator+"config"+File.separator+"platform";
             PlatformLoader platformLoader = new PlatformLoader();

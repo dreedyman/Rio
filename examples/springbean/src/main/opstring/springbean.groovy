@@ -26,10 +26,10 @@ deployment(name:'Hello World Spring Example') {
     spring(name: 'Hello', config: 'hello-spring.xml') {
         interfaces {
             classes 'org.rioproject.examples.springbean.Hello'
-            artifact 'org.rioproject.examples.springbean:springbean-api:2.2'
+            artifact 'org.rioproject.examples.springbean:springbean-api:2.3'
         }
         implementation(class: 'org.rioproject.examples.springbean.service.HelloImpl') {
-            artifact 'org.rioproject.examples.springbean:springbean-service:2.2'
+            artifact 'org.rioproject.examples.springbean:springbean-service:2.3'
         }
         maintain 1
     }

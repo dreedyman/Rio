@@ -286,17 +286,11 @@ public class Webster implements Runnable {
             System.out.println("Webster listening on port : " + port);
         if(logger.isDebugEnabled())
             logger.debug("Webster listening on port : " + port);
-        //try {
-            pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
-            //new ThreadPool("Webster", minThreads, maxThreads);
-            if(debug)
-                System.out.println("Webster maxThreads ["+maxThreads+"]");
-            if(logger.isDebugEnabled())
-                logger.debug("Webster maxThreads [{}]", maxThreads);
-        //} catch(Exception e) {
-        //    logger.error("Could not create ThreadPool", e);
-        //    throw new RuntimeException("Could not create Thread Pool");
-        //}
+        pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
+        if(debug)
+            System.out.println("Webster maxThreads ["+maxThreads+"]");
+        if(logger.isDebugEnabled())
+            logger.debug("Webster maxThreads [{}]", maxThreads);
         if(soTimeout>0) {
             if(debug)
                 System.out.println("Webster Socket SO_TIMEOUT set to ["+soTimeout+"] millis");
@@ -304,11 +298,12 @@ public class Webster implements Runnable {
                 logger.debug("Webster Socket SO_TIMEOUT set to [{}]] millis", soTimeout);
         }
 
-        /* Set system property */        
-        System.setProperty(Constants.CODESERVER, "http://"+ss.getInetAddress().getHostAddress()+":"+port);
+        /* Set system properties */
+        System.setProperty(Constants.WEBSTER, "http://"+ss.getInetAddress().getHostAddress()+":"+port);
+        System.setProperty(Constants.WEBSTER_ROOTS, roots);
 
         Thread runner = new Thread(this, "Webster");
-        //runner.setDaemon(true);
+        runner.setDaemon(true);
         runner.start();
     }
 
@@ -395,25 +390,6 @@ public class Webster implements Runnable {
     /*
      * Read up to CRLF, return false if EOF
      */
-    private boolean readLine(InputStream in, StringBuffer buf)
-        throws IOException {
-        while (true) {
-            int c = in.read();
-            if(c < 0)
-                return (buf.length() > 0);
-            if(c == '\r') {
-                in.mark(1);
-                c = in.read();
-                if(c != '\n')
-                    in.reset();
-                return (true);
-            }
-            if(c == '\n')
-                return (true);
-            buf.append((char)c);
-        }
-    }
-
     private String readRequest(InputStream inputStream) throws IOException {
         StringBuilder sb = new StringBuilder();
         int read;
@@ -479,7 +455,7 @@ public class Webster implements Runnable {
                         buff.append("Request: ").append(line);
                         logger.debug(buff.toString());
                     }
-                    if (line != null && line.length()>0) {
+                    if (line.length()>0) {
                         tokenizer = new StringTokenizer(line, " ");
                         if (!tokenizer.hasMoreTokens())
                             break;
@@ -969,7 +945,7 @@ public class Webster implements Runnable {
                     }
 
                 } catch (Exception e) {
-                logger.warn( "Closing Socket", e);
+                    logger.warn( "Closing Socket", e);
                 } finally {
                     try {
                         if (requestedFileOutputStream != null)
