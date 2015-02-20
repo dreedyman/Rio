@@ -24,10 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.BindException;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,31 +33,18 @@ import java.util.List;
  */
 public class WebsterUTest {
     @Test
-    public void createWebsterZeroArg() {
+    public void createWebsterWithConfig() {
         Throwable t = null;
         Webster w = null;
         try {
-            w = new Webster();
+            w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
         } catch (BindException e) {
             t = e;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
         Assert.assertNull(t);
         Assert.assertNotNull(w);
-        w.terminate();
-    }
-
-    @Test
-    public void createWebsterWithPort() {
-        Throwable t = null;
-        Webster w = null;
-        try {
-            w = new Webster(9000);
-        } catch (BindException e) {
-            t = e;
-        }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
-        Assert.assertEquals(9000, w.getPort());
         w.terminate();
     }
 
@@ -158,8 +142,10 @@ public class WebsterUTest {
         Throwable t = null;
         Webster w = null;
         try {
-            w = new Webster();
+            w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
         } catch (BindException e) {
+            t = e;
+        } catch (MalformedURLException e) {
             t = e;
         }
         Assert.assertNull(t);

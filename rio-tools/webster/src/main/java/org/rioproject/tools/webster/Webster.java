@@ -16,6 +16,8 @@
  */
 package org.rioproject.tools.webster;
 
+import groovy.util.ConfigObject;
+import groovy.util.ConfigSlurper;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
 import org.rioproject.net.PortRangeServerSocketFactory;
@@ -73,10 +75,9 @@ public class Webster implements Runnable {
     private static String SERVER_DESCRIPTION=Webster.class.getName();
 
     /**
-     * Create a new Webster. The port is determined by the
-     * org.rioproject.tools.webster.port system property. If the
-     * org.rioproject.tools.webster.port system property does not exist, an
-     * anonymous port will be allocated.
+     * Create a new Webster using a Groovy config file
+     *
+     * @param websterConfig The Groovy configuration file.
      *
      * <p>The Webster will be serving code as determined by the either the
      * org.rioproject.tools.webster.root system property (if set) or defaulting to
@@ -84,30 +85,22 @@ public class Webster implements Runnable {
      *
      * @throws BindException if Webster cannot create a socket
      */
-    public Webster() throws BindException {
-        String s = System.getProperty("org.rioproject.tools.webster.port");
-        if(s != null) {
-            port =  new Integer(s);
-        } else {
-            port = 0;
+    @SuppressWarnings("unchecked")
+    public Webster(final File websterConfig) throws BindException, MalformedURLException {
+        ConfigObject config = new ConfigSlurper().parse(websterConfig.toURI().toURL());
+        Map flattened = config.flatten();
+        port = (Integer)flattened.get("webster.port");
+        StringBuilder websterRoots = new StringBuilder();
+        for(String root : (List<String>)flattened.get("webster.roots")) {
+            if(websterRoots.length()>0)
+                websterRoots.append(";");
+            websterRoots.append(root);
         }
-        initialize();
-    }
-
-    /**
-     * Create a new Webster
-     *
-     * <p>The Webster will be serving code as determined by the either the
-     * org.rioproject.tools.webster.root system property (if set) or defaulting to
-     * the user.dir system property.
-     * 
-     * @param port The port to use
-     *
-     * @throws BindException if Webster cannot create a socket
-     */
-    public Webster(int port) throws BindException {
-        this.port = port;
-        initialize();
+        String bindAddress = (String) flattened.get("webster.address");
+        if(flattened.get("webster.putDirectory")!=null) {
+            putDirectory = (String) flattened.get("webster.putDirectory");
+        }
+        initialize(websterRoots.toString(), bindAddress);
     }
 
     /**
@@ -200,6 +193,9 @@ public class Webster implements Runnable {
             } else if("-soTimeout".equals(option)) {
                 i++;
                 soTimeout = Integer.parseInt(options[i]);
+            } else if("-putDirectory".equals(option)) {
+                i++;
+                putDirectory = options[i];
             } else {
                 throw new IllegalArgumentException(option);
             }
@@ -220,38 +216,13 @@ public class Webster implements Runnable {
     }
 
     /*
-     * Initialize Webster, serving code as determined by the either the
-     * org.rioproject.tools.webster.root system property (if set) or defaulting to
-     * the user.dir system property
-     */
-    private void initialize() throws BindException {
-        String root = System.getProperty("org.rioproject.tools.webster.root");
-        if(root == null)
-            root = System.getProperty("user.dir");
-        initialize(root);
-    }
-
-    /*
-     * Initialize Webster
-     * 
-     * @param roots The root(s) to serve code from. This is a semi-colin
-     * delimited list of directories
-     */
-    private void initialize(String roots) throws BindException {
-        initialize(roots, null);
-    }
-
-    /*
      * Initialize Webster
      * 
      * @param roots The root(s) to serve code from. This is a semi-colin
      * delimited list of directories
      */
     private void initialize(String roots, String bindAddress) throws BindException {
-        String d = System.getProperty("org.rioproject.tools.webster.debug");
-        if(d!=null)
-            debug = true;
-        d = System.getProperty("webster.debug");
+        String d = System.getProperty("webster.debug");
         if(d != null)
             debug = true;
         String str = System.getProperty("webster.put.dir");
@@ -296,6 +267,9 @@ public class Webster implements Runnable {
                 System.out.println("Webster Socket SO_TIMEOUT set to ["+soTimeout+"] millis");
             if(logger.isDebugEnabled())
                 logger.debug("Webster Socket SO_TIMEOUT set to [{}]] millis", soTimeout);
+        }
+        if(putDirectory!=null && debug) {
+            System.out.println("putDirectory: " + putDirectory);
         }
 
         /* Set system properties */
@@ -1023,14 +997,6 @@ public class Webster implements Runnable {
                     logger.warn("Closing incoming socket", e2);
                 }
             }
-        }
-    }
-
-    public static void main(String[] args) {
-        try {
-            new Webster();
-        } catch(Exception e) {
-            e.printStackTrace();
         }
     }
 }

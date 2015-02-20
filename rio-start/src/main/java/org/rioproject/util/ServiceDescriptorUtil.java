@@ -64,13 +64,43 @@ public final class ServiceDescriptorUtil {
      * <tt>org.rioproject.tools.webster.Webster</tt>.
      *
      * @param policy The security policy file to use
+     * @param sPort The port webster should use
+     * @param roots The roots webster should serve
+     * @param putDirectory The directory name that Webster will enable put file support
+     *
+     * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
+     * loaded from <tt>rio.home/lib</tt>
+     *
+     * @throws IOException If there are problems getting the anonymous port
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
+     * set
+     */
+    public static ServiceDescriptor getWebster(final String policy,
+                                               final String sPort,
+                                               final String[] roots,
+                                               final String putDirectory) throws IOException {
+        String[] options = null;
+        if(putDirectory!=null) {
+            options = new String[2];
+            options[0] = "-putDirectory";
+            options[1] = putDirectory;
+        }
+        return(getWebster(policy, sPort, roots, options, false));
+    }
+
+    /**
+     * Get the {@link com.sun.jini.start.ServiceDescriptor} instance for
+     * <tt>org.rioproject.tools.webster.Webster</tt>.
+     *
+     * @param policy The security policy file to use
      * @param roots The roots webster should serve
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * webster using an anonymous port. The <tt>webster-${rio-version}.jar</tt> file will be
-     * loaded from <tt>RIO_HOME/lib</tt>
+     * loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
      * set
      */
     public static ServiceDescriptor getWebster(final String policy, final String[] roots) throws IOException {
@@ -86,10 +116,10 @@ public final class ServiceDescriptorUtil {
      * @param roots The roots webster should serve
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
-     * loaded from <tt>RIO_HOME/lib</tt>
+     * loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
      * set
      */
     public static ServiceDescriptor getWebster(final String policy,
@@ -108,10 +138,10 @@ public final class ServiceDescriptorUtil {
      * @param options Options for Webster to use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
-     * loaded from <tt>RIO_HOME/lib</tt>
+     * loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
      * set
      */
     public static ServiceDescriptor getWebster(final String policy,
@@ -131,7 +161,7 @@ public final class ServiceDescriptorUtil {
      * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
-     * loaded from <tt>RIO_HOME/lib</tt>
+     * loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
      */
@@ -158,7 +188,7 @@ public final class ServiceDescriptorUtil {
      * @param debug If true, set the <tt>org.rioproject.tools.debug</tt> property
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
-     * loaded from <tt>RIO_HOME/lib</tt>
+     * loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
      */
@@ -187,10 +217,10 @@ public final class ServiceDescriptorUtil {
      * @param webster The location an name of the webster jar
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * webster using a specified port. The <tt>webster-${rio-version}.jar</tt> file will be
-     * loaded from <tt>RIO_HOME/lib</tt>
+     * loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws IllegalArgumentException If the <tt>RIO_HOME</tt> system property is not set
+     * @throws IllegalArgumentException If the<tt>rio.home</tt> system property is not set
      */
     public static ServiceDescriptor getWebster(final String policy,
                                                final String sPort,
@@ -250,10 +280,10 @@ public final class ServiceDescriptorUtil {
      * @param cybernodeConfig The configuration file the Cybernode will use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * the Cybernode using an anonymous port. The <tt>cybernode-service-${rio-version}.jar</tt> file
-     * will be loaded from <tt>RIO_HOME/lib</tt>
+     * will be loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
      * set
      */
     public static ServiceDescriptor getCybernode(final String policy, final String... cybernodeConfig) throws IOException {
@@ -300,10 +330,10 @@ public final class ServiceDescriptorUtil {
      * @param monitorConfig The configuration options the Monitor will use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * the Monitor using an anonymous port. The <tt>monitor-service-${rio-version}.jar</tt> file will
-     * be loaded from <tt>RIO_HOME/lib</tt>
+     * be loaded from <tt>rio.home/lib</tt>
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
      * set
      */
     public static ServiceDescriptor getMonitor(final String policy, final String... monitorConfig) throws IOException {
@@ -339,11 +369,11 @@ public final class ServiceDescriptorUtil {
      * @param policy The security policy file to use
      * @return The {@link com.sun.jini.start.ServiceDescriptor} instance for
      * Reggie using an anonymous port. The <tt>reggie-${river-version}.jar</tt> file will
-     * be loaded from <tt>RIO_HOME/lib</tt>
+     * be loaded from <tt>rio.home/lib</tt>
      * @param lookupConfig The configuration options Reggie will use
      *
      * @throws IOException If there are problems getting the anonymous port
-     * @throws RuntimeException If the <tt>RIO_HOME</tt> system property is not
+     * @throws RuntimeException If the<tt>rio.home</tt> system property is not
      * set
      */
     public static ServiceDescriptor getLookup(final String policy, final String... lookupConfig) throws IOException {
