@@ -20,6 +20,12 @@ def docsDir = new File("../docs");
 if (!docsDir.exists())
     docsDir = new File(System.getProperty("user.dir"), "docs")
 
+def javaDocs = new File("../target/site/apidocs")
+if(javaDocs.exists()) {
+    Process mv = "mv ${javaDocs.absolutePath} ../docs/.".execute()
+    mv.waitFor()
+}
+
 def getReplacement(String depth) {
     return "        <a href=\"https://github.com/dreedyman/Rio\"><img style=\"position: absolute; top: 0; right: 0; border: 0; z-index: 1000000;\" src=\"" + depth + "images/forkme_right_green_007200.png\" alt=\"Fork me on GitHub\"></a>\n" +
            "<div class=\"navbar navbar-fixed-top\">"

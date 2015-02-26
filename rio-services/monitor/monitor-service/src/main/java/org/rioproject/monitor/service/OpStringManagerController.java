@@ -53,7 +53,7 @@ public class OpStringManagerController {
     private Uuid uuid;
     private static Logger logger = LoggerFactory.getLogger(OpStringManagerController.class.getName());
     private DeploymentVerifier deploymentVerifier;
-    private final Map<String, OpStringManager> opStringManagerTable = new ConcurrentHashMap<String, OpStringManager>();
+    private final ConcurrentHashMap<String, OpStringManager> opStringManagerTable = new ConcurrentHashMap<String, OpStringManager>();
 
     void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {
         this.serviceProvisioner = serviceProvisioner;

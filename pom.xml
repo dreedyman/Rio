@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>5.1.1</version>
+    <version>5.1.2</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
-    <inceptionYear>2006</inceptionYear>
+    <inceptionYear>2007</inceptionYear>
     <url>http://www.rio-project.org</url>
 
     <licenses>
@@ -57,36 +57,6 @@
                         <configuration>
                             <aggregate>true</aggregate>
                         </configuration>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
-                <inherited>false</inherited>
-                <configuration>
-                    <aggregate>true</aggregate>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <id>aggregate</id>
-                        <configuration>
-                            <links>
-                                <link>http://docs.oracle.com/javase/8/docs/api/</link>
-                                <link>https://river.apache.org/doc/api/</link>
-                            </links>
-                            <detectLinks>true</detectLinks>
-                            <breakiterator>true</breakiterator>
-                            <top><![CDATA[<h2>Rio Project ${project.version} API Documentation</h2>]]></top>
-                            <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
-                            <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.impl.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.proxy:org.rioproject.monitor.proxy:org.rioproject.cybernode.proxy:org.rioproject.test:org.rioproject.gnostic.service:org.rioproject.impl.admin:org.rioproject.exec:org.rioproject.impl.bean:org.rioproject.impl.container:org.rioproject.impl.loader:org.rioproject.impl.util</excludePackageNames>
-                        </configuration>
-                        <reports>
-                            <report>aggregate</report>
-                        </reports>
                     </reportSet>
                 </reportSets>
             </plugin>
@@ -364,6 +334,40 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <links>
+                        <link>http://docs.oracle.com/javase/8/docs/api/</link>
+                        <link>https://river.apache.org/doc/api/</link>
+                    </links>
+                    <sourceFileExcludes>
+                        <exclude>org/rioproject/RioVersion.java</exclude>
+                    </sourceFileExcludes>
+                    <detectLinks>true</detectLinks>
+                    <breakiterator>true</breakiterator>
+                    <top><![CDATA[<h2>Rio Project ${project.version} API Reference Documentation</h2>]]></top>
+                    <footer><![CDATA[<i>Copyright &copy; <a href="http://rio-project.org" target="_blank">Rio Project</a>.</i>]]></footer>
+                    <excludePackageNames>edu.emory:org.rioproject.examples:org.rioproject.tools:org.rioproject.resolver.maven2:org.rioproject.resolver.aether:org.rioproject.monitor.*:org.rioproject.cybernode.*:org.rioproject.eventcollector.proxy:org.rioproject.eventcollector.service:org.rioproject.install:org.rioproject.impl.persistence:org.rioproject.util:org.rioproject.ui:org.rioproject.proxy:org.rioproject.monitor.proxy:org.rioproject.cybernode.proxy:org.rioproject.test:org.rioproject.gnostic.service:org.rioproject.impl.admin:org.rioproject.exec:org.rioproject.impl.bean:org.rioproject.impl.container:org.rioproject.impl.loader:org.rioproject.impl.util:org.rioproject.version:org.rioproject.servicecore</excludePackageNames>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>aggregate</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -425,7 +429,7 @@
         <gmaven.version>1.4</gmaven.version>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
         <junit.version>4.8.2</junit.version>
-        <rio.version>5.1.1</rio.version>
+        <rio.version>5.1.2</rio.version>
         <rio.plugin.version>5.1</rio.plugin.version>
         <river.version>2.2.2</river.version>
         <hyperic.version>1.6.3.82</hyperic.version>

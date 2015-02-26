@@ -26,12 +26,12 @@ deployment(name:'Events Example') {
 
     /* The artifact the back end service requires to instantiate can
      * be done once and referenced using the identifier 'service' */
-    artifact id: 'service', 'org.rioproject.examples.events:events-service:2.3'
+    artifact id: 'service', 'org.rioproject.examples.events:events-service:2.3.1'
 
     /* Declaring the artifact clients need to communicate with the service can
      * be done once and referenced using the identifier 'client'. Note the
      * classifier of 'dl' */
-    artifact id: 'client', 'org.rioproject.examples.events:events-proxy:2.3'
+    artifact id: 'client', 'org.rioproject.examples.events:events-proxy:2.3.1'
 
     /* The event producer */
     service(name: 'Hello') {
