@@ -68,7 +68,9 @@ public class ITSettingsParserTest {
 
             i = print(rc, i, rrs.size());
         }
-        parser.parse(getMavenSettingsFile());
+        File f = getMavenSettingsFile();
+        if(f!=null)
+            parser.parse(f);
     }
 
     @Test
@@ -100,7 +102,9 @@ public class ITSettingsParserTest {
 
             i = print(rc, i, rrs.size());
         }
-        parser.parse(getMavenSettingsFile());
+        File f = getMavenSettingsFile();
+        if(f!=null)
+            parser.parse(f);
     }
 
     @Test
@@ -132,7 +136,9 @@ public class ITSettingsParserTest {
 
             i = print(rc, i, rrs.size());
         }
-        parser.parse(getMavenSettingsFile());
+        File f = getMavenSettingsFile();
+        if(f!=null)
+            parser.parse(f);
     }
 
     private void printHeader(List<RemoteRepository> rrs, File settings) {
@@ -169,8 +175,6 @@ public class ITSettingsParserTest {
 
     /**
      * Gets the user's maven settings file (global or in home directory
-     *
-     * @throws IOException If no readable maven settings file exists
      */
     private File getMavenSettingsFile() throws IOException {
         // If maven home specified, first try that, otherwise try user home dir
@@ -182,7 +186,8 @@ public class ITSettingsParserTest {
         } else if (globalConfig.exists() && globalConfig.canRead()) {
             return globalConfig;
         } else {
-            throw new IOException("Unable to find a usable Maven settings file (global or in user home directory)");
+            System.err.println("Unable to find a usable Maven settings file (global or in user home directory");
+            return null;
         }
     }
 }
