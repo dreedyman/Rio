@@ -92,6 +92,7 @@ public class CybernodeUtilizationPanel extends JPanel {
                 return super.getCellRenderer(row, column);
             }
         };
+        treeTable.setAutoCreateColumnsFromModel(true);
         utilizationModel = createModel(columns);
 
         treeTable.setTreeTableModel(utilizationModel);
@@ -302,23 +303,6 @@ public class CybernodeUtilizationPanel extends JPanel {
         add(sp2, BorderLayout.CENTER);
     }
 
-    public void setSelectedColumns(String... selectedColumns) {
-        java.util.List<TableColumn> currentCols = new ArrayList<TableColumn>();
-        for(Enumeration<TableColumn> cols =
-                treeTable.getColumnModel().getColumns(); cols.hasMoreElements();) {
-            TableColumn col = cols.nextElement();
-            currentCols.add(col);
-        }
-
-        for(TableColumn col : currentCols) {
-            if(!col.getHeaderValue().equals(ColumnValueHelper.FIXED_COLUMN))
-                treeTable.getColumnModel().removeColumn(col);
-        }
-        for(String col : selectedColumns) {
-            insertColumn(col, treeTable.getColumnCount());
-        }
-    }
-
     private List<String> getColumns(String... column) {
         List<String> columns = new ArrayList<String>();
         columns.add(ColumnValueHelper.FIXED_COLUMN);
@@ -334,24 +318,6 @@ public class CybernodeUtilizationPanel extends JPanel {
             utilizationModel.setColumnIdentifiers(columns);
         }
         return utilizationModel;
-    }
-
-    private TableColumn insertColumn(String headerLabel, int vColIndex) {
-        TableColumn col = betterAddColumn(treeTable, headerLabel);
-        treeTable.moveColumn(treeTable.getColumnCount()-1, vColIndex);
-        return col;
-    }
-
-    private TableColumn betterAddColumn(JXTreeTable table, String headerLabel) {
-        TableColumn col = new TableColumn(treeTable.getColumnCount());
-
-        // Ensure that auto-create is off
-        if (table.getAutoCreateColumnsFromModel()) {
-            throw new IllegalStateException();
-        }
-        col.setHeaderValue(headerLabel);
-        table.addColumn(col);
-        return col;
     }
 
     public boolean getExpandAll() {

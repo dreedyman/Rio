@@ -99,7 +99,6 @@ public class PreferencesDialog extends JDialog {
 
                 String[] cols = cybernodePanel.getSelectedColumns();
                 frame.getUtilizationColumnManager().setSelectedColumns(cols);
-                cybernodeUtil.setSelectedColumns(cols);
 
                 //System.out.println(getSize());
                 dispose();

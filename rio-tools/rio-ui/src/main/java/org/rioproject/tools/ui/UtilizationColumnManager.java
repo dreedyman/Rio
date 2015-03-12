@@ -15,6 +15,7 @@
  */
 package org.rioproject.tools.ui;
 
+import javax.swing.*;
 import java.util.*;
 
 /**
@@ -59,8 +60,15 @@ public class UtilizationColumnManager {
     }
 
     public void setSelectedColumns(String[] columns) {
-        selectedColumns.clear();
-        selectedColumns.addAll(Arrays.asList(columns));
+        String[] current = selectedColumns.toArray(new String[selectedColumns.size()]);
+        if(!Arrays.deepEquals(current, columns)) {
+            selectedColumns.clear();
+            selectedColumns.addAll(Arrays.asList(columns));
+            JOptionPane.showMessageDialog(null,
+                                          "The new columns will be added upon Rio UI restart",
+                                          "Column Manager",
+                                          JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     private void checkProperties(Properties props, String[] columns) {

@@ -33,7 +33,9 @@ import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
+import net.jini.lookup.ServiceItemFilter;
 import net.jini.lookup.entry.Host;
+import net.jini.lookup.entry.Name;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.DeployAdmin;
@@ -49,10 +51,7 @@ import org.rioproject.impl.util.ThrowableUtil;
 import org.rioproject.install.Installer;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
-import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringException;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceElement;
+import org.rioproject.opstring.*;
 import org.rioproject.system.ComputeResourceAdmin;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.tools.ui.browser.Browser;
@@ -124,7 +123,7 @@ public class Main extends JFrame {
     private final RemoteEventTable remoteEventTable;
     private final Map<String, ImageIcon> toolBarImageMap = new HashMap<String, ImageIcon>();
     private final JTabbedPane monitorTabs = new JTabbedPane();
-    private final JTabbedPane mainTabs = new JTabbedPane();;
+    private final JTabbedPane mainTabs = new JTabbedPane();
     private final Map<ProvisionMonitor, ProvisionMonitorPanel> monitorPanelMap =
             new HashMap<ProvisionMonitor, ProvisionMonitorPanel>();
     private int orientation;
@@ -605,9 +604,12 @@ public class Main extends JFrame {
         if (props == null)
             throw new IllegalArgumentException("props is null");
 
-        File rioHomeDir = new File(System.getProperty("user.home") +File.separator +".rio");
-        if (!rioHomeDir.exists())
-            rioHomeDir.mkdir();
+        File rioHomeDir = new File(RioHome.get());
+        if (!rioHomeDir.exists()) {
+            if(rioHomeDir.mkdir()) {
+                System.out.println("Created rio.home: "+rioHomeDir.getPath());
+            }
+        }
         File propFile = new File(rioHomeDir, filename);
         props.store(new FileOutputStream(propFile), null);
     }
@@ -718,6 +720,7 @@ public class Main extends JFrame {
         ServiceTemplate eventCollectors = new ServiceTemplate(null,
                                                               new Class[]{EventCollector.class},
                                                               new Entry[]{new OperationalStringEntry(org.rioproject.config.Constants.CORE_OPSTRING)});
+        ServiceTemplate all = new ServiceTemplate(null, null, null);
 
         sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(), new LeaseRenewalManager(), config);
 
@@ -728,9 +731,22 @@ public class Main extends JFrame {
         clientEventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(),
                                                      provisionClientEventConsumer,
                                                      config);
-        monitorCache = sdm.createLookupCache(monitors, null, watcher);
-        sdm.createLookupCache(cybernodes, null, watcher);
+        monitorCache = sdm.createLookupCache(all,
+                                             new ServiceItemFilter() {
+                                                 @Override public boolean check(ServiceItem serviceItem) {
+                                                     return serviceItem.service instanceof ProvisionMonitor;
+                                                 }
+                                             },
+                                             watcher);
+        sdm.createLookupCache(all,
+                              new ServiceItemFilter() {
+                                  @Override public boolean check(ServiceItem serviceItem) {
+                                      return serviceItem.service instanceof Cybernode;
+                                  }
+                              },
+                              watcher);
         sdm.createLookupCache(eventCollectors, null, watcher);
+        sdm.createLookupCache(all, null, watcher);
         remoteEventTable.setDiscoveryManagement(jiniClient.getDiscoveryManager());
     }
 
@@ -805,7 +821,7 @@ public class Main extends JFrame {
                 ServiceItem item = sdEvent.getPostEventServiceItem();
                 if(item.service instanceof EventCollector) {
                     try {
-                        remoteEventTable.addEventCollector((EventCollector)item.service);
+                        remoteEventTable.addEventCollector((EventCollector) item.service);
                     } catch(Exception e) {
                         Util.showError(e, frame, "Cannot add Event Collector");
                     }
@@ -843,8 +859,7 @@ public class Main extends JFrame {
                         }
                         pmp.getGraphView().setOpStringState(ops.getName());
                     }
-                }
-                if(item.service instanceof Cybernode) {
+                } else if(item.service instanceof Cybernode) {
                     Cybernode c = (Cybernode)item.service;
                     CybernodeAdmin cAdmin;
                     try {
@@ -857,9 +872,24 @@ public class Main extends JFrame {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    boolean orphan = true;
+                    for(Entry e : item.attributeSets) {
+                        if(e instanceof OperationalStringEntry) {
+                            orphan = false;
+                            break;
+                        }
+                    }
+
+                    if(orphan) {
+                        Name name = getName(item.attributeSets);
+                        if(name!=null) {
+                            System.out.println("Discovered an orphan!!!! " + name.name);
+                        }
+                    }
                 }
-            } catch (Throwable t) {
-                t.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -885,12 +915,33 @@ public class Main extends JFrame {
         }
     }
 
-    ComputeResourceUtilization getComputeResourceUtilization(
-        ComputeResourceAdmin crAdmin, ServiceItem item) throws Throwable {
+    ServiceElement serviceElementFromServiceItem(ServiceItem item) {
+        ServiceElement element = new ServiceElement();
+        Name name  = getName(item.attributeSets);
+        ServiceBeanConfig serviceBeanConfig = new ServiceBeanConfig();
+        serviceBeanConfig.setName(name.name);
+        serviceBeanConfig.setOperationalStringName("External");
+        element.setServiceBeanConfig(serviceBeanConfig);
+        return element;
+    }
+
+    Name getName(Entry[] entries) {
+        Name name = null;
+        for(Entry e : entries) {
+            if(e instanceof Name) {
+                name = (Name)e;
+                break;
+            }
+        }
+        return name;
+    }
+
+    ComputeResourceUtilization getComputeResourceUtilization(ComputeResourceAdmin crAdmin,
+                                                             ServiceItem item) throws Exception {
         ComputeResourceUtilization cru=null;
         try {
             cru = crAdmin.getComputeResourceUtilization();
-        } catch(Throwable e) {
+        } catch(Exception e) {
             if(ThrowableUtil.isRetryable(e)) {
                 /* Rio 3.2 does not have the getComputeResourceUtilization method */
                 for(Entry entry : item.attributeSets) {
