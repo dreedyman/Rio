@@ -79,9 +79,9 @@ public class ExporterConfig {
      */
     public static Exporter getExporter(Configuration config, String component, String entry) throws ConfigurationException {
 
-        Exporter exporter = (Exporter)config.getEntry(component, entry, Exporter.class, null);
+        Exporter exporter = (Exporter) config.getEntry(component, entry, Exporter.class, null);
         if(exporter==null) {
-            exporter = (Exporter)config.getEntry(DEFAULT_COMPONENT, ENTRY_NAME, Exporter.class, null);
+            exporter = (Exporter) config.getEntry(DEFAULT_COMPONENT, ENTRY_NAME, Exporter.class, null);
             if(exporter==null) {
                 try {
                     exporter = new BasicJeriExporter(getServerEndpoint(), new BasicILFactory(), false, true);

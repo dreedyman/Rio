@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.1.2</version>
+        <version>5.1.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>rio-lib</artifactId>

@@ -17,12 +17,11 @@
  * This configuration is used to start the Event Collector
  */
 
-import org.rioproject.config.Component
-import org.rioproject.util.RioHome
-import org.rioproject.util.ServiceDescriptorUtil;
 import com.sun.jini.start.ServiceDescriptor
-import org.rioproject.resolver.maven2.Repository
+import org.rioproject.config.Component
 import org.rioproject.start.RioServiceDescriptor
+import org.rioproject.util.RioHome
+import org.rioproject.util.ServiceDescriptorUtil
 
 @Component('org.rioproject.start')
 class StartCollectorConfig {
@@ -42,7 +41,7 @@ class StartCollectorConfig {
         pathBuilder.append(rioHome).append(File.separator).append("lib").append(File.separator).append("event-collector-service.jar")
 
         def serviceDescriptors = [
-                new RioServiceDescriptor("artifact:org.rioproject.event-collector/event-collector-proxy/5.1.2",
+                new RioServiceDescriptor("artifact:org.rioproject.event-collector/event-collector-proxy/5.1.3",
                                          policyFile,
                                          pathBuilder.toString(),
                                          "org.rioproject.eventcollector.service.EventCollectorImpl",

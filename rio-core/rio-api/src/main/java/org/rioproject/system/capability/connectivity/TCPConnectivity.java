@@ -97,12 +97,26 @@ public class TCPConnectivity extends ConnectivityCapability {
             String hostAddress = (String) requirement.getAttributes().get(HOST_ADDRESS);
             String hostName = (String) requirement.getAttributes().get(HOST_NAME);
 
+            /*if(requirement.exclude()) {
+                if (hostAddress != null) {
+                    supports = !hostAddress.equals(getValue(HOST_ADDRESS));
+                } else {
+                    supports = !hostName.equalsIgnoreCase((String) getValue(HOST_NAME));
+                }
+            } else {
+                if (hostAddress != null) {
+                    supports = hostAddress.equals(getValue(HOST_ADDRESS));
+                } else {
+                    supports = hostName.equalsIgnoreCase((String) getValue(HOST_NAME));
+                }
+            }*/
             if(hostAddress!=null) {
                 supports = hostAddress.equals(getValue(HOST_ADDRESS));
             } else {
                 supports = hostName.equalsIgnoreCase((String) getValue(HOST_NAME));
             }
+
         }
-        return (supports?supports:super.supports(requirement));
+        return supports;
     }
 }

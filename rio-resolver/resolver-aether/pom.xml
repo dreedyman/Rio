@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.1.2</version>
+        <version>5.1.3</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject.resolver</groupId>
@@ -197,7 +197,28 @@
                         <rio.version>4.2</rio.version>
                         <java.util.logging.config.file>src/test/resources/test.properties</java.util.logging.config.file>
                     </systemPropertyVariables>
+                    <excludes>
+                        <exclude>**/ResolverConfigTest.java</exclude>
+                    </excludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/ResolverConfigTest.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

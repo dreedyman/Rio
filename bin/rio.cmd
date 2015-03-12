@@ -28,7 +28,7 @@ set SLF4J_CLASSPATH="%RIO_HOME%\lib\logging\*";"%RIO_HOME%\config\logging"
 set RIO_LIB=%RIO_HOME%\lib
 
 :: Set Versions
-set rioVersion=5.1.2
+set rioVersion=5.1.3
 set groovyVersion=2.3.8
 
 if "%JAVA_HOME%" == "" goto noJavaHome
@@ -58,7 +58,7 @@ set props="-Drio.home=%RIO_HOME%"
 goto end
 
 :create-project
-mvn archetype:generate -DarchetypeGroupId=org.rioproject -DarchetypeGroupId=org.rioproject -DarchetypeRepository=http://www.rio-project.org/maven2 -DarchetypeVersion=5.1.2
+mvn archetype:generate -DarchetypeGroupId=org.rioproject -DarchetypeGroupId=org.rioproject -DarchetypeRepository=http://www.rio-project.org/maven2 -DarchetypeVersion=5.1.3
 goto end
 
 :start

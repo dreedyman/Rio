@@ -17,13 +17,10 @@
 /*
  * Configuration for a Cybernode
  */
-import org.rioproject.config.Component
-
-import org.rioproject.impl.client.JiniClient
-
 import net.jini.core.discovery.LookupLocator
+import org.rioproject.config.Component
 import org.rioproject.config.Constants
-
+import org.rioproject.impl.client.JiniClient
 /*
  * Declare Cybernode properties
  */

@@ -17,6 +17,8 @@ package org.rioproject.config;
 
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A wrapper around {@link net.jini.config.Configuration}, using generics to allow for easier use.
@@ -26,6 +28,7 @@ import net.jini.config.ConfigurationProvider;
 @SuppressWarnings("unchecked")
 public class Configuration {
     private final net.jini.config.Configuration config;
+    private final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
     public Configuration(final net.jini.config.Configuration config) {
         this.config = config;
@@ -39,6 +42,10 @@ public class Configuration {
     public static Configuration getInstance(final ClassLoader classLoader, final String... args) throws ConfigurationException {
         net.jini.config.Configuration config = ConfigurationProvider.getInstance(args, classLoader);
         return new Configuration(config);
+    }
+
+    public net.jini.config.Configuration getWrappedConfig() {
+        return config;
     }
 
     public <T> T getEntry(final String component, final String name, final Class<T> type) throws ConfigurationException {
@@ -79,6 +86,32 @@ public class Configuration {
         }
 
         return (T) result;
+    }
+
+    public Integer getIntEntry(final String component,
+                               final String name,
+                               final int defaultValue,
+                               final int min,
+                               final int max) throws ConfigurationException {
+        if (min > max) {
+            throw new IllegalArgumentException("min must be less than or equal to max");
+        }
+        if (!inRange(defaultValue, min, max)) {
+            throw new IllegalArgumentException("defaultValue (" + defaultValue + ") must be between " + min + " and " + max);
+        }
+        int rslt = getEntry(component, name, Integer.TYPE, defaultValue);
+        if (!inRange(rslt, min, max)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("component {}, name {}: entry is out of range, value: {}, valid range: {}:{}",
+                             component, name, rslt, min, max);
+            }
+            throw new ConfigurationException("entry for component " + component + ", name " + name + " must be between " + min + " and " + max + ", has a value of " + rslt);
+        }
+        return rslt;
+    }
+
+    private boolean inRange(float value, float min, float max) {
+        return (min <= value) && (value <= max);
     }
 
 }
