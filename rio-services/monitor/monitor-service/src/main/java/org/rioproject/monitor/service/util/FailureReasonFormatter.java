@@ -44,8 +44,11 @@ public final class FailureReasonFormatter {
         StringBuilder failureReasonBuilder = new StringBuilder();
         if(!request.getFailureReasons().isEmpty()) {
             failureReasonBuilder.append("Failure Reason(s):\n");
+            int i=1;
             for(String reason : request.getFailureReasons()) {
-                failureReasonBuilder.append(reason);
+                if(i>1)
+                    failureReasonBuilder.append("\n");
+                failureReasonBuilder.append(i++).append(": ").append(reason);
             }
         } else {
             String action = request.getType().name().toLowerCase();

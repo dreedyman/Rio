@@ -198,9 +198,14 @@ public class InstantiatorResourceTest {
         request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(true,
                                                                                                   InetAddress.getLocalHost().getHostAddress(),
                                                                                                   "192.168.1.9"));
-        //Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        //Assert.assertTrue(notSupported.size()==2);
         Assert.assertFalse(instantiatorResource.canProvision(request));
+    }
+
+    @Test
+    public void testMeetsExcludeWithMatching() throws UnknownHostException, ProvisionException {
+        ProvisionRequest request = createProvisionRequest();
+        request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(true, "10.0.1.33"));
+        Assert.assertTrue(instantiatorResource.canProvision(request));
     }
 
     ServiceElement createServiceElement() {

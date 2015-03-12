@@ -1127,14 +1127,21 @@ public class InstantiatorResource {
         Result result = new Result();
         boolean supported = false;
         for (SystemComponent serviceRequirement : systemComponents) {
-            if(platformCapability.supports(serviceRequirement)) {
-                if(serviceRequirement.exclude()) {
+            if(serviceRequirement.exclude()) {
+                if(platformCapability.supports(serviceRequirement)) {
                     result.excluded.add(serviceRequirement);
-                    continue;
+                    break;
+                } else {
+                    supported = true;
+                    break;
                 }
-                supported = true;
-                break;
+            } else {
+                if(platformCapability.supports(serviceRequirement)) {
+                    supported = true;
+                    break;
+                }
             }
+
         }
         result.supported = supported;
         return result;
