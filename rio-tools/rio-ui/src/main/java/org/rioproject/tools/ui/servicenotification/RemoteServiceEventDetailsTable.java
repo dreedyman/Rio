@@ -29,6 +29,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -188,12 +190,19 @@ public class RemoteServiceEventDetailsTable extends JPanel {
         private String getExceptionText(Throwable thrown) {
             String exception = null;
             if(thrown!=null) {
-                StringBuilder builder = new StringBuilder();
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw, true);
+                if (thrown.getStackTrace() != null)
+                    thrown.printStackTrace(pw);
+                pw.flush();
+                sw.flush();
+                exception = sw.toString();
+                /*StringBuilder builder = new StringBuilder();
                 builder.append(thrown.getClass().getName()).append(": ").append(thrown.getLocalizedMessage() ).append("\n");
                 StackTraceElement[] trace = thrown.getStackTrace();
                 for (StackTraceElement aTrace : trace)
                     builder.append("    at ").append(aTrace).append("\n");
-                exception = builder.toString();
+                exception = builder.toString();*/
             }
             return exception;
         }

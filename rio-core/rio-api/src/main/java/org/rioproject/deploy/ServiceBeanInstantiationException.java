@@ -40,14 +40,6 @@ public class ServiceBeanInstantiationException extends Exception {
     private transient Throwable cause;
 
     /**
-     * Constructs a {@code ServiceBeanInstantiationException} with no detail
-     * message.
-     */
-    public ServiceBeanInstantiationException() {
-        super();
-    }
-
-    /**
      * Constructs a {@code ServiceBeanInstantiationException} with the specified
      * detail message
      *
@@ -196,7 +188,7 @@ public class ServiceBeanInstantiationException extends Exception {
             StringBuilder sb = new StringBuilder();
             sb.append("Caused by: ").append(className).append(": ").append(message).append("\n");
             for(StackTraceElement e : stackTrace) {
-                sb.append("\t").append("at ").append(e).append("\n");
+                sb.append("    at ").append(e).append("\n");
             }
             for(ExceptionDescriptor cause : causes) {
                 sb.append(cause.format());

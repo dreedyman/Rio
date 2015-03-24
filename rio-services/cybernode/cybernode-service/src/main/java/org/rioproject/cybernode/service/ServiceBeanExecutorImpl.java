@@ -61,6 +61,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -84,7 +85,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     private ServiceBeanInstance instance;
     private final String myID;
-    private final AtomicBoolean initializing = new AtomicBoolean(true);
+    private final AtomicBoolean inProcess = new AtomicBoolean(false);
     static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     private Logger logger = LoggerFactory.getLogger(ServiceBeanExecutorImpl.class);
 
@@ -158,7 +159,6 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
         Remote proxy = exporter.export(this);
         registry.bind(execBindName, proxy);
-        initializing.set(false);
 
         new Thread(new CreateFDH(config, this)).start();
     }
@@ -194,45 +194,51 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     public ServiceBeanInstance instantiate(final ServiceElement sElem,
                                            final OperationalStringManager opStringMgr)
         throws ServiceBeanInstantiationException {
-        logger.info("Instantiating {}, service counter={}", sElem.getName(), container.getServiceCounter());
-        if (container.getServiceCounter() > 0)
-            throw new ServiceBeanInstantiationException("ServiceBeanExecutor has already instantiated a service");
-
-        OperationalStringManager opMgr = opStringMgr;
         try {
-            opMgr = OpStringManagerProxy.getProxy(sElem.getOperationalStringName(),
-                                                  opStringMgr,
-                                                  context.getDiscoveryManagement());
-        } catch (Exception e) {
-            logger.warn("Unable to create proxy for OperationalStringManager, using provided OperationalStringManager", e);
+            inProcess.set(true);
+            logger.info("Instantiating {}, service counter={}", sElem.getName(), container.getServiceCounter());
+            if (container.getServiceCounter() > 0)
+                throw new ServiceBeanInstantiationException("ServiceBeanExecutor has already instantiated a service");
 
-        }
-
-        /* Set up thread deadlock detection */
-        ServiceElementUtil.setThreadDeadlockDetector(sElem, null);
-
-        /* Get the SLA ThresholdEvent wired up */
-        EventHandler slaThresholdEventHandler = null;
-        instance = container.activate(sElem, opMgr, null);
-        ServiceBeanDelegateImpl delegate = (ServiceBeanDelegateImpl) container.getServiceBeanDelegate(instance.getServiceBeanID());
-        ServiceBeanLoaderResult result = delegate.getLoadedServiceResult();
-        if(result.getImpl() instanceof ServiceBeanAdapter) {
-            slaThresholdEventHandler = ((ServiceBeanAdapter)result.getImpl()).getSLAEventHandler();
-        } else {
-            if(result.getBeanAdapter()!=null) {
-                slaThresholdEventHandler = result.getBeanAdapter().getSLAEventHandler();
-            } else {
-                String className = result.getImpl()==null?"<NO IMPLEMENTATION>":result.getImpl().getClass().getName();
-                logger.warn("SLAThresholdEvent notifications from this forked service are not enabled, service class does not provide support for Rio event registration {}.",
-                            className);
+            OperationalStringManager opMgr = opStringMgr;
+            try {
+                opMgr = OpStringManagerProxy.getProxy(sElem.getOperationalStringName(),
+                                                      opStringMgr,
+                                                      context.getDiscoveryManagement());
+            } catch (Exception e) {
+                logger.warn("Unable to create proxy for OperationalStringManager, using provided OperationalStringManager", e);
             }
-        }
-        if(slaThresholdEventHandler!=null) {
-            computeResourcePolicyHandler = new ComputeResourcePolicyHandler(sElem,
-                                                                            slaThresholdEventHandler,
-                                                                            null,
-                                                                            instance);
-            computeResource.addThresholdListener(computeResourcePolicyHandler);
+
+            /* Set up thread deadlock detection */
+            ServiceElementUtil.setThreadDeadlockDetector(sElem, null);
+
+            /* Get the SLA ThresholdEvent wired up */
+            EventHandler slaThresholdEventHandler = null;
+            instance = container.activate(sElem, opMgr, null);
+            ServiceBeanDelegateImpl delegate = (ServiceBeanDelegateImpl) container.getServiceBeanDelegate(instance.getServiceBeanID());
+            ServiceBeanLoaderResult result = delegate.getLoadedServiceResult();
+            if (result.getImpl() instanceof ServiceBeanAdapter) {
+                slaThresholdEventHandler = ((ServiceBeanAdapter) result.getImpl()).getSLAEventHandler();
+            } else {
+                if (result.getBeanAdapter() != null) {
+                    slaThresholdEventHandler = result.getBeanAdapter().getSLAEventHandler();
+                } else {
+                    String className = result.getImpl() == null ?
+                                       "<NO IMPLEMENTATION>" :
+                                       result.getImpl().getClass().getName();
+                    logger.warn("SLAThresholdEvent notifications from this forked service are not enabled, service class does not provide support for Rio event registration {}.",
+                                className);
+                }
+            }
+            if (slaThresholdEventHandler != null) {
+                computeResourcePolicyHandler = new ComputeResourcePolicyHandler(sElem,
+                                                                                slaThresholdEventHandler,
+                                                                                null,
+                                                                                instance);
+                computeResource.addThresholdListener(computeResourcePolicyHandler);
+            }
+        } finally {
+            inProcess.set(false);
         }
         return instance;
     }
@@ -281,6 +287,19 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         /* Perform the system exit in a thread, allowing the method to return */
         new Thread(new Runnable() {
             public void run() {
+                while(inProcess.get()) {
+                    logger.info("Waiting for inProcess to clear...");
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                }
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
                 System.exit(0);
             }
         }).start();

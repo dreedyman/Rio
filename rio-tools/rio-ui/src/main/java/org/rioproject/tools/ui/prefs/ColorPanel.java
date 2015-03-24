@@ -30,19 +30,22 @@ public class ColorPanel extends JPanel {
     private Color failureColor;
     private Color okayColor;
     private Color warningColor;
+    private Color unManagedColor;
     private final JComponent okayColorComp;
     private final JComponent failureColorComp;
     private final JComponent warningColorComp;
+    private final JComponent unManagedColorComp;
            
-    public ColorPanel(final Color failureColor, final Color okayColor, final Color warningColor) {
+    public ColorPanel(final Color failureColor, final Color okayColor, final Color warningColor, final Color unManagedColor) {
         super(new GridBagLayout());
         this.warningColor = warningColor;
         this.failureColor = failureColor;
         this.okayColor = okayColor;
+        this.unManagedColor = unManagedColor;
 
         setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(8, 8, 8, 8),
-            BorderFactory.createEtchedBorder()));
+                                                        BorderFactory.createEmptyBorder(8, 8, 8, 8),
+                                                        BorderFactory.createEtchedBorder()));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(4, 4, 4, 4);
@@ -66,6 +69,13 @@ public class ColorPanel extends JPanel {
                                               "<html>Press to choose the color for <b>Warning</b> status. " +
                                               "The <b>Warning</b> status is used if a deployed service is not registered into any lookup services<html>",
                                               setWarningColor,
+                                              this);
+
+        Field setUnManagedColor = getField("unManagedColor", getClass());
+        unManagedColorComp = makeColorComponent(unManagedColor,
+                                              "Un-Managed service Status Color",
+                                              "<html>Press to choose the color for <b>Un-Managed</b> status.",
+                                              setUnManagedColor,
                                               this);
 
         gbc.gridx = 0;
@@ -97,6 +107,14 @@ public class ColorPanel extends JPanel {
         gbc.gridx = 3;
         gbc.gridy = 4;
         add(warningColorComp, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        add(new JLabel("Un-Managed Status"), gbc);
+
+        gbc.gridx = 3;
+        gbc.gridy = 5;
+        add(unManagedColorComp, gbc);
     }
 
     public Color getWarningColor() {
@@ -124,6 +142,15 @@ public class ColorPanel extends JPanel {
     public void setWarningColor(final Color warningColor) {
         this.warningColor = warningColor;
         warningColorComp.setBackground(warningColor);
+    }
+
+    public void setUnManagedColor(final Color unManagedColor) {
+        this.unManagedColor = unManagedColor;
+        unManagedColorComp.setBackground(unManagedColor);
+    }
+
+    public Color getUnManagedColor() {
+        return unManagedColor;
     }
 
     private JComponent makeColorComponent(final Color color,

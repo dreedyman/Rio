@@ -308,9 +308,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                    commonCL);
         if(logger.isDebugEnabled())
             logger.debug("Created {}", serviceCL);
-        if(logger.isTraceEnabled())
-            ClassLoaderUtil.displayClassLoaderTree(serviceCL);
-        
+
         currentThread.setContextClassLoader(serviceCL);
         /* Get the ProxyPreparer */
         ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(config,

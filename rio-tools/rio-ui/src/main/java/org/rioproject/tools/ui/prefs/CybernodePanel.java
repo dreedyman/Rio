@@ -28,15 +28,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 /**
- * Option to declare the ammount of time the Cybenode table should poll
+ * Options to display specific utilization values for a Cybernode and
+ * optionally forked services
  *
  * @author Dennis Reedy
  */
 public class CybernodePanel extends JPanel {
     private JTextField refreshRate;
     private JTable columnChoices;
-
-    //"Utilization" Still needed?
 
     public CybernodePanel(int rate, String[] selectedColumns) {
         super();

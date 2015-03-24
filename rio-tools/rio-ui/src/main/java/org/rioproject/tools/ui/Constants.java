@@ -45,6 +45,7 @@ public interface Constants {
     final int ACTIVE=2;
     final int ACTIVE_NO_SERVICE_ITEM=3;
     final int FAILED=4;
+    final int ACTIVE_UNMANAGED=5;
     final long AVAILABLE_ID = 0;
     final long DEFAULT_DELAY=1000*30;
     final int DEFAULT_CYBERNODE_REFRESH_RATE = 30;
@@ -64,6 +65,7 @@ public interface Constants {
     final String LAST_DIRECTORY = "last.dir";
     final String FAILURE_COLOR = "color.failure";
     final String OKAY_COLOR = "color.okay";
+    final String UNMANAGED_COLOR = "color.unmanaged";
     final String WARNING_COLOR = "color.warning";
     final String ADMIN_FRAME_WIDTH = "admin.frame.width";
     final String ADMIN_FRAME_HEIGHT = "admin.frame.height";
@@ -75,6 +77,7 @@ public interface Constants {
     final String GRAPH_ORIENTATION = "graph.orientation";
     final String GRAPH_ORIENTATION_NORTH = "2";
     final String GRAPH_ORIENTATION_WEST = "0";
+    final String UNMANAGED = "Unmanaged";
 
     final String TREE_TABLE_AUTO_EXPAND = "tree.table.expand";
 

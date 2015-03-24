@@ -19,6 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 /**
  * Undeploy an OperationalString
@@ -26,25 +27,23 @@ import java.awt.event.ActionListener;
  * @author Dennis Reedy
  */
 public class UndeployPanel extends JPanel {
-    String selectedOpStringName;
+    private final java.util.List<String> selectedOpStringNames = new ArrayList<String>();
 
-    public UndeployPanel(String[] opstrings, final JDialog dialog) {
+    public UndeployPanel(final String[] opstrings, final JDialog dialog) {
         super(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         JPanel top = new JPanel(new BorderLayout(8, 8));
-        top.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEtchedBorder(),
-            BorderFactory.createEmptyBorder(8, 8, 8, 8)));
-        DefaultListModel listModel = new DefaultListModel();
+        top.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+                                                         BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+        DefaultListModel<String> listModel = new DefaultListModel<String>();
         for(int i=0; i<opstrings.length; i++)
             listModel.add(i, opstrings[i]);
-        final JList list = new JList(listModel);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        final JList<String> list = new JList<String>(listModel);
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         //list.setCellRenderer(new RemoveOpStringCellRenderer());
         if(listModel.getSize()==1)
             list.setSelectedIndex(0);
-        list.setToolTipText("A list of OperationalString items "+
-                            "that can be undeployed");
+        list.setToolTipText("A list of OperationalString items that can be undeployed");
         JLabel l1 = new JLabel("Select an OperationalString to Undeploy");
         l1.setLabelFor(list);
         top.add(l1, BorderLayout.NORTH);
@@ -63,8 +62,8 @@ public class UndeployPanel extends JPanel {
         remove.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent ae) {
-                    int index = list.getSelectedIndex();
-                    if(index==-1) {
+                    selectedOpStringNames.addAll(list.getSelectedValuesList());
+                    if(selectedOpStringNames.isEmpty()) {
                         JOptionPane.showMessageDialog(dialog,
                                                       "You must select an "+
                                                       "OperationalString to "+
@@ -74,9 +73,6 @@ public class UndeployPanel extends JPanel {
                                                       JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    DefaultListModel listModel =
-                        (DefaultListModel)list.getModel();
-                    selectedOpStringName = (String)listModel.getElementAt(index);
                     dialog.dispose();
                 }
             });
@@ -86,7 +82,7 @@ public class UndeployPanel extends JPanel {
         add(bottom, BorderLayout.SOUTH);
     }
 
-    public String getSelectedOpStringName() {
-        return selectedOpStringName;
+    public String[] getSelectedOpStringNames() {
+        return selectedOpStringNames.toArray(new String[selectedOpStringNames.size()]);
     }
 }

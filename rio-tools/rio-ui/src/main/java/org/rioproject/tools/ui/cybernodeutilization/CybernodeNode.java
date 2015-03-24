@@ -117,4 +117,21 @@ public class CybernodeNode extends AbstractMutableTreeTableNode implements CRUNo
     public int getColumnCount() {
         return columnValueHelper.getColumnCount();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        CybernodeNode that = (CybernodeNode) o;
+        return cybernode.equals(that.cybernode);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return cybernode.hashCode();
+    }
 }

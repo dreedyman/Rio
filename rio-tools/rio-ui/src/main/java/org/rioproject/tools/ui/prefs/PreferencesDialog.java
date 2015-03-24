@@ -48,8 +48,8 @@ public class PreferencesDialog extends JDialog {
         final ColorManager colorManager = graphView.getColorManager();
         final ColorPanel colorPanel = new ColorPanel(colorManager.getFailureColor(),
                                                      colorManager.getOkayColor(),
-                                                     colorManager.getWarningColor());
-
+                                                     colorManager.getWarningColor(),
+                                                     colorManager.getUnManagedColor());
 
         final CybernodePanel cybernodePanel =
             new CybernodePanel(frame.getCybernodeRefreshRate(),
@@ -93,6 +93,11 @@ public class PreferencesDialog extends JDialog {
                     runVis = true;
                 }
 
+                if(!colorManager.getUnManagedColor().equals(colorPanel.getUnManagedColor())) {
+                    colorManager.setUnManagedColor(colorPanel.getUnManagedColor());
+                    runVis = true;
+                }
+
                 frame.setCybernodeRefreshRate(cybernodePanel.getRefreshRate());
                 if(runVis)
                     graphView.getVisualization().run("repaint");
@@ -115,6 +120,7 @@ public class PreferencesDialog extends JDialog {
                 colorPanel.setFailureColor(colorMap.get(Constants.FAILURE_COLOR));
                 colorPanel.setOkayColor(colorMap.get(Constants.OKAY_COLOR));
                 colorPanel.setWarningColor(colorMap.get(Constants.WARNING_COLOR));
+                colorPanel.setUnManagedColor(colorMap.get(Constants.UNMANAGED_COLOR));
             }
         });
         JPanel buttonPane = new JPanel();

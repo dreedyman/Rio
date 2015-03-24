@@ -124,21 +124,25 @@ public class ProvisionMonitorPanel extends JPanel {
                 dialog.setSize(new Dimension(width, height));
                 dialog.setLocationRelativeTo(frame);
                 dialog.setVisible(true);
-                final String name = u.getSelectedOpStringName();
-                if(name==null)
+                final String[] toUndeploy = u.getSelectedOpStringNames();
+                if(toUndeploy.length==0)
                     return;
-                final GraphNode node = graphView.getOpStringNode(name);
-                final JDialog waitDialog = new WaitingDialog(frame, "Undeploying "+name+"...", 500);
+
+                final WaitingDialog waitDialog = new WaitingDialog(frame, 500);
                 org.rioproject.tools.ui.util.SwingWorker worker = new org.rioproject.tools.ui.util.SwingWorker() {
                     public Object construct() {
-                        try {
-                            DeployAdmin dAdmin = (DeployAdmin)node.getProvisionMonitor().getAdmin();
-                            dAdmin.undeploy(name);
-                        } catch(OperationalStringException e) {
-                            graphView.removeOpString(name);
-                        } catch(Exception e) {
-                            System.err.println("OUCH");
-                            e.printStackTrace();
+                        for(String name : toUndeploy) {
+                            final GraphNode node = graphView.getOpStringNode(name);
+                            waitDialog.setWaitForLabel("Undeploying " + name + "...");
+                            try {
+                                DeployAdmin dAdmin = (DeployAdmin) node.getProvisionMonitor().getAdmin();
+                                dAdmin.undeploy(name);
+                            } catch (OperationalStringException e) {
+                                graphView.removeOpString(name);
+                            } catch (Exception e) {
+                                System.err.println("OUCH");
+                                e.printStackTrace();
+                            }
                         }
                         return null;
                     }

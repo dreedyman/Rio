@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.1.3</version>
+        <version>5.1.4</version>
     </parent>
     <artifactId>rio-test</artifactId>
     <name>Module :: Rio Test Infrastructure</name>

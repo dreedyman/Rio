@@ -41,6 +41,7 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
     private boolean expandAll;
     private final JXTreeTable treeTable;
     private final Executor updateHandler = Executors.newSingleThreadExecutor();
+    private List<CybernodeNode> cybernodeNodes = new ArrayList<CybernodeNode>();
 
     public UtilizationTreeModel(final TreeTableNode root,
                                 final java.util.List<String> columns,
@@ -69,9 +70,12 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
     }
 
     public synchronized void addCybernodeNode(final CybernodeNode item) {
+        if(cybernodeNodes.contains(item))
+            return;
         insertNodeInto(item, (MutableTreeTableNode) getRoot(), getRoot().getChildCount());
         modelSupport.firePathChanged(nodeToTreePath(getRoot()));
         setServices(item);
+        cybernodeNodes.add(item);
     }
 
     public void removeCybernode(final Cybernode item) {
@@ -133,6 +137,7 @@ public class UtilizationTreeModel extends DefaultTreeTableModel {
             setValueAt(node, row);
         } else {
             System.err.println("Could not update Cybernode at ["+node+"], unable to find table row");
+            addCybernodeNode(node);
         }
     }
 

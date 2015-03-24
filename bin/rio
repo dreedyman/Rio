@@ -95,7 +95,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.1.3
+rioVersion=5.1.4
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -209,7 +209,6 @@ if [ "$start" = "1" ]; then
         -XX:HeapDumpPath=`toNative $RIO_HOME/logs` \
         $classpath $libpath $RIO_OPTS \
         -Djava.security.policy=`toNative $RIO_HOME/policy/policy.all` \
-        -Djava.protocol.handler.pkgs=org.rioproject.url \
         $loggingConfig \
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
@@ -224,7 +223,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.1.3
+    -DarchetypeVersion=5.1.4
 else
     # Set system properties
     PROPS="-Drio.home=$RIO_HOME"

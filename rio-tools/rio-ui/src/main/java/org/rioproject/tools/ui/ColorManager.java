@@ -37,13 +37,17 @@ public class ColorManager {
     public static final int EMPTY_COLOR_RGB = ColorLib.rgb(131, 139, 139);
     public static final int WARNING_COLOR_RGB = ColorLib.rgb(255, 170, 15);
     public static final int OKAY_COLOR_RGB = ColorLib.rgb(35, 142, 35);
+    //public static final int UNMANAGED_COLOR_RGB = ColorLib.rgb(127, 164, 127);
+    public static final int UNMANAGED_COLOR_RGB = ColorLib.rgb(104, 121, 104);
     public static final int FAILURE_COLOR_RGB = ColorLib.rgb(205,38,38);
     public static final int EDGE_COLOR_RGB = ColorLib.rgb(153, 153, 153);
 
     private Color okayColor;
     private Color warningColor;
     private Color failureColor;
+    private Color unManagedColor;
     private ColorAction colorAction;
+    private Predicate unManagedFilter;
     private Predicate okayFilter;
     private Predicate ambiguousFilter;
     private Predicate noServiceItemFilter;
@@ -60,10 +64,26 @@ public class ColorManager {
 
         rgb = Integer.parseInt(props.getProperty(Constants.WARNING_COLOR, Integer.toString(WARNING_COLOR_RGB)));
         setWarningColor(new Color(rgb));
+
+        rgb = Integer.parseInt(props.getProperty(Constants.UNMANAGED_COLOR, Integer.toString(UNMANAGED_COLOR_RGB)));
+        setUnManagedColor(new Color(rgb));
     }
     
     public void setOkayFilter(Predicate okayFilter) {
         this.okayFilter = okayFilter;
+    }
+
+    public void setUnManagedFilter(Predicate unManagedFilter) {
+        this.unManagedFilter = unManagedFilter;
+    }
+
+    public void setUnManagedColor(Color unManagedColor) {
+        if(unManagedColor==null)
+            throw new IllegalArgumentException("color is null");
+        this.unManagedColor = unManagedColor;
+        if(unManagedFilter != null && colorAction!=null) {
+            swapPredicateColor(unManagedFilter, unManagedColor);
+        }
     }
 
     public void setAmbiguousFilter(Predicate ambiguousFilter) {
@@ -84,6 +104,10 @@ public class ColorManager {
 
     public Color getOkayColor() {
         return okayColor;
+    }
+
+    public Color getUnManagedColor() {
+        return unManagedColor;
     }
 
     public void setOkayColor(Color okayColor) {
@@ -129,12 +153,13 @@ public class ColorManager {
         map.put(Constants.FAILURE_COLOR, new Color(FAILURE_COLOR_RGB));
         map.put(Constants.OKAY_COLOR, new Color(OKAY_COLOR_RGB));
         map.put(Constants.WARNING_COLOR, new Color(WARNING_COLOR_RGB));
+        map.put(Constants.UNMANAGED_COLOR, new Color(UNMANAGED_COLOR_RGB));
         return map;
     }
 
     private void swapPredicateColor(Predicate predicate, Color color) {
         if(colorAction.remove(predicate)) {
-            colorAction.add(predicate,ColorLib.color(color));
+            colorAction.add(predicate, ColorLib.color(color));
         }
     }
 }

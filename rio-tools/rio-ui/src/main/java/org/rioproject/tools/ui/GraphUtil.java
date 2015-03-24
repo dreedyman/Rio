@@ -47,7 +47,7 @@ public class GraphUtil {
                  new GraphNode(service, (TableNode) node));
         node.set(Constants.STATE, Constants.EMPTY);
         g.addEdge(opstringNode, node);
-        return (node);
+        return node;
     }
 
     public static Node addService(Graph g,
@@ -76,7 +76,7 @@ public class GraphUtil {
         instance.set(Constants.USER_OBJECT, gNode);
         instance.set(Constants.STATE, Constants.EMPTY);
         gNode.setTableNode((TableNode)instance);
-        return (instance);
+        return instance;
     }
 
     public static Node addServiceInstance(Graph g,
@@ -90,10 +90,14 @@ public class GraphUtil {
         if (graphNode.getServiceItem() == null) {
             instance.set(Constants.STATE, Constants.ACTIVE_NO_SERVICE_ITEM);
         } else {
-            instance.set(Constants.STATE, Constants.ACTIVE);
+            instance.set(Constants.STATE, getActiveState(graphNode));
         }
         graphNode.setTableNode((TableNode) instance);
-        return (instance);
+        return instance;
+    }
+
+    static int getActiveState(GraphNode graphNode) {
+        return graphNode.getOpStringName().equals(Constants.UNMANAGED)?Constants.ACTIVE_UNMANAGED:Constants.ACTIVE;
     }
 
     public static GraphNode addServiceInstance(Graph g,
@@ -111,7 +115,7 @@ public class GraphUtil {
             if (graphNode.getServiceItem() == null) {
                 instance.set(Constants.STATE, Constants.ACTIVE_NO_SERVICE_ITEM);
             } else {
-                instance.set(Constants.STATE, Constants.ACTIVE);
+                instance.set(Constants.STATE, getActiveState(graphNode));
             }
         } else {
             instance.set(Constants.STATE, Constants.FAILED);
@@ -124,7 +128,7 @@ public class GraphUtil {
         }
         */
         graphNode.setTableNode((TableNode) instance);
-        return (graphNode);
+        return graphNode;
     }
 
     /*
@@ -138,6 +142,7 @@ public class GraphUtil {
             services = getChildren(g, opStringNode.getTableNode());
         }
         int opStringState = Constants.EMPTY;
+        int activeState = getActiveState(opStringNode);
         for (GraphNode service : services) {
             int numActive = 0;
             int planned = service.getServiceElement().getPlanned();
@@ -154,35 +159,40 @@ public class GraphUtil {
                 if(instance.getServiceItem()!=null)
                     numWithServiceItems++;
             }
-            if(planned==0) {
-                if (service.getTableNode() != null)
-                    service.getTableNode().set(Constants.STATE,
-                                               Constants.EMPTY);
-            } else if (numActive == 0) {
-                if (service.getTableNode() != null)
-                    service.getTableNode().set(Constants.STATE,
-                                               Constants.FAILED);
-                opStringState = Constants.FAILED;
-            } else if (numActive < planned) {
-                if (service.getTableNode() != null)
-                    service.getTableNode().set(Constants.STATE,
-                                               Constants.WARNING);
-                if (opStringState != Constants.FAILED)
-                    opStringState = Constants.WARNING;
-            } else {
-                if (service.getTableNode() != null) {
-                    int state = numWithServiceItems==numActive?
-                                Constants.ACTIVE:
-                                Constants.ACTIVE_NO_SERVICE_ITEM; 
-                    service.getTableNode().set(Constants.STATE, state);
-                    if(state==Constants.ACTIVE_NO_SERVICE_ITEM)
+            try {
+                if (planned == 0) {
+                    if (service.getTableNode() != null)
+                        service.getTableNode().set(Constants.STATE,
+                                                   Constants.EMPTY);
+                } else if (numActive == 0) {
+                    if (service.getTableNode() != null)
+                        service.getTableNode().set(Constants.STATE,
+                                                   Constants.FAILED);
+                    opStringState = Constants.FAILED;
+                } else if (numActive < planned) {
+                    if (service.getTableNode() != null)
+                        service.getTableNode().set(Constants.STATE,
+                                                   Constants.WARNING);
+                    if (opStringState != Constants.FAILED)
                         opStringState = Constants.WARNING;
+                } else {
+                    if (service.getTableNode() != null) {
+                        int state = numWithServiceItems == numActive ?
+                                    activeState :
+                                    Constants.ACTIVE_NO_SERVICE_ITEM;
+                        service.getTableNode().set(Constants.STATE, state);
+                        if (state == Constants.ACTIVE_NO_SERVICE_ITEM)
+                            opStringState = Constants.WARNING;
+                    }
                 }
+            } catch(IllegalArgumentException e) {
+                e.printStackTrace();
             }
         }
+
         opStringNode.getTableNode().set(Constants.STATE,
                                         (opStringState == Constants.EMPTY ?
-                                         Constants.ACTIVE : opStringState));
+                                         activeState : opStringState));
     }
 
     /*
@@ -197,7 +207,7 @@ public class GraphUtil {
                 list.add((GraphNode) o);
             }
         }
-        return (list.toArray(new GraphNode[list.size()]));
+        return list.toArray(new GraphNode[list.size()]);
     }
 
     /*
@@ -259,7 +269,6 @@ public class GraphUtil {
             }
         }
         vis.run("filter");
-
     }
 
     private static GraphNode[] getCollapsedChildren(GraphNode node) {
@@ -274,10 +283,8 @@ public class GraphUtil {
             }
             nodes = list.toArray(new GraphNode[list.size()]);
         } else {
-            nodes =
-                ((GraphListener.CollapsedServiceElement)
-                    node.getCollapsedVertex()).getInstances();
+            nodes = ((GraphListener.CollapsedServiceElement)node.getCollapsedVertex()).getInstances();
         }
-        return (nodes);
+        return nodes;
     }
 }

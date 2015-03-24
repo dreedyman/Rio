@@ -615,7 +615,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                     abortThrowable = t;
                     if(t instanceof MissingMethodException) {
                         MissingMethodException e = (MissingMethodException)t;
-                         System.out.println("===> "+sElem.getName()+", MISSING:"+e.getMethod());
+                         logger.warn("===> "+sElem.getName()+", MISSING:"+e.getMethod());
                     }
                     logger.error("Failed to load the ServiceBean [{}] {} [{}]", sElem.getName(), label, buff.toString(),
                                  abortThrowable);

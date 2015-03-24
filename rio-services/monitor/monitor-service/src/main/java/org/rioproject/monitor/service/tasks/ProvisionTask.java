@@ -229,7 +229,6 @@ public class ProvisionTask implements Runnable {
                 thrown = e;
                 Throwable t = ThrowableUtil.getRootCause(e);
                 failureReason = t.getLocalizedMessage();
-
             } catch (Throwable t) {
                 result = ServiceProvisioner.PROVISION_FAILURE | ServiceProvisioner.UNINSTANTIABLE_JSB;
                 thrown = t;
@@ -245,10 +244,10 @@ public class ProvisionTask implements Runnable {
                     result = ServiceProvisioner.PROVISION_FAILURE | ServiceProvisioner.BAD_CYBERNODE;
                 } else {
                     if (logger.isTraceEnabled())
-                        logger.warn("Provisioning [{}] to [{}]",
+                        logger.warn("Provisioning failed [{}] to [{}]",
                                    LoggingUtil.getLoggingName(request), ir.getHostAddress(), thrown);
                     else
-                        logger.warn("Provisioning [{}] to [{}], {}: {}",
+                        logger.warn("Provisioning failed [{}] to [{}], {}: {}",
                                     LoggingUtil.getLoggingName(request),
                                     ir.getHostAddress(),
                                     thrown.getClass().getName(),
@@ -260,7 +259,7 @@ public class ProvisionTask implements Runnable {
             long stop = System.currentTimeMillis();
             context.getWatch().addValue(stop - start);
         }
-        return (result);
+        return result;
     }
 
     /*

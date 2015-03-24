@@ -28,9 +28,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class WaitingDialog extends JDialog {
     private JFrame frame;
+    private JLabel waitingFor;
     private SingleComponentInfiniteProgress spinnyThing;
-    private ScheduledExecutorService ses =
-        Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+
+    public WaitingDialog(JFrame frame, long delay) {
+        this(frame, null, delay);
+    }
 
     public WaitingDialog(JFrame frame, String waitFor, long delay) {
         super(frame);
@@ -41,7 +45,9 @@ public class WaitingDialog extends JDialog {
         spinnyThing = new SingleComponentInfiniteProgress(false);
         spinnyThing.setResizeRatio(0.25);
         spinnyThing.setPreferredSize(new Dimension(40, 20));
-        JLabel waitingFor = new JLabel("<html><center>"+waitFor+"</center></html>");
+        waitingFor = new JLabel();
+        if(waitFor!=null)
+            setWaitForLabel(waitFor);
         pane.setBackground(Color.WHITE);
         pane.add(spinnyThing, BorderLayout.WEST);
         pane.add(waitingFor, BorderLayout.CENTER);
@@ -51,6 +57,10 @@ public class WaitingDialog extends JDialog {
                          delay,
                          TimeUnit.MILLISECONDS);
         }
+    }
+
+    public void setWaitForLabel(String waitFor) {
+        waitingFor.setText(String.format("<html><center>%s</center></html>", waitFor));
     }
 
     @Override

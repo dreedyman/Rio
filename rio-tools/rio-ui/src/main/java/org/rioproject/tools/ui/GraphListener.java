@@ -203,16 +203,17 @@ public class GraphListener extends ControlAdapter {
                             doCollapseSupport(node, vis);
                         }
                     });
-                    popup.add(redeploy);
-                    popup.add(undeploy);
-                    popup.addSeparator();
+                    if(!node.isExternal()) {
+                        popup.add(redeploy);
+                        popup.add(undeploy);
+                        popup.addSeparator();
+                    }
                     popup.add(collapse);
 
                 }
                 if (node.isServiceElement()) {
                     popup = new JPopupMenu();
-                    JMenuItem redeployAll = new JMenuItem(
-                        "Redeploy the ServiceElement");
+                    JMenuItem redeployAll = new JMenuItem("Redeploy the ServiceElement");
                     redeployAll.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
                             try {
@@ -226,8 +227,7 @@ public class GraphListener extends ControlAdapter {
                         }
                     });
 
-                    JMenuItem serviceElementAdmin = new JMenuItem(
-                        "Show ServiceElement UI");
+                    JMenuItem serviceElementAdmin = new JMenuItem("Show ServiceElement UI");
                     serviceElementAdmin.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
                             JDialog dialog =
@@ -263,21 +263,16 @@ public class GraphListener extends ControlAdapter {
                                 dialog.setLocationRelativeTo(frame);
                                 dialog.setVisible(true);
                             } catch (Exception e) {
-                                Util.showError(e, dialog,
-                                               "Could not Show all Service UIs");
+                                Util.showError(e, dialog, "Could not Show all Service UIs");
                             }
                         }
                     });
 
-                    JMenuItem serviceUiAdmin = new JMenuItem(
-                        "Show all Service UIs");
+                    JMenuItem serviceUiAdmin = new JMenuItem("Show all Service UIs");
                     serviceUiAdmin.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent event) {
-                            GraphNode[] nodes =
-                                GraphUtil.getChildren(g,
-                                                      node.getTableNode());
-                            Map<String, ServiceItem> items =
-                                new HashMap<String, ServiceItem>();
+                            GraphNode[] nodes = GraphUtil.getChildren(g, node.getTableNode());
+                            Map<String, ServiceItem> items = new HashMap<String, ServiceItem>();
                             String sName = node.getServiceElement().getName();
                             for(GraphNode gn : nodes) {
                                 if(gn.getServiceItem()!=null) {
@@ -286,22 +281,23 @@ public class GraphListener extends ControlAdapter {
                                 }
                             }
 
-                            adminManager.doShowAdminUIs(node.getServiceElement(),
-                                                        items);
+                            adminManager.doShowAdminUIs(node.getServiceElement(), items);
                         }
                     });
-                    JMenuItem collapse =
-                        new JMenuItem(node.isCollapsed() ? "Expand" : "Collapse");
+                    JMenuItem collapse = new JMenuItem(node.isCollapsed() ? "Expand" : "Collapse");
                     collapse.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent actionEvent) {
                             doCollapseSupport(node, vis);
                         }
                     });
-                    popup.add(serviceElementAdmin);
-                    popup.add(serviceUiAdmin);
-                    popup.addSeparator();
-                    popup.add(redeployAll);
-                    popup.addSeparator();
+
+                    if(!node.isExternal()) {
+                        popup.add(serviceElementAdmin);
+                        popup.add(serviceUiAdmin);
+                        popup.addSeparator();
+                        popup.add(redeployAll);
+                        popup.addSeparator();
+                    }
                     popup.add(collapse);
                 }
                 if (node.isServiceInstance()) {
@@ -320,8 +316,7 @@ public class GraphListener extends ControlAdapter {
                         }
                     });
 
-                    JMenuItem redeployAll = new JMenuItem(
-                        "Redeploy the ServiceElement");
+                    JMenuItem redeployAll = new JMenuItem("Redeploy the ServiceElement");
                     redeployAll.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent ae) {
                             try {
@@ -340,9 +335,11 @@ public class GraphListener extends ControlAdapter {
                             adminManager.doShowAdminUI(node.getServiceItem(), frame);
                         }
                     });
-                    popup.add(redeploy);
-                    popup.add(redeployAll);
-                    popup.addSeparator();
+                    if(!node.isExternal()) {
+                        popup.add(redeploy);
+                        popup.add(redeployAll);
+                        popup.addSeparator();
+                    }
                     popup.add(admin);
                 }
                 if (popup != null) {

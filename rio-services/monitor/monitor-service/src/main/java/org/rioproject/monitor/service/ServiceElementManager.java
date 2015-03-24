@@ -1625,7 +1625,7 @@ public class ServiceElementManager implements InstanceIDManager {
                                  LoggingUtil.getLoggingName(svcElement));
             }
 
-            /* If we couldnt get the ServiceBeanConfig or instantiatorUuid,
+            /* If we couldn't get the ServiceBeanConfig or instantiatorUuid,
              * try to obtain it from the collection of Cybernodes */
             if(jsbConfig == null || instantiatorUuid==null) {
                 InstantiatorResource[] resources =

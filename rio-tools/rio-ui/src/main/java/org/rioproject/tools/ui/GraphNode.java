@@ -63,6 +63,10 @@ class GraphNode {
         this.tableNode = tableNode;
     }
 
+    public boolean isExternal() {
+        return getOpStringName().equals(Constants.UNMANAGED);
+    }
+
     public TableNode getTableNode() {
         return tableNode;
     }

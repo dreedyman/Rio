@@ -15,6 +15,8 @@
  */
 package org.rioproject.tools.ui;
 
+import net.jini.core.lookup.ServiceItem;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -23,8 +25,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @author Dennis Reedy
  */
-public class ServiceItemFetchQ  {
+public class RequestQueues {
     private static final BlockingQueue<Request> serviceItemFetchQ = new LinkedBlockingQueue<Request>();
+    private static final BlockingQueue<ExternalServiceRequest> externalServiceQ = new LinkedBlockingQueue<ExternalServiceRequest>();
 
     public static void write(GraphNode node, GraphView graphView) {
         serviceItemFetchQ.add(new Request(node, graphView));
@@ -36,6 +39,28 @@ public class ServiceItemFetchQ  {
 
     public static Request take() throws InterruptedException {
         return serviceItemFetchQ.take();
+    }
+
+    public static void write(ExternalServiceRequest request) {
+        externalServiceQ.add(request);
+    }
+
+    public static ExternalServiceRequest takeExternalServiceRequest() throws InterruptedException {
+        return externalServiceQ.take();
+    }
+
+    static class ExternalServiceRequest {
+        final ServiceItem item;
+        final boolean removed;
+
+        public ExternalServiceRequest(ServiceItem item) {
+            this(item, false);
+        }
+
+        public ExternalServiceRequest(ServiceItem item, boolean removed) {
+            this.item = item;
+            this.removed = removed;
+        }
     }
 
     static class Request {

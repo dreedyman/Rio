@@ -19,6 +19,8 @@
  */
 
 import com.sun.jini.start.ServiceDescriptor
+import org.rioproject.url.ProtocolRegistryService
+import org.rioproject.url.artifact.Handler
 import org.rioproject.util.FileHelper
 import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil
@@ -27,6 +29,10 @@ import org.rioproject.resolver.maven2.Repository
 
 @Component('org.rioproject.start')
 class StartCybernodeConfig {
+
+    StartCybernodeConfig() {
+        ProtocolRegistryService.create().register("artifact", new Handler());
+    }
 
     String[] getConfigArgs(String rioHome) {
         ServiceDescriptorUtil.checkForLoopback()
