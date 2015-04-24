@@ -30,14 +30,14 @@ import org.slf4j.LoggerFactory
 class ResolverConfiguration {
     public static final String RESOLVER_CONFIG = "org.rioproject.resolver.config"
     public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
-    private final resolverConfig
+    private final File resolverConfig
     static final Logger logger = LoggerFactory.getLogger(ResolverConfiguration.class)
 
     ResolverConfiguration() {
         if(System.properties[RESOLVER_CONFIG]==null) {
             resolverConfig = new File("${RioHome.get()}/config/resolverConfig.groovy")
         } else {
-            resolverConfig = new File(System.properties[RESOLVER_CONFIG])
+            resolverConfig = new File(System.getProperty(RESOLVER_CONFIG))
         }
         if(!resolverConfig.exists())
             logger.warn("The resolver configuration file does not exist {}, will", resolverConfig.path)
