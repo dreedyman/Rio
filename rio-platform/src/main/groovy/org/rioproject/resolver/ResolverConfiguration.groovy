@@ -42,7 +42,7 @@ class ResolverConfiguration {
         if(!resolverConfig.exists())
             logger.warn("The resolver configuration file does not exist {}, will", resolverConfig.path)
         else
-            logger.info("Using resolver configuration ${resolverConfig}")
+            logger.debug("Using resolver configuration ${resolverConfig}")
     }
 
     String getResolverJar() {
