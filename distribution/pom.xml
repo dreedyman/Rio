@@ -7,7 +7,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.1.4</version>
+        <version>5.1.5</version>
     </parent>
     <artifactId>distribution</artifactId>
     <name>Rio Distribution</name>
@@ -170,6 +170,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
             <optional>true</optional>
         </dependency>
 

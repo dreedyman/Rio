@@ -15,6 +15,7 @@
  */
 
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.classic.jul.LevelChangePropagator
 import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.rolling.RollingFileAppender
 import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP
@@ -23,6 +24,9 @@ import ch.qos.logback.core.rolling.TimeBasedRollingPolicy
 import java.lang.management.ManagementFactory
 
 import static ch.qos.logback.classic.Level.*
+
+context = new LevelChangePropagator()
+context.resetJUL = true
 
 /* Scan for changes every minute. */
 scan()

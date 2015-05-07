@@ -203,6 +203,7 @@
             <includes>
                 <include>org.rioproject:rio-logging-support</include>
                 <include>org.slf4j:slf4j-api</include>
+                <include>org.slf4j:jul-to-slf4j</include>
                 <include>ch.qos.logback:logback-core</include>
                 <include>ch.qos.logback:logback-classic</include>
             </includes>
@@ -214,6 +215,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
+                <include>org.slf4j:jul-to-slf4j</include>
                 <include>ch.qos.logback:logback-core</include>
                 <include>ch.qos.logback:logback-classic</include>
             </includes>

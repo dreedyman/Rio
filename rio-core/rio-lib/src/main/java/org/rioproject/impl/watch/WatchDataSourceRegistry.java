@@ -121,7 +121,13 @@ public class WatchDataSourceRegistry implements WatchRegistry {
         try {
             ObjectName objectName = getObjectName(watch);
             MBeanServer mbeanServer = MBeanServerFactory.getMBeanServer();
+            if(mbeanServer.isRegistered(objectName)) {
+                mbeanServer.unregisterMBean(objectName);
+                logger.info("Unregistered {}, update Watch [{}] registration with new watch instance",
+                            objectName, watch.getId());
+            }
             mbeanServer.registerMBean(watch, objectName);
+
         } catch (MalformedObjectNameException e) {
             logger.warn(e.toString(), e);
         } catch (MBeanRegistrationException e) {
@@ -129,6 +135,8 @@ public class WatchDataSourceRegistry implements WatchRegistry {
         } catch (InstanceAlreadyExistsException e) {
             logger.warn(e.toString(), e);
         } catch (NotCompliantMBeanException e) {
+            logger.warn(e.toString(), e);
+        } catch (InstanceNotFoundException e) {
             logger.warn(e.toString(), e);
         }
     }

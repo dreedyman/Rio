@@ -95,7 +95,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.1.4
+rioVersion=5.1.5
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -208,6 +208,7 @@ if [ "$start" = "1" ]; then
         -XX:OnOutOfMemoryError="`toNative $RIO_HOME/bin/rio` restart %p $service" \
         -XX:HeapDumpPath=`toNative $RIO_HOME/logs` \
         $classpath $libpath $RIO_OPTS \
+        -Djava.protocol.handler.pkgs=org.rioproject.url \
         -Djava.security.policy=`toNative $RIO_HOME/policy/policy.all` \
         $loggingConfig \
         -Dorg.rioproject.service=$service \
@@ -223,7 +224,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.1.4
+    -DarchetypeVersion=5.1.5
 else
     # Set system properties
     PROPS="-Drio.home=$RIO_HOME"

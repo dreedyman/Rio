@@ -60,8 +60,9 @@ grant codeBase "file:${user.home}${/}.m2${/}repository${/}org${/}rioproject${/}-
 /* -------------------------------------------------------
  * Give grant to groovy
  * ------------------------------------------------------*/
-grant codeBase "file:groovy/script" {
-    permission java.util.PropertyPermission "*","read";
+grant codeBase "file:/groovy/script" {
+    permission java.util.PropertyPermission "*","read,write";
+    permission java.io.FilePermission "*","read";
 };
 
 /* -------------------------------------------------------

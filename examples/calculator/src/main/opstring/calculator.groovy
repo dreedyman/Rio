@@ -15,8 +15,8 @@
  */
 import org.rioproject.config.Constants
 
-def artifactTable = ["api":"org.rioproject.examples.calculator:calculator-api:2.3.3",
-                     "service":"org.rioproject.examples.calculator:calculator-service:2.3.3"]
+def artifactTable = ["api":"org.rioproject.examples.calculator:calculator-api:2.3.4",
+                     "service":"org.rioproject.examples.calculator:calculator-service:2.3.4"]
 /**
  * The deployment configuration for the Calculator example
  *

@@ -24,7 +24,7 @@ class HospitalConfig {
 
     Entry[] getServiceUIs(String codebase) {
         String uiClass = 'org.rioproject.examples.hospital.ui.HospitalIntro'
-        URL url = new URL("artifact:org.rioproject.examples.hospital:hospital-ui:2.3.3")
+        URL url = new URL("artifact:org.rioproject.examples.hospital:hospital-ui:2.3.4")
         def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIComponentFactory(url, uiClass))]
         return entry as Entry[]
     }

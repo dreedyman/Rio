@@ -20,7 +20,7 @@ deployment(name: 'Test Deploy') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                               System.getProperty('user.name'))
 
-    include 'org.rioproject:gnostic:5.1.4'
+    include 'org.rioproject:gnostic:5.1.5'
 
     service(name: 'S1') {
         interfaces {

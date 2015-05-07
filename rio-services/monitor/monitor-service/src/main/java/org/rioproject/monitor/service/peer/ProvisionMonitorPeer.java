@@ -268,7 +268,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                 peerSet.add(peer);
             }
         }
-        peerLogger.debug("ProvisionMonitorPeer: ProvisionMonitor updated info :\n\tcount={}, address={}, id={}, ",
+        peerLogger.debug("ProvisionMonitorPeer: ProvisionMonitor updated info : backup count={}, address={}, id={}, ",
                          peer.getBackupCount(), peer.getAddress(), peer.getID().toString());
     }
 
@@ -324,7 +324,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
          */
         if(backup == null) {
             peerLogger.debug("No backup yet, try assignment");
-            doAssignment(peer);
+            if(doAssignment(peer))
+                peerLogger.debug("Now backup for ProvisionMonitor: address={}, id={}",
+                                 peer.getAddress(), peer.getID().toString());
         } else {
             /*
              * If our backup is a local backup (same machine), and the newly
@@ -335,7 +337,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             //   (!computeResource.getAddress().equals(peer.getAddress()))) {
 
             String resourceAddress = computeResource.getAddress().getHostAddress();
-            String resourceHostName =  computeResource.getAddress().getHostName();
+            String resourceHostName = computeResource.getAddress().getHostName();
 
             if(localBackup && !(resourceAddress.equals(peer.getAddress()) ||
                                 resourceHostName.equals(peer.getAddress())) ) {
@@ -373,8 +375,9 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             return;
         }
         synchronized(peerSet) {
-            if(peerSet.remove(info))
+            if(peerSet.remove(info)) {
                 peerLogger.debug("ProvisionMonitorPeer: Removed ProvisionMonitor at [{}]", info.getAddress());
+            }
         }
         /*
          * Check to see if the ProvisionMonitor that just left the network
@@ -441,8 +444,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * @param info PeerInfo
      */
     void notifyPeers(final ProvisionMonitor.PeerInfo info) {
-        new Thread(new PeerNotificationTask(getProvisionMonitorPeers(),
-                                            info)).start();
+        new Thread(new PeerNotificationTask(getProvisionMonitorPeers(), info)).start();
     }
 
     /**
@@ -495,10 +497,10 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             backup = peer.getService();
             backup.assignBackupFor(getServiceProxy());
             assigned = true;
-            peerLogger.debug("ProvisionMonitorPeer: ProvisionMonitor backup info :\n\tcount={}, address={}, id={}",
+            peerLogger.debug("ProvisionMonitor backup info: backup count={}, address={}, id={}",
                              peer.getBackupCount(), peer.getAddress(), peer.getID().toString());
         } catch(Exception e) {
-            peerLogger.warn("Assigning ProvisionMonitor backup", e);
+            peerLogger.warn("Failed assigning ProvisionMonitor backup", e);
         }
         return (assigned);
     }
