@@ -45,7 +45,13 @@ public class EnlistReleaseTest {
     }
 
     @Test
-    public void testEnlist() throws IOException, InterruptedException {
+    public void testEnlistRelease() throws IOException, InterruptedException {
+        testEnlist();
+        testRelease();
+        testReleaseEnlist();
+    }
+
+    void testEnlist() throws IOException, InterruptedException {
         ServiceBeanInstantiator[] sbis = null;
         int waited=0;
         long t0 = System.currentTimeMillis();
@@ -64,8 +70,7 @@ public class EnlistReleaseTest {
         Assert.assertTrue("Expected Cybernode count to be 1, was "+sbis.length, sbis.length==1);
     }
 
-    @Test
-    public void testRelease() throws IOException {
+    void testRelease() throws IOException {
         ServiceBeanInstantiator[] sbis;
         cybernode.release(true);
         Assert.assertFalse(cybernode.isEnlisted());
@@ -74,8 +79,7 @@ public class EnlistReleaseTest {
         Assert.assertTrue(sbis.length==0);
     }
 
-    @Test
-    public void testReleaseEnlist() throws IOException {
+    void testReleaseEnlist() throws IOException {
         ServiceBeanInstantiator[] sbis;
 
         cybernode.release(true);
