@@ -1,4 +1,4 @@
-### Overview
+### Overview  ![build status](https://travis-ci.org/dreedyman/Rio.svg?branch=develop)
 Rio is an open source technology that provides a dynamic architecture for developing, deploying and
 managing distributed systems composed of services.
 
