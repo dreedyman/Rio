@@ -112,8 +112,9 @@ public final class AetherService {
                           SettingsUtil.getLocalRepositoryLocation(effectiveSettings));
     }
 
-    public void setDependencyFilterScope(final String dependencyFilterScope) {
+    public AetherService setDependencyFilterScope(final String dependencyFilterScope) {
         this.dependencyFilterScope = dependencyFilterScope;
+        return this;
     }
 
     public void addDependencyFilter(final DependencyFilter filter) {
@@ -469,8 +470,9 @@ public final class AetherService {
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
 
-    public void setConfiguredRepositories(List<RemoteRepository> repositories) {
+    public AetherService setConfiguredRepositories(List<RemoteRepository> repositories) {
         configuredRepositories.addAll(repositories);
+        return this;
     }
 
     /**

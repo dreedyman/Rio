@@ -26,6 +26,7 @@ import org.rioproject.resolver.maven2.Repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,9 +51,15 @@ public class AetherServiceTest {
 
     @Test
     public void testGetClasspath() throws Exception {
-        ResolutionResult result = AetherService.getDefaultInstance().resolve("org.apache.maven",
-                                                                             "maven-settings-builder",
-                                                                             "3.0.3");
+        List<RemoteRepository> repos = new ArrayList<RemoteRepository>();
+        RemoteRepository.Builder repoBuilder = new RemoteRepository.Builder("central",
+                                                                            "default",
+                                                                            "http://repo1.maven.org/maven2");
+        repos.add(repoBuilder.build());
+
+        ResolutionResult result = AetherService.getDefaultInstance()
+                                      .setConfiguredRepositories(repos)
+                                      .resolve("junit", "junit", "4.10");
         Assert.assertNotNull(result);
         Assert.assertTrue(result.getArtifactResults().size()>0);
     }

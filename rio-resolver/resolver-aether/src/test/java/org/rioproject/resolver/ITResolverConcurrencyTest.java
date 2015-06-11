@@ -15,7 +15,7 @@
  */
 package org.rioproject.resolver;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.resolver.aether.AetherResolver;
 
@@ -30,7 +30,13 @@ public class ITResolverConcurrencyTest {
 
     @Test
     public void testConcurrentAccess() throws ExecutionException, InterruptedException {
-        Resolver r = new AetherResolver();
+        SettableResolver r = new AetherResolver();
+        List<RemoteRepository> repos = new ArrayList<RemoteRepository>();
+        RemoteRepository central = new RemoteRepository();
+        central.setId("central");
+        central.setUrl("http://repo1.maven.org/maven2");
+        repos.add(central);
+        r.setRemoteRepositories(repos);
         ExecutorService resolverExecutor = Executors.newCachedThreadPool();
         System.out.println("Create 100 threads");
         long t0 = System.currentTimeMillis();
