@@ -165,7 +165,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             callerCL = AccessController.doPrivileged(
                 new PrivilegedAction<ClassLoader>() {
                     public ClassLoader run() {
-                        return (currentThread.getContextClassLoader());
+                        return currentThread.getContextClassLoader();
                     }
                 });
         } else {
@@ -433,7 +433,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
     }
 
     protected Configuration getConfiguration() {
-        return (config==null? EmptyConfiguration.INSTANCE:config);
+        return config==null? EmptyConfiguration.INSTANCE:config;
     }
 
     public void setConfiguration(final Configuration config) {
@@ -489,7 +489,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 diffList.add(aDesc1);
             }
         }
-        return(diffList.toArray(new AssociationDescriptor[diffList.size()]));
+        return diffList.toArray(new AssociationDescriptor[diffList.size()]);
     }
 
 
@@ -507,7 +507,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 break;
             }
         }
-        return(handler);
+        return handler;
     }
 
     /**
@@ -522,7 +522,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 list.add(ah);
             }
         }
-        return (list.toArray(new AssociationHandler[list.size()]));
+        return list.toArray(new AssociationHandler[list.size()]);
     }
 
     /**
@@ -537,7 +537,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 list.add(ah.associationDescriptor);
             }
         }
-        return(list.toArray(new AssociationDescriptor[list.size()]));
+        return list.toArray(new AssociationDescriptor[list.size()]);
     }
 
     /**
@@ -552,7 +552,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         synchronized(listeners) {
             aListeners = listeners.toArray(new AssociationListener[listeners.size()]);
         }
-        return (aListeners);
+        return aListeners;
     }
 
     /**
@@ -569,7 +569,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
     protected AssociationHandler createAssociationHandler(final AssociationDescriptor aDesc) {
         if(aDesc == null)
             throw new IllegalArgumentException("associationDescriptor is null");
-        return(new AssociationHandler(aDesc));
+        return new AssociationHandler(aDesc);
     }
 
     /**
@@ -1099,7 +1099,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
                     logger.warn("Getting attributes from [{}]", getAssociation().getName(), e);
                 }
             }
-            return(new ServiceItem(serviceID, service, attrs));
+            return new ServiceItem(serviceID, service, attrs);
         }
 
         /**
@@ -1138,7 +1138,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             final ClassLoader cCL = AccessController.doPrivileged(
                     new PrivilegedAction<ClassLoader>() {
                         public ClassLoader run() {
-                            return (currentThread.getContextClassLoader());
+                            return currentThread.getContextClassLoader();
                         }
                     });
             try {
@@ -1242,7 +1242,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          * @return instance count
          */
         protected int instances() {
-            return(instances);
+            return instances;
         }
 
         /**
@@ -1265,7 +1265,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          * @return The Association instance for this AssociationHandler
          */
         public Association getAssociation() {
-            return (association);
+            return association;
         }
 
         /**
@@ -1323,7 +1323,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         for(int i = 0; i < interfaces.length; i++) {
             interfaces[i] = Class.forName(iNames[i], false, cl);
         }
-        return(interfaces);
+        return interfaces;
     }
 
     /*
@@ -1338,7 +1338,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             AccessController.doPrivileged(
                 new PrivilegedAction<ClassLoader>() {
                     public ClassLoader run() {
-                        return (currentThread.getContextClassLoader());
+                        return currentThread.getContextClassLoader();
                     }
                 });
         try {
@@ -1404,7 +1404,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
             AccessController.doPrivileged(new PrivilegedAction<Void>() {
                 public Void run() {
                     currentThread.setContextClassLoader(cCL);
-                    return (null);
+                    return null;
                 }
             });
         }
