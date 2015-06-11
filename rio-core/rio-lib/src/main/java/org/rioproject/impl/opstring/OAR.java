@@ -171,7 +171,7 @@ public class OAR implements Serializable {
         name = attrs.getValue(OAR_NAME);
         if(name==null)
             fillInAndThrow(OAR_NAME);
-        version = attrs.getValue(OAR_VERSION);        
+        version = attrs.getValue(OAR_VERSION);
         opStringName = attrs.getValue(OAR_OPSTRING);
         if(opStringName==null)
             fillInAndThrow(OAR_OPSTRING);

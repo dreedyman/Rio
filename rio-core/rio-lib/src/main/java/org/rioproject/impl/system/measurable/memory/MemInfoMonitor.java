@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.StringTokenizer;
 
 /**
@@ -82,8 +84,13 @@ public class MemInfoMonitor implements MeasurableMonitor<SystemMemoryUtilization
             }
 
             long free = total - active;
-            double usedPercent = (double)active/(double)total;
-            double freePercent = (double)free/(double)total;
+            double u = (double)active/(double)total;
+            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.HALF_EVEN);
+            double usedPercent = bd.doubleValue();
+
+            double f = (double)free/(double)total;
+            bd = new BigDecimal(f).setScale(2, RoundingMode.HALF_EVEN);
+            double freePercent = bd.doubleValue();
 
             double KB = 1024;
             memoryUtilization = new SystemMemoryUtilization(id,

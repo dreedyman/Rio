@@ -23,6 +23,6 @@ title Rio UI
 set command_line=%*
 
 if "%RIO_HOME%" == "" set RIO_HOME=%~dp0..
-set rioVersion=5.1.5
+set rioVersion=5.1.6
 "%JAVA_HOME%\bin\java" -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Drio.home="%RIO_HOME%" -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -jar "%RIO_HOME%/lib/rio-ui-%rioVersion%.jar" %command_line%
 

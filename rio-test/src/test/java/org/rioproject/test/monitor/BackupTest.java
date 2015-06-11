@@ -16,8 +16,8 @@
 
 package org.rioproject.test.monitor;
 
-import junit.framework.Assert;
 import net.jini.lookup.ServiceDiscoveryManager;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.cybernode.Cybernode;
@@ -75,13 +75,18 @@ public class BackupTest  {
     private static Logger logger = LoggerFactory.getLogger(BackupTest.class.getPackage().getName());
     @SetTestManager
     TestManager testManager;
+
+    @Test
+    public void runScenarios() throws Exception {
+        scenarioA();
+        scenarioB();
+    }
     
     /**
      * Runs scenario A.
      *
      * @throws Exception if the test fails
      */
-    @Test
     public void scenarioA() throws Exception {
         logger.info("\n*******************\nRunning scenario A ...\n*******************");
         Assert.assertNotNull(testManager);
@@ -196,8 +201,7 @@ public class BackupTest  {
      *
      * @throws Exception if the test fails
      */
-    @Test
-    public void testScenarioB() throws Exception {
+    public void scenarioB() throws Exception {
         logger.info("\n*******************\nRunning scenario B\n*******************");
         Assert.assertNotNull(testManager);
         testManager.startReggie();

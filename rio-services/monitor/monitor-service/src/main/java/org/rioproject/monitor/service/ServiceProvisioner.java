@@ -208,14 +208,14 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @return the ServiceResourceSelector
      */
     ServiceResourceSelector getServiceResourceSelector() {
-        return(selector);
+        return selector;
     }
 
     /**
      * @return The PendingManager
      */
     PendingManager getPendingManager() {
-        return(pendingMgr);
+        return pendingMgr;
     }
 
     /**
@@ -268,7 +268,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             name = "Cybernode";
         }
 
-        Uuid uuid=instantiator.getInstantiatorUuid();
+        Uuid uuid = instantiator.getInstantiatorUuid();
         InstantiatorResource resource = new InstantiatorResource(sbi,
                                                                  instantiator,
                                                                  name,
@@ -276,6 +276,13 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                                  handback,
                                                                  resourceCapability,
                                                                  serviceLimit);
+        for (LeasedResource lr : landlord.getLeasedResources()) {
+            InstantiatorResource ir = (InstantiatorResource)((ServiceResource)lr).getResource();
+            if(ir.equals(resource)) {
+                throw new LeaseDeniedException("Already registered");
+            }
+        }
+
         try {
             resource.setDeployedServices(deployedServices);
         } catch (Throwable t) {
@@ -296,7 +303,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         fixedServiceManager.process(serviceResource);
         /* See if any dynamic provision types are pending */
         pendingMgr.process();
-        return(registration);
+        return registration;
     }
 
 

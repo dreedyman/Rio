@@ -116,6 +116,12 @@ public class ScalingServiceTest {
     }
 
     @Test
+    public void runTests() throws Exception {
+        runTest();
+        runTest2();
+    }
+
+    //@Test
     public void runTest() throws Exception {
         logBanner("Running Test #1");
         Assert.assertNotNull(testManager);
@@ -177,7 +183,7 @@ public class ScalingServiceTest {
         logBanner("Test #1 Complete");
     }
 
-    @Test
+    //@Test
     public void runTest2() throws Exception {
         logBanner("Running Test #2");
         Assert.assertNotNull(testManager);

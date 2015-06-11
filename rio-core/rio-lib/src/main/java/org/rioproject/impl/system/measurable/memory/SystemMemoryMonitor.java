@@ -22,6 +22,8 @@ import org.rioproject.watch.ThresholdValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 
 /**
@@ -29,13 +31,6 @@ import java.text.NumberFormat;
  * the {@link SystemMemory} object, providing memory usage information for the
  * system using SIGAR. If SIGAR is not available, this utility returns a -1 for
  * system memory utilization.
- *
- * <p><b>Note:</b>
- * <a href="http://www.hyperic.com/products/sigar.html">Hyperic SIGAR</a>
- * is licensed under the GPL with a FLOSS license exception, allowing it to be
- * included with the Rio Apache License v2 distribution. If for some reason the
- * GPL cannot be used with your distribution of Rio,
- * remove the <tt>RIO_HOME/lib/hyperic</tt> directory.
  *
  * @author Dennis Reedy
  */
@@ -71,7 +66,10 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
             long free = sigar.getFreeSystemMemory();
             long used = sigar.getUsedSystemMemory();
 
-            double utilization = (double)used/(double)total;
+            double u = (double)used/(double)total;
+            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.HALF_EVEN);
+            double utilization = bd.doubleValue();
+
             if(logger.isTraceEnabled()) {
                 StringBuilder builder = new StringBuilder();
                 NumberFormat nf = NumberFormat.getInstance();

@@ -582,7 +582,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         Association<T> association;
         AssociationHandler handler = getAssociationHandler(aDesc);
         if (handler!=null) {
-            logger.trace("Already managing [{}] for [{}]", aDesc.toString(), clientName);
+            logger.warn("Already managing [{}] for [{}]", aDesc.toString(), clientName);
             association = handler.getAssociation();
         } else {
             if (aDesc.getAssociationType()==AssociationType.REQUIRES)
@@ -615,7 +615,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         for (AssociationDescriptor aDesc : aDescs) {
             AssociationHandler handler = getAssociationHandler(aDesc);
             if (handler!=null) {
-                logger.trace("Already managing [{}] for [{}]", aDesc.toString(), clientName);
+                logger.warn("Already managing [{}] for [{}]", aDesc.toString(), clientName);
                 associations.add(handler.getAssociation());
                 continue;
             }
@@ -1193,6 +1193,8 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 increment();
                 setFaultDetectionHandler(item.service, item.serviceID);
                 notifyOnDiscovery(association, item.service);
+            } else {
+                logger.warn("Already added {}", item.service.getClass().getName());
             }
         }
 

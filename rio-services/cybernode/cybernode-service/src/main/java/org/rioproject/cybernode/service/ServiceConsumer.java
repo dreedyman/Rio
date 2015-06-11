@@ -22,6 +22,7 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.event.EventRegistration;
 import net.jini.core.lease.Lease;
+import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
@@ -439,6 +440,9 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             } catch(SecurityException e) {
                 //cancelRegistration(provisioner);
                 logger.warn("ProvisionManager security exception", e);
+                break;
+            } catch(LeaseDeniedException e) {
+                logger.warn("ProvisionManager denied the lease", e);
                 break;
             } catch(Exception e) {
                 logger.warn("Recovering ProvisionManager Lease attempt retry count [{}] {}:{}",

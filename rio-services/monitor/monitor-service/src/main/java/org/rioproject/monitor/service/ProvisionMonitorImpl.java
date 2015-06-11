@@ -732,6 +732,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         Collection<MarshalledObject<ServiceBeanInstantiator>> marshalledWrappers =
             new ArrayList<MarshalledObject<ServiceBeanInstantiator>>();
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
+        logger.info("Returned {} service resources", resources.length);
         for(ServiceResource s : resources) {
             marshalledWrappers.add(((InstantiatorResource)s.getResource()).getWrappedServiceBeanInstantiator());
         }
@@ -743,6 +744,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     */
     public ServiceBeanInstantiator[] getServiceBeanInstantiators() {
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
+        logger.info("Returned {} service resources", resources.length);
         List<ServiceBeanInstantiator> list = new ArrayList<ServiceBeanInstantiator>();
         for(ServiceResource s : resources) {
             list.add(((InstantiatorResource)s.getResource()).getServiceBeanInstantiator());

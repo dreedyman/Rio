@@ -20,14 +20,11 @@ import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import org.junit.Test;
 import org.rioproject.impl.config.DynamicConfiguration;
-import org.rioproject.impl.watch.Watch;
-import org.rioproject.impl.watch.WatchDataSourceImpl;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.WatchDataSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +63,7 @@ public class WatchTest {
         this.clazz = clazz;
         this.expectedView = expectedView;
         if (System.getSecurityManager() == null)
-            System.setSecurityManager(new RMISecurityManager());
+            System.setSecurityManager(new SecurityManager());
     }
 
     /**

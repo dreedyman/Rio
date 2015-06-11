@@ -63,15 +63,17 @@ public abstract class ThresholdManager {
      * @return Value of property thresholdValues.
      */
     public ThresholdValues getThresholdValues() {
-        return (thresholdValues);
+        return thresholdValues;
     }
 
     /**
      * Setter for property thresholdValues.
      * 
-     * @param thresholdValues New value of property thresholdValues.
+     * @param thresholdValues New value of property thresholdValues, ignored of null.
      */
     public void setThresholdValues(ThresholdValues thresholdValues) {
+        if(thresholdValues==null)
+            return;
         this.thresholdValues = thresholdValues;
         logger.trace("{} Set ThresholdValues, low={}, high={}",
                      getID(), thresholdValues.getLowThreshold(), thresholdValues.getHighThreshold());

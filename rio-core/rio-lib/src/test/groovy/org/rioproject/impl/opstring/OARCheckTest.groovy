@@ -15,16 +15,39 @@
  */
 package org.rioproject.impl.opstring
 
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import org.rioproject.opstring.OperationalString
 import org.rioproject.test.utils.JarUtil
 
 import java.util.jar.Attributes
 import java.util.jar.Manifest
+
+import static org.junit.Assert.*
 /**
  * Check OAR construction.
  */
-class OARCheckTest extends GroovyTestCase {
+class OARCheckTest /*extends GroovyTestCase */{
+    File oarFile
 
+    @Before
+    void init() {
+        if(oarFile!=null) {
+            if (oarFile.delete())
+                println "Removed ${oarFile.path}"
+        }
+        oarFile = null
+    }
+    @After
+    void cleanup() {
+        if(oarFile!=null) {
+            if(oarFile.delete())
+                println "Removed ${oarFile.path}"
+        }
+    }
+
+    @Test
     void testBadOARCreateFromManifest() {
         Throwable t = null
         try {
@@ -44,20 +67,21 @@ class OARCheckTest extends GroovyTestCase {
         assertTrue t instanceof IllegalArgumentException
     }
 
+    @Test
     void testBadOARCreateFromManifest2() {
         Throwable t = null
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        File oarFile = createOAR(manifest)
+        oarFile = createOAR(manifest)
         try {
             new OAR(oarFile)
         } catch(OARException e) {
             t = e
         }
         assertTrue t!=null
-        oarFile.delete()
     }
 
+    @Test
     void testOARCreateFromManifest() {
         Throwable t = null
         Manifest manifest = new Manifest();
@@ -80,6 +104,7 @@ class OARCheckTest extends GroovyTestCase {
         assertEquals OAR.AUTOMATIC, oar.activationType
     }
 
+    @Test
     void testOARCreateFromURL() {
         Throwable t = null
         Manifest manifest = new Manifest();
@@ -88,7 +113,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, "test.groovy")
         manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.MANUAL)
-        File oarFile = createOAR(manifest, "from-url.oar")
+        oarFile = createOAR(manifest, "from-url.oar")
         OAR oar = null
         try {
             oar = new OAR(oarFile.toURI().toURL())
@@ -105,6 +130,7 @@ class OARCheckTest extends GroovyTestCase {
         assertTrue oar.repositories.size()==2
     }
 
+    @Test
     void testOARCreateFromJarURL() {
         Throwable t = null
         Manifest manifest = new Manifest();
@@ -113,7 +139,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, "test.groovy")
         manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.AUTOMATIC)
-        File oarFile = createOAR(manifest, "from-jar-url.oar")
+        oarFile = createOAR(manifest, "from-jar-url.oar")
         OAR oar = null
         try {
             oar = new OAR(new URL("jar:${oarFile.toURI().toURL()}!/"))
@@ -130,6 +156,7 @@ class OARCheckTest extends GroovyTestCase {
         assertTrue oar.repositories.size()==2
     }
 
+    @Test
     void testOARCreateFromURLAndLoadOpStrings() {
         File target =  getOpString("rules.groovy")
         assertTrue target.exists()
@@ -142,7 +169,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, oarOpString)
         manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.AUTOMATIC)
-        File oarFile = createOAR(manifest)
+        oarFile = createOAR(manifest)
         OAR oar = null
         try {
             oar = new OAR(oarFile.toURI().toURL())
@@ -162,6 +189,7 @@ class OARCheckTest extends GroovyTestCase {
         assertTrue oar.repositories.size()==2
     }
 
+    @Test
     void testOARCreateFromJarURLAndLoadOpStrings() {
         File target =  getOpString("rules.groovy")
         assertTrue target.exists()
@@ -174,7 +202,7 @@ class OARCheckTest extends GroovyTestCase {
         manifest.getMainAttributes().putValue(OAR.OAR_VERSION, "1.0")
         manifest.getMainAttributes().putValue(OAR.OAR_OPSTRING, oarOpString)
         manifest.getMainAttributes().putValue(OAR.OAR_ACTIVATION, OAR.AUTOMATIC)
-        File oarFile = createOAR(manifest)
+        oarFile = createOAR(manifest)
         OAR oar = null
         try {
             oar = new OAR(new URL("jar:${oarFile.toURI().toURL()}!/"))
@@ -195,15 +223,17 @@ class OARCheckTest extends GroovyTestCase {
     }
 
     def createOAR(Manifest manifest) {
-        return createOAR(manifest, "test.oar")
+        return createOAR(manifest, String.format("test-%s.oar", Math.random()))
     }
 
     def createOAR(Manifest manifest, String name) {
         String sep = File.separator
         File target = new File("${System.getProperty('user.dir')}${sep}target")
         File jar = new File(target, name)
-        if(jar.exists())
-            jar.delete()
+        if(jar.exists()) {
+            if(jar.delete())
+                System.out.println("Deleted "+jar.getPath());
+        }
         File repositories = new File("${System.getProperty('user.dir')}${sep}src${sep}test${sep}resources${sep}repositories.xml")
         return JarUtil.createJar(new File('target/test-classes'), target, name, manifest, repositories)
     }

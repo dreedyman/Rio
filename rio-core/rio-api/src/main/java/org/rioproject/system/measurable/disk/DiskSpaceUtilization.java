@@ -19,6 +19,8 @@ import org.rioproject.system.MeasuredResource;
 import org.rioproject.watch.ThresholdValues;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Measured Disk statistics
@@ -66,6 +68,15 @@ public class DiskSpaceUtilization extends MeasuredResource
     }
 
     @Override public String toString() {
-        return String.format("used= %s, available=%s, capacity=%s", used, available, capacity);
+        /** Gigabytes */
+        double GB = Math.pow(1021, 3);
+
+        BigDecimal bd = new BigDecimal(used/GB).setScale(2, RoundingMode.HALF_EVEN);
+        double u = bd.doubleValue();
+        bd = new BigDecimal(available/GB).setScale(2, RoundingMode.HALF_EVEN);
+        double a = bd.doubleValue();
+        bd = new BigDecimal(capacity/GB).setScale(2, RoundingMode.HALF_EVEN);
+        double c = bd.doubleValue();
+        return String.format("utilization=%s, used= %s GB, available=%s GB, capacity=%s GB", getValue(), u, a, c);
     }
 }

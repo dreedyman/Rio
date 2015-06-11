@@ -135,8 +135,6 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     private String id = null;
     /** The class name used to view the WatchDataSource */
     private String viewClass;
-    /** Holds value of property ThresholdVales. */
-    private ThresholdValues thresholdValues = new ThresholdValues();
     /** Configuration for the WatchDataSource */
     private Configuration config;
     /** The Exporter for the WatchDataSource */
@@ -149,7 +147,9 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
     private boolean exported = false;
     /** Flag to indicate whether the WatchDataSource is closed */
     private boolean closed = false;
-    /** Component for accessing configuration and getting a Logger */
+    /** A reference to the ThresholdManager if the WDS is is for a ThresholdWatch */
+    private ThresholdManager thresholdManager;
+    /** Component for accessing configuration */
     protected static final String COMPONENT = "org.rioproject.watch";
     /** A suitable Logger */
     protected static Logger logger = LoggerFactory.getLogger(WatchDataSourceImpl.class);
@@ -182,9 +182,13 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
         export();
     }
 
+    void setThresholdManager(ThresholdManager thresholdManager) {
+        this.thresholdManager = thresholdManager;
+    }
+
     /*
-     * Do initialization
-     */
+         * Do initialization
+         */
     private void doInit() {
         if(initialized)
             return;
@@ -447,15 +451,20 @@ public class WatchDataSourceImpl implements WatchDataSource, ServerProxyTrust {
      * @see org.rioproject.watch.WatchDataSource#getThresholdValues
      */
     public ThresholdValues getThresholdValues() {
-        return(thresholdValues);
+        ThresholdValues thresholdValues;
+        if(thresholdManager!=null)
+            thresholdValues = thresholdManager.getThresholdValues();
+        else
+            thresholdValues = new ThresholdValues();
+        return thresholdValues;
     }
 
     /**
      *  @see org.rioproject.watch.WatchDataSource#setThresholdValues
      */
     public void setThresholdValues(ThresholdValues tValues) {
-        if(tValues!=null)
-            thresholdValues = tValues;
+        if(thresholdManager!=null)
+            thresholdManager.setThresholdValues(tValues);
     }     
 
     /**

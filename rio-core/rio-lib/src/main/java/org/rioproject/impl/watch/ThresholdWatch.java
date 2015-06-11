@@ -41,6 +41,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     public ThresholdWatch(final String id) {
         super(id);
         thresholdManager = new BoundedThresholdManager(id);
+        setWatchDataSourceThresholdManager(thresholdManager);
         setView(VIEW);
     }
 
@@ -56,6 +57,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     public ThresholdWatch(final String id, final Configuration config) {
         super(id, config);
         thresholdManager = new BoundedThresholdManager(id);
+        setWatchDataSourceThresholdManager(thresholdManager);
         setView(VIEW);
     }    
     
@@ -68,6 +70,7 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
     public ThresholdWatch(final WatchDataSource watchDataSource, final String id) {
         super(watchDataSource, id);
         thresholdManager = new BoundedThresholdManager(id);
+        setWatchDataSourceThresholdManager(thresholdManager);
         setView(VIEW);
     }
     
@@ -210,6 +213,14 @@ public class ThresholdWatch extends Watch implements ThresholdWatchMBean {
      */
     public long getClearedCount() {
         return getThresholdValues().getThresholdClearedCount();
+    }
+
+    private void setWatchDataSourceThresholdManager(ThresholdManager thresholdManager) {
+        WatchDataSource wds = getWatchDataSource();
+        if(wds instanceof WatchDataSourceImpl) {
+            WatchDataSourceImpl impl = (WatchDataSourceImpl)wds;
+            impl.setThresholdManager(thresholdManager);
+        }
     }
 
 }

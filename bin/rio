@@ -95,7 +95,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.1.5
+rioVersion=5.1.6
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -224,7 +224,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.1.5
+    -DarchetypeVersion=5.1.6
 else
     # Set system properties
     PROPS="-Drio.home=$RIO_HOME"

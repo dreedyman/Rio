@@ -153,6 +153,9 @@ public class DiskSpace extends MeasurableCapability implements DiskSpaceMBean {
         long now = System.currentTimeMillis();
         addWatchRecord(new CalculableDiskSpace(getId(), dsUtilization, now));
         setLastMeasuredResource(dsUtilization);
+        if(logger.isTraceEnabled()) {
+            logger.trace(dsUtilization.toString());
+        }
     }
 }
 

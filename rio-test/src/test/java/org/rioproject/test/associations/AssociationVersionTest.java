@@ -15,11 +15,12 @@
  */
 package org.rioproject.test.associations;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
+import org.rioproject.associations.AssociationListener;
 import org.rioproject.associations.AssociationManagement;
 import org.rioproject.impl.associations.DefaultAssociationManagement;
 import org.rioproject.test.RioTestRunner;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Dennis Reedy
@@ -81,18 +83,40 @@ public class AssociationVersionTest {
     @Test
     public void testVersionedAssociationMatchesAll() throws ExecutionException, InterruptedException, IOException {
         AssociationManagement aMgr = new DefaultAssociationManagement();
+        L listener = new L();
+        aMgr.register(listener);
         AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy", Dummy.class, System.getProperty("org.rioproject.groups"));
         descriptor.setMatchOnName(false);
         Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
-        Dummy dummy = null;
-        TimeoutException timeoutException = null;
-        try {
-            dummy = association.getServiceFuture().get(5, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            timeoutException = e;
+        int waited = 0;
+        while(listener.association.get()==null && waited < 100) {
+            Thread.sleep(100);
+            waited++;
         }
-        Assert.assertNull(timeoutException);
+        Assert.assertNotNull(listener.association.get());
+        waited = 0;
+        while(listener.association.get().getServiceCount()< 4 && waited < 100) {
+            Thread.sleep(100);
+            waited++;
+        }
+        Dummy dummy = association.getServiceFuture().get();
         Assert.assertNotNull(dummy);
         Assert.assertEquals("Expected 4 got "+association.getServiceCount(), 4, association.getServiceCount());
+    }
+
+    class L implements AssociationListener {
+        AtomicReference<Association> association = new AtomicReference<Association>();
+
+        @Override public void discovered(Association association, Object service) {
+            this.association.set(association);
+        }
+
+        @Override public void changed(Association association, Object service) {
+
+        }
+
+        @Override public void broken(Association association, Object service) {
+
+        }
     }
 }

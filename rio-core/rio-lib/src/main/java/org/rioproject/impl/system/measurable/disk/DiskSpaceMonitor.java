@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -137,11 +139,14 @@ public class DiskSpaceMonitor implements MeasurableMonitor<DiskSpaceUtilization>
             }
         }
         double capacity = used + available;
+        double u = used/capacity;
+        BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.HALF_EVEN);
+        double utilization = bd.doubleValue();
         return (new DiskSpaceUtilization(id,
                                          used,
                                          available,
                                          capacity,
-                                         used / capacity,
+                                         utilization,
                                          tVals));
     }
 

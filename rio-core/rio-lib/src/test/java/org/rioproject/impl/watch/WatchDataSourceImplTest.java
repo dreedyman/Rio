@@ -24,16 +24,16 @@ import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.junit.Test;
 import org.rioproject.impl.config.DynamicConfiguration;
-
-import java.rmi.*;
-import java.rmi.server.ExportException;
-import java.util.*;
-
-import org.rioproject.impl.watch.WatchDataReplicatorProxy;
-import org.rioproject.impl.watch.WatchDataSourceImpl;
 import org.rioproject.watch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.rmi.ConnectException;
+import java.rmi.ConnectIOException;
+import java.rmi.NoSuchObjectException;
+import java.rmi.RemoteException;
+import java.rmi.server.ExportException;
+import java.util.*;
 
 
 /**
@@ -664,6 +664,7 @@ public class WatchDataSourceImplTest {
      */
     @Test public void testGetThresholdValues() throws Exception {
         WatchDataSourceImpl impl = new WatchDataSourceImpl();
+        impl.setThresholdManager(new BoundedThresholdManager("watch"));
         impl.setID("watch");
         impl.setConfiguration(EmptyConfiguration.INSTANCE);
         ThresholdValues tv = impl.getThresholdValues();
@@ -677,13 +678,14 @@ public class WatchDataSourceImplTest {
     }
 
     /**
-     * Tests the <code>getShresholdValues<code> method.
+     * Tests the <code>getThresholdValues<code> method.
      *
      * @throws Exception if the test fails
      */
     @Test public void testSetThresholdValues() throws Exception {
         WatchDataSourceImpl impl = new WatchDataSourceImpl();
         impl.setID("watch");
+        impl.setThresholdManager(new BoundedThresholdManager("watch"));
         impl.setConfiguration(EmptyConfiguration.INSTANCE);
 
         ThresholdValues tv = new ThresholdValues();
