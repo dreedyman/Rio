@@ -21,6 +21,8 @@ import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.associations.AssociationServiceListener;
 import org.rioproject.associations.AssociationType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -52,12 +54,13 @@ public class DefaultAssociation<T> implements Association<T> {
     /**
      * Collection of AssociationServiceListeners
      */
-    private final List<AssociationServiceListener<T>> aListeners = new
-        ArrayList<AssociationServiceListener<T>>();
+    private final List<AssociationServiceListener<T>> aListeners = new ArrayList<AssociationServiceListener<T>>();
     /**
      * Executor for futures
      */
     private final ExecutorService futuresExecutor = Executors.newCachedThreadPool();
+
+    private static final Logger logger = LoggerFactory.getLogger(DefaultAssociation.class);
 
     /**
      * Create an Association
@@ -142,7 +145,9 @@ public class DefaultAssociation<T> implements Association<T> {
         synchronized(serviceList) {
             count = serviceList.size();
         }
-        return(count);
+        if(logger.isTraceEnabled())
+            logger.trace("returning service count of: {}", count);
+        return count;
     }
     
     /**
@@ -306,14 +311,16 @@ public class DefaultAssociation<T> implements Association<T> {
         ServiceItem[] items = getServiceItems();
         for (ServiceItem item1 : items) {
             if (item1.service.equals(item.service)) {
-                return (false);
+                return false;
             }
         }
         synchronized(serviceList) {
             serviceList.add(item);
         }
+        if(logger.isDebugEnabled())
+            logger.debug("Service count now: {}", serviceList.size());
         notifyServiceAdd((T)item.service);
-        return (true);
+        return true;
     }
 
     /**
@@ -338,7 +345,7 @@ public class DefaultAssociation<T> implements Association<T> {
         }
         if(item!=null)
             notifyServiceRemoved(service);
-        return (item);
+        return item;
     }
 
     /**
