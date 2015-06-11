@@ -26,6 +26,11 @@
                         </a>
                     </p>
                 </div>
+                <div id="emptyrightbox">
+                    <p>
+                        <img src="https://travis-ci.org/dreedyman/Rio.svg?branch=develop" alt="images/rio.png"/>
+                    </p>
+                </div>
             </div>
             <div>
                 <p>Rio is an open source technology that provides a dynamic
