@@ -20,4 +20,4 @@ branches:
   only:
     - develop
 
-script: travis_wait mvn verify
+#script: travis_wait mvn verify
