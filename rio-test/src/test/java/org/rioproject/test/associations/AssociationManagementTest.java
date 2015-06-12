@@ -18,17 +18,14 @@ package org.rioproject.test.associations;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.config.Constants;
-import org.rioproject.net.HostUtil;
-import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceBeanConfig;
-import org.rioproject.opstring.ServiceElement;
+import org.rioproject.opstring.*;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URL;
 
 /**
  * Test that serviceDiscoveryTimeout works
@@ -56,14 +53,16 @@ public class AssociationManagementTest {
                 ServiceElement elem = new ServiceElement();
                 elem.setPlanned(1);
                 try {
-                    String codebase = "http://"+HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)+":9010";
+                    OperationalString operationalString = manager.getOperationalString();
+                    URL exportURL = operationalString.getServices()[0].getExportURLs()[0];
+                    String codebase = "http://"+exportURL.getHost()+":"+exportURL.getPort();
                     elem.setExportBundles(makeClassBundle(Dummy.class.getName(), codebase));
                     elem.setComponentBundle(makeClassBundle(DummyImpl.class.getName(), codebase));
 
                     ServiceBeanConfig sbc = new ServiceBeanConfig();
                     sbc.setName("Add");
                     sbc.setGroups(System.getProperty("org.rioproject.groups"));
-                    sbc.setOperationalStringName("association stuff");
+                    sbc.setOperationalStringName(operationalString.getName());
                     elem.setServiceBeanConfig(sbc);
 
                     logger.info("Wait 5 seconds to deploy another dummy...");
@@ -71,7 +70,7 @@ public class AssociationManagementTest {
                     logger.info("Deploying another dummy...");
                     manager.addServiceElement(elem, null);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Deploy failed", e);
                 }
             }
         }).start();

@@ -24,7 +24,7 @@ class StartReggieConfig {
         def reggieConfigs = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '9010', websterRoots as String[]),
+            ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
             ServiceDescriptorUtil.getLookup(policyFile, reggieConfigs as String[])
         ]
 

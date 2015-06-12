@@ -85,11 +85,11 @@ public class MemInfoMonitor implements MeasurableMonitor<SystemMemoryUtilization
 
             long free = total - active;
             double u = (double)active/(double)total;
-            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.HALF_EVEN);
+            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.FLOOR);
             double usedPercent = bd.doubleValue();
 
             double f = (double)free/(double)total;
-            bd = new BigDecimal(f).setScale(2, RoundingMode.HALF_EVEN);
+            bd = new BigDecimal(f).setScale(2, RoundingMode.CEILING);
             double freePercent = bd.doubleValue();
 
             double KB = 1024;

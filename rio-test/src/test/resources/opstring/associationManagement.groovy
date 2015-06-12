@@ -1,12 +1,10 @@
 package opstring
-
 import org.rioproject.config.Constants
-import org.rioproject.net.HostUtil
 
 import java.util.concurrent.TimeUnit
 
 def String getCodebase() {
-    return 'http://'+HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)+":9010"
+    return System.getProperty(Constants.WEBSTER)
 }
 
 deployment(name:'association stuff') {

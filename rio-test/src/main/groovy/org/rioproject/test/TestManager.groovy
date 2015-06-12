@@ -157,11 +157,18 @@ class TestManager {
     }
 
     private void startConfiguredServices() {
+        startWebster()
         if(testConfig.getNumLookups()>0) {
             int lookupCount = testConfig.getNumLookups()-countLookups();
             for(int i=0; i<lookupCount; i++)
-                        startReggie();
-                    }
+                startReggie();
+        }
+
+        if(testConfig.getNumCybernodes()>0) {
+            int cybernodeCount = testConfig.getNumCybernodes()-countCybernodes();
+            for(int i=0; i<cybernodeCount; i++)
+                startCybernode();
+        }
 
         if(testConfig.getNumMonitors()>0) {
             int monitorCount = testConfig.getNumMonitors()-countMonitors();
@@ -179,12 +186,6 @@ class TestManager {
                 OpStringManagerProxy.setDiscoveryManagement(
                         getServiceDiscoveryManager().getDiscoveryManager());
             }
-        }
-
-        if(testConfig.getNumCybernodes()>0) {
-            int cybernodeCount = testConfig.getNumCybernodes()-countCybernodes();
-            for(int i=0; i<cybernodeCount; i++)
-                startCybernode();
         }
 
         postInit();
@@ -291,15 +292,16 @@ class TestManager {
     }
 
     /**
-     * Starts a Webster.
-     *
-     * @param port The port to use
-     * @param dirs Directories to serve
+     * Starts a Webster serving up rio-home/lib, rio-home/lib, rioTestHome/target
      *
      * @return The started Webster
      */
-    Webster startWebster(int port, String dirs) {
-        Webster webster = new Webster(port, dirs);
+    Webster startWebster() {
+        String rioHome = System.getProperty('rio.home')
+        String rioTestHome = System.getProperty('rio.test.home')
+
+        String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${rioTestHome}/target/"
+        Webster webster = new Webster(0, websterRoots);
         websters.add(webster);
         return webster;
     }
@@ -544,7 +546,6 @@ class TestManager {
      * Shutdown all started services
      */
     def shutdown() {
-
         for(Webster w : websters)
             w.terminate();
         /* Make sure all services are terminated */

@@ -18,7 +18,8 @@ package org.rioproject.test.rmi;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rioproject.rmi.ResolvingLoader;
-import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
+import org.rioproject.url.ProtocolRegistryService;
+import org.rioproject.url.artifact.Handler;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +34,11 @@ import static org.junit.Assert.assertTrue;
 public class ResolvingLoaderTest {
     @BeforeClass
     public static void setSecurityPolicy() {
-        URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
+        try {
+            ProtocolRegistryService.create().register("artifact", new Handler());
+        } catch(Error e) {
+            System.out.println("Oops: "+e.getMessage());
+        }
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }

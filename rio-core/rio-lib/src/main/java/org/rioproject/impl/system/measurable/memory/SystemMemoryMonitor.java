@@ -67,7 +67,7 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
             long used = sigar.getUsedSystemMemory();
 
             double u = (double)used/(double)total;
-            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.HALF_EVEN);
+            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.FLOOR);
             double utilization = bd.doubleValue();
 
             if(logger.isTraceEnabled()) {

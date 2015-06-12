@@ -1,10 +1,9 @@
 package opstring
-
 import org.rioproject.config.Constants
-import org.rioproject.net.HostUtil
+
 
 def String getCodebase() {
-    return 'http://'+HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)+":9010"
+    return System.getProperty(Constants.WEBSTER)
 }
 
 deployment(name:'Forked Service Test') {

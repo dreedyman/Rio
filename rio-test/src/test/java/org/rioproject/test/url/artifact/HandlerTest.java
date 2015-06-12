@@ -18,7 +18,8 @@ package org.rioproject.test.url.artifact;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
+import org.rioproject.url.ProtocolRegistryService;
+import org.rioproject.url.artifact.Handler;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,7 +28,7 @@ import java.net.URLConnection;
 public class HandlerTest {
     @BeforeClass
     public static void setupURLStreamHandlerFactory() {
-        URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
+        ProtocolRegistryService.create().register("artifact", new Handler());
     }
 
     @Test
