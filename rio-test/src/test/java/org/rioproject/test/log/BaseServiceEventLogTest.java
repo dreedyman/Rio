@@ -46,11 +46,11 @@ public class BaseServiceEventLogTest {
     @Before
     public void setup() {
         Assert.assertNotNull(testManager);
-        monitor = (ProvisionMonitor)testManager.waitForService(ProvisionMonitor.class);
+        monitor = testManager.waitForService(ProvisionMonitor.class);
     }
 
     @Test
-    public void testNotifyWithContainedService() {
+    public void testNotifyWithContainedService() throws InterruptedException {
         File opstring = new File(System.getProperty("user.dir")+File.separator+
                                  "src"+File.separator+
                                  "test"+File.separator+
@@ -59,7 +59,7 @@ public class BaseServiceEventLogTest {
                                  "logging_simple_opstring.groovy");
         Assert.assertNotNull(opstring);
         testManager.deploy(opstring);
-        Simple simple = (Simple)testManager.waitForService(Simple.class);
+        Simple simple = testManager.waitForService(Simple.class);
         Assert.assertNotNull(simple);
 
         Entry[] attrs = new Entry[]{ServiceLogEvent.getEventDescriptor()};
@@ -74,7 +74,7 @@ public class BaseServiceEventLogTest {
     }
 
     @Test
-    public void testNotifyWithForkedService() {
+    public void testNotifyWithForkedService() throws InterruptedException {
         Throwable thrown = null;
         try {
             DeployAdmin dAdmin = (DeployAdmin)monitor.getAdmin();
@@ -95,7 +95,7 @@ public class BaseServiceEventLogTest {
         Assert.assertNotNull(opstring);
         OperationalStringManager mgr = testManager.deploy(opstring);
         testManager.waitForDeployment(mgr);
-        Simple simple = (Simple)testManager.waitForService(Simple.class, "Simple Logging Forked Simon");
+        Simple simple = testManager.waitForService(Simple.class, "Simple Logging Forked Simon");
         Assert.assertNotNull(simple);
 
         Entry[] attrs = new Entry[]{ServiceLogEvent.getEventDescriptor()};
@@ -109,7 +109,7 @@ public class BaseServiceEventLogTest {
         testManager.undeployAll(monitor);
     }
 
-    private void doVerifyLogging(ServiceItem[] items, Simple simple, int expected) {
+    private void doVerifyLogging(ServiceItem[] items, Simple simple, int expected) throws InterruptedException {
         EC ec = new EC();
         BasicEventConsumer bec = null;
 
@@ -131,6 +131,11 @@ public class BaseServiceEventLogTest {
             thrown = e;
         }
         Assert.assertNull(thrown);
+        int waited = 0;
+        while(ec.getNotificationCount()<expected && waited < 3000) {
+            Thread.sleep(100);
+            waited+=100;
+        }
         Assert.assertEquals("Expected "+expected+" notifications", expected, ec.getNotificationCount());
 
         thrown = null;
