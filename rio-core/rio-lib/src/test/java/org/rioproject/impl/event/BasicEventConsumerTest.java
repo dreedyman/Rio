@@ -137,6 +137,8 @@ public class BasicEventConsumerTest {
         Assert.assertNotNull(eventRegistration);
         p.fire();
         p.fire();
+        System.err.println("Wait 1 second to catch up...");
+        Thread.sleep(1000);
         Assert.assertTrue("Should have gotten 2, got "+watch.getCalculables().values().size(),
                           watch.getCalculables().values().size()==2);
         Calculable[] calculables = watch.getWatchDataSource().getCalculable();
