@@ -20,4 +20,4 @@ branches:
   only:
     - develop
 
-script: mvn verify
+#script: mvn verify
