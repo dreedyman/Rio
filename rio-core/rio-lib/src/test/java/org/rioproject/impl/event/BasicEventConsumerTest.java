@@ -119,7 +119,7 @@ public class BasicEventConsumerTest {
         Assert.assertTrue("Should have not been notified, but got: "+listener.counter.get(), listener.counter.get()==0);
     }
 
-    @Test
+    //@Test
     public void testUsingWatch() throws Exception {
         BasicEventConsumer consumer = new BasicEventConsumer(getEventDescriptor());
         WatchDataSourceRegistry watchRegistry = new WatchDataSourceRegistry();
