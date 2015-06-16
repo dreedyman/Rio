@@ -159,23 +159,9 @@ class TestManager {
     private void startConfiguredServices() {
         startWebster()
         if(testConfig.getNumLookups()>0) {
-            new Thread(new Runnable() {
-                void run() {
-                    int lookupCount = testConfig.getNumLookups()-countLookups();
-                    for(int i=0; i<lookupCount; i++)
-                        startReggie();
-                }
-            }).start()
-        }
-
-        if(testConfig.getNumCybernodes()>0) {
-            new Thread(new Runnable() {
-                void run() {
-                    int cybernodeCount = testConfig.getNumCybernodes() - countCybernodes();
-                    for (int i = 0; i < cybernodeCount; i++)
-                        startCybernode();
-                }
-            }).start()
+            int lookupCount = testConfig.getNumLookups()-countLookups();
+            for(int i=0; i<lookupCount; i++)
+                startReggie();
         }
 
         if(testConfig.getNumMonitors()>0) {
@@ -194,6 +180,12 @@ class TestManager {
                 OpStringManagerProxy.setDiscoveryManagement(
                         getServiceDiscoveryManager().getDiscoveryManager());
             }
+        }
+
+        if(testConfig.getNumCybernodes()>0) {
+            int cybernodeCount = testConfig.getNumCybernodes() - countCybernodes();
+            for (int i = 0; i < cybernodeCount; i++)
+                startCybernode();
         }
 
         postInit();
