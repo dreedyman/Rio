@@ -43,8 +43,8 @@ class HarvesterTest {
         Assert.assertTrue "Expected at least 1 ProvisionMonitor", monitors.length>0
         Cybernode[] cybernodes = testManager.getServices(Cybernode.class)
         int waited = 0
-        while(cybernodes.length < 2 && waited < 10) {
-            Thread.sleep(1000)
+        while(cybernodes.length < 2 && waited < 120) {
+            Thread.sleep(500)
             waited++
             cybernodes = testManager.getServices(ServiceBeanInstantiator.class)
             println "Waiting for 2 Cybernodes, have [${cybernodes.length} of 2] ..."

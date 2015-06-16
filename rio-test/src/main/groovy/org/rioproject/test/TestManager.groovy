@@ -159,15 +159,23 @@ class TestManager {
     private void startConfiguredServices() {
         startWebster()
         if(testConfig.getNumLookups()>0) {
-            int lookupCount = testConfig.getNumLookups()-countLookups();
-            for(int i=0; i<lookupCount; i++)
-                startReggie();
+            new Thread(new Runnable() {
+                void run() {
+                    int lookupCount = testConfig.getNumLookups()-countLookups();
+                    for(int i=0; i<lookupCount; i++)
+                        startReggie();
+                }
+            }).start()
         }
 
         if(testConfig.getNumCybernodes()>0) {
-            int cybernodeCount = testConfig.getNumCybernodes()-countCybernodes();
-            for(int i=0; i<cybernodeCount; i++)
-                startCybernode();
+            new Thread(new Runnable() {
+                void run() {
+                    int cybernodeCount = testConfig.getNumCybernodes() - countCybernodes();
+                    for (int i = 0; i < cybernodeCount; i++)
+                        startCybernode();
+                }
+            }).start()
         }
 
         if(testConfig.getNumMonitors()>0) {
@@ -389,7 +397,7 @@ class TestManager {
      * @return The OperationalStringManager that is managing the OperationalString
      */
     OperationalStringManager deploy(File opstring, ProvisionMonitor monitor) {
-        return deploy(opstring.toURL(), monitor)
+        return deploy(opstring.toURI().toURL(), monitor)
     }
 
     /**

@@ -54,58 +54,51 @@ public class SimpleForkTest {
 
     @Before
     public void setup() {
-        cybernode = (Cybernode)testManager.waitForService(Cybernode.class);
+        cybernode = testManager.waitForService(Cybernode.class);
     }
 
     @Test
-    public void testFork() {
+    public void testFork() throws Exception {
         Assert.assertNotNull(testManager);
         Assert.assertNotNull(cybernode);
-        Throwable thrown = null;
-        try {
-            OperationalStringManager mgr = testManager.getOperationalStringManager();
-            Assert.assertNotNull("Expected non-null OperationalStringManager", mgr);
-            OperationalString opstring = mgr.getOperationalString();
-            Assert.assertNotNull(opstring);
-            Assert.assertEquals(1, opstring.getServices().length);
-            ServiceElement elem = opstring.getServices()[0];
-            Assert.assertNotNull("Expected a non-null ExecDescriptor", elem.getExecDescriptor());
-            testManager.waitForDeployment(mgr);
-            String jvmVersion = System.getProperty("java.version");
-            if(jvmVersion.contains("1.5")) {
-                logger.info("The JMX Attach APIs require Java 6 or above. You are running Java "+jvmVersion);
-            } else {
-                RuntimeMXBean runtime = attach("T62___W_FL___SK_-1");
-                Assert.assertNotNull("Expected a RuntimeMXBean", runtime);
-                verifyJVMArgs(runtime, elem.getExecDescriptor());
-            }
-            ServiceBeanInstance[] instances = cybernode.getServiceBeanInstances(opstring.getServices()[0]);
-            Assert.assertEquals(1, instances.length);
-            Fork fork = (Fork)instances[0].getService();
-            Assert.assertTrue("Expected verify() to return true, check service log for details", fork.verify());
-            //logger.info("Wait for 5 minutes, make sure that only one service remains....");
-            //Thread.sleep(TimeUnit.MINUTES.toMillis(5));
-            //testManager.undeploy(opstring.getName());
-            testManager.stopCybernode(cybernode);
-            System.out.println("\nService Bean Exec JVMs\n============");
-            String listing = null;
-            long t0 = System.currentTimeMillis();
-            for(int i=0; i<180; i++) {
-                listing = list();
-                if(listing.length()==0 || (System.currentTimeMillis()-t0)>15000)
-                    break;
-                if(i % 5 == 0)
-                    System.out.println(listing);
-                Thread.sleep(500);
-            }
-            System.out.println("Time to exit: "+(System.currentTimeMillis()-t0));
-            Assert.assertTrue(listing!=null);
-            Assert.assertTrue(listing.length()==0);
-        } catch(Exception e) {
-            thrown = e;
-            e.printStackTrace();
+        OperationalStringManager mgr = testManager.getOperationalStringManager();
+        Assert.assertNotNull("Expected non-null OperationalStringManager", mgr);
+        OperationalString opstring = mgr.getOperationalString();
+        Assert.assertNotNull(opstring);
+        Assert.assertEquals(1, opstring.getServices().length);
+        ServiceElement elem = opstring.getServices()[0];
+        Assert.assertNotNull("Expected a non-null ExecDescriptor", elem.getExecDescriptor());
+        testManager.waitForDeployment(mgr);
+        String jvmVersion = System.getProperty("java.version");
+        if(jvmVersion.contains("1.5")) {
+            logger.info("The JMX Attach APIs require Java 6 or above. You are running Java "+jvmVersion);
+        } else {
+            RuntimeMXBean runtime = attach("T62___W_FL___SK_-1");
+            Assert.assertNotNull("Expected a RuntimeMXBean", runtime);
+            verifyJVMArgs(runtime, elem.getExecDescriptor());
         }
-        Assert.assertNull("Should not have thrown an exception", thrown);
+        ServiceBeanInstance[] instances = cybernode.getServiceBeanInstances(opstring.getServices()[0]);
+        Assert.assertEquals(1, instances.length);
+        Fork fork = (Fork)instances[0].getService();
+        Assert.assertTrue("Expected verify() to return true, check service log for details", fork.verify());
+        //logger.info("Wait for 5 minutes, make sure that only one service remains....");
+        //Thread.sleep(TimeUnit.MINUTES.toMillis(5));
+        //testManager.undeploy(opstring.getName());
+
+        /*testManager.stopCybernode(cybernode);
+        System.out.println("\nService Bean Exec JVMs\n============");
+        String listing = null;
+        long t0 = System.currentTimeMillis();
+        for(int i=0; i<180; i++) {
+            listing = list();
+            if(listing.length()==0 || (System.currentTimeMillis()-t0)>15000)
+                break;
+            if(i % 5 == 0)
+                System.out.println(listing);
+            Thread.sleep(500);
+        }
+        System.out.println("Time to exit: "+(System.currentTimeMillis()-t0));
+        Assert.assertTrue(listing.length()==0);*/
     }
 
     private void verifyJVMArgs(RuntimeMXBean runtime, ExecDescriptor exDesc) {
@@ -154,20 +147,6 @@ public class SimpleForkTest {
             }
         }
         return null;
-    }
-
-    private String list() throws Exception {
-        String[] managedVMs = VirtualMachineHelper.listManagedVMs();
-        StringBuilder list = new StringBuilder();
-        for(String managedVM : managedVMs) {
-            if(managedVM.contains("start-service-bean-exec")) {
-                if(list.length()>0)
-                    list.append("\n");
-                list.append("\t").append(managedVM);
-            }
-        }
-
-        return list.toString();
     }
 
     private String[] toArray(String s) {
