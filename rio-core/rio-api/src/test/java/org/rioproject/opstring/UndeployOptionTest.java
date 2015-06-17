@@ -15,7 +15,7 @@
  */
 package org.rioproject.opstring;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Calendar;

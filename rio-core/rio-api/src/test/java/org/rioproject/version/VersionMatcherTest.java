@@ -15,7 +15,7 @@
  */
 package org.rioproject.version;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

@@ -15,7 +15,7 @@
  */
 package org.rioproject.gnostic.service;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -15,7 +15,7 @@
  */
 package org.rioproject.test.config;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.config.Configuration;
 import org.junit.Test;
 import org.rioproject.config.GroovyConfig;

@@ -15,7 +15,7 @@
  */
 package org.rioproject.test.idle;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.core.lookup.ServiceItem;
 import org.junit.Test;
 import org.junit.runner.RunWith;

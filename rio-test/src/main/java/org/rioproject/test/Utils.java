@@ -15,7 +15,7 @@
  */
 package org.rioproject.test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.rioproject.config.Constants;
 import org.rioproject.watch.WatchDataSource;
 

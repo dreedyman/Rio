@@ -17,7 +17,7 @@ package org.rioproject.monitor.service;
 
 import com.sun.jini.reggie.TransientRegistrarImpl;
 import com.sun.jini.start.LifeCycle;
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import net.jini.discovery.DiscoveryEvent;

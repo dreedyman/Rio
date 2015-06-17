@@ -15,7 +15,7 @@
  */
 package org.rioproject.impl.watch;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.ThresholdType;

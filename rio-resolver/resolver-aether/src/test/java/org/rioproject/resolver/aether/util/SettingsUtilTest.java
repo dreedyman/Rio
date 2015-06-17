@@ -15,7 +15,7 @@
  */
 package org.rioproject.resolver.aether.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.apache.maven.settings.Settings;
 import org.junit.Test;
 

@@ -15,7 +15,7 @@
  */
 package org.rioproject.deploy;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
 import org.junit.Test;

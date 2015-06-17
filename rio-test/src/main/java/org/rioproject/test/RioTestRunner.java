@@ -15,7 +15,7 @@
  */
 package org.rioproject.test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.runners.model.MultipleFailureException;
 import org.junit.internal.runners.statements.FailOnTimeout;

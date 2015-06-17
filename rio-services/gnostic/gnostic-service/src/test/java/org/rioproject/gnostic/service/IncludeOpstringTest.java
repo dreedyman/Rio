@@ -15,7 +15,7 @@
  */
 package org.rioproject.gnostic.service;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.impl.opstring.GroovyDSLOpStringParser;
 import org.rioproject.impl.opstring.OpString;

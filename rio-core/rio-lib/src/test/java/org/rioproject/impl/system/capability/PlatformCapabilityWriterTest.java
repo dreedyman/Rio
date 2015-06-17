@@ -15,7 +15,7 @@
  */
 package org.rioproject.impl.system.capability;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;

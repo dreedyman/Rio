@@ -85,7 +85,7 @@ public class InstantiatorResourceTest {
                 break;
             }
         }
-        junit.framework.Assert.assertNotNull(resolverJar);
+        org.junit.Assert.assertNotNull(resolverJar);
         System.setProperty(ResolverConfiguration.RESOLVER_JAR, resolverJar);
     }
 

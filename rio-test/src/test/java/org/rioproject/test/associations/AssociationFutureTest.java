@@ -15,7 +15,7 @@
  */
 package org.rioproject.test.associations;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.space.JavaSpace05;
 import org.junit.Test;

@@ -15,7 +15,7 @@
  */
 package org.rioproject.impl.associations;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.core.lookup.ServiceItem;
 import org.junit.Test;
 import org.rioproject.associations.Association;

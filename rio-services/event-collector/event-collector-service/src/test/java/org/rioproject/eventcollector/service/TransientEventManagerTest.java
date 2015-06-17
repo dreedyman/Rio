@@ -15,7 +15,7 @@
  */
 package org.rioproject.eventcollector.service;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.config.EmptyConfiguration;
 import net.jini.core.event.RemoteEvent;
 import net.jini.discovery.LookupDiscovery;

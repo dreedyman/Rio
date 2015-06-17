@@ -15,7 +15,7 @@
  */
 package org.rioproject.cybernode.service;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.config.EmptyConfiguration;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;

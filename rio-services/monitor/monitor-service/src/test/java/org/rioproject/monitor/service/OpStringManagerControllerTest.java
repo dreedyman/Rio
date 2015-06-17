@@ -15,7 +15,7 @@
  */
 package org.rioproject.monitor.service;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.config.Configuration;
 import net.jini.id.UuidFactory;
 import org.junit.Test;

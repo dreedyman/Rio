@@ -16,7 +16,7 @@
 package org.rioproject.monitor.service.channel;
 
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.monitor.service.TestUtil;
 import org.rioproject.opstring.ServiceElement;

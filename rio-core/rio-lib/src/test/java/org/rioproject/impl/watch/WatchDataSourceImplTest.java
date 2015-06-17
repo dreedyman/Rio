@@ -15,7 +15,7 @@
  */
 package org.rioproject.impl.watch;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import net.jini.export.Exporter;
