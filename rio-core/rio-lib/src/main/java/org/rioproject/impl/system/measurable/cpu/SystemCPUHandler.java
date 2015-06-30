@@ -44,8 +44,7 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
     private OperatingSystemMXBean opSysMBean = null;
     private Method jmxCPUUtilization;
     private MeasurableMonitor<CpuUtilization> altMonitor;
-    static Logger logger =
-        LoggerFactory.getLogger(SystemCPUHandler.class.getPackage().getName());
+    static Logger logger = LoggerFactory.getLogger(SystemCPUHandler.class.getPackage().getName());
 
     public SystemCPUHandler() {
         sigar = SigarHelper.getInstance();
@@ -56,6 +55,7 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
                 try {
                     jmxCPUUtilization =
                         OperatingSystemMXBean.class.getMethod("getSystemLoadAverage");
+                    logger.debug("Using OperatingSystemMXBean.getSystemLoadAverage()");
                 } catch (NoSuchMethodException e) {
                     logger.warn("Unable to obtain OperatingSystemMXBean.getSystemLoadAverage method", e);
                 }
@@ -75,6 +75,8 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
                     altMonitor = new GenericCPUMeasurer();
                 }
             }
+        } else {
+            logger.debug("Using SIGAR for CPU utilization");
         }
     }
 
@@ -120,12 +122,12 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
     }
 
     private CpuUtilization getJmxCpuUtilization() {
-        double cpuUtilization = -1;
+        double cpuUtilization = 0;
         try {
             cpuUtilization = (Double)jmxCPUUtilization.invoke(opSysMBean);
             cpuUtilization = (cpuUtilization>0?cpuUtilization/100:cpuUtilization);
         } catch (Exception e) {
-            logger.warn("Could not get SystemloadAverage using reflection on OperatingSystemMXBean.getSystemLoadAverage()", e);
+            logger.warn("Could not getSystemLoadAverage() using reflection on OperatingSystemMXBean.getSystemLoadAverage()", e);
         }
         return new CpuUtilization(id, cpuUtilization, tVals);
     }

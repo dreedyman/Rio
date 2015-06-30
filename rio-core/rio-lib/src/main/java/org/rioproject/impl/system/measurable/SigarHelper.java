@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ import java.util.List;
 public final class SigarHelper {
     public static final String COMPONENT = SigarHelper.class.getPackage().getName();
     static Logger logger = LoggerFactory.getLogger(COMPONENT);
-    private static final double NOT_AVAILABLE = -1;
+    private static final double NOT_AVAILABLE = 0;
     private Object sigarInstance;
     private final Object sigarLock = new Object();
     
@@ -227,7 +228,7 @@ public final class SigarHelper {
     /**
      * Get the cpu kernel usage
      *
-     * @return The cpu kernel use as a percentage; or -1 if not available.
+     * @return The cpu kernel use as a percentage; or 0 if not available.
      */
     public double getSystemCpuPercentage() {
         checkCpuPercMethod();
@@ -255,7 +256,7 @@ public final class SigarHelper {
     /**
      * Get the cpu user usage
      *
-     * @return The cpu user use as a percentage; or -1 if not available.
+     * @return The cpu user use as a percentage; or 0 if not available.
      */
     public double getUserCpuPercentage() {
         checkCpuPercMethod();
@@ -285,7 +286,7 @@ public final class SigarHelper {
      *
      * @return The system load averages for the past 1, 5, and 15 minutes. If
      * the load average could not be obtained, return an array with a single
-     * element whose value is set to -1
+     * element whose value is set to 0
      */
     public double[] getLoadAverage() {
         if(getLoadAverageMethod==null) {
@@ -302,8 +303,15 @@ public final class SigarHelper {
                 loadAverage = (double[])getLoadAverageMethod.invoke(sigarInstance);
             }
         } catch (Exception e) {
-            if(logger.isDebugEnabled())
-                logger.debug("Failed invoking getLoadAverage method, load average is not available");
+            if(logger.isDebugEnabled()) {
+                Throwable t;
+                if(e instanceof InvocationTargetException)
+                    t = ((InvocationTargetException) e).getTargetException();
+                else
+                    t = e;
+                logger.debug("Failed invoking getLoadAverage method, load average is not available: {}: {}",
+                             t.getClass().getName(), t.getMessage());
+            }
             loadAverage = new double[]{NOT_AVAILABLE};
         }
         return loadAverage;
@@ -315,7 +323,7 @@ public final class SigarHelper {
      * @param pid The process id (pid) to obtain the CPU utilization
      * (percentage) for
      *
-     * @return The CPU utilization (percentage) for a process, or -1 if not
+     * @return The CPU utilization (percentage) for a process, or 0 if not
      * available
      */
     public double getProcessCpuPercentage(final long pid) {
@@ -358,7 +366,7 @@ public final class SigarHelper {
      *
      * @param pid The process id (pid) to obtain the CPU user usage
      *
-     * @return The cpu user usage for the process; or -1 if not available.
+     * @return The cpu user usage for the process; or 0 if not available.
      */
     public long getProcessCpuUser(final long pid) {
         checkProcCPU();
@@ -399,7 +407,7 @@ public final class SigarHelper {
      *
      * @param pid The process id (pid) to obtain the CPU system (kernel) usage
      *
-     * @return The cpu system (kernel) usage for the process; or -1 if not available.
+     * @return The cpu system (kernel) usage for the process; or 0 if not available.
      */
     public long getProcessCpuSys(final long pid) {
         checkProcCPU();
@@ -450,7 +458,7 @@ public final class SigarHelper {
      *
      * @param pid The process id (pid)
      *
-     * @return The amount of virtual memory (in bytes) or -1 if not available
+     * @return The amount of virtual memory (in bytes) or 0 if not available
      */
     public long getProcessVirtualMemorySize(final long pid) {
         checkProcMemMethod();
@@ -483,7 +491,7 @@ public final class SigarHelper {
      *
      * @param pid The process id (pid)
      *
-     * @return The amount of real memory (in bytes) or -1 if not available
+     * @return The amount of real memory (in bytes) or 0 if not available
      */
     public long getProcessResidentMemory(final long pid) {
         checkProcMemMethod();
@@ -515,7 +523,7 @@ public final class SigarHelper {
      *
      * @param pid The process id (pid)
      *
-     * @return The amount of shared memory (in bytes) or -1 if not available
+     * @return The amount of shared memory (in bytes) or 0 if not available
      */
     public long getProcessSharedMemory(final long pid) {
         checkProcMemMethod();
@@ -548,7 +556,7 @@ public final class SigarHelper {
      *
      * @param fileSystem The fileSystem name
      *
-     * @return The amount of available K-bytes for the file system, or -1 if not
+     * @return The amount of available K-bytes for the file system, or 0 if not
      * available
      */
     public long getFileSystemFree(final String fileSystem) {
@@ -575,7 +583,7 @@ public final class SigarHelper {
      *
      * @param fileSystem The fileSystem name
      *
-     * @return The amount of used K-bytes for the file system, or -1 if not
+     * @return The amount of used K-bytes for the file system, or 0 if not
      * available
      */
     public long getFileSystemUsed(final String fileSystem) {
@@ -597,7 +605,7 @@ public final class SigarHelper {
      *
      * @param fileSystem The fileSystem name
      *
-     * @return The number of K-bytes  for the file system, or -1 if not
+     * @return The number of K-bytes  for the file system, or 0 if not
      * available
      */
     public long getFileSystemTotal(final String fileSystem) {
@@ -619,7 +627,7 @@ public final class SigarHelper {
      *
      * @param fileSystem The fileSystem name
      *
-     * @return The percentage of disk used, or -1 if not available
+     * @return The percentage of disk used, or 0 if not available
      */
     public double getFileSystemUsedPercent(final String fileSystem) {
         checkFileSysemUsageMethods(fileSystem);
@@ -639,7 +647,7 @@ public final class SigarHelper {
      * Get the amount of system RAM.
      *
      * @return Get the amount of system Random Access Memory (in MB),
-     * or -1 if not available
+     * or 0 if not available
      */
     public long getRam() {
         checkSystemMemoryMethods();
@@ -658,7 +666,7 @@ public final class SigarHelper {
     /**
      * Get the amount of system memory
      *
-     * @return The total amount of system memory (in MB), or -1 if not available
+     * @return The total amount of system memory (in MB), or 0 if not available
      */
     public long getTotalSystemMemory() {
         checkSystemMemoryMethods();
@@ -677,7 +685,7 @@ public final class SigarHelper {
     /**
      * Get the percent of free system memory
      *
-     * @return The percent of free system memory, or -1 if not available
+     * @return The percent of free system memory, or 0 if not available
      */
     public double getFreeSystemMemoryPercent() {
         checkSystemMemoryMethods();
@@ -696,7 +704,7 @@ public final class SigarHelper {
     /**
      * Get the amount of free system memory
      *
-     * @return The amount of free system memory, or -1 if not available
+     * @return The amount of free system memory, or 0 if not available
      */
     public long getFreeSystemMemory() {
         checkSystemMemoryMethods();
@@ -715,7 +723,7 @@ public final class SigarHelper {
     /**
      * Get the percent of used system memory
      *
-     * @return The percent of used system memory, or -1 if not available
+     * @return The percent of used system memory, or 0 if not available
      */
     public double getUsedSystemMemoryPercent() {
         checkSystemMemoryMethods();
@@ -734,7 +742,7 @@ public final class SigarHelper {
     /**
      * Get the amount of used system memory
      *
-     * @return The amount of used system memory (in MB), or -1 if not available
+     * @return The amount of used system memory (in MB), or 0 if not available
      */
     public long getUsedSystemMemory() {
         checkSystemMemoryMethods();
