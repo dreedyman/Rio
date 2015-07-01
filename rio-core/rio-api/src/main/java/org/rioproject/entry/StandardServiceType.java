@@ -62,7 +62,7 @@ public class StandardServiceType extends ServiceType {
             ImageIcon icon = new ImageIcon(iconURL);
             iconImage = icon.getImage();
         } else if(iconName!=null) {
-            URL url = StandardServiceType.class.getClassLoader().getResource(iconName);
+            URL url = Thread.currentThread().getContextClassLoader().getResource(iconName);
             if(url!=null) {
                 ImageIcon icon = new ImageIcon(url);
                 iconImage = icon.getImage();
@@ -73,6 +73,11 @@ public class StandardServiceType extends ServiceType {
 
     public String getShortDescription(){
         return description;
+    }
+
+    @Override public String toString() {
+        return String.format("name: %s, description: %s, iconURL: %s, iconName: %s",
+                             name, description, iconURL, iconName);
     }
 }
 
