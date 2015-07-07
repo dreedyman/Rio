@@ -97,8 +97,9 @@ public class WatchDataSourceRegistry implements WatchRegistry {
                 WatchDataSource wd = w.getWatchDataSource();
                 if (wd != null)
                     wd.close();
-            } catch (Throwable t) {
-                logger.warn("Closing WatchDataSource", t);
+                watchRegistry.remove(w);
+            } catch (Exception e) {
+                logger.warn("Closing WatchDataSource", e);
             }
         }        
     }
