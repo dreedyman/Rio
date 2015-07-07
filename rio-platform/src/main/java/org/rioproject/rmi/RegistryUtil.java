@@ -15,7 +15,6 @@
  */
 package org.rioproject.rmi;
 
-import net.jini.config.ConfigurationException;
 import org.rioproject.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,11 +128,8 @@ public class RegistryUtil {
      *
      * @return The port the RMI Registry was created on, or -1 if the
      * RMIRegistry could not be created
-     * @throws ConfigurationException If there are errors reading the
-     * configuration
-     *
      */
-    public static int checkRegistry() throws ConfigurationException {
+    public static int checkRegistry() {
         int port;
         synchronized(RegistryUtil.class) {
             if(System.getProperty(Constants.REGISTRY_PORT)==null) {
@@ -152,10 +148,8 @@ public class RegistryUtil {
      *
      * @return The port the RMI Registry was created on, or -1 if the
      * RMIRegistry could not be created
-     * @throws ConfigurationException If there are errors reading the
-     * configuration
      */
-    public static int getRegistry() throws ConfigurationException {
+    public static int getRegistry() {
         int registryPort;
         synchronized(RegistryUtil.class) {
             int[] portRange = getRegistryPortRange();
@@ -198,7 +192,6 @@ public class RegistryUtil {
                 }
             }
         }
-
         return registryPort;
     }
 
