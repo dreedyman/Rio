@@ -386,7 +386,8 @@ public class ServiceStarter {
             return;
         for (Result result : results) {
             if (result != null && result.result != null &&
-                NonActivatableServiceDescriptor.class.equals(result.descriptor.getClass())) {
+                (NonActivatableServiceDescriptor.class.equals(result.descriptor.getClass()) ||
+                 RioServiceDescriptor.class.equals(result.descriptor.getClass()))) {
                 logger.trace("Storing ref to: {}", result.result);
                 transientServiceRefs.add(result.result);
             }
@@ -397,17 +398,21 @@ public class ServiceStarter {
      * Utility routine that prints out warning messages for each service
      * descriptor that produced an exception or that was null.
      */
-    private static void checkResultFailures(Result[] results) {
+    private static boolean checkResultFailures(Result[] results) {
         if (results.length == 0)
-            return;
+            return false;
+        boolean failures = false;
         for (int i = 0; i < results.length; i++) {
             if (results[i].exception != null) {
+                failures = true;
                 logger.warn("service.creation.unknown", results[i].exception);
                 logger.warn("service.creation.unknown.detail {} {}", i, results[i].descriptor);
             } else if (results[i].descriptor == null) {
+                failures = true;
                 logger.warn("service.creation.null {}", i);
             }
         }
+        return failures;
     }
 
     /**
