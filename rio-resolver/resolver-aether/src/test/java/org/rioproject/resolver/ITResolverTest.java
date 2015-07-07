@@ -101,8 +101,8 @@ public class ITResolverTest {
         if(testRepo.exists())
             FileUtils.remove(testRepo);
         Resolver r = new AetherResolver();
-        List<String> cp = getClassPathFor("com.sun.jini:outrigger:jar:dl:2.1", r);
-        Assert.assertTrue(cp.size()==1);
+        List<String> cp = getClassPathFor("com.sun.jini:outrigger-dl:jar:2.1", r);
+        Assert.assertTrue(cp.size()==2);
     }
 
     private List<String> getClassPathFor(String artifact, Resolver r) throws ResolverException {
