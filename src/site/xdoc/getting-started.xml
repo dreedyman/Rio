@@ -39,9 +39,9 @@
                 to the desired installation directory. For example, to install into <tt>/opt</tt>:
             </p>
             <p>
-                <tt>unzip rio-5.1.6.zip -d /opt</tt>
+                <tt>unzip rio-5.1.7.zip -d /opt</tt>
             </p>
-            <p>This creates a directory called <tt>rio-5.1.6</tt> under <tt>/opt</tt></p>
+            <p>This creates a directory called <tt>rio-5.1.7</tt> under <tt>/opt</tt></p>
 
             <p>
                 To install Rio on Windows, unzip the distribution package to the
@@ -56,7 +56,7 @@
 
             <p>
                 Once you have unzipped the distribution, you will have a
-                rio-5.1.6 directory containing the following items:
+                rio-5.1.7 directory containing the following items:
             </p>
             <ul>
                 <li><b>bin</b> - The directory that contains command to start Rio services</li>
