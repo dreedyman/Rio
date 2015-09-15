@@ -17,11 +17,11 @@ package org.rioproject.cybernode.service;
 
 import com.sun.jini.start.LifeCycle;
 import net.jini.config.Configuration;
-import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
 import org.rioproject.config.Constants;
+import org.rioproject.config.GroovyConfig;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
@@ -119,7 +119,8 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
     private void bootstrap(final String[] configArgs) throws Exception {
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
-        Configuration config = ConfigurationProvider.getInstance(configArgs, cCL);
+        Configuration config = new GroovyConfig(configArgs, cCL);
+        logger.debug("Loaded config");
         container = new ServiceBeanContainerImpl(config);
         computeResource = new ComputeResource(config);
 
@@ -128,7 +129,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
                                                              "provisionEnabled",
                                                              Boolean.class,
                                                              true);
-        computeResource.setPersistentProvisioning(provisionEnabled);        
+        computeResource.setPersistentProvisioning(provisionEnabled);
         String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
         computeResource.setPersistentProvisioningRoot(provisionRoot);
 

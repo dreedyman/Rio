@@ -204,14 +204,14 @@ public class ServiceBeanExecHandler {
                     break;
                 } catch (NotBoundException e) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(100);
                         wait++;
                     } catch (InterruptedException e1) {
                         logger.warn("Interrupted waiting for ServiceBean [{}] to register into Registry",
                                     serviceBindName);
                     }
                 }
-            } while (wait < forkedServiceWaitTime);
+            } while (wait < (forkedServiceWaitTime*10));
 
             if (wait >= forkedServiceWaitTime) {
                 logger.warn("Timed out waiting for [{}]. Waited [{}] seconds, configured wait " +
