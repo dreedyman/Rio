@@ -189,8 +189,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             logger.trace("{} has [{}] instance(s), planned [{}] of [{}/{}]",
                          ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
             if (actual >= planned) {
-                String message = String.format("%s has reached service limit of [%s], cannot be used to instantiate [%s/%s]",
-                                               ir.getName(), serviceLimit, sElem.getOperationalStringName(), sElem.getName());
+                String message = String.format("%s has already allocated [%s] of planned [%s] instances of [%s/%s]",
+                                               ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
                 provisionRequest.addFailureReason(message);
                 continue;
             }
