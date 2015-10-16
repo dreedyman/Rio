@@ -10,10 +10,12 @@ boolean onEnclave = (hostName.endsWith("wpafb.af.mil") || address.startsWith("10
 resolver {
     jar = "${System.properties['rio.home']}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
 
-    if (onEnclave) {
-        repositories = ["repo": "http://10.131.7.138:7001"]
-    } else {
-        repositories = ["mine"   : "http://10.0.1.9:9010",
-                        "central": "http://repo1.maven.org/maven2"]
+    repositories {
+        if (onEnclave) {
+            remote = ["repo": "http://10.131.7.138:7001"]
+        } else {
+            remote = ["mine"   : "http://10.0.1.9:9010",
+                      "central": "http://repo1.maven.org/maven2"]
+        }
     }
 }

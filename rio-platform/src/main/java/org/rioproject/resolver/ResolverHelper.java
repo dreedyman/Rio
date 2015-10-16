@@ -196,8 +196,11 @@ public final class ResolverHelper {
             if(r==null) {
                 throw new ResolverException("No Resolver configuration found");
             }
-            if(r instanceof SettableResolver)
-                ((SettableResolver)r).setRemoteRepositories(resolverConfiguration.getRemoteRepositories());
+            if(r instanceof SettableResolver) {
+                SettableResolver settableResolver = (SettableResolver) r;
+                settableResolver.setRemoteRepositories(resolverConfiguration.getRemoteRepositories());
+                settableResolver.setFlatDirectories(resolverConfiguration.getFlatDirectories());
+            }
             if(logger.isDebugEnabled()) {
                 StringBuilder message = new StringBuilder();
                 for(RemoteRepository rr : r.getRemoteRepositories()) {

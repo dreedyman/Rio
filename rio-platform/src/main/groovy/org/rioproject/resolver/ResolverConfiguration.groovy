@@ -58,7 +58,7 @@ class ResolverConfiguration {
         def repositories = []
         if(resolverConfig.exists()) {
             def config = new ConfigSlurper().parse(resolverConfig.toURI().toURL())
-            config.resolver.repositories.each { id, url ->
+            config.resolver.repositories.remote.each { id, url ->
                 RemoteRepository remoteRepository = new RemoteRepository()
                 remoteRepository.id = id
                 remoteRepository.url = url
@@ -66,5 +66,17 @@ class ResolverConfiguration {
             }
         }
         return repositories
+    }
+
+    List<File> getFlatDirectories() {
+        def repositories = []
+        if(resolverConfig.exists()) {
+            def config = new ConfigSlurper().parse(resolverConfig.toURI().toURL())
+            config.resolver.repositories.flatDirs.each { repo ->
+                repositories << repo
+            }
+        }
+        return repositories
+
     }
 }

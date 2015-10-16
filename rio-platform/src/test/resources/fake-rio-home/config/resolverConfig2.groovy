@@ -3,5 +3,7 @@
 
 resolver {
     jar = "resolver-aether"
-    repositories = ["project": "http://10.0.1.9:9005"]
+    repositories {
+        remote = ["project": "http://10.0.1.9:9005"]
+    }
 }

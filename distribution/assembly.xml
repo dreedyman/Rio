@@ -20,6 +20,41 @@
             <outputDirectory>/config/poms</outputDirectory>
             <destName>rio-gnostic-${project.version}.pom</destName>
         </file>
+        <file>
+            <source>${basedir}/../rio-services/monitor/monitor-api/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>monitor-api-${project.version}.pom</destName>
+        </file>
+        <file>
+            <source>${basedir}/../rio-services/monitor/monitor-proxy/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>monitor-proxy-${project.version}.pom</destName>
+        </file>
+        <file>
+            <source>${basedir}/../rio-services/cybernode/cybernode-proxy/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>cybernode-proxy-${project.version}.pom</destName>
+        </file>
+        <file>
+            <source>${basedir}/../rio-services/cybernode/cybernode-api/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>cybernode-api-${project.version}.pom</destName>
+        </file>
+        <file>
+            <source>${basedir}/../rio-core/rio-api/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>rio-api-${project.version}.pom</destName>
+        </file>
+        <file>
+            <source>${basedir}/../rio-core/rio-proxy/pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>rio-proxy-${project.version}.pom</destName>
+        </file>
+        <file>
+            <source>${basedir}/../pom.xml</source>
+            <outputDirectory>/config/poms</outputDirectory>
+            <destName>main-${project.version}.pom</destName>
+        </file>
     </files>
     <fileSets>
 

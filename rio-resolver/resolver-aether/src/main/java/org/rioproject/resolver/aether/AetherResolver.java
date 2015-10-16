@@ -186,6 +186,14 @@ public class AetherResolver implements SettableResolver {
     /**
      * {@inheritDoc}
      */
+    @Override public SettableResolver setFlatDirectories(Collection<File> directories) {
+        service.setConfiguredFlatDirectories(directories);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<RemoteRepository> getRemoteRepositories() {
         List<org.eclipse.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();

@@ -17,8 +17,8 @@ import org.rioproject.RioVersion
 
 /*
  * This file is used to configure the org.rioproject.resolver.Resolver, defining
- * the resolver jar file name as well as the remote Maven repositories that the
- * resolver will use. The order in which these repositories are listed is the
+ * the resolver jar file name as well as the remote Maven and flatDir repositories
+ * that the resolver will use. The order in which these repositories are listed is the
  * order in which they will be searched.
  *
  * If you have configured repositories into your ~/.m2/settings.xml, those repositories
@@ -27,8 +27,18 @@ import org.rioproject.RioVersion
  * Add or remove entries as needed.
  */
 resolver {
-    jar = "${System.properties['rio.home']}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
+    jar = "${rioHome()}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
 
-    repositories = ["rio"    : "http://www.rio-project.org/maven2",
-                    "central": "http://repo1.maven.org/maven2"]
+    repositories {
+        remote = ["rio"    : "http://www.rio-project.org/maven2",
+                  "central": "http://repo1.maven.org/maven2"]
+
+        flatDirs = [new File(rioHome(), "lib-dl"),
+                    new File(rioHome(), "config/poms"),
+                    new File(rioHome(), "lib")]
+    }
+}
+
+def rioHome() {
+    return System.getProperty("rio.home")
 }

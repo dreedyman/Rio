@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.1.7</version>
+        <version>5.2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject.resolver</groupId>
@@ -199,6 +199,7 @@
                     </systemPropertyVariables>
                     <excludes>
                         <exclude>**/ResolverConfigTest.java</exclude>
+                        <exclude>**/LocalRepositoryWorkspaceReaderTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -209,6 +210,7 @@
                 <configuration>
                     <includes>
                         <include>**/ResolverConfigTest.java</include>
+                        <include>**/LocalRepositoryWorkspaceReaderTest.java</include>
                     </includes>
                 </configuration>
                 <executions>

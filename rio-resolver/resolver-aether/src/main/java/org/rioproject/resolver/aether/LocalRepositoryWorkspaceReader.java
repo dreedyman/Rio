@@ -20,9 +20,12 @@ import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.repository.WorkspaceReader;
 import org.eclipse.aether.repository.WorkspaceRepository;
 import org.rioproject.resolver.aether.util.SettingsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,9 +33,11 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-public class LocalRepositoryWorkspaceReader implements WorkspaceReader {
+public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDirectoryReader {
     private final WorkspaceRepository workspaceRepository = new WorkspaceRepository();
     private final String localRepositoryLocation;
+    private final List<File> directories = new ArrayList<File>();
+    private static final Logger logger = LoggerFactory.getLogger(LocalRepositoryWorkspaceReader.class);
 
     public LocalRepositoryWorkspaceReader() throws SettingsBuildingException {
         localRepositoryLocation = SettingsUtil.getLocalRepositoryLocation(SettingsUtil.getSettings());
@@ -42,11 +47,17 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader {
         return workspaceRepository;
     }
 
+    public void addDirectories(Collection<File> directories) {
+        if(directories!=null)
+            this.directories.addAll(directories);
+    }
+
     public File findArtifact(Artifact artifact) {
         if(!artifact.isSnapshot()) {
             File artifactFile = new File(localRepositoryLocation, getArtifactPath(artifact));
             if(artifactFile.exists())
                 return artifactFile;
+            return findArtifactInFlatDirectories(artifact);
         }
         return null;
     }
@@ -72,7 +83,43 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader {
         return path.toString();
     }
 
-    private String getFileName(Artifact a) {
+    File findArtifactInFlatDirectories(Artifact artifact) {
+        File artifactFile = null;
+        if(!directories.isEmpty()) {
+            String fileName = getFileName(artifact);
+            if (logger.isDebugEnabled())
+                logger.debug("Resolve {}, file {}", artifact.toString(), fileName);
+            for (File directory : directories) {
+                File file = new File(directory, fileName);
+                if (file.exists()) {
+                    if (logger.isDebugEnabled())
+                        logger.debug("Resolved {}, file {}", artifact.toString(), file.getPath());
+                    artifactFile = file;
+                    break;
+                }
+            }
+
+            if (artifactFile == null) {
+                if (logger.isWarnEnabled()) {
+                    if (directories.isEmpty()) {
+                        logger.warn("Did not resolve {}", artifact.toString());
+                    } else {
+                        StringBuilder b = new StringBuilder();
+                        for (File d : directories) {
+                            if (b.length() > 0)
+                                b.append("\n");
+                            b.append("\t").append(d.getPath());
+                        }
+                        logger.warn("Did not resolve {} using the following flat directories\n{}",
+                                    artifact.toString(), b.toString());
+                    }
+                }
+            }
+        }
+        return artifactFile;
+    }
+
+    String getFileName(Artifact a) {
         org.rioproject.resolver.Artifact artifact = new org.rioproject.resolver.Artifact(a.getGroupId(),
                                                                                          a.getArtifactId(),
                                                                                          a.getVersion(),

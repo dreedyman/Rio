@@ -95,7 +95,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.1.7
+rioVersion=5.2
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -105,6 +105,7 @@ installRioToLocalRepository() {
             groovyClasspath="-cp `toNative $RIO_LIB/groovy-all-$groovyVersion.jar`"
             ""$JAVACMD"" $groovyClasspath org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain \
             $scriptDir/install.groovy $JAVA_HOME `toNative $RIO_HOME`
+            echo "Skip install"
         else
             echo "The required Rio environment does not exist, it seems either that the configured or derived setting of RIO_HOME [$RIO_HOME] is invalid."
             exit 1
@@ -154,10 +155,6 @@ fi
 # If the command is to start the Rio services, invoke the ServiceStarter
 # Otherwise invoke the CLI
 if [ "$start" = "1" ]; then
-
-    # Run installer first
-    installRioToLocalRepository
-
     if [ -z "$RIO_NATIVE_DIR" ] ; then
         RIO_NATIVE_DIR="`toNative $RIO_LIB/native`"
     fi
@@ -224,7 +221,11 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.1.7
+    -DarchetypeVersion=5.2
+elif [ "$install" = "1" ] ;then
+    echo "Install Rio artifacts locally"
+    # Run installer
+    installRioToLocalRepository
 else
     # Set system properties
     PROPS="-Drio.home=$RIO_HOME"

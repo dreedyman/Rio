@@ -15,6 +15,7 @@
  */
 package org.rioproject.resolver;
 
+import java.io.File;
 import java.util.Collection;
 
 /**
@@ -34,4 +35,16 @@ public interface SettableResolver extends Resolver {
      * @return An updated instance of the {@code SettableResolver}
      */
     SettableResolver setRemoteRepositories(Collection<RemoteRepository> repositories);
+
+    /**
+     * This adds repositories which look into one or more directories for finding dependencies. These
+     * directories will be searched last. Note that this does not support any meta-data formats found
+     * in Maven POM files.
+     *
+     * @param directories Directory instances the Resolver should use for finding dependencies.
+     *                     May be {@code null}.
+     *
+     * @return An updated instance of the {@code SettableResolver}
+     */
+    SettableResolver setFlatDirectories(Collection<File> directories);
 }

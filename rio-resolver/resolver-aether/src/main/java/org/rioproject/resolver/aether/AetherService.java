@@ -475,6 +475,16 @@ public final class AetherService {
         return this;
     }
 
+    public AetherService setConfiguredFlatDirectories(Collection<File> directories) {
+        if(workspaceReader instanceof FlatDirectoryReader) {
+            ((FlatDirectoryReader)workspaceReader).addDirectories(directories);
+        } else {
+            logger.warn("Unable to set flat directories for {}, not an instance of FlatDirectoryReader",
+                        workspaceReader.getClass().getName());
+        }
+        return this;
+    }
+
     /**
      * Get the {@code RemoteRepository} instances that are configured.
      *
