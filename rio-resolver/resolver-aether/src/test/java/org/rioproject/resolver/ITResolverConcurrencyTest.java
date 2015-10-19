@@ -30,7 +30,7 @@ public class ITResolverConcurrencyTest {
 
     @Test
     public void testConcurrentAccess() throws ExecutionException, InterruptedException {
-        SettableResolver r = new AetherResolver();
+        AetherResolver r = new AetherResolver();
         List<RemoteRepository> repos = new ArrayList<RemoteRepository>();
         RemoteRepository central = new RemoteRepository();
         central.setId("central");

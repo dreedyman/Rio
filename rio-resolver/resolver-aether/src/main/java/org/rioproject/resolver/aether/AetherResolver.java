@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Dennis Reedy
  */
-public class AetherResolver implements SettableResolver {
+public class AetherResolver implements Resolver, SettableResolver {
     protected AetherService service;
     private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<ResolutionRequest, Future<String[]>>();
     private final ExecutorService resolverExecutor;
