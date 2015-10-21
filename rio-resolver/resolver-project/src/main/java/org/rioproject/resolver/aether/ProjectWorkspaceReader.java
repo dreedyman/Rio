@@ -88,7 +88,7 @@ public class ProjectWorkspaceReader extends LocalRepositoryWorkspaceReader {
                 return artifactFile;
             }
         }
-        File artifactFile = new File(getLocalRepositoryLocation(), getArtifactPath(artifact));
+        File artifactFile = new File(getLocalRepositoryDir(), getArtifactPath(artifact));
         if(artifactFile.exists())
             return artifactFile;
         return null;

@@ -108,6 +108,15 @@ public class FileUtils {
      * @param file A File object to remove
      */
     public static void remove(File file) {
+        remove(file, false);
+    }
+
+    /**
+     * Remove a File
+     *
+     * @param file A File object to remove
+     */
+    public static void remove(File file, boolean debug) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if(files!=null) {
@@ -116,8 +125,8 @@ public class FileUtils {
                         remove(f);
                     else {
                         if (f.delete()) {
-                            if (logger.isDebugEnabled())
-                                logger.debug("Removed {}", getFilePath(f));
+                            if (debug)
+                                System.out.println("Removed " + getFilePath(f));
                         } else {
                             if (f.exists())
                                 logger.warn("Unable to remove {}", getFilePath(f));
@@ -125,8 +134,8 @@ public class FileUtils {
                     }
                 }
                 if (file.delete()) {
-                    if (logger.isDebugEnabled())
-                        logger.debug("Removed {}", getFilePath(file));
+                    if (debug)
+                        System.out.println("Removed "+ getFilePath(file));
                 } else {
                     if (file.exists())
                         logger.warn("Unable to remove " + getFilePath(file));
@@ -134,8 +143,8 @@ public class FileUtils {
             }
         } else {
             if (file.delete()) {
-                if (logger.isDebugEnabled())
-                    logger.debug("Removed {}", getFilePath(file));
+                if (debug)
+                    System.out.println("Removed "+ getFilePath(file));
             } else {
                 if (file.exists())
                     logger.warn("Unable to remove {}", getFilePath(file));

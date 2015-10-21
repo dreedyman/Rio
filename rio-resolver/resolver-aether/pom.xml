@@ -199,7 +199,7 @@
                     </systemPropertyVariables>
                     <excludes>
                         <exclude>**/ResolverConfigTest.java</exclude>
-                        <exclude>**/LocalRepositoryWorkspaceReaderTest.java</exclude>
+                        <exclude>**/FlatDirReaderTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -210,7 +210,7 @@
                 <configuration>
                     <includes>
                         <include>**/ResolverConfigTest.java</include>
-                        <include>**/LocalRepositoryWorkspaceReaderTest.java</include>
+                        <include>**/FlatDirReaderTest.java</include>
                     </includes>
                 </configuration>
                 <executions>

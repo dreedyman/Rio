@@ -17,30 +17,34 @@ package org.rioproject.resolver.aether;
 
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.repository.WorkspaceReader;
 import org.eclipse.aether.repository.WorkspaceRepository;
+import org.rioproject.resolver.aether.util.DefaultPomGenerator;
 import org.rioproject.resolver.aether.util.SettingsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 /**
- * A {@code WorkspaceReader} that checks if the artifact is in the local repository.
+ * A {@code WorkspaceReader} that checks if the artifact is in the local repository, and if configured,
+ * available in any flat directories.
  *
  * @author Dennis Reedy
  */
 public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDirectoryReader {
     private final WorkspaceRepository workspaceRepository = new WorkspaceRepository();
-    private final String localRepositoryLocation;
-    private final List<File> directories = new ArrayList<File>();
+    private final String localRepositoryDir;
+    private final File localPomGenerationDir;
+    private final Set<File> directories = new HashSet<File>();
     private static final Logger logger = LoggerFactory.getLogger(LocalRepositoryWorkspaceReader.class);
 
     public LocalRepositoryWorkspaceReader() throws SettingsBuildingException {
-        localRepositoryLocation = SettingsUtil.getLocalRepositoryLocation(SettingsUtil.getSettings());
+        localRepositoryDir = SettingsUtil.getLocalRepositoryLocation(SettingsUtil.getSettings());
+        localPomGenerationDir = new File(String.format("%s/.rio/generated/poms",
+                                                       System.getProperty("user.home").replace('\\', '/')));
     }
 
     public WorkspaceRepository getRepository() {
@@ -48,13 +52,15 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDire
     }
 
     public void addDirectories(Collection<File> directories) {
-        if(directories!=null)
+        if(directories!=null) {
             this.directories.addAll(directories);
+            this.directories.add(localPomGenerationDir);
+        }
     }
 
     public File findArtifact(Artifact artifact) {
         if(!artifact.isSnapshot()) {
-            File artifactFile = new File(localRepositoryLocation, getArtifactPath(artifact));
+            File artifactFile = new File(localRepositoryDir, getArtifactPath(artifact));
             if(artifactFile.exists())
                 return artifactFile;
             return findArtifactInFlatDirectories(artifact);
@@ -62,8 +68,8 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDire
         return null;
     }
 
-    protected String getLocalRepositoryLocation() {
-        return localRepositoryLocation;
+    protected String getLocalRepositoryDir() {
+        return localRepositoryDir;
     }
 
     public List<String> findVersions(Artifact artifact) {
@@ -100,19 +106,37 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDire
             }
 
             if (artifactFile == null) {
-                if (logger.isWarnEnabled()) {
-                    if (directories.isEmpty()) {
-                        logger.warn("Did not resolve {}", artifact.toString());
-                    } else {
-                        StringBuilder b = new StringBuilder();
-                        for (File d : directories) {
-                            if (b.length() > 0)
-                                b.append("\n");
-                            b.append("\t").append(d.getPath());
+                if(artifact.getExtension().equals("pom")) {
+                    File pomFile = new File(localPomGenerationDir, getPomPathAndName(artifact));
+                    if(pomFile.exists())
+                        return pomFile;
+                    Artifact jar = new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), "jar", artifact.getVersion());
+                    File jarFile = findArtifactInFlatDirectories(jar);
+                    if(jarFile!=null) {
+                        if (logger.isDebugEnabled())
+                            logger.debug("Generating pom for {}, location: {}", artifact, pomFile.getPath());
+                        if(!pomFile.getParentFile().exists()) {
+                            if(pomFile.getParentFile().mkdirs())  {
+                                logger.debug("Created {}", pomFile.getParentFile().getPath());
+                            }
                         }
-                        logger.warn("Did not resolve {} using the following flat directories\n{}",
-                                    artifact.toString(), b.toString());
+                        try {
+                            DefaultPomGenerator.writeTo(pomFile, artifact);
+                            return pomFile;
+                        } catch (IOException ex) {
+                            logger.error("Failed to generate {}", pomFile.getPath(), ex);
+                        }
                     }
+                }
+                if (logger.isWarnEnabled()) {
+                    StringBuilder b = new StringBuilder();
+                    for (File d : directories) {
+                        if (b.length() > 0)
+                            b.append("\n");
+                        b.append("\t").append(d.getPath());
+                    }
+                    logger.warn("Could not resolve {} using the following flat directories\n{}",
+                                artifact.toString(), b.toString());
                 }
             }
         }
@@ -120,12 +144,15 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDire
     }
 
     String getFileName(Artifact a) {
-        org.rioproject.resolver.Artifact artifact = new org.rioproject.resolver.Artifact(a.getGroupId(),
-                                                                                         a.getArtifactId(),
-                                                                                         a.getVersion(),
-                                                                                         a.getExtension(),
-                                                                                         a.getClassifier());
-        return artifact.getFileName();
+        return new org.rioproject.resolver.Artifact(a.getGroupId(),
+                                                    a.getArtifactId(),
+                                                    a.getVersion(),
+                                                    a.getExtension(),
+                                                    a.getClassifier()).getFileName();
+    }
+
+    String getPomPathAndName(Artifact a) {
+        return String.format("%s/%s", DefaultPomGenerator.getGenerationPath(a), getFileName(a));
     }
 
 }
