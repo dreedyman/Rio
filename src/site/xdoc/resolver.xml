@@ -34,16 +34,27 @@
                 The Resolver configuration by default is in <tt>${rio.home}/config/resolverConfig.groovy</tt>
                 directory. This file is used to configure the
                 <a href="apidocs/org/rioproject/resolver/SettableResolver.html">SettableResolver</a>,
-                defining the resolver jar file  as well as the remote Maven repositories that the
-                resolver will use.
+                defining the resolver jar file as well as the remote Maven repositories and any flatDir repositories
+                that the resolver will use.
                 <br/>
                 <br/>
                 <div class="source">
                 <pre>
 resolver {
-    jar = "${System.properties['rio.home']}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
-    repositories = ["rio"    : "http://www.rio-project.org/maven2",
-                    "central": "http://repo1.maven.org/maven2"]
+    jar = "${rioHome()}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
+
+    repositories {
+        remote = ["rio"    : "http://www.rio-project.org/maven2",
+                  "central": "http://repo1.maven.org/maven2"]
+
+        flatDirs = [new File(rioHome(), "lib-dl"),
+                    new File(rioHome(), "config/poms"),
+                    new File(rioHome(), "lib")]
+    }
+}
+
+def rioHome() {
+    return System.getProperty("rio.home")
 }</pre>
                 </div> <br/>
                 The resolver configuration above shows the jar file to use, as well as the
