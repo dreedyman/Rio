@@ -54,7 +54,6 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader, FlatDire
     public void addDirectories(Collection<File> directories) {
         if(directories!=null) {
             this.directories.addAll(directories);
-            this.directories.add(localPomGenerationDir);
         }
     }
 
