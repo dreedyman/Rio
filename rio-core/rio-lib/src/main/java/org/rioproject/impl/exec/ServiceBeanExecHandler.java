@@ -181,14 +181,16 @@ public class ServiceBeanExecHandler {
             } catch (ConfigurationException e) {
                 logger.warn("Cannot get shell template from configuration, continue with default");
             }
-            logger.info("Invoke {}.exec for {}, working directory {}",
-                        shell.getClass().getName(), ServiceLogUtil.logName(sElem), exDesc.getWorkingDirectory());
+            logger.info("Invoke {}.exec for {}", shell.getClass().getName(), ServiceLogUtil.logName(sElem));
+            if(logger.isDebugEnabled()) {
+                logger.debug("{}, working directory {}", ServiceLogUtil.logName(sElem), exDesc.getWorkingDirectory());
+            }
             manager = shell.exec(exDesc);
             forkedServiceListener.setName(serviceBindName);
             forkedServiceListener.setRegistryPort(regPort);
 
             long wait = 0;
-            do {
+            while (wait < (forkedServiceWaitTime*10)) {
                 try {
                     execHandler = (ServiceBeanExecutor)registry.lookup(serviceBindName);
                     forkedServiceListener.createFDH(execHandler);
@@ -199,8 +201,8 @@ public class ServiceBeanExecHandler {
                         execHandler.applyPlatformCapabilities(installedPlatformCapabilities);
                     instance = execHandler.instantiate(sElem, opStringMgr);
                     long activationTime = System.currentTimeMillis()-start;
-                    logger.info("Forked instance created for [{}], pid=[{}], activation time={} ms",
-                                serviceBindName, manager.getPid(), activationTime);
+                    logger.info("Forked instance created for [{}], pid=[{}], activation time={} seconds",
+                                serviceBindName, manager.getPid(), (activationTime/1000));
                     break;
                 } catch (NotBoundException e) {
                     try {
@@ -211,9 +213,9 @@ public class ServiceBeanExecHandler {
                                     serviceBindName);
                     }
                 }
-            } while (wait < (forkedServiceWaitTime*10));
+            }
 
-            if (wait >= forkedServiceWaitTime) {
+            if (instance==null) {
                 logger.warn("Timed out waiting for [{}]. Waited [{}] seconds, configured wait " +
                             "time is [{}] seconds. Killing spawned process and unregistering from local " +
                             "registry. Check the service's output log to determine root cause(s)",
