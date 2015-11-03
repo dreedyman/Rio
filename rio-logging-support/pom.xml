@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.2</version>
+        <version>5.2.1</version>
     </parent>
     <artifactId>rio-logging-support</artifactId>
     <name>Module :: Rio Logging Support</name>
