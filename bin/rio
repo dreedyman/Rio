@@ -222,7 +222,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
     -DarchetypeVersion=5.2.1
-elif [ "$install" = "1" ] ;then
+elif [ "$1" = "install" ] ;then
     echo "Install Rio artifacts locally"
     # Run installer
     installRioToLocalRepository
