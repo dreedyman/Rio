@@ -52,7 +52,6 @@ public class ProvisionMonitorPanel extends JPanel {
     private String lastArtifact = null;
 
     public ProvisionMonitorPanel(final ProvisionMonitor monitor,
-                                 final LookupCache monitorCache,
                                  final JFrame frame,
                                  final ColorManager colorManager,
                                  final Map<String, ImageIcon> toolBarImageMap,
@@ -79,13 +78,11 @@ public class ProvisionMonitorPanel extends JPanel {
 
                 /* If deploying an artifact or the oar is http based, deploy */
                 if (isArtifact || chosen.startsWith("http")) {
-                    final ServiceItem item = monitorCache.lookup(null);
-                    SwingDeployHelper.deploy(chosen, item, frame);
+                    SwingDeployHelper.deploy(chosen, monitor, frame);
                 } else {
                     File opStringFile = new File(chosen);
                     if (opStringFile.exists()) {
                         lastDir = chooser.getCurrentDirectory();
-                        final ServiceItem item = monitorCache.lookup(null);
                         final OperationalString[] opstrings;
                         try {
                             if (opStringFile.getName().endsWith("oar")) {
@@ -100,7 +97,7 @@ public class ProvisionMonitorPanel extends JPanel {
                             Util.showError(e, frame, "Failure parsing " + opStringFile.getName());
                             return;
                         }
-                        SwingDeployHelper.deploy(opstrings, item, frame, chosen);
+                        SwingDeployHelper.deploy(opstrings, monitor, frame, chosen);
                     } else {
                         JOptionPane.showMessageDialog(frame,
                                                       "The OperationalString file " + chosen + " does not exist",

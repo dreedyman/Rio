@@ -808,6 +808,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
             }
 
             emc.faultDetectionHandler = { String fdh ->
+                currentService.setFaultDetectionHandlerBundle(new ClassBundle(fdh))
                 println "FIX: faultDetectionHandler"
                 //builder.FaultDetectionHandler(ClassName: fdh)
             }

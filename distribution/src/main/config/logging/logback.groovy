@@ -176,7 +176,7 @@ logger("org.rioproject.monitor.DeploymentVerifier", INFO)
 logger("org.rioproject.monitor.InstantiatorResource", INFO)
 logger("org.rioproject.monitor.service.managers.FixedServiceManager", INFO)
 logger("org.rioproject.resolver.aether", OFF)
-logger("org.rioproject.resolver.aether.MultiLocalDirectoryReader", WARN)
+logger("org.rioproject.resolver.aether.ProjectWorkspaceReader", WARN)
 
 logger("org.rioproject.rmi.ResolvingLoader", OFF)
 
