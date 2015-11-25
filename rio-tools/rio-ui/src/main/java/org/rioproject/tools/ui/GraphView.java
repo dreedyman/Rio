@@ -414,6 +414,7 @@ public class GraphView extends Display {
                 //    g.addEdge(parent, opstringNode);
 
                 ServiceElement[] services = opstring.getServices();
+                System.err.println("Adding ["+services.length+"] services for "+opstring.getName());
                 for(ServiceElement service : services) {
                     doAddServiceElement(service);
                 }
@@ -570,6 +571,9 @@ public class GraphView extends Display {
                 }
                 setOpStringState(sElem.getOperationalStringName());
             }
+        } else {
+            System.err.println("Unable to add "+sElem.getName()+", cannot get opstring node "+
+                                       sElem.getOperationalStringName());
         }
     }
 
@@ -999,7 +1003,7 @@ public class GraphView extends Display {
               } else if(o instanceof GraphNode) {
                   GraphNode node = (GraphNode)o;
                   if(node.getOpString()!=null) {
-                      name = node.getOpStringName();
+                      name = checkNameLength(node.getOpStringName(), 10);
                   } else if(node.getServiceElement()!=null) {
                       name = node.getServiceElement().getName();
                   }
@@ -1066,7 +1070,7 @@ public class GraphView extends Display {
                     } else {
                         String name;
                         if(node.getOpString()!=null) {
-                            name = node.getOpStringName();
+                            name = checkNameLength(node.getOpStringName(), 10);
                         } else {
                             name = node.getServiceElement().getName();
                         }
@@ -1116,6 +1120,21 @@ public class GraphView extends Display {
             thePolygon.closePath();
             return thePolygon;
         }
+    }
+
+    private String checkNameLength(String s, int maxLength) {
+        String name;
+        if(s.length()>maxLength) {
+            StringBuilder sb = new StringBuilder();
+            int l = s.length();
+            sb.append(s.substring(0, 3))
+                    .append("...")
+                    .append(s.substring(l-3, l));
+            name = sb.toString();
+        } else {
+            name = s;
+        }
+        return name;
     }
 
     /**
