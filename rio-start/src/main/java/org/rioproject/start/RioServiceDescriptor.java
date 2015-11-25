@@ -27,6 +27,8 @@ import org.rioproject.config.PlatformLoader;
 import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
+import org.rioproject.resolver.Artifact;
+import org.rioproject.resolver.ResolverHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -302,14 +304,29 @@ public class RioServiceDescriptor implements ServiceDescriptor {
 
         ClassAnnotator annotator = new ClassAnnotator(ClassLoaderUtil.getCodebaseURLs(getCodebase()));
 
+        String serviceClassPath;
+        if(Artifact.isArtifact(getClasspath())) {
+            String[] classPath = ResolverHelper.getResolver().getClassPathFor(getClasspath());
+            StringBuilder classPathBuilder = new StringBuilder();
+            for(String jar:classPath) {
+                if(classPathBuilder.length()>0)
+                    classPathBuilder.append(File.pathSeparator);
+                classPathBuilder.append(jar);
+            }
+            serviceClassPath = classPathBuilder.toString();
+        } else {
+            serviceClassPath = getClasspath();
+        }
         ServiceClassLoader serviceCL =
-            new ServiceClassLoader(ServiceClassLoader.getURIs(ClassLoaderUtil.getClasspathURLs(getClasspath())),
+            new ServiceClassLoader(ServiceClassLoader.getURIs(ClassLoaderUtil.getClasspathURLs(serviceClassPath)),
                                    annotator,
                                    commonCL);
         if(logger.isDebugEnabled())
             logger.debug("Created {}", serviceCL);
 
         currentThread.setContextClassLoader(serviceCL);
+        if(logger.isTraceEnabled())
+            logger.trace("{}", ClassLoaderUtil.getContextClassLoaderTree());
         /* Get the ProxyPreparer */
         ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(config,
                                                                               COMPONENT,

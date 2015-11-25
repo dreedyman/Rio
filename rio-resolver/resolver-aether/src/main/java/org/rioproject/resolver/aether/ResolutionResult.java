@@ -19,6 +19,7 @@ package org.rioproject.resolver.aether;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.resolution.ArtifactResult;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,15 +27,24 @@ import java.util.List;
  */
 public class ResolutionResult {
     private Artifact artifact;
-    private List<ArtifactResult> artifactResults;
+    private List<ArtifactResult> artifactResults = new ArrayList<ArtifactResult>();
+
+    public ResolutionResult() {
+    }
 
     public ResolutionResult(Artifact artifact, List<ArtifactResult> artifactResults) {
         this.artifact = artifact;
-        this.artifactResults = artifactResults;
+        this.artifactResults.addAll(artifactResults);
     }
 
-    public void setArtifact(Artifact artifact) {
+    public ResolutionResult setArtifact(Artifact artifact) {
         this.artifact = artifact;
+        return this;
+    }
+
+    public ResolutionResult addArtifactResult(ArtifactResult result) {
+        artifactResults.add(result);
+        return this;
     }
 
     public Artifact getArtifact() {

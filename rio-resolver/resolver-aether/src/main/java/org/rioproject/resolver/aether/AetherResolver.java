@@ -16,12 +16,15 @@
 package org.rioproject.resolver.aether;
 
 import org.apache.maven.settings.building.SettingsBuildingException;
-import org.eclipse.aether.RepositoryException;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.DependencyCollectionException;
 import org.eclipse.aether.repository.ArtifactRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
+import org.eclipse.aether.resolution.ArtifactDescriptorException;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.rioproject.resolver.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +46,7 @@ public class AetherResolver implements Resolver, SettableResolver {
     private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<ResolutionRequest, Future<String[]>>();
     private final ExecutorService resolverExecutor;
     private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
+    private final FlatDirectoryReader flatDirectoryReader = new FlatDirectoryWorkspaceReader();
     private static final Logger logger = LoggerFactory.getLogger(AetherResolver.class.getName());
 
     public AetherResolver() {
@@ -141,7 +145,9 @@ public class AetherResolver implements Resolver, SettableResolver {
         try {
             location = service.getLocation(artifact, artifactType);
         } catch (ArtifactResolutionException e) {
-            throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
+            location = getURLFromFlatDirs(artifact, artifactType);
+            if(location==null)
+                throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
         } catch (MalformedURLException e) {
             throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
@@ -150,6 +156,26 @@ public class AetherResolver implements Resolver, SettableResolver {
                                                       artifact, e.getLocalizedMessage()));
         }
         return location;
+    }
+
+    private URL getURLFromFlatDirs(String artifact, String artifactType) throws ResolverException {
+        DefaultArtifact a = new DefaultArtifact(artifact);
+        String extension = artifactType==null? "jar":artifactType;
+        DefaultArtifact toResolve = new DefaultArtifact(a.getGroupId(),
+                                                        a.getArtifactId(),
+                                                        a.getClassifier(),
+                                                        extension,
+                                                        a.getVersion());
+        ArtifactResult result = flatDirectoryReader.findArtifact(toResolve);
+        if(result!=null) {
+            try {
+                return result.getArtifact().getFile().toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
+                                                          artifact, e.getLocalizedMessage()));
+            }
+        }
+        return null;
     }
 
     /**
@@ -187,7 +213,7 @@ public class AetherResolver implements Resolver, SettableResolver {
      * {@inheritDoc}
      */
     @Override public SettableResolver setFlatDirectories(Collection<File> directories) {
-        service.setConfiguredFlatDirectories(directories);
+        flatDirectoryReader.addDirectories(directories);
         return this;
     }
 
@@ -315,7 +341,7 @@ public class AetherResolver implements Resolver, SettableResolver {
         }
 
         public String[] call() throws ResolverException {
-            String[] classPath;
+            String[] classPath = null;
             List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories = null;
             if(request.getRepositories()!=null) {
                 remoteRepositories = transformRemoteRepository(request.getRepositories());
@@ -339,11 +365,47 @@ public class AetherResolver implements Resolver, SettableResolver {
                                              a.getVersion());
                 }
                 classPath = produceClassPathFromResolutionResult(result);
-            } catch (RepositoryException e) {
-                throw new ResolverException(e.getLocalizedMessage());
             } catch (SettingsBuildingException e) {
                 throw new ResolverException(String.format("Error reading local Maven configuration: %s",
-                                                          e.getLocalizedMessage()));
+                                                          e.getLocalizedMessage()), e);
+            } catch (DependencyCollectionException e) {
+                CollectRequest collectRequest = e.getResult().getRequest();
+                ArtifactResult artifactResult = null;
+                if(collectRequest.getRoot()!=null && collectRequest.getRoot().getArtifact()!=null)
+                    artifactResult = flatDirectoryReader.findArtifact(collectRequest.getRoot().getArtifact());
+                if(artifactResult==null) {
+                    throw new ResolverException("Encountered bad artifact descriptors, version ranges or " +
+                                                "other issues during calculation of the dependency " +
+                                                "graph",
+                                                e);
+                } else {
+                    ResolutionResult result = new ResolutionResult()
+                                                  .setArtifact(new DefaultArtifact(request.getArtifact()))
+                                                  .addArtifactResult(artifactResult);
+                    classPath = produceClassPathFromResolutionResult(result);
+                }
+            } catch (DependencyResolutionException e) {
+                List<ArtifactResult> artifactResults = new ArrayList<ArtifactResult>();
+                artifactResults.addAll(e.getResult().getArtifactResults());
+                int resolvedLocally = e.getResult().getCollectExceptions().size();
+                for(Exception collectException : e.getResult().getCollectExceptions()) {
+                    if(collectException instanceof ArtifactDescriptorException) {
+                        ArtifactDescriptorException ade = (ArtifactDescriptorException)collectException;
+                        ArtifactResult artifactResult = flatDirectoryReader.findArtifact(ade.getResult()
+                                                                                             .getArtifact());
+                        if (artifactResult != null) {
+                            resolvedLocally--;
+                            artifactResults.add(artifactResult);
+                        }
+                    }
+                }
+                if(resolvedLocally==0) {
+                    ResolutionResult result = new ResolutionResult(new DefaultArtifact(request.getArtifact()), artifactResults);
+                    classPath = produceClassPathFromResolutionResult(result);
+                } else {
+                    throw new ResolverException(String.format("Could not download all transitive dependencies: %s",
+                                                              e.getLocalizedMessage()));
+                }
             }
             return classPath;
         }

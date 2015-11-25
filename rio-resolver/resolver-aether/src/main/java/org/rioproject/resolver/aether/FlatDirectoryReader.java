@@ -15,6 +15,9 @@
  */
 package org.rioproject.resolver.aether;
 
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.resolution.ArtifactResult;
+
 import java.io.File;
 import java.util.Collection;
 
@@ -30,4 +33,13 @@ public interface FlatDirectoryReader {
      * @param directories Directories to add
      */
     void addDirectories(Collection<File> directories);
+
+    /**
+     * Find an artifact in flat directories.
+     *
+     * @param artifact The artifact to find.
+     *
+     * @return The resolved artifact or null.
+     */
+    ArtifactResult findArtifact(Artifact artifact);
 }

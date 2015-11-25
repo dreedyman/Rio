@@ -69,7 +69,7 @@ public class FlatDirReaderTest {
     public void clean() {
         File poms =  new File(String.format("%s/.rio/generated/poms",
                                             System.getProperty("user.home").replace('\\', '/')));
-        org.eclipse.aether.artifact.Artifact a = new DefaultArtifact("something.something:darkside-deathstar:pom:2.1");;
+        org.eclipse.aether.artifact.Artifact a = new DefaultArtifact("something.something:darkside-deathstar:pom:2.1");
         File pomDir = new File(poms, DefaultPomGenerator.getGenerationPath(a));
         FileUtils.remove(pomDir.getParentFile().getParentFile(), true);
     }
@@ -98,6 +98,12 @@ public class FlatDirReaderTest {
         Assert.assertTrue(cp.length>0);
         String[] cp2 = resolver.getClassPathFor("something.something:darkside-deathstar:2.2");
         Assert.assertTrue(cp2.length>0);
+    }
+
+    //@Test
+    public void testFlatDirReader3() throws ResolverException, IOException {
+        String[] cp = resolver.getClassPathFor("mil.afrl.mstc.open:eng-lib:3.1-develop");
+
     }
 
 }

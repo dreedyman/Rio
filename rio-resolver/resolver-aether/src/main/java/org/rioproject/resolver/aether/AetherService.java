@@ -28,6 +28,7 @@ import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.CollectResult;
 import org.eclipse.aether.collection.DependencyCollectionException;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.deployment.DeployRequest;
@@ -266,11 +267,11 @@ public final class AetherService {
                                                                                         dependencyRequest).getArtifactResults();
             return new ResolutionResult(artifact, artifactResults);
         } catch(NullPointerException e) {
-            /* catch, log and rethrow */
-            logger.error("Trying to resolve {}, make sure that all parent poms are resolve-able", artifact, e);
-            throw e;
+            /* catch and throw a DependencyCollectionException */
+            String message = String.format("Trying to resolve %s, failed to read artifact descriptor, " +
+                                           "make sure that all parent poms are resolve-able", artifact);
+            throw new DependencyCollectionException(new CollectResult(collectRequest), message, e);
         }
-
     }
 
     /**
@@ -472,16 +473,6 @@ public final class AetherService {
 
     public AetherService setConfiguredRepositories(List<RemoteRepository> repositories) {
         configuredRepositories.addAll(repositories);
-        return this;
-    }
-
-    public AetherService setConfiguredFlatDirectories(Collection<File> directories) {
-        if(workspaceReader instanceof FlatDirectoryReader) {
-            ((FlatDirectoryReader)workspaceReader).addDirectories(directories);
-        } else {
-            logger.warn("Unable to set flat directories for {}, not an instance of FlatDirectoryReader",
-                        workspaceReader.getClass().getName());
-        }
         return this;
     }
 

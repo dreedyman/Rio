@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.2.1</version>
+        <version>5.2.2</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.rioproject.resolver</groupId>
