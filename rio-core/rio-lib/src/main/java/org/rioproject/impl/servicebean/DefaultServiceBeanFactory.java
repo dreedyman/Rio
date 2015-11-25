@@ -67,6 +67,17 @@ public class DefaultServiceBeanFactory implements ServiceBeanFactory {
                 LifeCycle lifeCycle = (LifeCycle)context.getServiceBeanManager().getDiscardManager();
                 String[] args = ConfigHelper.getConfigArgs(context.getServiceElement());
                 Object impl = constructor.newInstance(args, lifeCycle);
+                if(logger.isDebugEnabled()) {
+                    StringBuilder sb = new StringBuilder();
+                    for(String s : args) {
+                        if(sb.length()>0)
+                            sb.append("\n");
+                        sb.append("\t").append(s);
+                    }
+                    logger.debug("{}/{} CONFIG ARGS: [{}]\n{}",
+                                 context.getServiceElement().getOperationalStringName(),
+                                 context.getServiceElement().getName(), args.length, sb);
+                }
                 Object proxy;
                 logger.trace("Obtained implementation instance: {}", impl);
                 if(impl instanceof ServiceProxyAccessor) {

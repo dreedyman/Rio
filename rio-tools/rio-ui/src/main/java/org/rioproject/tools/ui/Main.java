@@ -789,7 +789,6 @@ public class Main extends JFrame {
         ProvisionMonitorPanel pmp = null;
         if(monitorPanelMap.get(monitor)==null) {
             pmp = new ProvisionMonitorPanel(monitor,
-                                            monitorCache,
                                             frame,
                                             colorManager,
                                             toolBarImageMap,

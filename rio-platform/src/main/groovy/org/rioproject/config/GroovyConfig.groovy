@@ -46,8 +46,10 @@ class GroovyConfig implements net.jini.config.Configuration {
             configFile = new ConfigurationFile(args, loader)
         } else {
             if(args[0].endsWith(".config") || args[0].equals("-")) {
+                log.debug("Delegate to ConfigurationFile for {}", args[0])
                 configFile = new ConfigurationFile(args, loader)
             } else {
+                log.debug("Use GroovyConfig for {}", args[0])
                 /* Make sure we have all groovy files */
                 checkInputs(args)
                 traverseInputs(args, loader)
@@ -285,8 +287,9 @@ class GroovyConfig implements net.jini.config.Configuration {
             }
             if(mismatch) {
                 throw new ConfigurationException("entry for component $component, name $name "+
-                                                 "is of wrong type: ${value.getClass().name}, "+
-                                                 "expected: ${type.name}");
+                        "is of wrong type: ${value.getClass().name}, "+
+                        "value: ${value}",
+                        "expected: ${type.name}, ${gr}");
             }
         }
         return value

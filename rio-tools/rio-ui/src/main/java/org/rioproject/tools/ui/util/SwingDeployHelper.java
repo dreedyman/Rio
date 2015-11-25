@@ -15,7 +15,6 @@
  */
 package org.rioproject.tools.ui.util;
 
-import net.jini.core.lookup.ServiceItem;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.monitor.ProvisionMonitor;
@@ -33,12 +32,12 @@ public class SwingDeployHelper {
      * Deploy operational strings
      *
      * @param opstrings The operational strings to deploy
-     * @param item The Provision Monitor's ServiceItem
+     * @param monitor The Provision Monitor
      * @param frame The UI's frame, used as the JOptionPane's parent if a confirm dialog needs to be shown
      * @param deployName The name of the selected operational string
      */
     public static void deploy(final OperationalString[] opstrings,
-                              final ServiceItem item,
+                              final ProvisionMonitor monitor,
                               final JFrame frame,
                               final String deployName) {
         StringBuilder opstringNames = new StringBuilder();
@@ -53,7 +52,6 @@ public class SwingDeployHelper {
         SwingWorker worker = new SwingWorker() {
             public Object construct() {
                 try {
-                    ProvisionMonitor monitor = (ProvisionMonitor) item.service;
                     DeployAdmin dAdmin = (DeployAdmin) monitor.getAdmin();
                     for (OperationalString opString : opstrings) {
                         if (dAdmin.hasDeployed(opString.getName())) {
@@ -89,18 +87,17 @@ public class SwingDeployHelper {
      * Deploy operational strings
      *
      * @param artifact The artifact to deploy
-     * @param item The Provision Monitor's ServiceItem
+     * @param monitor The Provision Monitor
      * @param frame The UI's frame, used as the JOptionPane's parent if a confirm dialog or an error needs to be shown
      */
     public static void deploy(final String artifact,
-                              final ServiceItem item,
+                              final ProvisionMonitor monitor,
                               final JFrame frame) {
         final JDialog dialog = new WaitingDialog(frame, "Deploying "+artifact+"...", 500);
 
         SwingWorker worker = new SwingWorker() {
             public Object construct() {
                 try {
-                    ProvisionMonitor monitor = (ProvisionMonitor) item.service;
                     DeployAdmin dAdmin = (DeployAdmin) monitor.getAdmin();
                     dAdmin.deploy(artifact);
                 } catch (Exception e) {
