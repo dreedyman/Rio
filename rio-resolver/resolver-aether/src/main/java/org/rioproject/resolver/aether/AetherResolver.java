@@ -266,6 +266,9 @@ public class AetherResolver implements Resolver, SettableResolver {
     protected String[] produceClassPathFromResolutionResult(ResolutionResult result) {
         List<String> classPath = new ArrayList<String>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
+            if(logger.isDebugEnabled())
+                logger.debug("Adding classpath for artifact: {}, result: {}",
+                             artifactResult.getArtifact(), artifactResult.getArtifact().getFile());
             classPath.add(artifactResult.getArtifact().getFile().getAbsolutePath());
             ArtifactRepository r = artifactResult.getRepository();
             if(r instanceof org.eclipse.aether.repository.RemoteRepository) {

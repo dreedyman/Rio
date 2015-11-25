@@ -49,10 +49,10 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader {
     public File findArtifact(Artifact artifact) {
         if(!artifact.isSnapshot()) {
             File artifactFile = new File(localRepositoryDir, getArtifactPath(artifact));
-            logger.info("{} exists? {}", artifactFile.getPath(), artifactFile.exists());
+            if(logger.isDebugEnabled())
+                logger.debug("{} exists? {}", artifactFile.getPath(), artifactFile.exists());
             if(artifactFile.exists())
                 return artifactFile;
-            //return findArtifactInFlatDirectories(artifact);
         } else {
             logger.info("Skip {}", artifact.toString());
         }

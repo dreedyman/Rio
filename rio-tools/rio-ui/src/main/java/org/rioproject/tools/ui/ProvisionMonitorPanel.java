@@ -16,8 +16,6 @@
 package org.rioproject.tools.ui;
 
 import net.jini.config.Configuration;
-import net.jini.core.lookup.ServiceItem;
-import net.jini.lookup.LookupCache;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.impl.opstring.OAR;
 import org.rioproject.impl.opstring.OpStringLoader;

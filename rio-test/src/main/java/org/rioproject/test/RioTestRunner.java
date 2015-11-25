@@ -449,6 +449,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                                        t.getClass().getName()+": "+t.getMessage());
                 }
             }
+
+            testManager.shutdown();
             
             if (errors.isEmpty())
                 return;

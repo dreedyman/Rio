@@ -287,9 +287,9 @@ class GroovyConfig implements net.jini.config.Configuration {
             }
             if(mismatch) {
                 throw new ConfigurationException("entry for component $component, name $name "+
-                        "is of wrong type: ${value.getClass().name}, "+
-                        "value: ${value}",
-                        "expected: ${type.name}, ${gr}");
+                                                 "is of wrong type: ${value.getClass().name}, "+
+                                                 "value: ${value}",
+                                                 "expected: ${type.name}, ${gr}");
             }
         }
         return value
