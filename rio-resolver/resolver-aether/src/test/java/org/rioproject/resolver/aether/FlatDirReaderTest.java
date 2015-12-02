@@ -99,11 +99,4 @@ public class FlatDirReaderTest {
         String[] cp2 = resolver.getClassPathFor("something.something:darkside-deathstar:2.2");
         Assert.assertTrue(cp2.length>0);
     }
-
-    //@Test
-    public void testFlatDirReader3() throws ResolverException, IOException {
-        String[] cp = resolver.getClassPathFor("mil.afrl.mstc.open:eng-lib:3.1-develop");
-
-    }
-
 }

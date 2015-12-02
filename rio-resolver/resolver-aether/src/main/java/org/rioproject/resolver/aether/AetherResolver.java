@@ -266,9 +266,18 @@ public class AetherResolver implements Resolver, SettableResolver {
     protected String[] produceClassPathFromResolutionResult(ResolutionResult result) {
         List<String> classPath = new ArrayList<String>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
-            if(logger.isDebugEnabled())
-                logger.debug("Adding classpath for artifact: {}, result: {}",
-                             artifactResult.getArtifact(), artifactResult.getArtifact().getFile());
+            if(artifactResult.getArtifact()==null) {
+                logger.error("Unknown artifact for {}", artifactResult.getRequest().getArtifact());
+            }
+            if(logger.isDebugEnabled()) {
+                if(artifactResult.getArtifact()!=null)
+                    logger.debug("Adding classpath for artifact: {}, result: {}",
+                                 artifactResult.getArtifact(), artifactResult.getArtifact().getFile());
+                else {
+                    logger.error("Adding classpath for artifact: {}, no file found",
+                                 artifactResult.getArtifact());
+                }
+            }
             classPath.add(artifactResult.getArtifact().getFile().getAbsolutePath());
             ArtifactRepository r = artifactResult.getRepository();
             if(r instanceof org.eclipse.aether.repository.RemoteRepository) {
@@ -344,7 +353,7 @@ public class AetherResolver implements Resolver, SettableResolver {
         }
 
         public String[] call() throws ResolverException {
-            String[] classPath = null;
+            String[] classPath;
             List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories = null;
             if(request.getRepositories()!=null) {
                 remoteRepositories = transformRemoteRepository(request.getRepositories());
@@ -389,20 +398,34 @@ public class AetherResolver implements Resolver, SettableResolver {
                 }
             } catch (DependencyResolutionException e) {
                 List<ArtifactResult> artifactResults = new ArrayList<ArtifactResult>();
-                artifactResults.addAll(e.getResult().getArtifactResults());
-                int resolvedLocally = e.getResult().getCollectExceptions().size();
-                for(Exception collectException : e.getResult().getCollectExceptions()) {
-                    if(collectException instanceof ArtifactDescriptorException) {
-                        ArtifactDescriptorException ade = (ArtifactDescriptorException)collectException;
-                        ArtifactResult artifactResult = flatDirectoryReader.findArtifact(ade.getResult()
-                                                                                             .getArtifact());
-                        if (artifactResult != null) {
-                            resolvedLocally--;
-                            artifactResults.add(artifactResult);
-                        }
+                Set<org.eclipse.aether.artifact.Artifact> flatDirArtifacts = new HashSet<org.eclipse.aether.artifact.Artifact>();
+                for(ArtifactResult result : e.getResult().getArtifactResults()) {
+                    if(result.isMissing()) {
+                        flatDirArtifacts.add(result.getRequest().getArtifact());
+                    } else {
+                        artifactResults.add(result);
                     }
                 }
-                if(resolvedLocally==0) {
+                //artifactResults.addAll(e.getResult().getArtifactResults());
+                for(Exception collectException : e.getResult().getCollectExceptions()) {
+                    if(collectException instanceof ArtifactDescriptorException) {
+                        flatDirArtifacts.add(((ArtifactDescriptorException)collectException).getResult().getArtifact());
+                    }
+                }
+                int toResolveLocally =flatDirArtifacts.size();
+                if(logger.isDebugEnabled())
+                    logger.debug("Try and resolve {} artifacts using configured flatDirs", toResolveLocally);
+                for(org.eclipse.aether.artifact.Artifact artifact : flatDirArtifacts) {
+                    ArtifactResult artifactResult = flatDirectoryReader.findArtifact(artifact);
+                    if (artifactResult != null) {
+                        toResolveLocally--;
+                        artifactResults.add(artifactResult);
+                    }
+                }
+
+                if(logger.isDebugEnabled())
+                    logger.debug("Number of unresolved artifact after flatDir check: {}", toResolveLocally);
+                if(toResolveLocally==0) {
                     ResolutionResult result = new ResolutionResult(new DefaultArtifact(request.getArtifact()), artifactResults);
                     classPath = produceClassPathFromResolutionResult(result);
                 } else {
@@ -412,6 +435,7 @@ public class AetherResolver implements Resolver, SettableResolver {
             }
             return classPath;
         }
+
     }
 
     class ResolutionRequest {
