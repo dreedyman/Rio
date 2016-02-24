@@ -255,6 +255,16 @@ public final class AetherService {
         setMirrorSelector(myRepositories, (DefaultRepositorySystemSession) session);
         List<RemoteRepository> repositoriesToUse = applyAuthentication(myRepositories);
 
+        if(logger.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            for(RemoteRepository r : repositoriesToUse) {
+                if(builder.length()>0)
+                    builder.append(", ");
+                builder.append(r.getUrl());
+            }
+            logger.debug("Resolve {} using repositories {}", artifact, builder.toString());
+        }
+
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(dependency);
         collectRequest.setRepositories(repositoriesToUse);

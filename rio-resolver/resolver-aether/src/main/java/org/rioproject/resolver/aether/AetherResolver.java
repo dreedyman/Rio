@@ -255,10 +255,10 @@ public class AetherResolver implements Resolver, SettableResolver {
 
             org.eclipse.aether.repository.RemoteRepository.Builder repoBuilder =
                 new org.eclipse.aether.repository.RemoteRepository.Builder(rr.getId(), "default", rr.getUrl());
-            repoBuilder.setSnapshotPolicy(snapshotPolicy);
-            repoBuilder.setReleasePolicy(releasePolicy);
-
-            remoteRepositories.add(repoBuilder.build());
+            remoteRepositories.add(repoBuilder
+                                       .setSnapshotPolicy(snapshotPolicy)
+                                       .setReleasePolicy(releasePolicy)
+                                       .build());
         }
         return remoteRepositories;
     }

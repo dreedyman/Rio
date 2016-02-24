@@ -38,42 +38,40 @@ import net.jini.lookup.ui.AdminUI;
 import net.jini.security.TrustVerifier;
 import net.jini.security.proxytrust.ServerProxyTrust;
 import org.rioproject.RioVersion;
-import org.rioproject.impl.admin.ServiceAdminImpl;
-import org.rioproject.impl.bean.BeanAdapter;
-import org.rioproject.impl.config.ConfigHelper;
 import org.rioproject.config.Constants;
-import org.rioproject.impl.config.ExporterConfig;
-import org.rioproject.impl.container.DiscardManager;
-import org.rioproject.impl.container.ServiceLogUtil;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.entry.ComputeResourceInfo;
-import org.rioproject.entry.OperationalStringEntry;
-import org.rioproject.entry.StandardServiceType;
-import org.rioproject.entry.UIDescriptorFactory;
-import org.rioproject.impl.event.DispatchEventHandler;
+import org.rioproject.entry.*;
+import org.rioproject.entry.ServiceInfo;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
 import org.rioproject.event.EventProducer;
+import org.rioproject.impl.admin.ServiceAdminImpl;
+import org.rioproject.impl.bean.BeanAdapter;
+import org.rioproject.impl.config.ConfigHelper;
+import org.rioproject.impl.config.ExporterConfig;
+import org.rioproject.impl.container.DiscardManager;
+import org.rioproject.impl.container.ServiceLogUtil;
+import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.impl.fdh.HeartbeatClient;
 import org.rioproject.impl.jmx.JMXUtil;
-import org.rioproject.loader.ServiceClassLoader;
-import org.rioproject.log.ServiceLogEvent;
-import org.rioproject.logging.ServiceLogEventHandler;
-import org.rioproject.logging.ServiceLogEventHandlerHelper;
 import org.rioproject.impl.logging.ServiceLogEventPublisherImpl;
-import org.rioproject.opstring.ServiceElement;
-import org.rioproject.resolver.Artifact;
 import org.rioproject.impl.persistence.PersistentStore;
 import org.rioproject.impl.service.Joiner;
 import org.rioproject.impl.service.LandlordLessor;
 import org.rioproject.impl.service.ServiceProvider;
 import org.rioproject.impl.service.ServiceResource;
-import org.rioproject.servicebean.*;
-import org.rioproject.serviceui.UIComponentFactory;
-import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.impl.sla.SLAThresholdEventAdapter;
 import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.impl.watch.WatchRegistry;
+import org.rioproject.loader.ServiceClassLoader;
+import org.rioproject.log.ServiceLogEvent;
+import org.rioproject.logging.ServiceLogEventHandler;
+import org.rioproject.logging.ServiceLogEventHandlerHelper;
+import org.rioproject.opstring.ServiceElement;
+import org.rioproject.resolver.Artifact;
+import org.rioproject.servicebean.*;
+import org.rioproject.serviceui.UIComponentFactory;
+import org.rioproject.sla.SLAThresholdEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -723,9 +721,11 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
          * 8. If we have an artifact, get the version number from it and create
          * the ServiceInfo
          */
-        ServiceInfo sInfo = getServiceInfo();
+        net.jini.lookup.entry.ServiceInfo sInfo = getServiceInfo();
         if(sInfo!=null)
             attrList.add(sInfo);
+
+        attrList.add(getServiceInfo(sInfo));
 
         /* Get any attribute added to the context*/
         if(context instanceof DefaultServiceBeanContext) {
@@ -808,8 +808,9 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         return sType;
     }
 
-    protected ServiceInfo getServiceInfo() {
-        ServiceInfo sInfo = null;
+    protected net.jini.lookup.entry.ServiceInfo getServiceInfo() {
+
+        net.jini.lookup.entry.ServiceInfo sInfo = null;
         String artifact;
         if(context.getServiceElement().getExportBundles()!=null &&
            context.getServiceElement().getExportBundles().length>0) {
@@ -820,14 +821,20 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if(artifact!=null) {
             String version = getVersionFromArtifact(artifact);
             if(version!=null)
-                sInfo = new ServiceInfo(context.getServiceElement().getName(),
-                                        "",
-                                        "",
-                                        version,
-                                        "","");
+                sInfo = new net.jini.lookup.entry.ServiceInfo(context.getServiceElement().getName(),
+                                                              "",
+                                                              "",
+                                                              version,
+                                                              "","");
 
         }
         return sInfo;
+    }
+
+    protected ServiceInfo getServiceInfo(net.jini.lookup.entry.ServiceInfo info) {
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.initialize(context.getServiceElement().getName(), info==null?null:info.version);
+        return serviceInfo;
     }
 
     private String getVersionFromArtifact(final String a) {

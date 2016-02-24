@@ -662,6 +662,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         /* Add service UIs programmatically */
         addAttributes(getServiceUIs());
 
+        addAttributes((Entry[]) config.getEntry(getConfigComponent(), "initialLookupAttributes", Entry[].class, new Entry[0]));
+
         /* Get the security policy to apply to loading services */
         String serviceSecurityPolicy = (String)config.getEntry(getConfigComponent(),
                                                                "serviceSecurityPolicy",

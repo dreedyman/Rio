@@ -19,6 +19,7 @@ import com.sun.jini.config.Config;
 import com.sun.jini.start.LifeCycle;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
+import net.jini.core.entry.Entry;
 import net.jini.core.event.EventRegistration;
 import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.LeaseDeniedException;
@@ -66,7 +67,10 @@ import org.rioproject.monitor.service.tasks.TaskTimer;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.resolver.*;
+import org.rioproject.resolver.Artifact;
+import org.rioproject.resolver.Resolver;
+import org.rioproject.resolver.ResolverException;
+import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.util.RioHome;
@@ -828,6 +832,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             
             addAttribute(ProvisionMonitorEvent.getEventDescriptor());
             addAttribute(failureEventDesc);
+
+            addAttributes((Entry[]) config.getEntry(CONFIG_COMPONENT,
+                                                    "initialLookupAttributes",
+                                                    Entry[].class,
+                                                    new Entry[0]));
 
             /* Utility for loading OperationalStrings */
             opStringLoader = getOpStringLoader();

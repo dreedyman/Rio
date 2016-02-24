@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,6 +132,14 @@ public class ServiceAdvertiser {
                     if (hostEntry != null) {
                         addList.add(hostEntry);
                         logger.debug("Added Host [{}] for {}", ((Host)hostEntry).hostName, serviceName);
+                    } else {
+                        logger.warn("Unable to obtain the Host entry for {}", serviceName);
+                    }
+
+                    Entry infoEntry = loadServiceInfo(serviceName, "", proxyCL);
+                    if (infoEntry != null) {
+                        addList.add(infoEntry);
+                        logger.debug("Added ServiceInfo for {}", serviceName);
                     } else {
                         logger.warn("Unable to obtain the Host entry for {}", serviceName);
                     }
@@ -347,12 +356,10 @@ public class ServiceAdvertiser {
             Class<?> entryClass = loader.loadClass(entryClassName);
             Constructor cons = entryClass.getConstructor(String.class);
             Entry newEntry = (Entry)cons.newInstance(value);
-            /* Check if the service already has the Entry, if it does perform
-             * no more work if it does not add the entry*/
+            /* Check if the service already has the Entry, if it does not, add the entry */
             Entry[] attributes = joinAdmin.getLookupAttributes();
             for (Entry attribute : attributes) {
-                if (attribute.getClass().getName().equals(
-                    entryClass.getName())) {
+                if (attribute.getClass().getName().equals(entryClass.getName())) {
                     add = false;
                     break;
                 }
@@ -363,9 +370,21 @@ public class ServiceAdvertiser {
         } catch(Exception e) {
             logger.warn("{} not found, cannot add {}", entryClassName, entryClassName.toLowerCase(), e);
         }
-        return(entry);
+        return entry;
     }
 
+    private static Entry loadServiceInfo(String name, String version,  ClassLoader loader) {
+        Entry serviceInfo = null;
+        try {
+            Class c = loader.loadClass("org.rioproject.entry.ServiceInfo");
+            serviceInfo = (Entry)c.newInstance();
+            Method m = c.getMethod("initialize", String.class, String.class);
+            m.invoke(serviceInfo, name, version);
+        } catch (Exception e) {
+            // This happens if Rio classes are not in classpath. Ignore
+        }
+        return serviceInfo;
+    }
 
     /*
      * Add Attributes using the JoinAdmin
