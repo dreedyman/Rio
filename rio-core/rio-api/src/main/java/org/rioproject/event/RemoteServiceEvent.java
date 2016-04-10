@@ -39,77 +39,86 @@ import net.jini.core.event.RemoteEvent;
 public class RemoteServiceEvent extends RemoteEvent implements Serializable {
     static final long serialVersionUID = 1L;
     
-    /* Support for versions prior to River 3.0.0
-     * Set superclass fields in versions of River before 3.0.0, so
-     * the current state of those fields is serialized.  River 3.0.0 does
+    /* Support for versions prior to River 3.0.0:
+     * Sets superclass fields in versions of River before 3.0.0, so
+     * current state of those fields is serialized.  River 3.0.0 does
      * this automatically for us, by calling getter methods during writeObject.
+     * 
+     * Presently, due to the com.sun.jini to org.apache.river namespace change
+     * it isn't possible for Rio to support both versions of River either
+     * side of this change, so most of the code is commented out.
+     * 
+     * If Rio is restructured slightly, such that a new module is created,
+     * that depends on com.sun.jini OR org.apache.river namspaces and 
+     * content exported to Rio API, then Rio could support versions either side
+     * of the namespace change.  In that case uncomment the code.
      */
-    static final boolean REMOTE_EVENT_CLASS_CHANGED;
-    static final Field EVENT_ID;
-    static final Field SEQ_NUM;
-    static final Field HANDBACK;
-    
-    static { //May throw a security exception
-	boolean classChange;
-	Field event_id = null;
-	Field seq_num = null;
-	Field hand_back = null;
-	try {
-	    event_id = RemoteEvent.class.getDeclaredField("eventID");
-	    int modifier = event_id.getModifiers();
-	    if (modifier == Modifier.PROTECTED){
-		classChange = false;
-		seq_num = RemoteEvent.class.getDeclaredField("seqNum");
-		hand_back = RemoteEvent.class.getDeclaredField("handback");
-	    } else {
-		classChange = true;
-	    }
-	} catch (NoSuchFieldException ex) {
-	    classChange = false;
-	} 
-	REMOTE_EVENT_CLASS_CHANGED = classChange;
-	if (!classChange){
-	    EVENT_ID = event_id;
-	    SEQ_NUM = seq_num;
-	    HANDBACK = hand_back;
-	} else {
-	    EVENT_ID = null;
-	    SEQ_NUM = null;
-	    HANDBACK = null;
-	}
-    }
-    
-    private static void setField (Field f, Object caller, long value){
-	// Support for River / Jini < 3.0.0, remove when no longer required
-	if (!REMOTE_EVENT_CLASS_CHANGED){
-	    try {
-		f.setLong(caller, value);
-	    } catch (IllegalArgumentException ex) {
-		throw new AssertionError("This shouldn't happen", ex);
-	    } catch (IllegalAccessException ex) {
-		throw new AssertionError(
-		    "This class should have access to protected method in superclass",
-		    ex
-		);
-	    }
-	}
-    }
-    
-    private static void setField (Field f, Object caller, Object value){
-	// Support for River / Jini < 3.0.0, remove when no longer required
-	if (!REMOTE_EVENT_CLASS_CHANGED){
-	    try {
-		f.set(caller, value);
-	    } catch (IllegalArgumentException ex) {
-		throw new AssertionError("This shouldn't happen", ex);
-	    } catch (IllegalAccessException ex) {
-		throw new AssertionError(
-		    "This class should have access to protected method in superclass",
-		    ex
-		);
-	    }
-	}
-    }
+//    static final boolean REMOTE_EVENT_CLASS_CHANGED;
+//    static final Field EVENT_ID;
+//    static final Field SEQ_NUM;
+//    static final Field HANDBACK;
+//    
+//    static { //May throw a security exception
+//	boolean classChange;
+//	Field event_id = null;
+//	Field seq_num = null;
+//	Field hand_back = null;
+//	try {
+//	    event_id = RemoteEvent.class.getDeclaredField("eventID");
+//	    int modifier = event_id.getModifiers();
+//	    if (modifier == Modifier.PROTECTED){
+//		classChange = false;
+//		seq_num = RemoteEvent.class.getDeclaredField("seqNum");
+//		hand_back = RemoteEvent.class.getDeclaredField("handback");
+//	    } else {
+//		classChange = true;
+//	    }
+//	} catch (NoSuchFieldException ex) {
+//	    classChange = false;
+//	} 
+//	REMOTE_EVENT_CLASS_CHANGED = classChange;
+//	if (!classChange){
+//	    EVENT_ID = event_id;
+//	    SEQ_NUM = seq_num;
+//	    HANDBACK = hand_back;
+//	} else {
+//	    EVENT_ID = null;
+//	    SEQ_NUM = null;
+//	    HANDBACK = null;
+//	}
+//    }
+//    
+//    private static void setField (Field f, Object caller, long value){
+//	// Support for River / Jini < 3.0.0, remove when no longer required
+//	if (!REMOTE_EVENT_CLASS_CHANGED){
+//	    try {
+//		f.setLong(caller, value);
+//	    } catch (IllegalArgumentException ex) {
+//		throw new AssertionError("This shouldn't happen", ex);
+//	    } catch (IllegalAccessException ex) {
+//		throw new AssertionError(
+//		    "This class should have access to protected method in superclass",
+//		    ex
+//		);
+//	    }
+//	}
+//    }
+//    
+//    private static void setField (Field f, Object caller, Object value){
+//	// Support for River / Jini < 3.0.0, remove when no longer required
+//	if (!REMOTE_EVENT_CLASS_CHANGED){
+//	    try {
+//		f.set(caller, value);
+//	    } catch (IllegalArgumentException ex) {
+//		throw new AssertionError("This shouldn't happen", ex);
+//	    } catch (IllegalAccessException ex) {
+//		throw new AssertionError(
+//		    "This class should have access to protected method in superclass",
+//		    ex
+//		);
+//	    }
+//	}
+//    }
     
     /** The time this event was fired 
      * @serial
@@ -153,7 +162,7 @@ public class RemoteServiceEvent extends RemoteEvent implements Serializable {
      */
     public void setEventID(long eventID) {
         this.eventID = eventID;
-	setField(EVENT_ID, this, eventID);
+//	setField(EVENT_ID, this, eventID);
     }
     
     //Inherit javadoc
@@ -169,7 +178,7 @@ public class RemoteServiceEvent extends RemoteEvent implements Serializable {
      */
     public void setSequenceNumber(long seqNum) {
         this.seqNum = seqNum;
-	setField(SEQ_NUM, this, seqNum);
+//	setField(SEQ_NUM, this, seqNum);
     }
     
     //Inherit javadoc
@@ -186,7 +195,7 @@ public class RemoteServiceEvent extends RemoteEvent implements Serializable {
      */
     public void setHandback(MarshalledObject handback) {
         this.handback = handback;
-	setField(HANDBACK, this, handback);
+//	setField(HANDBACK, this, handback);
     }
 
     /**
