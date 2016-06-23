@@ -75,6 +75,10 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class ServiceStarter {
+    static {
+        RioProperties.load();
+        LogManagementHelper.checkConfigurationReset();
+    }
     /**
      * Component name for service starter configuration entries
      */
@@ -440,7 +444,6 @@ public class ServiceStarter {
         LogManagementHelper.setup();
         logger.debug("Entering {}", ServiceStarter.class.getName());
         ensureSecurityManager();
-        RioProperties.load();
         try {
             Result[] results = doStart(args);
             checkResultFailures(results);

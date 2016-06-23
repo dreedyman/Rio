@@ -376,7 +376,7 @@ public class ServiceAdvertiser {
     private static Entry loadServiceInfo(String name, String version,  ClassLoader loader) {
         Entry serviceInfo = null;
         try {
-            Class c = loader.loadClass("org.rioproject.entry.ServiceInfo");
+            Class<?> c = loader.loadClass("org.rioproject.entry.ServiceInfo");
             serviceInfo = (Entry)c.newInstance();
             Method m = c.getMethod("initialize", String.class, String.class);
             m.invoke(serviceInfo, name, version);

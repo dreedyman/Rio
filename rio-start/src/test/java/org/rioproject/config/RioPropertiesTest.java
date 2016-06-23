@@ -16,11 +16,7 @@
 package org.rioproject.config;
 
 import org.junit.Assert;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
 
 /**
  * Test loading properties from rio.env

@@ -17,12 +17,14 @@ package org.rioproject.start;
 
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.URL;
 
 /**
- * Checks for log redirection if running without a console and installs a {@code ServiceLogEventHandler}
- * based on the logging system being used.
+ * Helper for management of logging system
  *
  * @author Dennis Reedy
  */
@@ -32,6 +34,9 @@ public final class LogManagementHelper {
 
     private LogManagementHelper() {}
 
+    /**
+     * Installs a {@code ServiceLogEventHandler} based on the logging system being used.
+     */
     public static void setup() {
         //redirectIfNecessary();
         try {
@@ -41,6 +46,59 @@ public final class LogManagementHelper {
         } catch(Exception e) {
             stdErrLogger.warn("Unable to add ServiceLogEventHandler {}: {}", e.getClass().getName(), e.getMessage());
         }
+    }
+
+    /**
+     * Checks if the underlying logging system configuration has been changed from default
+     * startup settings.
+     */
+    public static void checkConfigurationReset() {
+        String config = System.getProperty("logback.configurationFile");
+        if(config==null)
+            return;
+        try {
+            Class<?> loggerFactory = Class.forName("org.slf4j.LoggerFactory");
+            Method getILoggerFactory = loggerFactory.getMethod("getILoggerFactory");
+            Object loggerContext = getILoggerFactory.invoke(null);
+
+            Class<?> configurationWatchListUtil = Class.forName("ch.qos.logback.core.joran.util.ConfigurationWatchListUtil");
+            URL main = (URL) getMethod("getMainWatchURL", configurationWatchListUtil).invoke(null, loggerContext);
+            File currentConfigFile = null;
+            if(main!=null) {
+                currentConfigFile = new File(main.toURI());
+            }
+
+            File configFile = new File(config);
+            if (currentConfigFile == null ||
+                !currentConfigFile.getAbsolutePath().equals(configFile.getAbsolutePath())) {
+                Method reset = loggerContext.getClass().getMethod("reset");
+                reset.invoke(loggerContext);
+
+                if(configFile.getName().endsWith(".xml")) {
+                    Class<?> joranConfigurator = Class.forName("ch.qos.logback.classic.joran.JoranConfigurator");
+                    Object configurator = joranConfigurator.newInstance();
+                    getMethod("setContext", joranConfigurator).invoke(configurator, loggerContext);
+                    joranConfigurator.getMethod("doConfigure", File.class).invoke(configurator, configFile);
+                } else {
+                    Class<?> gafferConfigurator = Class.forName("ch.qos.logback.classic.gaffer.GafferConfigurator");
+                    Constructor<?> constructor = gafferConfigurator.getConstructor(loggerContext.getClass());
+                    Object configurator = constructor.newInstance(loggerContext);
+                    gafferConfigurator.getMethod("run", File.class).invoke(configurator, configFile);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Method getMethod(String name, Class<?> cl) {
+        for(Method m : cl.getMethods()) {
+            if(m.getName().equals(name)) {
+                return m;
+            }
+        }
+        throw new NoSuchMethodError("Could not find "+name+" in "+cl.getName());
     }
 
     static void redirectIfNecessary() {

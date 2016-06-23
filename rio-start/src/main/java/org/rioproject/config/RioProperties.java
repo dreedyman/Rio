@@ -15,8 +15,7 @@
  */
 package org.rioproject.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.rioproject.util.PropertyHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +33,6 @@ import java.util.Properties;
  * @author Dennis Reedy
  */
 public final class RioProperties {
-    private final static Logger logger = LoggerFactory.getLogger(RioProperties.class);
     private RioProperties(){}
 
     public static void load() {
@@ -53,14 +51,13 @@ public final class RioProperties {
                     if(rioEnv.exists()) {
                         loadAndSetProperties(rioEnv);
                     } else {
-                        logger.info("{} not found, skipping", rioEnv.getPath());
+                        System.err.println(rioEnv.getPath()+" not found, skipping");
                     }
                 } else {
-                    logger.info("RIO_HOME environment not set");
+                    System.err.println("RIO_HOME environment not set");
                 }
             }
         } else {
-            logger.debug("Loading from {}", Constants.ENV_PROPERTY_NAME);
             rioEnv = new File(rioEnvFileName);
             if(rioEnv.exists()) {
                 loadAndSetProperties(rioEnv);
@@ -69,25 +66,16 @@ public final class RioProperties {
     }
 
     private static void loadAndSetProperties(final File rioEnv) {
-        logger.info("Loading properties from {}", rioEnv.getPath());
+        System.err.println("Loading properties from "+ rioEnv.getPath());
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(rioEnv));
             for(String propertyName : properties.stringPropertyNames()) {
-                if(System.getProperty(propertyName)==null) {
-                    if(logger.isDebugEnabled()) {
-                        logger.debug("Setting {}: {}", propertyName, properties.getProperty(propertyName));
-                    }
-                    System.setProperty(propertyName, properties.getProperty(propertyName));
-                } else {
-                    if(logger.isDebugEnabled()) {
-                        logger.debug("Skipping {}: {}, it is already set to: {}",
-                                     propertyName, properties.getProperty(propertyName), System.getProperty(propertyName));
-                    }
-                }
+                String properyValue = PropertyHelper.expandProperties(properties.getProperty(propertyName));
+                System.setProperty(propertyName, properyValue);
             }
         } catch (Exception e) {
-            logger.warn("Problem reading {}", rioEnv.getPath(), e);
+            e.printStackTrace();
         }
     }
 }
