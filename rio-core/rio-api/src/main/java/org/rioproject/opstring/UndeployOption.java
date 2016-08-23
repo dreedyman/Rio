@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Reedy
  */
 public class UndeployOption implements Serializable {
-    private static final long serialVersionUID = 1l;
+    private static final long serialVersionUID = 1L;
     public enum Type {
         /**
          * If at least one service in an {@code OperationalString} implements the

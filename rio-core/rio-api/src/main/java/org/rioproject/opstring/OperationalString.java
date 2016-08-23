@@ -15,6 +15,7 @@
  */
 package org.rioproject.opstring;
 
+import javax.annotation.PostConstruct;
 import java.net.URL;
 
 /**
@@ -76,6 +77,7 @@ public interface OperationalString {
      * status is determined by the inspecting ServiceElement instance
      * availability
      */
+    @PostConstruct
     int getStatus();
 
     /**

@@ -60,6 +60,8 @@ public class IdleServiceTest {
         public void notify(ProvisionMonitorEvent event) {
             if(event.getAction().equals(ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED)) {
                 undeployed = true;
+            } else {
+                System.out.println("===> "+event.getAction().name());
             }
         }
     }

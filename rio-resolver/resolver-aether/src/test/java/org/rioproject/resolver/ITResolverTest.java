@@ -31,7 +31,7 @@ import java.util.List;
  * Test maven resolver
  */
 public class ITResolverTest {
-    File saveOriginalSettings;
+    private File saveOriginalSettings;
 
     @Before
     public void saveOriginalSettings() throws IOException {

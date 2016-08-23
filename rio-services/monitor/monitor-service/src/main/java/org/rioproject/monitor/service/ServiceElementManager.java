@@ -54,8 +54,8 @@ import org.rioproject.entry.ComputeResourceInfo;
 import org.rioproject.impl.client.DiscoveryManagementPool;
 import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 import org.rioproject.impl.fdh.FaultDetectionHandler;
-import org.rioproject.impl.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.impl.fdh.FaultDetectionListener;
+import org.rioproject.impl.fdh.PooledFaultDetectionHandler;
 import org.rioproject.impl.loader.ClassBundleLoader;
 import org.rioproject.impl.opstring.OpStringFilter;
 import org.rioproject.impl.service.ServiceResource;
@@ -81,7 +81,6 @@ import java.rmi.MarshalledObject;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -126,7 +125,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /** Is informed if a service is detected to have failed */
     private final ServiceFaultListener serviceFaultListener = new ServiceFaultListener();
     /** Table of service IDs to FaultDetectionHandler instances, one for each service */
-    private final Map<ServiceID, FaultDetectionHandler> fdhTable = new ConcurrentHashMap<ServiceID, FaultDetectionHandler>();
+    //private final Map<ServiceID, FaultDetectionHandler> fdhTable = new ConcurrentHashMap<ServiceID, FaultDetectionHandler>();
     /** A List of ServiceBeanInstances */
     private final List<ServiceBeanInstance> serviceBeanList = new ArrayList<ServiceBeanInstance>();
     /** A List of ServiceBeanInstances which have been decremented and are not
@@ -174,6 +173,7 @@ public class ServiceElementManager implements InstanceIDManager {
     private static final Logger sbiLogger = LoggerFactory.getLogger(InstanceIDManager.class);
     /** Used to access service provisioning configuration */
     private static final String SERVICE_PROVISION_CONFIG_COMPONENT="service.provision";
+    private FaultDetectionHandler<ServiceID> faultDetectionHandler;
 
     /**
      * Construct a ServiceElementManager
@@ -681,7 +681,16 @@ public class ServiceElementManager implements InstanceIDManager {
 
             sElemListener = new ServiceElementManagerServiceListener();
             lCache.addListener(sElemListener);
-            
+
+            if(faultDetectionHandler==null) {
+                faultDetectionHandler = new PooledFaultDetectionHandler();
+                if(svcElement.getServiceBeanConfig().getFDHProperties().size()>0)
+                    faultDetectionHandler.configure(svcElement.getServiceBeanConfig().getFDHProperties());
+
+                faultDetectionHandler.setLookupCache(lCache);
+                faultDetectionHandler.register(serviceFaultListener);
+            }
+
             ServiceBeanInstance[] sbInstances = instanceList.toArray(new ServiceBeanInstance[instanceList.size()]);
 
             if(sbInstances.length>0) {
@@ -1275,10 +1284,8 @@ public class ServiceElementManager implements InstanceIDManager {
         }
 
         /* Stop all FaultDetectionHandler instances */
-        for (Map.Entry<ServiceID, FaultDetectionHandler> entry : fdhTable.entrySet()) {
-            FaultDetectionHandler fdh = entry.getValue();
-            fdh.terminate();
-        }
+        if(faultDetectionHandler!=null)
+            faultDetectionHandler.terminate();
 
         /* If requested, destroy service instances */
         if(destroyServices &&
@@ -1384,8 +1391,6 @@ public class ServiceElementManager implements InstanceIDManager {
         throws Exception {
         if(serviceID==null)
             return;
-        if(fdhTable.containsKey(serviceID))
-            return;
         if(proxy instanceof ReferentUuid) {
             Uuid uuid = ((ReferentUuid)proxy).getReferentUuid();
             if(myUuid.equals(uuid)) {
@@ -1393,13 +1398,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 return;
             }
         }
-        ClassLoader cl = proxy.getClass().getClassLoader();
-        FaultDetectionHandler<ServiceID> fdh = FaultDetectionHandlerFactory.getFaultDetectionHandler(svcElement, cl);
-        fdh.register(serviceFaultListener);
-        fdhTable.put(serviceID, fdh);
-        fdh.monitor(proxy, serviceID, lCache);
-        mgrLogger.trace("Obtained FaultDetectionHandler [{}] for [{}]",
-                         fdh.getClass().getName(), LoggingUtil.getLoggingName(svcElement));
+        faultDetectionHandler.monitor(proxy, serviceID);
     }
 
     /**
@@ -1543,7 +1542,6 @@ public class ServiceElementManager implements InstanceIDManager {
         }
         */
         services.remove(proxy);
-        fdhTable.remove(new ServiceID(serviceUuid.getMostSignificantBits(), serviceUuid.getLeastSignificantBits()));
         if(idleServiceManager.get()!=null && proxy instanceof ServiceActivityProvider) {
             idleServiceManager.get().removeService((ServiceActivityProvider)proxy);
         }

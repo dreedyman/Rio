@@ -71,6 +71,8 @@ public class ServiceBeanConfig implements Serializable {
      * This property is stored as an configuration parameter. The value for
      * this property is an Integer */
     public static final String INITIAL_PLANNED_SERVICES = "initial.planned";
+    /** Key for accessing fault detection handler properties*/
+    public static final String FDH = "FDH";
     /**
      * Convenience constant used to request that attempts be made to
      * discover all lookup services that are within range, and which
@@ -290,6 +292,17 @@ public class ServiceBeanConfig implements Serializable {
      */
     public LookupLocator[] getLocators() {
         return ((LookupLocator[])configParms.get(LOCATORS));
+    }
+
+    public void setFDHProperties(Properties props) {
+        configParms.put(FDH, props);
+    }
+
+    public Properties getFDHProperties() {
+        Properties props = (Properties) configParms.get(FDH);
+        if(props==null)
+            props = new Properties();
+        return props;
     }
 
     /**

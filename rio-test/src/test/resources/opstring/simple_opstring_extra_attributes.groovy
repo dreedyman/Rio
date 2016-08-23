@@ -2,8 +2,8 @@ package opstring
 
 import org.rioproject.RioVersion
 
-def artifactTable = ["api":"org.rioproject.test.simple:simple-api:2.0",
-                     "service":"org.rioproject.test.simple:simple-service:2.0"]
+def artifactTable = ["api":"org.rioproject.test.simple:simple-api:LATEST",
+                     "service":"org.rioproject.test.simple:simple-service:LATEST"]
 
 def getEntries() {
     return new org.rioproject.test.simple.SimpleEntry(RioVersion.VERSION)

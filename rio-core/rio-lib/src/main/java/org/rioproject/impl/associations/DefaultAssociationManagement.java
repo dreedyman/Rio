@@ -76,11 +76,11 @@ public class DefaultAssociationManagement implements AssociationManagement {
     /**
      * Registered AssociationListener instances.
      */
-    private final List<AssociationListener> listeners = new ArrayList<AssociationListener>();
+    private final List<AssociationListener> listeners = new ArrayList<>();
     /**
      * Collection of AssociationDescriptor.
      */
-    private final List<AssociationHandler> associationHandlers = new ArrayList<AssociationHandler>();
+    private final List<AssociationHandler> associationHandlers = new ArrayList<>();
     /**
      * The ServiceBeanControl object for the ServiceBean.
      */
@@ -163,11 +163,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         if(cl==null) {
             final Thread currentThread = Thread.currentThread();
             callerCL = AccessController.doPrivileged(
-                new PrivilegedAction<ClassLoader>() {
-                    public ClassLoader run() {
-                        return currentThread.getContextClassLoader();
-                    }
-                });
+                (PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
         } else {
             callerCL = cl;
         }
@@ -315,7 +311,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * {@inheritDoc}
      */
     public List<Association<?>> getAssociations() {
-        List<Association<?>> associations = new ArrayList<Association<?>>();
+        List<Association<?>> associations = new ArrayList<>();
         synchronized(associationHandlers) {
             for (AssociationHandler ah : associationHandlers) {
                 associations.add(ah.getAssociation());
@@ -475,8 +471,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      */
     private AssociationDescriptor[] getDifference(final AssociationDescriptor[] desc1,
                                                   final AssociationDescriptor[] desc2) {
-        ArrayList<AssociationDescriptor> diffList =
-            new ArrayList<AssociationDescriptor>();
+        ArrayList<AssociationDescriptor> diffList = new ArrayList<>();
         for (AssociationDescriptor aDesc1 : desc1) {
             boolean matched = false;
             for (AssociationDescriptor aDesc2 : desc2) {
@@ -516,7 +511,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * @return Array of AssociationHandler instances
      */
     private AssociationHandler[] getAssociationHandlers() {
-        ArrayList<AssociationHandler> list = new ArrayList<AssociationHandler>();
+        ArrayList<AssociationHandler> list = new ArrayList<>();
         synchronized(associationHandlers) {
             for (AssociationHandler ah : associationHandlers) {
                 list.add(ah);
@@ -531,7 +526,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * @return Array of AssociationDescriptor instances
      */
     private AssociationDescriptor[] getAssociationDescriptors() {
-        ArrayList<AssociationDescriptor> list = new ArrayList<AssociationDescriptor>();
+        ArrayList<AssociationDescriptor> list = new ArrayList<>();
         synchronized(associationHandlers) {
             for (AssociationHandler ah : associationHandlers) {
                 list.add(ah.associationDescriptor);
@@ -547,7 +542,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * instances. A new array is allocated each time. If there are no
      * AssociationListener instances a zero-length array is returned
      */
-    protected AssociationListener<?>[] getAssociationListeners() {
+    private AssociationListener<?>[] getAssociationListeners() {
         AssociationListener[] aListeners;
         synchronized(listeners) {
             aListeners = listeners.toArray(new AssociationListener[listeners.size()]);
@@ -566,7 +561,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      *
      * @throws IllegalArgumentException if the AssociationDescriptor is null
      */
-    protected AssociationHandler createAssociationHandler(final AssociationDescriptor aDesc) {
+    private AssociationHandler createAssociationHandler(final AssociationDescriptor aDesc) {
         if(aDesc == null)
             throw new IllegalArgumentException("associationDescriptor is null");
         return new AssociationHandler(aDesc);
@@ -610,8 +605,8 @@ public class DefaultAssociationManagement implements AssociationManagement {
     public List<Association<?>> addAssociationDescriptors(final AssociationDescriptor... aDescs) {
         if(aDescs == null)
             throw new IllegalArgumentException("The AssociationDescriptor cannot be null");
-        List<AssociationHandler> newHandlers = new ArrayList<AssociationHandler>();
-        List<Association<?>> associations = new ArrayList<Association<?>>();
+        List<AssociationHandler> newHandlers = new ArrayList<>();
+        List<Association<?>> associations = new ArrayList<>();
         for (AssociationDescriptor aDesc : aDescs) {
             AssociationHandler handler = getAssociationHandler(aDesc);
             if (handler!=null) {
@@ -657,7 +652,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      */
     @SuppressWarnings("unchecked")
     class Listener implements AssociationListener {
-        private final List<Association> requiredAssociations = Collections.synchronizedList(new ArrayList<Association>());
+        private final List<Association> requiredAssociations = Collections.synchronizedList(new ArrayList<>());
         private AssociationInjector associationInjector;
 
         AssociationInjector getAssociationInjector() {
@@ -828,7 +823,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * @param service The discovered service
      */
     @SuppressWarnings("unchecked")
-    protected void notifyOnDiscovery(final Association association, final Object service) {
+    private void notifyOnDiscovery(final Association association, final Object service) {
         AssociationListener[] listeners = getAssociationListeners();
         logger.trace("[{}] DISCOVERED [{}], Notify [{}] listeners", clientName, association.getName(), listeners.length+1);
         try {
@@ -849,7 +844,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * @param service The discovered service
      */
     @SuppressWarnings("unchecked")
-    protected void notifyOnChange(final Association association, final Object service) {
+    private void notifyOnChange(final Association association, final Object service) {
         AssociationListener[] listeners = getAssociationListeners();
         logger.trace("[{}] CHANGED [{}], Notify [{}] listeners", clientName, association.getName(), listeners.length);
         try {
@@ -869,7 +864,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * @param service The discovered service
      */
     @SuppressWarnings("unchecked")
-    protected void notifyOnBroken(final Association association, final Object service) {
+    private void notifyOnBroken(final Association association, final Object service) {
         AssociationListener[] listeners = getAssociationListeners();
         logger.trace("[{}] BROKEN [{}], Type={}, Notify [{}] listeners",
                      clientName, association.getName(), association.getAssociationType().toString(), listeners.length);
@@ -953,7 +948,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          * Table of service IDs to FaultDetectionHandler instances, one for
          * each service
          */
-        private final Map<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
+        private final Map<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<>();
         /** The Association for the AssociationHandler */
         private final Association association;
         /** The LookupCache for the ServiceDiscoveryManager */
@@ -970,7 +965,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          * @param assocDesc The AssociationDescriptor describing the
          * attributes of the Association
          */
-        public AssociationHandler(final AssociationDescriptor assocDesc) {
+        AssociationHandler(final AssociationDescriptor assocDesc) {
             associationDescriptor = assocDesc;
             association = new DefaultAssociation(associationDescriptor);
             /* If the association has a version declared and no AssociationMatchFilter, add a VersionMatchFilter */
@@ -1043,12 +1038,8 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 }
             } catch(IllegalStateException e) {
                 logger.warn("Creating an AssociationHandler, {}", e.getMessage());
-            } catch(IOException e) {
-                logger.warn("Creating an AssociationHandler", e);
-            } catch (ClassNotFoundException e) {
+            } catch(Exception e) {
                 logger.error("Creating an AssociationHandler", e);
-            } catch(Throwable t) {
-                logger.error("Creating an AssociationHandler", t);
             }
         }
 
@@ -1136,32 +1127,23 @@ public class DefaultAssociationManagement implements AssociationManagement {
             }
             final Thread currentThread = Thread.currentThread();
             final ClassLoader cCL = AccessController.doPrivileged(
-                    new PrivilegedAction<ClassLoader>() {
-                        public ClassLoader run() {
-                            return currentThread.getContextClassLoader();
-                        }
-                    });
+                (PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
             try {
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(callerCL);
-                        return null;
-                    }
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(callerCL);
+                    return null;
                 });
-                item = new MarshalledObject<ServiceItem>(item).get();
+                item = new MarshalledObject<>(item).get();
                 item.service = proxyPreparer.prepareProxy(item.service);
                 doServiceDiscovered(item);
             } catch(Exception e) {
                 logger.warn("(Un)Marshalling ServiceItem", e);
             } finally {
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(cCL);
-                        return null;
-                    }
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(cCL);
+                    return null;
                 });
             }
-
         }
 
         private void doServiceDiscovered(ServiceItem item) {
@@ -1182,7 +1164,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          *
          * @throws Exception if the fault detection handler cannot be attached
          */
-        protected void serviceDiscovered(final ServiceItem item) throws Exception {
+        void serviceDiscovered(final ServiceItem item) throws Exception {
             logger.trace("[{}] Service Discovered [{}] CL=[{}]",
                          clientName, item.service.getClass().getName(),
                          item.service.getClass().getClassLoader().toString());
@@ -1226,7 +1208,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          *
          * @param item The service that has failed
          */
-        protected void notifyOnFailure(final ServiceItem item) {
+        void notifyOnFailure(final ServiceItem item) {
             if(instances >0) {
                 association.setState(Association.State.CHANGED);
                 notifyOnChange(association, item.service);
@@ -1276,7 +1258,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          *
          * @throws Exception if the fault detection handler cannot be attached
          */
-        protected void setFaultDetectionHandler(final Object service, final ServiceID serviceID) throws Exception {
+        void setFaultDetectionHandler(final Object service, final ServiceID serviceID) throws Exception {
             FaultDetectionHandler<ServiceID> fdh = null;
             if(container!=null) {
                 ServiceBeanDelegate delegate =
@@ -1304,11 +1286,12 @@ public class DefaultAssociationManagement implements AssociationManagement {
          *
          * @throws Exception If error(s) occur
          */
-        protected void registerFaultDetectionHandler(final Object service,
-                                                     final ServiceID serviceID,
-                                                     final FaultDetectionHandler<ServiceID> fdh) throws Exception {
+        void registerFaultDetectionHandler(final Object service,
+                                           final ServiceID serviceID,
+                                           final FaultDetectionHandler<ServiceID> fdh) throws Exception {
+            fdh.setLookupCache(lCache);
             fdh.register(this);
-            fdh.monitor(service, serviceID, lCache);
+            fdh.monitor(service, serviceID);
             fdhTable.put(serviceID, fdh);
         }
     }
@@ -1336,17 +1319,11 @@ public class DefaultAssociationManagement implements AssociationManagement {
         final Thread currentThread = Thread.currentThread();
         final ClassLoader cCL =
             AccessController.doPrivileged(
-                new PrivilegedAction<ClassLoader>() {
-                    public ClassLoader run() {
-                        return currentThread.getContextClassLoader();
-                    }
-                });
+                (PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
         try {
-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                public Void run() {
-                    currentThread.setContextClassLoader(callerCL);
-                    return null;
-                }
+            AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                currentThread.setContextClassLoader(callerCL);
+                return null;
             });
             for (ServiceBeanInstance instance : instances) {
                 Object service = instance.getService();
@@ -1401,11 +1378,9 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 }
             }
         } finally {
-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                public Void run() {
-                    currentThread.setContextClassLoader(cCL);
-                    return null;
-                }
+            AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                currentThread.setContextClassLoader(cCL);
+                return null;
             });
         }
     }
@@ -1414,7 +1389,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * This class handles the condition when the association is a Jini Lookup
      * Service
      */
-    static class LookupServiceHandler implements DiscoveryListener {
+    private static class LookupServiceHandler implements DiscoveryListener {
         /** An instance of DiscoveryManagement */
         DiscoveryManagement dm;
         /**
@@ -1423,7 +1398,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
          */
         private final AssociationHandler handler;
         /** Table of ServiceRegistrar instances to ServiceIDs */
-        private final Map<ServiceRegistrar, ServiceID> registrarTable = new Hashtable<ServiceRegistrar, ServiceID>();
+        private final Map<ServiceRegistrar, ServiceID> registrarTable = new HashMap<>();
         /** A ProxyPreparer for discovered services */
         ProxyPreparer proxyPreparer;
 
@@ -1518,7 +1493,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
     /**
      * Listen for colocated service removals
      */
-    class ColocatedListener implements FaultDetectionHandler <ServiceID>, ServiceBeanContainerListener {
+    private class ColocatedListener implements FaultDetectionHandler <ServiceID>, ServiceBeanContainerListener {
         private Uuid uuid;
         private ServiceID serviceID;
         private Object service;
@@ -1536,7 +1511,10 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 listener.serviceFailure(service, serviceID);
         }
 
-        public void setConfiguration(String[] configArgs) {
+        public void configure(Properties p) {
+        }
+
+        @Override public void setLookupCache(LookupCache lCache) {
         }
 
         public void register(FaultDetectionListener<ServiceID> listener) {
@@ -1546,7 +1524,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         public void unregister(FaultDetectionListener listener) {
         }
 
-        public void monitor(Object service, ServiceID id, LookupCache lCache) throws Exception {
+        public void monitor(Object service, ServiceID id) {
             serviceID = id;
             uuid = UuidFactory.create(serviceID.getMostSignificantBits(), serviceID.getLeastSignificantBits());
             this.service = service;

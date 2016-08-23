@@ -14,12 +14,6 @@
             <outputDirectory>/config/poms</outputDirectory>
             <destName>rio-main-${project.version}.pom</destName>
         </file>
-        <!-- Copy the Gnostic pom so we can correctly install Gnostic jars into the local repository -->
-        <file>
-            <source>${basedir}/../rio-services/gnostic/pom.xml</source>
-            <outputDirectory>/config/poms</outputDirectory>
-            <destName>rio-gnostic-${project.version}.pom</destName>
-        </file>
         <file>
             <source>${basedir}/../rio-services/monitor/monitor-api/pom.xml</source>
             <outputDirectory>/config/poms</outputDirectory>
@@ -147,7 +141,6 @@
                 <exclude>org.rioproject.cybernode:cybernode-ui:jar</exclude>
                 <exclude>org.rioproject.event-collector:event-collector-api:jar</exclude>
                 <exclude>org.rioproject.event-collector:event-collector-proxy:jar</exclude>
-                <exclude>org.rioproject.gnostic:gnostic-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-api:jar</exclude>
                 <exclude>org.rioproject.monitor:monitor-proxy:jar</exclude>
                 <exclude>org.rioproject:rio-api:jar</exclude>
@@ -179,14 +172,6 @@
                 <exclude>org.sonatype.sisu:*:*</exclude>
                 <exclude>com.google.guava:*:*</exclude>
                 <exclude>com.google.code.findbugs:*</exclude>
-                <!-- The following exclusions are for gnostic and it's dependencies -->
-                <exclude>org.codehaus.janino:*</exclude>
-                <exclude>org.drools:*</exclude>
-                <exclude>antlr:*</exclude>
-                <exclude>org.eclipse.jdt.core.compiler:*</exclude>
-                <exclude>org.mvel:*</exclude>
-                <exclude>org.slf4j:*</exclude>
-                <exclude>ch.qos.logback:*</exclude>
             </excludes>
             <outputDirectory>lib</outputDirectory>
         </dependencySet>
@@ -209,7 +194,6 @@
                 <include>org.rioproject.cybernode:cybernode-api:jar</include>
                 <include>org.rioproject.cybernode:cybernode-proxy:jar</include>
                 <include>org.rioproject.cybernode:cybernode-ui:jar</include>
-                <include>org.rioproject.gnostic:gnostic-api:jar</include>
                 <include>org.rioproject.monitor:monitor-api:jar</include>
                 <include>org.rioproject.monitor:monitor-proxy:jar</include>
                 <include>org.rioproject.event-collector:event-collector-api:jar</include>

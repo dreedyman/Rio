@@ -21,10 +21,7 @@ import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.collection.DependencyCollectionException;
 import org.eclipse.aether.repository.ArtifactRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
-import org.eclipse.aether.resolution.ArtifactDescriptorException;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.resolution.ArtifactResult;
-import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.resolution.*;
 import org.rioproject.resolver.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,6 +151,9 @@ public class AetherResolver implements Resolver, SettableResolver {
         } catch (SettingsBuildingException e) {
             throw new ResolverException(String.format("Error loading settings for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
+        } catch (VersionRangeResolutionException e) {
+            throw new ResolverException(String.format("Error resolving latest version for %s: %s",
+                                                      artifact, e.getLocalizedMessage()));
         }
         return location;
     }
@@ -195,6 +195,9 @@ public class AetherResolver implements Resolver, SettableResolver {
                                                       artifact, e.getLocalizedMessage()));
         } catch (SettingsBuildingException e) {
             throw new ResolverException(String.format("Error loading settings for resolved artifact %s: %s",
+                                                      artifact, e.getLocalizedMessage()));
+        } catch (VersionRangeResolutionException e) {
+            throw new ResolverException(String.format("Error resolving latest version for %s: %s",
                                                       artifact, e.getLocalizedMessage()));
         }
         return location;
@@ -432,6 +435,9 @@ public class AetherResolver implements Resolver, SettableResolver {
                     throw new ResolverException(String.format("Could not download all transitive dependencies: %s",
                                                               e.getLocalizedMessage()));
                 }
+            } catch (VersionRangeResolutionException e) {
+                throw new ResolverException(String.format("Error resolving latest version: %s",
+                                                          e.getLocalizedMessage()), e);
             }
             return classPath;
         }

@@ -94,8 +94,7 @@ public final class FaultDetectionHandlerFactory {
             fdhClass = ClassBundleLoader.loadClass(theFdhBundle);
         else
             fdhClass = ClassBundleLoader.loadClass(cl, theFdhBundle);
-        FaultDetectionHandler fdh = (FaultDetectionHandler)fdhClass.newInstance();
-        return (fdh);
+        return  (FaultDetectionHandler)fdhClass.newInstance();
     }
 
     private static ClassBundle getClassBundle(ClassBundle cb) {

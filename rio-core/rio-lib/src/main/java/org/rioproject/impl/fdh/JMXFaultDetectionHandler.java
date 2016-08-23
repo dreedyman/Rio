@@ -15,13 +15,8 @@
  */
 package org.rioproject.impl.fdh;
 
-import com.sun.jini.config.Config;
-import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
-import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
-import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceItemFilter;
 import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.util.ThrowableUtil;
@@ -32,6 +27,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * The JMXFaultDetectionHandler is a fault detection handler that uses JMX remote
@@ -128,27 +124,23 @@ import java.io.IOException;
  */
 public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
     private String jmxConnection;
-    static final int DEFAULT_INVOCATION_DELAY = 1000 * 60;
-    public static final String INVOCATION_DELAY_KEY = "invocationDelay";
-    private long invocationDelay = DEFAULT_INVOCATION_DELAY;
-    /** Component name, used for config and logger */
-    private static final String COMPONENT = JMXFaultDetectionHandler.class.getName();
     /**
      * A Logger
      */
-    static Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(JMXFaultDetectionHandler.class);
 
     @Override
-    public void monitor(Object proxy, final ServiceID id, LookupCache lCache)
-        throws Exception {
+    public void monitor(Object proxy, final ServiceID id) {
 
-        ServiceItem item = lCache.lookup(new ServiceItemFilter() {
-            public boolean check(ServiceItem item) {
-                return item.serviceID.equals(id);
-            }
-        });
-        jmxConnection = JMXUtil.getJMXConnection(item.attributeSets);
-        super.monitor(proxy, id, lCache);
+        if(getLookupCache()!=null) {
+            ServiceItem item = getLookupCache().lookup(new ServiceItemFilter() {
+                public boolean check(ServiceItem item) {
+                    return item.serviceID.equals(id);
+                }
+            });
+            jmxConnection = JMXUtil.getJMXConnection(item.attributeSets);
+        }
+        super.monitor(proxy, id);
     }
 
     /**
@@ -159,11 +151,11 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
      * @throws Exception If there are problems creating the underlying service
      * monitor
      */
-    public void monitor() throws Exception {
+    public void monitor() {
         getServiceMonitor();
     }
 
-    protected ServiceMonitor getServiceMonitor() throws Exception {
+    protected ServiceMonitor getServiceMonitor() {
         ServiceMonitor monitor = null;
         if (jmxConnection != null) {
             monitor = new MBeanServerConnectionMonitor();
@@ -175,52 +167,18 @@ public class JMXFaultDetectionHandler extends AbstractFaultDetectionHandler {
         this.jmxConnection = jmxConnection;
     }
 
-    public void setConfiguration(String[] configArgs) {
-        if (configArgs == null)
-            throw new IllegalArgumentException("configArgs is null");
-        try {
-            this.configArgs = new String[configArgs.length];
-            this.configArgs = new String[configArgs.length];
-            System.arraycopy(configArgs,
-                             0,
-                             this.configArgs,
-                             0,
-                             configArgs.length);
-
-            setConfiguration(ConfigurationProvider.getInstance(configArgs));
-        } catch (ConfigurationException e) {
-            logger.error("Setting Configuration", e);
+    @Override public void configure(Properties properties) {
+        super.configure(properties);
+        if(logger.isTraceEnabled()) {
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("JMXFaultDetectionHandler Properties : ");
+            buffer.append("invocation delay=").append(invocationDelay).append(", ");
+            buffer.append("retry count=").append(retryCount).append(", ");
+            buffer.append("retry timeout=").append(retryTimeout);
+            logger.trace(buffer.toString());
         }
     }
 
-    public void setConfiguration(Configuration config) throws ConfigurationException {
-        if (config == null)
-            throw new IllegalArgumentException("config is null");
-        this.config = config;
-
-        setInvocationDelay(Config.getLongEntry(config,
-                                               COMPONENT,
-                                               INVOCATION_DELAY_KEY,
-                                               DEFAULT_INVOCATION_DELAY,
-                                               0,
-                                               Long.MAX_VALUE));
-        setRetryCount(Config.getIntEntry(config,
-                                         COMPONENT,
-                                         RETRY_COUNT_KEY,
-                                         DEFAULT_RETRY_COUNT,
-                                         0,
-                                         Integer.MAX_VALUE));
-        setRetryTimeout(Config.getLongEntry(config,
-                                            COMPONENT,
-                                            RETRY_TIMEOUT_KEY,
-                                            DEFAULT_RETRY_TIMEOUT,
-                                            0,
-                                            Long.MAX_VALUE));
-    }
-
-    public void setInvocationDelay(long invocationDelay) {
-        this.invocationDelay = invocationDelay;
-    }
 
     class MBeanServerConnectionMonitor extends Thread implements ServiceMonitor {
         boolean keepAlive = true;

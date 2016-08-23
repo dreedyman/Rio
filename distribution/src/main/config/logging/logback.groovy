@@ -21,6 +21,8 @@ import ch.qos.logback.core.rolling.RollingFileAppender
 import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy
 
+import java.lang.management.ManagementFactory
+
 import static ch.qos.logback.classic.Level.*
 
 context = new LevelChangePropagator()
@@ -46,9 +48,19 @@ def checkEndsWithFileSeparator(String s) {
  * a) The output file is placed in the directory defined by the "rio.log.dir" System property
  * b) With a name based on the "org.rioproject.service" System property.
  */
-def getLogLocationAndName() {
+/*def getLogLocationAndName() {
     String logDir = checkEndsWithFileSeparator(System.getProperty("rio.log.dir"))
     return "$logDir${System.getProperty("org.rioproject.service")}"
+}*/
+def getLogLocationAndName() {
+    String logDir = checkEndsWithFileSeparator(System.getProperty("rio.log.dir"))
+    String name = ManagementFactory.getRuntimeMXBean().getName();
+    String pid = name;
+    int ndx = name.indexOf("@");
+    if(ndx>=1) {
+        pid = name.substring(0, ndx);
+    }
+    return "$logDir${System.getProperty("org.rioproject.service")}-$pid"
 }
 
 /*

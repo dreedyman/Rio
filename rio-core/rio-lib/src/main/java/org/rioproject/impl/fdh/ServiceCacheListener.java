@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.gnostic.service;
+package org.rioproject.impl.fdh;
 
-import org.rioproject.sla.RuleMap;
+import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 
 /**
- * Rules are added asynchronously, the allows a listener to be notified of a rule
- * being added or whether the rule failed to be added.
+ * @author Dennis Reedy
  */
-public interface RuleMapListener {
-    void added(RuleMap ruleMap);
-    void failed(RuleMap ruleMap);
+public abstract class ServiceCacheListener extends ServiceDiscoveryAdapter {
+
+    public abstract void terminate();
 }

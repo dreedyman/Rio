@@ -7,7 +7,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.2.3</version>
+        <version>5.3</version>
     </parent>
     <artifactId>distribution</artifactId>
     <name>Rio Distribution</name>
@@ -109,20 +109,6 @@
         <dependency>
             <groupId>${project.groupId}.monitor</groupId>
             <artifactId>monitor-service</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-         <dependency>
-            <groupId>${project.groupId}.gnostic</groupId>
-            <artifactId>gnostic-api</artifactId>
-            <version>${project.version}</version>
-             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}.gnostic</groupId>
-            <artifactId>gnostic-service</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
         </dependency>

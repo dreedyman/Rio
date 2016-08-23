@@ -36,6 +36,7 @@ import java.util.TimerTask;
  *
  * @author Dennis Reedy
  */
+@Deprecated
 public class HeartbeatClient {
     private static final long DEFAULT_HEARTBEAT_PERIOD = 1000 * 30;
     public static final String HEARTBEAT_SERVER_KEY = "heartbeatServer";

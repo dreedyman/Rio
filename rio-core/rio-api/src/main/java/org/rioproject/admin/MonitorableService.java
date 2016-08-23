@@ -38,7 +38,7 @@ public interface MonitorableService {
     /**
      * Low cost roundtrip check
      * 
-     * @throws RemoteException If an error occured during communication with the
+     * @throws RemoteException If an error occurred during communication with the
      * service
      */
     void ping() throws RemoteException;

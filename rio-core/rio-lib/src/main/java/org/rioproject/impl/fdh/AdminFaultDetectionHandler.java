@@ -15,15 +15,13 @@
  */
 package org.rioproject.impl.fdh;
 
-import com.sun.jini.config.Config;
 import net.jini.admin.Administrable;
-import net.jini.config.ConfigurationException;
-import net.jini.config.ConfigurationProvider;
 import org.rioproject.impl.util.ThrowableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.rmi.RemoteException;
+import java.util.Properties;
 
 /**
  * The AdminFaultDetectionHandler is used to monitor services that implement
@@ -144,72 +142,30 @@ import java.rmi.RemoteException;
  * @author Dennis Reedy
  */
 public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
-    static final int DEFAULT_INVOCATION_DELAY = 1000 * 60;
-    public static final String INVOCATION_DELAY_KEY = "invocationDelay";
-    private long invocationDelay = DEFAULT_INVOCATION_DELAY;
-    /** Component name, used for config and logger */
-    private static final String COMPONENT =  AdminFaultDetectionHandler.class.getName();
     /** A Logger */
-    static Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(AdminFaultDetectionHandler.class);
 
-    /**
-     * @see FaultDetectionHandler#setConfiguration
-     */
-    public void setConfiguration(String[] configArgs) {
-        if(configArgs == null)
-            throw new IllegalArgumentException("configArgs is null");
-        try {
-            this.configArgs = new String[configArgs.length];
-            System.arraycopy(configArgs, 0, this.configArgs, 0, configArgs.length);
-
-            this.config = ConfigurationProvider.getInstance(configArgs);
-
-            setInvocationDelay(Config.getLongEntry(config,
-                                                   COMPONENT,
-                                                   INVOCATION_DELAY_KEY,
-                                                   DEFAULT_INVOCATION_DELAY,
-                                                   0,
-                                                   Long.MAX_VALUE));
-            setRetryCount(Config.getIntEntry(config,
-                                             COMPONENT,
-                                             RETRY_COUNT_KEY,
-                                             DEFAULT_RETRY_COUNT,
-                                             0,
-                                             Integer.MAX_VALUE));
-            setRetryTimeout(Config.getLongEntry(config,
-                                                COMPONENT,
-                                                RETRY_TIMEOUT_KEY,
-                                                DEFAULT_RETRY_TIMEOUT,
-                                                0,
-                                                Long.MAX_VALUE));
-            
-            if(logger.isTraceEnabled()) {
-                StringBuilder buffer = new StringBuilder();
-                buffer.append("AdminFaultDetectionHandler Properties : ");
-                buffer.append("invocation delay=").append(invocationDelay).append(", ");
-                buffer.append("retry count=").append(retryCount).append(", ");
-                buffer.append("retry timeout=").append(retryTimeout);
-                logger.trace(buffer.toString());
-            }
-        } catch(ConfigurationException e) {
-            logger.warn("Setting Configuration", e);
+    @Override public void configure(Properties properties) {
+        super.configure(properties);
+        if(logger.isTraceEnabled()) {
+            StringBuilder buffer = new StringBuilder();
+            buffer.append("AdminFaultDetectionHandler Properties : ");
+            buffer.append("invocation delay=").append(invocationDelay).append(", ");
+            buffer.append("retry count=").append(retryCount).append(", ");
+            buffer.append("retry timeout=").append(retryTimeout);
+            logger.trace(buffer.toString());
         }
-    }
-
-    public void setInvocationDelay(long invocationDelay) {
-        this.invocationDelay = invocationDelay;
     }
 
     /**
      * Get the class which implements the ServiceMonitor
      */
-    protected ServiceMonitor getServiceMonitor() throws Exception {
+    protected ServiceMonitor getServiceMonitor() {
         ServiceMonitor monitor = null;
         if(proxy instanceof Administrable) {
-            ((Administrable)proxy).getAdmin();
             monitor = new ServiceAdminManager();
         }
-        return(monitor);
+        return monitor;
     }
         
     /**
@@ -251,7 +207,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
          */
         public boolean verify() {
             if(!keepAlive)
-                return (false);
+                return  false;
             boolean verified = false;
             try {
                 if(logger.isTraceEnabled())
@@ -271,7 +227,7 @@ public class AdminFaultDetectionHandler extends AbstractFaultDetectionHandler {
                         logger.debug("Unrecoverable Exception invoking getAdmin()", t);
                 }
             }
-            return (verified);
+            return  verified;
         }
 
         public void run() {

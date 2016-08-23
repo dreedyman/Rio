@@ -13,17 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.gnostic.service;
+package org.rioproject.impl.fdh;
+
+import net.jini.core.entry.Entry;
+import net.jini.lookup.entry.Name;
 
 /**
- * Constants related to Gnostic configuration.
- *
- * @author Jerome Bernard
  * @author Dennis Reedy
  */
-public interface Constants {
-    static final String PROVISION_EVENTS_STREAM = "provision-events-stream";
-    static final String CALCULABLES_STREAM = "calculables-stream";
-    static final String SCALING_RULE = "ScalingRuleHandler.drl";
-    static final String[] BUILT_IN_RULES = {SCALING_RULE};
+public final class NameHelper {
+    private NameHelper() {}
+
+    /**
+     * Get the first Name.name from the attribute collection set
+     *
+     * @param attrs Array of Entry objects
+     *
+     * @return The the first Name.name from the attribute collection set or
+     * null if not found
+     */
+    static String getName(Entry[] attrs) {
+        for (Entry attr : attrs) {
+            if (attr instanceof Name) {
+                return (((Name) attr).name);
+            }
+        }
+        return "unknown";
+    }
 }

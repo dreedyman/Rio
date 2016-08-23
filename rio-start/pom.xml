@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.2.3</version>
+        <version>5.3</version>
     </parent>
     <artifactId>rio-start</artifactId>
     <name>Module :: Rio service starters</name>

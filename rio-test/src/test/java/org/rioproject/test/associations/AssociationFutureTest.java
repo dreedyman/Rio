@@ -210,8 +210,7 @@ public class AssociationFutureTest {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    aMgr.getAssociationHandler(a).serviceAdded(
-                        new ServiceDiscoveryEvent(this, null, AssociationUtils.makeServiceItem(0)));
+                    aMgr.getAssociationHandler(a).serviceAdded(new ServiceDiscoveryEvent(this, null, AssociationUtils.makeServiceItem(0)));
                 }
             }).start();
             dummy = target.future.get();

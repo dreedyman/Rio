@@ -16,18 +16,19 @@
 package org.rioproject.impl.fdh;
 
 import net.jini.config.Configuration;
-import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
-import net.jini.lookup.entry.Name;
-import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.rioproject.impl.fdh.Options.*;
 
 /**
  * The AbstractFaultDetectionHandler provides a base class which can be extended 
@@ -50,17 +51,16 @@ import java.util.List;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public abstract class AbstractFaultDetectionHandler implements FaultDetectionHandler<ServiceID> {
-    public static final int DEFAULT_RETRY_COUNT = 3;
-    public static final long DEFAULT_RETRY_TIMEOUT = 1000;
-    public static final String RETRY_COUNT_KEY = "retryCount";
-    public static final String RETRY_TIMEOUT_KEY = "retryTimeout";
+    private static final int DEFAULT_RETRY_COUNT = 3;
+    private static final long DEFAULT_RETRY_TIMEOUT = 1000;
+    private static final long DEFAULT_INVOCATION_DELAY = TimeUnit.SECONDS.toMillis(1);
     /** Object that can be used to communicate to the service */
     protected Object proxy;
-    protected int retryCount = DEFAULT_RETRY_COUNT;
-    protected long retryTimeout = DEFAULT_RETRY_TIMEOUT;
+    long invocationDelay = DEFAULT_INVOCATION_DELAY;
+    int retryCount = DEFAULT_RETRY_COUNT;
+    long retryTimeout = DEFAULT_RETRY_TIMEOUT;
     /** Collection of FaultDetectionListeners */
-    private final List<FaultDetectionListener<ServiceID>> listeners =
-        new ArrayList<FaultDetectionListener<ServiceID>>();
+    private final Set<FaultDetectionListener<ServiceID>> listeners = new HashSet<>();
     /** ServiceID used to discover service instance */
     private ServiceID serviceID;    
     /** The LookupCache */
@@ -72,57 +72,73 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
     /** A Configuration object */
     protected Configuration config;    
     /** Listener for the LookupCache */
-    private FDHListener fdhListener;
-    /** Component name, used for config and logger */
-    private static final String COMPONENT = 
-        "org.rioproject.impl.fdh.AbstractFaultDetectionHandler";
+    private ServiceCacheListener fdhListener;
     /** Class which provides service monitoring */
-    protected ServiceMonitor serviceMonitor;
+    ServiceMonitor serviceMonitor;
     /** A Logger */
-    static Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static Logger logger = LoggerFactory.getLogger(AbstractFaultDetectionHandler.class);
+
+    @Override public void configure(Properties properties) {
+        if(properties.getProperty(INVOCATION_DELAY)!=null) {
+            invocationDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(properties.getProperty(INVOCATION_DELAY)));
+        }
+        if(properties.getProperty(RETRY_COUNT)!=null) {
+            retryCount = Integer.parseInt(properties.getProperty(RETRY_COUNT));
+        }
+        if(properties.getProperty(RETRY_TIMEOUT)!=null) {
+            retryTimeout = TimeUnit.SECONDS.toMillis(Long.parseLong(properties.getProperty(RETRY_TIMEOUT)));
+        }
+    }
     
     /**
      * @see FaultDetectionHandler#register
      */
     public void register(FaultDetectionListener<ServiceID> listener) {
-        if(listener == null)
-            throw new IllegalArgumentException("listener is null");
-        synchronized(listeners) {
-            if(!listeners.contains(listener))
+        if(listener!=null) {
+            synchronized (listeners) {
                 listeners.add(listener);
+            }
         }
+    }
+
+    public LookupCache getLookupCache() {
+        return lCache;
     }
 
     /**
      * @see FaultDetectionHandler#unregister
      */
     public void unregister(FaultDetectionListener<ServiceID> listener) {
-        if(listener == null)
-            throw new IllegalArgumentException("listener is null");
-        synchronized(listeners) {
-            listeners.remove(listener);
+        if(listener!=null) {
+            synchronized (listeners) {
+                listeners.remove(listener);
+            }
+        }
+    }
+
+    @Override public void setLookupCache(LookupCache lCache) {
+        this.lCache = lCache;
+        if(this.lCache != null) {
+            fdhListener = getServiceCacheListener();
+            try {
+                this.lCache.addListener(fdhListener);
+            } catch(IllegalStateException e) {
+                logger.error("Unable to set the FaultDetectionListener", e);
+            }
         }
     }
 
     /**
      * @see FaultDetectionHandler#monitor
      */
-    public void monitor(Object proxy, ServiceID id, LookupCache lCache) throws Exception {
+    public void monitor(Object proxy, ServiceID id) {
         if(proxy == null)
             throw new IllegalArgumentException("proxy is null");
         if(id == null)
             throw new IllegalArgumentException("id is null");
         this.proxy = proxy;
         this.serviceID = id;
-        if(lCache != null) {
-            this.lCache = lCache;
-            fdhListener = new FDHListener();
-            try {
-                this.lCache.addListener(fdhListener);
-            } catch(IllegalStateException e) {
-                throw new Exception("Unable to set the FaultDetectionListener", e);
-            }
-        }
+
         serviceMonitor = getServiceMonitor();        
     }
 
@@ -133,8 +149,24 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
      *
      * @throws Exception if the ServiceMonitor cannot be created
      */
-    protected abstract ServiceMonitor getServiceMonitor() throws Exception;
-    
+    protected abstract ServiceMonitor getServiceMonitor();
+
+    protected ServiceCacheListener getServiceCacheListener() {
+        return new FDHListener();
+    }
+
+    public long getInvocationDelay() {
+        return invocationDelay;
+    }
+
+    public long getRetryTimeout() {
+        return retryTimeout;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
     /**
      * @see FaultDetectionHandler#terminate
      */
@@ -169,6 +201,10 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
         }
     }
 
+    protected Set<FaultDetectionListener<ServiceID>> getListeners() {
+        return listeners;
+    }
+
     public void setRetryCount(int retryCount) {
         this.retryCount = retryCount;
     }
@@ -199,7 +235,7 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
     /**
      * Listen for service removal events for the service we're interested in
      */
-    class FDHListener extends ServiceDiscoveryAdapter {
+    private class FDHListener extends ServiceCacheListener {
         boolean reachable = false;
 
         /**
@@ -213,7 +249,7 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
                 return;
             }
             if(logger.isTraceEnabled())
-                logger.trace("FDH: service [{}], removed notification", getName(item.attributeSets));
+                logger.trace("FDH: service [{}], removed notification", NameHelper.getName(item.attributeSets));
 
             if(serviceMonitor != null) {
                 for(int i = 0; i < retryCount; i++) {                    
@@ -229,36 +265,24 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
                             Thread.currentThread().interrupt();
                             if(logger.isTraceEnabled())
                                 logger.trace("FDH: service [{}], proxy [{}] interrupted during retry timeout",
-                                             getName(item.attributeSets), proxy.getClass().getName());
+                                             NameHelper.getName(item.attributeSets), proxy.getClass().getName());
                         }
                     }
                 }
             }
             if(logger.isTraceEnabled())
                 logger.trace("FDH: service [{}], proxy [{}] is reachable [{}]",
-                             getName(item.attributeSets), proxy.getClass().getName(), reachable);
+                             NameHelper.getName(item.attributeSets), proxy.getClass().getName(), reachable);
             if(!reachable && !terminating) {
                 notifyListeners();
                 terminate();
             }
         }
+
+        @Override public void terminate() {
+        }
     }
         
     
-    /**
-     * Get the first Name.name from the attribute collection set
-     *
-     * @param attrs Array of Entry objects
-     *
-     * @return The the first Name.name from the attribute collection set or
-     * null if not found
-     */
-    protected String getName(Entry[] attrs) {
-        for (Entry attr : attrs) {
-            if (attr instanceof Name) {
-                return (((Name) attr).name);
-            }
-        }
-        return("unknown");
-    }
+
 }

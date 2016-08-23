@@ -2,8 +2,8 @@ package opstring
 
 deployment(name:'ServiceLogEvent Test II') {
 
-    artifact id:'service', 'org.rioproject.test.simple:simple-logging-service:2.0'
-    artifact id:'service-dl', 'org.rioproject.test.simple:simple-api:2.0'
+    artifact id:'service', 'org.rioproject.test.simple:simple-logging-service:LATEST'
+    artifact id:'service-dl', 'org.rioproject.test.simple:simple-api:LATEST'
 
     groups System.getProperty('org.rioproject.groups')
 

@@ -15,6 +15,8 @@
  */
 package org.rioproject.test.idle;
 
+import org.rioproject.annotation.SetServiceBeanContext;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,8 @@ import java.util.concurrent.CountDownLatch;
  */
 public class IdleImpl implements Idle {
     private final CountDownLatch countDown;
-    Logger logger = LoggerFactory.getLogger(IdleImpl.class);
+    private Long instanceID;
+    private Logger logger = LoggerFactory.getLogger(IdleImpl.class);
 
     public IdleImpl() {
         Random random = new Random();
@@ -35,13 +38,18 @@ public class IdleImpl implements Idle {
         while(value==0) {
             value = random.nextInt(10);
         }
-        logger.info("IdleImpl has count set to {}", value);
         countDown = new CountDownLatch(value);
     }
 
+    @SetServiceBeanContext
+    public void set(ServiceBeanContext context) {
+        instanceID = context.getServiceBeanConfig().getInstanceID();
+    }
+
     public boolean isActive() throws IOException {
+        long was = countDown.getCount();
         countDown.countDown();
-        logger.info("IdleImpl has count: {}", countDown.getCount());
+        logger.info("IdleImpl [{}] was {}, now count: {}", instanceID, was, countDown.getCount());
         return countDown.getCount()>0;
     }
 }

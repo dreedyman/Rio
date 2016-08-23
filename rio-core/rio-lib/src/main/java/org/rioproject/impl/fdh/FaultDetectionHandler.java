@@ -17,6 +17,8 @@ package org.rioproject.impl.fdh;
 
 import net.jini.lookup.LookupCache;
 
+import java.util.Properties;
+
 /**
  * The FaultDetectionHandler is loaded by client entities do determine whether a
  * service is reachable. Developers may choose to implement custom fault
@@ -26,14 +28,13 @@ import net.jini.lookup.LookupCache;
  * @author Dennis Reedy
  */
 public interface FaultDetectionHandler<T> {
+
     /**
-     * Set configuration attributes for the FaultDetectionHandler.
-     * 
-     * @param configArgs Configuration attributes a FaultDetectionHandler will
-     * use to monitor the service. Values are specific to a concrete instance of
-     * the FaultDetectionHandler
+     * Configure the FaultDetectionHandler
+     *
+     * @param properties Properties to configure the FaultDetectionHandler
      */
-    void setConfiguration(String[] configArgs);
+    void configure(Properties properties);
 
     /**
      * Register a FaultDetectionListener
@@ -50,17 +51,21 @@ public interface FaultDetectionHandler<T> {
     void unregister(FaultDetectionListener<T> listener);
 
     /**
+     * Set the LookupCache
+     *
+     * @param lCache A LookupCache instance to be used to be notified of service
+     * transition events from a Jini Lookup Service
+     */
+    void setLookupCache(LookupCache lCache);
+
+    /**
      * Begin monitoring the service
      * 
      * @param service The service that the FaultDetectionHandler will monitor
      * @param serviceID An Object representing a unique service identifier for
      * the service being monitored.
-     * @param lCache A LookupCache instance to be used to be notified of service
-     * transition events from a Jini Lookup Service
-     * @throws Exception If there are abnormal conditions encountered
      */
-    void monitor(Object service, T serviceID, LookupCache lCache)
-    throws Exception;
+    void monitor(Object service, T serviceID);
 
     /**
      * Terminate the FaultDetectionHandler

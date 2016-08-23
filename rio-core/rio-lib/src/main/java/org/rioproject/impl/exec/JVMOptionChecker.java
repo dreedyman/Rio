@@ -38,6 +38,8 @@ public class JVMOptionChecker {
          * across this, looking for the next option that begins with a - */
         boolean dealWithOnOutOfMemoryError = false;
         for(String s : runtime.getInputArguments()) {
+            if(s.contains("jarjar.org.gradle.process.internal.child.BootstrapSecurityManager"))
+                continue;
             if(s.startsWith("-XX:OnOutOfMemoryError")) {
                 dealWithOnOutOfMemoryError = true;
             } else {

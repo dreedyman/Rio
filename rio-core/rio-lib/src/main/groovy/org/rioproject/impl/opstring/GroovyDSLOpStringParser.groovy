@@ -807,10 +807,12 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 helper.inFlightRuleServiceDefinition.addWatches(helper.toArray(watches))
             }
 
-            emc.faultDetectionHandler = { String fdh ->
-                currentService.setFaultDetectionHandlerBundle(new ClassBundle(fdh))
-                println "FIX: faultDetectionHandler"
-                //builder.FaultDetectionHandler(ClassName: fdh)
+            emc.faultDetectionHandler = { Map attributes ->
+                def props = new Properties()
+                attributes.each { k, v ->
+                    props.setProperty(k as String, v as String)
+                }
+                currentService.serviceBeanConfig.setFDHProperties(props)
             }
         })
 

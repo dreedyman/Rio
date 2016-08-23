@@ -689,7 +689,7 @@ class TestManager {
         String cmdLine = cmdLineBuilder.toString();
         log.info "Logging for $service will be sent to ${logDir}"
         log.info "Starting ${service}, using starter config [${starter}]"
-        log.debug "Exec command line: ${cmdLine}"
+        log.info "Exec command line: ${cmdLine}"
         Process process = Runtime.runtime.exec(cmdLine)
         processes.add(process)
     }

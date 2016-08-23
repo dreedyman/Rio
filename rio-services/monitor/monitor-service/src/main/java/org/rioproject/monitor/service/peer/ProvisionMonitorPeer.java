@@ -15,7 +15,6 @@
  */
 package org.rioproject.monitor.service.peer;
 
-import net.jini.admin.Administrable;
 import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
@@ -27,7 +26,6 @@ import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryManager;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
-import org.rioproject.admin.ServiceBeanAdmin;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceProvisionListener;
@@ -37,8 +35,8 @@ import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 import org.rioproject.impl.event.BasicEventConsumer;
 import org.rioproject.impl.fdh.FaultDetectionHandler;
-import org.rioproject.impl.fdh.FaultDetectionHandlerFactory;
 import org.rioproject.impl.fdh.FaultDetectionListener;
+import org.rioproject.impl.fdh.PooledFaultDetectionHandler;
 import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
@@ -46,7 +44,10 @@ import org.rioproject.monitor.service.*;
 import org.rioproject.monitor.service.channel.ServiceChannel;
 import org.rioproject.monitor.service.channel.ServiceChannelEvent;
 import org.rioproject.monitor.service.tasks.PeerNotificationTask;
-import org.rioproject.opstring.*;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.OperationalStringException;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +62,8 @@ import java.util.*;
 public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements RemoteServiceEventListener,
                                                                              FaultDetectionListener<ServiceID>,
                                                                              Runnable {
-    static Logger peerLogger = LoggerFactory.getLogger(ProvisionMonitorPeer.class.getName());
-    static final String CONFIG_COMPONENT = "org.rioproject.monitor";
+    private static Logger peerLogger = LoggerFactory.getLogger(ProvisionMonitorPeer.class.getName());
+    private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** The PeerInfo object for this ProvisionMonitor */
     private ProvisionMonitor.PeerInfo myPeerInfo;
     /**
@@ -72,8 +73,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     private BasicEventConsumer eventConsumer;
     /** Table of Peer ProvisionMonitor instances to OpStringManagers which
      * are backups for the peer */
-    private final Map<ProvisionMonitor, List<OpStringManager>> opStringTable =
-        new HashMap<ProvisionMonitor, List<OpStringManager>>();
+    private final Map<ProvisionMonitor, List<OpStringManager>> opStringTable = new HashMap<ProvisionMonitor, List<OpStringManager>>();
     /** The ProvisionMonitor instances this ProvisionMonitor is a backup for */
     private final List<ProvisionMonitor> backupList = new ArrayList<ProvisionMonitor>();
     /** The ProvisionMonitor that is our backup */
@@ -85,7 +85,8 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
     /**
      * Table of service IDs to FaultDetectionHandler instances, one for each service
      */
-    private final Hashtable<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
+    //private final Hashtable<ServiceID, FaultDetectionHandler> fdhTable = new Hashtable<ServiceID, FaultDetectionHandler>();
+    private final FaultDetectionHandler<ServiceID> faultDetectionHandler = new PooledFaultDetectionHandler();
     /** ServiceTemplate for ProvisionMonitor discovery */
     private ServiceTemplate template;
     /** DiscoveryManagement instance */
@@ -164,11 +165,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
      * Terminate the ProvisionMonitorPeer, cleaning up listeners, etc...
      */
     public void terminate() {
-        for(Enumeration<FaultDetectionHandler> en = fdhTable.elements();
-            en.hasMoreElements();) {
-            FaultDetectionHandler fdh = en.nextElement();
-            fdh.terminate();
-        }
+        faultDetectionHandler.terminate();
         eventConsumer.deregister(this);
         eventConsumer.terminate();
         if(sdm != null)
@@ -352,7 +349,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                 }
             }
         }
-        setFaultDetectionHandler(item.service, item.serviceID);
+        faultDetectionHandler.monitor(item.service, item.serviceID);
     }
 
     /**
@@ -434,8 +431,6 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
         } else {
             peerLogger.debug("No backup OpStringManagers for removed peer");
         }
-        /* Remove the FaultDetectionHandler from the table */
-        fdhTable.remove(serviceID);
     }
 
     /**
@@ -773,8 +768,7 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
                     Date redeployDate = (Date)parms[0];
                     boolean clean = (Boolean) parms[1];
                     boolean sticky = (Boolean) parms[2];
-                    ServiceProvisionListener listener =
-                        (ServiceProvisionListener)parms[3];
+                    ServiceProvisionListener listener = (ServiceProvisionListener)parms[3];
 
                     long delay = redeployDate.getTime() - System.currentTimeMillis();
                     if(delay <= 0) {
@@ -806,34 +800,13 @@ public class ProvisionMonitorPeer extends ServiceDiscoveryAdapter implements Rem
             else
                 sdm = new ServiceDiscoveryManager(dm, new LeaseRenewalManager(config), config);
             lCache = sdm.createLookupCache(template, null, this);
+
+            faultDetectionHandler.setLookupCache(lCache);
+            faultDetectionHandler.register(this);
             if(!assignBackup())
                 peerLogger.debug("ProvisionMonitorPeer: No backup");
         } catch(Exception e) {
             peerLogger.warn("ProvisionMonitor discovery", e);
-        }
-    }
-
-    /**
-     * Set the FaultDetectionHandler for a newly discovered ProvisionMonitor
-     *
-     * @param service The ProvisionMonitor's proxy
-     * @param serviceID The serviceID of the ProvisionMonitor
-     */
-    void setFaultDetectionHandler(final Object service, final ServiceID serviceID) {
-        try {
-            if(serviceID == null) {
-                peerLogger.info("No ServiceID for newly discovered ProvisionMonitor, cant setup FDH");
-                return;
-            }
-            ServiceBeanAdmin sbAdmin = (ServiceBeanAdmin)((Administrable)service).getAdmin();
-            ClassBundle fdhBundle = sbAdmin.getServiceElement().getFaultDetectionHandlerBundle();
-            FaultDetectionHandler<ServiceID> fdh =
-                FaultDetectionHandlerFactory.getFaultDetectionHandler(fdhBundle, service.getClass().getClassLoader());
-            fdh.register(this);
-            fdh.monitor(service, serviceID, lCache);
-            fdhTable.put(serviceID, fdh);
-        } catch(Exception e) {
-            peerLogger.warn("Setting FaultDetectionHandler for a newly discovered ProvisionMonitor", e);
         }
     }
 
