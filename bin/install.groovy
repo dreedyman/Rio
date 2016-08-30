@@ -1,8 +1,4 @@
 #!/usr/bin/env groovy
-
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-
 /*
  * Copyright to the original author or authors.
  *
@@ -103,14 +99,13 @@ File logDir = new File(rioHome+File.separator+"logs")
 if(!logDir.exists())
     logDir.mkdirs()
 File installerLog = new File(logDir, "install.log")
-if(!installerLog.exists())
+if(!installerLog.exists()) {
     installerLog.createNewFile()
-else
+} else {
+    println "Skip install, install.log exists"
     return
-
-Date date = new Date(System.currentTimeMillis())
-DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-println "INFO  ${formatter.format(date)} check local repository for artifacts"
+}
+println "Install Rio artifacts locally"
 
 StringBuffer out = new StringBuffer()
 long installDate = System.currentTimeMillis()

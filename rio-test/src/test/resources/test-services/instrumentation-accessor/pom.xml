@@ -21,7 +21,7 @@
       </pluginRepositories>
 
     <properties>
-        <rio.version>5.3</rio.version>
+        <rio.version>5.4</rio.version>
     </properties>
 
     <build>
