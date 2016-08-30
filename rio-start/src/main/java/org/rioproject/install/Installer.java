@@ -82,7 +82,6 @@ public final class Installer {
             formatAndAddToMap("org.rioproject.cybernode:cybernode-proxy", "cybernode-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject.cybernode:cybernode-ui", "cybernode-ui", rioArtifactJars);
             formatAndAddToMap("org.rioproject.monitor:monitor-api", "monitor-api", rioArtifactJars);
-            formatAndAddToMap("org.rioproject.gnostic:gnostic-api", "gnostic-api", rioArtifactJars);
             formatAndAddToMap("org.rioproject.monitor:monitor-proxy", "monitor-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject:rio-api", "rio-api", rioArtifactJars);
             formatAndAddToMap("org.rioproject:rio-proxy", "rio-proxy", rioArtifactJars);
@@ -96,12 +95,6 @@ public final class Installer {
                 Artifact a = entry.getKey();
                 install(a, null, new File(libDlDir, entry.getValue()), aetherServiceInstance);
             }
-
-            /* Install the Gnostic service and the Gnostic pom */
-            Artifact gnosticParent = new Artifact("org.rioproject:gnostic:" + RioVersion.VERSION);
-            install(gnosticParent, FileHelper.find(pomDir, "rio-gnostic"), null, aetherServiceInstance);
-            Artifact gnosticService = new Artifact("org.rioproject.gnostic:gnostic-service:" + RioVersion.VERSION);
-            install(gnosticService, null, FileHelper.find(libDir, "gnostic-service"), aetherServiceInstance);
 
             File jskDLJar = FileHelper.find(libDlDir, "jsk-dl");
             File reggieDLJar = FileHelper.find(libDlDir, "reggie-dl");
