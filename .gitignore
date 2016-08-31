@@ -23,6 +23,7 @@ target
 *.iws
 #netbeans
 nbactions.xml
+dependency-reduced-pom.xml
 
 # OS generated files #
 ######################
