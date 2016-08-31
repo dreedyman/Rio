@@ -68,6 +68,8 @@ public class ITResolverTest {
                     sb.append(",");
                 sb.append(s);
             }
+            System.out.println("Have:   "+jskPlatformJar.getAbsolutePath());
+            System.out.println("Expect: "+sb.toString());
             Assert.assertEquals(jskPlatformJar.getAbsolutePath(), sb.toString());
         } finally {
             Assert.assertNull(thrown);
