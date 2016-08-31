@@ -105,7 +105,7 @@ if(!installerLog.exists()) {
     println "Skip install, install.log exists"
     return
 }
-println "Install Rio artifacts locally"
+println "Install Rio artifacts locally..."
 
 StringBuffer out = new StringBuffer()
 long installDate = System.currentTimeMillis()
@@ -125,4 +125,4 @@ if(out.length()>0) {
     installerLog.append(builder.toString())
     installerLog.append(out.toString())
 }
-
+println "Complete"
