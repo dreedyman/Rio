@@ -50,40 +50,30 @@ public class ITResolverTest {
     @Test
     public void testJskLibResolution() throws ResolverException {
         File testRepo;
-        Throwable thrown = null;
-        try {
-            Utils.writeLocalM2RepoSettings();
-            Resolver r = new AetherResolver();
-            testRepo = Repository.getLocalRepository();
-            if(testRepo.exists())
-                FileUtils.remove(testRepo);
-            String[] classPath = r.getClassPathFor("net.jini:jsk-lib:2.1");
-            Assert.assertTrue("classPath for net.jini:jsk-lib:2.1 expected to be > 1, actual="+classPath.length,
-                              classPath.length>0);
-            File jskPlatformJar = new File(testRepo, "net/jini/jsk-lib/2.1/jsk-lib-2.1.jar");
-            Assert.assertTrue(jskPlatformJar.exists());
-        } finally {
-            Assert.assertNull(thrown);
-        }
+        Utils.writeLocalM2RepoSettings();
+        Resolver r = new AetherResolver();
+        testRepo = Repository.getLocalRepository();
+        if(testRepo.exists())
+            FileUtils.remove(testRepo);
+        String[] classPath = r.getClassPathFor("net.jini:jsk-lib:2.1");
+        Assert.assertTrue("classPath for net.jini:jsk-lib:2.1 expected to be > 1, actual="+classPath.length,
+                          classPath.length>0);
+        File jskPlatformJar = new File(testRepo, "net/jini/jsk-lib/2.1/jsk-lib-2.1.jar");
+        Assert.assertTrue(jskPlatformJar.exists());
     }
 
     @Test
     public void testGroovyResolution() throws ResolverException {
         File testRepo;
-        Throwable thrown = null;
-        try {
-            Utils.writeLocalM2RepoSettings();
-            testRepo = Repository.getLocalRepository();
-            if(testRepo.exists())
-                FileUtils.remove(testRepo);
-            Resolver r = new AetherResolver();
-            URL loc = r.getLocation("org.codehaus.groovy:groovy-all:1.6.2", null);
-            Assert.assertNotNull(loc);
-            File groovyJar = new File(testRepo, "org/codehaus/groovy/groovy-all/1.6.2/groovy-all-1.6.2.jar");
-            Assert.assertTrue(groovyJar.exists());
-        } finally {
-            Assert.assertNull(thrown);
-        }
+        Utils.writeLocalM2RepoSettings();
+        testRepo = Repository.getLocalRepository();
+        if(testRepo.exists())
+            FileUtils.remove(testRepo);
+        Resolver r = new AetherResolver();
+        URL loc = r.getLocation("org.codehaus.groovy:groovy-all:1.6.2", null);
+        Assert.assertNotNull(loc);
+        File groovyJar = new File(testRepo, "org/codehaus/groovy/groovy-all/1.6.2/groovy-all-1.6.2.jar");
+        Assert.assertTrue(groovyJar.exists());
     }
 
     @Test
