@@ -28,6 +28,8 @@ import javax.management.ObjectName;
 import javax.management.remote.*;
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 /**
  * Provides JMX connection utilities.
@@ -73,6 +75,12 @@ public class JMXConnectionUtil {
         System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
         if(logger.isInfoEnabled())
             logger.info("JMXServiceURL={}", jmxServiceURL);
+        Registry registry = LocateRegistry.getRegistry(registryPort);
+        for(String s : registry.list()) {
+            if(s.equals("jmxrmi")) {
+                registry.unbind(s);
+            }
+        }
         JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null, mbs);
         jmxConn.start();
         if(logger.isDebugEnabled())
