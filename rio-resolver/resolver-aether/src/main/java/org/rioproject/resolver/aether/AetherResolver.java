@@ -189,7 +189,9 @@ public class AetherResolver implements Resolver, SettableResolver {
                 transformRemoteRepository(repositories);
             location = service.getLocation(artifact, artifactType, remoteRepositories);
         } catch (ArtifactResolutionException e) {
-            throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
+            location = getURLFromFlatDirs(artifact, artifactType);
+            if(location==null)
+                throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
         } catch (MalformedURLException e) {
             throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
