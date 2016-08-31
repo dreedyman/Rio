@@ -62,15 +62,6 @@ public class ITResolverTest {
                               classPath.length>0);
             File jskPlatformJar = new File(testRepo, "net/jini/jsk-lib/2.1/jsk-lib-2.1.jar");
             Assert.assertTrue(jskPlatformJar.exists());
-            StringBuilder sb = new StringBuilder();
-            for(String s : classPath) {
-                if(sb.length()>0)
-                    sb.append(",");
-                sb.append(s);
-            }
-            System.out.println("Have:   "+jskPlatformJar.getAbsolutePath());
-            System.out.println("Expect: "+sb.toString());
-            Assert.assertEquals(jskPlatformJar.getAbsolutePath(), sb.toString());
         } finally {
             Assert.assertNull(thrown);
         }
