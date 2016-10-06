@@ -58,7 +58,7 @@ public class IdleServiceManager {
     }
 
     public void addService(final ServiceActivityProvider service) {
-        activityMap.put(service, 0l);
+        activityMap.put(service, 0L);
     }
 
     public void removeService(final ServiceActivityProvider service) {
@@ -69,7 +69,7 @@ public class IdleServiceManager {
         scheduledExecutorService.shutdownNow();
     }
 
-    class IdleChecker implements Runnable {
+    private class IdleChecker implements Runnable {
         final long delay;
 
         IdleChecker(long delay) {
@@ -93,7 +93,7 @@ public class IdleServiceManager {
                                 activityMap.put(entry.getKey(), value);
                             }
                         } else {
-                            activityMap.put(entry.getKey(), 0l);
+                            activityMap.put(entry.getKey(), 0L);
                         }
                     } catch (IOException e) {
                         logger.warn("Unable to get activity from service", e);
@@ -103,11 +103,12 @@ public class IdleServiceManager {
                     }
                 }
 
-                if (idleServices.size() == serviceElement.getPlanned()) {
+                int count = Math.max(serviceElement.getPlanned(), activityMap.size());
+                if (idleServices.size() == count) {
                     logger.info("Service [{}] has {} / {} idle instances. Notify for undeploy.",
                                 LoggingUtil.getLoggingName(serviceElement),
                                 idleServices.size(),
-                                serviceElement.getPlanned());
+                                count);
                     ServiceChannel.getInstance().broadcast(new ServiceChannelEvent(this,
                                                                                    serviceElement,
                                                                                    ServiceChannelEvent.Type.IDLE));
