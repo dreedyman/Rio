@@ -35,8 +35,8 @@ import java.util.List;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class PlatformLoader {
-    static final String COMPONENT = "org.rioproject.boot";
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final String COMPONENT = "org.rioproject.boot";
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Parse the platform
@@ -129,8 +129,8 @@ public class PlatformLoader {
         if(System.getProperty("StaticCybernode")!=null)
             return new PlatformCapabilityConfig[0];
         if(rioHome==null) {
-            throw new IllegalArgumentException("RIO_HOME cannot be null. You must set it as a system property " +
-                                               "or it must be set in your environment");
+            logger.warn("rio.home is not set, returning empty platform configuration");
+            return new PlatformCapabilityConfig[0];
         }
         File rioHomeDir = new File(rioHome);
         if(!rioHomeDir.exists())

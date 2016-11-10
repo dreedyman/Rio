@@ -97,7 +97,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
             if(serviceConsumer!=null) {
                 serviceConsumer.updateMonitors();
             }
-                }
+        }
 
         try {
             double[] range = new double[]{thresholdValues.getCurrentLowThreshold(),

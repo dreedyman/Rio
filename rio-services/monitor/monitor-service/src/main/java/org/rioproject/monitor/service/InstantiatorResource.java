@@ -680,7 +680,7 @@ public class InstantiatorResource {
          */
         if(sElem.getProvisionType() == ServiceElement.ProvisionType.FIXED) {
             int planned = sElem.getPlanned();
-            int actual = getServiceElementCount(sElem);
+            int actual = getServiceElementCount(sElem)+getInProcessCounter(sElem);
             int numAllowed = planned-actual;
             if(numAllowed <=0) {
                 String failureReason =

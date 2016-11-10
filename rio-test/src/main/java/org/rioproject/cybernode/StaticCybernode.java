@@ -23,21 +23,20 @@ import org.rioproject.cybernode.service.ServiceBeanContainerImpl;
 import org.rioproject.cybernode.service.ServiceBeanDelegateImpl;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
+import org.rioproject.impl.client.LookupCachePool;
 import org.rioproject.impl.opstring.OAR;
 import org.rioproject.impl.opstring.OpStringLoader;
+import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.impl.util.StringUtil;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.impl.client.LookupCachePool;
 import org.rioproject.start.LogManagementHelper;
-import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
-import org.rioproject.impl.util.StringUtil;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.rmi.RMISecurityManager;
 import java.security.*;
 import java.util.*;
 
@@ -83,7 +82,7 @@ public class StaticCybernode {
                 }
 
             });
-        System.setSecurityManager(new RMISecurityManager());
+        System.setSecurityManager(new SecurityManager());
         System.setProperty("StaticCybernode", "true");
     }
 

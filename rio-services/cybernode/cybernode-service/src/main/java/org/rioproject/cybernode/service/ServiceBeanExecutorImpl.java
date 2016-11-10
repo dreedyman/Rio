@@ -122,31 +122,27 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         Configuration config = new GroovyConfig(configArgs, cCL);
         logger.debug("Loaded config");
         container = new ServiceBeanContainerImpl(config);
-        computeResource = new ComputeResource(config);
 
         /* Setup persistent provisioning attributes */
         boolean provisionEnabled = (Boolean) config.getEntry("org.rioproject.cybernode",
                                                              "provisionEnabled",
                                                              Boolean.class,
                                                              true);
-        computeResource.setPersistentProvisioning(provisionEnabled);
-        String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
-        computeResource.setPersistentProvisioningRoot(provisionRoot);
-
-        MeasurableCapability[] mCaps = loadMeasurables(config);
-        for(MeasurableCapability mCap : mCaps) {
-            computeResource.addMeasurableCapability(mCap);
-            mCap.start();
-        }
-
-        container.setComputeResource(computeResource);
-        container.addListener(this);
 
         context = ServiceBeanActivation.getServiceBeanContext(CONFIG_COMPONENT,
                                                               "Cybernode",
                                                               configArgs,
                                                               config,
                                                               getClass().getClassLoader());
+
+        computeResource = context.getComputeResourceManager().getComputeResource();
+        computeResource.setPersistentProvisioning(provisionEnabled);
+        String provisionRoot = Environment.setupProvisionRoot(provisionEnabled, config);
+        computeResource.setPersistentProvisioningRoot(provisionRoot);
+        computeResource.boot();
+        container.setComputeResource(computeResource);
+        container.addListener(this);
+
         registry = LocateRegistry.getRegistry(cybernodeRegistryPort);
 
         exporter = ExporterConfig.getExporter(config, "org.rioproject.cybernode", "exporter");

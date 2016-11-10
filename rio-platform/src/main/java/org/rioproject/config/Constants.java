@@ -21,70 +21,70 @@ package org.rioproject.config;
  * @author Dennis Reedy
  */
 public interface Constants {
-    static final String BASE_COMPONENT = "org.rioproject";
+    String BASE_COMPONENT = "org.rioproject";
     @Deprecated
-    static final String CODESERVER = BASE_COMPONENT+".webster";
+    String CODESERVER = BASE_COMPONENT+".webster";
     /**
      * System property set indicating the address and port of the Webster
      * instance created by this utility, in the form of :
      * <pre>http://address:port</pre>
      */
-    static final String WEBSTER = BASE_COMPONENT+".webster";
+    String WEBSTER = BASE_COMPONENT+".webster";
     /**
      * System property set indicating the roots that webster is serving
      */
-    static final String WEBSTER_ROOTS = WEBSTER+".roots";
+    String WEBSTER_ROOTS = WEBSTER+".roots";
     /**
      * System property set when an RMI Registry is started
      */
-    static final String REGISTRY_PORT = BASE_COMPONENT+".registryPort";
+    String REGISTRY_PORT = BASE_COMPONENT+".registryPort";
     /**
      * System property for the cybernode's process ID
      */
-    static final String PROCESS_ID = BASE_COMPONENT+".processID";
+    String PROCESS_ID = BASE_COMPONENT+".processID";
     /**
      * System property set to indicate to use a specific MBeanServer. If not
      * set then the Platform MBeanServer is to be used
      */
-    static final String JMX_MBEANSERVER = BASE_COMPONENT+".jmxMBeanServer";
+    String JMX_MBEANSERVER = BASE_COMPONENT+".jmxMBeanServer";
     /**
      * System property set when the JMX Platform MBeanServer is set to the
      * RMI Registry
      */
-    static final String JMX_SERVICE_URL = BASE_COMPONENT+".jmxServiceURL";
+    String JMX_SERVICE_URL = BASE_COMPONENT+".jmxServiceURL";
     /**
      * System property set when to indicate a comma separated list of group
      * names to use
      */
-    static final String GROUPS_PROPERTY_NAME = BASE_COMPONENT+".groups";
+    String GROUPS_PROPERTY_NAME = BASE_COMPONENT+".groups";
     /**
      * System property set when to indicate a comma separated list of lookup
      * locators
      */
-    static final String LOCATOR_PROPERTY_NAME = BASE_COMPONENT+".locators";
+    String LOCATOR_PROPERTY_NAME = BASE_COMPONENT+".locators";
     /**
      * System property set when to indicate a comma separated list of lookup
      * locators
      */
-    static final String ENV_PROPERTY_NAME = BASE_COMPONENT+".env";
+    String ENV_PROPERTY_NAME = BASE_COMPONENT+".env";
     /**
      * System property to set and check to determine address to bind to or
      * address bound to
      */
-    static final String RMI_HOST_ADDRESS = "java.rmi.server.hostname";
+    String RMI_HOST_ADDRESS = "java.rmi.server.hostname";
     /**
      * System property name for ServiceBeanExecutor name binding
      */
-    static final String SERVICE_BEAN_EXEC_NAME = BASE_COMPONENT+".serviceBeanExec";
+    String SERVICE_BEAN_EXEC_NAME = BASE_COMPONENT+".serviceBeanExec";
     /**
      * Property to indicate that a service bean is being started
      */
-    static final String STARTING = BASE_COMPONENT+".starting-bean";
+    String STARTING = BASE_COMPONENT+".starting-bean";
     /**
      * Property to indicate the directory the test framework has been started
      * in.
      */
-    static final String RIO_TEST_EXEC_DIR = BASE_COMPONENT+".test.exec.dir";
+    String RIO_TEST_EXEC_DIR = BASE_COMPONENT+".test.exec.dir";
     /**
      * Property to indicate that the Resolver should not include Rio artifacts
      * in the resolution of a classpath. If this property is set to &quot;false&quot;,
@@ -92,12 +92,12 @@ public interface Constants {
      * generated classpaths.
      */
     @SuppressWarnings("unused")
-    static final String RESOLVER_PRUNE_PLATFORM = BASE_COMPONENT+".resolver.prune.platform";
+    String RESOLVER_PRUNE_PLATFORM = BASE_COMPONENT+".resolver.prune.platform";
     /**
      * Property to indicate the jar(s) to use when creating the class loader to load an implementation
      * of the {@link org.rioproject.resolver.Resolver}
      */
-    static final String RESOLVER_JAR = BASE_COMPONENT+".resolver.jar";
+    String RESOLVER_JAR = BASE_COMPONENT+".resolver.jar";
     /**
      * Property to indicate that Rio should limit the creation of utilities that
      * create sockets (like {@link net.jini.export.Exporter}) to limit socket ports
@@ -105,13 +105,13 @@ public interface Constants {
      * string, <tt>startRange-endRange</tt>, where <tt>startRange</tt> and <tt>endRange</tt>
      * are inclusive
      */
-    static final String PORT_RANGE = BASE_COMPONENT+".portRange";
+    String PORT_RANGE = BASE_COMPONENT+".portRange";
     /**
      * Default name of the OperationalString name for core-services
      */
-    static final String CORE_OPSTRING="System-Core";
+    String CORE_OPSTRING="System-Core";
     /**
      * Property to use for the starter configuration for forking a service
      */
-    static final String START_SERVICE_BEAN_EXEC_CONFIG = BASE_COMPONENT+".start-service-bean-exec";
+    String START_SERVICE_BEAN_EXEC_CONFIG = BASE_COMPONENT+".start-service-bean-exec";
 }

@@ -206,8 +206,8 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 ServiceProvisionContext spc = getServiceProvisionContext();
                 long nextID = (changeInstanceID ?
                                request.getInstanceIDMgr().getNextInstanceID() : currentID);
-                if(changeInstanceID)
-                    logger.warn("[{}] Changing instanceID", LoggingUtil.getLoggingName(request));
+                if(changeInstanceID && logger.isTraceEnabled())
+                    logger.trace("[{}] Changing instanceID", LoggingUtil.getLoggingName(request));
                 request.setServiceElement(ServiceElementUtil.prepareInstanceID(request.getServiceElement(),
                                                                                true,
                                                                                nextID));
@@ -217,7 +217,10 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 spc.getInProcess().add(request.getServiceElement());
                 spc.setProvisionRequest(request);
                 spc.setServiceResource(resource);
+                InstantiatorResource ir = (InstantiatorResource) resource.getResource();
+                ir.incrementProvisionCounter(request.getServiceElement());
                 spc.getProvisioningPool().execute(new ProvisionTask(spc, null));
+
             }
             logger.debug(b.toString());
         }
@@ -236,12 +239,12 @@ public class FixedServiceManager extends PendingServiceElementManager {
             return 0;
 
         int planned = request.getServiceElement().getPlanned();
-        int actual = ir.getServiceElementCount(request.getServiceElement());
+        int actual = ir.getServiceElementCount(request.getServiceElement())+ir.getInProcessCounter(request.getServiceElement());
         int numAllowed = planned - actual;
         if (request.getServiceElement().getMaxPerMachine() != -1 &&
             request.getServiceElement().getMaxPerMachine() < numAllowed)
             numAllowed = request.getServiceElement().getMaxPerMachine();
-        logger.trace("Cybernode {} has {}, can accommodate {} of {}",
+        logger.info("Cybernode {} has {}, can accommodate {} of {}",
                      ir.getName(), actual, numAllowed, LoggingUtil.getLoggingName(request));
         return (numAllowed);
     }

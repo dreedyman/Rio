@@ -181,13 +181,15 @@ public class ProvisionTask implements Runnable {
                 for (int i = 0; i < numProvisionRetries; i++) {
                     if (logger.isDebugEnabled()) {
                         String retry = (i == 0 ? "" : ", retry (" + i + ") ");
-                        logger.debug("Allocating {} [{}] ...", retry, LoggingUtil.getLoggingName(request));
+                        logger.debug("Allocating {} [{}] to {}...",
+                                     retry, LoggingUtil.getLoggingName(request), ir.getInstantiator().getName());
                     }
                     DeployedService deployedService = ir.getInstantiator().instantiate(event);
                     if (deployedService != null) {
                         jsbInstance = deployedService.getServiceBeanInstance();
                         ir.addDeployedService(deployedService);
-                        logger.info("Allocated [{}]", LoggingUtil.getLoggingName(request));
+                        logger.info("Allocated [{}] on {}",
+                                    LoggingUtil.getLoggingName(request), ir.getInstantiator().getName());
                         if (logger.isTraceEnabled()) {
                             Object service = jsbInstance.getService();
                             Class serviceClass = service.getClass();

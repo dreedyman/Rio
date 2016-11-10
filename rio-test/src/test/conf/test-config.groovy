@@ -4,6 +4,16 @@ import org.rioproject.test.TestConfig
 * Configuration file for Rio test cases
 */
 
+FixedTest {
+    groups = "FixedTest"
+    //locators = ''
+    numCybernodes = 4
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/opstring/fixed.groovy'
+    autoDeploy = false
+}
+
 CustomAttributesTest {
     groups = "CustomAttributesTest"
     //locators = ''

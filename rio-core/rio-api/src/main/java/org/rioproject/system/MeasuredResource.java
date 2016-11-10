@@ -57,7 +57,7 @@ public class MeasuredResource implements Serializable {
      * @return The measured value
      */
     public double getValue() {
-        return (value);
+        return value;
     }
 
     /**
@@ -66,7 +66,7 @@ public class MeasuredResource implements Serializable {
      * @return String identifier of the measurable resource
      */
     public String getIdentifier() {
-        return (identifier);
+        return identifier;
     }
     
     /**
@@ -76,7 +76,7 @@ public class MeasuredResource implements Serializable {
      * measurement
      */
     public ThresholdValues getThresholdValues() {
-        return(tValues);
+        return tValues;
     }
     
     /**
@@ -121,7 +121,7 @@ public class MeasuredResource implements Serializable {
             else
                 return (getIdentifier().equals(((MeasuredResource)obj).getIdentifier()));
         }
-        return (false);
+        return false;
     }
 
     /**
@@ -133,7 +133,7 @@ public class MeasuredResource implements Serializable {
     public int hashCode() {
         int hc = 17;
         hc = 37*hc+(identifier != null? identifier.hashCode() : 0);
-        return(hc);
+        return hc;
     }
 
 

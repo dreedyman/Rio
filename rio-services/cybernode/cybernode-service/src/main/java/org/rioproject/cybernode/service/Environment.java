@@ -36,7 +36,7 @@ import java.util.StringTokenizer;
  */
 public class Environment {
     /** Logger */
-    static Logger logger = LoggerFactory.getLogger(Environment.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(Environment.class.getName());
 
     /*
      * Setup the default environment
@@ -148,7 +148,7 @@ public class Environment {
      *
      * @throws IOException if there are errors accessing the file system
      */
-    public static File setupRecordRoot(Configuration config) throws IOException {
+    static File setupRecordRoot(Configuration config) throws IOException {
         String recordDir = getRioHomeDirectory()+"logs"+File.separator+"records";
         try {
             recordDir = (String)config.getEntry(CybernodeImpl.getConfigComponent(), 
@@ -168,11 +168,11 @@ public class Environment {
      * 
      * @return The path to the Rio home directory
      */
-    static String getRioHomeDirectory() {
+    private static String getRioHomeDirectory() {
         String rioHome = RioHome.get();
         if(!rioHome.endsWith(File.separator))
             rioHome = rioHome+File.separator;
-        return(rioHome);
+        return rioHome;
     }
 
     /**
@@ -182,7 +182,7 @@ public class Environment {
      * 
      * @throws IOException if read or write access is not permitted
      */
-    static void checkAccess(File directory) throws IOException {
+    private static void checkAccess(File directory) throws IOException {
         checkAccess(directory, true);        
     }
     
@@ -194,7 +194,7 @@ public class Environment {
      * 
      * @throws IOException if read or write access is not permitted
      */
-    static void checkAccess(File directory, boolean isWriteable) throws IOException {
+    private static void checkAccess(File directory, boolean isWriteable) throws IOException {
         if(!directory.exists()) {
             if(directory.mkdirs()) {
                 logger.debug("Created directory [{}]", directory.getCanonicalPath());
@@ -215,7 +215,7 @@ public class Environment {
         }
     }
 
-    static String[] toStringArray(String s) {
+    private static String[] toStringArray(String s) {
         StringTokenizer tok = new StringTokenizer(s, File.pathSeparator+" ");
         List<String> sList = new ArrayList<String>();
         while(tok.hasMoreTokens())
