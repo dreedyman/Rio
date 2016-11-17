@@ -539,7 +539,7 @@ public class ServiceElementManager implements InstanceIDManager {
      *
      * @param sElem The ServiceElement to remove
      */
-    void removeFixedServiceRequests(final ServiceElement sElem) {
+    private void removeFixedServiceRequests(final ServiceElement sElem) {
         if(sElem.getProvisionType() != ProvisionType.FIXED)
             return;
         if(provisioner.getFixedServiceManager().hasServiceElement(sElem)){
@@ -627,7 +627,7 @@ public class ServiceElementManager implements InstanceIDManager {
      *
      * @throws Exception If there are any problems starting the manager
      */
-    public int startManager(final ServiceProvisionListener provListener) throws Exception {
+    int startManager(final ServiceProvisionListener provListener) throws Exception {
         return(startManager(provListener, new ServiceBeanInstance[0]));
     }
 
@@ -759,7 +759,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * Destroy all discovered services this ServiceElementManager knows of
      */
-    void destroyServices() {
+    private void destroyServices() {
         if(sdm==null)
             return;
         ServiceBeanInstance[] instances = getServiceBeanInstances();
@@ -790,11 +790,11 @@ public class ServiceElementManager implements InstanceIDManager {
      *
      * @return True if the service is destroyed
      */
-    boolean destroyService(final Object service, final Uuid serviceUuid, boolean clean) {
+    private boolean destroyService(final Object service, final Uuid serviceUuid, boolean clean) {
         boolean terminated = false;
         boolean forceClean = false;
         try {
-            doDestroyService(service, serviceUuid, clean);
+            doDestroyService(service);
             terminated = true;
         } catch(Exception e) {
             if(mgrLogger.isTraceEnabled()) {
@@ -810,7 +810,7 @@ public class ServiceElementManager implements InstanceIDManager {
                 forceClean = true;
             } else {
                 try {
-                    doDestroyService(service, serviceUuid, clean);
+                    doDestroyService(service);
                 } catch (RemoteException e1) {
                     mgrLogger.debug("Retried service destroy and it failed. {}:{}, force clean for [{}] ServiceBeanInstance [{}]",
                                     e1.getClass().getName(),
@@ -841,12 +841,8 @@ public class ServiceElementManager implements InstanceIDManager {
      * Destroy a service
      *
      * @param service The ServiceItem of the service to destroy
-     * @param serviceUuid The service Uuid
-     * @param clean remove service references
-     *
-     * @return True if the service is destroyed
      */
-    void doDestroyService(final Object service, final Uuid serviceUuid, boolean clean) throws RemoteException {
+    private void doDestroyService(final Object service) throws RemoteException {
         logger.trace("Obtaining DestroyAdmin for [{}]", LoggingUtil.getLoggingName(svcElement));
         Administrable admin = (Administrable)service;
         DestroyAdmin destroyAdmin = (DestroyAdmin)admin.getAdmin();
@@ -1041,7 +1037,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * @return A ServiceBeanInstance for the uuid, or <code>null</code> if not
      * found
      */
-    ServiceBeanInstance getServiceBeanInstance(final Uuid uuid) {
+    private ServiceBeanInstance getServiceBeanInstance(final Uuid uuid) {
         ServiceBeanInstance instance = null;
         if(uuid!=null) {
             ServiceBeanInstance[] sbs = getServiceBeanInstances();
@@ -1058,7 +1054,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /*
      * Replace the ServiceBeanInstance
      */
-    boolean replaceServiceBeanInstance(final ServiceBeanInstance instance) {
+    private boolean replaceServiceBeanInstance(final ServiceBeanInstance instance) {
         boolean replaced = false;
         int ndx = serviceBeanList.indexOf(instance);
         if(ndx!=-1) {
@@ -1212,7 +1208,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * 
      * @param instance The ServiceBeanInstance
      */
-    void removeServiceBeanInstance(final ServiceBeanInstance instance) {
+    private void removeServiceBeanInstance(final ServiceBeanInstance instance) {
         synchronized(serviceBeanList) {
             int index = serviceBeanList.indexOf(instance);
             if(index!=-1) {
@@ -1227,7 +1223,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * @param id The instanceID to remove
      * @param action The action taken
      */
-    void removeInstanceID(final Long id, final String action) {
+    private void removeInstanceID(final Long id, final String action) {
         if(id!=null) {
             if(instanceIDs.remove(id)) {
                 if(sbiLogger.isDebugEnabled()) {
@@ -1258,7 +1254,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * value will be ignored if the provision type is
      * ServiceProvisionManagement.EXTERNAL
      */
-    public void stopManager(final boolean destroyServices) {
+    void stopManager(final boolean destroyServices) {
         shutdown.set(true);
         if(idleServiceManager.get()!=null) {
             idleServiceManager.get().terminate();
@@ -1689,7 +1685,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /*
      * Add a ServiceBeanInstance
      */
-    void addServiceBeanInstance(final ServiceBeanInstance instance) {
+    private void addServiceBeanInstance(final ServiceBeanInstance instance) {
         if(instance==null)
             return;
         StringBuffer buff = new StringBuffer();
@@ -1746,7 +1742,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * Manage service provision notifications 
      */
-    class ServiceBeanProvisionListener implements ProvisionListener {
+    private class ServiceBeanProvisionListener implements ProvisionListener {
         /**
          * @see ProvisionListener#uninstantiable(ProvisionRequest)
          */
@@ -1772,10 +1768,8 @@ public class ServiceElementManager implements InstanceIDManager {
                 Object proxy = instance.getService();
                 String hostName = instance.getHostName();
                 if(shutdown.get()) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Service Provision notification for ").append(LoggingUtil.getLoggingName(svcElement));
-                    builder.append(" while shutting down, destroy the service instance\n");
-                    logger.warn(builder.toString());
+                    logger.warn("Service Provision notification for {} while shutting down, destroy the service instance\n",
+                                LoggingUtil.getLoggingName(svcElement));
                     /* Prepare the proxy */
                     if(proxy instanceof RemoteMethodControl)
                         proxy = proxyPreparer.prepareProxy(proxy);
@@ -1883,7 +1877,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * Handle internal service notifications for associated service transitions
      */
-    class LocalServiceChannelClient implements ServiceChannelListener {
+    private class LocalServiceChannelClient implements ServiceChannelListener {
 
         public void notify(final ServiceChannelEvent event) {
             if(getActive()) {
@@ -1897,7 +1891,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * Manage service discovery notifications
      */
-    class ServiceElementManagerServiceListener extends ServiceDiscoveryAdapter {
+    private class ServiceElementManagerServiceListener extends ServiceDiscoveryAdapter {
 
         /**
          * Notification that a service has been discovered
@@ -1913,12 +1907,10 @@ public class ServiceElementManager implements InstanceIDManager {
                     return;
                 }
                 if(shutdown.get()) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("\n*************************************************\n");
-                    builder.append("Discovery notification for ").append(LoggingUtil.getLoggingName(svcElement));
-                    builder.append(" while shutting down\n");
-                    builder.append("*************************************************");
-                    logger.warn(builder.toString());
+                    logger.warn("\n*************************************************\n" +
+                                "Discovery notification for {} while shutting down\n" +
+                                "*************************************************",
+                                LoggingUtil.getLoggingName(svcElement));
                     return;
                 }
                 /* Prepare the proxy */
@@ -1975,7 +1967,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * Manage service failure notifications
      */
-    class ServiceFaultListener implements FaultDetectionListener<ServiceID> {
+    private class ServiceFaultListener implements FaultDetectionListener<ServiceID> {
         /**
          * @see org.rioproject.impl.fdh.FaultDetectionListener#serviceFailure(Object, Object)
          */
@@ -2140,7 +2132,7 @@ public class ServiceElementManager implements InstanceIDManager {
     /**
      * A local ServiceProvisionListener for relocation requests
      */
-    class RelocationListener implements ServiceProvisionListener {
+    private class RelocationListener implements ServiceProvisionListener {
         ServiceProvisionListener remoteListener;
         ServiceBeanInstance original;
 
@@ -2206,7 +2198,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * Helper method to obtain execute a
      * ProvisionMonitorTask to send a ProvisionMonitorEvent
      */
-    void processEvent(final ProvisionMonitorEvent event) {
+    private void processEvent(final ProvisionMonitorEvent event) {
         eventProcessor.processEvent(event);
     }
 
@@ -2232,7 +2224,7 @@ public class ServiceElementManager implements InstanceIDManager {
      * 
      * @return ComputeResourceInfo
      */
-    ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
+    private ComputeResourceInfo getComputeResourceInfo(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ComputeResourceInfo) {
                 return (ComputeResourceInfo) attr;
@@ -2248,14 +2240,14 @@ public class ServiceElementManager implements InstanceIDManager {
      * provisioned to a Cybernode, we should be able to get it's
      * ServiceBeanConfig
      */
-    void instanceIDLog(final StringBuffer buff) {
+    private void instanceIDLog(final StringBuffer buff) {
         if(sbiLogger.isTraceEnabled()) {
             dumpInstanceIDs(buff);
             sbiLogger.trace(buff.toString());
         }
     }
 
-    void dumpInstanceIDs(final StringBuffer buff) {
+    private void dumpInstanceIDs(final StringBuffer buff) {
         long[] ids = getAllocatedIDs();
         if(ids.length > 0) {
             buff.append("Instance ID list [");

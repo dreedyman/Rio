@@ -38,7 +38,6 @@ import java.util.Set;
  */
 public class FixedServiceManager extends PendingServiceElementManager {
     private final List<ServiceResource> inProcessResource = Collections.synchronizedList(new ArrayList<ServiceResource>());
-    private final ServiceProvisionContext context;
     private final Logger logger = LoggerFactory.getLogger(FixedServiceManager.class);
 
     /**
@@ -47,8 +46,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
      * @param context The ServiceProvisionContext
      */
     public FixedServiceManager(final ServiceProvisionContext context) {
-        super("Fixed-Service TestManager");
-        this.context = context;
+        super("Fixed-Service TestManager", context);
     }        
 
     /**
@@ -138,6 +136,12 @@ public class FixedServiceManager extends PendingServiceElementManager {
                 int numDeployed = 0;
                 for (Key requestKey : requests) {
                     ProvisionRequest request = collection.get(requestKey);
+                    if(ir.isUninstantiable(request.getServiceElement())) {
+                        logger.info("{} could not be deployed on {}, skip",
+                                    LoggingUtil.getLoggingName(context.getProvisionRequest()),
+                                    ir.getHostAddress());
+                        continue;
+                    }
                     try {
                         if (clearedMaxPerMachineAndIsolated(request, ir.getHostAddress()) && ir.canProvision(request)) {
                             numDeployed = doDeploy(resource, request);
@@ -163,7 +167,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
     /*
      * Helper method to dispatch a ProvisionFailureEventTask and send a ProvisionFailureEvent
      */
-    void processProvisionFailure(ProvisionRequest request, Exception e) {
+    private void processProvisionFailure(ProvisionRequest request, Exception e) {
         ProvisionFailureEvent event = new ProvisionFailureEvent(context.getEventSource(),
                                                                 request.getServiceElement(),
                                                                 request.getFailureReasons(),
@@ -265,7 +269,7 @@ public class FixedServiceManager extends PendingServiceElementManager {
         return sr.length != 0;
     }
 
-    public ServiceProvisionContext getServiceProvisionContext() {
+    private ServiceProvisionContext getServiceProvisionContext() {
         return new ServiceProvisionContext(context.getSelector(),
                                            context.getProvisioningPool(),
                                            context.getInProcess(),

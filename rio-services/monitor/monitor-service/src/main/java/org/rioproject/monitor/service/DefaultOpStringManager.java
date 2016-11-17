@@ -57,9 +57,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class DefaultOpStringManager implements OperationalStringManager, OpStringManager, ServerProxyTrust {
     /** Component name we use to find items in the configuration */
-    static final String CONFIG_COMPONENT = "org.rioproject.monitor";
+    private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    static Logger logger = LoggerFactory.getLogger(DefaultOpStringManager.class);
+    private static Logger logger = LoggerFactory.getLogger(DefaultOpStringManager.class);
 
     private OperationalString opString;
     /**
@@ -410,7 +410,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
     }
 
-    class IdleServiceListener implements ServiceChannelListener {
+    private class IdleServiceListener implements ServiceChannelListener {
         final OpStringManager manager;
         final Map<ServiceElement, Boolean> tracking = new HashMap<ServiceElement, Boolean>();
 
@@ -449,9 +449,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *                 provisioned at OperationalString deployment time
      * @throws Exception if the ServiceElementManager cannot be created
      */
-    void createServiceElementManager(final ServiceElement sElem,
-                                     final boolean start,
-                                     final ServiceProvisionListener listener) throws Exception {
+    private void createServiceElementManager(final ServiceElement sElem,
+                                             final boolean start,
+                                             final ServiceProvisionListener listener) throws Exception {
         ServiceElementManager svcElemMgr =
             new ServiceElementManager(sElem, proxy, provisioner, uuid, isActive(), config);
         /* Set event attributes */
@@ -611,7 +611,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *
      * @param elements Array of ServiceElement instances to update
      */
-    void updateServiceElements(final ServiceElement[] elements) {
+    private void updateServiceElements(final ServiceElement[] elements) {
         if (!isActive())
             return;
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
@@ -1309,7 +1309,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @param instance The corresponding ServiceBeanInstance
      * @return The scheduled RedeploymentTask, or null if not found
      */
-    RedeploymentTask getScheduledRedeploymentTask(final ServiceElement sElem, final ServiceBeanInstance instance) {
+    private RedeploymentTask getScheduledRedeploymentTask(final ServiceElement sElem, final ServiceBeanInstance instance) {
         TimerTask[] tasks = getTasks();
         RedeploymentTask scheduledTask = null;
         for (TimerTask task : tasks) {
@@ -1362,7 +1362,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *         managing the ServiceElement. If no ServiceElementManager is found,
      *         null is returned
      */
-    ServiceElementManager getServiceElementManager(final ServiceBeanInstance instance) {
+    private ServiceElementManager getServiceElementManager(final ServiceBeanInstance instance) {
         for (ServiceElementManager mgr : svcElemMgrs) {
             if (mgr.hasServiceBeanInstance(instance))
                 return (mgr);
@@ -1380,7 +1380,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @throws IOException If the service proxy from a ServiceBeanInstance
      *                     returned from a ServiceElementManager cannot be unmarshalled
      */
-    ServiceElementManager getServiceElementManager(final Object proxy) throws IOException {
+    private ServiceElementManager getServiceElementManager(final Object proxy) throws IOException {
         for (ServiceElementManager mgr : svcElemMgrs) {
             ServiceBeanInstance[] instances = mgr.getServiceBeanInstances();
             for (ServiceBeanInstance instance : instances) {

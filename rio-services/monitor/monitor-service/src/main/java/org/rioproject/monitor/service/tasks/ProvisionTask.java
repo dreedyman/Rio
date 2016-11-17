@@ -80,6 +80,8 @@ public class ProvisionTask implements Runnable {
                 boolean resubmitted = true;
                 logger.debug("Provision attempt failed for [{}]", LoggingUtil.getLoggingName(context.getProvisionRequest()));
                 if ((result & ServiceProvisioner.UNINSTANTIABLE_JSB) != 0) {
+                    InstantiatorResource ir = (InstantiatorResource) context.getServiceResource().getResource();
+                    ir.addUninstantiable(context.getProvisionRequest().getServiceElement());
                     /* Notify ServiceProvisionListener of failure */
                     context.getProvisionRequest().getListener().uninstantiable(context.getProvisionRequest());
                     resubmitted = false;
@@ -154,8 +156,7 @@ public class ProvisionTask implements Runnable {
         }
     }
 
-    int doProvision(ProvisionRequest request,
-                    ServiceResource serviceResource) {
+    private int doProvision(ProvisionRequest request, ServiceResource serviceResource) {
         long start = System.currentTimeMillis();
         int result = 0;
         InstantiatorResource ir = (InstantiatorResource) serviceResource.getResource();
