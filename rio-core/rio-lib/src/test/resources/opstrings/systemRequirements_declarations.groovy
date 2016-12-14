@@ -35,6 +35,8 @@ deployment(name: 'systemRequirements declarations') {
 
         operatingSystem name:'Mac OSX', version:'10.7*'
 
+        network address:'10.0.1.23', exclude: true
+
         processor available: 8
 
         platformRequirement type: "NativeLibrarySupport", name: 'libbrlcad.19'

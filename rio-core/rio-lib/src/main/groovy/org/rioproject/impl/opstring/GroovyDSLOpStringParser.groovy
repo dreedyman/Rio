@@ -47,6 +47,7 @@ import org.rioproject.sla.RuleMap.RuleDefinition
 import org.rioproject.sla.RuleMap.ServiceDefinition
 import org.rioproject.sla.SLA
 import org.rioproject.system.SystemWatchID
+import org.rioproject.system.capability.connectivity.TCPConnectivity
 import org.rioproject.system.capability.platform.OperatingSystem
 import org.rioproject.system.capability.platform.ProcessorArchitecture
 import org.rioproject.system.capability.platform.StorageCapability
@@ -508,6 +509,25 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 helper.addSystemComponent(parent, memory, systemRequirementsTable, currentService)
             }
 
+            emc.network = { Map attributes ->
+                Map attributeMap = [:]
+                attributeMap["Name"] = TCPConnectivity.ID
+                boolean exclude = true
+                if(attributes.containsKey("exclude")) {
+                    def excludeValue = attributes.remove("exclude")
+                    if(excludeValue instanceof Boolean) {
+                        exclude = excludeValue
+                    } else {
+                        exclude = Boolean.parseBoolean(excludeValue)
+                    }
+                }
+                attributeMap.putAll(helper.capitalizeFirstLetterOfEachKey(attributes))
+                SystemComponent network = new SystemComponent(TCPConnectivity.ID, TCPConnectivity.class.name, attributeMap)
+                if(!exclude)
+                    network.setExclude(exclude)
+                helper.addSystemComponent(parent, network, systemRequirementsTable, currentService)
+            }
+
             emc.diskspace = { Map attributes ->
                 Map attributeMap = [:]
                 attributeMap["Name"] = SystemWatchID.DISK_SPACE
@@ -840,6 +860,21 @@ class GroovyDSLOpStringParser implements OpStringParser {
             ((InputStream)source).close()
         
         return opStrings
+    }
+
+    boolean isIpAddress(String ip) {
+        String [] parts = ip.split ("\\.");
+        for (String s : parts){
+            try {
+                int i = Integer.parseInt(s);
+                if (i < 0 || i > 255){
+                    return false;
+                }
+            } catch(NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected void processAdditionalTags(ExpandoMetaClass emc) {

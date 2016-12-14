@@ -30,6 +30,7 @@ import org.rioproject.opstring.UndeployOption
 import org.rioproject.sla.SLA
 import org.rioproject.sla.ServiceLevelAgreements
 import org.rioproject.system.SystemWatchID
+import org.rioproject.system.capability.connectivity.TCPConnectivity
 import org.rioproject.system.capability.platform.OperatingSystem
 import org.rioproject.system.capability.platform.ProcessorArchitecture
 import org.rioproject.system.capability.platform.StorageCapability
@@ -236,12 +237,13 @@ class OpStringParserTest extends GroovyTestCase {
         assertTrue "Memory threshold low value should be 0.1", tVals.getLowThreshold()==0.1
 
         SystemComponent[] sysComps = sysReqs.getSystemComponents()
-        assertEquals "There should be 7 SystemComponents", 7, sysComps.length
+        assertEquals "There should be 8 SystemComponents", 8, sysComps.length
         boolean checkedMemory = false
         boolean checkedStorageCapability = false
         boolean checkedOperatingSystem = false
         boolean checkedProcessorArchitecture = false
         boolean checkedNativeLib = false
+        boolean checkedNetwork = false
         for(SystemComponent sc : sysComps) {
             assertNotNull sc.attributes
             if(sc.name.equals(SystemMemory.ID)) {
@@ -279,12 +281,21 @@ class OpStringParserTest extends GroovyTestCase {
                 checkSystemComponent sc, attrs
                 checkedNativeLib = true
             }
+            if(sc.name.equals("Network")) {
+                Map attrs = new HashMap()
+                attrs.put("Name", TCPConnectivity.ID)
+                attrs.put("Address", "10.0.1.23")
+                System.out.println("===> "+sc.getAttributes())
+                checkSystemComponent sc, attrs
+                checkedNetwork = true
+            }
         }
         assertTrue checkedMemory
         assertTrue checkedStorageCapability
         assertTrue checkedOperatingSystem
         assertTrue checkedProcessorArchitecture
         assertTrue checkedNativeLib
+        assertTrue checkedNetwork
         
         /* Make sure we have no system requirements */
         slas = elems[3].getServiceLevelAgreements()
