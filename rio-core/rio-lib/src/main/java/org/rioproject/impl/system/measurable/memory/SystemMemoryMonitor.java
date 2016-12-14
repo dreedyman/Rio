@@ -40,7 +40,8 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
     private SigarHelper sigar;
     private static double KB = 1024;
     private static double MB = Math.pow(KB, 2);
-    static Logger logger = LoggerFactory.getLogger(SystemMemoryMonitor.class);
+    private static double GB = Math.pow(KB, 3);
+    private static Logger logger = LoggerFactory.getLogger(SystemMemoryMonitor.class);
 
     public SystemMemoryMonitor() {
         sigar = SigarHelper.getInstance();
@@ -60,15 +61,32 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
     public SystemMemoryUtilization getMeasuredResource() {
         SystemMemoryUtilization smu;
         if(sigar==null) {
-            smu = new SystemMemoryUtilization(id, tVals);
+            com.sun.management.OperatingSystemMXBean bean =
+                (com.sun.management.OperatingSystemMXBean)
+                    java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+            long total = bean.getTotalPhysicalMemorySize();
+            long free = bean.getFreePhysicalMemorySize();
+            double totalMB = ((double)total)/MB;
+            double freeMB = ((double)free)/MB;
+            double usedMB = totalMB-freeMB;
+            double utilization = computeUtilization(total-free, total);
+            double freeSystemPercent = computeUtilization(free, total);
+
+            smu = new SystemMemoryUtilization(id,
+                                              utilization,
+                                              totalMB,
+                                              freeMB,
+                                              usedMB,
+                                              freeSystemPercent,
+                                              utilization,
+                                              Double.NaN,
+                                              tVals);
         } else {
             long total = sigar.getTotalSystemMemory();
             long free = sigar.getFreeSystemMemory();
             long used = sigar.getUsedSystemMemory();
 
-            double u = (double)used/(double)total;
-            BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.FLOOR);
-            double utilization = bd.doubleValue();
+            double utilization = computeUtilization(used, total);
 
             if(logger.isTraceEnabled()) {
                 StringBuilder builder = new StringBuilder();
@@ -100,5 +118,11 @@ public class SystemMemoryMonitor implements MeasurableMonitor<SystemMemoryUtiliz
                                               tVals);
         }
         return smu;
+    }
+
+    private double computeUtilization(long used, long total) {
+        double u = (double)used/(double)total;
+        BigDecimal bd = new BigDecimal(u).setScale(2, RoundingMode.FLOOR);
+        return bd.doubleValue();
     }
 }

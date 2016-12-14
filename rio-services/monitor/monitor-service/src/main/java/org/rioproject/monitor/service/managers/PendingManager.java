@@ -31,7 +31,6 @@ import java.util.Set;
  * objects that have a ServiceProvisionManagement type of DYNAMIC.
  */
 public class PendingManager extends PendingServiceElementManager {
-    private final ServiceProvisionContext context;
     private final Logger logger = LoggerFactory.getLogger(PendingManager.class.getName());
 
     /**
@@ -40,8 +39,7 @@ public class PendingManager extends PendingServiceElementManager {
      * @param context The ServiceProvisionContext
      */
     public PendingManager(ServiceProvisionContext context) {
-        super("Dynamic-Service TestManager");
-        this.context = context;
+        super("Dynamic-Service TestManager", context);
     }
 
     /**

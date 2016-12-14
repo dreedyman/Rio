@@ -59,9 +59,9 @@ public class SystemCapabilitiesTest {
     @Test
     public void testGetMeasurableCapabilities() throws Exception {
         MeasurableCapability[] mCaps = systemCapabilities.getMeasurableCapabilities(new DynamicConfiguration());
-        /* We don't get a disk space capability on Windows, so expect 3 not 4 */
-        boolean windoze = System.getProperty("os.name").startsWith("Windows");
-        int expected = windoze?3:4;
+        int expected = 5;
+        for(MeasurableCapability m : mCaps)
+        System.out.println("===> "+m.getId());
         Assert.assertEquals("Expected "+expected, expected, mCaps.length);
 
         org.rioproject.impl.system.measurable.memory.Memory memory =
@@ -77,12 +77,9 @@ public class SystemCapabilitiesTest {
         Assert.assertNotNull(cpuProc);
         log(cpuProc);
 
-        if(!windoze) {
-            DiskSpace diskSpace = getCapability(DiskSpace.class, mCaps);
-            Assert.assertNotNull(diskSpace);
-            log(diskSpace);
-        }
-
+        DiskSpace diskSpace = getCapability(DiskSpace.class, mCaps);
+        Assert.assertNotNull(diskSpace);
+        log(diskSpace);
     }
 
     @Test

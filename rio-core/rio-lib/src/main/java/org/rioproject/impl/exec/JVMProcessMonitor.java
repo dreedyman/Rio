@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>Utility that that monitors a JVM on the same machine.</p>
  *
  * <p>The preference is to use <a href="http://www.hyperic.com/products/sigar.html">SIGAR</a>. A process list
- * is obtained, containing a collection of all running processes. For each JVM that is bing monitored, th JVM's
+ * is obtained, containing a collection of all running processes. For each JVM that is being monitored, the JVM's
  * process id is looked for in the returned list of process ids. If not found, the JVM is determined to no longer
  * be running.
  * </p>
@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * classpath), the <a href="http://docs.oracle.com/javase/6/docs/jdk/api/attach/spec/index.html">Attach API</a> is
  * used.</p>
  *
- * <p>The repaing period (how often to check for JVM existence) is controlled by the
+ * <p>The reaping period (how often to check for JVM existence) is controlled by the
  * {@code org.rioproject.exec.monitor.reap.interval} system property. This property is the amount of seconds, and
  * defaults to 5.
  * </p>

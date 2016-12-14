@@ -49,6 +49,12 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
         sigar = SigarHelper.getInstance();
         if(sigar!=null) {
             pid = sigar.getPid();
+        } else {
+            String name = ManagementFactory.getRuntimeMXBean().getName();
+            int ndx = name.indexOf("@");
+            if(ndx>=1) {
+                pid = Long.parseLong(name.substring(0, ndx));
+            }
         }
     }
 

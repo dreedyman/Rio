@@ -63,13 +63,13 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     /** The collection of ServiceResource objects to manage */
     protected Collection<LeasedResource> collection;
     /* Semaphore for access to modifying the collection */
-    protected final Object collectionLock = new Object();
-    static final Logger logger = LoggerFactory.getLogger(ServiceResourceSelector.class);
+    final Object collectionLock = new Object();
+    private static final Logger logger = LoggerFactory.getLogger(ServiceResourceSelector.class);
     /**
      * The LandlordLessor which will be registered to, and will provide Lease
      * notification events
      */
-    protected LandlordLessor landlord;
+    private LandlordLessor landlord;
 
     /**
      * Set the <code>LandlordLessor</code> the
@@ -94,7 +94,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @throws Exception If there are errors getting a ServiceResource
      */
-    public ServiceResource getServiceResource(final ProvisionRequest provisionRequest) throws Exception {
+    ServiceResource getServiceResource(final ProvisionRequest provisionRequest) throws Exception {
         ServiceResource[] svcResources = getServiceResources();
         if(svcResources.length==0) {
             provisionRequest.addFailureReason(String.format("There are no registered Cybernodes, unable to provision %s",
@@ -119,9 +119,9 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @throws ProvisionException if any errors occur selecting a resource
      */
-    public ServiceResource getServiceResource(final ProvisionRequest provisionRequest,
-                                              final Uuid uuid,
-                                              final boolean inclusive) throws ProvisionException {
+    ServiceResource getServiceResource(final ProvisionRequest provisionRequest,
+                                       final Uuid uuid,
+                                       final boolean inclusive) throws ProvisionException {
         return (selectServiceResource(provisionRequest, getServiceResources(uuid, inclusive)));
     }
 
@@ -137,8 +137,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @throws org.rioproject.monitor.service.ProvisionException If there are unrecoverable errors
      * provisioning the service
      */
-    protected ServiceResource selectServiceResource(final ProvisionRequest provisionRequest,
-                                                    final ServiceResource[] svcResources) throws ProvisionException {
+    private ServiceResource selectServiceResource(final ProvisionRequest provisionRequest,
+                                                  final ServiceResource[] svcResources) throws ProvisionException {
         if(svcResources.length==0) {
             provisionRequest.addFailureReason(String.format("There are no available Cybernodes, unable to provision %s",
                                                             provisionRequest.getServiceElement().getName()));
@@ -372,7 +372,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of ServiceResource instances that match
      * the host address
      */
-    ServiceResource[] getServiceResources(final Uuid uuid, final boolean inclusive) {
+    private ServiceResource[] getServiceResources(final Uuid uuid, final boolean inclusive) {
         ServiceResource[] svcResources = getServiceResources();
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
@@ -415,7 +415,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      *
      * @return Array of ServiceResource instances that match the host address
      */
-    ServiceResource[] getServiceResources(final ServiceResource[] svcResources, final String hostAddress, final boolean inclusive) {
+    private ServiceResource[] getServiceResources(final ServiceResource[] svcResources, final String hostAddress, final boolean inclusive) {
         ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
@@ -505,6 +505,14 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         update(resource);
     }
 
+    public void removeUninstantiable(ServiceElement serviceElement) {
+        ServiceResource[] svcResources = getServiceResources();
+        for (ServiceResource svcResource : svcResources) {
+            InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
+            ir.removeUninstantiable(serviceElement);
+        }
+    }
+
     /**
      * If the <code>Collection</code> backed by the concrete class requires
      * processing other then that defined by <code>Collection.add</code>
@@ -579,7 +587,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of InstantiatorResource instances that have instantiated
      * the ServiceElement
      */
-    InstantiatorResource[] getInstantiatorResources(final ServiceElement sElem, final boolean includeInProcess) {
+    private InstantiatorResource[] getInstantiatorResources(final ServiceElement sElem, final boolean includeInProcess) {
         ServiceResource[] svcResources = getServiceResources();
         ArrayList<InstantiatorResource> list = new ArrayList<InstantiatorResource>();
         for (ServiceResource svcResource : svcResources) {

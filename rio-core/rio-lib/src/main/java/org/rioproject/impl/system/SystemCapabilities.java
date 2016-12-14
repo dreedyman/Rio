@@ -20,10 +20,15 @@ import net.jini.config.ConfigurationException;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;
 import org.rioproject.costmodel.ResourceCostModel;
-import org.rioproject.system.SystemWatchID;
-import org.rioproject.impl.util.FileUtils;
-import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.impl.system.capability.PlatformCapabilityLoader;
+import org.rioproject.impl.system.measurable.MeasurableCapability;
+import org.rioproject.impl.system.measurable.cpu.CPU;
+import org.rioproject.impl.system.measurable.disk.DiskSpace;
+import org.rioproject.impl.system.measurable.memory.Memory;
+import org.rioproject.impl.system.measurable.memory.SystemMemory;
+import org.rioproject.impl.util.FileUtils;
+import org.rioproject.system.SystemWatchID;
+import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.system.capability.connectivity.TCPConnectivity;
 import org.rioproject.system.capability.platform.OperatingSystem;
 import org.rioproject.system.capability.platform.ProcessorArchitecture;
@@ -31,12 +36,6 @@ import org.rioproject.system.capability.platform.StorageCapability;
 import org.rioproject.system.capability.software.J2SESupport;
 import org.rioproject.system.capability.software.NativeLibrarySupport;
 import org.rioproject.system.capability.software.RioSupport;
-import org.rioproject.impl.system.measurable.MeasurableCapability;
-import org.rioproject.impl.system.measurable.SigarHelper;
-import org.rioproject.impl.system.measurable.cpu.CPU;
-import org.rioproject.impl.system.measurable.disk.DiskSpace;
-import org.rioproject.impl.system.measurable.memory.Memory;
-import org.rioproject.impl.system.measurable.memory.SystemMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,15 +102,9 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
         if(memory.isEnabled())
             measurables.add(memory);
 
-        /* If SIGAR is available, create a Memory MeasurableCapability for the
-         * physical machine as well */
-        boolean haveSigar = SigarHelper.sigarAvailable();
-        if(haveSigar) {
-            MeasurableCapability systemMemory = new SystemMemory(config);
-            if(systemMemory.isEnabled())
-                measurables.add(systemMemory);
-
-        }
+        MeasurableCapability systemMemory = new SystemMemory(config);
+        if(systemMemory.isEnabled())
+            measurables.add(systemMemory);
 
         /* Load memory pool management */
         try {
@@ -137,17 +130,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             measurables.add(jvmCpu);
 
 
-        /*
-         * Load the DiskSpace capability only if we have SIGAR or if SIGAR is
-         * not available and not running on Windows
-         */
-        MeasurableCapability diskSpace = null;
-        if(haveSigar) {
-            diskSpace = getDiskSpace(config);
-        } else if(!OperatingSystemType.isWindows()) {
-            diskSpace = getDiskSpace(config);
-        }
-        if(diskSpace!=null && diskSpace.isEnabled())
+        MeasurableCapability diskSpace = getDiskSpace(config);
+        if(diskSpace.isEnabled())
             measurables.add(diskSpace);
 
         /*

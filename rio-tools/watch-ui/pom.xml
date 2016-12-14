@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.4</version>
+        <version>5.6</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>watch-ui</artifactId>

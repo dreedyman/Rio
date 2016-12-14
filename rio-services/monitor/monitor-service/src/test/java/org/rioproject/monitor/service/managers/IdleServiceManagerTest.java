@@ -31,7 +31,7 @@ public class IdleServiceManagerTest {
     @Test
     public void testIdleServiceManager() throws InterruptedException {
         ServiceElement serviceElement = TestUtil.makeServiceElement("bar", "foo", 2);
-        IdleServiceManager idleServiceManager = new IdleServiceManager(3000l, serviceElement);
+        IdleServiceManager idleServiceManager = new IdleServiceManager(3000L, serviceElement);
         TestServiceActivityProvider sap1 = new TestServiceActivityProvider();
         TestServiceActivityProvider sap2 = new TestServiceActivityProvider();
         idleServiceManager.addService(sap1);
@@ -54,7 +54,7 @@ public class IdleServiceManagerTest {
         Assert.assertTrue(l.notified == 1);
     }
 
-    class TestServiceActivityProvider implements ServiceActivityProvider {
+    private class TestServiceActivityProvider implements ServiceActivityProvider {
         boolean active = true;
 
         @Override

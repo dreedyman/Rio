@@ -43,7 +43,7 @@ import java.util.*;
  * OperationalString is configured to use artifacts, that required artifacts have been resolved
  */
 public class DeploymentVerifier {
-    static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
     private final List<RemoteRepository> additionalRepositories = new ArrayList<RemoteRepository>();
     private final DiscoveryManagement discoveryManagement;
 
@@ -89,7 +89,7 @@ public class DeploymentVerifier {
         if(service.getComponentBundle().getArtifact()!=null) {
             resolveOperationalStringService(service, resolver, repositories);
         } else {
-            OpStringUtil.checkCodebase(service, System.getProperty(Constants.CODESERVER));
+            OpStringUtil.checkCodebase(service, System.getProperty(Constants.WEBSTER));
         }
         ensureGroups(service);
     }

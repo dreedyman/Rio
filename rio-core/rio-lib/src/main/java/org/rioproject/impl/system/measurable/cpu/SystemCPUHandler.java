@@ -44,7 +44,7 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
     private OperatingSystemMXBean opSysMBean = null;
     private Method jmxCPUUtilization;
     private MeasurableMonitor<CpuUtilization> altMonitor;
-    static Logger logger = LoggerFactory.getLogger(SystemCPUHandler.class.getPackage().getName());
+    private static Logger logger = LoggerFactory.getLogger(SystemCPUHandler.class.getPackage().getName());
 
     public SystemCPUHandler() {
         sigar = SigarHelper.getInstance();

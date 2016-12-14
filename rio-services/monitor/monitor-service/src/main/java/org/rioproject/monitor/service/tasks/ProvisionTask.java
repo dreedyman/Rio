@@ -80,6 +80,8 @@ public class ProvisionTask implements Runnable {
                 boolean resubmitted = true;
                 logger.debug("Provision attempt failed for [{}]", LoggingUtil.getLoggingName(context.getProvisionRequest()));
                 if ((result & ServiceProvisioner.UNINSTANTIABLE_JSB) != 0) {
+                    InstantiatorResource ir = (InstantiatorResource) context.getServiceResource().getResource();
+                    ir.addUninstantiable(context.getProvisionRequest().getServiceElement());
                     /* Notify ServiceProvisionListener of failure */
                     context.getProvisionRequest().getListener().uninstantiable(context.getProvisionRequest());
                     resubmitted = false;
@@ -154,8 +156,7 @@ public class ProvisionTask implements Runnable {
         }
     }
 
-    int doProvision(ProvisionRequest request,
-                    ServiceResource serviceResource) {
+    private int doProvision(ProvisionRequest request, ServiceResource serviceResource) {
         long start = System.currentTimeMillis();
         int result = 0;
         InstantiatorResource ir = (InstantiatorResource) serviceResource.getResource();
@@ -181,13 +182,15 @@ public class ProvisionTask implements Runnable {
                 for (int i = 0; i < numProvisionRetries; i++) {
                     if (logger.isDebugEnabled()) {
                         String retry = (i == 0 ? "" : ", retry (" + i + ") ");
-                        logger.debug("Allocating {} [{}] ...", retry, LoggingUtil.getLoggingName(request));
+                        logger.debug("Allocating {} [{}] to {}...",
+                                     retry, LoggingUtil.getLoggingName(request), ir.getInstantiator().getName());
                     }
                     DeployedService deployedService = ir.getInstantiator().instantiate(event);
                     if (deployedService != null) {
                         jsbInstance = deployedService.getServiceBeanInstance();
                         ir.addDeployedService(deployedService);
-                        logger.info("Allocated [{}]", LoggingUtil.getLoggingName(request));
+                        logger.info("Allocated [{}] on {}",
+                                    LoggingUtil.getLoggingName(request), ir.getInstantiator().getName());
                         if (logger.isTraceEnabled()) {
                             Object service = jsbInstance.getService();
                             Class serviceClass = service.getClass();

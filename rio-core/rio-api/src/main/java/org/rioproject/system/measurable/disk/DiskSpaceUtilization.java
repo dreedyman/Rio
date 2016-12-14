@@ -69,7 +69,7 @@ public class DiskSpaceUtilization extends MeasuredResource
 
     @Override public String toString() {
         /** Gigabytes */
-        double GB = Math.pow(1021, 3);
+        double GB = Math.pow(1024, 3);
 
         BigDecimal bd = new BigDecimal(used/GB).setScale(2, RoundingMode.HALF_EVEN);
         double u = bd.doubleValue();

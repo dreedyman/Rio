@@ -60,8 +60,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ComputeResource {
     /** Name to use when getting Configuration values and to get the Logger */
-    static final String COMPONENT = "org.rioproject.system";
-    static Logger logger = LoggerFactory.getLogger(ComputeResource.class);
+    private static final String COMPONENT = "org.rioproject.system";
+    private static Logger logger = LoggerFactory.getLogger(ComputeResource.class);
     /**
      * A description of the <code>ComputeResource</code> 
      */
@@ -117,7 +117,7 @@ public class ComputeResource {
     private final List<PlatformCapability> removals = new ArrayList<PlatformCapability>();
     private SystemCapabilitiesLoader systemCapabilitiesLoader;
 
-    public static final long DEFAULT_REPORT_INTERVAL=1000*60;
+    private static final long DEFAULT_REPORT_INTERVAL=1000*60;
     private long reportInterval;
     private final List<ResourceCapabilityChangeListener> listeners = new ArrayList<ResourceCapabilityChangeListener>();
     private final ScheduledExecutorService resourceCapabilityChangeService = Executors.newScheduledThreadPool(1);
@@ -161,6 +161,7 @@ public class ComputeResource {
         if(reportInterval<1000)
             throw new ConfigurationException("The reportInterval must not be less then 1000 milliseconds.");
         scheduleResourceCapabilityReporting();
+        ComputeResourceAccessor.setComputeResource(this);
     }
     
     /**
@@ -730,13 +731,11 @@ public class ComputeResource {
      */
     public ComputeResourceUtilization getComputeResourceUtilization() {
         MeasuredResource[] mrs = getMeasuredResources();
-        ComputeResourceUtilization computeResourceUtilization =
-            new ComputeResourceUtilization(getDescription(),
-                                           getAddress().getHostName(),
-                                           getAddress().getHostAddress(),
-                                           getUtilization(mrs),
-                                           Arrays.asList(mrs));
-        return(computeResourceUtilization);
+        return new ComputeResourceUtilization(getDescription(),
+                                              getAddress().getHostName(),
+                                              getAddress().getHostAddress(),
+                                              getUtilization(mrs),
+                                              Arrays.asList(mrs));
     }
 
     /**
@@ -812,7 +811,7 @@ public class ComputeResource {
         resourceCapabilityChangeService.shutdown();
     }
 
-    class ResourceCapabilityChangeNotifier implements Runnable {
+    private class ResourceCapabilityChangeNotifier implements Runnable {
         public void run() {
             notifyResourceCapabilityChangeListeners();
         }

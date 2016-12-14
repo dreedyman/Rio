@@ -466,7 +466,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     /**
      * Monitors ServiceBeanInstantiator leases being removed. 
      */
-    class LeaseMonitor extends LeaseListenerAdapter {
+    private class LeaseMonitor extends LeaseListenerAdapter {
         @Override
         public void expired(final LeasedResource resource) {
             remove(resource);

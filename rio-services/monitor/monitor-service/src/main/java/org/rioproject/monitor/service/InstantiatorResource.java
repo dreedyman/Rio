@@ -98,8 +98,9 @@ public class InstantiatorResource {
      * The Uuid that has been assigned to the ServiceBeanInstantiator
      */
     private final Uuid instantiatorUuid;
+    private final List<ServiceElement> uninstantiables = new ArrayList<ServiceElement>();
     /** The Logger */
-    static final Logger logger = LoggerFactory.getLogger(InstantiatorResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(InstantiatorResource.class);
 
     /**
      * Create an InstantiatorResource
@@ -132,7 +133,7 @@ public class InstantiatorResource {
         this.serviceLimit.set(serviceLimit);
     }
 
-    public MarshalledObject<ServiceBeanInstantiator> getWrappedServiceBeanInstantiator() {
+    MarshalledObject<ServiceBeanInstantiator> getWrappedServiceBeanInstantiator() {
         return wrappedServiceBeanInstantiator;
     }
 
@@ -166,21 +167,9 @@ public class InstantiatorResource {
     void setDeployedServices(List<DeployedService> deployedServices) {
         synchronized(serviceElementMap) {
             serviceElementMap.clear();
-            for(DeployedService deployedService : deployedServices) {
-
-                ServiceElement sElem = deployedService.getServiceElement();
-                if (serviceElementMap.containsKey(sElem)) {
-                    List<DeployedService> list = serviceElementMap.get(sElem);
-                    if(!list.contains(deployedService)) {
-                        list.add(deployedService);
-                        serviceElementMap.put(sElem, list);
-                    }
-                } else {
-                    List<DeployedService> list = new ArrayList<DeployedService>();
-                    list.add(deployedService);
-                    serviceElementMap.put(sElem, list);
-                }
-            }
+        }
+        for(DeployedService deployedService : deployedServices) {
+            addDeployedService(deployedService);
         }
     }
 
@@ -599,8 +588,20 @@ public class InstantiatorResource {
      *
      * @return The host name of the ServiceBeanInstantiator
      */
-    public String getHostName() {
+    String getHostName() {
         return (resourceCapability.getHostName());
+    }
+
+    public void addUninstantiable(ServiceElement serviceElement) {
+        uninstantiables.add(serviceElement);
+    }
+
+    public boolean isUninstantiable(ServiceElement serviceElement) {
+        return uninstantiables.contains(serviceElement);
+    }
+
+    public void removeUninstantiable(ServiceElement serviceElement) {
+        uninstantiables.remove(serviceElement);
     }
 
     /**
@@ -680,7 +681,7 @@ public class InstantiatorResource {
          */
         if(sElem.getProvisionType() == ServiceElement.ProvisionType.FIXED) {
             int planned = sElem.getPlanned();
-            int actual = getServiceElementCount(sElem);
+            int actual = getServiceElementCount(sElem)+getInProcessCounter(sElem);
             int numAllowed = planned-actual;
             if(numAllowed <=0) {
                 String failureReason =
@@ -895,7 +896,7 @@ public class InstantiatorResource {
      * components contains a StorageCapability and if that StorageCapability has
      * the requested disk space size available
      */
-     boolean supportsStorageRequirement(int requestedSize, PlatformCapability[] pCaps) {
+    private boolean supportsStorageRequirement(int requestedSize, PlatformCapability[] pCaps) {
         boolean supports = false;
         for (PlatformCapability pCap : pCaps) {
             if (pCap instanceof StorageCapability) {
@@ -915,7 +916,7 @@ public class InstantiatorResource {
      * @return The available storage from the StorageCapability. If a
      * StorageCapability cannot be found return -1
      */
-    double getAvailableStorage(PlatformCapability[] pCaps) {
+    private double getAvailableStorage(PlatformCapability[] pCaps) {
         double available = -1;
         for (PlatformCapability pCap : pCaps) {
             if (pCap instanceof StorageCapability) {
@@ -1122,8 +1123,8 @@ public class InstantiatorResource {
         return unsupportedRequirements;
     }
 
-    Result check(final PlatformCapability platformCapability,
-                  final List<SystemComponent> systemComponents) {
+    private Result check(final PlatformCapability platformCapability,
+                         final List<SystemComponent> systemComponents) {
         Result result = new Result();
         boolean supported = false;
         for (SystemComponent serviceRequirement : systemComponents) {
@@ -1147,12 +1148,12 @@ public class InstantiatorResource {
         return result;
     }
 
-    class Result {
+    private class Result {
         boolean supported;
         List<SystemComponent> excluded = new ArrayList<SystemComponent>();
     }
 
-    String formatSystemComponents(final List<SystemComponent> systemComponents, final String... keys) {
+    private String formatSystemComponents(final List<SystemComponent> systemComponents, final String... keys) {
         StringBuilder builder = new StringBuilder();
         for(String key : keys) {
             for (SystemComponent serviceRequirement : systemComponents) {
@@ -1166,12 +1167,12 @@ public class InstantiatorResource {
         return builder.toString();
     }
 
-    String formatFailureReason(final List<SystemComponent> systemComponents,
-                               final String capability,
-                               final String name,
-                               final ServiceElement sElem,
-                               final boolean notExcluded,
-                               final String... keys) {
+    private String formatFailureReason(final List<SystemComponent> systemComponents,
+                                       final String capability,
+                                       final String name,
+                                       final ServiceElement sElem,
+                                       final boolean notExcluded,
+                                       final String... keys) {
 
         String formattedComponents = formatSystemComponents(systemComponents, keys);
         String failureReason;
@@ -1193,7 +1194,7 @@ public class InstantiatorResource {
         return failureReason;
     }
 
-    boolean isOperatingSystem(SystemComponent systemComponent) {
+    private boolean isOperatingSystem(SystemComponent systemComponent) {
         String name = systemComponent.getName();
         String className = systemComponent.getClassName();
         if(className==null) {
@@ -1202,7 +1203,7 @@ public class InstantiatorResource {
         return systemComponent.getClassName().equals(OperatingSystem.class.getName());
     }
 
-    boolean isArchitecture(SystemComponent systemComponent) {
+    private boolean isArchitecture(SystemComponent systemComponent) {
         String name = systemComponent.getName();
         String className = systemComponent.getClassName();
         if(className==null) {
@@ -1211,7 +1212,7 @@ public class InstantiatorResource {
         return systemComponent.getClassName().equals(ProcessorArchitecture.class.getName());
     }
 
-    boolean isMachineAddress(SystemComponent systemComponent) {
+    private boolean isMachineAddress(SystemComponent systemComponent) {
         String name = systemComponent.getName();
         String className = systemComponent.getClassName();
         if(className==null) {
@@ -1225,7 +1226,7 @@ public class InstantiatorResource {
 
     }
 
-    ProcessorArchitecture getArchitecture () {
+    private ProcessorArchitecture getArchitecture () {
         ProcessorArchitecture architecture = null;
         for (PlatformCapability platformCapability : resourceCapability.getPlatformCapabilities()) {
             if(platformCapability instanceof ProcessorArchitecture) {
@@ -1236,7 +1237,7 @@ public class InstantiatorResource {
         return architecture;
     }
 
-    OperatingSystem getOperatingSystem () {
+    private OperatingSystem getOperatingSystem () {
         OperatingSystem operatingSystem = null;
         for (PlatformCapability platformCapability : resourceCapability.getPlatformCapabilities()) {
             if(platformCapability instanceof OperatingSystem) {
@@ -1247,7 +1248,7 @@ public class InstantiatorResource {
         return operatingSystem;
     }
 
-    TCPConnectivity getTCPConnectivity () {
+    private TCPConnectivity getTCPConnectivity () {
         TCPConnectivity tcpConnectivity = null;
         for (PlatformCapability platformCapability : resourceCapability.getPlatformCapabilities()) {
             if(platformCapability instanceof TCPConnectivity) {

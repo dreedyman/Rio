@@ -36,7 +36,7 @@ import java.net.URLConnection;
  * @author Dennis Reedy
  */
 public class OpStringUtil {
-    static Logger logger = LoggerFactory.getLogger(OpStringUtil.class.getPackage().getName());
+    private static Logger logger = LoggerFactory.getLogger(OpStringUtil.class.getPackage().getName());
 
     /**
      * Check if the codebase is null or the codebase needs to be resolved
@@ -111,8 +111,8 @@ public class OpStringUtil {
             }
         }
         sb.append(sb1.toString());
-        if (logger.isInfoEnabled()) {
-            logger.info("{} derived classpath for loading artifact {}", elem.getName(), sb.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("{} derived classpath for loading artifact {}", elem.getName(), sb.toString());
         }
     }
 
