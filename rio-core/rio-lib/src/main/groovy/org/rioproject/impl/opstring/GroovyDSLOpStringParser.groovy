@@ -523,8 +523,7 @@ class GroovyDSLOpStringParser implements OpStringParser {
                 }
                 attributeMap.putAll(helper.capitalizeFirstLetterOfEachKey(attributes))
                 SystemComponent network = new SystemComponent(TCPConnectivity.ID, TCPConnectivity.class.name, attributeMap)
-                if(!exclude)
-                    network.setExclude(exclude)
+                network.setExclude(exclude)
                 helper.addSystemComponent(parent, network, systemRequirementsTable, currentService)
             }
 

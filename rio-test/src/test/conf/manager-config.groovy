@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.rioproject.config.Constants
 import org.rioproject.net.HostUtil
-
 /*
  * Configuration properties used to launch Rio services from the test framework
  */
@@ -51,9 +48,14 @@ manager {
     String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
     System.setProperty("hostAddress", address)
 
+    String serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
+
     jvmOptions =
         '-Djava.protocol.handler.pkgs=org.rioproject.url '+
         '-Djava.rmi.server.useCodebaseOnly=false '+
+        '-Djdk.serialFilter='+serialFilter+' '+
+        '-Dsun.rmi.registry.registryFilter='+serialFilter+' '+
+        '-Dsun.rmi.transport.dgcFilter='+serialFilter+' '+
         '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${rio.home}${/}logs '+
         '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.home}${/}policy${/}policy.all '+
         '-Drio.home=${rio.home} -Drio.test.home=${rio.test.home} -Drio.test.attach '+

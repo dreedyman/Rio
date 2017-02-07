@@ -155,7 +155,11 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         }
 
         Remote proxy = exporter.export(this);
-        registry.bind(execBindName, proxy);
+        try {
+            registry.bind(execBindName, proxy);
+        } catch(Exception e) {
+            logger.warn("Failed to bind to local RMI Registry", e);
+        }
 
         new Thread(new CreateFDH(config, this)).start();
     }

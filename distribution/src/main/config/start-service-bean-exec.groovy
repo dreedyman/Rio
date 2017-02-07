@@ -57,6 +57,6 @@ class StartServiceBeanExecConfig {
                                      (String[]) configArgs)
         ]
 
-        return (ServiceDescriptor[]) serviceDescriptors
+        return serviceDescriptors as ServiceDescriptor[]
     }
 }

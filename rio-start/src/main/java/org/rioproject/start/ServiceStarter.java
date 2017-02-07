@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import java.rmi.RMISecurityManager;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -82,11 +81,11 @@ public class ServiceStarter {
     /**
      * Component name for service starter configuration entries
      */
-    static final String COMPONENT = ServiceStarter.class.getPackage().getName();
+    private static final String COMPONENT = ServiceStarter.class.getPackage().getName();
     /**
      * Configure logger
      */
-    static final Logger logger = LoggerFactory.getLogger(ServiceStarter.class.getPackage().getName());
+    private static final Logger logger = LoggerFactory.getLogger(ServiceStarter.class.getPackage().getName());
     /**
      * Array of strong references to transient services
      */
@@ -245,9 +244,9 @@ public class ServiceStarter {
      * Utility routine that sets a security manager if one isn't already
      * present.
      */
-    synchronized static void ensureSecurityManager() {
+    private synchronized static void ensureSecurityManager() {
         if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new RMISecurityManager());
+            System.setSecurityManager(new SecurityManager());
         }
     }
 
