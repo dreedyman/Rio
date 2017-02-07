@@ -28,16 +28,22 @@ import java.util.StringTokenizer;
  * Utility to replace JVM input args.
  */
 public class JVMOptionChecker {
-    static final Logger logger = LoggerFactory.getLogger(JVMOptionChecker.class);
+    private static final Logger logger = LoggerFactory.getLogger(JVMOptionChecker.class);
 
     public static String getJVMInputArgs(String userArgs) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-        List<String> inputArgs = new ArrayList<String>();
+        List<String> inputArgs = new ArrayList<>();
         /* RuntimeMXBean.getInputArguments() will strip the "" from the command to run
          * if the hot spot option -XX:OnOutOfMemoryError is provided. We need to skip
          * across this, looking for the next option that begins with a - */
         boolean dealWithOnOutOfMemoryError = false;
         for(String s : runtime.getInputArguments()) {
+            if(s.contains("org.rioproject.**;")) {
+                String[] parts = s.split("=");
+                String result = String.format("%s=\"%s\"", parts[0], parts[1]);
+                inputArgs.add(result);
+                continue;
+            }
             if(s.contains("jarjar.org.gradle.process.internal.child.BootstrapSecurityManager"))
                 continue;
             if(s.startsWith("-XX:OnOutOfMemoryError")) {
@@ -49,6 +55,7 @@ public class JVMOptionChecker {
             if(!dealWithOnOutOfMemoryError) {
                 inputArgs.add(s);
             }
+
         }
         if(userArgs==null) {
             return flatten(inputArgs);

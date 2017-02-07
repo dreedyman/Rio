@@ -221,6 +221,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     public Object start(final ServiceBeanContext context) throws ServiceBeanInstantiationException {
         if (context == null)
             throw new IllegalArgumentException("ServiceBeanContext is null");
+        this.context = context;
         try {
             Configuration config = context.getConfiguration();
             try {
@@ -254,7 +255,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         } catch(Throwable t) {
             /* If there is an exception starting, make sure to set the context. This is needed for
              * subsequent logging */
-            this.context = context;
             if(t instanceof ServiceBeanInstantiationException)
                 throw (ServiceBeanInstantiationException)t;
             Throwable cause = getRootCause(t);

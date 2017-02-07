@@ -53,7 +53,7 @@ class StartMonitorConfig {
             ServiceDescriptorUtil.getMonitor(policyFile, getMonitorConfigArgs(rioHome))
         ]
 
-        return (ServiceDescriptor[])serviceDescriptors
+        return serviceDescriptors as ServiceDescriptor[]
     }
 
 }

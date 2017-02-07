@@ -58,7 +58,7 @@ class StartCybernodeConfig {
                 ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
                 ServiceDescriptorUtil.getCybernode(policyFile, getConfigArgs(rioHome))
         ]
-        return (ServiceDescriptor[]) serviceDescriptors
+        return serviceDescriptors as ServiceDescriptor[]
     }
 
 }

@@ -28,7 +28,7 @@ set SLF4J_CLASSPATH="%RIO_HOME%\lib\logging\*";"%RIO_HOME%\config\logging"
 set RIO_LIB=%RIO_HOME%\lib
 
 :: Set Versions
-set rioVersion=5.6
+set rioVersion=5.6.2
 set groovyVersion=2.3.8
 
 if "%JAVA_HOME%" == "" goto noJavaHome
@@ -53,12 +53,18 @@ if "%1"=="create-project" goto create-project
 set command_line=%*
 set launchTarget=org.rioproject.tools.cli.CLI
 set classpath=-cp "%RIO_HOME%\lib\rio-cli-%rioVersion%.jar";"%SLF4J_CLASSPATH%";
-set props="-Drio.home=%RIO_HOME%"
-"%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -Drio.home="%RIO_HOME%" -Djava.rmi.server.useCodebaseOnly=false -Djava.security.policy="%RIO_HOME%"\policy\policy.all %launchTarget% %cliExt% %command_line%
+
+set urlProp="-Djava.protocol.handler.pkgs=org.rioproject.url"
+set rmiProps="-Djava.rmi.server.useCodebaseOnly=false"
+set secProps="-Djava.security.policy="%RIO_HOME%"\policy\policy.all"
+set serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
+set serialProps="-Djdk.serialFilter=%serialFilter% -Dsun.rmi.registry.registryFilter=%serialFilter% -Dsun.rmi.transport.dgcFilter=%serialFilter%"
+
+"%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -Drio.home="%RIO_HOME%" %urlProp% %rmiProps% %secProps% i%serialProps% %launchTarget% %cliExt% %command_line%
 goto end
 
 :create-project
-mvn archetype:generate -DarchetypeGroupId=org.rioproject -DarchetypeGroupId=org.rioproject -DarchetypeRepository=http://www.rio-project.org/maven2 -DarchetypeVersion=5.6
+mvn archetype:generate -DarchetypeGroupId=org.rioproject -DarchetypeGroupId=org.rioproject -DarchetypeRepository=http://www.rio-project.org/maven2 -DarchetypeVersion=5.6.2
 goto end
 
 :start

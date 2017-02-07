@@ -73,6 +73,7 @@ public final class RioProperties {
             for(String propertyName : properties.stringPropertyNames()) {
                 String properyValue = PropertyHelper.expandProperties(properties.getProperty(propertyName));
                 System.setProperty(propertyName, properyValue);
+                System.out.println("Setting "+propertyName+" = "+System.getProperty(propertyName));
             }
         } catch (Exception e) {
             e.printStackTrace();

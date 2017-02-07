@@ -1588,7 +1588,7 @@ public class ServiceElementManager implements InstanceIDManager {
         ServiceBeanInstance[] instances = getServiceBeanInstances();
 
         for (ServiceBeanInstance sbi : instances) {
-            if (sbi.getServiceBeanID().equals(uuid)) {
+            if (sbi.getServiceBeanID()!=null && sbi.getServiceBeanID().equals(uuid)) {
                 instance = sbi;
                 break;
             }
@@ -1931,7 +1931,7 @@ public class ServiceElementManager implements InstanceIDManager {
                     setFaultDetectionHandler(item.service, item.serviceID);
                 }
 
-                /**
+                /*
                  * If this ServiceElementManager is active, then services will
                  * be added as they are provisioned (through the
                  * ServiceBeanProvisionListener). If the service is EXTERNAL, produce an event notifying

@@ -39,7 +39,7 @@ class StartReggieConfig {
             ServiceDescriptorUtil.getLookup(policyFile, reggieConfig as String[])
         ]
 
-        return (ServiceDescriptor[])serviceDescriptors
+        return serviceDescriptors as ServiceDescriptor[]
     }
 
 }
