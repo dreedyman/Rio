@@ -15,6 +15,7 @@
  */
 package org.rioproject.system.capability.connectivity;
 
+import org.rioproject.config.Constants;
 import org.rioproject.deploy.SystemComponent;
 import org.rioproject.net.HostUtil;
 
@@ -77,9 +78,10 @@ public class TCPConnectivity extends ConnectivityCapability {
         if(ipv6Nics>0)
             define(IPv6_NIC, ipv6buff.toString());
 
+        InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         define(NAME, ID);
-        define(HOST_ADDRESS, HostUtil.getInetAddress().getHostAddress());
-        define(HOST_NAME, InetAddress.getLocalHost().getHostName());
+        define(HOST_ADDRESS, address.getHostAddress());
+        define(HOST_NAME, address.getHostName());
     }
 
     /**

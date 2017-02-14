@@ -149,7 +149,7 @@ public final class ClassLoaderUtil {
             builder.append("  cl" + i + " -- ClassLoader ").append(curClassLoader).append(": ");
             if (curClassLoader instanceof URLClassLoader) {
                 URL[] urls = ((URLClassLoader) (curClassLoader)).getURLs();
-                if (urls != null) {
+                if (urls != null && urls.length>0) {
                     builder.append(urls[0]);
                     for (int j = 1; j < urls.length; j++) {
                         builder.append(", ").append(urls[j]);

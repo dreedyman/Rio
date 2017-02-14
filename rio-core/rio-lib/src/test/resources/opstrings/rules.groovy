@@ -5,8 +5,8 @@ import org.rioproject.config.Constants
 deployment(name: 'Gnostic') {
     groups System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
 
-    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.6.2'
-    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.6.2'
+    artifact id: 'service', 'org.rioproject.gnostic:gnostic-service:5.6.3'
+    artifact id: 'service-api', 'org.rioproject.gnostic:gnostic-api:5.6.3'
 
     service(name: 'Gnostic') {
         interfaces {

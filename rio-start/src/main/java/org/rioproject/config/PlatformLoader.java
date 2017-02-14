@@ -144,7 +144,10 @@ public class PlatformLoader {
         pathBuilder.append(rioLibJar.getAbsolutePath()).append(File.pathSeparator);
         pathBuilder.append(rioProxyJar.getAbsolutePath()).append(File.pathSeparator);
         pathBuilder.append(rioApiJar.getAbsolutePath()).append(File.pathSeparator);
-        pathBuilder.append(serviceUiJar.getAbsolutePath());
+        if(serviceUiJar.exists())
+            pathBuilder.append(serviceUiJar.getAbsolutePath());
+        else
+            logger.warn("{} does not exist", serviceUiJar.getPath());
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig("Rio",
                                                                        RioVersion.VERSION,

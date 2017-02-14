@@ -15,6 +15,9 @@
  */
 package org.rioproject.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.*;
 import java.util.Enumeration;
 
@@ -22,6 +25,7 @@ import java.util.Enumeration;
  * Utility for getting host name and address.
  */
 public final class HostUtil {
+    private static Logger logger = LoggerFactory.getLogger(HostUtil.class);
 
     private HostUtil() {
     }
@@ -34,10 +38,14 @@ public final class HostUtil {
      *
      * @throws UnknownHostException if no IP address for the local host could be found.
      */
-    public static InetAddress getInetAddress() throws UnknownHostException {
+    private static InetAddress getInetAddress() throws UnknownHostException {
         InetAddress address = null;
         try {
-            address = getFirstNonLoopbackAddress(false, false);
+            if(logger.isDebugEnabled())
+                logger.debug("Getting first non loopback address");
+            address = getFirstNonLoopbackAddress(true, false);
+            if(logger.isDebugEnabled())
+                logger.debug("Address return as: {}", address);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -91,10 +99,12 @@ public final class HostUtil {
      * @throws UnknownHostException if no IP address for the host name could be found.
      */
     public static InetAddress getInetAddressFromProperty(final String property) throws UnknownHostException {
-        InetAddress inetAddress = getInetAddress();
+        InetAddress inetAddress;
         String value = System.getProperty(property);
         if(value != null) {
             inetAddress = InetAddress.getByName(value);
+        } else {
+            inetAddress = getInetAddress();
         }
         return inetAddress;
     }
@@ -112,6 +122,8 @@ public final class HostUtil {
         Enumeration en = NetworkInterface.getNetworkInterfaces();
         while (en.hasMoreElements()) {
             NetworkInterface i = (NetworkInterface) en.nextElement();
+            if(logger.isDebugEnabled())
+                logger.debug("Checking NetworkInterface: {}", i);
             for (Enumeration en2 = i.getInetAddresses(); en2.hasMoreElements();) {
                 InetAddress addr = (InetAddress) en2.nextElement();
                 if (!addr.isLoopbackAddress()) {

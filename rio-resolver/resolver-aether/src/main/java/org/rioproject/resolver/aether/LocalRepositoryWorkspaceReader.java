@@ -62,7 +62,18 @@ public class LocalRepositoryWorkspaceReader implements WorkspaceReader {
     }
 
     public List<String> findVersions(Artifact artifact) {
-        return new ArrayList<String>();
+        List<String> versions = new ArrayList<String>();
+        String artifactRoot = String.format("%s/%s",
+                                            artifact.getGroupId().replace('.', File.separatorChar),
+                                            artifact.getArtifactId());
+        File artifactDir = new File(localRepositoryDir, artifactRoot);
+        if(artifactDir.exists()) {
+            for (File f : artifactDir.listFiles()) {
+                if (f.isDirectory())
+                    versions.add(f.getName());
+            }
+        }
+        return versions;
     }
 
     protected String getArtifactPath(final Artifact a) {
