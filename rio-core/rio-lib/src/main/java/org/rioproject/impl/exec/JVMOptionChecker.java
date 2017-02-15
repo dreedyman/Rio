@@ -40,7 +40,11 @@ public class JVMOptionChecker {
         for(String s : runtime.getInputArguments()) {
             if(s.contains("org.rioproject.**;")) {
                 String[] parts = s.split("=");
-                String result = String.format("%s=\"%s\"", parts[0], parts[1]);
+                String result;
+                if(!parts[1].startsWith(""))
+                    result = String.format("%s=\"%s\"", parts[0], parts[1]);
+                else
+                    result = String.format("%s=%s", parts[0], parts[1]);
                 inputArgs.add(result);
                 continue;
             }
