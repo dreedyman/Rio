@@ -40,12 +40,10 @@ public class JVMOptionChecker {
         for(String s : runtime.getInputArguments()) {
             if(s.contains("org.rioproject.**;")) {
                 String[] parts = s.split("=");
-                String result;
-                if(!parts[1].startsWith(""))
-                    result = String.format("%s=\"%s\"", parts[0], parts[1]);
-                else
-                    result = String.format("%s=%s", parts[0], parts[1]);
+                String value = parts[1].replaceAll("\"", "");
+                String result = String.format("%s=\"%s\"", parts[0], value);
                 inputArgs.add(result);
+                logger.warn("Added: [{}]", result);
                 continue;
             }
             if(s.contains("jarjar.org.gradle.process.internal.child.BootstrapSecurityManager"))
