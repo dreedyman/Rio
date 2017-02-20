@@ -20,14 +20,13 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
-import org.rioproject.impl.system.measurable.cpu.CPU;
-import org.rioproject.system.MeasuredResource;
 import org.rioproject.impl.system.measurable.SimpleThresholdListener;
+import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.cpu.CpuUtilization;
 import org.rioproject.watch.ThresholdValues;
 
 /**
- * Simple test of DiskSpace class
+ * Simple test of CPU class
  */
 public class CPUTest {
     @Before

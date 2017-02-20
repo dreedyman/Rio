@@ -96,6 +96,12 @@ class BasicMeasurable {
  */
 @Component('org.rioproject.system.measurable.cpu')
 class MeasurableCPU extends BasicMeasurable {
+    MeasurableMonitor getMonitor() {
+        if(OperatingSystemType.isLinux())
+            return new LinuxHandler()
+        else
+            return new SystemCPUHandler()
+    }
     /*
      * High threshold is the number of CPUs on the system
      */
