@@ -42,7 +42,7 @@ public class CPUTest {
         Assert.assertTrue("MeasuredResource should not be null", mRes!=null);
         Assert.assertTrue("MeasuredResource should be a CPUUtilization", mRes instanceof CpuUtilization);
         double utilization = cpu.getUtilization();
-        Assert.assertTrue("Utilization should be > 0", utilization>0);
+        Assert.assertTrue("Utilization should be >= 0", utilization>=0);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class CPUTest {
         cpu.start();
         cpu.checkValue();
         double utilization = cpu.getUtilization();
-        Assert.assertTrue("Utilization should be > 0", utilization>0);
+        Assert.assertTrue("Utilization should be >= 0", utilization>=0);
         Assert.assertTrue(l.getType()== null);
     }
 
@@ -67,7 +67,7 @@ public class CPUTest {
         cpu.start();
         cpu.checkValue();
         double utilization = cpu.getUtilization();
-        Assert.assertTrue("Utilization should be > 0", utilization>0);
+        Assert.assertTrue("Utilization should be >= 0", utilization>=0);
         Assert.assertTrue(l.getType()==null);
     }
 }

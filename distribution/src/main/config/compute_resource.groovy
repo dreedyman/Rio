@@ -22,6 +22,8 @@ import net.jini.config.Configuration
 import org.rioproject.config.Component
 import org.rioproject.impl.system.OperatingSystemType
 import org.rioproject.impl.system.measurable.MeasurableMonitor
+import org.rioproject.impl.system.measurable.cpu.LinuxHandler
+import org.rioproject.impl.system.measurable.cpu.SystemCPUHandler
 import org.rioproject.impl.system.measurable.memory.MemInfoMonitor
 import org.rioproject.impl.system.measurable.memory.SystemMemoryMonitor
 import org.rioproject.impl.system.measurable.memory.pool.MemoryPool
