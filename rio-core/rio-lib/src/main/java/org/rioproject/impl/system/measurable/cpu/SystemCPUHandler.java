@@ -85,9 +85,10 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
         double cpuUtilization = 0;
         if(opSysMBean instanceof com.sun.management.OperatingSystemMXBean) {
             cpuUtilization = ((com.sun.management.OperatingSystemMXBean)opSysMBean).getSystemCpuLoad();
+            cpuUtilization = cpuUtilization>0?cpuUtilization:0;
         } else {
             cpuUtilization = opSysMBean.getSystemLoadAverage();
-            cpuUtilization = (cpuUtilization>0?cpuUtilization/100:0);
+            cpuUtilization = cpuUtilization>0?cpuUtilization/100:0;
         }
         return new CpuUtilization(id, cpuUtilization, tVals);
     }
