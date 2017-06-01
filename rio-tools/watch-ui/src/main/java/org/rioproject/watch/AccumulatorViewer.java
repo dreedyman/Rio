@@ -460,8 +460,14 @@ public class AccumulatorViewer extends JPanel implements TreeSelectionListener {
 
     private CalculableViewable loadView(String view) throws ClassNotFoundException, 
     InstantiationException, IllegalAccessException {
-        Class vuClass = loader.loadClass(view);
-        return(CalculableViewable)vuClass.newInstance();
+        ClassLoader cCL = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(AccumulatorViewer.class.getClassLoader());
+        try {
+            Class vuClass = loader.loadClass(view);
+            return (CalculableViewable) vuClass.newInstance();
+        } finally {
+            Thread.currentThread().setContextClassLoader(cCL);
+        }
     }
 
     static class GridBagPanel extends JPanel {

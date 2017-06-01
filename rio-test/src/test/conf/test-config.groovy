@@ -207,3 +207,12 @@ AdvertiseLifecycleTest {
     numMonitors = 1
     numLookups = 1
 }
+
+AddTestPropertiesTest {
+    groups = "AddTestPropertiesTest"
+    numCybernodes = 1
+    numMonitors = 1
+    numLookups = 1
+    opstring = 'src/test/resources/opstring/simple_opstring.groovy'
+    autoDeploy = true
+}

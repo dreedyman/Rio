@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Properties;
 
 public class SimpleImpl implements Simple {
     String food;
@@ -77,6 +78,10 @@ public class SimpleImpl implements Simple {
     public String hello(String message) throws RemoteException {
         System.out.println("Client says hello : "+message);
         return("Hello visitor : "+visitorNumber++);
+    }
+
+    public Properties getSystemProperties() {
+        return System.getProperties();
     }
 
     public int getGauge() {

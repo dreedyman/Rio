@@ -73,6 +73,7 @@ class TestManager {
     def config
     boolean createShutdownHook
     TestConfig testConfig
+    def additionalExecProps=  [:]
     ThreadPoolExecutor execPool = (ThreadPoolExecutor)java.util.concurrent.Executors.newCachedThreadPool();
 
     /**
@@ -99,7 +100,7 @@ class TestManager {
      *
      * @throws IllegalArgumentException if the testConfig is null
      */
-    public void init(TestConfig testConfig) {
+    void init(TestConfig testConfig) {
         if(testConfig==null)
             throw new IllegalArgumentException("testConfig cannot be null")
         this.testConfig = testConfig
@@ -638,6 +639,24 @@ class TestManager {
         }
         return classpathBuilder.toString()
     }
+
+    def addExecProperty(String key, String value) {
+        additionalExecProps.put(key, value)
+    }
+
+    def addExecProperties(Map options) {
+        additionalExecProps.putAll(options)
+    }
+
+    String getAdditonalExecProps() {
+        StringBuilder s = new StringBuilder()
+        additionalExecProps.each {k, v ->
+            if(s.length()>0)
+                s.append(" ")
+            s.append("-D").append(k).append("=").append(v)
+        }
+        s.toString()
+    }
     
     private void exec(String starter) {
         String classpath = "${PropertyHelper.expandProperties(config.manager.execClassPath)}"
@@ -647,6 +666,7 @@ class TestManager {
         jvmOptions = "${PropertyHelper.expandProperties(jvmOptions)}"
         if(config.manager.inheritOptions)
             jvmOptions = JVMOptionChecker.getJVMInputArgs(jvmOptions)
+        jvmOptions = jvmOptions+ getAdditonalExecProps()
         jvmOptions = jvmOptions+' -D'+Constants.RIO_TEST_EXEC_DIR+'='+System.getProperty("user.dir")
 
         StringBuilder classpathBuilder = new StringBuilder()

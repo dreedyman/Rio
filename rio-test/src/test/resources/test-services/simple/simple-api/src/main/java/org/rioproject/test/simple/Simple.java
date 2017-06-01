@@ -16,7 +16,9 @@
 package org.rioproject.test.simple;
 
 import java.rmi.RemoteException;
+import java.util.Properties;
 
 public interface Simple {
     String hello(String message) throws RemoteException;
+    Properties getSystemProperties() throws RemoteException;
 }

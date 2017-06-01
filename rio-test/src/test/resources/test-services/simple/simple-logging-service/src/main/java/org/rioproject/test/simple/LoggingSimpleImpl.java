@@ -20,6 +20,8 @@ import org.rioproject.logging.ServiceLogEventHandlerHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Properties;
+
 
 /**
  * A Simple service that logs.
@@ -42,6 +44,10 @@ public class LoggingSimpleImpl implements Simple {
             logger.error("Passed a null message parameter");
         }
         return(processMessage(message));
+    }
+
+    public Properties getSystemProperties() {
+        return System.getProperties();
     }
 
     private String processMessage(String message) {

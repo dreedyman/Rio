@@ -40,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.LogManager;
 
 /**
@@ -115,8 +116,24 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         Utils.setEnvironment();
         testConfig = createTestConfig(getTestClass().getName());
         testManager = testConfig.getTestManager();
+
+        for (FrameworkMethod fMethod : getTestClass().getAnnotatedMethods(AddSystemProperties.class)) {
+            Method method = fMethod.getMethod();
+            if(Modifier.isStatic(method.getModifiers())) {
+                method.setAccessible(true);
+                try {
+                    Map options = (Map) method.invoke(null);
+                    testManager.addExecProperties(options);
+                    break;
+                } catch (Exception e) {
+                    logger.warn("Invoking static method [{}] with declared annotation {}",
+                                method.getName(), AddSystemProperties.class.getName(),
+                                e);
+                }
+            }
+        }
         testManager.init(testConfig);
-        
+
         for (FrameworkMethod fMethod : getTestClass().getAnnotatedMethods(SetTestManager.class)) {
             Method method = fMethod.getMethod();
             if(Modifier.isStatic(method.getModifiers())) {
@@ -128,7 +145,6 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
                                 method.getName(), SetTestManager.class.getName(),
                                 e);
                 }
-                //break;
             }
         }
         for(Field field : getAnnotatedFields(getTestClass().getJavaClass(),
