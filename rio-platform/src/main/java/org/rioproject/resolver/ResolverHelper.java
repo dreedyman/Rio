@@ -51,15 +51,24 @@ import java.util.ServiceLoader;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public final class ResolverHelper {
     private static URLClassLoader resolverLoader;
-    static final Logger logger = LoggerFactory.getLogger(ResolverHelper.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ResolverHelper.class.getName());
     private static final ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
     static {
-        File resolverJar = new File(getResolverJarFile());
         try {
-            resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
-                                                Thread.currentThread().getContextClassLoader());
-        } catch (MalformedURLException e) {
-            logger.error("Creating ClassLoader to load {}", resolverJar.getPath(), e);
+            Resolver resolver = doGetResolver(Thread.currentThread().getContextClassLoader());
+            if(resolver!=null)
+                resolverLoader = (URLClassLoader) resolver.getClass().getClassLoader();
+        } catch (IOException | ResolverException e) {
+            logger.warn("Failed getting resolver from context classloader, try loading from rio dist", e);
+        }
+        if(resolverLoader==null) {
+            File resolverJar = new File(getResolverJarFile());
+            try {
+                resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
+                                                    Thread.currentThread().getContextClassLoader());
+            } catch (MalformedURLException e) {
+                logger.error("Creating ClassLoader to load {}", resolverJar.getPath(), e);
+            }
         }
     }
 
@@ -85,7 +94,7 @@ public final class ResolverHelper {
 
         if(logger.isDebugEnabled())
             logger.debug("Using Resolver {}", resolver.getClass().getName());
-        List<URL> jars = new ArrayList<URL>();
+        List<URL> jars = new ArrayList<>();
         if (artifact != null) {
             String[] artifactParts = artifact.split(" ");
             for(String artifactPart : artifactParts) {
@@ -132,7 +141,7 @@ public final class ResolverHelper {
        return getResolver(resolverLoader);
     }
 
-    static String getResolverJarFile() {
+    private static String getResolverJarFile() {
         String resolverJarFile = resolverConfiguration.getResolverJar();
         if(resolverJarFile!=null && !new File(resolverJarFile).exists()) {
             logger.warn("The configured resolver jar file [{}] does not exist, will attempt to load default resolver",
@@ -208,7 +217,10 @@ public final class ResolverHelper {
                         message.append("\n");
                     message.append(rr);
                 }
-                logger.debug("Resolver repositories: {}\n{}", r.getRemoteRepositories().size(), message.toString());
+                if(r.getRemoteRepositories().isEmpty())
+                    logger.debug("Configured resolver repositories: 0");
+                else
+                    logger.debug("Configured resolver repositories: {}\n{}", r.getRemoteRepositories().size(), message.toString());
             }
         } catch (Exception e) {
             if(e instanceof ResolverException)

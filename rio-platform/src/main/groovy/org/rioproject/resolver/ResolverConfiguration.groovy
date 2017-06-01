@@ -29,26 +29,36 @@ import org.slf4j.LoggerFactory
  */
 class ResolverConfiguration {
     public static final String RESOLVER_CONFIG = "org.rioproject.resolver.config"
-    public static final String RESOLVER_JAR = "org.rioproject.resolver.jar";
-    private final File resolverConfig
+    public static final String RESOLVER_JAR = "org.rioproject.resolver.jar"
+    private final URL resolverConfig
     static final Logger logger = LoggerFactory.getLogger(ResolverConfiguration.class)
 
     ResolverConfiguration() {
         if(System.properties[RESOLVER_CONFIG]==null) {
-            resolverConfig = new File("${RioHome.get()}/config/resolverConfig.groovy")
+            resolverConfig = createFromFile("${RioHome.get()}/config/resolverConfig.groovy")
         } else {
-            resolverConfig = new File(System.getProperty(RESOLVER_CONFIG))
+            String configRef = System.getProperty(RESOLVER_CONFIG)
+            if(configRef.contains("!/")) {
+                int ndx = configRef.lastIndexOf("/")
+                String resource = configRef.substring(ndx+1)
+                logger.debug("Loading [{}] from context classloader {}",
+                             resource, Thread.currentThread().getContextClassLoader())
+                resolverConfig = Thread.currentThread().getContextClassLoader().getResource(resource)
+            } else {
+                resolverConfig = createFromFile(configRef)
+            }
         }
-        if(!resolverConfig.exists())
-            logger.warn("The resolver configuration file does not exist {}, will", resolverConfig.path)
+        if(resolverConfig==null)
+            logger.warn("The resolver configuration was not loaded {}, using empty configuration",
+                        System.properties[RESOLVER_CONFIG])
         else
-            logger.debug("Using resolver configuration ${resolverConfig}")
+            logger.debug("Using resolver configuration ${resolverConfig.toExternalForm()}")
     }
 
     String getResolverJar() {
         String resolverJar = System.properties[RESOLVER_JAR]
-        if(resolverJar==null && resolverConfig.exists()) {
-            def config = new ConfigSlurper().parse(resolverConfig.toURI().toURL())
+        if(resolverJar==null && resolverConfig!=null) {
+            def config = new ConfigSlurper().parse(resolverConfig)
             resolverJar = config.resolver.jar
         }
         return resolverJar
@@ -56,12 +66,12 @@ class ResolverConfiguration {
 
     List<RemoteRepository> getRemoteRepositories() {
         def repositories = []
-        if(resolverConfig.exists()) {
-            def config = new ConfigSlurper().parse(resolverConfig.toURI().toURL())
+        if(resolverConfig!=null) {
+            def config = new ConfigSlurper().parse(resolverConfig)
             config.resolver.repositories.remote.each { id, url ->
                 RemoteRepository remoteRepository = new RemoteRepository()
-                remoteRepository.id = id
-                remoteRepository.url = url
+                remoteRepository.setId(id as String)
+                remoteRepository.setUrl(url as String)
                 repositories << remoteRepository
             }
         }
@@ -70,13 +80,21 @@ class ResolverConfiguration {
 
     List<File> getFlatDirectories() {
         def repositories = []
-        if(resolverConfig.exists()) {
-            def config = new ConfigSlurper().parse(resolverConfig.toURI().toURL())
+        if(resolverConfig!=null) {
+            def config = new ConfigSlurper().parse(resolverConfig)
             config.resolver.repositories.flatDirs.each { repo ->
                 repositories << repo
             }
         }
         return repositories
 
+    }
+
+    private static URL createFromFile(String filename) {
+        URL url = null
+        File configFileRef = new File(filename)
+        if(configFileRef.exists())
+            url = configFileRef.toURI().toURL()
+        return url
     }
 }

@@ -165,7 +165,7 @@ public class WebsterUTest {
     }
 
     private List<String> get(int port) throws IOException {
-        URL url = new URL("http://" + HostUtil.getInetAddress().getHostAddress() + ":" + port);
+        URL url = new URL("http://" + HostUtil.getInetAddressFromProperty("java.rmi.server.hostname").getHostAddress() + ":" + port);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestMethod("GET");

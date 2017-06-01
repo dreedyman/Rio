@@ -27,10 +27,10 @@ import net.jini.lookup.entry.jmx.JMXProperty;
 import net.jini.lookup.entry.jmx.JMXProtocolType;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
+import org.rioproject.impl.discovery.ReggieStat;
 import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.service.ServiceStopHandler;
 import org.rioproject.rmi.RegistryUtil;
-import org.rioproject.impl.discovery.ReggieStat;
 import org.rioproject.tools.webster.Webster;
 import org.rioproject.util.TimeUtil;
 import org.slf4j.Logger;
@@ -43,7 +43,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.rmi.ConnectException;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -108,7 +107,7 @@ public class CLI {
      */
     protected synchronized static void ensureSecurityManager() {
         if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new RMISecurityManager());
+            System.setSecurityManager(new SecurityManager());
         }
     }
 

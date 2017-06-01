@@ -15,7 +15,6 @@
  */
 package org.rioproject.impl.system.measurable.cpu;
 
-import org.rioproject.impl.system.OperatingSystemType;
 import org.rioproject.impl.system.measurable.MeasurableMonitor;
 import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.system.measurable.cpu.CpuUtilization;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
-import java.lang.reflect.Method;
 
 /**
  * CPU monitor that obtains system CPU utilization. This utility uses either
@@ -42,39 +40,12 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
     private ThresholdValues tVals;
     private SigarHelper sigar;
     private OperatingSystemMXBean opSysMBean = null;
-    private Method jmxCPUUtilization;
-    private MeasurableMonitor<CpuUtilization> altMonitor;
     private static Logger logger = LoggerFactory.getLogger(SystemCPUHandler.class.getPackage().getName());
 
     public SystemCPUHandler() {
         sigar = SigarHelper.getInstance();
         if(sigar==null) {
-            String jvmVersion = System.getProperty("java.version");
-            if(!jvmVersion.contains("1.5")) {
-                opSysMBean = ManagementFactory.getOperatingSystemMXBean();
-                try {
-                    jmxCPUUtilization =
-                        OperatingSystemMXBean.class.getMethod("getSystemLoadAverage");
-                    logger.debug("Using OperatingSystemMXBean.getSystemLoadAverage()");
-                } catch (NoSuchMethodException e) {
-                    logger.warn("Unable to obtain OperatingSystemMXBean.getSystemLoadAverage method", e);
-                }
-            }
-            if(jmxCPUUtilization==null) {
-                if(OperatingSystemType.isLinux()) {
-                    logger.debug("Create LinuxHandler");
-                    altMonitor = new LinuxHandler();
-                } else if(OperatingSystemType.isSolaris()) {
-                    logger.debug("Create MpstatOutputParser");
-                    altMonitor = new MpstatOutputParser();
-                } else if(OperatingSystemType.isMac()) {
-                    logger.debug("Create MacTopOutputParser");
-                    altMonitor = new MacTopOutputParser();
-                } else {
-                    logger.debug("Create GenericCPUMeasurer");
-                    altMonitor = new GenericCPUMeasurer();
-                }
-            }
+            opSysMBean = ManagementFactory.getOperatingSystemMXBean();
         } else {
             logger.debug("Using SIGAR for CPU utilization");
         }
@@ -82,14 +53,10 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
 
     public void setID(String id) {
         this.id = id;
-        if(altMonitor!=null)
-            altMonitor.setID(id);
     }
 
     public void setThresholdValues(ThresholdValues tVals) {
         this.tVals = tVals;
-        if(altMonitor!=null)
-            altMonitor.setThresholdValues(tVals);
     }
 
     public CpuUtilization getMeasuredResource() {
@@ -97,19 +64,12 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
         if(sigar!=null) {
             util = getSigarCpuUtilization();
         } else {
-            if(jmxCPUUtilization!=null) {
-                util = getJmxCpuUtilization();
-            } else {
-                util = altMonitor.getMeasuredResource();
-            }
+            util = getJmxCpuUtilization();
         }
-
         return util;
     }
 
     public void terminate() {
-        if(altMonitor!=null)
-            altMonitor.terminate();
     }
 
     private CpuUtilization getSigarCpuUtilization() {
@@ -123,11 +83,12 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
 
     private CpuUtilization getJmxCpuUtilization() {
         double cpuUtilization = 0;
-        try {
-            cpuUtilization = (Double)jmxCPUUtilization.invoke(opSysMBean);
-            cpuUtilization = (cpuUtilization>0?cpuUtilization/100:cpuUtilization);
-        } catch (Exception e) {
-            logger.warn("Could not getSystemLoadAverage() using reflection on OperatingSystemMXBean.getSystemLoadAverage()", e);
+        if(opSysMBean instanceof com.sun.management.OperatingSystemMXBean) {
+            cpuUtilization = ((com.sun.management.OperatingSystemMXBean)opSysMBean).getSystemCpuLoad();
+            cpuUtilization = cpuUtilization>0?cpuUtilization:0;
+        } else {
+            cpuUtilization = opSysMBean.getSystemLoadAverage();
+            cpuUtilization = cpuUtilization>0?cpuUtilization/100:0;
         }
         return new CpuUtilization(id, cpuUtilization, tVals);
     }

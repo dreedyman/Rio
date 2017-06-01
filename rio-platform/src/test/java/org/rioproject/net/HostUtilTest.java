@@ -24,11 +24,6 @@ import java.net.InetAddress;
  * @author Dennis Reedy
  */
 public class HostUtilTest {
-    @Test
-    public void testGetInetAddress() throws Exception {
-        InetAddress inetAddress = HostUtil.getInetAddress();
-        Assert.assertNotNull(inetAddress);
-    }
 
     @Test
     public void testGetHostAddress() throws Exception {

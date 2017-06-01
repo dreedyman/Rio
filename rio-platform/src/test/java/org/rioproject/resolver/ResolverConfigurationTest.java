@@ -53,9 +53,10 @@ public class ResolverConfigurationTest {
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
         String jarName = resolverConfiguration.getResolverJar();
         Assert.assertNotNull(jarName);
-        Assert.assertTrue(jarName.equals(String.format("%s/lib/resolver/resolver-aether-%s.jar",
-                                                       System.getProperty("rio.home"),
-                                                       RioVersion.VERSION)));
+        String expected = String.format("%s/lib/resolver/resolver-aether-%s.jar",
+                                        System.getProperty("rio.home"),
+                                        RioVersion.VERSION);
+        Assert.assertTrue("Expected: "+expected+", got: "+jarName, jarName.equals(expected));
     }
 
     @Test

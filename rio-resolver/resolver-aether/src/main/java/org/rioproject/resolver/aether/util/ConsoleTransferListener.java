@@ -39,7 +39,7 @@ public class ConsoleTransferListener extends AbstractTransferListener {
     }
 
     public ConsoleTransferListener(PrintStream out) {
-        this.out = (out != null) ? out : System.out;
+        this.out = (out != null) ? out : System.err;
     }
 
     @Override

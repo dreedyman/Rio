@@ -98,7 +98,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.6.2
+rioVersion=5.6.4
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -212,6 +212,7 @@ if [ "$start" = "1" ]; then
         -Djava.security.policy=`toNative $RIO_HOME/policy/policy.all` \
         $loggingConfig \
         -Djdk.serialFilter=$serialFilter \
+        -Djava.net.preferIPv4Stack=true \
         -Dsun.rmi.registry.registryFilter=$serialFilter \
         -Dsun.rmi.transport.dgcFilter=$serialFilter \
         -Dorg.rioproject.service=$service \
@@ -227,7 +228,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.6.2
+    -DarchetypeVersion=5.6.4
 elif [ "$install" = "1" ] ;then
     # Run installer
     installRioToLocalRepository
