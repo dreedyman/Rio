@@ -82,7 +82,8 @@ public class OpStringUtil {
                 canServe(jar, codebaseToUse);
             bundle.setCodebase(codebaseToUse);
             logger.debug("Fixed ClassBundle {}", bundle);
-
+        } else {
+            logger.debug("ClassBundle {}", bundle);
         }
 
         ClassBundle[] exports = elem.getExportBundles();

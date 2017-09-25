@@ -54,7 +54,7 @@
     </reporting>
 
     <properties>
-        <rio.version>5.6.4</rio.version>
+        <rio.version>5.6.5</rio.version>
         <rio.plugin.version>5.1</rio.plugin.version>
         <slf4j.version>1.7.5</slf4j.version>
         <logback.version>1.0.11</logback.version>
