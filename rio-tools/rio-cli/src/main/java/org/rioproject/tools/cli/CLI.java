@@ -1133,7 +1133,7 @@ public class CLI {
     /**
      * Handle jconsole command
      */
-    protected static class JConsoleHandler implements OptionHandler {
+    public static class JConsoleHandler implements OptionHandler {
         public String process(final String input, final BufferedReader br, final PrintStream out) {
             if (out == null)
                 throw new IllegalArgumentException("Must have an output PrintStream");
