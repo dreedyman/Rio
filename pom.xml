@@ -378,8 +378,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <optimize>true</optimize>
                     <encoding>UTF-8</encoding>
                     <meminitial>128m</meminitial>
@@ -445,6 +445,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <shade.version>2.4.3</shade.version>
+        <jetty.version>9.4.6.v20170531</jetty.version>
     </properties>
 
 </project>
