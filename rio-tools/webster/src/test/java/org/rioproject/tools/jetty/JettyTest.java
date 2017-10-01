@@ -23,39 +23,55 @@ import static org.junit.Assert.assertTrue;
 public class JettyTest {
 
     @Test
+    public void testSecure() throws Exception {
+        String projectDir = System.getProperty("projectDir");
+        String resources = new File(projectDir+"/src/test/resources").getPath();
+        File fileDir = new File(projectDir+"/target/files-0");
+        if(fileDir.mkdirs())
+            System.out.println("Created "+fileDir.getPath());
+        Jetty jetty = new Jetty().setRoots(fileDir.getPath()).setPutDir(fileDir.getPath());
+        jetty.startSecure();
+        String jettyURL = jetty.getURI().toURL().toExternalForm();
+        System.out.println("===> jettyURL: "+jetty.getURI().toURL().getProtocol());
+        System.out.println("===> jettyURL: "+jettyURL);
+        assertTrue(jetty.getURI().toURL().getProtocol().equals("https"));
+        //jetty.join();
+    }
+
+    @Test
     public void testUpload() throws Exception {
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
-
-        File fileDir = new File(projectDir+"/target/files");
+        File fileDir = new File(projectDir+"/target/files-1");
         if(fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
 
-        Jetty jetty = new Jetty(0, new String[]{fileDir.getPath()});
+        Jetty jetty = new Jetty().setRoots(fileDir.getPath()).setPutDir(fileDir.getPath());
+        jetty.start();
+        /*0, new String[]{fileDir.getPath()}, fileDir.getPath());*/
         String jettyURL = String.format("http://%s:%s", jetty.getAddress(), jetty.getPort());
-        System.out.println("===> "+jettyURL);
-        jetty.join();
+        System.out.println("===> jettyURL: "+jettyURL);
+        //jetty.join();
         File file1 = new File(resources+"/file1.txt");
         assertTrue(file1.exists());
         //GenericUtil.upload(file1, new URL(jettyURL+"/"+file1.getName()));
         upload(new URL(jettyURL+"/"+file1.getName()), file1);
+
+        File uploaded = new File(fileDir, "file1.txt");
+        assertTrue(uploaded.exists());
     }
 
-    //@Test
+    @Test
     public void testStart() throws Exception {
-        File dist = new File(System.getProperty("dist"));
-        String lib = new File(dist, "lib/sorcer/lib").getPath();
-        String libDl = new File(dist, "lib/sorcer/lib-dl").getPath();
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
-        File fileDir = new File(projectDir+"/build/files");
+        File fileDir = new File(projectDir+"/target/files-2");
         if(fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
-        Jetty jetty = new Jetty(0, new String[]{lib, libDl, resources});
-        //assertTrue(jetty.getPort()==8080);
-        assertTrue(InetAddress.getLocalHost().getHostAddress().equals(jetty.getAddress()));
+        Jetty jetty = new Jetty().setRoots(resources).setPutDir(fileDir.getPath());
+        jetty.start();
 
-        int count = 500;
+        int count = 5;
         CyclicBarrier gate = new CyclicBarrier(count+1);
         CountDownLatch filesWritten = new CountDownLatch(count);
         List<Fetcher> fetchers = new ArrayList<>();
@@ -99,11 +115,7 @@ public class JettyTest {
         CountDownLatch filesWritten;
         int failed;
 
-        public Fetcher(CyclicBarrier gate,
-                       URL url,
-                       File fileDir,
-                       CountDownLatch filesWritten,
-                       int index) {
+        Fetcher(CyclicBarrier gate, URL url, File fileDir, CountDownLatch filesWritten, int index) {
             this.gate = gate;
             this.url = url;
             this.fileDir = fileDir;
@@ -120,12 +132,11 @@ public class JettyTest {
                 while(!downloaded) {
                     try {
                         Files.write(f.toPath(), fetch(url).getBytes());
-                        //System.out.println("Wrote " + f.getName());
-                        filesWritten.countDown();
+                        System.out.println("Wrote " + f.getName());
                         downloaded = true;
                     } catch (IOException e) {
                         failed++;
-                        //System.out.println("Failed writing "+f.getName()+", "+e.getClass().getName()+": "+e.getMessage());
+                        System.out.println("Failed writing "+f.getName()+", "+e.getClass().getName()+": "+e.getMessage());
                         if(e instanceof SocketException) {
                             Thread.sleep(50);
                         } else {
@@ -133,8 +144,8 @@ public class JettyTest {
                             break;
                         }
                     }
-
                 }
+                filesWritten.countDown();
             } catch (InterruptedException | BrokenBarrierException  e) {
                 e.printStackTrace();
             }

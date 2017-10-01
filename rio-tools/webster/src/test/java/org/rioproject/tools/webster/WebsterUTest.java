@@ -143,9 +143,7 @@ public class WebsterUTest {
         Webster w = null;
         try {
             w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
-        } catch (BindException e) {
-            t = e;
-        } catch (MalformedURLException e) {
+        } catch (BindException | MalformedURLException e) {
             t = e;
         }
         Assert.assertNull(t);
@@ -170,7 +168,7 @@ public class WebsterUTest {
 
         connection.setRequestMethod("GET");
 
-        List<String> items = new ArrayList<String>();
+        List<String> items = new ArrayList<>();
 
         connection.connect();
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));

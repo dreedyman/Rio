@@ -100,8 +100,8 @@ public class Utils {
         sb.append("            </activation>").append("\n");
         sb.append("            <repositories>").append("\n");
         sb.append("                <repository>").append("\n");
-        sb.append("                    <id>rio</id>").append("\n");
-        sb.append("                    <url>http://www.rio-project.org/maven2</url>").append("\n");
+        sb.append("                    <id>jboss</id>").append("\n");
+        sb.append("                    <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>").append("\n");
         sb.append("                    <releases>").append("\n");
         sb.append("                        <enabled>true</enabled>").append("\n");
         sb.append("                    </releases>").append("\n");
@@ -110,8 +110,8 @@ public class Utils {
         sb.append("                    </snapshots>").append("\n");
         sb.append("                </repository>").append("\n");
         sb.append("                <repository>").append("\n");
-        sb.append("                    <id>jboss</id>").append("\n");
-        sb.append("                    <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>").append("\n");
+        sb.append("                    <id>rio</id>").append("\n");
+        sb.append("                    <url>http://www.rio-project.org/maven2</url>").append("\n");
         sb.append("                    <releases>").append("\n");
         sb.append("                        <enabled>true</enabled>").append("\n");
         sb.append("                    </releases>").append("\n");

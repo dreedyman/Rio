@@ -18,6 +18,8 @@ package org.rioproject.tools.jetty;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,14 +35,17 @@ import java.io.IOException;
 public class PutHandler extends DefaultHandler {
     private File putDir;
     private static final int BUFFER_SIZE = 4096;
+    private static final Logger logger = LoggerFactory.getLogger(PutHandler.class);
 
     public PutHandler(File putDir) {
         this.putDir = putDir;
+        logger.info("Created PutHandler for: {}", putDir.getPath());
     }
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String method = request.getMethod();
+        logger.info("Method: {}", method);
         if (!HttpMethod.PUT.is(method)) {
             super.handle(target, baseRequest, request, response);
             return;

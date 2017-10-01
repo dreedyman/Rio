@@ -28,7 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.rioproject.impl.config.DynamicConfiguration;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.RemoteRepository;

@@ -16,18 +16,20 @@
  */
 package org.rioproject.tools.jetty;
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.rioproject.net.HostUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URI;
 
 /**
  * Embedded Jetty server
@@ -35,10 +37,14 @@ import java.io.File;
  * Created by Dennis Reedy on 6/19/17.
  */
 public class Jetty {
-    private final Server server;
+    private int port;
+    private int minThreads;
+    private int maxThreads;
+    private Server server;
+    private final ContextHandlerCollection contexts = new ContextHandlerCollection();
     private static final Logger logger = LoggerFactory.getLogger(Jetty.class);
 
-    public Jetty(int port, String... roots) throws Exception {
+    /*public Jetty(int port, String... roots) throws Exception {
         this(port, roots, System.getProperty("webster.put.dir"));
     }
 
@@ -58,39 +64,106 @@ public class Jetty {
         String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
         connector.setHost(address);
         server.setConnectors(new Connector[] { connector });
-        HandlerList handlers = new HandlerList();
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
         for(String root : roots) {
             logger.info("Adding {}", new File(root).getName());
-
-            /*ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setDirectoriesListed(true);
-            resourceHandler.setResourceBase(new File(root).getName());
-            ContextHandler context = new ContextHandler();
-            context.setContextPath("/");
             File dir = new File(root);
-            context.setBaseResource(Resource.newResource(dir));
-            context.setHandler(resourceHandler);
-            contexts.addHandler(context);*/
+            contexts.addHandler(createContextHandler(dir, new ResourceHandler()));
 
-
-            ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setDirectoriesListed(true);
-            resourceHandler.setResourceBase(".");
-            handlers.addHandler(resourceHandler);
         }
-        if(putDir!=null)
-            handlers.addHandler(new PutHandler(new File(putDir)));
-        handlers.addHandler(new DefaultHandler());
+        if(putDir!=null) {
+            File dir = new File(putDir);
+            contexts.addHandler(createContextHandler(dir, new PutHandler(dir)));
+        }
+        server.setHandler(contexts);
+        server.start();
+    }*/
 
-        server.setHandler(handlers);
+    public Jetty setRoots(String... roots) {
+        for(String root : roots) {
+            logger.info("Adding {}", new File(root).getName());
+            File dir = new File(root);
+            contexts.addHandler(createContextHandler(dir, new ResourceHandler()));
+        }
+        return this;
+    }
+
+    public Jetty setPort(int port) {
+        this.port = port;
+        return this;
+    }
+
+    public Jetty setMinThreads(int minThreads) {
+        this.minThreads = minThreads;
+        return this;
+    }
+
+    public Jetty setMaxThreads(int maxThreads) {
+        this.maxThreads = maxThreads;
+        return this;
+    }
+
+    public Jetty setPutDir(String putDir) {
+        File dir = new File(putDir);
+        contexts.addHandler(createContextHandler(dir, new PutHandler(dir)));
+        return this;
+    }
+
+    public void start() throws Exception {
+        createServer();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(port);
+        String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+        connector.setHost(address);
+        server.setConnectors(new Connector[] { connector });
+        server.setHandler(contexts);
         server.start();
     }
 
+    public void startSecure() throws Exception {
+        createServer();
+        HttpConfiguration https = new HttpConfiguration();
+        https.addCustomizer(new SecureRequestCustomizer());
+
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath(Jetty.class.getResource("/org/rioproject/riokey.jks").toExternalForm());
+        sslContextFactory.setKeyStorePassword("riorules");
+        sslContextFactory.setKeyManagerPassword("riorules");
+        ServerConnector sslConnector = new ServerConnector(server,
+                                                           new SslConnectionFactory(sslContextFactory, "http/1.1"),
+                                                           new HttpConnectionFactory(https));
+        sslConnector.setPort(0);
+        String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+        sslConnector.setHost(address);
+        server.setConnectors(new Connector[] { sslConnector });
+        server.setHandler(contexts);
+        server.start();
+    }
+
+    public URI getURI() {
+        return server==null?null:server.getURI();
+    }
+
+    private void createServer() {
+        if(server!=null)
+            return;
+        if(maxThreads>0) {
+            QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads);
+            server = new Server(threadPool);
+        } else {
+            server = new Server();
+        }
+    }
+
     public int getPort() {
+        if(server==null)
+            return port;
         return ((ServerConnector)server.getConnectors()[0]).getLocalPort();
     }
 
     public String getAddress() {
+        if(server==null)
+            return null;
         return server.getURI().getHost();
     }
 
@@ -100,6 +173,14 @@ public class Jetty {
         } catch (InterruptedException e) {
             logger.warn("Jetty join interrupted", e);
         }
+    }
+
+    private ContextHandler createContextHandler(File dir, AbstractHandler handler) {
+        ContextHandler context = new ContextHandler();
+        context.setContextPath("/");
+        context.setBaseResource(Resource.newResource(dir));
+        context.setHandler(handler);
+        return context;
     }
 
 }

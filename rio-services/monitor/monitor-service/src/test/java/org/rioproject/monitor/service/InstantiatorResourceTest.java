@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rioproject.deploy.*;
-import org.rioproject.impl.config.DynamicConfiguration;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.impl.opstring.OpString;
 import org.rioproject.impl.system.SystemCapabilities;
 import org.rioproject.opstring.OperationalString;

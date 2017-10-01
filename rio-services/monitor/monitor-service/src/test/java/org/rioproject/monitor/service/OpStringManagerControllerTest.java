@@ -19,7 +19,7 @@ import org.junit.Assert;
 import net.jini.config.Configuration;
 import net.jini.id.UuidFactory;
 import org.junit.Test;
-import org.rioproject.impl.config.DynamicConfiguration;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.impl.opstring.OpString;
 import org.rioproject.opstring.OperationalString;
 
