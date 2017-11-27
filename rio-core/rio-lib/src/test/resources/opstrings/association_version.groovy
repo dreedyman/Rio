@@ -17,7 +17,7 @@ deployment(name:'Empty') {
         associations {
             association(name: 'Add', type: 'requires', property: 'add', version:'2.1') { }
         }
-        maintain "numCpus/2"
+        maintain 1
     }
 
     service(name: 'Add') {
