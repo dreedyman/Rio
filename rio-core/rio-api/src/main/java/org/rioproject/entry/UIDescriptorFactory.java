@@ -38,6 +38,7 @@ import java.util.Collections;
  *
  * @author Dennis Reedy
  */
+@SuppressWarnings("unused")
 public class UIDescriptorFactory {
 
    /**
@@ -170,22 +171,22 @@ public class UIDescriptorFactory {
         
         if(typeName.equals(JComponentFactory.TYPE_NAME)) {
             types = new UIFactoryTypes( Collections.singleton(JComponentFactory.TYPE_NAME));
-            factory = new MarshalledObject<UIComponentFactory>(new UIComponentFactory(urls, className));
+            factory = new MarshalledObject<>(new UIComponentFactory(urls, className));
             desc.toolkit = JComponentFactory.TOOLKIT;
         } else if(typeName.equals(JDialogFactory.TYPE_NAME)) {
             types = new UIFactoryTypes(
                 Collections.singleton(JDialogFactory.TYPE_NAME));
-            factory = new MarshalledObject<UIDialogFactory>(new UIDialogFactory(urls, className));
+            factory = new MarshalledObject<>(new UIDialogFactory(urls, className));
             desc.toolkit = JDialogFactory.TOOLKIT;
         } else if(typeName.equals(JFrameFactory.TYPE_NAME)) {
             types = new UIFactoryTypes(
                 Collections.singleton(JFrameFactory.TYPE_NAME));
-            factory = new MarshalledObject<UIFrameFactory>(new UIFrameFactory(urls, className));
+            factory = new MarshalledObject<>(new UIFrameFactory(urls, className));
             desc.toolkit = JFrameFactory.TOOLKIT;
         } else if(typeName.equals(JWindowFactory.TYPE_NAME)) {
             types = new UIFactoryTypes(
                 Collections.singleton(JWindowFactory.TYPE_NAME));
-            factory = new MarshalledObject<UIWindowFactory>(new UIWindowFactory(urls, className));
+            factory = new MarshalledObject<>(new UIWindowFactory(urls, className));
             desc.toolkit = JWindowFactory.TOOLKIT;
         } else {
             throw new IllegalArgumentException("unknown typeName "+typeName);
@@ -214,7 +215,7 @@ public class UIDescriptorFactory {
         desc.role = role;
         desc.toolkit = JComponentFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JComponentFactory.TYPE_NAME)));
-        desc.factory = new MarshalledObject<JComponentFactory>(factory);
+        desc.factory = new MarshalledObject<>(factory);
         return (desc);
     }
 
@@ -237,7 +238,7 @@ public class UIDescriptorFactory {
         desc.role = role;
         desc.toolkit = JDialogFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JDialogFactory.TYPE_NAME)));
-        desc.factory = new MarshalledObject<JDialogFactory>(factory);
+        desc.factory = new MarshalledObject<>(factory);
         return (desc);
     }
 
@@ -259,7 +260,7 @@ public class UIDescriptorFactory {
         desc.role = role;
         desc.toolkit = JFrameFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JFrameFactory.TYPE_NAME)));
-        desc.factory = new MarshalledObject<JFrameFactory>(factory);
+        desc.factory = new MarshalledObject<>(factory);
         return (desc);
     }
 
@@ -272,7 +273,7 @@ public class UIDescriptorFactory {
         desc.role = role;
         desc.toolkit = JWindowFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JWindowFactory.TYPE_NAME)));
-        desc.factory = new MarshalledObject<JWindowFactory>(factory);
+        desc.factory = new MarshalledObject<>(factory);
         return (desc);
     }
 }
