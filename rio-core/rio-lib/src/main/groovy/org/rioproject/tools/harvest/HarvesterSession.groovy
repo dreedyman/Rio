@@ -18,13 +18,19 @@ package org.rioproject.tools.harvest
 /**
  * Contains information needed to communicate with Harvester
  */
-public class HarvesterSession implements Serializable {
+class HarvesterSession implements Serializable {
     static final long serialVersionUID = 1L
     int port
     String host
 
-    public HarvesterSession(int port, String host) {
+    HarvesterSession(int port, String host) {
         this.port = port
         this.host = host
+    }
+
+
+    @Override
+    String toString() {
+        return String.format("HarvesterSession port: %d, host: %s", port, host)
     }
 }

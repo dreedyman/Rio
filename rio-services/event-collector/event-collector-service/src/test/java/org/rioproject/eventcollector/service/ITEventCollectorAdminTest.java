@@ -22,6 +22,11 @@ import org.rioproject.eventcollector.api.EventCollectorAdmin;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +47,7 @@ public class ITEventCollectorAdminTest {
 
     @Before
     public void createEventCollector() throws Exception {
+        clean();
         Map<String, Object> map = cybernode.activate(new File("src/test/opstring/EventCollector.groovy"));
         eventCollector = (EventCollectorImpl) map.get("Bones");
     }
@@ -50,6 +56,7 @@ public class ITEventCollectorAdminTest {
     public void stopEventCollector() {
         cybernode.deactivate(eventCollector);
     }
+
     @Test
     public void testGettingTheAdminProxy() {
         EventCollectorAdmin admin = (EventCollectorAdmin) eventCollector.getAdmin();
@@ -118,5 +125,27 @@ public class ITEventCollectorAdminTest {
                 break;
             }
         }
+    }
+
+    private void clean() throws IOException {
+        String userDir = System.getProperty("user.dir");
+        File dir = new File(userDir, "target/events/collection");
+        if(dir.exists()) {
+            Files.walkFileTree(dir.toPath(), new SimpleFileVisitor<Path>() {
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+        //((PersistentEventManager)eventCollector.getEventManager()).createCollectionDirectory();
     }
 }
