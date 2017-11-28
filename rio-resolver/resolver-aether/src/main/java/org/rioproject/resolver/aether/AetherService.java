@@ -300,7 +300,7 @@ public final class AetherService {
         rangeRequest.setArtifact(artifact);
         rangeRequest.setRepositories(remoteRepositories);
         VersionRangeResult latestVersion = repositorySystem.resolveVersionRange(session, rangeRequest);
-        return latestVersion.getHighestVersion().toString();
+        return latestVersion.getVersions().size()==0?"":latestVersion.getHighestVersion().toString();
     }
 
     /**

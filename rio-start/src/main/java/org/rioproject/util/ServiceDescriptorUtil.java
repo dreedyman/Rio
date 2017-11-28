@@ -19,7 +19,9 @@ import com.sun.jini.config.ConfigUtil;
 import com.sun.jini.start.ServiceDescriptor;
 import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.net.HostUtil;
+import org.rioproject.start.ConfigurationServiceDescriptor;
 import org.rioproject.start.RioServiceDescriptor;
 import org.slf4j.LoggerFactory;
 
@@ -251,7 +253,7 @@ public final class ServiceDescriptorUtil {
             System.setProperty("org.rioproject.tools.webster.debug", "1");
         }
         String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
-        List<String> optionsList = new ArrayList<String>();
+        List<String> optionsList = new ArrayList<>();
         if(options!=null) {
             Collections.addAll(optionsList, options);
         }
@@ -265,11 +267,64 @@ public final class ServiceDescriptorUtil {
         }
         optionsList.add(portOptionArg);
         optionsList.add(portArg);
-        return(new RioServiceDescriptor("",
+        return new RioServiceDescriptor("",
                                         policy,
                                         webster,
                                         websterClass,
-                                        optionsList.toArray(new String[optionsList.size()])));
+                                        optionsList.toArray(new String[optionsList.size()]));
+    }
+
+    public static ServiceDescriptor getJetty(final String sPort,
+                                             final String[] roots) {
+        return getJetty(sPort, roots, null, 0, 0);
+
+    }
+
+    public static ServiceDescriptor getJetty(final String sPort,
+                                             final String[] roots,
+                                             final String putDir) {
+        return getJetty(sPort, roots, putDir, 0, 0);
+
+    }
+
+    public static ServiceDescriptor getJetty(final String sPort,
+                                             final String[] roots,
+                                             final String putDir,
+                                             final int minThreads,
+                                             final int maxThreads) {
+
+        String rioHome = System.getProperty("rio.home", RioHome.get());
+        if(rioHome==null)
+            throw new RuntimeException("rio.home property not declared or derivable");
+        String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
+
+        DynamicConfiguration config = new DynamicConfiguration();
+        config.setEntry("org.rioproject.tools.jetty",
+                        "port",
+                        int.class,
+                        Integer.parseInt(sPort));
+        config.setEntry("org.rioproject.tools.jetty",
+                        "port",
+                        String[].class,
+                        roots);
+        if(putDir!=null)
+            config.setEntry("org.rioproject.tools.jetty",
+                            "putDir",
+                            String.class,
+                            putDir);
+        if(minThreads>0)
+            config.setEntry("org.rioproject.tools.jetty",
+                            "minThreads",
+                            int.class,
+                            minThreads);
+        if(maxThreads>0)
+            config.setEntry("org.rioproject.tools.jetty",
+                            "maxThreads",
+                            int.class,
+                            maxThreads);
+        String jettyClass = "org.rioproject.tools.jetty.Jetty";
+
+        return new ConfigurationServiceDescriptor();
     }
 
     /**

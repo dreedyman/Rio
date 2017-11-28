@@ -6,7 +6,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>org.rioproject</groupId>
-        <version>5.6.4</version>
+        <version>5.6.5</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>webster</artifactId>
@@ -17,6 +17,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>rio-start</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
@@ -38,6 +44,40 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${shade.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.eclipse.jetty:*</include>
+                                </includes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>org.rioproject.tools.webster.Webster</Main-Class>
+                                        <Implementation-Title>Rio Project</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Rio-Version>${project.version}</Rio-Version>
+                                        <Rio-Build>${maven.build.timestamp}</Rio-Build>
+                                        <Class-Path>rio-platform-${project.version}.jar</Class-Path>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
@@ -51,7 +91,7 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -70,6 +110,10 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <systemPropertyVariables>
+                        <projectDir>${project.basedir}</projectDir>
+                        <buildDirectory>${project.build.directory}</buildDirectory>
+                    </systemPropertyVariables>
                     <excludes>
                         <exclude>**/*IT*.java</exclude>
                     </excludes>

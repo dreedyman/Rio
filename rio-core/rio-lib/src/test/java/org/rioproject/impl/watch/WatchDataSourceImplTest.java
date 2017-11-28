@@ -23,7 +23,7 @@ import net.jini.jeri.BasicILFactory;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.junit.Test;
-import org.rioproject.impl.config.DynamicConfiguration;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.watch.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

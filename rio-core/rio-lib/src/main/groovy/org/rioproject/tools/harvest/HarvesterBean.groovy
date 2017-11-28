@@ -78,10 +78,10 @@ class HarvesterBean implements Harvester {
 
     HarvesterSession connect() {
         String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
-        ServerSocket server = new ServerSocket(0, 50, InetAddress.getByName(address))
-        HarvesterSession hSession =
-        new HarvesterSession(server.localPort,
-                             InetAddress.localHost.hostName)
+        //ServerSocket server = new ServerSocket(0, 50, InetAddress.getByName(address))
+        ServerSocket server = new ServerSocket(0)
+        HarvesterSession hSession = new HarvesterSession(server.localPort, InetAddress.localHost.hostName)
+        logger.info("connection request, return: {}", hSession)
         Thread.start {
             File parent
             if (harvestDir) {
@@ -109,39 +109,42 @@ class HarvesterBean implements Harvester {
     List<File> handleConnect(ServerSocket server, HarvesterSession hSession, File parent) {
         List<File> harvested = new ArrayList<File>()
         Socket socket = server.accept()
-        SocketAddress sockAddr = socket.remoteSocketAddress
+        /*iSocketAddress sockAddr = socket.remoteSocketAddress
         if (logger.isInfoEnabled())
-            logger.info "Connect from HarvesterAgent " +
-                        "[$sockAddr.hostName, $sockAddr.port]"
+            logger.info("Connect from HarvesterAgent [{}]", sockAddr)*/
         def line
         File file
         PrintWriter writer = null
         def reader = new BufferedReader(new InputStreamReader(socket.inputStream))
-        while ((line = reader.readLine()) != null) {
-            if (line.startsWith("filename:")) {
-                String filename = line.substring(9)
-                //println "===> filename: arg [${filename}]"
-                int ndx = filename.lastIndexOf("/")
-                if (ndx > 0) {
-                    String parentDir = filename.substring(0, ndx)
-                    //println "===> parentDir = ${parentDir}"
-                    File p = new File(parent, parentDir)
-                    if (!p.exists())
-                        p.mkdirs()
-                }
-                file = new File(parent, filename)
-                if (!file.exists()) {
-                    file.createNewFile()
-                }
-                harvested.add(file)
-                writer = file.newPrintWriter()
-                //println "===> Using file ${file.path}"
-            } else {
-                if (writer) {
-                    writer.write("${line}\n")
-                    writer.flush()
+        try {
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("filename:")) {
+                    String filename = line.substring(9)
+                    //println "===> filename: arg [${filename}]"
+                    int ndx = filename.lastIndexOf("/")
+                    if (ndx > 0) {
+                        String parentDir = filename.substring(0, ndx)
+                        //println "===> parentDir = ${parentDir}"
+                        File p = new File(parent, parentDir)
+                        if (!p.exists())
+                            p.mkdirs()
+                    }
+                    file = new File(parent, filename)
+                    if (!file.exists()) {
+                        file.createNewFile()
+                    }
+                    harvested.add(file)
+                    writer = file.newPrintWriter()
+                    //println "===> Using file ${file.path}"
+                } else {
+                    if (writer) {
+                        writer.write("${line}\n")
+                        writer.flush()
+                    }
                 }
             }
+        } catch (Throwable t) {
+            logger.error("Oops", t)
         }
         return harvested
     }

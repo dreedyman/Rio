@@ -11,7 +11,7 @@ def getLogDir() {
     }
     String logRoot = System.getProperty(Constants.GROUPS_PROPERTY_NAME,
                                         System.getProperty('user.name'))
-    return logDir+'${/}rio${/}'+logRoot
+    return logDir+'${/}'+logRoot
 }
 
 deployment(name:'Harvester') {
@@ -29,9 +29,9 @@ deployment(name:'Harvester') {
 
         parameters {
             parameter name: "match", value: "*.log, *.wds, *-1"
-            parameter name: "directories",
+            /*parameter name: "directories",
                       //value: '${java.io.tmpdir}/service_logs'
-                      value: getLogDir()
+                      value: getLogDir()*/
         }
 
         maxPerMachine type:'physical', 1

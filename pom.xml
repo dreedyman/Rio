@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rioproject</groupId>
     <artifactId>main</artifactId>
-    <version>5.6.4</version>
+    <version>5.6.5</version>
     <packaging>pom</packaging>
     <name>Rio Project</name>
     <description>Rio Project</description>
@@ -378,8 +378,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <optimize>true</optimize>
                     <encoding>UTF-8</encoding>
                     <meminitial>128m</meminitial>
@@ -434,7 +434,7 @@
         <gmaven.version>1.4</gmaven.version>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
         <junit.version>4.12</junit.version>
-        <rio.version>5.6.4</rio.version>
+        <rio.version>5.6.5</rio.version>
         <rio.plugin.version>5.1</rio.plugin.version>
         <river.version>2.2.2</river.version>
         <hyperic.version>1.6.3.82</hyperic.version>
@@ -445,6 +445,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <shade.version>2.4.3</shade.version>
+        <jetty.version>9.4.6.v20170531</jetty.version>
     </properties>
 
 </project>
