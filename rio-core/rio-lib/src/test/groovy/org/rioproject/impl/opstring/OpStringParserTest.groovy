@@ -1001,7 +1001,12 @@ class OpStringParserTest extends GroovyTestCase {
         assertTrue geometryService.associationDescriptors[1].interfaceNames.any { it == 'net.jini.space.JavaSpace05' }
         assertEquals 'net.gomez.provider.space.SpaceProxy', geometryService.associationDescriptors[1].proxyClass
         assertEquals Utilization.class.name, geometryService.associationDescriptors[1].serviceSelectionStrategy
-
+        assertTrue geometryService.execDescriptor.getEnvironment().size()==2
+        geometryService.execDescriptor.getEnvironment().each { k, v ->
+            println "===> $k: $v"
+        }
         assertEquals 1, opstring.nestedOperationalStrings.size()
+
+
     }
 }

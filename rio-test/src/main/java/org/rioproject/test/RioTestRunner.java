@@ -26,7 +26,9 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.rioproject.RioVersion;
 import org.rioproject.logging.LoggingSystem;
+import org.rioproject.url.ProtocolRegistryService;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
+import org.rioproject.url.artifact.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +72,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         try {
             new URL("artifact:foo");
         } catch (MalformedURLException e) {
-            URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
+            ProtocolRegistryService.create().register("artifact", new Handler());
+            //URL.setURLStreamHandlerFactory(new ArtifactURLStreamHandlerFactory());
         }
     }
     TestManager testManager;

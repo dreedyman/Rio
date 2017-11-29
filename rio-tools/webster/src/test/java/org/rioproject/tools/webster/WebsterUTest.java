@@ -15,9 +15,7 @@
  */
 package org.rioproject.tools.webster;
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.rioproject.net.HostUtil;
 import org.rioproject.net.PortRangeServerSocketFactory;
 
 import java.io.BufferedReader;
@@ -27,6 +25,8 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for Webster
@@ -43,8 +43,8 @@ public class WebsterUTest {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
+        assertNull(t);
+        assertNotNull(w);
         w.terminate();
     }
 
@@ -57,10 +57,10 @@ public class WebsterUTest {
         } catch (BindException e) {
             t = e;
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
-        Assert.assertEquals(9000, w.getPort());
-        Assert.assertEquals(System.getProperty("user.dir"), w.getRoots());
+        assertNull(t);
+        assertNotNull(w);
+        assertEquals(9000, w.getPort());
+        assertEquals(System.getProperty("user.dir"), w.getRoots());
         w.terminate();
     }
 
@@ -73,10 +73,10 @@ public class WebsterUTest {
         } catch (Exception e) {
             t = e;
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
-        Assert.assertEquals(9000, w.getPort());
-        Assert.assertEquals(System.getProperty("user.dir"), w.getRoots());
+        assertNull(t);
+        assertNotNull(w);
+        assertEquals(9000, w.getPort());
+        assertEquals(System.getProperty("user.dir"), w.getRoots());
         w.terminate();
     }
 
@@ -94,10 +94,10 @@ public class WebsterUTest {
         } catch (Exception e) {
             t = e;
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
-        Assert.assertEquals(port, w.getPort());
-        Assert.assertEquals(System.getProperty("user.dir"), w.getRoots());
+        assertNull(t);
+        assertNotNull(w);
+        assertEquals(port, w.getPort());
+        assertEquals(System.getProperty("user.dir"), w.getRoots());
     }
 
     @Test
@@ -113,11 +113,11 @@ public class WebsterUTest {
         } catch (Exception e) {
             t = e;
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
+        assertNull(t);
+        assertNotNull(w);
         int port = w.getPort();
-        Assert.assertTrue("Port " + port + " should be >= 10000", port >= 10000);
-        Assert.assertTrue("Port " + port + " should be <= 10005", port <= 10005);
+        assertTrue("Port " + port + " should be >= 10000", port >= 10000);
+        assertTrue("Port " + port + " should be <= 10005", port <= 10005);
     }
 
     @Test
@@ -130,11 +130,11 @@ public class WebsterUTest {
         } catch (Exception e) {
             t = e;
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
+        assertNull(t);
+        assertNotNull(w);
         int port = w.getPort();
-        Assert.assertTrue("Port " + port + " should be >= 10000", port >= 10000);
-        Assert.assertTrue("Port " + port + " should be <= 10005", port <= 10005);
+        assertTrue("Port " + port + " should be >= 10000", port >= 10000);
+        assertTrue("Port " + port + " should be <= 10005", port <= 10005);
     }
 
     @Test
@@ -143,13 +143,11 @@ public class WebsterUTest {
         Webster w = null;
         try {
             w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
-        } catch (BindException e) {
-            t = e;
-        } catch (MalformedURLException e) {
+        } catch (BindException | MalformedURLException e) {
             t = e;
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(w);
+        assertNull(t);
+        assertNotNull(w);
         t = null;
         List<String> items = null;
         try {
@@ -158,19 +156,20 @@ public class WebsterUTest {
             t = e;
             e.printStackTrace();
         }
-        Assert.assertNull(t);
-        Assert.assertNotNull(items);
+        assertNull(t);
+        assertNotNull(items);
         File cwd = new File(System.getProperty("user.dir"));
-        Assert.assertTrue(items.size() == cwd.list().length);
+        assertTrue(items.size() == cwd.list().length);
     }
 
     private List<String> get(int port) throws IOException {
-        URL url = new URL("http://" + HostUtil.getInetAddressFromProperty("java.rmi.server.hostname").getHostAddress() + ":" + port);
+        URL url = new URL("http://" + InetAddress.getLocalHost().getHostName()+ ":" + port);
+        System.out.println("===> "+url.toExternalForm());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestMethod("GET");
 
-        List<String> items = new ArrayList<String>();
+        List<String> items = new ArrayList<>();
 
         connection.connect();
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));

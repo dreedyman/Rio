@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.impl.config;
+package org.rioproject.config;
 
 import net.jini.config.AbstractConfiguration;
 import net.jini.config.ConfigurationException;

@@ -32,9 +32,9 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class ResolverConfigTest {
-    Webster webster;
-    String repoPath = "something/something/darkside-provider/2.0";
-    String artifactFileName = "darkside-provider-2.0-deploy.config";
+    private Webster webster;
+    private String repoPath = "something/something/darkside-deathstar/2.0";
+    private String artifactFileName = "darkside-deathstar-2.0-deploy.config";
 
     @Before
     public void setup() throws IOException {
@@ -85,11 +85,9 @@ public class ResolverConfigTest {
         System.setProperty(ResolverConfiguration.RESOLVER_CONFIG, config.getAbsolutePath());
         System.setProperty(ResolverConfiguration.RESOLVER_JAR, resolverJar.getAbsolutePath());
         Resolver resolver = ResolverHelper.getResolver();
-        URL url = resolver.getLocation("something.something:darkside-provider:config:deploy:2.0", "config");
+        URL url = resolver.getLocation("something.something:darkside-deathstar:config:deploy:2.0", "config");
         Assert.assertNotNull(url);
-        File resolved = new File(String.format("%s/%s/%s",
-                                               Repository.getLocalRepository(), repoPath, artifactFileName));
-        org.junit.Assert.assertTrue(resolved.exists());
+        org.junit.Assert.assertTrue(new File(url.toURI()).exists());
         System.out.println("===> "+new File(url.toURI()).getPath());
     }
 }

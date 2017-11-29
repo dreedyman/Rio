@@ -20,7 +20,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.rioproject.impl.config.DynamicConfiguration;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.impl.system.measurable.MeasurableCapability;
 import org.rioproject.impl.system.measurable.cpu.CPU;
 import org.rioproject.impl.system.measurable.disk.DiskSpace;

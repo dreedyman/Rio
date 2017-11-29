@@ -19,7 +19,7 @@ import org.junit.Assert;
 import net.jini.config.Configuration;
 import net.jini.config.EmptyConfiguration;
 import org.junit.Test;
-import org.rioproject.impl.config.DynamicConfiguration;
+import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.watch.Calculable;
 import org.rioproject.watch.WatchDataSource;
 

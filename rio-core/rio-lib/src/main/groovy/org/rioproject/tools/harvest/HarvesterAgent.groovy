@@ -17,6 +17,8 @@ package org.rioproject.tools.harvest
 
 import org.rioproject.annotation.Started
 import org.rioproject.util.PropertyHelper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * A service that is dispatched to all Cybernodes, and used to collect (harvest)
@@ -27,6 +29,7 @@ public class HarvesterAgent {
     Map<String, Object> parameters
     static final String MATCH = "match"
     static final String PREFIX = "prefix"
+    private static final Logger logger = LoggerFactory.getLogger(HarvesterAgent.class)
 
     @Started
     def harvest() {
@@ -34,7 +37,8 @@ public class HarvesterAgent {
 
         def dirParm = parameters.get("directories")
         if(!dirParm)
-            dirParm = ["${System.getProperty("java.io.tmpdir")}/service_logs"]
+            dirParm = "${System.getProperty("rio.log.dir")}"
+        logger.info("dirParam: {}", dirParm)
         def dirs = dirParm.tokenize(":")
 
         def matchOn
@@ -54,42 +58,43 @@ public class HarvesterAgent {
             Map<String, List<File>> fileMap = new HashMap<String, List<File>>()
             for(String sDir : dirs) {
                 sDir = PropertyHelper.expandProperties(sDir)
-                println("===> Checking ${sDir} ...")
+                logger.info("Checking ${sDir} ...")
                 List<File> fileList = buildFileList(sDir, matchOn)
-                println("===> ${sDir} returned ${fileList.size()} matching files")
+                logger.info("${sDir} returned ${fileList.size()} matching files")
                 if(fileList.size()>0)
                     fileMap.put(sDir, fileList)
             }
 
             while(harvester==null) {
-                println "Waiting for Harvester to come online..."
+                logger.info "Waiting for Harvester to come online..."
                 Thread.sleep(1000)
             }
 
-            println "Harvester is online."
+            logger.info "Harvester is online."
             fileMap.each { parent, fileList ->
-                println "${parent} -> ${fileList}"
-                println "---"
+                logger.info "${parent} -> ${fileList}"
             }
             HarvesterSession session = harvester.connect()
+            logger.info("Obtained {}", session)
             Socket socket = new Socket(session.host, session.port)
+            logger.info("Connected to HarvesterBean: {}", session)
             socket.withStreams { input, output ->
                 def writer = new PrintWriter(output)
                 if(fileMap.size()==0) {
                     writer.write("empty\n")
                     writer.flush()
-                    println "No files to send, exit immediately"
+                    logger.info "No files to send, exit immediately"
                     return
                 }
                 fileMap.each { parent, fileList ->
-                    println "===> Directory ${parent} has ${fileList.size()} files to send"
+                    logger.info "Directory ${parent} has ${fileList.size()} files to send"
                     for(File file : fileList) {
-                        println "===> Processing file [${file.absolutePath}]"
+                        logger.info "Processing file [${file.absolutePath}]"
                         String filePath = file.absolutePath
                         String baseDirName = filePath.substring(parent.length())
                         if(!baseDirName.startsWith(File.separator))
                             baseDirName = File.separator+baseDirName
-                        println "     Sending file    [filename:${prefix}${hostName}${baseDirName}]"
+                        logger.info "Sending file    [filename:${prefix}${hostName}${baseDirName}]"
                         writer.write("filename:${prefix}${hostName}${baseDirName}\n")
                         writer.flush()
                         file.eachLine { line ->
@@ -108,7 +113,7 @@ public class HarvesterAgent {
         List<File> list = new ArrayList<File>()
         File dir = new File(sDir)
         if(!(dir.exists() && dir.isDirectory())) {
-            println("The [$sDir] directory does not exist or is not a directory")
+            logger.info("The [$sDir] directory does not exist or is not a directory")
         }
 
         for(File f : dir.listFiles()) {

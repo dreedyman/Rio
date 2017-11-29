@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.harvest
+package org.rioproject.start;
+
+import com.sun.jini.start.ServiceDescriptor;
+import net.jini.config.Configuration;
 
 /**
- * Contains information needed to communicate with Harvester
+ * @author Dennis Reedy
  */
-class HarvesterSession implements Serializable {
-    static final long serialVersionUID = 1L
-    int port
-    String host
+public class ConfigurationServiceDescriptor implements ServiceDescriptor {
+    public static String COMPONENT =  "ConfigurationServiceDescriptor";
 
-    HarvesterSession(int port, String host) {
-        this.port = port
-        this.host = host
-    }
-
-
-    @Override
-    String toString() {
-        return String.format("HarvesterSession port: %d, host: %s", port, host)
+    @Override public Object create(Configuration config) throws Exception {
+        //config.getEntry();
+        return null;
     }
 }
