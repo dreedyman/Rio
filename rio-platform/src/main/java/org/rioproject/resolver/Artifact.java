@@ -56,7 +56,9 @@ public class Artifact {
     public Artifact(String artifact) {
         if(artifact==null)
             throw new IllegalArgumentException("artifact is null");
-        Pattern p = Pattern.compile("([^: /\\\\]+):([^: /\\\\]+)(:([^: /\\\\]*)(:([^: /\\\\]+))?)?:([^: /\\\\]+)" );
+        String regEx = "([a-zA-Z0-9._]*):([a-zA-Z0-9._]*):(([a-zA-Z0-9._]*):((([a-zA-Z0-9._]*):)?))?([a-zA-Z0-9._]*)";
+        String regEx1 = "([^*;: /\\\\]+):([^*;: /\\\\]+)(:([^^*;: /\\\\]*)(:([^: /\\\\]+))?)?:([^: /\\\\]+)";
+        Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher( artifact );
         if (!m.matches() ) {
             throw new IllegalArgumentException( "Bad artifact coordinates " + artifact
@@ -139,13 +141,11 @@ public class Artifact {
 
         Artifact artifact = (Artifact) o;
 
-        if (artifactId != null ? !artifactId.equals(artifact.artifactId) : artifact.artifactId != null) return false;
-        if (classifier != null ? !classifier.equals(artifact.classifier) : artifact.classifier != null) return false;
-        if (groupId != null ? !groupId.equals(artifact.groupId) : artifact.groupId != null) return false;
-        if (type != null ? !type.equals(artifact.type) : artifact.type != null) return false;
-        if (version != null ? !version.equals(artifact.version) : artifact.version != null) return false;
-
-        return true;
+        return (artifactId != null ? artifactId.equals(artifact.artifactId) : artifact.artifactId == null) &&
+               (classifier != null ? classifier.equals(artifact.classifier) : artifact.classifier == null) &&
+               (groupId != null ? groupId.equals(artifact.groupId) : artifact.groupId == null) &&
+               (type != null ? type.equals(artifact.type) : artifact.type == null) &&
+               (version != null ? version.equals(artifact.version) : artifact.version == null);
     }
 
     @Override
