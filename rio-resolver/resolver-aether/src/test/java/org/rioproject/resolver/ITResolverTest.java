@@ -15,23 +15,29 @@
  */
 package org.rioproject.resolver;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.rioproject.resolver.aether.AetherResolver;
 import org.rioproject.resolver.maven2.Repository;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test maven resolver
  */
 public class ITResolverTest {
     private File saveOriginalSettings;
+    private static boolean online = true;
+
+    @BeforeClass
+    public static void check()  {
+        online = ConnectionCheck.connected();
+    }
 
     @Before
     public void saveOriginalSettings() throws IOException {
@@ -49,6 +55,7 @@ public class ITResolverTest {
 
     @Test
     public void testJskLibResolution() throws ResolverException {
+        assumeTrue(online);
         File testRepo;
         Utils.writeLocalM2RepoSettings();
         Resolver r = new AetherResolver();
@@ -64,6 +71,7 @@ public class ITResolverTest {
 
     @Test
     public void testGroovyResolution() throws ResolverException {
+        assumeTrue(online);
         File testRepo;
         Utils.writeLocalM2RepoSettings();
         testRepo = Repository.getLocalRepository();
@@ -78,6 +86,7 @@ public class ITResolverTest {
 
     @Test
     public void testWithSettings() throws ResolverException {
+        assumeTrue(online);
         File testRepo;
         Utils.writeLocalM2RepoSettings();
         testRepo = Repository.getLocalRepository();

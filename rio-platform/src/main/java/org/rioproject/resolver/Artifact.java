@@ -56,8 +56,10 @@ public class Artifact {
     public Artifact(String artifact) {
         if(artifact==null)
             throw new IllegalArgumentException("artifact is null");
-        String regEx = "([a-zA-Z0-9._]*):([a-zA-Z0-9._]*):(([a-zA-Z0-9._]*):((([a-zA-Z0-9._]*):)?))?([a-zA-Z0-9._]*)";
-        String regEx1 = "([^*;: /\\\\]+):([^*;: /\\\\]+)(:([^^*;: /\\\\]*)(:([^: /\\\\]+))?)?:([^: /\\\\]+)";
+        /*String regEx = "([a-zA-Z0-9._]*):([a-zA-Z0-9._]*):(([a-zA-Z0-9._]*):((([a-zA-Z0-9._]*):)?))?([a-zA-Z0-9._]*)";
+        String regEx1 = "([^*;: /\\\\]+):([^*;: /\\\\]+)(:([^^*;: /\\\\]*)(:([^: /\\\\]+))?)?:([^: /\\\\]+)";*/
+        String regEx = "([a-zA-Z0-9._-]+):([a-zA-Z0-9._-]+)(:([a-zA-Z0-9._-]*)(:([a-zA-Z0-9._-]+))?)?:([a-zA-Z0-9._-]+)";
+
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher( artifact );
         if (!m.matches() ) {

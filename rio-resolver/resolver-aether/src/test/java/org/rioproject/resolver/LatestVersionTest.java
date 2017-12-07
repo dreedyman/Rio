@@ -15,10 +15,7 @@
  */
 package org.rioproject.resolver;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.rioproject.resolver.aether.AetherResolver;
 import org.rioproject.resolver.maven2.Repository;
 
@@ -27,11 +24,19 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * @author Dennis Reedy
  */
 public class LatestVersionTest {
+    private static boolean online;
     private File saveOriginalSettings;
+
+    @BeforeClass
+    public static void check()  {
+        online = ConnectionCheck.connected();
+    }
 
     @Before
     public void saveOriginalSettings() throws IOException {
@@ -49,6 +54,7 @@ public class LatestVersionTest {
 
     @Test
     public void testLatestLocation() throws ResolverException, URISyntaxException {
+        assumeTrue(online);
         File testRepo;
         Throwable thrown = null;
         try {
@@ -67,6 +73,7 @@ public class LatestVersionTest {
 
     @Test
     public void testLatestClasspath() throws ResolverException {
+        assumeTrue(online);
         File testRepo;
         Throwable thrown = null;
         try {
