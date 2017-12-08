@@ -25,18 +25,20 @@ import org.rioproject.monitor.service.ProvisionRequest;
 public class LoggingUtil {
 
     public static String getLoggingName(ProvisionRequest request) {
+        if(request==null)
+            return "[Cannot determine name from null ProvisionRequest]";
         return getLoggingName(request.getServiceElement());
     }
 
     public static String getLoggingName(ServiceElement element) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(element.getOperationalStringName()).append("/").append(element.getName());
-        return sb.toString();
+        return getLoggingName(element.getOperationalStringName(), element.getName());
     }
 
      public static String getLoggingName(ServiceBeanConfig config) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(config.getOperationalStringName()).append("/").append(config.getName());
-        return sb.toString();
+         return getLoggingName(config.getOperationalStringName(), config.getName());
+    }
+
+    private static String getLoggingName(String s, String s1) {
+        return String.format("%s/%s", s, s1);
     }
 }
