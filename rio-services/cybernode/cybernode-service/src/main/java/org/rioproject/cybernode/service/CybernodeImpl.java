@@ -1088,9 +1088,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
         UIComponentFactory platformCapabilityUI = new UIComponentFactory(getUIJars(),
                                                                          "org.rioproject.cybernode.ui.CybernodeUI");
 
-        Entry[] uis = new Entry[] {UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, platformCapabilityUI),
-                                   UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, cybernodeUI)};
-        return(uis);
+        return new Entry[] {UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, platformCapabilityUI),
+                            UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, cybernodeUI)};
     }
 
     protected ServiceBeanContainer getServiceBeanContainer() {

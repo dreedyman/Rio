@@ -35,8 +35,8 @@ import java.util.List;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class PlatformLoader {
-    private static final String COMPONENT = "org.rioproject.boot";
-    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(PlatformLoader.class);
+    private static final List<PlatformCapabilityConfig> platformList = new ArrayList<>();
 
     /**
      * Parse the platform
@@ -51,65 +51,77 @@ public class PlatformLoader {
     public PlatformCapabilityConfig[] parsePlatform(String directory) throws Exception {
         if(directory == null)
             throw new IllegalArgumentException("directory is null");
-        List<PlatformCapabilityConfig> platformList = new ArrayList<PlatformCapabilityConfig>();
-        File dir = new File(directory);
-        if(dir.exists()) {
-            if(dir.isDirectory()) {
-                if(dir.canRead()) {
-                    File[] files = dir.listFiles();
-                    for (File file : files) {
-                        if(file.getName().endsWith("groovy")) {
-                            GroovyClassLoader gCL = new GroovyClassLoader(getClass().getClassLoader());
-                            Class gClass = gCL.parseClass(file);
-                            GroovyObject gO = (GroovyObject)gClass.newInstance();
-                            String methodName = null;
-                            for(Object o : gO.getMetaClass().getMethods()) {
-                                MetaMethod m = (MetaMethod)o;
-                                if(m.getName().startsWith("getPlatformCapabilityConfig")) {
-                                    methodName = m.getName();
-                                    break;
-                                }
-                            }
-                            if(methodName==null) {
-                                logger.warn("The {} class does not contain a getPlatformCapabilityConfig() " +
-                                            "or getPlatformCapabilityConfigs() method", file.getName());
-                                continue;
-                            }
-                            Object[] args = {};
-                            try {
-                                Object result = gO.invokeMethod(methodName, args);
-                                if(result!=null) {
-                                    if(result instanceof Collection) {
-                                        Collection c = (Collection)result;
-                                        for(Object o : c) {
-                                            if(!(o instanceof PlatformCapabilityConfig)) {
-                                                logger.warn("The {}.{}() method returned a collection of invalid type(s). " +
-                                                            "The {} type is not allowed", file.getName(), methodName, o.getClass().getName());
-                                                break;
-                                            }
-                                        }
-                                        platformList.addAll(c);
-                                    } else if(result instanceof PlatformCapabilityConfig) {
-                                        platformList.add((PlatformCapabilityConfig)result);
-                                    } else {
-                                        logger.warn("The {}.{}() returned an unsupported type: {}",
-                                                    file.getName(), methodName, result.getClass().getName());
+
+        if(platformList.isEmpty()) {
+            logger.info("Who dis?", new Throwable());
+            File dir = new File(directory);
+            if (dir.exists()) {
+                if (dir.isDirectory()) {
+                    if (dir.canRead()) {
+                        logger.debug("Looking for platform configurations in {}", dir.getPath());
+                        File[] files = dir.listFiles();
+                        for (File file : files) {
+                            if (file.getName().endsWith("groovy")) {
+                                logger.debug("Load and parse platform configuration {}", file.getName());
+                                GroovyClassLoader gCL = new GroovyClassLoader(getClass().getClassLoader());
+                                Class gClass = gCL.parseClass(file);
+                                GroovyObject gO = (GroovyObject) gClass.newInstance();
+                                String methodName = null;
+                                for (Object o : gO.getMetaClass().getMethods()) {
+                                    MetaMethod m = (MetaMethod) o;
+                                    if (m.getName().startsWith("getPlatformCapabilityConfig")) {
+                                        methodName = m.getName();
+                                        break;
                                     }
                                 }
-                            } catch(Exception e) {
-                                Throwable t = e.getCause()==null?e:e.getCause();
-                                logger.warn("The {} class is in error. {}:{}", file.getName(), t.getClass(), t.getMessage());
+                                if (methodName == null) {
+                                    logger.error("The {} class does not contain a getPlatformCapabilityConfig() " +
+                                                "or getPlatformCapabilityConfigs() method", file.getName());
+                                    continue;
+                                }
+                                Object[] args = {};
+                                try {
+                                    Object result = gO.invokeMethod(methodName, args);
+                                    if (result != null) {
+                                        if (result instanceof Collection) {
+                                            Collection c = (Collection) result;
+                                            for (Object o : c) {
+                                                if (!(o instanceof PlatformCapabilityConfig)) {
+                                                    logger.error(
+                                                        "The {}.{}() method returned a collection of invalid type(s). " +
+                                                        "The {} type is not allowed",
+                                                        file.getName(),
+                                                        methodName,
+                                                        o.getClass().getName());
+                                                    break;
+                                                }
+                                            }
+                                            platformList.addAll(c);
+                                        } else if (result instanceof PlatformCapabilityConfig) {
+                                            platformList.add((PlatformCapabilityConfig) result);
+                                        } else {
+                                            logger.error("The {}.{}() returned an unsupported type: {}",
+                                                        file.getName(), methodName, result.getClass().getName());
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    Throwable t = e.getCause() == null ? e : e.getCause();
+                                    logger.error("The {} class is in error. {}:{}",
+                                                file.getName(),
+                                                t.getClass(),
+                                                t.getMessage());
+                                }
                             }
                         }
+                    } else {
+                        logger.warn("No read permissions for platform directory [{}]", directory);
                     }
                 } else {
-                    logger.warn("No read permissions for platform directory [{}]", directory);
+                    logger.warn("Platform directory [{}] is not a directory", dir);
                 }
             } else {
-                logger.warn("Platform directory [{}] is not a directory", dir);
+                logger.warn("Platform directory [{}] not found", directory);
             }
-        } else {
-            logger.warn("Platform directory [{}] not found", directory);
         }
         return(platformList.toArray(new PlatformCapabilityConfig[platformList.size()]));
     }
@@ -161,7 +173,7 @@ public class PlatformLoader {
                                                                         jskLibJar.getAbsolutePath());
         jiniCap.setCommon("yes");
 
-        Collection<PlatformCapabilityConfig> c = new ArrayList<PlatformCapabilityConfig>();
+        Collection<PlatformCapabilityConfig> c = new ArrayList<>();
         c.add(rioCap);
         c.add(jiniCap);
         return(c.toArray(new PlatformCapabilityConfig[c.size()]));
