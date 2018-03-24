@@ -75,6 +75,7 @@ import org.rioproject.opstring.ServiceElement;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.serviceui.UIComponentFactory;
+import org.rioproject.serviceui.UIFrameFactory;
 import org.rioproject.sla.SLA;
 import org.rioproject.sla.SLAThresholdEvent;
 import org.rioproject.system.ComputeResourceUtilization;
@@ -1082,13 +1083,16 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @throws IOException If the UIDescriptors cannot be created
      */
     protected Entry[] getServiceUIs() throws IOException {
+        UIFrameFactory cybernodeUIFrame = new UIFrameFactory(getUIJars(),
+                                                                 "org.rioproject.serviceui.components.AdminFrame");
         UIComponentFactory cybernodeUI = new UIComponentFactory(getUIJars(),
                                                                 "org.rioproject.cybernode.ui.PlatformCapabilityUI");
 
         UIComponentFactory platformCapabilityUI = new UIComponentFactory(getUIJars(),
                                                                          "org.rioproject.cybernode.ui.CybernodeUI");
 
-        return new Entry[] {UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, platformCapabilityUI),
+        return new Entry[] {UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, cybernodeUIFrame),
+                            UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, platformCapabilityUI),
                             UIDescriptorFactory.getUIDescriptor(AdminUI.ROLE, cybernodeUI)};
     }
 

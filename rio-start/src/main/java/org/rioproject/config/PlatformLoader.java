@@ -53,7 +53,6 @@ public class PlatformLoader {
             throw new IllegalArgumentException("directory is null");
 
         if(platformList.isEmpty()) {
-            logger.info("Who dis?", new Throwable());
             File dir = new File(directory);
             if (dir.exists()) {
                 if (dir.isDirectory()) {

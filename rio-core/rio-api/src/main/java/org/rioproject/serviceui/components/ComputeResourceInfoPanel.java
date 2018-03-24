@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.serviceui;
+package org.rioproject.serviceui.components;
 
 import org.rioproject.entry.ComputeResourceInfo;
 
@@ -29,7 +29,7 @@ import java.awt.*;
  * @author Dennis Reedy
  */
 public class ComputeResourceInfoPanel extends JPanel {
-    JTextField jvmVendor, jvmVersion, hostaddr, hostname, osinfo, arch;
+    private JTextField jvmVendor, jvmVersion, hostaddr, hostname, osinfo, arch;
 
     public ComputeResourceInfoPanel() {
         super();

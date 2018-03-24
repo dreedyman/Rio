@@ -18,6 +18,7 @@ package org.rioproject.tools.ui.serviceui;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceItem;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.serviceui.components.AdminFrame;
 import org.rioproject.tools.ui.Constants;
 import org.rioproject.ui.Util;
 

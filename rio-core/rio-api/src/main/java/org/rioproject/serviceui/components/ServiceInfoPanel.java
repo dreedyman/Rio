@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.serviceui;
+package org.rioproject.serviceui.components;
 
 import net.jini.lookup.entry.ServiceInfo;
 
@@ -27,7 +27,7 @@ import java.awt.*;
  * @author Dennis Reedy
  */
 public class ServiceInfoPanel extends JPanel {
-    JTextField  name, serialno, model, manufacturer, vendor, version;
+    private JTextField  name, serialno, model, manufacturer, vendor, version;
 
     public ServiceInfoPanel() {
         super();
@@ -53,6 +53,8 @@ public class ServiceInfoPanel extends JPanel {
         add(new JLabel("Manufacturer"));    add(manufacturer);
         add(new JLabel("Vendor"));          add(vendor);
         add(new JLabel("Version"));         add(version);
+        add(Box.createVerticalGlue());
+        add(Box.createVerticalGlue());
     }
 
     public void setServiceInfo(ServiceInfo info) {

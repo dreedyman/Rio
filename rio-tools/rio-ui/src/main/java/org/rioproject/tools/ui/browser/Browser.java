@@ -47,7 +47,7 @@ import net.jini.lookup.DiscoveryAdmin;
 import net.jini.lookup.entry.UIDescriptor;
 import net.jini.security.*;
 import net.jini.security.proxytrust.ServerProxyTrust;
-import org.rioproject.tools.ui.serviceui.AdminFrame;
+import org.rioproject.serviceui.components.AdminFrame;
 import org.rioproject.ui.Util;
 
 import javax.swing.*;

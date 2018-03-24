@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.serviceui;
+package org.rioproject.serviceui.components;
 
 import com.sun.jini.admin.DestroyAdmin;
 import net.jini.admin.Administrable;
@@ -48,7 +48,7 @@ public class ServiceTerminator implements ActionListener {
         killService();
     }
 
-    public void killService() {
+    private void killService() {
         try {
             String name;
             ServiceType sType = getServiceType(this.attrs);
@@ -81,13 +81,13 @@ public class ServiceTerminator implements ActionListener {
         }
     }
 
-    ServiceType getServiceType(Entry[] attrs) {
+    private ServiceType getServiceType(Entry[] attrs) {
         for (Entry attr : attrs) {
             if (attr instanceof ServiceType) {
                 return (ServiceType) attr;
             }
         }
-        return (null);
+        return null;
     }
 
 }

@@ -16,6 +16,7 @@
 package org.rioproject.tools.ui.serviceui;
 
 import net.jini.core.lookup.ServiceItem;
+import org.rioproject.serviceui.components.ServiceUIPanel;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;

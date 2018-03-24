@@ -45,56 +45,51 @@ public class UIFrameFactory implements JFrameFactory, Serializable {
         this.exportURL = exportURL;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     public JFrame getJFrame(Object roleObject) {
         if(!(roleObject instanceof ServiceItem)) {
             throw new IllegalArgumentException("ServiceItem required");
         }
         ClassLoader cl = ((ServiceItem)roleObject).service.getClass().getClassLoader();
-        JFrame component=null;
+        JFrame component;
         final URLClassLoader uiLoader = URLClassLoader.newInstance(exportURL, cl);
         final Thread currentThread = Thread.currentThread();
 
         final ClassLoader parentLoader = AccessController.doPrivileged(
-            new PrivilegedAction<ClassLoader>() {
-                public ClassLoader run() {
-                    return(currentThread.getContextClassLoader());
-                }
-        }
+            (PrivilegedAction<ClassLoader>) () -> (currentThread.getContextClassLoader())
         );
 
         try {
             AccessController.doPrivileged(
-                new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(uiLoader);
-                        return(null);
-                    }
+                (PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(uiLoader);
+                    return(null);
                 }
             );
 
             try {
-                Class clazz = uiLoader.loadClass(className);
+                Class<?> clazz = uiLoader.loadClass(className);
+                for(Constructor<?> c : clazz.getConstructors()) {
+                    System.out.println(c);
+                }
                 Constructor constructor = clazz.getConstructor(Object.class);
                 Object instanceObj = constructor.newInstance(roleObject);
                 component = (JFrame)instanceObj;
             } catch(Throwable t) {
                 if(t.getCause() != null)
                     t = t.getCause();
-                IllegalArgumentException e = 
-                    new IllegalArgumentException("Unable to instantiate ServiceUI :"
-                                                   + t.getClass().getName()
-                                                   + ": "
-                                                   + t.getLocalizedMessage());
-                e.initCause(t);
-                throw e;
+                throw new IllegalArgumentException("Unable to instantiate ServiceUI "+
+                                                   t.getClass().getName()+ ": "+
+                                                   t.getLocalizedMessage(), t);
             }
         } finally {
             AccessController.doPrivileged(
-                new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(parentLoader);
-                        return(null);
-                    }
+                (PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(parentLoader);
+                    return(null);
                 }
             );
         }

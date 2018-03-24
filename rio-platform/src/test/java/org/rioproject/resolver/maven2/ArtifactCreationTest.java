@@ -35,7 +35,7 @@ public class ArtifactCreationTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createBadArtifact3() throws Exception {
-        new Artifact("E:\\workspaceBranch\\iGrid\\rio\\lib\\rio-lib-5.6.6.jar;E:\\workspaceBranch\\iGrid\\rio\\lib-dl\\rio-proxy-5.6.6.jar;E:\\workspaceBranch\\iGrid\\rio\\lib-dl\\rio-api-5.6.6.jar;E:\\workspaceBranch\\iGrid\\rio\\lib-dl\\serviceui-2.2.2.jar");
+        new Artifact("E:\\workspaceBranch\\iGrid\\rio\\lib\\rio-lib-5.7.jar;E:\\workspaceBranch\\iGrid\\rio\\lib-dl\\rio-proxy-5.7.jar;E:\\workspaceBranch\\iGrid\\rio\\lib-dl\\rio-api-5.7.jar;E:\\workspaceBranch\\iGrid\\rio\\lib-dl\\serviceui-2.2.2.jar");
     }
 
     @Test(expected = IllegalArgumentException.class)

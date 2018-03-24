@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.serviceui;
+package org.rioproject.serviceui.components;
 
 import net.jini.admin.Administrable;
 import net.jini.core.entry.Entry;
@@ -25,6 +25,7 @@ import net.jini.lookup.ui.factory.JDialogFactory;
 import net.jini.lookup.ui.factory.JFrameFactory;
 import net.jini.lookup.ui.factory.JWindowFactory;
 import org.rioproject.entry.ComputeResourceInfo;
+import org.rioproject.serviceui.UIFrameFactory;
 import org.rioproject.serviceui.UILoader;
 import org.rioproject.ui.Util;
 
@@ -54,29 +55,23 @@ import java.util.TimerTask;
  * @author Dennis Reedy
  */
 public class ServiceUIPanel extends JPanel {
-    /** Various push buttons */
-    JButton dismissB, terminateB;
     /** The ServiceItem for the service */
-    ServiceItem item=null;
+    private ServiceItem item;
     /** A tabbed pane to display JComponents */
-    JTabbedPane tabpane;
-    /** Optional image to display */
-    Image image=null;
-    /** base JPanel to layout components onto */
-    JPanel base;
-    Object[] uiComponents;
+    private JTabbedPane tabpane;
+    private Object[] uiComponents;
     /* List of loaded JComponent instances */
-    java.util.List<JComponent> jComponentList = new ArrayList<JComponent>();
-    Container parent;
+    private java.util.List<JComponent> jComponentList = new ArrayList<>();
+    private Container parent;
 
-    public ServiceUIPanel(ServiceItem item, long startupDelay, Container parent)
-        throws Exception {
+    public ServiceUIPanel(ServiceItem item, long startupDelay, Container parent) {
         super(new BorderLayout());
         this.item = item;
         this.parent = parent;
         Entry[] attrs = item.attributeSets;
 
-        base = new JPanel();
+        /* base JPanel to layout components onto */
+        JPanel base = new JPanel();
         base.setLayout(new BorderLayout(8, 8));
         tabpane = new JTabbedPane();
 
@@ -110,20 +105,20 @@ public class ServiceUIPanel extends JPanel {
         try {
             uiFetcher.join(startupDelay);
         } catch(InterruptedException e) {
-            throw new Exception("Unable to obtain Service UI attributes for "+
-                                svcName+" in allotted time of "+
-                                (startupDelay/1000)+" seconds");
+            System.err.println("Unable to obtain Service UI attributes for "+
+                               svcName+" in allotted time of "+
+                               (startupDelay/1000)+" seconds");
         }
         waitingToLoadTask.cancel();
         if(waitingToLoadTask.dialog!=null)
             waitingToLoadTask.dialog.dispose();
         if(uiFetcher.isInterrupted())
-            throw new Exception("Unable to obtain Service UI attributes for "+
+            System.err.println("Unable to obtain Service UI attributes for "+
                                 svcName+" in allotted time of "+
                                 (startupDelay/1000)+" seconds");
         timeoutTask.cancel();
         if(uiFetcher.exception!=null)
-            throw uiFetcher.exception;
+            uiFetcher.exception.printStackTrace();
 
         ServiceInfo info = getServiceInfo(attrs);
         if(type!=null || info!=null) {
@@ -134,7 +129,8 @@ public class ServiceUIPanel extends JPanel {
             typePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
 
             if(type!=null) {
-                image = type.getIcon(0);
+                /* Optional image to display */
+                Image image = type.getIcon(0);
                 typePanel.setServiceType(type);
             }
 
@@ -163,13 +159,14 @@ public class ServiceUIPanel extends JPanel {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         if(!(parent instanceof JInternalFrame)) {
-            dismissB = new JButton("Close");
+            /* Various push buttons */
+            JButton dismissB = new JButton("Close");
             dismissB.setToolTipText("Close the dialog");
             dismissB.addActionListener(new DismissHandler());
             buttonPanel.add(dismissB);
 
             if(item.service instanceof Administrable) {
-                terminateB = new JButton("Terminate");
+                JButton terminateB = new JButton("Terminate");
                 terminateB.setToolTipText("Terminate (destroy) the service");
                 terminateB.addActionListener(new ServiceTerminator(item,
                                                                    parent));
@@ -177,7 +174,7 @@ public class ServiceUIPanel extends JPanel {
             }
         }
 
-        base.add(tabpane,BorderLayout.CENTER);
+        base.add(tabpane, BorderLayout.CENTER);
         base.add(buttonPanel, BorderLayout.SOUTH);
 
         add("Center", base);
@@ -186,10 +183,10 @@ public class ServiceUIPanel extends JPanel {
 
     public Object[] getUIComponents() {
         if(uiComponents==null)
-           return(new Object[0]);
+           return new Object[0];
         Object[] comps = new Object[uiComponents.length];
         System.arraycopy(uiComponents, 0, comps, 0, uiComponents.length);
-        return(comps);
+        return comps;
     }
 
     public class DismissHandler implements ActionListener {
@@ -201,11 +198,14 @@ public class ServiceUIPanel extends JPanel {
     private JComponent getComponent(Object factory, Object item) throws Exception {
         JComponent uiComponent = null;
         Class factoryClass = factory.getClass();
-        if(JFrameFactory.class.isAssignableFrom(factoryClass))
+        if(JFrameFactory.class.isAssignableFrom(factoryClass)) {
+            if(factory instanceof UIFrameFactory) {
+                if(!((UIFrameFactory)factory).getClassName().equals(AdminFrame.class.getName()))
+                    uiComponent = new LaunchPanel(factory, item);
+            }
+        } else if(JWindowFactory.class.isAssignableFrom(factoryClass)) {
             uiComponent = new LaunchPanel(factory, item);
-        else if(JWindowFactory.class.isAssignableFrom(factoryClass))
-            uiComponent = new LaunchPanel(factory, item);
-        else if(JComponentFactory.class.isAssignableFrom(factoryClass)) {
+        } else if(JComponentFactory.class.isAssignableFrom(factoryClass)) {
             JComponentFactory fac = (JComponentFactory)factory;
             uiComponent = fac.getJComponent(item);
             String name = uiComponent.getAccessibleContext().getAccessibleName();
@@ -213,10 +213,11 @@ public class ServiceUIPanel extends JPanel {
                 uiComponent.getAccessibleContext().setAccessibleName(
                                                   uiComponent.getClass().getName());
 
-        } else if(JDialogFactory.class.isAssignableFrom(factoryClass))
+        } else if(JDialogFactory.class.isAssignableFrom(factoryClass)) {
             uiComponent = new LaunchPanel(factory, item);
+        }
 
-        return(uiComponent);
+        return uiComponent;
     }
 
     class UIComponentFetcher extends Thread {
@@ -232,8 +233,7 @@ public class ServiceUIPanel extends JPanel {
                             break;
                         JComponent jComp = getComponent(uiComponents[i], item);
                         if(jComp instanceof JPanel) {
-                            name =
-                                jComp.getAccessibleContext().getAccessibleName();
+                            name = jComp.getAccessibleContext().getAccessibleName();
                             tabpane.add(name, jComp);
                             jComponentList.add(jComp);
                         } else {

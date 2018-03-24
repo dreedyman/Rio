@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.serviceui;
+package org.rioproject.serviceui.components;
 
 import net.jini.lookup.entry.ServiceType;
 
@@ -28,9 +28,9 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class ServiceTypePanel extends JPanel {
-    JTextField name, comment;
-    ImageIcon icon;
-    JPanel iconPanel;
+    private JTextField name, comment;
+    private ImageIcon icon;
+    private JPanel iconPanel;
 
     public ServiceTypePanel() {
         super();

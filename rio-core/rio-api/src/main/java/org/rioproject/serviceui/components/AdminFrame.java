@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.tools.ui.serviceui;
+package org.rioproject.serviceui.components;
 
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.lookup.entry.ServiceType;
-import org.rioproject.tools.ui.Constants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,25 +33,18 @@ import java.lang.reflect.Method;
  */
 @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
 public class AdminFrame extends JFrame {    
-    ServiceUIPanel serviceUIPanel;
+    private ServiceUIPanel serviceUIPanel;
 
-    public AdminFrame(ServiceItem item, Component component) throws Exception {
-        this(item, Constants.DEFAULT_DELAY, component);
-    }
-
-    public AdminFrame(ServiceItem item, long startupDelay, Component component) throws Exception {
+    public AdminFrame(final Object arg) {
         super();
-        serviceUIPanel = new ServiceUIPanel(item, startupDelay, this);
+        ServiceItem item = (ServiceItem) arg;
+        serviceUIPanel = new ServiceUIPanel(item, 1000*30, this);
         ServiceType sType = getServiceType(item.attributeSets);
         if(sType!=null && sType.getDisplayName()!=null)
             setTitle("Service UI for "+sType.getDisplayName());
         Container container = getContentPane();
         if(container!=null)
             container.add(serviceUIPanel);
-        display(component);
-    }
-
-    private void display(Component component) {
         WindowListener l = new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 dispose();
@@ -61,7 +53,16 @@ public class AdminFrame extends JFrame {
         addWindowListener(l);
         // Set dimensions and show
         setSize(565, 588);
-        setLocationRelativeTo(component);
+    }
+
+    public AdminFrame(Object arg, Component component) {
+        this(arg);
+        display(component);
+    }
+
+    private void display(Component component) {
+        if(component!=null)
+            setLocationRelativeTo(component);
         setVisible(true);
     }
 
@@ -71,7 +72,7 @@ public class AdminFrame extends JFrame {
                 return (ServiceType) attr;
             }
         }
-        return(null);
+        return null;
     }
 
     @Override
