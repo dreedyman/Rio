@@ -74,15 +74,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.river</groupId>
+            <groupId>au.net.zeus.jgdms.outrigger</groupId>
             <artifactId>outrigger-dl</artifactId>
             <version>${river.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.river</groupId>
-            <artifactId>outrigger</artifactId>
+            <groupId>au.net.zeus.jgdms.outrigger</groupId>
+            <artifactId>outrigger-service</artifactId>
             <version>${river.version}</version>
             <scope>test</scope>
         </dependency>

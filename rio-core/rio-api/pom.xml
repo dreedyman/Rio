@@ -22,13 +22,13 @@
     <dependencies>
 
         <dependency>
-		    <groupId>net.jini.lookup</groupId>
-		    <artifactId>serviceui</artifactId>
+		    <groupId>au.net.zeus.jgdms</groupId>
+		    <artifactId>jgdms-ui-factory</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>net.jini</groupId>
-            <artifactId>jsk-dl</artifactId>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-lib-dl</artifactId>
         </dependency>
 
         <dependency>
@@ -39,10 +39,15 @@
         </dependency>
 
         <dependency>
-            <groupId>net.jini</groupId>
-            <artifactId>jsk-platform</artifactId>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-platform</artifactId>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jini-2.1-compat</artifactId>
+        </dependency>      
 
         <dependency>
             <groupId>org.slf4j</groupId>

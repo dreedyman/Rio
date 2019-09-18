@@ -23,13 +23,20 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.river</groupId>
-            <artifactId>start</artifactId>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>service-starter</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jini-2.1-compat</artifactId>
+            <version>3.1.0</version>
         </dependency>
 
         <dependency>
-            <groupId>net.jini</groupId>
-            <artifactId>jsk-platform</artifactId>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-platform</artifactId>
         </dependency>
 
         <dependency>

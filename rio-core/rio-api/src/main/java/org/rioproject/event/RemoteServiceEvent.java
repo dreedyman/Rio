@@ -52,7 +52,7 @@ public class RemoteServiceEvent extends RemoteEvent implements Serializable {
          * <code>source</code> is required by RemoteEvents' superclass, 
          * EventObject, which rejects a null for <code>source</code>.
          */
-        super(source, 0, 0, null);
+        super(source, 0, 0, (MarshalledObject) null);
         date = new Date(System.currentTimeMillis());
     }
 

@@ -55,24 +55,37 @@
         </dependency>
 
 		<dependency>
-		    <groupId>org.apache.river</groupId>
-		    <artifactId>start</artifactId>
+		    <groupId>au.net.zeus.jgdms</groupId>
+		    <artifactId>service-starter</artifactId>
+                    <version>${river.version}</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
-		    <groupId>net.jini.lookup</groupId>
-		    <artifactId>serviceui</artifactId>
+		    <groupId>au.net.zeus.jgdms</groupId>
+		    <artifactId>jgdms-ui-factory</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>net.jini</groupId>
-            <artifactId>jsk-lib</artifactId>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-lib</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-discovery-providers</artifactId>
+            <version>${river.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-jrmp</artifactId>
+            <version>${river.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>net.jini</groupId>
-            <artifactId>jsk-platform</artifactId>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-platform</artifactId>
             <scope>provided</scope>
         </dependency>
 

@@ -41,8 +41,8 @@
         </dependency>
 
         <dependency>
-		    <groupId>net.jini.lookup</groupId>
-		    <artifactId>serviceui</artifactId>
+		    <groupId>au.net.zeus.jgdms</groupId>
+		    <artifactId>jgdms-ui-factory</artifactId>
         </dependency>
 
         <dependency>

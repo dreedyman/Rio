@@ -135,13 +135,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.river</groupId>
-            <artifactId>reggie</artifactId>
+            <groupId>au.net.zeus.jgdms.reggie</groupId>
+            <artifactId>reggie-service</artifactId>
             <optional>true</optional>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.river</groupId>
+            <groupId>au.net.zeus.jgdms.reggie</groupId>
             <artifactId>reggie-dl</artifactId>
             <optional>true</optional>
         </dependency>

@@ -187,8 +187,9 @@ public class DeploymentVerifierTest {
 
     private void startLookup(String... groups) throws Exception {
         DynamicConfiguration configuration = new DynamicConfiguration();
-        configuration.setEntry("com.sun.jini.reggie", "initialMemberGroups", String[].class, groups);
+        configuration.setEntry("org.apache.river.reggie", "initialMemberGroups", String[].class, groups);
         registrar = new Reggie(configuration, null);
+        registrar.start();
         listener = new DL();
         discoveryManagement = new LookupDiscoveryManager(new String[]{"foo"}, null, listener);
         deploymentVerifier = new DeploymentVerifier(EmptyConfiguration.INSTANCE, discoveryManagement);
