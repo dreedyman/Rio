@@ -15,6 +15,7 @@
  */
 package org.rioproject.net;
 
+import java.net.UnknownHostException;
 import net.jini.jeri.*;
 import net.jini.jeri.tcp.TcpEndpoint;
 import net.jini.jeri.tcp.TcpServerEndpoint;
@@ -152,13 +153,13 @@ public class ITPortRangeServerSocketFactoryTest {
     }
 
     @Test
-    public void createBasicJeriExporter() {
+    public void createBasicJeriExporter() throws UnknownHostException {
         Throwable t = null;
         PortRangeServerSocketFactory range = null;
         List<Endpoint> endPoints = new ArrayList<Endpoint>();
+        String host = getHostAddressFromProperty("java.rmi.server.hostname");
         for(int i=0; i<500; i++) {
             try {
-                String host = getHostAddressFromProperty("java.rmi.server.hostname");
                 range = new PortRangeServerSocketFactory(10000, 10500);
                 TcpServerEndpoint tcpEndPoint = TcpServerEndpoint.getInstance(host,
                                                                               0,
@@ -166,6 +167,7 @@ public class ITPortRangeServerSocketFactoryTest {
                                                                               range);
                 endPoints.add(new BasicJeriExporter(tcpEndPoint, new BasicILFactory())
                                       .getServerEndpoint().enumerateListenEndpoints(new EndpointContext()));
+
             } catch (Exception e) {
                 t = e;
                 e.printStackTrace();
