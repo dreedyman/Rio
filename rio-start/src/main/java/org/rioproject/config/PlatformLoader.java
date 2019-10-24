@@ -147,9 +147,10 @@ public class PlatformLoader {
         if(!rioHomeDir.exists())
             throw new Exception(rioHome+" does not exist");
 
-        File rioApiJar = new File(rioHomeDir, "lib-dl"+File.separator+String.format("rio-api-%s.jar", RioVersion.VERSION));
-        File rioProxyJar = new File(rioHomeDir, "lib-dl"+File.separator+String.format("rio-proxy-%s.jar", RioVersion.VERSION));
-        File serviceUiJar = FileHelper.find(new File(rioHomeDir, "lib-dl"), "serviceui");
+        File libDl = new File(rioHomeDir, "lib-dl");
+        File rioApiJar = new File(libDl, String.format("rio-api-%s.jar", RioVersion.VERSION));
+        File rioProxyJar = new File(libDl, String.format("rio-proxy-%s.jar", RioVersion.VERSION));
+        File serviceUiJar = FileHelper.find(libDl, "serviceui");
         File rioLibJar = new File(rioHomeDir, "lib"+File.separator+String.format("rio-lib-%s.jar", RioVersion.VERSION));
         StringBuilder pathBuilder = new StringBuilder();
         pathBuilder.append(rioLibJar.getAbsolutePath()).append(File.pathSeparator);
@@ -158,7 +159,7 @@ public class PlatformLoader {
         if(serviceUiJar!=null && serviceUiJar.exists())
             pathBuilder.append(serviceUiJar.getAbsolutePath());
         else
-            logger.warn("{} does not exist", serviceUiJar.getPath());
+            logger.warn("serviceui jar does not exist in {}", libDl.getPath());
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig("Rio",
                                                                        RioVersion.VERSION,
@@ -166,16 +167,22 @@ public class PlatformLoader {
         rioCap.setCommon("yes");
         rioCap.setPlatformClass("org.rioproject.system.capability.software.RioSupport");
 
-        File jskLibJar = FileHelper.find(new File(rioHomeDir, "lib"), "jsk-lib");
-        PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig("Apache River",
-                                                                        FileHelper.getJarVersion(jskLibJar.getName()),
-                                                                        jskLibJar.getAbsolutePath());
-        jiniCap.setCommon("yes");
-
         Collection<PlatformCapabilityConfig> c = new ArrayList<>();
         c.add(rioCap);
-        c.add(jiniCap);
-        return(c.toArray(new PlatformCapabilityConfig[c.size()]));
+
+        File libDir = new File(rioHomeDir, "lib");
+        File jskLibJar = FileHelper.find(libDir, "jsk-lib");
+        if (jskLibJar != null) {
+            PlatformCapabilityConfig jiniCap = new PlatformCapabilityConfig("Apache River",
+                                                                            FileHelper.getJarVersion(jskLibJar.getName()),
+                                                                            jskLibJar.getAbsolutePath());
+            jiniCap.setCommon("yes");
+            c.add(jiniCap);
+        } else {
+            logger.warn("jsk-lib jar does not exist in {}", libDir.getPath());
+        }
+
+        return(c.toArray(new PlatformCapabilityConfig[0]));
     }
 
 }
