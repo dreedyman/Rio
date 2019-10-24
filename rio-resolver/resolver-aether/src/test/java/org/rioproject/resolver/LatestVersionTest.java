@@ -15,16 +15,19 @@
  */
 package org.rioproject.resolver;
 
-import org.junit.*;
-import org.rioproject.resolver.aether.AetherResolver;
-import org.rioproject.resolver.maven2.Repository;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-
-import static org.junit.Assume.assumeTrue;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.rioproject.resolver.aether.AetherResolver;
+import org.rioproject.resolver.maven2.Repository;
 
 /**
  * @author Dennis Reedy
@@ -63,7 +66,7 @@ public class LatestVersionTest {
             if(testRepo.exists())
                 FileUtils.remove(testRepo);
             Resolver r = new AetherResolver();
-            URL loc = r.getLocation("org.codehaus.groovy:groovy-all:LATEST", null);
+            URL loc = r.getLocation("org.springframework.boot:spring-boot:LATEST", null);
             Assert.assertNotNull(loc);
             Assert.assertTrue(new File(loc.toURI()).exists());
         } finally {

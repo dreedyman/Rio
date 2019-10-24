@@ -46,6 +46,16 @@ public class Utils {
         sb.append("                    </snapshots>").append("\n");
         sb.append("                </repository>").append("\n");
         sb.append("                <repository>").append("\n");
+        sb.append("                    <id>central</id>").append("\n");
+        sb.append("                    <url>https://repo.maven.apache.org/maven2</url>").append("\n");
+        sb.append("                    <releases>").append("\n");
+        sb.append("                        <enabled>true</enabled>").append("\n");
+        sb.append("                    </releases>").append("\n");
+        sb.append("                    <snapshots>").append("\n");
+        sb.append("                        <enabled>true</enabled>").append("\n");
+        sb.append("                    </snapshots>").append("\n");
+        sb.append("                </repository>").append("\n");
+        sb.append("                <repository>").append("\n");
         sb.append("                    <id>jboss</id>").append("\n");
         sb.append("                    <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>").append("\n");
         sb.append("                    <releases>").append("\n");

@@ -15,6 +15,17 @@
  */
 package org.rioproject.resolver.aether;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
@@ -38,8 +49,22 @@ import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.installation.InstallRequest;
 import org.eclipse.aether.installation.InstallationException;
-import org.eclipse.aether.repository.*;
-import org.eclipse.aether.resolution.*;
+import org.eclipse.aether.repository.Authentication;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.MirrorSelector;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
+import org.eclipse.aether.repository.WorkspaceReader;
+import org.eclipse.aether.resolution.ArtifactDescriptorPolicy;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.resolution.ResolutionErrorPolicy;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResolutionException;
+import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
@@ -51,6 +76,7 @@ import org.eclipse.aether.util.repository.AuthenticationBuilder;
 import org.eclipse.aether.util.repository.DefaultMirrorSelector;
 import org.eclipse.aether.util.repository.SimpleArtifactDescriptorPolicy;
 import org.eclipse.aether.util.repository.SimpleResolutionErrorPolicy;
+import org.eclipse.aether.version.Version;
 import org.rioproject.resolver.aether.filters.ClassifierFilter;
 import org.rioproject.resolver.aether.filters.ExcludePlatformFilter;
 import org.rioproject.resolver.aether.util.ConsoleRepositoryListener;
@@ -58,11 +84,6 @@ import org.rioproject.resolver.aether.util.ConsoleTransferListener;
 import org.rioproject.resolver.aether.util.SettingsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
 
 /**
  * Use Maven 3's Aether API for Maven dependency resolution.
@@ -258,11 +279,14 @@ public final class AetherService {
 
         if(version.endsWith("LATEST")) {
             DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, "[0,)");
-            actualVersion = getLatestVersion(artifact, session, repositoriesToUse);
+            Map.Entry<String, RemoteRepository> result = getLatestVersion(artifact, session, repositoriesToUse);
+            actualVersion = result.getKey();
+            repositoriesToUse.clear();
+            repositoriesToUse.add(result.getValue());
         }
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, actualVersion);
-        Dependency dependency = new Dependency(artifact, /*JavaScopes.RUNTIME*/dependencyFilterScope==null?JavaScopes.RUNTIME:dependencyFilterScope);
+        Dependency dependency = new Dependency(artifact, dependencyFilterScope==null?JavaScopes.RUNTIME:dependencyFilterScope);
 
         if(logger.isDebugEnabled()) {
             StringBuilder builder = new StringBuilder();
@@ -293,14 +317,18 @@ public final class AetherService {
         }
     }
 
-    private String getLatestVersion(Artifact artifact,
-                                    RepositorySystemSession session,
-                                    List<RemoteRepository> remoteRepositories) throws VersionRangeResolutionException {
+    private Map.Entry<String, RemoteRepository> getLatestVersion(Artifact artifact,
+                                                                 RepositorySystemSession session,
+                                                                 List<RemoteRepository> remoteRepositories)
+        throws VersionRangeResolutionException {
         VersionRangeRequest rangeRequest = new VersionRangeRequest();
         rangeRequest.setArtifact(artifact);
         rangeRequest.setRepositories(remoteRepositories);
         VersionRangeResult latestVersion = repositorySystem.resolveVersionRange(session, rangeRequest);
-        return latestVersion.getVersions().size()==0?"":latestVersion.getHighestVersion().toString();
+        Version version = latestVersion.getVersions().size() == 0 ? null : latestVersion.getHighestVersion();
+        RemoteRepository resolvedFrom = (RemoteRepository) latestVersion.getRepository(version);
+        String latest = version == null? "" : version.toString();
+        return new AbstractMap.SimpleEntry<>(latest, resolvedFrom);
     }
 
     /**
@@ -494,8 +522,11 @@ public final class AetherService {
                                                            a.getArtifactId(),
                                                            a.getClassifier(),
                                                            a.getExtension(), "[0,)");
-            String latestVersion = getLatestVersion(artifact, session, repositoriesToUse);
+            Map.Entry<String, RemoteRepository> result = getLatestVersion(artifact, session, repositoriesToUse);
+            String latestVersion = result.getKey();
             a = a.setVersion(latestVersion);
+            repositoriesToUse.clear();
+            repositoriesToUse.add(result.getValue());
         }
 
         String extension = artifactExt==null? "jar":artifactExt;
@@ -547,7 +578,7 @@ public final class AetherService {
             RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/").build();
             myRepositories.add(central);
         }*/
-        return Collections.unmodifiableList(myRepositories);
+        return myRepositories;
     }
 
     /**
