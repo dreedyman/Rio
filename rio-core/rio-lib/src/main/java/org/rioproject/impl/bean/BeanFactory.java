@@ -35,10 +35,7 @@ import java.lang.reflect.Constructor;
  * @author Dennis Reedy
  */
 public class BeanFactory implements ServiceBeanFactory {
-    /** Component name for the logger */
-    static String COMPONENT = "org.rioproject.bean";
-    /** A Logger */
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(BeanFactory.class);
 
     /**
      * Creates the bean and the {@link BeanAdapter}
@@ -52,15 +49,17 @@ public class BeanFactory implements ServiceBeanFactory {
         BeanAdapter adapter;
         try {
             bean = getBean(context);
+            logger.trace("Obtained bean: {}", bean);
             adapter = new BeanAdapter(bean);
             /* Invoke the start method */
             proxy = adapter.start(context);
         } catch(Exception e) {
+            logger.error("Failed creating bean", e);
             if(e instanceof ServiceBeanInstantiationException)
                 throw (ServiceBeanInstantiationException)e;
             throw new ServiceBeanInstantiationException("Service Instantiation Exception", e, true);
         }
-        return (new Created(bean, proxy, adapter));
+        return new Created(bean, proxy, adapter);
     }
 
     /**
@@ -73,15 +72,19 @@ public class BeanFactory implements ServiceBeanFactory {
      * @throws Exception If there are errors loading the bean
      */
     protected Object getBean(final ServiceBeanContext context) throws Exception {
+        logger.trace("Getting currentThread");
         final Thread currentThread = Thread.currentThread();
+        logger.trace("Getting component bundle");
         ClassBundle bundle = context.getServiceElement().getComponentBundle();
+        logger.trace("Getting bean ClassLoader");
         ClassLoader beanCL = currentThread.getContextClassLoader();
+        logger.trace("Loading bean class: {}", bundle.getClassName());
         Class<?> beanClass = beanCL.loadClass(bundle.getClassName());
-        logger.trace("Load service class: {}", beanClass);
+        logger.trace("Loaded service class: {}", beanClass);
         logger.trace("Activating as ServiceBean");
         Constructor constructor = beanClass.getConstructor((Class[])null);
         logger.trace("Obtained implementation constructor: {}", constructor);
-        return(constructor.newInstance((Object[])null));
+        return constructor.newInstance((Object[])null);
     }
 
 }
