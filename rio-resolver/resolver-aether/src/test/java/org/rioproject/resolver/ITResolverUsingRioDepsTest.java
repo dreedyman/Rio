@@ -17,15 +17,20 @@ package org.rioproject.resolver;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rioproject.resolver.aether.AetherResolver;
 import org.rioproject.resolver.maven2.Repository;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Test resolving artifacts with and without inclusion of Rio
  */
+@Ignore
 public class ITResolverUsingRioDepsTest {
     
     private static String RESOLVER_PRUNE_PLATFORM="org.rioproject.resolver.prune.platform";

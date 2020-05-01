@@ -15,17 +15,6 @@
  */
 package org.rioproject.resolver.aether;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
@@ -49,22 +38,8 @@ import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.installation.InstallRequest;
 import org.eclipse.aether.installation.InstallationException;
-import org.eclipse.aether.repository.Authentication;
-import org.eclipse.aether.repository.LocalRepository;
-import org.eclipse.aether.repository.MirrorSelector;
-import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.repository.RepositoryPolicy;
-import org.eclipse.aether.repository.WorkspaceReader;
-import org.eclipse.aether.resolution.ArtifactDescriptorPolicy;
-import org.eclipse.aether.resolution.ArtifactRequest;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.resolution.ArtifactResult;
-import org.eclipse.aether.resolution.DependencyRequest;
-import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.resolution.ResolutionErrorPolicy;
-import org.eclipse.aether.resolution.VersionRangeRequest;
-import org.eclipse.aether.resolution.VersionRangeResolutionException;
-import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.repository.*;
+import org.eclipse.aether.resolution.*;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
@@ -85,6 +60,11 @@ import org.rioproject.resolver.aether.util.SettingsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+
 /**
  * Use Maven 3's Aether API for Maven dependency resolution.
  *
@@ -96,12 +76,12 @@ public final class AetherService {
     private Settings effectiveSettings;
     private String dependencyFilterScope;
     private final WorkspaceReader workspaceReader;
-    private final List<RemoteRepository> configuredRepositories = new ArrayList<RemoteRepository>();
+    private final List<RemoteRepository> configuredRepositories = new ArrayList<>();
     private final Collection<DependencyFilter> dependencyFilters =
-        Collections.synchronizedCollection(new ArrayList<DependencyFilter>());
+        Collections.synchronizedCollection(new ArrayList<>());
     private static final Logger logger = LoggerFactory.getLogger(AetherService.class);
-    static final String CONFIG_PROP_NO_CACHE = "aether.versionResolver.noCache";
-    static final String CONFIG_PROP_SESSION_STATE = "aether.updateCheckManager.sessionState";
+    private static final String CONFIG_PROP_NO_CACHE = "aether.versionResolver.noCache";
+    private static final String CONFIG_PROP_SESSION_STATE = "aether.updateCheckManager.sessionState";
 
     private AetherService(final RepositorySystem repositorySystem, final WorkspaceReader workspaceReader) throws SettingsBuildingException {
         this.repositorySystem = repositorySystem;
@@ -110,7 +90,7 @@ public final class AetherService {
         this.repositorySystemSession = getRepositorySystemSession();
     }
 
-    public static AetherService getDefaultInstance() {
+    static AetherService getDefaultInstance() {
         try {
             RepositorySystem repositorySystem = newRepositorySystem();
             return new AetherService(repositorySystem, new LocalRepositoryWorkspaceReader());
@@ -128,7 +108,7 @@ public final class AetherService {
         }
     }
 
-    public RepositorySystemSession getRepositorySystemSession() throws SettingsBuildingException {
+    public RepositorySystemSession getRepositorySystemSession() {
         return newSession(repositorySystem,
                           workspaceReader,
                           SettingsUtil.getLocalRepositoryLocation(effectiveSettings));
@@ -162,8 +142,7 @@ public final class AetherService {
 
     private RepositorySystemSession newSession(final RepositorySystem system,
                                                final WorkspaceReader workspaceReader,
-                                               final String repositoryLocation)
-        throws SettingsBuildingException {
+                                               final String repositoryLocation) {
         DefaultRepositorySystemSession session = repositorySystemSession==null?
                                                  MavenRepositorySystemUtils.newSession():
                                                  (DefaultRepositorySystemSession) repositorySystemSession;
@@ -202,11 +181,9 @@ public final class AetherService {
      * @return A <code>ResolutionResult</code> for the artifact with the specified coordinates.
      *
      * @throws DependencyCollectionException If errors are encountered creating the collection of dependencies
-     * @throws DependencyResolutionException If errors are encountered resolving dependencies
-     * @throws SettingsBuildingException If errors are encountered handling settings
      */
     public ResolutionResult resolve(final String groupId, final String artifactId, final String version)
-        throws DependencyCollectionException, DependencyResolutionException, SettingsBuildingException, VersionRangeResolutionException {
+        throws DependencyCollectionException, DependencyResolutionException, VersionRangeResolutionException {
         return resolve(groupId, artifactId, "jar", null, version);
     }
 
@@ -222,8 +199,6 @@ public final class AetherService {
      * @return A <code>ResolutionResult</code> for the artifact with the specified coordinates.
      *
      * @throws DependencyCollectionException If errors are encountered creating the collection of dependencies
-     * @throws DependencyResolutionException If errors are encountered resolving dependencies
-     * @throws SettingsBuildingException If errors are encountered handling settings
      */
     public ResolutionResult resolve(final String groupId,
                                     final String artifactId,
@@ -231,7 +206,6 @@ public final class AetherService {
                                     final String classifier,
                                     final String version) throws DependencyCollectionException,
                                                                  DependencyResolutionException,
-                                                                 SettingsBuildingException,
                                                                  VersionRangeResolutionException {
         return resolve(groupId, artifactId, extension, classifier, version, null);
     }
@@ -250,8 +224,6 @@ public final class AetherService {
      * @return A <code>ResolutionResult</code> for the artifact with the specified coordinates.
      *
      * @throws DependencyCollectionException If errors are encountered creating the collection of dependencies
-     * @throws DependencyResolutionException If errors are encountered resolving dependencies
-     * @throws SettingsBuildingException If errors are encountered handling settings
      */
     public ResolutionResult resolve(final String groupId,
                                     final String artifactId,
@@ -260,7 +232,6 @@ public final class AetherService {
                                     final String version,
                                     final List<RemoteRepository> repositories) throws DependencyCollectionException,
                                                                                       DependencyResolutionException,
-                                                                                      SettingsBuildingException,
                                                                                       VersionRangeResolutionException {
 
         RepositorySystemSession session = newSession(repositorySystem,
@@ -280,9 +251,11 @@ public final class AetherService {
         if(version.endsWith("LATEST")) {
             DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, "[0,)");
             Map.Entry<String, RemoteRepository> result = getLatestVersion(artifact, session, repositoriesToUse);
-            actualVersion = result.getKey();
-            repositoriesToUse.clear();
-            repositoriesToUse.add(result.getValue());
+            if (result != null) {
+                actualVersion = result.getKey();
+                repositoriesToUse.clear();
+                repositoriesToUse.add(result.getValue());
+            }
         }
 
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, actualVersion);
@@ -326,9 +299,13 @@ public final class AetherService {
         rangeRequest.setRepositories(remoteRepositories);
         VersionRangeResult latestVersion = repositorySystem.resolveVersionRange(session, rangeRequest);
         Version version = latestVersion.getVersions().size() == 0 ? null : latestVersion.getHighestVersion();
-        RemoteRepository resolvedFrom = (RemoteRepository) latestVersion.getRepository(version);
-        String latest = version == null? "" : version.toString();
-        return new AbstractMap.SimpleEntry<>(latest, resolvedFrom);
+        ArtifactRepository resolvedFrom = latestVersion.getRepository(version);
+        if (resolvedFrom instanceof RemoteRepository) {
+            RemoteRepository resolvedFromRemote = (RemoteRepository)resolvedFrom;
+            String latest = version == null ? "" : version.toString();
+            return new AbstractMap.SimpleEntry<>(latest, resolvedFromRemote);
+        }
+        return null;
     }
 
     /**
@@ -346,11 +323,11 @@ public final class AetherService {
      * @throws IllegalArgumentException if the groupId, artifactId, version or pomFile is null.
      */
     public void install(final String groupId, final String artifactId, final String version, final File pomFile, final File artifactFile)
-        throws InstallationException, SettingsBuildingException {
+        throws InstallationException {
         install(groupId, artifactId, version, null, pomFile, artifactFile);
     }
 
-    /**
+    /*
      * Installs a JAR and its POM to the local repository.
      *
      * @param groupId The group identifier of the artifact, may be {@code null}.
@@ -365,13 +342,13 @@ public final class AetherService {
      * @throws InstallationException if the requested installation is unsuccessful
      * @throws IllegalArgumentException if the groupId, artifactId, version or pomFile is null.
      */
-    public void install(final String groupId, final String artifactId, final String version, final String classifier, final File pomFile, final File artifactFile)
-        throws InstallationException, SettingsBuildingException {
+    private void install(final String groupId, final String artifactId, final String version, final String classifier, final File pomFile, final File artifactFile)
+        throws InstallationException {
 
         InstallRequest installRequest = new InstallRequest();
         if(artifactFile!=null) {
             String name = artifactFile.getName();
-            String type = name.substring(artifactFile.getName().lastIndexOf(".")+1, name.length());
+            String type = name.substring(artifactFile.getName().lastIndexOf(".")+1);
             Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, classifier, type, version);
             jarArtifact = jarArtifact.setFile(artifactFile);
             Artifact pomArtifact = new SubArtifact(jarArtifact, classifier, "pom");
@@ -405,7 +382,7 @@ public final class AetherService {
                        final File artifactFile,
                        final File pomFile,
                        final String repositoryId,
-                       final String repositoryURL) throws DeploymentException, SettingsBuildingException {
+                       final String repositoryURL) throws DeploymentException {
 
         DeployRequest deployRequest = new DeployRequest();
         if(artifactFile!=null) {
@@ -432,14 +409,14 @@ public final class AetherService {
         repositorySystem.deploy(session, deployRequest);
     }
 
-    /**
+    /*
      * Get the {@code DependencyFilter} for an artifact
      *
      * @param a The artifact
      *
      * @return The {@code DependencyFilter} to use
      */
-    protected DependencyFilter getDependencyFilter(final Artifact a) {
+    private DependencyFilter getDependencyFilter(final Artifact a) {
         Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();
         if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
             filters.add(new ClassifierFilter(a.getClassifier()));
@@ -460,14 +437,13 @@ public final class AetherService {
      *
      * @return The location of the artifact
      *
-     * @throws ArtifactResolutionException if the artifact cannot be resolved
      * @throws MalformedURLException if the resolved artifact cannot be converted to a URL
      * @throws SettingsBuildingException If errors are encountered handling settings
      */
-    public URL getLocation(final String artifactCoordinates, final String artifactExt) throws ArtifactResolutionException,
-                                                                                              MalformedURLException,
-                                                                                              SettingsBuildingException,
-                                                                                              VersionRangeResolutionException {
+    URL getLocation(final String artifactCoordinates, final String artifactExt) throws ArtifactResolutionException,
+                                                                                       MalformedURLException,
+                                                                                       SettingsBuildingException,
+                                                                                       VersionRangeResolutionException {
         return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories());
     }
 
@@ -481,13 +457,12 @@ public final class AetherService {
      *
      * @return The location of the artifact
      *
-     * @throws ArtifactResolutionException if the artifact cannot be resolved
      * @throws MalformedURLException if the resolved artifact cannot be converted to a URL
      * @throws SettingsBuildingException If errors are encountered handling settings
      */
-    public URL getLocation(final String artifactCoordinates,
-                           final String artifactExt,
-                           final List<RemoteRepository> repositories) throws ArtifactResolutionException,
+    URL getLocation(final String artifactCoordinates,
+                    final String artifactExt,
+                    final List<RemoteRepository> repositories) throws ArtifactResolutionException,
                                                                              MalformedURLException,
                                                                              SettingsBuildingException,
                                                                              VersionRangeResolutionException {
@@ -523,10 +498,12 @@ public final class AetherService {
                                                            a.getClassifier(),
                                                            a.getExtension(), "[0,)");
             Map.Entry<String, RemoteRepository> result = getLatestVersion(artifact, session, repositoriesToUse);
-            String latestVersion = result.getKey();
-            a = a.setVersion(latestVersion);
-            repositoriesToUse.clear();
-            repositoriesToUse.add(result.getValue());
+            if (result != null) {
+                String latestVersion = result.getKey();
+                a = a.setVersion(latestVersion);
+                repositoriesToUse.clear();
+                repositoriesToUse.add(result.getValue());
+            }
         }
 
         String extension = artifactExt==null? "jar":artifactExt;
@@ -542,7 +519,7 @@ public final class AetherService {
         return artifactResult.getArtifact().getFile().toURI().toURL();
     }
 
-    public AetherService setConfiguredRepositories(List<RemoteRepository> repositories) {
+    AetherService setConfiguredRepositories(List<RemoteRepository> repositories) {
         configuredRepositories.addAll(repositories);
         return this;
     }
@@ -552,9 +529,9 @@ public final class AetherService {
      *
      * @return An immutable {@code List} of {@code RemoteRepository} instances.
      */
-    public List<RemoteRepository> getRemoteRepositories() {
+    List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
-        List<RemoteRepository> myRepositories = new ArrayList<RemoteRepository>();
+        List<RemoteRepository> myRepositories = new ArrayList<>();
         myRepositories.addAll(configuredRepositories);
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
@@ -591,7 +568,7 @@ public final class AetherService {
     private List<RemoteRepository> applyAuthentication(final List<RemoteRepository> repositories) {
         if(effectiveSettings.getServers().isEmpty())
             return repositories;
-        Set<RemoteRepository> appliedRepositories = new HashSet<RemoteRepository>();
+        Set<RemoteRepository> appliedRepositories = new HashSet<>();
         for(Server server : effectiveSettings.getServers()) {
             for(RemoteRepository remoteRepository : repositories) {
                 if(server.getId().equals(remoteRepository.getId())) {
@@ -613,7 +590,7 @@ public final class AetherService {
                 }
             }
         }
-        return new ArrayList<RemoteRepository>(appliedRepositories);
+        return new ArrayList<>(appliedRepositories);
     }
 
     /**
@@ -641,7 +618,7 @@ public final class AetherService {
         List<Mirror> mirrors = effectiveSettings.getMirrors();
         if(!mirrors.isEmpty()) {
 
-            List<RemoteRepository> repositoryMirrors = new ArrayList<RemoteRepository>();
+            List<RemoteRepository> repositoryMirrors = new ArrayList<>();
             for (Mirror mirror : mirrors) {
                 mirrorSelector.add(mirror.getId(),
                                    mirror.getUrl(),

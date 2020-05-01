@@ -40,19 +40,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AetherResolver implements Resolver, SettableResolver {
     protected AetherService service;
-    private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<ResolutionRequest, Future<String[]>>();
+    private final Map<ResolutionRequest, Future<String[]>> resolvingMap = new ConcurrentHashMap<>();
     private final ExecutorService resolverExecutor;
-    private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<RemoteRepository>();
+    private final List<RemoteRepository> cachedRemoteRepositories = new ArrayList<>();
     private final FlatDirectoryReader flatDirectoryReader = new FlatDirectoryWorkspaceReader();
     private static final Logger logger = LoggerFactory.getLogger(AetherResolver.class.getName());
 
     public AetherResolver() {
-        resolverExecutor = Executors.newCachedThreadPool(new ThreadFactory() {
-            @Override public Thread newThread(Runnable runnable) {
-                Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-                thread.setDaemon(true);
-                return thread;
-            }
+        resolverExecutor = Executors.newCachedThreadPool(runnable -> {
+            Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+            thread.setDaemon(true);
+            return thread;
         });
         service = AetherService.getDefaultInstance();
     }
@@ -80,9 +78,7 @@ public class AetherResolver implements Resolver, SettableResolver {
         request.increment();
         try {
             classPath = future.get();
-        } catch (InterruptedException e) {
-            throw new ResolverException(String.format("While trying to resolve %s", artifact), e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new ResolverException(String.format("While trying to resolve %s", artifact), e);
         } finally {
             if(request.decrement()==0) {
@@ -121,9 +117,7 @@ public class AetherResolver implements Resolver, SettableResolver {
         request.increment();
         try {
             classPath = future.get();
-        } catch (InterruptedException e) {
-            throw new ResolverException(String.format("While trying to resolve %s", artifact), e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new ResolverException(String.format("While trying to resolve %s", artifact), e);
         } finally {
             if(request.decrement()==0) {
@@ -210,7 +204,7 @@ public class AetherResolver implements Resolver, SettableResolver {
      */
     @Override
     public SettableResolver setRemoteRepositories(Collection<RemoteRepository> repositories) {
-        service.setConfiguredRepositories(transformRemoteRepository(repositories.toArray(new RemoteRepository[repositories.size()])));
+        service.setConfiguredRepositories(transformRemoteRepository(repositories.toArray(new RemoteRepository[0])));
         return this;
     }
 
@@ -228,7 +222,7 @@ public class AetherResolver implements Resolver, SettableResolver {
     @Override
     public Collection<RemoteRepository> getRemoteRepositories() {
         List<org.eclipse.aether.repository.RemoteRepository> repos = service.getRemoteRepositories();
-        List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+        List<RemoteRepository> remoteRepositories = new ArrayList<>();
 
         for(org.eclipse.aether.repository.RemoteRepository r : repos)
             remoteRepositories.add(transformAetherRemoteRepository(r));
@@ -245,11 +239,10 @@ public class AetherResolver implements Resolver, SettableResolver {
         return service;
     }
 
-    protected List<org.eclipse.aether.repository.RemoteRepository> transformRemoteRepository(RemoteRepository[] repositories) {
+    List<org.eclipse.aether.repository.RemoteRepository> transformRemoteRepository(RemoteRepository[] repositories) {
         if(repositories==null)
             throw new IllegalArgumentException("repositories must not be null");
-        List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories =
-            new ArrayList<org.eclipse.aether.repository.RemoteRepository>();
+        List<org.eclipse.aether.repository.RemoteRepository> remoteRepositories = new ArrayList<>();
         for(RemoteRepository rr : repositories) {
             RepositoryPolicy releasePolicy = new RepositoryPolicy(true,
                                                                   rr.getReleaseUpdatePolicy(),
@@ -268,8 +261,8 @@ public class AetherResolver implements Resolver, SettableResolver {
         return remoteRepositories;
     }
 
-    protected String[] produceClassPathFromResolutionResult(ResolutionResult result) {
-        List<String> classPath = new ArrayList<String>();
+    private String[] produceClassPathFromResolutionResult(ResolutionResult result) {
+        List<String> classPath = new ArrayList<>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
             if(artifactResult.getArtifact()==null) {
                 logger.error("Unknown artifact for {}", artifactResult.getRequest().getArtifact());
@@ -279,8 +272,7 @@ public class AetherResolver implements Resolver, SettableResolver {
                     logger.debug("Adding classpath for artifact: {}, result: {}",
                                  artifactResult.getArtifact(), artifactResult.getArtifact().getFile());
                 else {
-                    logger.error("Adding classpath for artifact: {}, no file found",
-                                 artifactResult.getArtifact());
+                    logger.error("Adding classpath for artifact: {}, no file found", artifactResult);
                 }
             }
             classPath.add(artifactResult.getArtifact().getFile().getAbsolutePath());
@@ -294,10 +286,10 @@ public class AetherResolver implements Resolver, SettableResolver {
         }
         if(logger.isDebugEnabled())
             logResolutionResult(result);
-        return classPath.toArray(new String[classPath.size()]);
+        return classPath.toArray(new String[0]);
     }
 
-    protected void logResolutionResult(ResolutionResult result) {
+    private void logResolutionResult(ResolutionResult result) {
         StringBuilder resolvedList = new StringBuilder();
         int artifactLength = getMaxArtifactStringLength(result.getArtifactResults());
         for (ArtifactResult artifactResult : result.getArtifactResults() ) {
@@ -314,7 +306,7 @@ public class AetherResolver implements Resolver, SettableResolver {
         logger.debug(String.format("Artifact resolution for %s:%s", result.getArtifact(), newLine+resolvedList.toString()));
     }
 
-    protected RemoteRepository transformAetherRemoteRepository(org.eclipse.aether.repository.RemoteRepository r) {
+    RemoteRepository transformAetherRemoteRepository(org.eclipse.aether.repository.RemoteRepository r) {
         RemoteRepository rr = new RemoteRepository();
         rr.setId(r.getId());
         rr.setUrl(r.getUrl());
@@ -382,9 +374,6 @@ public class AetherResolver implements Resolver, SettableResolver {
                                              a.getVersion());
                 }
                 classPath = produceClassPathFromResolutionResult(result);
-            } catch (SettingsBuildingException e) {
-                throw new ResolverException(String.format("Error reading local Maven configuration: %s",
-                                                          e.getLocalizedMessage()), e);
             } catch (DependencyCollectionException e) {
                 CollectRequest collectRequest = e.getResult().getRequest();
                 ArtifactResult artifactResult = null;
@@ -402,8 +391,8 @@ public class AetherResolver implements Resolver, SettableResolver {
                     classPath = produceClassPathFromResolutionResult(result);
                 }
             } catch (DependencyResolutionException e) {
-                List<ArtifactResult> artifactResults = new ArrayList<ArtifactResult>();
-                Set<org.eclipse.aether.artifact.Artifact> flatDirArtifacts = new HashSet<org.eclipse.aether.artifact.Artifact>();
+                List<ArtifactResult> artifactResults = new ArrayList<>();
+                Set<org.eclipse.aether.artifact.Artifact> flatDirArtifacts = new HashSet<>();
                 for(ArtifactResult result : e.getResult().getArtifactResults()) {
                     if(result.isMissing()) {
                         flatDirArtifacts.add(result.getRequest().getArtifact());
