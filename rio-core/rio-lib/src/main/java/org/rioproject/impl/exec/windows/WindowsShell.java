@@ -37,7 +37,7 @@ import java.net.URL;
  */
 public class WindowsShell extends AbstractShell {
     private static final String DEFAULT_EXEC_CMD="classpath:start-template.cmd";
-    static final Logger logger = LoggerFactory.getLogger(WindowsShell.class);
+    private static final Logger logger = LoggerFactory.getLogger(WindowsShell.class);
 
     public WindowsShell() {
         super(DEFAULT_EXEC_CMD);

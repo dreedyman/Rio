@@ -22,20 +22,21 @@ import net.jini.export.Exporter;
 import net.jini.id.Uuid;
 import net.jini.jeri.BasicILFactory;
 import net.jini.jeri.BasicJeriExporter;
-import org.rioproject.impl.config.ExporterConfig;
-import org.rioproject.impl.container.DiscardManager;
-import org.rioproject.impl.container.ServiceLogUtil;
+import org.rioproject.config.Constants;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.deploy.ServiceRecord;
 import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.exec.ServiceBeanExecListener;
 import org.rioproject.exec.ServiceBeanExecutor;
+import org.rioproject.impl.config.ExporterConfig;
+import org.rioproject.impl.container.DiscardManager;
+import org.rioproject.impl.container.ServiceLogUtil;
 import org.rioproject.impl.fdh.FaultDetectionListener;
-import org.rioproject.opstring.OperationalStringManager;
-import org.rioproject.opstring.ServiceElement;
 import org.rioproject.impl.util.FileUtils;
 import org.rioproject.impl.util.RMIServiceNameHelper;
+import org.rioproject.opstring.OperationalStringManager;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.util.PropertyHelper;
@@ -49,7 +50,6 @@ import java.lang.management.RuntimeMXBean;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.util.Map;
@@ -91,6 +91,7 @@ public class ServiceBeanExecHandler {
     public ServiceBeanExecutor getServiceBeanExecutor() {
         return execHandler;
     }
+
     public ServiceBeanInstance exec(final OperationalStringManager opStringMgr,
                                     final DiscardManager discardManager,
                                     final PlatformCapability[] installedPlatformCapabilities) throws Exception {
@@ -122,8 +123,7 @@ public class ServiceBeanExecHandler {
         String serviceBindName = RMIServiceNameHelper.createBindName(sElem);
 
         /* Get the Cybernode's RMI Registry */
-        int regPort = RegistryUtil.checkRegistry();
-        String sPort = Integer.toString(regPort);
+        String sPort = System.getProperty(Constants.REGISTRY_PORT);
 
         String logDir = getLogDirectory(config, sElem.getOperationalStringName());
         if(!logDir.endsWith(File.separator))
@@ -165,7 +165,8 @@ public class ServiceBeanExecHandler {
         exDesc.setStdOutFileName(serviceOut);
 
         try {
-            Registry registry = LocateRegistry.getRegistry(regPort);
+            Registry registry = RegistryUtil.getRegistry();
+
             ForkedServiceBeanListener forkedServiceListener = new ForkedServiceBeanListener(discardManager);
             ServiceBeanExecListener listener = forkedServiceListener.getServiceBeanExecListener();
             long start = System.currentTimeMillis();
@@ -187,7 +188,7 @@ public class ServiceBeanExecHandler {
             }
             manager = shell.exec(exDesc);
             forkedServiceListener.setName(serviceBindName);
-            forkedServiceListener.setRegistryPort(regPort);
+            forkedServiceListener.setRegistryPort(Integer.parseInt(sPort));
 
             long wait = 0;
             while (wait < (forkedServiceWaitTime*10)) {
@@ -225,7 +226,7 @@ public class ServiceBeanExecHandler {
             }
 
         } catch (Exception e) {
-            unregister(regPort, serviceBindName);
+            unregister(serviceBindName);
             logger.info("Terminate process for ServiceBean [{}]", serviceBindName);
             if(manager!=null)
                 manager.destroy(true);
@@ -238,9 +239,9 @@ public class ServiceBeanExecHandler {
         return serviceRecord;
     }
 
-    private void unregister(final int regPort, final String name) {
+    private void unregister(final String name) {
         try {
-            Registry registry = LocateRegistry.getRegistry(regPort);
+            Registry registry = RegistryUtil.getRegistry();
             registry.unbind(name);
             logger.info("Unbound failed ServiceBean fork for [{}]", name);
         } catch (Exception e1) {
@@ -323,7 +324,7 @@ public class ServiceBeanExecHandler {
 
         public void serviceFailure(final Object service, final String serviceID) {
             try {
-                Registry registry = LocateRegistry.getRegistry(registryPort);
+                Registry registry = RegistryUtil.getRegistry(registryPort);
                 registry.unbind(name);
                 logger.info("Terminated ServiceBean fork for [{}] unbound from local registry", name);
             } catch (Exception e) {
