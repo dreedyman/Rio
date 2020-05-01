@@ -16,11 +16,15 @@
 package org.rioproject.rmi;
 
 import org.rioproject.config.Constants;
+import org.rioproject.net.HostUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -113,44 +117,48 @@ import java.rmi.registry.Registry;
  */
 public class RegistryUtil {
     public static final int DEFAULT_PORT = 1099;
-    public static final int DEFAULT_RETRY_COUNT = 50;
-    static final String COMPONENT = "org.rioproject.rmi";
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
-
+    private static final int DEFAULT_RETRY_COUNT = 50;
+    private static final String COMPONENT = "org.rioproject.rmi";
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    
     /**
-     * Check if RMI Registry has been started for the VM, if not start it.
-     * This method will use the {@link org.rioproject.config.Constants#REGISTRY_PORT}
-     * system property to determine if the {@link java.rmi.registry.Registry} has
-     * been created.
+     * Get the RMI Registry
      *
-     * <p>If the RMI Registry is created, this method will also set the
-     * {@link org.rioproject.config.Constants#REGISTRY_PORT} system property
-     *
-     * @return The port the RMI Registry was created on, or -1 if the
-     * RMIRegistry could not be created
+     * @return The RMI Registry
      */
-    public static int checkRegistry() {
-        int port;
-        synchronized(RegistryUtil.class) {
-            if(System.getProperty(Constants.REGISTRY_PORT)==null) {
-                port = getRegistry();
-                if(port>0)
-                    System.setProperty(Constants.REGISTRY_PORT, Integer.toString(port));
-            } else {
-                port = Integer.parseInt(System.getProperty(Constants.REGISTRY_PORT));
-            }
-        }
-        return port;
+    public static Registry getRegistry() throws UnknownHostException, RemoteException {
+        int port = System.getProperty(Constants.REGISTRY_PORT) == null
+                   ? DEFAULT_PORT : Integer.parseInt(System.getProperty(Constants.REGISTRY_PORT));
+        return getRegistry(port);
     }
 
     /**
-     * Check if RMI Registry has been started for the VM, if not start it.
+     * Get the RMI Registry.
+     *
+     * @param port The port to use.
+     *
+     * @return The RMI Registry
+     */
+    public static Registry getRegistry(int port) throws UnknownHostException, RemoteException {
+        Registry registry;
+        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+        if (System.getProperty("javax.net.ssl.keyStore") != null) {
+            registry =  LocateRegistry.getRegistry(address, port, new SslRMIClientSocketFactory());
+        } else {
+            registry =  LocateRegistry.getRegistry(address, port);
+        }
+        return registry;
+    }
+
+    /**
+     * Create a RMI Registry has been started for the VM, if not start it.
      *
      * @return The port the RMI Registry was created on, or -1 if the
      * RMIRegistry could not be created
      */
-    public static int getRegistry() {
+    public static Registry createRegistry() {
         int registryPort;
+        Registry registry = null;
         synchronized(RegistryUtil.class) {
             int[] portRange = getRegistryPortRange();
             if(portRange!=null) {
@@ -160,23 +168,21 @@ public class RegistryUtil {
                     ServerSocket s = socketFactory.createServerSocket(0);
                     registryPort = socketFactory.getLastPort();
                     s.close();
-                    LocateRegistry.createRegistry(registryPort);
+                    registry = createRegistry(registryPort);
+                    System.setProperty(Constants.REGISTRY_PORT, Integer.toString(registryPort));
                 } catch (IOException e) {
                     if(logger.isTraceEnabled())
-                            logger.trace("Failed to create RMI Registry for port range {}-{}"+
-                                          portRange[0], portRange[1]);
-                    registryPort = -1;
+                        logger.trace("Failed to create RMI Registry for port range {}-{}"+
+                                     portRange[0], portRange[1]);
                 }
             } else {
                 registryPort = DEFAULT_PORT;
                 int originalPort = registryPort;
-                int registryRetries = DEFAULT_RETRY_COUNT;
-                Registry registry = null;
-                for(int i = 0; i < registryRetries; i++) {
+                for(int i = 0; i < DEFAULT_RETRY_COUNT; i++) {
                     try {
-                        registry = LocateRegistry.createRegistry(registryPort);
+                        registry = createRegistry(registryPort);
                         break;
-                    } catch(RemoteException e1) {
+                    } catch(IOException e1) {
                         if(logger.isTraceEnabled())
                             logger.trace("Failed to create RMI Registry using port [{}], increment port and try again",
                                          registryPort);
@@ -185,14 +191,28 @@ public class RegistryUtil {
                 }
                 if(registry==null) {
                     logger.warn("Unable to create RMI Registry using ports {} through {}", originalPort, registryPort);
-                    registryPort = -1;
                 } else {
+                    System.setProperty(Constants.REGISTRY_PORT, Integer.toString(registryPort));
                     if(logger.isDebugEnabled())
                         logger.debug("Created RMI Registry on port={}", System.getProperty(Constants.REGISTRY_PORT));
                 }
             }
         }
-        return registryPort;
+        return registry;
+    }
+
+    private static Registry createRegistry(int registryPort) throws RemoteException {
+        Registry registry;
+        if (System.getProperty("javax.net.ssl.keyStore") != null) {
+            registry = LocateRegistry.createRegistry(registryPort,
+                                                     new SslRMIClientSocketFactory(),
+                                                     new SslRMIServerSocketFactory());
+        } else {
+            registry = LocateRegistry.createRegistry(registryPort);
+        }
+        logger.info("Created Registry on port: {}", registryPort);
+        System.setProperty(Constants.REGISTRY_PORT, Integer.toString(registryPort));
+        return registry;
     }
 
     /**
@@ -201,7 +221,7 @@ public class RegistryUtil {
      * @return The port range as an integer array, where the first element is the
      * range start, the second the range end. If there is no declared port range, return null.
      */
-    static int[] getRegistryPortRange() {
+    private static int[] getRegistryPortRange() {
         String registryPortRange = System.getProperty(Constants.PORT_RANGE);
         int[] portRange = null;
         if(registryPortRange!=null) {
@@ -215,7 +235,7 @@ public class RegistryUtil {
                 logger.warn("Illegal range value specified, continue using default registryPort settings.", e);
             }
         }
-        return(portRange);
+        return portRange;
     }
 
     /**
