@@ -18,11 +18,10 @@ package org.rioproject.impl.jmx;
 import net.jini.core.entry.Entry;
 import net.jini.id.Uuid;
 import net.jini.lookup.entry.jmx.JMXProperty;
-import net.jini.lookup.entry.jmx.JMXProtocolType;
 import org.rioproject.config.Constants;
-import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -286,35 +285,7 @@ public class JMXUtil {
         return (ObjectName.getInstance(oName));
     }
 
-    /**
-     * Get the attributes to add to a service's attribute collection
-     *
-     * @return An array of {@link net.jini.core.entry.Entry}s. If the
-     * <tt>org.rioproject.jmxServiceURL</tt> system property exists (is not null)
-     * create an array of 2 attributes, one being
-     * {@link net.jini.lookup.entry.jmx.JMXProtocolType} with the protocol
-     * type set to {@link net.jini.lookup.entry.jmx.JMXProtocolType#RMI}, the other
-     * {@link net.jini.lookup.entry.jmx.JMXProperty}, set to the value of the property
-     * <tt>org.rioproject.jmxServiceURL</tt>. If the
-     * <tt>org.rioproject.jmxServiceURL</tt> property is not found, return a
-     * zero-length array. A new array is created each time.
-     */
-    public static Entry[] getJMXConnectionEntries() {
-        Entry[] entries = new Entry[0];
-        /* Check for JMXConnection */
-        try {
-            JMXConnectionUtil.createJMXConnection();
-            String jmxServiceURL = System.getProperty(Constants.JMX_SERVICE_URL);
-            if(jmxServiceURL!=null) {
-                entries = new Entry[2];
-                entries[0] = new JMXProtocolType(JMXProtocolType.RMI);
-                entries[1] = new JMXProperty(Constants.JMX_SERVICE_URL, jmxServiceURL);
-            }
-        } catch (Exception e) {
-            logger.warn("Could not create JMX Connection, JMX monitoring not available", e);
-        }
-        return(entries);
-    }
+
 
     /**
      * Get the String value found in the JMXProperty entry, or null if the attribute
