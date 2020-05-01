@@ -16,16 +16,13 @@
  */
 package org.rioproject.impl.watch;
 
-import org.rioproject.servicebean.ServiceBeanContext;
-import org.rioproject.impl.jmx.JMXUtil;
-import org.rioproject.impl.jmx.MBeanServerFactory;
 import org.rioproject.impl.sla.SLAPolicyHandler;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.system.SystemWatchID;
 import org.rioproject.watch.WatchDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.*;
 import java.rmi.NoSuchObjectException;
 import java.util.*;
 
@@ -34,9 +31,9 @@ import java.util.*;
  */
 public class WatchDataSourceRegistry implements WatchRegistry {
     /** Collection of Watch instances that have been registered */
-    protected final List<Watch> watchRegistry = new ArrayList<Watch>();
-    /** Table of ThresholdWatch classnames and ThresholdListener objects */
-    protected final Map<String, Collection<ThresholdListener>> thresholdListenerTable = new Hashtable<String, Collection<ThresholdListener>>();
+    private final List<Watch> watchRegistry = new ArrayList<>();
+    /** Table of ThresholdWatch class names and ThresholdListener objects */
+    private final Map<String, Collection<ThresholdListener>> thresholdListenerTable = new Hashtable<>();
     /** The ServiceBeanContext */
     private ServiceBeanContext context;
     /** A Logger */
@@ -62,25 +59,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
                 logger.warn("Deregistering Watch", t);
             }
             /// unregister ThresholdListeners
-            if(thresholdListenerTable.containsKey(watch.getId())) {
-                thresholdListenerTable.remove(watch.getId());
-            }
-            //unregister from jmx
-            unregisterJMX(watch);
-        }
-    }
-
-    private void unregisterJMX(Watch watch) {
-        try {
-            ObjectName objectName = getObjectName(watch);
-            if(MBeanServerFactory.getMBeanServer().isRegistered(objectName))
-               MBeanServerFactory.getMBeanServer().unregisterMBean(objectName);
-        } catch (MalformedObjectNameException e) {
-            logger.warn(e.toString(), e);
-        } catch (InstanceNotFoundException e) {
-            logger.warn(e.toString(), e);
-        } catch (MBeanRegistrationException e) {
-            logger.warn(e.toString(), e);
+            thresholdListenerTable.remove(watch.getId());
         }
     }
 
@@ -88,9 +67,9 @@ public class WatchDataSourceRegistry implements WatchRegistry {
      * @see WatchRegistry#closeAll()
      */
     public void closeAll() {
-        Watch[] watches = watchRegistry.toArray(new Watch[watchRegistry.size()]);
+        Watch[] watches = watchRegistry.toArray(new Watch[0]);
         for(Watch w : watches) {
-            unregisterJMX(w);
+            //unregisterJMX(w);
             if(w instanceof PeriodicWatch)
                 ((PeriodicWatch)w).stop();
             try {
@@ -113,52 +92,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
         watchRegistry.addAll(Arrays.asList(watches));
         for (Watch watch : watches) {
             associateThresholdListener(watch);
-            //register jmx
-            registerJMX(watch);
         }
-    }
-
-    private void registerJMX(Watch watch) {
-        try {
-            ObjectName objectName = getObjectName(watch);
-            MBeanServer mbeanServer = MBeanServerFactory.getMBeanServer();
-            if(mbeanServer.isRegistered(objectName)) {
-                mbeanServer.unregisterMBean(objectName);
-                logger.info("Unregistered {}, update Watch [{}] registration with new watch instance",
-                            objectName, watch.getId());
-            }
-            mbeanServer.registerMBean(watch, objectName);
-
-        } catch (MalformedObjectNameException e) {
-            logger.warn(e.toString(), e);
-        } catch (MBeanRegistrationException e) {
-            logger.warn(e.toString(), e);
-        } catch (InstanceAlreadyExistsException e) {
-            logger.warn(e.toString(), e);
-        } catch (NotCompliantMBeanException e) {
-            logger.warn(e.toString(), e);
-        } catch (InstanceNotFoundException e) {
-            logger.warn(e.toString(), e);
-        }
-    }
-
-    private ObjectName getObjectName(Watch watch) throws
-                                                  MalformedObjectNameException {
-        String domain = getClass().getPackage().getName();
-        String objectName = null;
-        if(context != null) {
-            String jmxName = JMXUtil.getJMXName(context, domain);
-            objectName = jmxName+","+
-                         "name=Watch,"+
-                         "id="+watch.getId();
-        }
-        if(objectName == null) {
-            String id = watch.getId();
-            if(id.equals(""))
-                id = "<empty-string>";
-            objectName = domain+":type=Watch,ID="+id;
-        }
-        return (ObjectName.getInstance(objectName));
     }
 
     /**
@@ -173,7 +107,7 @@ public class WatchDataSourceRegistry implements WatchRegistry {
         if(thresholdListenerTable.containsKey(id)) {
             collection = thresholdListenerTable.get(id);
         } else {
-            collection = new ArrayList<ThresholdListener>();
+            collection = new ArrayList<>();
         }
         if(!collection.contains(thresholdListener)) {
             if(logger.isTraceEnabled())
@@ -200,13 +134,13 @@ public class WatchDataSourceRegistry implements WatchRegistry {
         }
     }
 
-    /**
+    /*
      * This method will associate a Watch to a ThresholdListener, iff the Watch
      * is a ThresholdWatch and the Watch objects classname is found in the table
      * 
      * @param watch The Watch to associate
      */
-    protected void associateThresholdListener(Watch watch) {
+    private void associateThresholdListener(Watch watch) {
         if(!(watch instanceof ThresholdWatch))
             return;
         ThresholdWatch tWatch = (ThresholdWatch)watch;
