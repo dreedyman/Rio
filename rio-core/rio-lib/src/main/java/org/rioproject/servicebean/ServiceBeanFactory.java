@@ -31,7 +31,7 @@ public interface ServiceBeanFactory {
      * aggregates the results of a service creation attempt: 
      * proxy and associated implementation. 
      */
-    public static class Created {
+    class Created {
         /** The service impl */
         private final Object impl;
         /** The service proxy */
