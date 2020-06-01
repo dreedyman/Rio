@@ -21,7 +21,6 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.entry.Entry;
 import net.jini.core.event.EventRegistration;
-import net.jini.core.event.UnknownEventException;
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.lease.UnknownLeaseException;
 import net.jini.core.lookup.ServiceID;
@@ -71,6 +70,7 @@ import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.system.ResourceCapability;
 import org.rioproject.util.RioHome;
@@ -87,8 +87,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.rmi.*;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -130,7 +130,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @throws Exception If the ProvisionMonitorImpl cannot be created
      */
     @SuppressWarnings("unused")
-    public ProvisionMonitorImpl() throws Exception {
+    public ProvisionMonitorImpl() {
         super();
     }
 
@@ -270,22 +270,16 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         String name = context.getServiceBeanConfig().getName();
         if(registryPort!=0) {
             try {
-                Registry registry = LocateRegistry.getRegistry(registryPort);
-                try {
-                    registry.bind(name, (Remote)proxy);
-                    logger.debug("Bound to RMI Registry on port={}", registryPort);
-                } catch(AlreadyBoundException e) {
-                    /*ignore */
-                }
-            } catch(AccessException e) {
-                logger.warn("Binding {} to RMI Registry", name, e);
-            } catch(RemoteException e) {
+                Registry registry = RegistryUtil.getRegistry(registryPort);
+                registry.bind(name, (Remote)proxy);
+                logger.debug("Bound to RMI Registry on port={}", registryPort);
+            } catch(RemoteException | UnknownHostException | AlreadyBoundException e) {
                 logger.warn("Binding {} to RMI Registry", name, e);
             }
         } else {
             logger.debug("RMI Registry property not set, unable to bind {}", name);
         }
-        return(proxy);
+        return proxy;
     }
 
     /*
@@ -328,8 +322,8 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     public OperationalStringManager[] getOperationalStringManagers() {
         if(opStringMangerController.getOpStringManagers().length==0)
             return (new OperationalStringManager[0]);
-        ArrayList<OpStringManager> list = new ArrayList<OpStringManager>();
-        list.addAll(Arrays.asList(opStringMangerController.getOpStringManagers()));
+        ArrayList<OpStringManager> list =
+            new ArrayList<>(Arrays.asList(opStringMangerController.getOpStringManagers()));
         OperationalStringManager[] os = new OperationalStringManager[list.size()];
         int i = 0;
         for (OpStringManager opMgr : list) {
@@ -399,11 +393,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
          */
         final Thread currentThread = Thread.currentThread();
         final ClassLoader cCL = AccessController.doPrivileged(
-            new PrivilegedAction<ClassLoader>() {
-                public ClassLoader run() {
-                    return (currentThread.getContextClassLoader());
-                }
-            });
+            (PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
         boolean swapCLs = !(cCL instanceof ServiceClassLoader);
         try {
             final ClassLoader myCL = AccessController.doPrivileged(
@@ -413,11 +403,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                     }
                 });
             if(swapCLs) {
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(myCL);
-                        return (null);
-                    }
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(myCL);
+                    return (null);
                 });
             }
             deploymentResult = deploy(opStringURL, null);
@@ -425,17 +413,15 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             Throwable cause =  e.getCause();
             if(cause==null)
                 cause = e;
-            Map<String, Throwable> m = new HashMap<String, Throwable>();
+            Map<String, Throwable> m = new HashMap<>();
             m.put(cause.getClass().getName(), cause);
             deploymentResult = new DeploymentResult(null, m);
             logger.warn("Deploying {}", opStringURL, e);
         } finally {
             if(swapCLs) {
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(cCL);
-                        return (null);
-                    }
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(cCL);
+                    return (null);
                 });
             }
         }
@@ -530,7 +516,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 DeployRequest request = new DeployRequest(opString, null);
                 deploymentVerifier.verifyDeploymentRequest(request);
 
-                Map<String, Throwable> map = new HashMap<String, Throwable>();
+                Map<String, Throwable> map = new HashMap<>();
                 OpStringManager manager = opStringMangerController.addOperationalString(opString, map, null, null, listener);
                 deploymentResult = new DeploymentResult(manager.getOperationalStringManager(), map);
             } else {
@@ -679,7 +665,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     /*
      * @see org.rioproject.monitor.ProvisionMonitor#getPeerInfo
      */
-    public PeerInfo getPeerInfo() throws RemoteException {
+    public PeerInfo getPeerInfo() {
         return (provisionMonitorPeer.doGetPeerInfo());
     }
 
@@ -734,7 +720,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
 
     public Collection<MarshalledObject<ServiceBeanInstantiator>> getWrappedServiceBeanInstantiators() {
         Collection<MarshalledObject<ServiceBeanInstantiator>> marshalledWrappers =
-            new ArrayList<MarshalledObject<ServiceBeanInstantiator>>();
+            new ArrayList<>();
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
         logger.info("Returned {} service resources", resources.length);
         for(ServiceResource s : resources) {
@@ -749,19 +735,19 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     public ServiceBeanInstantiator[] getServiceBeanInstantiators() {
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
         logger.info("Returned {} service resources", resources.length);
-        List<ServiceBeanInstantiator> list = new ArrayList<ServiceBeanInstantiator>();
+        List<ServiceBeanInstantiator> list = new ArrayList<>();
         for(ServiceResource s : resources) {
             list.add(((InstantiatorResource)s.getResource()).getServiceBeanInstantiator());
         }        
         return list.toArray(new ServiceBeanInstantiator[list.size()]);
     }
 
-    /**
+    /*
      * Get the ProvisionMonitor event proxy source
      *
      * @return The ProvisionMonitor event proxy source
      */
-    protected ProvisionMonitor getEventProxy() {
+    private ProvisionMonitor getEventProxy() {
         return((ProvisionMonitor)getServiceProxy());
     }
 
@@ -771,7 +757,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * 
      * @param context The ServiceBeanContext
      */
-    public void initialize(ServiceBeanContext context) throws Exception {
+    public void initialize(ServiceBeanContext context) {
         try {
             /*
              * Determine if a log directory has been provided. If so, create a
@@ -804,7 +790,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             EventHandler failureHandler = new DispatchEventHandler(failureEventDesc, config);
             getEventTable().put(failureEventDesc.eventID, failureHandler);
 
-            registerEventAdapters();
+            //registerEventAdapters();
 
             provisioner = new ServiceProvisioner(config, getEventProxy(), failureHandler, provisionWatch);
 
@@ -816,10 +802,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             opStringMangerController.setServiceProxy(getEventProxy());
             opStringMangerController.setDeploymentVerifier(deploymentVerifier);
 
-            if(System.getProperty(Constants.CODESERVER)==null) {
-                System.setProperty(Constants.CODESERVER, context.getExportCodebase());
+            if(System.getProperty(Constants.WEBSTER)==null) {
+                System.setProperty(Constants.WEBSTER, context.getExportCodebase());
                 logger.warn("The system property [{}] has not been set, it has been resolved to: {}",
-                               Constants.CODESERVER, System.getProperty(Constants.CODESERVER));
+                               Constants.WEBSTER, System.getProperty(Constants.WEBSTER));
 
             }
 
@@ -828,7 +814,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
              */
 
             /* Check for JMXConnection */
-            addAttributes(JMXUtil.getJMXConnectionEntries());
+            //addAttributes(JMXUtil.getJMXConnectionEntries());
             
             addAttribute(ProvisionMonitorEvent.getEventDescriptor());
             addAttribute(failureEventDesc);
@@ -997,7 +983,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         return deployAdmin;
     }
 
-    private void registerEventAdapters() throws LeaseDeniedException, UnknownEventException, RemoteException {
+    /*private void registerEventAdapters() throws LeaseDeniedException, UnknownEventException, RemoteException {
         // translate ProvisionFailureEvents to notifications
         EventDescriptor provisionFailureEventDescriptor = new EventDescriptor(ProvisionFailureEvent.class,
                                                                               ProvisionFailureEvent.ID);
@@ -1018,16 +1004,14 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         register(provisionMonitorEventDescriptor, provisionMonitorEventAdapter, null, Long.MAX_VALUE);
         //register notification info
         mbeanNoticationInfoList.add(provisionMonitorEventAdapter.getNotificationInfo());
-    }
+    }*/
 
     /**
      * Get the OpStringloader, the utility to load OperationalStrings
      *
      * @return The OpStringLoader
-     *
-     * @throws Exception if the OpStringLoader cannot be created
      */
-    protected OpStringLoader getOpStringLoader() throws Exception {
-        return(new OpStringLoader(this.getClass().getClassLoader()));
+    private OpStringLoader getOpStringLoader() {
+        return new OpStringLoader(this.getClass().getClassLoader());
     }
 }

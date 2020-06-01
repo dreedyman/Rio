@@ -38,7 +38,7 @@ public final class HostUtil {
      *
      * @throws UnknownHostException if no IP address for the local host could be found.
      */
-    private static InetAddress getInetAddress() throws UnknownHostException {
+    public static InetAddress getInetAddress() throws UnknownHostException {
         InetAddress address = null;
         try {
             if(logger.isDebugEnabled())

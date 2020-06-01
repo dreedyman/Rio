@@ -56,6 +56,10 @@ manager {
         '-Djdk.serialFilter='+serialFilter+' '+
         '-Dsun.rmi.registry.registryFilter='+serialFilter+' '+
         '-Dsun.rmi.transport.dgcFilter='+serialFilter+' '+
+        '-Djavax.net.ssl.keyStore='+rioHome+'/config/ssl/rio.keystore.jks ' +
+        '-Djavax.net.ssl.trustStore='+rioHome+'/config/ssl/rio.truststore.jks ' +
+        '-Djavax.net.ssl.keyStorePassword=rioadmin ' +
+        '-Djavax.net.ssl.trustStorePassword=rioadmin ' +
         '-Djava.net.preferIPv4Stack=true '+
         '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${rio.home}${/}logs '+
         '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.home}${/}policy${/}policy.all '+

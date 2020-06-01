@@ -158,6 +158,6 @@ class PermGenTest {
     }
 
     private String getPermGen(WatchDataSource w) {
-        return "perm gen utilization: ${String.format('%5.7f', w.lastCalculable.value)}"
+        return "perm gen utilization: ${String.format('%5.8.0f', w.lastCalculable.value)}"
     }
 }

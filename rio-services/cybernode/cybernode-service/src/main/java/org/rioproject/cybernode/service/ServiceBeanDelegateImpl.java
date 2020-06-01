@@ -112,12 +112,12 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
     private ServiceCostCalculator serviceCostCalculator;
     //private ServiceProvisionEvent provisionEvent;
     private ServiceBeanExecHandler execManager;
-    private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<PlatformCapability>();
+    private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<>();
     private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     /** Logger */
     private final static Logger logger = LoggerFactory.getLogger(ServiceBeanDelegateImpl.class.getName());
     /** Result from loading the service */
-    protected ServiceBeanLoaderResult loadResult;
+    private ServiceBeanLoaderResult loadResult;
     private AtomicBoolean isDiscarded = new AtomicBoolean(false);
 
     /**
@@ -127,7 +127,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
      * @param serviceID Unique identifier for the ServiceBean
      * @param container The ServiceBeanContainer
      */
-    public ServiceBeanDelegateImpl(Integer identifier, Uuid serviceID, ServiceBeanContainer container) {
+    ServiceBeanDelegateImpl(Integer identifier, Uuid serviceID, ServiceBeanContainer container) {
         this.identifier = identifier;
         this.serviceID = serviceID;
         this.container = container;
@@ -182,7 +182,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                 }
             }
         }
-        return(serviceRecord);
+        return serviceRecord;
     }
 
     public boolean isActive() {
@@ -195,7 +195,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
      * @return The ServiceElement used by this ServiceBeanDelegateImpl
      */
     public ServiceElement getServiceElement() {
-        return(sElem);
+        return sElem;
     }
 
     /*
@@ -205,7 +205,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
      */
     public boolean update(ServiceElement newElem, OperationalStringManager opMgr) {
         if(terminated.get() || terminating.get())
-            return(false);
+            return false;
 
         if(execManager!=null) {
             try {
@@ -229,12 +229,12 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
             }
         }
         if(!this.sElem.equals(newElem))
-            return(false);
+            return false;
 
         synchronized(this) {
             if(serviceProxy==null) {
                 logger.trace("Cannot update [{}], Proxy is null", sElem.getName());
-                return(false);
+                return false;
             }
             /* Preserve instanceID */
             Long instanceID = sElem.getServiceBeanConfig().getInstanceID();
@@ -250,7 +250,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
             } else {
                 logger.warn("Cannot update [{}], Unknown ServiceBeanContext type [{}]",
                             ServiceLogUtil.logName(sElem), context.getClass().getName());
-                return(false);
+                return false;
             }
 
             if(context.getServiceBeanManager() instanceof DefaultServiceBeanManager) {
@@ -263,10 +263,10 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
             } else {
                 logger.warn("Cannot update [{}], Unknown ServiceBeanManager type [{}]",
                             sElem.getName(), context.getServiceBeanManager().getClass().getName());
-                return(false);
+                return false;
             }
         }
-        return(true);
+        return true;
     }
 
     /**
@@ -279,11 +279,11 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
      */
     public ServiceBeanInstance load() throws ServiceBeanInstantiationException {
         if(instance!=null)
-            return(instance);
+            return instance;
         synchronized(this) {
             startServiceBean(sElem, opStringMgr);
         }
-        return(instance);
+        return instance;
     }
 
     /**
@@ -292,7 +292,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
      * @return The ServiceBeanInstance
      */
     public ServiceBeanInstance getServiceBeanInstance() {
-        return (instance);
+        return instance;
     }
 
     /**
@@ -433,7 +433,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
         }
     }
 
-    /**
+    /*
      * Load, instantiate and start the ServiceBean
      *
      * @param sElem The ServiceElement
@@ -442,7 +442,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
      * @throws org.rioproject.deploy.ServiceBeanInstantiationException if there are errors creating the
      * service bean
      */
-    protected void startServiceBean(final ServiceElement sElem, final OperationalStringManager opStringMgr)
+    private void startServiceBean(final ServiceElement sElem, final OperationalStringManager opStringMgr)
     throws ServiceBeanInstantiationException {
         /*
         threadGroup = new ThreadGroup("ServiceBeanThreadGroup:"+sElem.getName()) {
@@ -522,6 +522,10 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                             context = loadResult.getServiceBeanContext();
                             associationManagement = context.getAssociationManagement();
                             serviceProxy = loadResult.getMarshalledInstance().get(false);
+                            logger.info("YAY: {}", serviceProxy);
+                        } catch (Exception e) {
+                            logger.info("FAILED", e);
+                            throw e;
                         } finally {
                             Thread.currentThread().setContextClassLoader(currentCL);
                         }
@@ -690,7 +694,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
         return serviceProxy;
     }
 
-    public ServiceBeanLoaderResult getLoadedServiceResult() {
+    ServiceBeanLoaderResult getLoadedServiceResult() {
         return loadResult;
     }
 
@@ -783,7 +787,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
          */
         public boolean unregister(Object impl) {
             discard();
-            return(true);
+            return true;
         }
     }
 

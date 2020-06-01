@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
+
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.jul.LevelChangePropagator
-import ch.qos.logback.core.ConsoleAppender
-import ch.qos.logback.core.rolling.RollingFileAppender
-import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP
-import ch.qos.logback.core.rolling.TimeBasedRollingPolicy
 
 import java.lang.management.ManagementFactory
 
@@ -168,6 +165,7 @@ logger("org.rioproject.impl.container.ServiceBeanLoader", INFO)
 logger("org.rioproject.system.measurable", INFO)
 logger("org.rioproject.impl.servicebean", INFO)
 logger("org.rioproject.associations", INFO)
+logger("org.rioproject.impl.servicebean", INFO)
 
 logger("org.rioproject.monitor", DEBUG)
 logger("org.rioproject.monitor.sbi", DEBUG)

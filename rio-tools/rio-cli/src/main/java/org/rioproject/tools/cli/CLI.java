@@ -43,8 +43,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.rmi.ConnectException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -611,9 +609,9 @@ public class CLI {
             int port = RegistryUtil.DEFAULT_PORT;
             for(int i=0; i< RegistryUtil.getRegistryRetries(); i++) {
                 try {
-                    Registry registry = LocateRegistry.getRegistry(port++);
+                    Registry registry = RegistryUtil.getRegistry(port++);
                     rmiRegistries.add(registry);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     //;
                 }
             }

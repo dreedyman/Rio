@@ -94,7 +94,7 @@ public final class BeanDelegator implements InvocationHandler, Serializable {
             throw new IllegalArgumentException("interfaces is null");
         if(interfaces.length == 0)
             throw new IllegalArgumentException("interfaces must contain values");
-        return (Proxy.newProxyInstance(loader, interfaces, new BeanDelegator(service, bean, loader)));
+        return Proxy.newProxyInstance(loader, interfaces, new BeanDelegator(service, bean, loader));
     }
 
     /**
