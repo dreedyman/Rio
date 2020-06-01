@@ -29,7 +29,7 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public final class VirtualMachineHelper {
-    static final Logger logger = LoggerFactory.getLogger(VirtualMachineHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(VirtualMachineHelper.class);
 
     private VirtualMachineHelper() {}
 
@@ -73,7 +73,7 @@ public final class VirtualMachineHelper {
             Method id = vmDesc.getClass().getMethod("id");
             vmList.add((String)id.invoke(vmDesc));
         }
-        return vmList.toArray(new String[vmList.size()]);
+        return vmList.toArray(new String[0]);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class VirtualMachineHelper {
             logger.error("The JMX Attach APIs require Java 6 or above. You are running Java {}", jvmVersion);
             return new String[0];
         }
-        List<String> vmList = new ArrayList<String>();
+        List<String> vmList = new ArrayList<>();
         Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
         Method list = vmClass.getMethod("list");
         List vmDescriptors = (List)list.invoke(null);
@@ -102,6 +102,6 @@ public final class VirtualMachineHelper {
             Method id = vmDesc.getClass().getMethod("id");
             vmList.add(id.invoke(vmDesc)+" "+displayName.invoke(vmDesc));
         }
-        return vmList.toArray(new String[vmList.size()]);
+        return vmList.toArray(new String[0]);
     }
 }

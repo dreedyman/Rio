@@ -17,9 +17,8 @@ package org.rioproject.impl.exec.posix;
 
 import org.rioproject.impl.exec.ProcessManager;
 import org.rioproject.impl.exec.Util;
-import org.rioproject.impl.util.FileUtils;
-import org.rioproject.impl.util.StreamRedirector;
 import org.rioproject.impl.system.OperatingSystemType;
+import org.rioproject.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class PosixProcessManager extends ProcessManager {
     private static final String COMPONENT = PosixProcessManager.class.getPackage().getName();
     private static final String KILL_SCRIPT="ps-kill-template.sh";
     private static final String PROC_STATUS_SCRIPT="proc-status-template.sh";
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     /**
      * Create a PosixProcessManager
@@ -234,14 +233,12 @@ public class PosixProcessManager extends ProcessManager {
                     if(s==null)
                         continue;
                     //System.out.println("process ["+pid+"] status="+s);
-                    if(s!=null) {
-                        if(Integer.parseInt(s)!=0) {
-                            if(logger.isDebugEnabled()) {
-                                logger.debug("Process status for pid [{}], command [{}] is: {}",
-                                             getPid(), commandLine, Integer.parseInt(s));
-                            }
-                            break;
+                    if(Integer.parseInt(s)!=0) {
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("Process status for pid [{}], command [{}] is: {}",
+                                         getPid(), commandLine, Integer.parseInt(s));
                         }
+                        break;
                     }
                 } catch (IOException e) {
                     logger.warn("Non fatal exception trying to read " +

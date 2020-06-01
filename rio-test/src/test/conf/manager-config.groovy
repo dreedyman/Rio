@@ -63,6 +63,11 @@ manager {
         '-Dorg.rioproject.groups=${org.rioproject.groups} '+
         '-Dorg.rioproject.service=${service}'
 
+    secureJvmOptions =
+            '-Djavax.net.ssl.keyStore='+rioHome+'/config/ssl/rio.keystore.jks ' +
+                    '-Djavax.net.ssl.trustStore='+rioHome+'/config/ssl/rio.truststore.jks ' +
+                    '-Djavax.net.ssl.keyStorePassword=rioadmin ' +
+                    '-Djavax.net.ssl.trustStorePassword=rioadmin '
     /*
      * Remove any previously created service log files
      */

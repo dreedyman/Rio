@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Dennis Reedy
  */
 public class JVMProcessMonitor {
-    public static final String REAP_INTERVAL = "org.rioproject.exec.monitor.reap.interval";
+    static final String REAP_INTERVAL = "org.rioproject.exec.monitor.reap.interval";
     private MonitorReaper monitorReaper;
     private final Map<String, FaultDetectionListener<String>> monitoringMap;
     private static final JVMProcessMonitor instance = new JVMProcessMonitor();
@@ -60,7 +60,7 @@ public class JVMProcessMonitor {
     private static final Logger logger = LoggerFactory.getLogger(JVMProcessMonitor.class);
 
     private JVMProcessMonitor() {
-        monitoringMap = new ConcurrentHashMap<String, FaultDetectionListener<String>>();
+        monitoringMap = new ConcurrentHashMap<>();
     }
 
     public static JVMProcessMonitor getInstance() {
@@ -111,7 +111,7 @@ public class JVMProcessMonitor {
      * The reaper
      */
     class MonitorReaper implements Runnable  {
-        private final List<String> removals = new ArrayList<String>();
+        private final List<String> removals = new ArrayList<>();
         private final AtomicBoolean keepAlive = new AtomicBoolean(true);
         private int reapInterval;
         private final SigarHelper sigar;
@@ -136,7 +136,7 @@ public class JVMProcessMonitor {
             List<String> list;
             if(sigar==null) {
                 String[] ids = VirtualMachineHelper.listIDs();
-                list = new ArrayList<String>();
+                list = new ArrayList<>();
                 Collections.addAll(list, ids);
             } else {
                 list = sigar.getProcessList();

@@ -71,15 +71,13 @@ public class Handler extends URLStreamHandler {
             throw new RuntimeException("Could not get a ResolverInstance", e);
         }
     }
-    private final ConcurrentMap<Artifact, URL> cache = new ConcurrentHashMap<Artifact, URL>();
+    private final ConcurrentMap<Artifact, URL> cache = new ConcurrentHashMap<>();
 
     public Handler() {
-        ScheduledExecutorService snapshotReaper = Executors.newScheduledThreadPool(1, new ThreadFactory() {
-            @Override public Thread newThread(Runnable runnable) {
-                Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-                thread.setDaemon(true);
-                return thread;
-            }
+        ScheduledExecutorService snapshotReaper = Executors.newScheduledThreadPool(1, runnable -> {
+            Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+            thread.setDaemon(true);
+            return thread;
         });
         snapshotReaper.scheduleAtFixedRate(new SnapShotReaper(), 3, 3, TimeUnit.HOURS);
     }
@@ -129,7 +127,7 @@ public class Handler extends URLStreamHandler {
      */
     private class SnapShotReaper implements Runnable {
         public void run() {
-            List<Artifact> removals = new ArrayList<Artifact>();
+            List<Artifact> removals = new ArrayList<>();
             for(Map.Entry<Artifact, URL> entry : cache.entrySet()) {
                 if(entry.getKey().getVersion().endsWith("SNAPSHOT")) {
                     removals.add(entry.getKey());

@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +85,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     private ServiceBeanInstance instance;
     private final String myID;
     private final AtomicBoolean inProcess = new AtomicBoolean(false);
-    static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
+    private static final String CONFIG_COMPONENT = "org.rioproject.cybernode";
     private Logger logger = LoggerFactory.getLogger(ServiceBeanExecutorImpl.class);
 
     /**
@@ -143,16 +142,9 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         container.setComputeResource(computeResource);
         container.addListener(this);
 
-        registry = LocateRegistry.getRegistry(cybernodeRegistryPort);
+        registry = RegistryUtil.getRegistry();
 
         exporter = ExporterConfig.getExporter(config, "org.rioproject.cybernode", "exporter");
-
-        int createdRegistryPort = RegistryUtil.getRegistry();
-        if(createdRegistryPort>0) {
-            System.setProperty(Constants.REGISTRY_PORT, Integer.toString(createdRegistryPort));
-        } else {
-            throw new RuntimeException("Unable to create RMI Registry");
-        }
 
         Remote proxy = exporter.export(this);
         try {
@@ -286,23 +278,21 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         }
         
         /* Perform the system exit in a thread, allowing the method to return */
-        new Thread(new Runnable() {
-            public void run() {
-                while(inProcess.get()) {
-                    logger.info("Waiting for inProcess to clear...");
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        // ignore
-                    }
-                }
+        new Thread(() -> {
+            while(inProcess.get()) {
+                logger.info("Waiting for inProcess to clear...");
                 try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     // ignore
                 }
-                System.exit(0);
             }
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            System.exit(0);
         }).start();
     }
 
@@ -313,11 +303,11 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     }
 
     public WatchDataSource[] fetch() {
-        List<WatchDataSource> watchDataSources = new ArrayList<WatchDataSource>();
+        List<WatchDataSource> watchDataSources = new ArrayList<>();
         for(MeasurableCapability mCap : computeResource.getMeasurableCapabilities()) {
             watchDataSources.add(mCap.getWatchDataSource());
         }
-        return watchDataSources.toArray(new WatchDataSource[watchDataSources.size()]);
+        return watchDataSources.toArray(new WatchDataSource[0]);
     }
 
     public WatchDataSource fetch(final String id) {
@@ -332,7 +322,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     }
 
     private MeasurableCapability[] loadMeasurables(final Configuration config) {
-        List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
+        List<MeasurableCapability> measurables = new ArrayList<>();
         /* Create the Memory MeasurableCapability */
         MeasurableCapability memory = new Memory(config);
         if(memory.isEnabled())
@@ -345,7 +335,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
         } catch (RuntimeException e) {
             logger.warn("JVM CPU monitoring not supported");
         }
-        return measurables.toArray(new MeasurableCapability[measurables.size()]);
+        return measurables.toArray(new MeasurableCapability[0]);
     }
 
     private class CreateFDH implements Runnable {

@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ProtocolRegistryService implements URLStreamHandlerFactory {
     private static ProtocolRegistryService registry;
-    private final Map<String, URLStreamHandler> handlers = new ConcurrentHashMap<String, URLStreamHandler>();
+    private final Map<String, URLStreamHandler> handlers = new ConcurrentHashMap<>();
     private static Logger logger = LoggerFactory.getLogger(ProtocolRegistryService.class);
 
     private ProtocolRegistryService() {}

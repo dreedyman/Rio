@@ -72,6 +72,7 @@ import org.rioproject.net.HostUtil;
 import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.opstring.ServiceElement;
+import org.rioproject.rmi.RegistryUtil;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.servicebean.ServiceBeanManager;
 import org.rioproject.serviceui.UIComponentFactory;
@@ -100,13 +101,14 @@ import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.rioproject.config.Constants.REGISTRY_PORT;
 
 /**
  * Implementation of a Cybernode
@@ -148,7 +150,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
     /** Flag indicating the Cybernode is in shutdown sequence */
     private final AtomicBoolean shutdownSequence= new AtomicBoolean(false);
     /** Collection of services that are in the process of instantiation */
-    private final List<ServiceProvisionEvent> inProcess = new ArrayList<ServiceProvisionEvent>();
+    private final List<ServiceProvisionEvent> inProcess = new ArrayList<>();
     /** Log format version */
     private static final int LOG_VERSION = 1;
     /** PersistentStore to save state */
@@ -307,7 +309,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
      * @see org.rioproject.deploy.ServiceBeanInstantiator#getServiceRecords
      */
     public ServiceRecord[] getServiceRecords(int filter) {
-        Set<ServiceRecord> recordSet = new HashSet<ServiceRecord>();
+        Set<ServiceRecord> recordSet = new HashSet<>();
         ServiceStatement[] statements = serviceStatementManager.get();
         for (ServiceStatement statement : statements) {
             ServiceRecord[] records = statement.getServiceRecords(getUuid(), filter);
@@ -504,33 +506,30 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                           "accept remote inbound communications");
             return null;
         }
-        Object proxy = CybernodeProxy.getInstance(cybernode, getUuid());
+        Remote proxy = CybernodeProxy.getInstance(cybernode, getUuid());
         logger.trace("Proxy created {}", proxy);
         /* Get the registry port */
-        String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
-        registryPort = Integer.parseInt(sPort);
+
         String name = context.getServiceBeanConfig().getName();
 
-        if(registryPort!=0) {
+        try {
+            String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
+            Registry registry = RegistryUtil.createRegistry();
+            registryPort = Integer.parseInt(System.getProperty(REGISTRY_PORT));
             try {
-                String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-                Registry registry = LocateRegistry.getRegistry(address, registryPort);
-                try {
-                    registry.bind(name, (Remote)proxy);
-                    logger.debug("Bound to RMI Registry on port={}", registryPort);
-                } catch(AlreadyBoundException e) {
-                    /*ignore */
-                }
-            } catch(AccessException e) {
-                logger.warn("Binding "+name+" to RMI Registry", e);
-            } catch(RemoteException e) {
-                logger.warn("Binding "+name+" to RMI Registry", e);
-            } catch (java.net.UnknownHostException e) {
-                logger.warn("Unknown host address locating RMI Registry", e);
+                registry.bind(name, proxy);
+                logger.debug("Bound to RMI Registry on port={}", registryPort);
+            } catch(AlreadyBoundException e) {
+                /*ignore */
             }
-        } else {
-            logger.debug("RMI Registry property not set, unable to bind {}", name);
+        } catch(AccessException e) {
+            logger.warn("Binding "+name+" to RMI Registry", e);
+        } catch(RemoteException e) {
+            logger.warn("Failed binding "+name+" to RMI Registry", e);
+        } catch (java.net.UnknownHostException e) {
+            logger.warn("Unknown host address locating RMI Registry", e);
         }
+
         /*
          * Set the MarshalledInstance into the ServiceBeanManager
          */
@@ -658,7 +657,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                                                                           ProxyPreparer.class,
                                                                           new BasicProxyPreparer());
         /* Check for JMXConnection */
-        addAttributes(JMXUtil.getJMXConnectionEntries());
+        //addAttributes(JMXUtil.getJMXConnectionEntries());
 
         /* Add service UIs programmatically */
         addAttributes(getServiceUIs());

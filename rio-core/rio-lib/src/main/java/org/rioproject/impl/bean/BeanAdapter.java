@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.management.*;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -120,7 +119,7 @@ import java.util.Set;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class BeanAdapter extends ServiceBeanAdapter {
     private static final String COMPONENT = "org.rioproject.bean";
-    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(BeanAdapter.class);
     private Object bean;
     private Remote delegatingProxy;
 
@@ -135,7 +134,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
         this.bean = bean;
     }
    
-    @Override
+    /*@Override
     protected void registerMBean(ObjectName oName, MBeanServer mbeanServer)
     throws NotCompliantMBeanException, MBeanRegistrationException, InstanceAlreadyExistsException {
         String implClass = bean.getClass().getName();
@@ -153,7 +152,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
         } else {
             mbeanServer.registerMBean(this, oName);
         }
-    }
+    }*/
     
     /**
      * Override the start method to create a delegating proxy required
@@ -183,7 +182,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                                      PostConstruct.class:Started.class;
             BeanHelper.invokeLifeCycle(annotation, "postStart", bean);
         }
-        return(o);
+        return o;
     }
 
     /**
@@ -340,21 +339,19 @@ public class BeanAdapter extends ServiceBeanAdapter {
         }
     }
 
-    /**
+    /*
      * Create the delegating proxy
      *
      * @return The proxy that will handle the delegation between the ServiceBean
      * and the Bean (POJO)
-     *
-     * @throws RuntimeException
      */
-    protected Remote createDelegatingProxy() {
+    private Remote createDelegatingProxy() {
         try {
             Class[] interfaces = getInterfaceClasses(bean.getClass());
-            Remote proxy = (Remote) BeanDelegator.getInstance(this, bean, interfaces);
-            return(proxy);
+            logger.trace("Interface classes: {}", interfaces.length);
+            return ((Remote) BeanDelegator.getInstance(this, bean, interfaces));
         } catch (Exception e) {
-            logger.info("exporting a standard proxy");
+            logger.info("Exporting a standard proxy", e);
             throw new RuntimeException("could not create proxy", e);
         }
     }
@@ -362,13 +359,12 @@ public class BeanAdapter extends ServiceBeanAdapter {
     /*
      * Get an array of classes the bean & service bean implement
      */
-    private static Class[] getInterfaceClasses(Class c)
-        throws ClassNotFoundException {
-        Set<Class> remotes = new HashSet<Class>();
+    private static Class[] getInterfaceClasses(Class c) {
         Class[] interfaces = c.getInterfaces();
-        remotes.addAll(Arrays.asList(interfaces));
+        Set<Class> remotes = new HashSet<>(Arrays.asList(interfaces));
         remotes.add(Service.class);
-        return(remotes.toArray(new Class[remotes.size()]));
+        logger.trace("interface classes: {}", remotes);
+        return remotes.toArray(new Class[0]);
     }
 
     /**
@@ -379,7 +375,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
     protected Remote exportDo(Exporter exporter) throws Exception {
         if(exporter == null)
             throw new IllegalArgumentException("exporter is null");
-        return (exporter.export(delegatingProxy));
+        return exporter.export(delegatingProxy);
     }
 
     /**
@@ -435,7 +431,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                                             new Object[]{proxy});
             }
         } catch (Exception e) {
-            logger.warn("Count not set bean proxy");
+            logger.warn("Count not set bean proxy", e);
             throw new RuntimeException("Could not set bean proxy", e);
         }
         return (proxy);
@@ -480,7 +476,7 @@ public class BeanAdapter extends ServiceBeanAdapter {
                 proxy = super.createProxy();
             }*/
         } catch (Exception e) {
-            logger.warn("Could not create bean proxy");
+            logger.warn("Could not create bean proxy", e);
             throw new RuntimeException("could not create bean proxy", e);
         }
         return proxy;

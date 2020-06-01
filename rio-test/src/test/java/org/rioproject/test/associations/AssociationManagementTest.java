@@ -36,8 +36,8 @@ import java.net.URL;
 public class AssociationManagementTest {
     @SetTestManager
     static TestManager testManager;
-    OperationalStringManager manager;
-    Logger logger = LoggerFactory.getLogger(AssociationManagementTest.class);
+    private OperationalStringManager manager;
+    private Logger logger = LoggerFactory.getLogger(AssociationManagementTest.class);
 
     @Before
     public void setup() {
@@ -47,7 +47,7 @@ public class AssociationManagementTest {
 
     @Test
     public void testServiceDiscoveryTimeout() throws Exception {
-        Dummy darrel = (Dummy) testManager.waitForService(Dummy.class);
+        Dummy darrel = testManager.waitForService(Dummy.class);
         new Thread(new Runnable() {
             @Override public void run() {
                 ServiceElement elem = new ServiceElement();

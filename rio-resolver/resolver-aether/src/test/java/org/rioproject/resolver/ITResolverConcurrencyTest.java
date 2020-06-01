@@ -16,6 +16,7 @@
 package org.rioproject.resolver;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.rioproject.resolver.aether.AetherResolver;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.*;
 /**
  * @author Dennis Reedy
  */
+@Ignore
 public class ITResolverConcurrencyTest {
 
     @Test

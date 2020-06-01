@@ -39,9 +39,9 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class DefaultServiceBeanFactory implements ServiceBeanFactory {
     /** Component name logging */
-    static String COMPONENT = "org.rioproject.impl.servicebean";
+    private static String COMPONENT = "org.rioproject.impl.servicebean";
     /** A Logger */
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     /** Constructor types for a JSK service */
     private static final Class[] activationTypes = {String[].class,
                                                     LifeCycle.class};
@@ -124,7 +124,7 @@ public class DefaultServiceBeanFactory implements ServiceBeanFactory {
      * Determine if a class has a declared constructor matching that required by
      * an activation constructor
      */
-    static boolean useActivationConstructor(Class<?> clazz) {
+    private static boolean useActivationConstructor(Class<?> clazz) {
         try {
             clazz.getDeclaredConstructor(activationTypes);
             return (true);
@@ -137,7 +137,7 @@ public class DefaultServiceBeanFactory implements ServiceBeanFactory {
      * Determine if a class has method signatures as those found in the
      * ServiceBean
      */
-    static boolean isServiceBean(Class<?> clazz) {
+    private static boolean isServiceBean(Class<?> clazz) {
         try {
             clazz.getMethod("start", startType);
             return (true);

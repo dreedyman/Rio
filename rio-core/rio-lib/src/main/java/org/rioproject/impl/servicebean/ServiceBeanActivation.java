@@ -28,24 +28,23 @@ import net.jini.id.UuidFactory;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import org.rioproject.admin.ServiceBeanControlException;
-import org.rioproject.util.MulticastStatus;
 import org.rioproject.config.Constants;
-import org.rioproject.impl.container.DiscardManager;
-import org.rioproject.servicebean.ServiceBeanContext;
-import org.rioproject.impl.container.ServiceAdvertiser;
 import org.rioproject.deploy.SystemRequirements;
+import org.rioproject.impl.client.DiscoveryManagementPool;
+import org.rioproject.impl.client.LookupCachePool;
+import org.rioproject.impl.container.DiscardManager;
+import org.rioproject.impl.container.ServiceAdvertiser;
+import org.rioproject.impl.service.Destroyer;
+import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.log.LoggerConfig;
 import org.rioproject.opstring.ClassBundle;
 import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
-import org.rioproject.impl.client.DiscoveryManagementPool;
-import org.rioproject.impl.client.LookupCachePool;
-import org.rioproject.impl.service.Destroyer;
-import org.rioproject.rmi.RegistryUtil;
+import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.sla.ServiceLevelAgreements;
-import org.rioproject.impl.system.ComputeResource;
+import org.rioproject.util.MulticastStatus;
 import org.rioproject.watch.ThresholdValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,13 +67,13 @@ import java.util.Properties;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class ServiceBeanActivation {
-    static final String COMPONENT = ServiceBeanActivation.class.getPackage().getName();
-    public static final String QOS_COMPONENT = Constants.BASE_COMPONENT+".system";
-    public static final String BOOT_COMPONENT = Constants.BASE_COMPONENT+".boot";
+    private static final String COMPONENT = ServiceBeanActivation.class.getPackage().getName();
+    private static final String QOS_COMPONENT = Constants.BASE_COMPONENT + ".system";
+    private static final String BOOT_COMPONENT = Constants.BASE_COMPONENT + ".boot";
     public static final String BOOT_CONFIG_COMPONENT = BOOT_COMPONENT+".configComponent";
-    static LifeCycleManager sbLifeCycleManager;
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
-    static final String BOOT_COOKIE = "boot-cookie";
+    private static LifeCycleManager sbLifeCycleManager;
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final String BOOT_COOKIE = "boot-cookie";
 
     /**
      * Create a ServiceBeanContext from the Configuration element.
@@ -141,11 +140,8 @@ public class ServiceBeanActivation {
         if(loader == null)
             throw new IllegalArgumentException("loader is null");
 
-        Map<String, Object> configParms = new HashMap<String, Object>();
-
-        RegistryUtil.checkRegistry();
-        
-        configParms.putAll(readServiceBeanConfig(configComponent, defaultServiceName, config));
+        Map<String, Object> configParms =
+            new HashMap<>(readServiceBeanConfig(configComponent, defaultServiceName, config));
 
         String jmxName = (String)config.getEntry(configComponent, "jmxName", String.class, null);
         if(jmxName!=null)
@@ -226,11 +222,12 @@ public class ServiceBeanActivation {
                                                serviceID);
         serviceBeanManager.setDiscardManager(sbLifeCycleManager);
         serviceBeanManager.setServiceID(serviceID);
-        DefaultServiceBeanContext serviceBeanContext = new DefaultServiceBeanContext(sElem, serviceBeanManager, computeResource, null); /* Shared Configuration */
+        DefaultServiceBeanContext serviceBeanContext =
+            new DefaultServiceBeanContext(sElem, serviceBeanManager, computeResource, null); /* Shared Configuration */
         serviceBeanContext.setConfiguration(config);
         serviceBeanContext.setConfigurationFiles(configArgs);
         logger.debug("Leaving getServiceBeanContext");
-        return (serviceBeanContext);
+        return serviceBeanContext;
     }
 
     /**
@@ -248,9 +245,9 @@ public class ServiceBeanActivation {
      * @throws ConfigurationException if there are errors reading the configuration 1
      * @throws IllegalArgumentException If any of the arguments are null.
      */
-    static Map<String, Object> readServiceBeanConfig(final String configComponent,
-                                                     final String defaultServiceName,
-                                                     final Configuration config)
+    private static Map<String, Object> readServiceBeanConfig(final String configComponent,
+                                                             final String defaultServiceName,
+                                                             final Configuration config)
     throws ConfigurationException {
         if(configComponent == null)
             throw new IllegalArgumentException("configComponent is null");
@@ -259,7 +256,7 @@ public class ServiceBeanActivation {
         if(config == null)
             throw new IllegalArgumentException("config is null");
 
-        Map<String, Object> configParms = new HashMap<String, Object>();
+        Map<String, Object> configParms = new HashMap<>();
 
         /* Set the ClassLoader for the DiscoveryManagementPool to be the
          * CommonCLassLoader, not the current context ClassLoader */
@@ -318,7 +315,7 @@ public class ServiceBeanActivation {
      * @throws ConfigurationException if there are problems reading the configuration
      * @throws IllegalArgumentException If the config argument is null.
      */
-    static void checkUtilityConfiguration(final Configuration config) throws IOException, ConfigurationException {
+    private static void checkUtilityConfiguration(final Configuration config) throws IOException, ConfigurationException {
         if(config == null)
             throw new IllegalArgumentException("configArgs are null");
 
@@ -362,7 +359,7 @@ public class ServiceBeanActivation {
     public static class LifeCycleManager implements DiscardManager, LifeCycle {
         boolean terminated = false;
         boolean shutdownHookRegistered = false;
-        final Map<DestroyAdmin, Subject>registrationMap = new HashMap<DestroyAdmin, Subject>();
+        final Map<DestroyAdmin, Subject>registrationMap = new HashMap<>();
 
         /*
          * Register the ServiceBean to the LifeCycleManager and advertise it
@@ -429,15 +426,13 @@ public class ServiceBeanActivation {
                     if (subject != null) {
                         try {
                             Subject.doAsPrivileged(subject,
-                                                   new PrivilegedExceptionAction<Void>() {
-                                                       public Void run() throws Exception {
-                                                           try {
-                                                               dAdmin.destroy();
-                                                           } catch (Exception e) {
-                                                               //e.printStackTrace();
-                                                           }
-                                                           return (null);
+                                                   (PrivilegedExceptionAction<Void>) () -> {
+                                                       try {
+                                                           dAdmin.destroy();
+                                                       } catch (Exception e) {
+                                                           //e.printStackTrace();
                                                        }
+                                                       return (null);
                                                    },
                                                    null);
                         } catch (PrivilegedActionException e) {

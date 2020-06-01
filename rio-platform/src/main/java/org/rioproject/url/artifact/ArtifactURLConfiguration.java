@@ -30,13 +30,13 @@ import java.util.List;
  */
 public class ArtifactURLConfiguration {
     private String artifact;
-    private final List<RemoteRepository> repositories = new ArrayList<RemoteRepository>();
+    private final List<RemoteRepository> repositories = new ArrayList<>();
 
     public ArtifactURLConfiguration(final String path) {
         String pathToUse = path;
         int index = pathToUse.indexOf(";");
         if(index!=-1) {
-            String repositoryString = pathToUse.substring(index+1, pathToUse.length());
+            String repositoryString = pathToUse.substring(index+1);
             pathToUse = pathToUse.substring(0, index);
             String[] parts = repositoryString.split(";");
             for(String s : parts) {
@@ -63,6 +63,6 @@ public class ArtifactURLConfiguration {
     }
 
     public RemoteRepository[] getRepositories() {
-        return repositories.toArray(new RemoteRepository[repositories.size()]);
+        return repositories.toArray(new RemoteRepository[0]);
     }
 }

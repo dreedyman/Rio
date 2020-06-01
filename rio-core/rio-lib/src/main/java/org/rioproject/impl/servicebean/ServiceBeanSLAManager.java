@@ -66,9 +66,7 @@ public class ServiceBeanSLAManager {
      * system related to those the service has declared
      */
     private SLAThresholdEventAdapter slaAdapter;
-    /* Monitors thread deadlocks in forked vms */
-    static final String COMPONENT = ServiceBeanSLAManager.class.getName();
-    static final Logger logger = LoggerFactory.getLogger(ServiceBeanSLAManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceBeanSLAManager.class);
 
     public ServiceBeanSLAManager(final Object impl,
                                  final Object proxy,

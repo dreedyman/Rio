@@ -19,37 +19,23 @@ import com.sun.jini.config.Config;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
-import org.rioproject.exec.ExecDescriptor;
-import org.rioproject.servicebean.ServiceBean;
-import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
-import org.rioproject.impl.jmx.JMXConnectionUtil;
-import org.rioproject.impl.jmx.JMXUtil;
-import org.rioproject.impl.servicebean.ServiceElementUtil;
-import org.rioproject.opstring.ServiceElement;
-import org.rioproject.sla.SLA;
-import org.rioproject.system.ComputeResourceUtilization;
-import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.SystemWatchID;
-import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.exec.ExecDescriptor;
 import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.impl.system.measurable.cpu.CPU;
-import org.rioproject.impl.system.measurable.cpu.ProcessCPUHandler;
 import org.rioproject.impl.system.measurable.memory.Memory;
-import org.rioproject.impl.system.measurable.memory.ProcessMemoryMonitor;
-import org.rioproject.watch.WatchDescriptor;
+import org.rioproject.servicebean.ServiceBean;
+import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.system.ComputeResourceUtilization;
+import org.rioproject.system.MeasuredResource;
+import org.rioproject.system.capability.PlatformCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.MBeanServerConnection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -179,21 +165,17 @@ public class ServiceExecutor {
     private Memory memory;
     private CPU cpu;
     private long actualPID=-1;
-    private MBeanServerConnection mbsc;
-    private ServiceBeanContext context;
-    private Configuration config;
     private static final String COMPONENT = ServiceExecutor.class.getPackage().getName();
     private int pidFileWaitTime = 60; // number of seconds
-    static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
     public ServiceExecutor() {
         sigar = SigarHelper.getInstance();
     }
 
     public void setServiceBeanContext(final ServiceBeanContext context)
-        throws ServiceBeanInstantiationException, IOException, ConfigurationException {
-        this.context = context;
-        this.config = context.getConfiguration();
+        throws ServiceBeanInstantiationException, IOException {
+        //private MBeanServerConnection mbsc;
         try {
             shellTemplate = (String)context.getConfiguration().getEntry(COMPONENT,
                                                                         "shellTemplate",
@@ -345,7 +327,7 @@ public class ServiceExecutor {
             if(actualPID==-1)
                 logger.warn("No SIGAR support available, unable to obtain PID");
         }
-        if(actualPID!=-1) {
+        /*if(actualPID!=-1) {
             logger.info("PID of exec'd process obtained: "+actualPID);
             try {
                 mbsc = JMXConnectionUtil.attach(Long.toString(actualPID));
@@ -361,23 +343,23 @@ public class ServiceExecutor {
         } else {
             logger.info("Could not obtain actual PID of exec'd process, " +
                         "process cpu and java memory utilization are not available");
-        }
+        }*/
 
     }
 
     public ComputeResourceUtilization getComputeResourceUtilization() {
         List<MeasuredResource> mRes;
         if(memory!=null && cpu!=null) {
-            mRes =  new ArrayList<MeasuredResource>();            
+            mRes =  new ArrayList<>();
             mRes.add(memory.getMeasuredResource());
             mRes.add(cpu.getMeasuredResource());
         } else {
-            mRes = Collections.unmodifiableList(new ArrayList<MeasuredResource>());
+            mRes = Collections.unmodifiableList(new ArrayList<>());
         }
         return new ComputeResourceUtilization("", "", "", mRes);
     }
 
-    private void setThreadDeadlockDetector(final ServiceElement elem) {
+    /*private void setThreadDeadlockDetector(final ServiceElement elem) {
         ServiceElementUtil.setThreadDeadlockDetector(elem, mbsc);
     }
 
@@ -417,9 +399,9 @@ public class ServiceExecutor {
 
             context.getWatchRegistry().register(memory, cpu);
         }
-    }
+    }*/
 
-    private <T> T getPlatformMXBeanProxy(final MBeanServerConnection mbsc,
+   /* private <T> T getPlatformMXBeanProxy(final MBeanServerConnection mbsc,
                                          final String name,
                                          final Class<T> mxBeanInterface) {
         return JMXUtil.getPlatformMXBeanProxy(mbsc, name, mxBeanInterface);
@@ -434,7 +416,7 @@ public class ServiceExecutor {
                     wDesc.setMBeanServerConnection(mbsc);
             }
         }
-    }
+    }*/
 
     private String getCommandLine(final ExecDescriptor exec) {
         String cmd;
@@ -481,13 +463,11 @@ public class ServiceExecutor {
 
         processManager = shell.exec(exDesc);
 
-        processManager.registerListener(new ProcessManager.Listener() {
-            public void processTerminated(int pid) {
-                if(logger.isDebugEnabled())
-                    logger.debug("Process [{}] terminated", pid);
-                if(serviceBean!=null)
-                    serviceBean.destroy(true);
-            }
+        processManager.registerListener(pid -> {
+            if(logger.isDebugEnabled())
+                logger.debug("Process [{}] terminated", pid);
+            if(serviceBean!=null)
+                serviceBean.destroy(true);
         });
         return processManager;
     }
@@ -505,16 +485,11 @@ public class ServiceExecutor {
         }
     }
 
-    public long readPidFromFile(File f) throws IOException {
-        long pid = -1;
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new FileReader(f));
+    private long readPidFromFile(File f) throws IOException {
+        long pid;
+        try (BufferedReader in = new BufferedReader(new FileReader(f))) {
             String line = in.readLine().trim();
             pid = Long.valueOf(line);
-        } finally {
-            if(in!=null)
-                in.close();
         }
         return pid;
     }
@@ -539,21 +514,17 @@ public class ServiceExecutor {
             try {
                 ProcessManager manager = svcExecutor.exec(exDesc);
                 manager.manage();
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            Thread.sleep(10000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        //svcExecutor.terminate();
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+                    //svcExecutor.terminate();
                 }).start();
                 manager.getProcess().waitFor();
                 System.out.println("Manager returned from waitFor()");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         } catch (ConfigurationException e) {

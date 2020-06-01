@@ -16,20 +16,17 @@
 package org.rioproject.impl.jmx;
 
 import com.sun.tools.attach.VirtualMachine;
-import org.rioproject.config.Constants;
-import org.rioproject.net.HostUtil;
-import org.rioproject.rmi.RegistryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.remote.*;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 /**
  * Provides JMX connection utilities.
@@ -38,55 +35,8 @@ import java.rmi.registry.Registry;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class JMXConnectionUtil {
-    static final Logger logger = LoggerFactory.getLogger(JMXConnectionUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(JMXConnectionUtil.class);
 
-    /**
-     * Create a {@link javax.management.remote.JMXConnectorServer}, bound to
-     * the RMI Registry created by an infrastructure service (Cybernode or
-     * Monitor).
-     *
-     * <p>If <tt>JMXConnectorServer</tt> has been created, return immediately.
-     * If the <tt>JMXConnectorServer</tt> needs to be created, it will be
-     * bound to the RMI Registry, and set the
-     * <tt>org.rioproject.jmxServiceURL</tt> system property.
-     *
-     * <p>This utility uses the {@link org.rioproject.rmi.RegistryUtil} class to
-     * obtain the port to access the RMI Registry.
-     *
-     * @throws Exception If there are errors reading the configuration, or
-     * creating the {@link javax.management.remote.JMXConnectorServer}
-     */
-    public static void createJMXConnection() throws Exception {
-        if(System.getProperty(Constants.JMX_SERVICE_URL)!=null)
-            return;
-        RegistryUtil.checkRegistry();
-        String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
-        int registryPort = Integer.parseInt(sPort);
-
-        if(registryPort==0) {
-            logger.error("RMI Registry property [{}] not found, unable to create MBeanServer", Constants.REGISTRY_PORT);
-            throw new Exception("Unable to create the JMXConnectorServer");
-        }
-
-        MBeanServer mbs = MBeanServerFactory.getMBeanServer();
-        String hostAddress = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        JMXServiceURL jmxServiceURL = new JMXServiceURL("service:jmx:rmi://"+hostAddress+":"+registryPort+
-                                                        "/jndi/rmi://"+hostAddress+":"+registryPort+"/jmxrmi");
-        System.setProperty(Constants.JMX_SERVICE_URL, jmxServiceURL.toString());
-        if(logger.isInfoEnabled())
-            logger.info("JMXServiceURL={}", jmxServiceURL);
-        Registry registry = LocateRegistry.getRegistry(registryPort);
-        for(String s : registry.list()) {
-            if(s.equals("jmxrmi")) {
-                registry.unbind(s);
-            }
-        }
-        JMXConnectorServer jmxConn = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceURL, null, mbs);
-        jmxConn.start();
-        if(logger.isDebugEnabled())
-            logger.debug("JMX Platform MBeanServer exported with RMI Connector");
-
-    }
 
     /**
      * Get the agentID of the Platform MBeanServer

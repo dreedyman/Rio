@@ -85,7 +85,7 @@ public final class CommandLineHelper {
      *
      * @return A {@code String} that includes -cp followed by the class-path items
      */
-    public static String getClassPath(String classPath) {
+    static String getClassPath(String classPath) {
         StringBuilder cpBuilder = new StringBuilder();
         cpBuilder.append("-cp").append(" ").append(classPath).append(" ");
         return cpBuilder.toString();
@@ -100,7 +100,7 @@ public final class CommandLineHelper {
      *
      * @throws IOException if the canonical path cannot be returned
      */
-    public static String getStarterConfig(final String rioHome) throws IOException {
+    static String getStarterConfig(final String rioHome) throws IOException {
         String startConfig = System.getProperty(Constants.START_SERVICE_BEAN_EXEC_CONFIG);
         if(startConfig!=null)
             return startConfig;
@@ -113,12 +113,12 @@ public final class CommandLineHelper {
         return f.getCanonicalPath();
     }
 
-    /**
+    /*
      * Get the standard Rio JVM arguments
      *
      * @return The JVM arguments for java.rmi.server.useCodebaseOnly, java.protocol.handler.pkgs, and java.security.policy
      */
-    static String getStandardJVMArgs() {
+    private static String getStandardJVMArgs() {
         String rioHome = RioHome.get();
         StringBuilder argsBuilder = new StringBuilder();
 
@@ -126,6 +126,20 @@ public final class CommandLineHelper {
         argsBuilder.append(" ");
         argsBuilder.append(getOption("java.rmi.server.useCodebaseOnly", "false"));
         argsBuilder.append(" ");
+        String sslDir = buildDirectory(rioHome, "config/ssl");
+        if (System.getProperty("javax.net.ssl.keyStore") != null) {
+            argsBuilder.append(getOption("javax.net.ssl.keyStore", System.getProperty("javax.net.ssl.keyStore")));
+            argsBuilder.append(" ");
+            argsBuilder.append(getOption("javax.net.ssl.trustStore",
+                                         System.getProperty("javax.net.ssl.trustStore")));
+            argsBuilder.append(" ");
+            argsBuilder.append(getOption("javax.net.ssl.keyStorePassword",
+                                         System.getProperty("javax.net.ssl.keyStorePassword")));
+            argsBuilder.append(" ");
+            argsBuilder.append(getOption("javax.net.ssl.trustStorePassword",
+                                         System.getProperty("javax.net.ssl.trustStorePassword")));
+            argsBuilder.append(" ");
+        }
         String policyDir = buildDirectory(rioHome, "policy");
         argsBuilder.append(getOption("java.security.policy", policyDir+"policy.all"));
         argsBuilder.append(" ");
@@ -144,11 +158,11 @@ public final class CommandLineHelper {
      *
      * @return A String suitable for to pass to the JVM for starting a service bean in it's own JVM.
      */
-    public static String createInputArgs(final String normalizedServiceName,
-                                         final String serviceBindName,
-                                         final String sRegPort,
-                                         final String declaredJVMOptions,
-                                         final String logDir) {
+    static String createInputArgs(final String normalizedServiceName,
+                                  final String serviceBindName,
+                                  final String sRegPort,
+                                  final String declaredJVMOptions,
+                                  final String logDir) {
         StringBuilder extendedJVMOptions = new StringBuilder();
         extendedJVMOptions.append(getStandardJVMArgs());
         if(declaredJVMOptions!=null)
@@ -192,7 +206,7 @@ public final class CommandLineHelper {
      *
      * @return The classname used as the service starter
      */
-    public static String getStarterClass() {
+    static String getStarterClass() {
         return "org.rioproject.start.ServiceStarter";
     }
 

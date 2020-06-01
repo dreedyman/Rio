@@ -1,5 +1,9 @@
 .gitignore
-.idea/*
+.idea/
+.idea/vcs.xml
+
+cleanRepoOfRioDeps.groovy
+
 ###################
 # Maven target directories
 ###################

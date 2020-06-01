@@ -83,9 +83,9 @@ public class ServiceBeanLoader {
         Policy.setPolicy(globalPolicy);
     }
     private static final Map<String, AtomicInteger> counterTable =
-        Collections.synchronizedMap(new HashMap<String, AtomicInteger>());
+        Collections.synchronizedMap(new HashMap<>());
     private static final List<ProvisionedResources> provisionedResources =
-        Collections.synchronizedList(new ArrayList<ProvisionedResources>());
+        Collections.synchronizedList(new ArrayList<>());
     private final static ExecutorService service = Executors.newCachedThreadPool();
 
     /**
@@ -120,11 +120,7 @@ public class ServiceBeanLoader {
         if(globalPolicy!=null)
             globalPolicy.setPolicy(loader, null);
         checkAndMaybeCleanProvisionedResources(elem);
-        service.submit(new Runnable() {
-            public void run() {
-                ResolvingLoader.release(loader);
-            }
-        });
+        service.submit(() -> ResolvingLoader.release(loader));
     }
 
     @Override
@@ -137,8 +133,8 @@ public class ServiceBeanLoader {
      * Check and maybe remove provisioned resources collection
      */
     private static void checkAndMaybeCleanProvisionedResources(final ServiceElement elem) {
-        List<ProvisionedResources> toRemove = new ArrayList<ProvisionedResources>();
-        ProvisionedResources[] copy = provisionedResources.toArray(new ProvisionedResources[provisionedResources.size()]);
+        List<ProvisionedResources> toRemove = new ArrayList<>();
+        ProvisionedResources[] copy = provisionedResources.toArray(new ProvisionedResources[0]);
         for(ProvisionedResources pr : copy) {
             if(elem.getComponentBundle()!=null &&
                elem.getComponentBundle().getArtifact()!=null)
@@ -181,8 +177,8 @@ public class ServiceBeanLoader {
                                                final Uuid serviceID,
                                                final ServiceBeanManager jsbManager,
                                                final ServiceBeanContainer container) throws ServiceBeanInstantiationException {
-        ServiceBeanFactory.Created created = null;
-        MarshalledInstance marshalledProxy = null;
+        ServiceBeanFactory.Created created;
+        MarshalledInstance marshalledProxy;
         ServiceBeanContext context;
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
         ComputeResource computeResource = container.getComputeResource();
@@ -202,12 +198,12 @@ public class ServiceBeanLoader {
                 if(dlPR.getJars().length==0 && dlPR.getArtifact()!=null) {
                     String convertedArtifact = dlPR.getArtifact().replaceAll(":", "/");
                     String[] artifactParts = convertedArtifact.split(" ");
-                    List<URL> exportURLList = new ArrayList<URL>();
+                    List<URL> exportURLList = new ArrayList<>();
                     for(String artifactPart : artifactParts) {
                         // TODO: if the repositories is default maven central, still need to add?
                         exportURLList.add(new URL("artifact:"+artifactPart+dlPR.getRepositories()));
                     }
-                    exports = exportURLList.toArray(new URL[exportURLList.size()]);
+                    exports = exportURLList.toArray(new URL[0]);
                 } else {
                     exports = dlPR.getJars();
                 }
@@ -223,7 +219,6 @@ public class ServiceBeanLoader {
         Uuid serviceIDToUse = serviceID;
         try {
             ClassBundle jsbBundle = sElem.getComponentBundle();
-            List<URL> urlList = new ArrayList<URL>();
             /*
             URL[] implJARs;
             if(jsbBundle!=null && jsbBundle.getCodebase()!=null)
@@ -231,7 +226,7 @@ public class ServiceBeanLoader {
             else
                 implJARs = new URL[0];
             */
-            urlList.addAll(Arrays.asList(implJARs));
+            List<URL> urlList = new ArrayList<>(Arrays.asList(implJARs));
 
             /* Get matched PlatformCapability jars to load */
             PlatformCapability[] pCaps = computeResource.getPlatformCapabilities();
@@ -244,7 +239,7 @@ public class ServiceBeanLoader {
                 }
             }
 
-            URL[] classpath = urlList.toArray(new URL[urlList.size()]);
+            URL[] classpath = urlList.toArray(new URL[0]);
             Properties metaData = new Properties();
             metaData.setProperty("opStringName", sElem.getOperationalStringName());
             metaData.setProperty("serviceName", sElem.getName());
@@ -347,7 +342,7 @@ public class ServiceBeanLoader {
             created = serviceBeanFactory.create(context);
             logger.trace("Created ServiceBeanFactory.Created {}", created);
             Object impl = created.getImpl();
-            logger.trace("Obtained implementation {}", impl);
+            logger.trace("Obtained implementation: {}", impl);
             
             if(context.getServiceElement().getComponentBundle()==null) {
                 String compName = impl.getClass().getName();
@@ -373,13 +368,13 @@ public class ServiceBeanLoader {
             }
             Object proxy = created.getProxy();
             if(logger.isTraceEnabled()) {
-                logger.trace("Obtained the proxy %s", proxy);
+                logger.trace("Obtained the proxy: {}", proxy);
             }
             if(proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
             if(logger.isTraceEnabled()) {
-                logger.trace("Proxy {}, prepared? {}", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
+                logger.trace("Proxy: {}, prepared? {}", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
             }
             /*
              * Set the MarshalledInstance into the ServiceBeanManager
@@ -430,12 +425,12 @@ public class ServiceBeanLoader {
         return(new ServiceBeanLoaderResult(context, created.getImpl(), created.getBeanAdapter(), marshalledProxy, serviceIDToUse));
     }  
 
-    static synchronized Map<String, ProvisionedResources> provisionService(final ServiceElement elem,
-                                                                           final Resolver resolver,
-                                                                           final boolean supportsInstallation)
+    private static synchronized Map<String, ProvisionedResources> provisionService(final ServiceElement elem,
+                                                                                   final Resolver resolver,
+                                                                                   final boolean supportsInstallation)
         throws MalformedURLException, ServiceBeanInstantiationException {
 
-        Map<String, ProvisionedResources> map = new HashMap<String, ProvisionedResources>();
+        Map<String, ProvisionedResources> map = new HashMap<>();
         URL[] implJARs = null;
         String implArtifact = (elem.getComponentBundle()!=null?
                                elem.getComponentBundle().getArtifact(): null);
@@ -520,7 +515,7 @@ public class ServiceBeanLoader {
          * then we must check the dlPR jars for requisite jar inclusion
          */
         if(exportArtifact==null && implArtifact==null) {
-            String localCodebase = System.getProperty(Constants.CODESERVER);
+            String localCodebase = System.getProperty(Constants.WEBSTER);
             if(localCodebase!=null) {
                 if(!localCodebase.endsWith("/"))
                     localCodebase = localCodebase+"/";
@@ -618,7 +613,7 @@ public class ServiceBeanLoader {
     }
    
     private static class ProvisionedResources {
-        Set<URL> jars = new HashSet<URL>();
+        Set<URL> jars = new HashSet<>();
         String artifact;
         StringBuilder repositories = new StringBuilder();
 
@@ -635,7 +630,7 @@ public class ServiceBeanLoader {
         }
 
         URL[] getJars() {
-            return jars.toArray(new URL[jars.size()]);
+            return jars.toArray(new URL[0]);
         }
 
         String getArtifact() {

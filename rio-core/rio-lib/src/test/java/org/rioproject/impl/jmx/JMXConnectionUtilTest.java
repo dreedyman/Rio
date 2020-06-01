@@ -17,7 +17,6 @@ package org.rioproject.impl.jmx;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.rioproject.config.Constants;
 
 /**
  * Tests for th {@code JMXConnectionUtil}
@@ -25,11 +24,6 @@ import org.rioproject.config.Constants;
  * @author Dennis Reedy
  */
 public class JMXConnectionUtilTest {
-    @Test
-    public void testCreateJMXConnection() throws Exception {
-        JMXConnectionUtil.createJMXConnection();
-        Assert.assertNotNull(System.getProperty(Constants.JMX_SERVICE_URL));
-    }
 
     @Test
     public void testGetPlatformMBeanAgentID() throws Exception {

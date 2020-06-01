@@ -41,7 +41,7 @@ class StartCollectorConfig {
         pathBuilder.append(rioHome).append(File.separator).append("lib").append(File.separator).append("event-collector-service.jar")
 
         def serviceDescriptors = [
-                new RioServiceDescriptor("artifact:org.rioproject.event-collector/event-collector-proxy/5.7",
+                new RioServiceDescriptor("artifact:org.rioproject.event-collector/event-collector-proxy/5.8.0",
                                          policyFile,
                                          pathBuilder.toString(),
                                          "org.rioproject.eventcollector.service.EventCollectorImpl",

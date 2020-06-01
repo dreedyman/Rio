@@ -28,7 +28,6 @@ import org.rioproject.admin.ServiceBeanControlException;
 import org.rioproject.config.Constants;
 import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.impl.client.JiniClient;
-import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ import java.util.List;
  * The ServiceAdvertiser is a utility to help advertise a service with configured attributes.
  */
 public class ServiceAdvertiser {
-    static Logger logger = LoggerFactory.getLogger(ServiceAdvertiser.class.getName());
+    private static Logger logger = LoggerFactory.getLogger(ServiceAdvertiser.class.getName());
 
     /**
      * Advertise a ServiceBean
@@ -110,7 +109,7 @@ public class ServiceAdvertiser {
                                                                            serviceName,
                                                                            context.getExportCodebase());
                     JoinAdmin joinAdmin = (JoinAdmin) adminObject;
-                    ArrayList<Entry> addList = new ArrayList<Entry>();
+                    ArrayList<Entry> addList = new ArrayList<>();
                     logger.trace("OperationalString {}", opStringName);
                     /* Try and add an OperationalStringEntry */
                     if (opStringName != null && opStringName.length() > 0) {
@@ -173,9 +172,9 @@ public class ServiceAdvertiser {
                     /* If running forked, add JMX connection entries */
                     if(logger.isTraceEnabled())
                         logger.trace("Service: {}, forked? {}", serviceName, forked);
-                    if(forked) {
+                    /*if(forked) {
                         Collections.addAll(addList, JMXUtil.getJMXConnectionEntries());
-                    }
+                    }*/
 
                     addList.addAll(context.getServiceBeanConfig().getAdditionalEntries());
 
@@ -186,7 +185,7 @@ public class ServiceAdvertiser {
 
                     /* If we have Entry objects to add, add them */
                     if (!addList.isEmpty()) {
-                        Entry[] adds = addList.toArray(new Entry[addList.size()]);
+                        Entry[] adds = addList.toArray(new Entry[0]);
                         addAttributes(adds, joinAdmin);
                     }
                     /* Apply groups to the JoinAdmin */
@@ -226,7 +225,7 @@ public class ServiceAdvertiser {
                             }
                             logger.trace("Setting locators [{}] using JoinAdmin.setLookupLocators", buff.toString());
                         }
-                        joinAdmin.setLookupLocators(lookupLocators.toArray(new LookupLocator[lookupLocators.size()]));
+                        joinAdmin.setLookupLocators(lookupLocators.toArray(new LookupLocator[0]));
                     }
                 } else {
                     logger.error("Admin must implement JoinAdmin or ServiceBeanControl to be properly advertised");
@@ -288,13 +287,13 @@ public class ServiceAdvertiser {
             logger.warn("Unable to obtain configuration for service [{}]", context.getServiceElement().getName(), e);
             return new Entry[0];
         }
-        ArrayList<Entry> attrList = new ArrayList<Entry>();
+        ArrayList<Entry> attrList = new ArrayList<>();
         Entry[] configuredAttributes = getConfiguredAttributes(getServiceComponentName(context),
                                                                config,
                                                                context.getServiceElement().getName(),
                                                                context.getExportCodebase());
         Collections.addAll(attrList, configuredAttributes);
-        return(attrList.toArray(new Entry[attrList.size()]));
+        return(attrList.toArray(new Entry[0]));
     }
 
 
@@ -313,7 +312,7 @@ public class ServiceAdvertiser {
                                                    Configuration config,
                                                    String serviceName,
                                                    String exportCodebase) {
-        ArrayList<Entry> attrList = new ArrayList<Entry>();
+        ArrayList<Entry> attrList = new ArrayList<>();
         if(serviceBeanComponent!=null) {
             try {
                 /* 1. Get any configured ServiceUIs */
@@ -343,7 +342,7 @@ public class ServiceAdvertiser {
                 logger.warn("Getting initialAttributes for [{}]", serviceName, e);
             }
         }
-        return(attrList.toArray(new Entry[attrList.size()]));
+        return(attrList.toArray(new Entry[0]));
     }
 
     /*

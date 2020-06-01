@@ -98,7 +98,7 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=5.7
+rioVersion=5.8.0
 groovyVersion=2.3.8
 
 # Call the install script, do not assume that Groovy has been installed.
@@ -201,6 +201,12 @@ if [ "$start" = "1" ]; then
     # o To set common locators that all services should use, add the following system property
     #     -Dorg.rioproject.locators="jini://localhost:10500" \
     # -------------------
+
+    # -Djavax.net.ssl.keyStore=`toNative $RIO_HOME/config/ssl/rio.keystore.jks` \
+    # -Djavax.net.ssl.trustStore=`toNative $RIO_HOME/config/ssl/rio.truststore.jks` \
+    # -Djavax.net.ssl.keyStorePassword=rioadmin \
+    # -Djavax.net.ssl.trustStorePassword=rioadmin \
+
     serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
 
     ""$JAVACMD"" -server $JAVA_MEM_OPTIONS $JAVA_RMI_OPTIONS $JAVA_GC_OPTIONS \
@@ -228,7 +234,7 @@ elif [ "$project" = "1" ] ;then
     -DarchetypeGroupId=org.rioproject \
     -DarchetypeArtifactId=rio-archetype \
     -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.7
+    -DarchetypeVersion=5.8.0
 elif [ "$install" = "1" ] ;then
     # Run installer
     installRioToLocalRepository
