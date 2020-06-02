@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class FlatDirectoryWorkspaceReader implements FlatDirectoryReader {
     private final File localPomGenerationDir;
-    private final Set<File> directories = new HashSet<File>();
+    private final Set<File> directories = new HashSet<>();
     private static final Logger logger = LoggerFactory.getLogger(FlatDirectoryWorkspaceReader.class);
 
     public FlatDirectoryWorkspaceReader() {
@@ -47,6 +47,11 @@ public class FlatDirectoryWorkspaceReader implements FlatDirectoryReader {
         if(directories!=null) {
             this.directories.addAll(directories);
         }
+    }
+
+    @Override
+    public Collection<File> getDirectories() {
+        return this.directories;
     }
 
     @Override public ArtifactResult findArtifact(Artifact artifact) {

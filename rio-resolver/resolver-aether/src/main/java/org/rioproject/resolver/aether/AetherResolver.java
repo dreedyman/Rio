@@ -100,7 +100,8 @@ public class AetherResolver implements Resolver, SettableResolver {
     public String[] getClassPathFor(String artifact, RemoteRepository[] repositories) throws ResolverException {
         String[] classPath;
         Future<String[]> future;
-        ResolutionRequest request = new ResolutionRequest(artifact, repositories);
+        ResolutionRequest request = new ResolutionRequest(artifact,
+                                                          repositories);
         synchronized (resolvingMap) {
             future = resolvingMap.get(request);
             if(future==null) {
@@ -216,6 +217,11 @@ public class AetherResolver implements Resolver, SettableResolver {
         return this;
     }
 
+    @Override
+    public Collection<File> getFlatDirectories() {
+        return flatDirectoryReader.getDirectories();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -322,8 +328,8 @@ public class AetherResolver implements Resolver, SettableResolver {
     private int getMaxArtifactStringLength(List<ArtifactResult> artifactResults) {
         int artifactLength = 0;
         for (ArtifactResult artifactResult : artifactResults ) {
-            artifactLength = artifactResult.getArtifact().toString().length()>artifactLength?
-                             artifactResult.getArtifact().toString().length():artifactLength;
+            artifactLength = Math.max(artifactResult.getArtifact().toString().length(),
+                                      artifactLength);
         }
         return artifactLength;
     }
@@ -343,7 +349,7 @@ public class AetherResolver implements Resolver, SettableResolver {
      * Asynchronous task for resolving an artifact
      */
     private class ResolvingRequestTask implements Callable<String[]> {
-        private ResolutionRequest request;
+        private final ResolutionRequest request;
 
         private ResolvingRequestTask(ResolutionRequest request) {
             this.request = request;
@@ -435,10 +441,10 @@ public class AetherResolver implements Resolver, SettableResolver {
 
     }
 
-    class ResolutionRequest {
-        private String artifact;
+    static class ResolutionRequest {
+        private final String artifact;
         private  RemoteRepository[] repositories;
-        private AtomicInteger counter = new AtomicInteger(0);
+        private final AtomicInteger counter = new AtomicInteger(0);
 
         ResolutionRequest(String artifact) {
             this.artifact = artifact;

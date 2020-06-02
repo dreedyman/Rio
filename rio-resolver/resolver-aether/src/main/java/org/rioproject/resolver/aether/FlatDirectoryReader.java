@@ -35,6 +35,13 @@ public interface FlatDirectoryReader {
     void addDirectories(Collection<File> directories);
 
     /**
+     * Get flat directories
+     *
+     * @return Directories
+     */
+    Collection<File> getDirectories();
+
+    /**
      * Find an artifact in flat directories.
      *
      * @param artifact The artifact to find.

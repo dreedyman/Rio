@@ -47,4 +47,14 @@ public interface SettableResolver {
      * @return An updated instance of the {@code SettableResolver}
      */
     SettableResolver setFlatDirectories(Collection<File> directories);
+
+    /**
+     * Gets repositories which look into one or more directories for finding dependencies. These
+     * directories will be searched last. Note that this does not support any meta-data formats found
+     * in Maven POM files.
+     *
+     * @return Directory instances the Resolver should use for finding dependencies.
+     *                          May be {@code null}.
+     */
+    Collection<File> getFlatDirectories();
 }

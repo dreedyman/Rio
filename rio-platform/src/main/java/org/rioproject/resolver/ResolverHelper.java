@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -54,13 +53,10 @@ public final class ResolverHelper {
     private static final Logger logger = LoggerFactory.getLogger(ResolverHelper.class.getName());
     private static final ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
     static {
-        try {
             Resolver resolver = doGetResolver(Thread.currentThread().getContextClassLoader());
-            if(resolver!=null)
+            if(resolver!=null) {
                 resolverLoader = (URLClassLoader) resolver.getClass().getClassLoader();
-        } catch (IOException | ResolverException e) {
-            logger.warn("Failed getting resolver from context classloader, try loading from rio dist", e);
-        }
+            }
         if(resolverLoader==null) {
             File resolverJar = new File(getResolverJarFile());
             try {
@@ -122,7 +118,7 @@ public final class ResolverHelper {
         }
         if(logger.isDebugEnabled())
             logger.debug("Artifact: {}, resolved jars {}", artifact, jars);
-        return jars.toArray(new URL[jars.size()]);
+        return jars.toArray(new URL[0]);
     }
 
     /**
@@ -207,8 +203,8 @@ public final class ResolverHelper {
             }
             if(r instanceof SettableResolver) {
                 SettableResolver settableResolver = (SettableResolver) r;
-                settableResolver.setRemoteRepositories(resolverConfiguration.getRemoteRepositories());
-                settableResolver.setFlatDirectories(resolverConfiguration.getFlatDirectories());
+                settableResolver.setRemoteRepositories(resolverConfiguration.getRemoteRepositories())
+                                .setFlatDirectories(resolverConfiguration.getFlatDirectories());
             }
             if(logger.isDebugEnabled()) {
                 StringBuilder message = new StringBuilder();
@@ -217,11 +213,24 @@ public final class ResolverHelper {
                         message.append("\n");
                     message.append(rr);
                 }
-                if(r.getRemoteRepositories().isEmpty())
+                if (r.getRemoteRepositories().isEmpty()) {
                     logger.debug("Configured resolver repositories: 0");
-                else
+                } else {
                     logger.debug("Configured resolver repositories: {}\n{}", r.getRemoteRepositories().size(), message.toString());
+                }
+                if(r instanceof SettableResolver) {
+                    StringBuilder flatDirs = new StringBuilder();
+                    SettableResolver settableResolver = (SettableResolver) r;
+                    for (File f : settableResolver.getFlatDirectories()) {
+                        if(flatDirs.length()>0)
+                            flatDirs.append("\n");
+                        flatDirs.append(f.getPath());
+                    }
+                    logger.debug("Configured flatDir repositories: {}\n{}",
+                                 settableResolver.getFlatDirectories().size(), flatDirs.toString());
+                }
             }
+
         } catch (Exception e) {
             if(e instanceof ResolverException)
                 throw (ResolverException)e;
@@ -233,7 +242,7 @@ public final class ResolverHelper {
     /*
      * Returns the Resolver using ServiceLoader.load.
      */
-    private static Resolver doGetResolver(final ClassLoader cl) throws IOException, ResolverException {
+    private static Resolver doGetResolver(final ClassLoader cl) {
         Resolver resolver = null;
         ServiceLoader<Resolver> loader =  ServiceLoader.load(Resolver.class, cl);
         if(logger.isDebugEnabled()) {
@@ -263,7 +272,7 @@ public final class ResolverHelper {
         String newString = s;
         if (System.getProperty("os.name").startsWith("Windows")) {
             if(s.startsWith("/"))
-                newString = s.substring(1, s.length());
+                newString = s.substring(1);
             if(s.startsWith("file:"))
                 newString = s.replace('/', '\\');
         }
