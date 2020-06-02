@@ -29,7 +29,7 @@ import java.util.List;
  * @author Dennis Reedy
  */
 public class ArtifactURLConfiguration {
-    private String artifact;
+    private final String artifact;
     private final List<RemoteRepository> repositories = new ArrayList<>();
 
     public ArtifactURLConfiguration(final String path) {
