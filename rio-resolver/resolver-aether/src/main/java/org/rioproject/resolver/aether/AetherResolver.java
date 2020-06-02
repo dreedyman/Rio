@@ -412,7 +412,7 @@ public class AetherResolver implements Resolver, SettableResolver {
                         flatDirArtifacts.add(((ArtifactDescriptorException)collectException).getResult().getArtifact());
                     }
                 }
-                int toResolveLocally =flatDirArtifacts.size();
+                int toResolveLocally = flatDirArtifacts.size();
                 if(logger.isDebugEnabled())
                     logger.debug("Try and resolve {} artifacts using configured flatDirs", toResolveLocally);
                 for(org.eclipse.aether.artifact.Artifact artifact : flatDirArtifacts) {
