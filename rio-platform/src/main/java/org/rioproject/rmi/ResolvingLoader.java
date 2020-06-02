@@ -51,7 +51,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
      * A table of artifacts to derived codebases. This improves performance by resolving the classpath once per
      * artifact.
      */
-    private final Map<String, String> artifactToCodebase = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> artifactToCodebase = new ConcurrentHashMap<>();
     private static final Resolver resolver;
     private static final Logger logger = LoggerFactory.getLogger(ResolvingLoader.class.getName());
     static {
@@ -73,8 +73,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         }
         String resolvedCodebase = resolveCodebase(codebase);
         Class<?> cl = loader.loadClass(resolvedCodebase, name, defaultLoader);
-        if(logger.isDebugEnabled()) {
-            logger.debug("Class {} loaded by {}", name, cl.getClassLoader());
+        if(logger.isTraceEnabled()) {
+            logger.trace("Class {} loaded by {}", name, cl.getClassLoader());
         }
         return cl;
     }
@@ -89,8 +89,8 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         }
         String resolvedCodebase = resolveCodebase(codebase);
         Class<?> proxyClass = loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
-        if(logger.isDebugEnabled()) {
-            logger.debug("Proxy classes {} loaded by {}", Arrays.toString(interfaces), proxyClass.getClassLoader());
+        if(logger.isTraceEnabled()) {
+            logger.trace("Proxy classes {} loaded by {}", Arrays.toString(interfaces), proxyClass.getClassLoader());
         }
         return proxyClass;
     }
@@ -127,11 +127,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         try {
             Field loaderTable = sun.rmi.server.LoaderHandler.class.getDeclaredField("loaderTable");
             loaderTable.setAccessible(true);
-            HashMap loaderTableMap = (HashMap)loaderTable.get(null);
+            HashMap<?,?> loaderTableMap = (HashMap<?,?>)loaderTable.get(null);
             findAndRemove(serviceLoader, loaderTableMap);
-        } catch (NoSuchFieldException e) {
-            logger.warn("Failure accessing the loaderTable field", e);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             logger.warn("Failure accessing the loaderTable field", e);
         }
     }
@@ -170,9 +168,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
         return adaptedCodebase;
     }
 
-    private synchronized static void findAndRemove(ClassLoader loader, Map loaderTable) {
+    private synchronized static void findAndRemove(ClassLoader loader, Map<?,?> loaderTable) {
         for(Object o : loaderTable.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
+            Map.Entry<?,?> entry = (Map.Entry<?,?>) o;
             Object key = entry.getKey();
             try {
                 Field parentField = key.getClass().getDeclaredField("parent");
@@ -181,9 +179,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                 if (isDescendantOf(toCheck, loader)) {
                     parentField.set(key, null);
                 }
-            } catch (NoSuchFieldException e) {
-                logger.warn("Failure accessing the parent field", e);
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 logger.warn("Failure accessing the parent field", e);
             }
         }
