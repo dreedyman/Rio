@@ -177,44 +177,44 @@
         <dependencies>
 
             <dependency>
-                <groupId>org.apache.river</groupId>
-                <artifactId>start</artifactId>
+                <groupId>au.net.zeus.jgdms</groupId>
+                <artifactId>jini-2.1-compat</artifactId>
                 <version>${river.version}</version>
             </dependency>
             
             <dependency>
-                <groupId>net.jini</groupId>
-                <artifactId>jsk-lib</artifactId>
+                <groupId>au.net.zeus.jgdms</groupId>
+                <artifactId>jgdms-lib</artifactId>
                 <version>${river.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.jini</groupId>
-                <artifactId>jsk-dl</artifactId>
+                <groupId>au.net.zeus.jgdms</groupId>
+                <artifactId>jgdms-lib-dl</artifactId>
                 <version>${river.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.jini</groupId>
-                <artifactId>jsk-platform</artifactId>
+                <groupId>au.net.zeus.jgdms</groupId>
+                <artifactId>jgdms-platform</artifactId>
                 <version>${river.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.river</groupId>
-                <artifactId>reggie</artifactId>
+                <groupId>au.net.zeus.jgdms.reggie</groupId>
+                <artifactId>reggie-service</artifactId>
                 <version>${river.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.river</groupId>
+                <groupId>au.net.zeus.jgdms.reggie</groupId>
                 <artifactId>reggie-dl</artifactId>
                 <version>${river.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.jini.lookup</groupId>
-                <artifactId>serviceui</artifactId>
+                <groupId>au.net.zeus.jgdms</groupId>
+                <artifactId>jgdms-ui-factory</artifactId>
                 <version>${river.version}</version>
             </dependency>
 
@@ -436,7 +436,7 @@
         <junit.version>4.12</junit.version>
         <rio.version>5.8.0</rio.version>
         <rio.plugin.version>5.1</rio.plugin.version>
-        <river.version>2.2.2</river.version>
+        <river.version>3.1.0</river.version>
         <hyperic.version>1.6.3.82</hyperic.version>
         <hyperic.repo.dir>${settings.localRepository}/org/hyperic/sigar-dist</hyperic.repo.dir>
         <sigar.dist>${hyperic.repo.dir}/${hyperic.version}/sigar-dist-${hyperic.version}</sigar.dist>

@@ -45,7 +45,7 @@ public class ServiceProvisionEvent extends RemoteEvent implements Serializable {
      * @param source The event source
      */
     public ServiceProvisionEvent(Object source) {
-        super(source, ID, 0, null);
+        super(source, ID, 0, (MarshalledObject) null);
     }
 
     /**
@@ -58,7 +58,7 @@ public class ServiceProvisionEvent extends RemoteEvent implements Serializable {
     public ServiceProvisionEvent(Object source,
                                  OperationalStringManager opStringManager, 
                                  ServiceElement svcElement) {
-        super(source, ID, 0, null);
+        super(source, ID, 0, (MarshalledObject) null);
         this.opStringManager = opStringManager;
         this.svcElement = svcElement;
     }

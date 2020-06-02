@@ -18,9 +18,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.apache.river</groupId>
+    <groupId>au.net.zeus.jgdms.reggie</groupId>
     <artifactId>reggie-dl</artifactId>
-    <version>2.2.2</version>
+    <version>3.1</version>
     <url>http://river.apache.org</url>
     <description>River Lookup and Registry service client download jar</description>
 	
@@ -38,9 +38,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.jini</groupId>
-            <artifactId>jsk-dl</artifactId>
-	    <version>2.2.2</version>
+            <groupId>au.net.zeus.jgdms</groupId>
+            <artifactId>jgdms-lib-dl</artifactId>
+	    <version>3.1</version>
         </dependency>
     </dependencies>
 
