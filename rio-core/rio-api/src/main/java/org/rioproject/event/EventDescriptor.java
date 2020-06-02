@@ -29,7 +29,7 @@ public class EventDescriptor extends AbstractEntry {
     /**
      * The event classes Class that this EventDescriptor describes
      */
-    public Class eventClass = null;
+    public Class<?> eventClass = null;
     /**
      * The event class event identifier. Care should be taken that this
      * identifier is unique
@@ -49,7 +49,7 @@ public class EventDescriptor extends AbstractEntry {
      * @param eventClass The event class the descriptor describes
      * @param eventID The identifier for the event
      */
-    public EventDescriptor(Class eventClass, Long eventID) {
+    public EventDescriptor(Class<?> eventClass, Long eventID) {
         this.eventClass = eventClass;
         this.eventID = eventID;
     }
@@ -102,6 +102,6 @@ public class EventDescriptor extends AbstractEntry {
     public String toString() {
         String eventClassName = (eventClass==null? "<null>":eventClass.getName());
         String eventIDVal = (eventID==null? "<null>":eventID.toString());
-        return ("Class: " + eventClassName + ", eventID: " + eventIDVal);
+        return "Class: " + eventClassName + ", eventID: " + eventIDVal;
     }
 }
