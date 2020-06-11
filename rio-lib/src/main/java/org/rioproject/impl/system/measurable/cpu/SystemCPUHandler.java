@@ -16,11 +16,8 @@
 package org.rioproject.impl.system.measurable.cpu;
 
 import org.rioproject.impl.system.measurable.MeasurableMonitor;
-import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.system.measurable.cpu.CpuUtilization;
 import org.rioproject.watch.ThresholdValues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -38,17 +35,10 @@ import java.lang.management.OperatingSystemMXBean;
 public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
     private String id;
     private ThresholdValues tVals;
-    private SigarHelper sigar;
-    private OperatingSystemMXBean opSysMBean = null;
-    private static Logger logger = LoggerFactory.getLogger(SystemCPUHandler.class.getPackage().getName());
+    private final OperatingSystemMXBean opSysMBean;
 
     public SystemCPUHandler() {
-        sigar = SigarHelper.getInstance();
-        if(sigar==null) {
-            opSysMBean = ManagementFactory.getOperatingSystemMXBean();
-        } else {
-            logger.debug("Using SIGAR for CPU utilization");
-        }
+        opSysMBean = ManagementFactory.getOperatingSystemMXBean();
     }
 
     public void setID(String id) {
@@ -60,35 +50,20 @@ public class SystemCPUHandler implements MeasurableMonitor<CpuUtilization> {
     }
 
     public CpuUtilization getMeasuredResource() {
-        CpuUtilization util;
-        if(sigar!=null) {
-            util = getSigarCpuUtilization();
-        } else {
-            util = getJmxCpuUtilization();
-        }
-        return util;
+        return getJmxCpuUtilization();
     }
 
     public void terminate() {
     }
 
-    private CpuUtilization getSigarCpuUtilization() {
-        return new CpuUtilization(id,
-                                   sigar.getSystemCpuPercentage(),
-                                   sigar.getUserCpuPercentage(),
-                                   sigar.getLoadAverage(),
-                                   Runtime.getRuntime().availableProcessors(),
-                                   tVals);
-    }
-
     private CpuUtilization getJmxCpuUtilization() {
-        double cpuUtilization = 0;
+        double cpuUtilization;
         if(opSysMBean instanceof com.sun.management.OperatingSystemMXBean) {
             cpuUtilization = ((com.sun.management.OperatingSystemMXBean)opSysMBean).getSystemCpuLoad();
-            cpuUtilization = cpuUtilization>0?cpuUtilization:0;
+            cpuUtilization = cpuUtilization > 0 ? cpuUtilization : 0;
         } else {
             cpuUtilization = opSysMBean.getSystemLoadAverage();
-            cpuUtilization = cpuUtilization>0?cpuUtilization/100:0;
+            cpuUtilization = cpuUtilization > 0 ? cpuUtilization / 100 : 0;
         }
         return new CpuUtilization(id, cpuUtilization, tVals);
     }

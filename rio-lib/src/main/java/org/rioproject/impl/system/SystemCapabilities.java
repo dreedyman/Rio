@@ -442,8 +442,8 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                 pCap.setClassPath(caps[i].getClasspath());
             if(caps[i].getPath()!=null)
                 pCap.setPath(caps[i].getPath());
-            if(caps[i].geCostModelClass()!=null) {
-                ResourceCostModel costModel = (ResourceCostModel)Class.forName(caps[i].geCostModelClass()).newInstance();
+            if(caps[i].getCostModelClass()!=null) {
+                ResourceCostModel costModel = (ResourceCostModel)Class.forName(caps[i].getCostModelClass()).newInstance();
                 pCap.setResourceCostModel(costModel);
             }
             PlatformCapabilityLoader.getLoadableClassPath(pCap);

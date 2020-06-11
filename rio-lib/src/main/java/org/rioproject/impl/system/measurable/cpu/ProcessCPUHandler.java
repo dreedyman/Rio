@@ -16,12 +16,9 @@
 package org.rioproject.impl.system.measurable.cpu;
 
 import org.rioproject.impl.system.measurable.MXBeanMonitor;
-import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.system.MeasuredResource;
 import org.rioproject.system.measurable.cpu.ProcessCpuUtilization;
 import org.rioproject.watch.ThresholdValues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -40,39 +37,11 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
     private double cpuBefore;
     private String id;
     private ThresholdValues tVals;
-    private long pid;
-    private SigarHelper sigar;
-    static Logger logger =
-        LoggerFactory.getLogger(ProcessCPUHandler.class.getPackage().getName());
-
-    public ProcessCPUHandler() {
-        sigar = SigarHelper.getInstance();
-        if(sigar!=null) {
-            pid = sigar.getPid();
-        } else {
-            String name = ManagementFactory.getRuntimeMXBean().getName();
-            int ndx = name.indexOf("@");
-            if(ndx>=1) {
-                pid = Long.parseLong(name.substring(0, ndx));
-            }
-        }
-    }
-
-    public ProcessCPUHandler(long pid) {
-        sigar = SigarHelper.getInstance();
-        if (sigar!=null) {
-            this.pid = pid;
-        }
-    }
 
     public void setMXBean(OperatingSystemMXBean mxBean) {
         if(mxBean instanceof com.sun.management.OperatingSystemMXBean) {
             osMBean = (com.sun.management.OperatingSystemMXBean)mxBean;
         }
-    }
-
-    public void setPID(long pid) {
-        this.pid = pid;
     }
 
     public void setStartTime(long startTime) {
@@ -95,30 +64,8 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
     }
 
     private synchronized ProcessCpuUtilization getUtilization() {
-        ProcessCpuUtilization pCpu;
-        if (sigar!=null) {
-            try {
-                /* On rare occasions the percentage has been a negative value,
-                 * always make sure its a postive value */
-                double percent = Math.abs(sigar.getProcessCpuPercentage(pid));
-                long sys = sigar.getProcessCpuSys(pid);
-                long user = sigar.getProcessCpuUser(pid);
-                //System.out.println("User time....." + user);
-                //System.out.println("Sys time......" + sys);
-                //System.out.println("Percent......." + percent);
-                //System.out.println("------------")
-                pCpu = new ProcessCpuUtilization(id, percent, sys, user, tVals);
-            } catch(Exception e) {
-                logger.warn("SIGAR exception getting ProcessCpu, get CPU process utilization using JMX", e);
-                double percent = getUtilizationUsingJMX();
-                pCpu = new ProcessCpuUtilization(id, percent, tVals);
-            }
-        } else {
-            double percent = getUtilizationUsingJMX();
-            pCpu = new ProcessCpuUtilization(id, percent, tVals);
-        }
-
-        return pCpu;
+        double percent = getUtilizationUsingJMX();
+        return new ProcessCpuUtilization(id, percent, tVals);
     }
 
     private double getUtilizationUsingJMX() {
