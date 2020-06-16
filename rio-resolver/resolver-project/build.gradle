@@ -1,0 +1,27 @@
+group = 'org.rioproject.resolver'
+description = 'Module :: Project Module Resolver'
+dependencies {
+    compile project(':resolver-aether')
+    compile project(':rio-platform')
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.8'
+    compile group: 'org.eclipse.aether', name: 'aether-api', version: '0.9.0.M3'
+    compile group: 'org.eclipse.aether', name: 'aether-spi', version: '0.9.0.M3'
+    compile group: 'org.eclipse.aether', name: 'aether-util', version: '0.9.0.M3'
+    compile group: 'org.eclipse.aether', name: 'aether-impl', version: '0.9.0.M3'
+    compile group: 'org.apache.maven', name: 'maven-aether-provider', version: '3.1.0'
+    compile group: 'org.apache.maven.wagon', name: 'wagon-provider-api', version: '1.0'
+    compile group: 'org.apache.maven', name: 'maven-settings-builder', version: '3.1.0'
+    compile group: 'org.apache.maven', name: 'maven-settings', version: '3.1.0'
+    compile(group: 'org.apache.maven.wagon', name: 'wagon-http-lightweight', version: '1.0-beta-7') {
+        exclude(module: 'commons-logging')
+    }
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.12'
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+}
+
+jar {
+    manifest {
+        attributes("Class-Path": "resolver-aether-${version}.jar")
+    }
+}

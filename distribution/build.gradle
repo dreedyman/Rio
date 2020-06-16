@@ -1,0 +1,232 @@
+/*
+ * Copyright to the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Build a distribution  */
+
+apply plugin: 'base'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+/* Declare a custom configuration for distribution only dependencies */
+configurations {
+    distribution
+    distribution.extendsFrom(runtime)
+}
+
+dependencies {
+    distribution "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    distribution "org.apache.river:start:$riverVersion"
+    distribution "org.apache.river:reggie:$riverVersion"
+    distribution "org.apache.river:reggie-dl:$riverVersion"
+    distribution "net.jini.lookup:serviceui:$riverVersion"
+    distribution "org.slf4j:jul-to-slf4j:$slf4jVersion"
+    distribution "ch.qos.logback:logback-classic:$logbackVersion"
+}
+
+ext {
+    distDir = "${project.buildDir.path}/rio"
+}
+
+/*
+ * This will gather up and organize subproject dependencies, and resolve distribution dependencies
+ */
+task gatherDeps() {
+    description = "Gather up and organize distribution dependencies"
+
+    doLast {
+        File dir = file("${distDir}-${version}")
+        if (dir.exists()) {
+            delete dir
+            println "Removed distribution $dir"
+        }
+        println "Creating distribution $dir"
+
+        /* Copy over distribution dependencies */
+        project.configurations['distribution'].files.each {file ->
+            if (filter(file.name)) {
+                String dest
+                if (file.path.contains("-dl") || (file.path.contains("ui"))) {
+                    dest = "lib-dl"
+                } else if (file.path.contains("logback") || file.path.contains("slf4j")) {
+                    dest = "lib/logging"
+                } else {
+                    dest = "lib"
+                }
+                copy {
+                    from file
+                    into "$distDir-${version}/$dest"
+                }
+            }
+        }
+    }
+}
+
+def filter(artifact) {
+    def exclusions = ["examples", "rio-int-tests", "distribution"/*, "jsk-platform", "jsk-resources"*/]
+    boolean include = true
+    for(String exclude : exclusions) {
+        if(artifact.contains(exclude))  {
+            include = false
+            break
+        }
+    }
+    include
+}
+
+def filterDeps(project, prefix, dest) {
+    project.configurations.runtime.filter {
+        String[] parts = prefix.split(",")
+        for (String part : parts) {
+            if (it.name.startsWith(part.trim())) {
+                return !file("$distDir-${version}/$dest/$it.name").exists()
+            }
+        }
+        false
+    }
+}
+
+task createDistribution(dependsOn: [":rio-platform:install",
+                                    ":rio-start:install",
+                                    ":rio-lib:install",
+                                    ":resolver-aether:install",
+                                    ":resolver-project:install",
+                                    ":cybernode-service:install",
+                                    ":cybernode-ui:install",
+                                    ":monitor-service:install",
+                                    ":rio-cli:install",
+                                    ":rio-test:install",
+                                    ":rio-ui:install",
+                                    ":watch-ui:install",
+                                    gatherDeps]) {
+    description 'Creates a Rio distribution'
+    doLast {
+        File rioLibDir = file("$distDir-${version}/lib/")
+        File rioDlDir = file("$distDir-${version}/lib-dl")
+        File rioLoggingDir = file("$distDir-${version}/lib/logging")
+        File rioResolverDir = file("$distDir-${version}/lib/resolver")
+
+        rootProject.subprojects.each { project ->
+            boolean include = filter(project.path)
+            if(include) {
+                //println "Processing ${project.path}"
+                project.tasks.withType(Jar).each { jar ->
+                    File target
+                    if(!jar.archiveName.contains("sources")) {
+                        if (jar.archiveName.indexOf('dl') > 0 ||
+                                jar.archiveName.indexOf('ui') > 0 ||
+                                jar.archiveName.indexOf('proxy') > 0) {
+                            target = rioDlDir
+                        } else if (jar.archiveName.contains("resolver")) {
+                            target = rioResolverDir
+                        } else if (jar.archiveName.contains("logging")) {
+                            target = rioLoggingDir
+                        } else {
+                            target = rioLibDir
+                        }
+                        if (file(jar.archivePath).exists()) {
+                            copy {
+                                from jar.archivePath
+                                into target
+                            }
+                        } else {
+                            println "Archive does not exist ${jar.archivePath}"
+                        }
+                    }
+                }
+            }
+        }
+
+        copy {
+            from("${project.rootProject.projectDir}") {
+                include "LICENSE.txt"
+            }
+            into "${distDir}-${version}"
+        }
+
+        copy {
+            from("${project.projectDir}/src/main") {
+                include "config/**"
+                include "policy/**"
+            }
+            into "${distDir}-${version}"
+        }
+
+        copy {
+            from("${project.rootProject.projectDir}/bin") {
+                include "**"
+                fileMode = 0755
+            }
+            into "${distDir}-${version}/bin"
+        }
+    }
+}
+
+task distribution(type: Zip, dependsOn: [createDistribution]) {
+    description 'Creates a Rio distribution archive'
+    doFirst {
+        println "Zipping distribution rio-${version} -> distribution-${version}.zip"
+    }
+    //compression = Compression.GZIP // for Tar type
+    baseName = "distribution"
+    destinationDir = project.buildDir
+    from("${project.buildDir.path}/rio-${version}")
+    into "distribution-${version}"
+    doLast {
+        println "Complete"
+    }
+}
+
+def rioDistribution = file("build/distribution-${version}.zip")
+artifacts {
+    archives file: rioDistribution, name: 'distribution', type: 'zip', builtBy: distribution
+}
+
+publishing {
+    publications {
+        distribution(MavenPublication) {
+            artifact rioDistribution
+        }
+    }
+    repositories {
+        maven { url "http://www.rio-project.org/maven2" }
+    }
+}
+
+task installer(dependsOn: ["distribution"]) {
+    description = "Creates a distribution and an IzPack based installer."
+    inputs.dir("${project.buildDir.path}/rio-${version}" as File)
+    outputs.files "${project.buildDir.path}/rio-${version}-installer.jar"
+
+    doLast {
+        ant.taskdef(name: 'izpack',
+                classpath: fileTree(dir: file("${rootProject.projectDir.path}/distribution/izpack/lib"), includes: ['*.jar']).asPath,
+                classname: 'com.izforge.izpack.ant.IzPackTask')
+
+        ant.property(name: 'app.group',   value: 'Rio')
+        ant.property(name: 'app.name',    value: 'Rio')
+        ant.property(name: 'app.title',   value: 'Rio')
+        ant.property(name: 'app.version', value: version)
+        ant.property(name: 'app.subpath', value: "Rio-$version")
+
+        ant.izpack(basedir: "${rootProject.projectDir.path}/distribution/izpack",
+                output: "${project.buildDir.path}/rio-${version}-installer.jar",
+                compression: 'deflate',
+                compressionlevel: '9') {
+            config(file("${rootProject.projectDir.path}/distribution/izpack/installer.xml").text)
+        }
+    }
+}
+installer.outputs.upToDateWhen { false }

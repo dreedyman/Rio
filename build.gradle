@@ -1,0 +1,55 @@
+allprojects {
+    apply plugin: 'maven'
+
+    group = 'org.rioproject'
+    version = '6.0.0'
+
+    ext {
+        groovyVersion = "2.3.8"
+        junitVersion = "4.12"
+        logbackVersion = "1.1.3"
+        riverVersion = "2.2.2"
+        slf4jVersion = "1.7.12"
+        policyAll = file("${rootProject.projectDir}//distribution/src/main/policy/policy.all").absolutePath
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'groovy'
+    apply plugin: 'maven-publish'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url "http://www.rio-project.org/maven2"
+        }
+        maven {
+            url "http://repository.jboss.org/nexus/content/groups/public-jboss/"
+        }
+    }
+
+    if (project.name != "distribution") {
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
+            }
+            repositories {
+                mavenLocal()
+                maven {
+                    url "http://www.rio-project.org/maven2"
+                }
+            }
+        }
+    }
+
+}

@@ -204,7 +204,6 @@ public final class ServiceDescriptorUtil {
             throw new RuntimeException("rio.home property not declared or derivable");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
         return(getWebster(policy, sPort, roots, options, debug, webster));
-
     }
 
     /**
@@ -356,7 +355,7 @@ public final class ServiceDescriptorUtil {
         jarList.add(createVersionedJar("cybernode-service"));
         if(System.getProperty("rio.test.attach")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
-            jarList.add(createVersionedJar("rio-test"));
+            jarList.add(createVersionedJar("rio-int-test"));
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
@@ -399,7 +398,7 @@ public final class ServiceDescriptorUtil {
         jarList.add(createVersionedJar("monitor-service"));
         if(System.getProperty("rio.test.attach")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
-            jarList.add(createVersionedJar("rio-test"));
+            jarList.add(createVersionedJar("rio-int-test"));
         }
         StringBuilder classPath = new StringBuilder();
         classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));

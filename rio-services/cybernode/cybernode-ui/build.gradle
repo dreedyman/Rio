@@ -1,0 +1,9 @@
+group = 'org.rioproject.cybernode'
+description = 'Module :: Cybernode Service UI'
+dependencies {
+    implementation project(':rio-lib')
+    implementation project(':watch-ui')
+    implementation group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    implementation group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
+    implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
+}

@@ -44,7 +44,6 @@ public class FilterPanel extends JPanel {
     private final FilterParser filterParser = new FilterParser();
     private final EventCollectorListener eventCollectorListener;
     private final EventColorManager eventColorManager = new EventColorManager();
-    private final JCheckBox useEventCollector;
 
     public FilterPanel(final FilterListener filterListener,
                        final TreeExpansionListener treeExpansionListener,
@@ -98,16 +97,6 @@ public class FilterPanel extends JPanel {
             e.printStackTrace();
         }
 
-        useEventCollector = new JCheckBox();
-        setUseEventCollectorCheckBoxText();
-        setCheckBox(useEventCollector, props, Constants.USE_EVENT_COLLECTOR, false);
-        useEventCollector.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                eventCollectorListener.handleEventCollectorRegistration(useEventCollector.isSelected());
-            }
-        });
-
-        p.add(useEventCollector, BorderLayout.EAST);
         add(p, BorderLayout.SOUTH);
 
         /*java.util.List<String> autoCompleteElements = new ArrayList<String>();
@@ -336,16 +325,6 @@ public class FilterPanel extends JPanel {
         dialog.setSize(850, 405);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
-    }
-
-    public boolean getUseEventCollector() {
-        return useEventCollector.isSelected();
-    }
-
-    public void setUseEventCollectorCheckBoxText() {
-        useEventCollector.setText(String.format("Use EventCollector (discovered %d EventCollectors)",
-                                                eventCollectorListener.getEventControllerCount()));
-
     }
 
     private URL getSyntaxHelp() {

@@ -63,7 +63,7 @@ public class PlatformLoader {
                             if (file.getName().endsWith("groovy")) {
                                 logger.debug("Load and parse platform configuration {}", file.getName());
                                 GroovyClassLoader gCL = new GroovyClassLoader(getClass().getClassLoader());
-                                Class gClass = gCL.parseClass(file);
+                                Class<?> gClass = gCL.parseClass(file);
                                 GroovyObject gO = (GroovyObject) gClass.newInstance();
                                 String methodName = null;
                                 for (Object o : gO.getMetaClass().getMethods()) {
@@ -122,7 +122,7 @@ public class PlatformLoader {
                 logger.warn("Platform directory [{}] not found", directory);
             }
         }
-        return(platformList.toArray(new PlatformCapabilityConfig[platformList.size()]));
+        return(platformList.toArray(new PlatformCapabilityConfig[0]));
     }
 
     /**

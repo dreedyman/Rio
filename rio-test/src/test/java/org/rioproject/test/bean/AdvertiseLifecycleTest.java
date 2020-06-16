@@ -32,6 +32,7 @@ import org.rioproject.monitor.ProvisionFailureEvent;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
 import org.rioproject.opstring.*;
+import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -42,6 +43,11 @@ import org.rioproject.test.TestManager;
  * @author Dennis Reedy
  */
 @RunWith(RioTestRunner.class)
+@RioTestConfig(
+        groups = "AdvertiseLifecycleTest",
+        numCybernodes = 1,
+        numMonitors = 1,
+        numLookups = 1)
 public class AdvertiseLifecycleTest {
     @SetTestManager
     static TestManager testManager;

@@ -1,0 +1,9 @@
+
+description = 'Module :: Rio Command Line Interface'
+dependencies {
+  compileOnly project(':rio-lib')
+  compileOnly project(':webster')
+  compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+  implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+}

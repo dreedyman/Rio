@@ -1,0 +1,25 @@
+group = 'org.rioproject.monitor'
+description = 'Module :: Monitor Service Implementation'
+dependencies {
+    compile project(':rio-lib')
+    compile project(':monitor-proxy')
+    implementation group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
+    implementation group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    testCompile project(':resolver-aether')
+    testCompile project(':rio-start')
+    testCompile group: 'org.apache.river', name: 'reggie', version: "${riverVersion}"
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: "${logbackVersion}"
+}
+
+jar {
+    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        include "org/rioproject/monitor/**"
+        include "org/rioproject/proxy/**"
+    }
+}
+
+test {
+    systemProperties 'java.security.policy': policyAll
+}

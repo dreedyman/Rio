@@ -42,9 +42,48 @@ public class TestConfig {
     private String component;
     private boolean runHarvester;
     private long timeout;
+    private String testConfigLocation;
     private LoggingSystem loggingSystem;
 
     TestConfig(String testClassName) {
+        this.testClassName = testClassName;
+        component = testClassName;
+        int ndx = component.lastIndexOf(".");
+        if (ndx > -1)
+            component = component.substring(ndx + 1);
+        testConfigLocation = System.getProperty("org.rioproject.test.config");
+
+            /* If the property isnt declared look for the test configuration
+            in the expected place. If found, use it */
+        if(testConfigLocation==null) {
+            File tc = new File(System.getProperty("user.dir"),
+                               "src"+File.separator+
+                                       "test"+File.separator+
+                                       "conf"+File.separator+
+                                       "test-config.groovy");
+            if(tc.exists())
+                testConfigLocation = tc.getPath();
+        }
+        if(testConfigLocation!=null) {
+            loadConfig(testConfigLocation);
+        }
+    }
+
+    TestConfig(RioTestConfig rioTestConfig, String testClassName) {
+        autoDeploy = rioTestConfig.autoDeploy();
+        groups = rioTestConfig.groups().length() == 0 ? null : rioTestConfig.groups();
+        locators = rioTestConfig.locators().length() == 0 ? null : rioTestConfig.locators();
+        numCybernodes = rioTestConfig.numCybernodes();
+        numMonitors = rioTestConfig.numMonitors();
+        numLookups = rioTestConfig.numLookups();
+        opString = rioTestConfig.opstring().length() == 0 ? null : rioTestConfig.opstring();
+        autoDeploy = rioTestConfig.autoDeploy();
+        loggingSystem = LoggingSystem.valueOf(rioTestConfig.loggingSystem());
+
+        if (opString == null) {
+            autoDeploy = false;
+        }
+        testManager = new TestManager(true);
         this.testClassName = testClassName;
         component = testClassName;
         int ndx = component.lastIndexOf(".");
@@ -153,6 +192,14 @@ public class TestConfig {
 
     public LoggingSystem getLoggingSystem() {
         return loggingSystem;
+    }
+
+    public String getTestClassName() {
+        return testClassName;
+    }
+
+    public String getTestConfigLocation() {
+        return testConfigLocation;
     }
 
     private boolean hasConfigurationFor(final String component, final Map<String, Object> map) {

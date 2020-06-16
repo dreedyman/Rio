@@ -4,6 +4,7 @@
 
 cleanRepoOfRioDeps.groovy
 
+build/
 ###################
 # Maven target directories
 ###################

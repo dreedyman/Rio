@@ -1,0 +1,6 @@
+group = 'org.rioproject.examples.workflow'
+description = 'Example :: Workflow API'
+dependencies {
+  compile project(':rio-lib')
+  compileOnly group: 'net.jini', name: 'jsk-platform', version:'2.2.2'
+}

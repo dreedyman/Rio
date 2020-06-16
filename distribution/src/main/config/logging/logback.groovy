@@ -175,6 +175,9 @@ logger("org.rioproject.monitor.services", DEBUG)
 logger("org.rioproject.monitor.DeploymentVerifier", INFO)
 logger("org.rioproject.monitor.InstantiatorResource", INFO)
 logger("org.rioproject.monitor.service.managers.FixedServiceManager", INFO)
+
+logger("org.rioproject.tools.webster", DEBUG)
+
 logger("org.rioproject.resolver.aether", OFF)
 logger("org.rioproject.resolver.aether.ProjectWorkspaceReader", WARN)
 

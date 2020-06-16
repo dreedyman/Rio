@@ -24,15 +24,15 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.junit.runners.model.TestClass;
 import org.rioproject.RioVersion;
 import org.rioproject.logging.LoggingSystem;
 import org.rioproject.url.ProtocolRegistryService;
-import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 import org.rioproject.url.artifact.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -62,11 +62,15 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
             if(System.getProperty("java.util.logging.config.file")==null) {
                 LogManager logManager = LogManager.getLogManager();
                 try {
-                    logManager.readConfiguration(Thread.currentThread().getClass().getResourceAsStream("/default-logging.properties"));
+                    logManager.readConfiguration(
+                            Thread.currentThread().getClass().getResourceAsStream("/default-logging.properties"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+        } else {
+            SLF4JBridgeHandler.install();
+            java.util.logging.LogManager.getLogManager().getLogger("").setLevel(java.util.logging.Level.FINEST);
         }
         /* If the artifact URL has not been configured, set it up */
         try {
@@ -95,7 +99,8 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
     @Override
     protected Statement withAfterClasses(Statement statement) {
         Statement afterStatement = super.withAfterClasses(statement);
-        return new TestCaseShutdownStatement(afterStatement, testManager);
+        return new TestCaseShutdownStatement(afterStatement,
+                                             testManager);
     }
 
     /**
@@ -106,7 +111,6 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
      * This method also creates and initializes a {@link TestManager} providing
      * Rio testing functionality to standard JUnit tests.
      *
-     * @see #createTestConfig(String)
      */
     @Override
     public void run(RunNotifier notifier) {
@@ -117,7 +121,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         }
 
         Utils.setEnvironment();
-        testConfig = createTestConfig(getTestClass().getName());
+        testConfig = createTestConfig(getTestClass());
         testManager = testConfig.getTestManager();
 
         for (FrameworkMethod fMethod : getTestClass().getAnnotatedMethods(AddSystemProperties.class)) {
@@ -230,31 +234,30 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         return super.withPotentialTimeout(method, target, next);
     }
 
+
     /**
      * Creates A testConfig. Can be overridden by subclasses.
      *
-     * @param testClassName The name of the test class to be run
+     * @param testClass The test class to be run
      *
      * @return A TestConfig
      */
-    protected TestConfig createTestConfig(String testClassName) {
-        TestConfig testConfig = new TestConfig(testClassName);
-        String testConfigLocation = System.getProperty("org.rioproject.test.config");
-
-        /* If the property isnt declared look for the test configuration
-        in the expected place. If found, use it */
-        if(testConfigLocation==null) {
-            File tc = new File(System.getProperty("user.dir"),
-                               "src"+File.separator+
-                               "test"+File.separator+
-                               "conf"+File.separator+
-                               "test-config.groovy");
-            if(tc.exists())
-                testConfigLocation = tc.getPath();
+    protected TestConfig createTestConfig(TestClass testClass) {
+        TestConfig testConfig;
+        RioTestConfig rioTestConfig = testClass.getAnnotation(RioTestConfig.class);
+        if (rioTestConfig != null) {
+            testConfig = new TestConfig(rioTestConfig, testClass.getName());
+        } else {
+            testConfig = new TestConfig(testClass.getName());
         }
+        echoTestConfig(testConfig);
+        return testConfig;
+    }
+
+    private void echoTestConfig(TestConfig testConfig) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        sb.append("Test Configuration for ").append(testClassName);
+        sb.append("Test Configuration for ").append(testConfig.getTestClassName());
         sb.append("\n");
         sb.append("==========================================");
         sb.append("\n");
@@ -272,41 +275,41 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         sb.append(System.getProperty("rio.home"));
         sb.append("\n");
 
-        if(testConfigLocation!=null) {
-            sb.append("test-config:   ").append(testConfigLocation);
+        if (testConfig.getTestConfigLocation() != null) {
+            sb.append("test-config:   ").append(testConfig.getTestConfigLocation());
             sb.append("\n");
-            testConfig.loadConfig(testConfigLocation);
-            sb.append("groups:        ").append((testConfig.getGroups()==null?
-                                         "<not declared>":testConfig.getGroups()));
-            sb.append("\n");
-            sb.append("locators:      ").append((testConfig.getLocators()==null?
-                                         "<not declared>":testConfig.getLocators()));
-            sb.append("\n");
-            sb.append("numCybernodes: ").append(testConfig.getNumCybernodes());
-            sb.append("\n");
-            sb.append("numMonitors:   ").append(testConfig.getNumMonitors());
-            sb.append("\n");
-            if(testConfig.getNumLookups()>0) {
-                sb.append("numLookups:    ").append(testConfig.getNumLookups());
-                sb.append("\n");
-            }
-            sb.append("opstring:      ").append((testConfig.getOpString()==null?
-                                         "<not declared>":testConfig.getOpString()));
-            sb.append("\n");
-            sb.append("autoDeploy:    ").append(testConfig.autoDeploy());
-            sb.append("\n");
-
-            if(testConfig.autoDeploy())
-                Assert.assertNotNull("You have declared that the test case " +
-                                     "["+testClassName+"] have it's " +
-                                     "OperationalString automatically " +
-                                     "deployed, but have not declared an " +
-                                     "OperationalString. You must declare " +
-                                     "an OperationalString using the " +
-                                     "opstring property for the test case " +
-                                     "configuration",
-                                     testConfig.getOpString());
         }
+        sb.append("groups:        ").append((testConfig.getGroups()==null?
+                "<not declared>":testConfig.getGroups()));
+        sb.append("\n");
+        sb.append("locators:      ").append((testConfig.getLocators()==null?
+                "<not declared>":testConfig.getLocators()));
+        sb.append("\n");
+        sb.append("numCybernodes: ").append(testConfig.getNumCybernodes());
+        sb.append("\n");
+        sb.append("numMonitors:   ").append(testConfig.getNumMonitors());
+        sb.append("\n");
+        if(testConfig.getNumLookups()>0) {
+            sb.append("numLookups:    ").append(testConfig.getNumLookups());
+            sb.append("\n");
+        }
+        sb.append("opstring:      ").append((testConfig.getOpString()==null?
+                "<not declared>":testConfig.getOpString()));
+        sb.append("\n");
+        sb.append("autoDeploy:    ").append(testConfig.autoDeploy());
+        sb.append("\n");
+
+        if(testConfig.autoDeploy())
+            Assert.assertNotNull("You have declared that the test case " +
+                                         "["+testConfig.getTestClassName()+"] have it's " +
+                                         "OperationalString automatically " +
+                                         "deployed, but have not declared an " +
+                                         "OperationalString. You must declare " +
+                                         "an OperationalString using the " +
+                                         "opstring property for the test case " +
+                                         "configuration",
+                                 testConfig.getOpString());
+
         sb.append("testManager:   ").append(testConfig.getTestManager().getClass().getName());
         sb.append("\n");
         sb.append("harvest:       ").append(testConfig.runHarvester());
@@ -314,11 +317,10 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         sb.append("loggingSystem: ").append(testConfig.getLoggingSystem().name().toLowerCase());
         sb.append("\n");
         sb.append("timeout:       ").append((testConfig.getTimeout()==0?
-                                     "<not declared>":testConfig.getTimeout()));
+                "<not declared>":testConfig.getTimeout()));
         sb.append("\n");
         sb.append("==========================================");
         logger.info(sb.toString());
-        return testConfig;
     }
 
     /**
@@ -386,7 +388,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
 
     List<Field> getAnnotatedFields(Class<?> tClass,
                                    Class<? extends Annotation> annotationClass) {
-		List<Field> results= new ArrayList<Field>();
+		List<Field> results= new ArrayList<>();
 		for (Class<?> eachClass : getSuperClasses(tClass)) {
 			Field[] fields= eachClass.getDeclaredFields();
 			for (Field field : fields) {
@@ -399,7 +401,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
     }
 
     private List<Class<?>> getSuperClasses(Class< ?> testClass) {
-		ArrayList<Class<?>> results= new ArrayList<Class<?>>();
+		ArrayList<Class<?>> results= new ArrayList<>();
 		Class<?> current= testClass;
 		while (current != null) {
 			results.add(current);
@@ -432,7 +434,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
      * have been run. This statement also undeploys deployed opstrings prior to
      * returning.
      */
-    class TestCaseShutdownStatement extends Statement {
+    static class TestCaseShutdownStatement extends Statement {
         Statement next;
         TestManager testManager;
 
@@ -443,7 +445,7 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
 
         @Override
         public void evaluate() throws Throwable {
-            List<Throwable> errors = new ArrayList<Throwable>();
+            List<Throwable> errors = new ArrayList<>();
             try {
                 next.evaluate();
             } catch (Throwable e) {

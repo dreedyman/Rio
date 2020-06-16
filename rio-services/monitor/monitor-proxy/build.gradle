@@ -1,0 +1,15 @@
+group = 'org.rioproject.monitor'
+description = 'Module :: Monitor Service Proxy'
+dependencies {
+    compile project(':rio-lib')
+    implementation group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
+}
+
+jar {
+    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        include "org/rioproject/monitor/**"
+        include "org/rioproject/proxy/**"
+    }
+}
+

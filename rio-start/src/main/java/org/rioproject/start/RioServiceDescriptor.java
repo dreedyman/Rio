@@ -90,7 +90,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     private final String implClassName;
     private final String[] serverConfigArgs;
     private final LifeCycle lifeCycle;
-    private static LifeCycle NoOpLifeCycle = new LifeCycle() { // default, no-op
+    private static final LifeCycle NoOpLifeCycle = new LifeCycle() { // default, no-op
                                                                // object
         public boolean unregister(Object impl) {
             return false;
@@ -280,7 +280,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 }
             }
         }
-        URL[] commonJARs = urlList.toArray(new URL[urlList.size()]);
+        URL[] commonJARs = urlList.toArray(new URL[0]);
 
         /*
         if(commonJARs.length==0)

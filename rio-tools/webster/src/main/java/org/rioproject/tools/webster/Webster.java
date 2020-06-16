@@ -273,6 +273,9 @@ public class Webster implements Runnable {
         }
 
         /* Set system properties */
+        if (logger.isDebugEnabled()) {
+            logger.debug("Setting WEBSTER property to: " + "http://"+ss.getInetAddress().getHostAddress()+":"+port);
+        }
         System.setProperty(Constants.WEBSTER, "http://"+ss.getInetAddress().getHostAddress()+":"+port);
         System.setProperty(Constants.WEBSTER_ROOTS, roots);
 
@@ -557,6 +560,9 @@ public class Webster implements Runnable {
         String[] roots = expandRoots();
         for (String root : roots) {
             f = new File(root, fn.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Looking for {} in {}, found? {}", fn, root, f.exists());
+            }
             if (f.exists()) {
                 return (f);
             }
@@ -565,7 +571,7 @@ public class Webster implements Runnable {
     }
 
     protected String[] expandRoots() {
-        List<String> expandedRoots = new LinkedList<String>();
+        List<String> expandedRoots = new LinkedList<>();
         if(hasWildcard()) {
             String[] rawRoots = websterRoot;
             for (String root : rawRoots) {

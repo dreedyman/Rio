@@ -1,0 +1,41 @@
+group = 'org.rioproject.resolver'
+description = 'Module :: Aether Resolver'
+
+ext {
+    aetherVersion = "1.0.0.v20140518" 
+    mavenVersion = "3.1.0"
+}
+
+dependencies {
+    compile project(':rio-platform')
+    compile group: 'org.eclipse.aether', name: 'aether-api', version: "${aetherVersion}"
+    compile group: 'org.eclipse.aether', name: 'aether-spi', version: "${aetherVersion}"
+    compile group: 'org.eclipse.aether', name: 'aether-util', version: "${aetherVersion}"
+    compile group: 'org.eclipse.aether', name: 'aether-impl', version: "${aetherVersion}"
+    compile group: 'org.eclipse.aether', name: 'aether-connector-basic', version: "${aetherVersion}"
+    compile group: 'org.eclipse.aether', name: 'aether-transport-file', version: "${aetherVersion}"
+    compile group: 'org.eclipse.aether', name: 'aether-transport-http', version: "${aetherVersion}"
+    compile group: 'org.apache.maven', name: 'maven-aether-provider', version: "${mavenVersion}"
+    compile group: 'org.apache.maven.wagon', name: 'wagon-provider-api', version: '1.0'
+    compile group: 'org.apache.maven', name: 'maven-settings-builder', version: "${mavenVersion}"
+    compile group: 'org.apache.maven', name: 'maven-settings', version: "${mavenVersion}"
+    compile group: 'org.apache.maven.wagon', name: 'wagon-file', version: '2.2'
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+    testCompile project(':webster')
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+}
+
+jar {
+    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        include "org/eclipse/**"
+        include "org/apache/maven/**"
+        include "org/codehaus/plexus/**"
+        include "org/sonatype/plexus/**"
+        include "org/apache/**"
+        include "commons-codec/**"
+        include "javax/**"
+    }
+}

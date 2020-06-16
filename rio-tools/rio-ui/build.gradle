@@ -1,0 +1,11 @@
+description = 'Module :: Rio Management User Interface'
+dependencies {
+    compile project(':rio-lib')
+    compile project(':webster')
+    compile group: 'org.prefuse', name: 'prefuse', version: '2007.10.21'
+    compile group: 'net.jini.lookup', name: 'serviceui', version: '2.2.2'
+    compile group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+    compile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.12'
+    compile group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+}

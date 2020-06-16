@@ -22,16 +22,18 @@ import org.junit.Test;
 import org.eclipse.aether.installation.InstallationException;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test parsing pom with project.parent.version set
  */
 public class ResolverParseParentTest {
     @Test
     public void testVersionFromProjectParentVersion() throws IOException, ResolverException, InstallationException, SettingsBuildingException {
-        Util.verifyAndInstall();
-        ProjectModuleResolver r = new ProjectModuleResolver();
+        ProjectModuleResolver r = Util.verifyAndInstall();
         String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0");
-        Assert.assertTrue("We should have 3 items in the classpath, we got: " + cp.length, cp.length == 3);
+        assertEquals("We should have 2 items in the classpath, we got: " + cp.length, 2, cp.length);
     }
 
     @After

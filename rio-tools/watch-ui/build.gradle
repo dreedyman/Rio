@@ -1,0 +1,6 @@
+description = 'Module :: Watch User Interface'
+dependencies {
+    compile project(':rio-lib')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compileOnly group: 'net.jini', name: 'jsk-platform', version: '2.2.2'
+}

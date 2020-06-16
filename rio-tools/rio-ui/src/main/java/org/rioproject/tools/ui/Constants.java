@@ -82,8 +82,6 @@ public interface Constants {
 
     String CYBERNODE_REFRESH_RATE = "cybernode.refresh.rate";
 
-    String USE_EVENT_COLLECTOR = "use.event.collector";
-
     /*
      * Percentage of CPU utilization on the machine
      */

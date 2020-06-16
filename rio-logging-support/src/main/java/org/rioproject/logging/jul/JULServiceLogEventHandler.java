@@ -45,7 +45,7 @@ import java.util.logging.LogRecord;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class JULServiceLogEventHandler extends Handler implements ServiceLogEventHandler {
     private Level publishOnLevel = Level.SEVERE;
-    private final Collection<String> publishableLoggers = Collections.synchronizedCollection(new ArrayList<String>());
+    private final Collection<String> publishableLoggers = Collections.synchronizedCollection(new ArrayList<>());
     private ServiceLogEventPublisher eventPublisher;
 
     @Override

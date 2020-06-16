@@ -20,12 +20,12 @@ package org.rioproject.logging.jul;
  */
 public class StringColorizer {
     public enum Color {
-        LIGHT_RED(31), LIGHT_GREEN(32), LIGHT_YELLOW(33), LIGHT_BLUE(34), LIGHT_MAGENTA(35), LIGHT_CYAN(36),
-        RED(91), GREEN(92), YELLOW(93), BLUE(94), MAGENTA(95), CYAN(96);
+        BLUE(94), CYAN(96), GREEN(92), LIGHT_BLUE(34), LIGHT_CYAN(36), LIGHT_GREEN(32),
+        LIGHT_MAGENTA(35), LIGHT_RED(31), LIGHT_YELLOW(33), MAGENTA(95), RED(91), YELLOW(93);
 
-        private int code;
+        private final int code;
 
-        private Color(int c) {
+        Color(int c) {
             code = c;
         }
 

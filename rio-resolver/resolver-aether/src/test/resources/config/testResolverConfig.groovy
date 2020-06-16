@@ -8,6 +8,6 @@ resolver {
     jar = "resolver-aether"
     repositories {
         remote = ["project": "http://${hostAddress}:${System.properties["resolver.config.test.port"]}"]
-        flatDirs = [new File(System.getProperty("user.dir"), "target/flat")]
+        flatDirs = [new File(System.getProperty("user.dir"), "build/flat")]
     }
 }

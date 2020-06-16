@@ -1,0 +1,35 @@
+description = 'Module :: Rio Library'
+dependencies {
+    compile project(':rio-platform')
+    //compileOnly group: 'org.apache.commons', name: 'commons-compress', version: '[1.18,)'
+    implementation project(':rio-logging-support')
+    implementation project(':rio-start')
+    compile group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
+    compile group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+    implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
+    implementation files("${System.properties['java.home']}/../lib/tools.jar")
+    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+}
+
+sourceSets {
+    main {
+        java { srcDirs = [] }
+        groovy { srcDirs += ['src/main/java'] }
+    }
+    test {
+        java { srcDirs = [] }
+        groovy { srcDirs += ['src/test/java'] }
+    }
+}
+
+jar {
+    manifest {
+        attributes("Class-Path": "jsk-lib-${riverVersion}.jar")
+    }
+}
+test {
+    systemProperties 'java.security.policy': policyAll
+}

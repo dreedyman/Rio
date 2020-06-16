@@ -39,9 +39,9 @@ import java.util.logging.LogRecord;
 @SuppressWarnings("unused")
 public class LogbackServiceLogEventHandler extends AppenderBase<ILoggingEvent> implements ServiceLogEventHandler {
     private Level publishOnLevel = Level.ERROR;
-    private final Collection<String> publishableLoggers = Collections.synchronizedCollection(new ArrayList<String>());
+    private final Collection<String> publishableLoggers = Collections.synchronizedCollection(new ArrayList<>());
     private ServiceLogEventPublisher eventPublisher;
-    private final BlockingQueue<ILoggingEvent> eventQ = new LinkedBlockingQueue<ILoggingEvent>();
+    private final BlockingQueue<ILoggingEvent> eventQ = new LinkedBlockingQueue<>();
 
     public LogbackServiceLogEventHandler() {
         Executor eventExecutor = Executors.newSingleThreadExecutor();
@@ -113,30 +113,28 @@ public class LogbackServiceLogEventHandler extends AppenderBase<ILoggingEvent> i
                 } catch (InterruptedException e) {
                     break;
                 }
-                if(loggingEvent!=null) {
-                    boolean publish = false;
+                boolean publish = false;
+                if(loggingEvent.getThrowableProxy()!=null) {
+                    publish = true;
+                } else if(loggingEvent.getLevel().levelInt>=publishOnLevel.levelInt &&
+                        loggingEvent.getLevel()!= Level.OFF) {
+                    for(String logger : publishableLoggers) {
+                        if(loggingEvent.getLoggerName().startsWith(logger)) {
+                            publish = true;
+                            break;
+                        }
+                    }
+                }
+                if(publish) {
+                    LogRecord logRecord = new LogRecord(java.util.logging.Level.parse(getJULLevel(loggingEvent.getLevel())),
+                                                        loggingEvent.getFormattedMessage());
+                    logRecord.setMillis(loggingEvent.getTimeStamp());
                     if(loggingEvent.getThrowableProxy()!=null) {
-                        publish = true;
-                    } else if(loggingEvent.getLevel().levelInt>=publishOnLevel.levelInt &&
-                              loggingEvent.getLevel()!= Level.OFF) {
-                        for(String logger : publishableLoggers) {
-                            if(loggingEvent.getLoggerName().startsWith(logger)) {
-                                publish = true;
-                                break;
-                            }
+                        if(loggingEvent.getThrowableProxy() instanceof ThrowableProxy) {
+                            logRecord.setThrown((((ThrowableProxy) loggingEvent.getThrowableProxy()).getThrowable()));
                         }
                     }
-                    if(publish) {
-                        LogRecord logRecord = new LogRecord(java.util.logging.Level.parse(getJULLevel(loggingEvent.getLevel())),
-                                                            loggingEvent.getFormattedMessage());
-                        logRecord.setMillis(loggingEvent.getTimeStamp());
-                        if(loggingEvent.getThrowableProxy()!=null) {
-                            if(loggingEvent.getThrowableProxy() instanceof ThrowableProxy) {
-                                logRecord.setThrown((((ThrowableProxy) loggingEvent.getThrowableProxy()).getThrowable()));
-                            }
-                        }
-                        eventPublisher.publish(logRecord);
-                    }
+                    eventPublisher.publish(logRecord);
                 }
             }
         }

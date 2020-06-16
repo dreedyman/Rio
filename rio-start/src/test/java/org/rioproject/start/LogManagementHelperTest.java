@@ -20,7 +20,7 @@ public class LogManagementHelperTest {
         try {
             MemoryAppender memoryAppender1 = new MemoryAppender();
             getLogger(memoryAppender1).info("=============== Nothing ===============");
-            assertTrue(memoryAppender1.getLogMessages().size()==0);
+            assertTrue(memoryAppender1.getLogMessages().size()==1);
             System.setProperty(Constants.ENV_PROPERTY_NAME,
                                System.getProperty("user.dir") + "/src/test/resources/config/rio-with-logback.env");
 

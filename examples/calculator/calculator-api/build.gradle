@@ -1,0 +1,5 @@
+group = 'org.rioproject.examples.calculator'
+description = 'Example :: Calculator API'
+dependencies {
+  compile project(':rio-lib')
+}

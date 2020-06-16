@@ -1,0 +1,10 @@
+group = 'org.rioproject.examples.events'
+description = 'Example :: Events Service Implementation'
+dependencies {
+    compile project(':examples:events:events-proxy')
+    compile project(':rio-lib')
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+    testCompile project(':rio-test')
+    testCompile group: 'junit', name: 'junit', version: '4.8.2'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.11'
+}

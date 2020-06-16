@@ -23,18 +23,8 @@ class CommonPlatformConfig {
 
     def getPlatformCapabilityConfigs() {
         def configs = []
-        String libDir = System.getProperty("rio.home")+File.separator+"lib"+File.separator
+        //String libDir = System.getProperty("rio.home")+File.separator+"lib"+File.separator
 
-        configs << new PlatformCapabilityConfig("Commons Compress",
-                                                "1.0",
-                                                "Apache Commons Compress",
-                                                "Apache Software Foundation",
-                                                libDir+"commons-compress-1.0.jar")
-        configs << new PlatformCapabilityConfig("Sigar",
-                                                "1.6.2",
-                                                "Hyperic SIGAR",
-                                                "Hyperic",
-                                                libDir+"hyperic"+File.separator+"sigar.jar")
         return configs
     }
 

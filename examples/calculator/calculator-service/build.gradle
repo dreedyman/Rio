@@ -1,0 +1,9 @@
+group = 'org.rioproject.examples.calculator'
+description = 'Example :: Calculator Service Implementation'
+dependencies {
+  compile project(':examples:calculator:calculator-api')
+  compile project(':rio-lib')
+  testCompile project(':rio-test')
+    testCompile group: 'junit', name: 'junit', version:'4.8.2'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.11'
+}

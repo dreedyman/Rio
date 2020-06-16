@@ -41,9 +41,7 @@ import org.rioproject.cybernode.Cybernode;
 import org.rioproject.cybernode.CybernodeAdmin;
 import org.rioproject.deploy.DeployAdmin;
 import org.rioproject.deploy.ServiceBeanInstance;
-import org.rioproject.entry.OperationalStringEntry;
 import org.rioproject.event.RemoteServiceEventListener;
-import org.rioproject.eventcollector.api.EventCollector;
 import org.rioproject.impl.client.JiniClient;
 import org.rioproject.impl.client.ServiceDiscoveryAdapter;
 import org.rioproject.impl.discovery.RecordingDiscoveryListener;
@@ -220,12 +218,7 @@ public class Main extends JFrame {
     }
 
     void setStartupLocations(final Properties startupProps) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                remoteEventTable.init(startupProps);
-            }
-        });
+        SwingUtilities.invokeLater(() -> remoteEventTable.init());
     }
 
     public UtilizationColumnManager getUtilizationColumnManager() {
@@ -519,7 +512,6 @@ public class Main extends JFrame {
         Point point = getLocation();
         Properties props = new Properties();
 
-        props.put(Constants.USE_EVENT_COLLECTOR, Boolean.toString(remoteEventTable.getUseEventCollector()));
         props.put(Constants.EVENTS_DIVIDER, Integer.toString(remoteEventTable.getDividerLocation()));
 
         props.put(Constants.FRAME_HEIGHT, Integer.toString(dim.height));
@@ -715,9 +707,6 @@ public class Main extends JFrame {
         jiniClient = new JiniClient(new LookupDiscoveryManager(groups, locators, null, config));
         ServiceTemplate monitors = new ServiceTemplate(null, new Class[]{ProvisionMonitor.class}, null);
         ServiceTemplate cybernodes = new ServiceTemplate(null, new Class[]{Cybernode.class}, null);
-        ServiceTemplate eventCollectors = new ServiceTemplate(null,
-                                                              new Class[]{EventCollector.class},
-                                                              new Entry[]{new OperationalStringEntry(org.rioproject.config.Constants.CORE_OPSTRING)});
         ServiceTemplate all = new ServiceTemplate(null, null, null);
 
         sdm = new ServiceDiscoveryManager(jiniClient.getDiscoveryManager(), new LeaseRenewalManager(), config);
@@ -728,7 +717,6 @@ public class Main extends JFrame {
 
         monitorCache = sdm.createLookupCache(monitors, null, watcher);
         sdm.createLookupCache(cybernodes, null, watcher);
-        sdm.createLookupCache(eventCollectors, null, watcher);
 
         clientEventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(),
                                                      provisionClientEventConsumer,
@@ -984,13 +972,6 @@ public class Main extends JFrame {
         public void serviceAdded(ServiceDiscoveryEvent sdEvent) {
             try {
                 ServiceItem item = sdEvent.getPostEventServiceItem();
-                if(item.service instanceof EventCollector) {
-                    try {
-                        remoteEventTable.addEventCollector((EventCollector) item.service);
-                    } catch(Exception e) {
-                        Util.showError(e, frame, "Cannot add Event Collector");
-                    }
-                }
                 if(item.service instanceof ProvisionMonitor) {
                     ProvisionMonitor monitor = (ProvisionMonitor) item.service;
                     ProvisionMonitorPanel pmp = addProvisionMonitorPanel(item);
@@ -1063,9 +1044,6 @@ public class Main extends JFrame {
 
             if(item.service instanceof Cybernode) {
                 cup.removeCybernode((Cybernode)item.service);
-            }
-            if(item.service instanceof EventCollector) {
-                remoteEventTable.removeEventCollector((EventCollector)item.service);
             }
         }
     }

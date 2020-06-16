@@ -70,9 +70,7 @@ public class FileHandler extends java.util.logging.FileHandler {
             Field getLockFileName = this.getClass().getSuperclass().getDeclaredField("lockFileName");
             getLockFileName.setAccessible(true);
             lockFileName = (String)getLockFileName.get(this);
-        } catch (NoSuchFieldException e) {
-            Logger.getAnonymousLogger().log(Level.WARNING, "Getting lockFileName", e);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             Logger.getAnonymousLogger().log(Level.WARNING, "Getting lockFileName", e);
         }
         return lockFileName;
@@ -118,9 +116,9 @@ public class FileHandler extends java.util.logging.FileHandler {
 
     static int getLimitProperty(LogManager manager, String name, int defaultValue) {
         double KB = 1024;
-        /** Megabytes */
+        /* Megabytes */
         double MB = Math.pow(KB, 2);
-        /** Gigabytes */
+        /* Gigabytes */
         double GB = Math.pow(KB, 3);
 
         String val = manager.getProperty(name);

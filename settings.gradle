@@ -1,0 +1,80 @@
+rootProject.name = 'main'
+include ':rio-logging-support'
+include ':rio-start'
+include ':rio-lib'
+include ':rio-platform'
+include ':resolver-aether'
+include ':resolver-project'
+include ':cybernode-proxy'
+include ':cybernode-service'
+include ':cybernode-ui'
+include ':monitor-proxy'
+include ':monitor-service'
+include ':rio-cli'
+include ':rio-ui'
+include ':webster'
+include ':watch-ui'
+include ':rio-test'
+include ':rio-int-tests'
+include ':examples:calculator:calculator-api'
+include ':examples:calculator:calculator-service'
+include ':examples:calculator'
+include ':examples:events:events-api'
+include ':examples:events:events-proxy'
+include ':examples:events:events-service'
+include ':examples:events:events-ui'
+include ':examples:events'
+include ':examples:hospital:hospital-api'
+include ':examples:hospital:hospital-rule'
+include ':examples:hospital:hospital-service'
+include ':examples:hospital:hospital-ui'
+include ':examples:hospital'
+include ':examples:springbean:springbean-api'
+include ':examples:springbean:springbean-service'
+include ':examples:springbean'
+include ':examples:workflow:workflow-api'
+include ':examples:workflow:workflow-service'
+include ':examples:workflow'
+include ':examples:tomcat'
+include ':distribution'
+
+project(':rio-logging-support').projectDir = "$rootDir/rio-logging-support" as File
+project(':rio-start').projectDir = "$rootDir/rio-start" as File
+project(':rio-lib').projectDir = "$rootDir/rio-lib" as File
+project(':rio-platform').projectDir = "$rootDir/rio-platform" as File
+project(':resolver-aether').projectDir = "$rootDir/rio-resolver/resolver-aether" as File
+project(':resolver-project').projectDir = "$rootDir/rio-resolver/resolver-project" as File
+project(':cybernode-proxy').projectDir = "$rootDir/rio-services/cybernode/cybernode-proxy" as File
+project(':cybernode-service').projectDir = "$rootDir/rio-services/cybernode/cybernode-service" as File
+project(':cybernode-ui').projectDir = "$rootDir/rio-services/cybernode/cybernode-ui" as File
+project(':monitor-proxy').projectDir = "$rootDir/rio-services/monitor/monitor-proxy" as File
+project(':monitor-service').projectDir = "$rootDir/rio-services/monitor/monitor-service" as File
+project(':rio-cli').projectDir = "$rootDir/rio-tools/rio-cli" as File
+project(':rio-ui').projectDir = "$rootDir/rio-tools/rio-ui" as File
+project(':webster').projectDir = "$rootDir/rio-tools/webster" as File
+project(':watch-ui').projectDir = "$rootDir/rio-tools/watch-ui" as File
+project(':rio-test').projectDir = "$rootDir/rio-test" as File
+project(':rio-int-tests').projectDir = "$rootDir/rio-int-tests" as File
+project(':distribution').projectDir = "$rootDir/distribution" as File
+
+
+project(':examples:calculator:calculator-api').projectDir = "$rootDir/examples/calculator/calculator-api" as File
+project(':examples:calculator:calculator-service').projectDir = "$rootDir/examples/calculator/calculator-service" as File
+project(':examples:calculator').projectDir = "$rootDir/examples/calculator" as File
+project(':examples:events:events-api').projectDir = "$rootDir/examples/events/events-api" as File
+project(':examples:events:events-proxy').projectDir = "$rootDir/examples/events/events-proxy" as File
+project(':examples:events:events-service').projectDir = "$rootDir/examples/events/events-service" as File
+project(':examples:events:events-ui').projectDir = "$rootDir/examples/events/events-ui" as File
+project(':examples:events').projectDir = "$rootDir/examples/events" as File
+project(':examples:hospital:hospital-api').projectDir = "$rootDir/examples/hospital/hospital-api" as File
+project(':examples:hospital:hospital-rule').projectDir = "$rootDir/examples/hospital/hospital-rule" as File
+project(':examples:hospital:hospital-service').projectDir = "$rootDir/examples/hospital/hospital-service" as File
+project(':examples:hospital:hospital-ui').projectDir = "$rootDir/examples/hospital/hospital-ui" as File
+project(':examples:hospital').projectDir = "$rootDir/examples/hospital" as File
+project(':examples:springbean:springbean-api').projectDir = "$rootDir/examples/springbean/springbean-api" as File
+project(':examples:springbean:springbean-service').projectDir = "$rootDir/examples/springbean/springbean-service" as File
+project(':examples:springbean').projectDir = "$rootDir/examples/springbean" as File
+project(':examples:workflow:workflow-api').projectDir = "$rootDir/examples/workflow/workflow-api" as File
+project(':examples:workflow:workflow-service').projectDir = "$rootDir/examples/workflow/workflow-service" as File
+project(':examples:workflow').projectDir = "$rootDir/examples/workflow" as File
+project(':examples:tomcat').projectDir = "$rootDir/examples/tomcat" as File

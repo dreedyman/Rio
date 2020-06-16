@@ -79,7 +79,7 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
     private int cybernodeRegistryPort;
     private Registry registry;
     private ServiceBeanExecListener listener;
-    private JMXFaultDetectionHandler fdh;
+    /*private JMXFaultDetectionHandler fdh;*/
     private ComputeResource computeResource;
     private ComputeResourcePolicyHandler computeResourcePolicyHandler;
     private ServiceBeanInstance instance;
@@ -256,9 +256,9 @@ public class ServiceBeanExecutorImpl implements ServiceBeanExecutor,
 
     public void serviceDiscarded(final ServiceRecord record) {
         logger.info("Destroying ServiceBeanExecutor for {}", execBindName);
-        if(fdh!=null)
+      /*  if(fdh!=null)
             fdh.terminate();
-
+*/
         if(computeResourcePolicyHandler!=null) {
             computeResourcePolicyHandler.terminate();
         }

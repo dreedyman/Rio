@@ -30,7 +30,7 @@ import java.io.IOException;
  */
 public class Util {
 
-    static void verifyAndInstall() throws InstallationException, IOException, SettingsBuildingException {
+    static ProjectModuleResolver verifyAndInstall() throws InstallationException, IOException, SettingsBuildingException {
         File projectPom = new File("src/test/resources/project/pom.xml");
         File projectAPIPom = new File("src/test/resources/project/project-api/pom.xml");
         File projectAPITarget = new File("src/test/resources/project/project-api/target");
@@ -57,6 +57,7 @@ public class Util {
         r.getAetherService().install("org.rioproject.resolver.test", "project", "2.0", projectPom, null);
         r.getAetherService().install("org.rioproject.resolver.test.project", "project-api", "2.0", projectAPIPom, apiArtifact);
         r.getAetherService().install("org.rioproject.resolver.test.project", "project-service", "2.0", projectServicePom, serviceArtifact);
+        return r;
     }
 
     public static void cleanProjectFromRepository() {

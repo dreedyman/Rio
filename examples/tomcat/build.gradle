@@ -1,0 +1,8 @@
+group = 'org.rioproject.examples'
+description = 'Example :: Tomcat'
+dependencies {
+  compile project(':rio-platform')
+  testCompile project(':rio-test')
+    testCompile group: 'junit', name: 'junit', version:'4.8.2'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.11'
+}

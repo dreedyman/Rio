@@ -1,0 +1,17 @@
+description = 'Module :: Rio service starters'
+dependencies {
+    compile project(':rio-platform')
+    compile group: 'org.apache.river', name: 'start', version: "${riverVersion}"
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+
+    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: "${logbackVersion}"
+    testCompile group: 'ch.qos.logback', name: 'logback-core', version: "${logbackVersion}"
+}
+
+jar {
+    manifest {
+        attributes("Class-Path": "rio-platform-${version}.jar start-${riverVersion}.jar")
+    }
+}

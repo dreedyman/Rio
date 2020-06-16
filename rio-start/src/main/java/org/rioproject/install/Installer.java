@@ -78,13 +78,9 @@ public final class Installer {
             File libDir = new File(rioHome + File.separator + "lib");
 
             /* Install client and proxy jars */
-            formatAndAddToMap("org.rioproject.cybernode:cybernode-api", "cybernode-api", rioArtifactJars);
             formatAndAddToMap("org.rioproject.cybernode:cybernode-proxy", "cybernode-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject.cybernode:cybernode-ui", "cybernode-ui", rioArtifactJars);
-            formatAndAddToMap("org.rioproject.monitor:monitor-api", "monitor-api", rioArtifactJars);
             formatAndAddToMap("org.rioproject.monitor:monitor-proxy", "monitor-proxy", rioArtifactJars);
-            formatAndAddToMap("org.rioproject:rio-api", "rio-api", rioArtifactJars);
-            formatAndAddToMap("org.rioproject:rio-proxy", "rio-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject:watch-ui", "watch-ui", rioArtifactJars);
 
             formatAndAddToMap("org.rioproject.event-collector:event-collector-api", "event-collector-api", rioArtifactJars);

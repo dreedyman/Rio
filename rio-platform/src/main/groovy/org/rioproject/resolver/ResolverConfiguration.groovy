@@ -48,11 +48,12 @@ class ResolverConfiguration {
                 resolverConfig = createFromFile(configRef)
             }
         }
-        if(resolverConfig==null)
+        if (resolverConfig==null) {
             logger.warn("The resolver configuration was not loaded {}, using empty configuration",
-                        System.properties[RESOLVER_CONFIG])
-        else
+                    System.properties[RESOLVER_CONFIG])
+        } else {
             logger.debug("Using resolver configuration ${resolverConfig.toExternalForm()}")
+        }
     }
 
     String getResolverJar() {

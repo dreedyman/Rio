@@ -1,0 +1,6 @@
+group = 'org.rioproject.examples.hospital'
+description = 'Example :: Hospital Rules'
+dependencies {
+  compile project(':examples:hospital:hospital-api')
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.5'
+}

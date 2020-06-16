@@ -38,7 +38,7 @@ public class ResolverConfigTest {
 
     @Before
     public void setup() throws IOException {
-        File repo = new File(System.getProperty("user.dir")+"/target/repo");
+        File repo = new File(System.getProperty("user.dir")+"/build/repo");
         repo.mkdirs();
 
         File resolvedArtifactDir = new File(Repository.getLocalRepository(), repoPath);
@@ -72,7 +72,7 @@ public class ResolverConfigTest {
     public void resolveConfig() throws ResolverException, URISyntaxException {
         File config = new File(System.getProperty("user.dir") +
                                "/src/test/resources/config/testResolverConfig.groovy");
-        File target = new File(System.getProperty("user.dir"), "target");
+        File target = new File(System.getProperty("user.dir"), "build/libs");
         File resolverJar = null;
         for(File f : target.listFiles()) {
             if(f.getName().startsWith("resolver-aether")) {

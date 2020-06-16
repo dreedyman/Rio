@@ -129,7 +129,7 @@ public class PlatformCapabilityConfig {
         this.platformClass = platformClass;
     }
 
-    public String geCostModelClass() {
+    public String getCostModelClass() {
         return costModelClass;
     }
 

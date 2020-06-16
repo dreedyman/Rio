@@ -38,7 +38,7 @@ public class FlatDirReaderTest {
 
     @Before
     public void setup() throws IOException, ResolverException {
-        flatRepo = new File(System.getProperty("user.dir") + "/target/flat");
+        flatRepo = new File(System.getProperty("user.dir") + "/build/flat");
         flatRepo.mkdirs();
         File artifact = new File(flatRepo, artifactFileName);
         File source = new File(String.format("%s/src/test/resources/config/%s",
@@ -49,7 +49,7 @@ public class FlatDirReaderTest {
 
         File config = new File(System.getProperty("user.dir") +
                                "/src/test/resources/config/testResolverConfig.groovy");
-        File target = new File(System.getProperty("user.dir"), "target");
+        File target = new File(System.getProperty("user.dir"), "build/libs");
         resolverJar = null;
         for(File f : target.listFiles()) {
             if(f.getName().startsWith("resolver-aether")) {

@@ -46,6 +46,6 @@ public class ResolverTestDependenciesTest {
     public void resolveWithTestDependenciesIncluded() throws ResolverException {
         ProjectModuleResolver r = new ProjectModuleResolver();
         String[] cp = r.getClassPathFor("org.rioproject.resolver.test.project:project-service:2.0");
-        Assert.assertTrue("We should have 3 items in the classpath, we got: " + cp.length, cp.length == 3);
+        Assert.assertTrue("We should have 2 items in the classpath, we got: " + cp.length, cp.length == 2);
     }
 }

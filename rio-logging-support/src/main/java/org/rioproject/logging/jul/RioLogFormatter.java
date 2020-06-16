@@ -36,14 +36,14 @@ public class RioLogFormatter extends Formatter {
     Date date = new Date();
     private final static String format = "{0,date,yyyy.MM.dd HH:mm:ss,SSS}";
     private MessageFormat formatter;
-    private Object args[] = new Object[1];
-    private String lineSeparator = System.getProperty("line.separator");
-    private boolean includePackageNames;
+    private final Object[] args = new Object[1];
+    private final String lineSeparator = System.getProperty("line.separator");
+    private final boolean includePackageNames;
     private boolean colorize;
-    private String levelFormat;
+    private final String levelFormat;
     private final Level[] levels = new Level[]{Level.SEVERE, Level.WARNING, Level.INFO,
                                                Level.CONFIG, Level.FINE, Level.FINER, Level.FINEST};
-    private final Map<Level, StringColorizer.Color> levelColorMap = new HashMap<Level, StringColorizer.Color>();
+    private final Map<Level, StringColorizer.Color> levelColorMap = new HashMap<>();
 
     public RioLogFormatter() {
         super();
@@ -106,7 +106,7 @@ public class RioLogFormatter extends Formatter {
             if(!includePackageNames) {
                 int ndx = record.getSourceClassName().lastIndexOf(".");
                 if (ndx > 0)
-                    name = record.getSourceClassName().substring(ndx + 1, record.getSourceClassName().length());
+                    name = record.getSourceClassName().substring(ndx + 1);
                 else
                     name = record.getSourceClassName();
             }

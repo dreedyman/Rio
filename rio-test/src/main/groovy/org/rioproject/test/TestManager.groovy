@@ -47,15 +47,17 @@ import org.rioproject.opstring.OperationalStringManager
 import org.rioproject.opstring.ServiceElement
 import org.rioproject.resolver.Artifact
 import org.rioproject.resolver.ResolverHelper
+import org.rioproject.resolver.maven2.Repository
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
 import org.rioproject.tools.webster.Webster
 import org.rioproject.util.PropertyHelper
 
+import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 /**
  * Simplifies the running of core Rio services
- * 
+ *
  * @author Dennis Reedy
  */
 @Slf4j
@@ -74,7 +76,7 @@ class TestManager {
     boolean createShutdownHook
     TestConfig testConfig
     def additionalExecProps=  [:]
-    ThreadPoolExecutor execPool = (ThreadPoolExecutor)java.util.concurrent.Executors.newCachedThreadPool();
+    ThreadPoolExecutor execPool = (ThreadPoolExecutor) Executors.newCachedThreadPool()
 
     /**
      * Create a TestManager without installing a shutdown hook
@@ -130,20 +132,20 @@ class TestManager {
                                             "property must be set")
         log.info "Using [${groups}] group for discovery"
 
-        DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
+        DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance()
         if(config.manager.config) {
             def mgrConfig = [PropertyHelper.expandProperties(config.manager.config)]
             Configuration conf = new GroovyConfig((String[])mgrConfig, null)
             discoPool.setConfiguration(conf)
         }
 
-        DiscoveryManagement dMgr = discoPool.getDiscoveryManager(null);
+        DiscoveryManagement dMgr = discoPool.getDiscoveryManager(testConfig.component)
         serviceDiscoveryManager =
             new ServiceDiscoveryManager(dMgr, new LeaseRenewalManager())
         //String hosts = System.getProperty(TEST_HOSTS, '')
 
         if(createShutdownHook) {
-            Runtime rt = Runtime.getRuntime();
+            Runtime rt = Runtime.getRuntime()
             log.info "Adding shutdown hook"
 
             Closure cl = {
@@ -160,16 +162,16 @@ class TestManager {
     private void startConfiguredServices() {
         startWebster()
         if(testConfig.getNumLookups()>0) {
-            int lookupCount = testConfig.getNumLookups()-countLookups();
+            int lookupCount = testConfig.getNumLookups()-countLookups()
             for(int i=0; i<lookupCount; i++)
-                startReggie();
+                startReggie()
         }
 
         if(testConfig.getNumMonitors()>0) {
-            int monitorCount = testConfig.getNumMonitors()-countMonitors();
+            int monitorCount = testConfig.getNumMonitors()-countMonitors()
             if(monitorCount>0) {
                 for(int i=0; i<monitorCount; i++)
-                    startProvisionMonitor();
+                    startProvisionMonitor()
                 /*
                 * Need to get an instance of DiscoveryManagement and set
                 * it to the OpStringManagerProxy utility in order to
@@ -179,23 +181,23 @@ class TestManager {
                 * strategies, specifically the utilization strategy
                 */
                 OpStringManagerProxy.setDiscoveryManagement(
-                        getServiceDiscoveryManager().getDiscoveryManager());
+                        getServiceDiscoveryManager().getDiscoveryManager())
             }
         }
 
         if(testConfig.getNumCybernodes()>0) {
-            int cybernodeCount = testConfig.getNumCybernodes() - countCybernodes();
+            int cybernodeCount = testConfig.getNumCybernodes() - countCybernodes()
             for (int i = 0; i < cybernodeCount; i++)
-                startCybernode();
+                startCybernode()
         }
 
-        postInit();
+        postInit()
 
         if(testConfig.getOpString()!=null) {
-            setOpStringToDeploy(testConfig.getOpString());
+            setOpStringToDeploy(testConfig.getOpString())
             if(testConfig.autoDeploy()) {
-                OperationalStringManager mgr = deploy();
-                setDeployedOperationalStringManager(mgr);
+                OperationalStringManager mgr = deploy()
+                setDeployedOperationalStringManager(mgr)
             }
         }
     }
@@ -298,13 +300,14 @@ class TestManager {
      * @return The started Webster
      */
     Webster startWebster() {
+        String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('rio.home')
         String rioTestHome = System.getProperty('rio.test.home')
 
-        String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${rioTestHome}/target/"
-        Webster webster = new Webster(0, websterRoots);
-        websters.add(webster);
-        return webster;
+        String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${rioTestHome}/build/;${m2Repo}"
+        Webster webster = new Webster(0, websterRoots)
+        websters.add(webster)
+        return webster
     }
 
     /**
@@ -360,8 +363,8 @@ class TestManager {
         if(Artifact.isArtifact(opstring)) {
             URL opStringURL = ResolverHelper.getResolver().getLocation(opstring, "oar")
             if(opStringURL==null)
-                throw new OperationalStringException("Artifact "+opstring+" not resolvable");
-            OAR oar = new OAR(new File(opStringURL.toURI()));
+                throw new OperationalStringException("Artifact "+opstring+" not resolvable")
+            OAR oar = new OAR(new File(opStringURL.toURI()))
             ProvisionMonitor monitor = (ProvisionMonitor)waitForService(ProvisionMonitor.class)
             return deploy(oar.loadOperationalStrings()[0], monitor)
         } else {
@@ -416,7 +419,7 @@ class TestManager {
     OperationalStringManager deploy(URL opstring, ProvisionMonitor monitor) {
         OpStringLoader loader = new OpStringLoader(getClass().classLoader)
         OperationalString[] opstrings = loader.parseOperationalString(opstring)
-        return deploy(opstrings[0], monitor)        
+        return deploy(opstrings[0], monitor)
     }
 
     /**
@@ -470,12 +473,12 @@ class TestManager {
      * @param monitor The ProvisionMonitor instance to perform the undeployment
      */
     def undeployAll(ProvisionMonitor monitor) {
-        DeployAdmin deployAdmin = (DeployAdmin) monitor.getAdmin();
-        OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers();
+        DeployAdmin deployAdmin = (DeployAdmin) monitor.getAdmin()
+        OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers()
         for (OperationalStringManager mgr : opStringMgrs) {
             String opStringName = mgr.getOperationalString().name
             log.debug "Undeploying ${opStringName} ..."
-            deployAdmin.undeploy(opStringName);
+            deployAdmin.undeploy(opStringName)
             log.debug "Undeployed ${opStringName}"
         }
     }
@@ -526,7 +529,7 @@ class TestManager {
      * @param service The ProvisionMonitor service proxy
      */
     def stopProvisionMonitor(service) {
-        stopService(service, "Monitor") 
+        stopService(service, "Monitor")
     }
 
     /**
@@ -539,7 +542,7 @@ class TestManager {
         if(service==null)
             throw new IllegalArgumentException("service proxy is null for ${name}")
 
-        ServiceStopHandler stopHandler = new ServiceStopHandler();
+        ServiceStopHandler stopHandler = new ServiceStopHandler()
         stopHandler.destroyService(service, name, System.out)
     }
 
@@ -548,7 +551,7 @@ class TestManager {
      */
     def shutdown() {
         for(Webster w : websters)
-            w.terminate();
+            w.terminate()
         /* Make sure all services are terminated */
         for(Process p : processes) {
             p.destroy()
@@ -587,7 +590,7 @@ class TestManager {
             Assert.assertEquals "Expected only 1 OperationalString", 1, opstrings.length
             for(ServiceElement elem : opstrings[0].services)
                 elem.getServiceBeanConfig().addInitParameter(HarvesterAgent.PREFIX,
-                                                             testConfig.getComponent())            
+                                                             testConfig.getComponent())
             deploy(opstrings[0], monitor)
             /* Count the number of physical machines*/
             List<String> hosts = new ArrayList<String>()
@@ -657,7 +660,7 @@ class TestManager {
         }
         s.toString()
     }
-    
+
     private void exec(String starter) {
         String classpath = "${PropertyHelper.expandProperties(config.manager.execClassPath)}"
         String service = starter.substring(starter.lastIndexOf("-")+1)
@@ -678,15 +681,15 @@ class TestManager {
         /* Check if logback is being used, if so set logback configuration */
         if(testConfig.getLoggingSystem()==TestConfig.LoggingSystem.LOGBACK) {
             jvmOptions = jvmOptions+" -Dlogback.configurationFile=${rioHome}/config/logging/logback.groovy"
-            File logbackDir = new File(loggingLibDir, "logback");
+            File logbackDir = new File(loggingLibDir, "logback")
             classpathBuilder.append(buildClassPath(logbackDir))
         } else {
             jvmOptions = jvmOptions+" -Djava.util.logging.config.file=${rioHome}/config/logging/rio-logging.properties"
-            File julDir = new File(loggingLibDir, "jul");
+            File julDir = new File(loggingLibDir, "jul")
             classpathBuilder.append(buildClassPath(julDir))
         }
 
-        String logDir = null        
+        String logDir = null
         String mainClass = "${config.manager.mainClass}"
         if(config.manager.log.size()>0) {
             logDir = "${config.manager.log}${File.separator}${testConfig.component}"
@@ -706,14 +709,14 @@ class TestManager {
                 .append(jvmOptions)
                 .append(" -cp ").append(classpathBuilder.toString()).append(" ")
                 .append(mainClass).append(" ").append(starter)
-        String cmdLine = cmdLineBuilder.toString();
+        String cmdLine = cmdLineBuilder.toString()
         log.info "Logging for $service will be sent to ${logDir}"
         log.info "Starting ${service}, using starter config [${starter}]"
         log.info "Exec command line: ${cmdLine}"
         Process process = Runtime.runtime.exec(cmdLine)
         processes.add(process)
     }
-    
+
     /**
      * Wait for a deployment to complete. This means to wait for all services
      * declared to activate and join the network
@@ -724,7 +727,7 @@ class TestManager {
      * @throws TimeoutException if the time waiting for the deployment exceeds
      * {@link ServiceMonitor#MAX_TIMEOUT}
      */
-    public void waitForDeployment(OperationalStringManager mgr) {
+    void waitForDeployment(OperationalStringManager mgr) {
         OperationalString opstring  = mgr.getOperationalString()
         Map<ServiceElement, Integer> deploy = new HashMap<ServiceElement, Integer>()
         int total = 0
@@ -751,7 +754,7 @@ class TestManager {
                 }
             }
             if(sleptFor==ServiceMonitor.MAX_TIMEOUT)
-                break;
+                break
             if (deployed < total) {
                 Thread.sleep(1000)
                 sleptFor += 1000
@@ -759,7 +762,7 @@ class TestManager {
         }
 
         if(sleptFor>=ServiceMonitor.MAX_TIMEOUT && deployed < total)
-            throw new TimeoutException("Timeout waiting for service to be deployed");
+            throw new TimeoutException("Timeout waiting for service to be deployed")
     }
 
     private int countLookups() {
@@ -898,14 +901,14 @@ class TestManager {
     }
 
     private String getJava() {
-        StringBuilder jvmBuilder = new StringBuilder();
-        jvmBuilder.append(System.getProperty("java.home"));
-        jvmBuilder.append(File.separator);
-        jvmBuilder.append("bin");
-        jvmBuilder.append(File.separator);
-        jvmBuilder.append("java");
-        jvmBuilder.append(" ");
-        return jvmBuilder.toString();
+        StringBuilder jvmBuilder = new StringBuilder()
+        jvmBuilder.append(System.getProperty("java.home"))
+        jvmBuilder.append(File.separator)
+        jvmBuilder.append("bin")
+        jvmBuilder.append(File.separator)
+        jvmBuilder.append("java")
+        jvmBuilder.append(" ")
+        return jvmBuilder.toString()
     }
 
     private def loadManagerConfig() {
