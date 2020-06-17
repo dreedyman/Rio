@@ -302,9 +302,12 @@ class TestManager {
     Webster startWebster() {
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('rio.home')
-        String rioTestHome = System.getProperty('rio.test.home')
 
-        String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${rioTestHome}/build/;${m2Repo}"
+        String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${m2Repo}"
+        String rioTestHome = System.getProperty('rio.test.home')
+        if (rioTestHome != null) {
+            websterRoots = websterRoots +";${rioTestHome}/build/"
+        }
         Webster webster = new Webster(0, websterRoots)
         websters.add(webster)
         return webster

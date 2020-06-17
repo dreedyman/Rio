@@ -28,6 +28,7 @@ import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryManagement;
 import net.jini.discovery.LookupDiscovery;
+import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.id.Uuid;
 import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.*;
@@ -73,7 +74,7 @@ public class LookupCachePool {
      * @return An instance of the LookupCachePool
      */
     public static synchronized LookupCachePool getInstance() {
-        return(singleton);
+        return singleton;
     }
 
     /**
@@ -129,7 +130,7 @@ public class LookupCachePool {
             return(null);
         }
         DiscoveryManagementPool.SharedDiscoveryManager sharedDM = (DiscoveryManagementPool.SharedDiscoveryManager)dMgr;
-        return(getLookupCache(sharedDM.getSharedName(), sharedDM.getGroups(), sharedDM.getLocators(), template));
+        return getLookupCache(sharedDM.getSharedName(), sharedDM.getGroups(), sharedDM.getLocators(), template);
     }
     
     /**
@@ -162,13 +163,22 @@ public class LookupCachePool {
                                       final ServiceTemplate template) throws IOException {
         if(template==null)
             throw new IllegalArgumentException("template is null");
-        SDMWrapper sdmWrapper;
+
+        //SDMWrapper sdmWrapper;
         try {
-            sdmWrapper = getSDMWrapper(sharedName, groups, locators);
+            LookupDiscoveryManager lookupDiscoveryManager = new LookupDiscoveryManager(groups, locators, null,
+                                                                                       config == null ? EmptyConfiguration.INSTANCE : config);
+
+            ServiceDiscoveryManager serviceDiscoveryManager =
+                    new ServiceDiscoveryManager(lookupDiscoveryManager,
+                                                new LeaseRenewalManager(EmptyConfiguration.INSTANCE),
+                                                EmptyConfiguration.INSTANCE);
+            //sdmWrapper = getSDMWrapper(sharedName, groups, locators);
+            return serviceDiscoveryManager.createLookupCache(template, null, null);
         } catch(ConfigurationException e) {
             throw new IOException("Configuration problem creating a SDMWrapper", e);
         }
-        return(sdmWrapper.getLookupCache(template, true));
+        //return sdmWrapper.getLookupCache(template, true);
     }
     
     /**

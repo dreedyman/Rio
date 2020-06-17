@@ -32,24 +32,14 @@ import java.util.Map;
  * Example testing the Calculator service and it's required services from the
  * <tt>OperationalString</tt>
  */
-@RunWith(Parameterized.class)
-public class ITCalculatorTest extends ITAbstractCalculatorTest {
-    String opstring;
+public class ITCalculatorTest {
+    String opstring = "../src/main/opstring/calculator.groovy";
     Calculator calculator;
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        String opstring = System.getProperty("opstring");
-        Assert.assertNotNull("no opstring given", opstring);
-        return Arrays.asList(new Object[][] {{ opstring }});
-    }
-
-    public ITCalculatorTest(String opstring) {
-        this.opstring = opstring;
-    }
+    CalculatorTester calculatorTester;
 
     @Before
     public void setupCalculator() throws Exception {
+        calculatorTester = new CalculatorTester();
         StaticCybernode cybernode = new StaticCybernode();
         Map<String, Object> map = cybernode.activate(new File(opstring));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -62,7 +52,7 @@ public class ITCalculatorTest extends ITAbstractCalculatorTest {
 
     @Test
     public void testBean() throws RemoteException {
-        testService(calculator);
+        calculatorTester.verify(calculator);
     }
 
 }

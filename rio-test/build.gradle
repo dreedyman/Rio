@@ -3,8 +3,8 @@ dependencies {
     compile project(':rio-lib')
     compile project(':cybernode-service')
     implementation project(':rio-logging-support')
-    compile group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
-    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+    //compile group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
     compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
     compile group: 'junit', name: 'junit', version: "${junitVersion}"
     compile project(':webster')

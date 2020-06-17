@@ -8,3 +8,8 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.8.2'
     testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.11'
 }
+
+test {
+    systemProperty 'java.security.policy', policyAll
+    systemProperty "rio.home", "${rootProject.projectDir.path}/distribution/build/rio-${version}"
+}

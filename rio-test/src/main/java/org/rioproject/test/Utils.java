@@ -82,7 +82,7 @@ public class Utils {
                 System.setProperty("rio.home", rioHome);
         }
         if(rioHome==null)
-            throw new RuntimeException("RIO_HOME not set. You " +
+            throw new RuntimeException("RIO_HOME or rio.home is not set. You " +
                                        "must set it as a system property " +
                                        "or it must be set in your " +
                                        "environment");

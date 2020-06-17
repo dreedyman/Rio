@@ -31,5 +31,5 @@ jar {
     }
 }
 test {
-    systemProperties 'java.security.policy': policyAll
+    systemProperty 'java.security.policy', policyAll
 }

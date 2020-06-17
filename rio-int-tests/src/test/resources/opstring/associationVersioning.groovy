@@ -2,7 +2,7 @@ package opstring
 import org.rioproject.config.Constants
 import org.rioproject.entry.VersionEntry
 
-def String getCodebase() {
+static String getCodebase() {
     return System.getProperty(Constants.WEBSTER)
 }
 

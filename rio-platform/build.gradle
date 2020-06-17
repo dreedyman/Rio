@@ -7,6 +7,17 @@ dependencies {
     testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
 }
 
+sourceSets {
+    main {
+        java { srcDirs = [] }
+        groovy { srcDirs += ['src/main/java'] }
+    }
+    test {
+        java { srcDirs = [] }
+        groovy { srcDirs += ['src/test/java'] }
+    }
+}
+
 jar {
     manifest {
         attributes("Class-Path": "jsk-platform-${riverVersion}.jar")

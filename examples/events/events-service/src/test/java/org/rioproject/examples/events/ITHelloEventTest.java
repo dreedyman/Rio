@@ -31,22 +31,10 @@ import java.util.Map;
 /**
  * Example testing the events example.
  */
-@RunWith (Parameterized.class)
 public class ITHelloEventTest {
-    String opstring;
+    String opstring = "../src/main/opstring/events.groovy";
     Hello eventProducer;
     HelloEventConsumer eventConsumer;
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        String opstring = System.getProperty("opstring");
-        Assert.assertNotNull("no opstring given", opstring);
-        return Arrays.asList(new Object[][] {{ opstring }});
-    }
-
-    public ITHelloEventTest(String opstring) {
-        this.opstring = opstring;
-    }
 
     @Before
     public void setup() throws Exception {

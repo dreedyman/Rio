@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -29,29 +30,29 @@ import java.rmi.RemoteException;
  * Testing the Workflow example using the Rio test framework
  */
 @RunWith (RioTestRunner.class)
+@RioTestConfig (
+        groups = "Workflow",
+        numCybernodes = 1,
+        numMonitors = 1,
+        opstring = "../src/main/opstring/workflow.groovy"
+)
 public class ITWorkflowDeployTest {
     @SetTestManager
     static TestManager testManager;
     static Master master;
 
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setup(){
 	    Assert.assertNotNull(testManager);
-        master = (Master)testManager.waitForService(Master.class);
+        master = testManager.waitForService(Master.class);
     }
 
     @Test
-    public void testBean() throws RemoteException {
+    public void testBean() throws RemoteException, WorkflowException {
         Assert.assertNotNull(master);
-        Exception thrown = null;
-        try {
-            System.out.println("Submitting Order ...");
-            WorkflowEntry result = master.process();
-            System.out.println("Order result is : "+result.value);
-        } catch (Exception e) {
-            e.printStackTrace();
-            thrown = e;
-        }
-        Assert.assertNull(thrown);
+        System.out.println("Submitting Order ...");
+        WorkflowEntry result = master.process();
+        System.out.println("Order result is : " + result.value);
     }
+
 }

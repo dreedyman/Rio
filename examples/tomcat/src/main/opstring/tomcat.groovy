@@ -38,13 +38,13 @@ deployment(name: 'Tomcat Deploy') {
          *
          * overwrite: 'no', removeOnDestroy: false
          */
-        software(name: 'Tomcat', version: '6.0.16', removeOnDestroy: true) {
-            install source: 'http://rio-project.org/examples/tomcat/apache-tomcat-6.0.16.zip',
+        software(name: 'Tomcat', version: '9.0.36', removeOnDestroy: false) {
+            install source: 'https://us.mirrors.quenda.co/apache/tomcat/tomcat-9/v9.0.36/bin/apache-tomcat-9.0.36.zip',
                     target: 'tomcat',
                     unarchive: true
             postInstall(removeOnCompletion: false) {
                 if (!System.properties['os.name'].toLowerCase().contains('windows')) {
-                    execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-6.0.16/bin/*sh'
+                    execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-9.0.36/bin/*sh'
                 }
             }
         }

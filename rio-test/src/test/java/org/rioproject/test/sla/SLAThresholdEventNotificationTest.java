@@ -38,8 +38,7 @@ public class SLAThresholdEventNotificationTest {
     @Test
     public void testSLAThresholdEventNotification() {
         Assert.assertNotNull(testManager);
-        SLAThresholdEventProducer service =
-            (SLAThresholdEventProducer)testManager.waitForService(SLAThresholdEventProducer.class);
+        SLAThresholdEventProducer service = testManager.waitForService(SLAThresholdEventProducer.class);
         EventDescriptor eDesc = SLAThresholdEvent.getEventDescriptor();
         Assert.assertNotNull(service);
         DynamicEventConsumer eventConsumer = null;

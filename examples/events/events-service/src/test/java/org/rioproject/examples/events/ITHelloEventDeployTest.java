@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -27,15 +28,21 @@ import org.rioproject.test.TestManager;
  * Testing the events example using the Rio test framework
  */
 @RunWith (RioTestRunner.class)
+@RioTestConfig (
+        groups = "HelloEvent",
+        numCybernodes = 1,
+        numMonitors = 1,
+        opstring = "../src/main/opstring/events.groovy"
+)
 public class ITHelloEventDeployTest {
     @SetTestManager
     static TestManager testManager;
     Hello eventProducer;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
 	    Assert.assertNotNull(testManager);
-        eventProducer = (Hello)testManager.waitForService(Hello.class);
+        eventProducer = testManager.waitForService(Hello.class);
     }
 
     @Test

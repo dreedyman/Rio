@@ -16,7 +16,6 @@
 package org.rioproject.impl.watch;
 
 import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.impl.jmx.GenericMBeanInvoker;
 import org.rioproject.watch.WatchDescriptor;
@@ -86,8 +85,8 @@ public class WatchInjector {
     private PropertyDescriptor[] pds;
     private ServiceBeanContext context;
     /** Collection of created Watch objects */
-    private final List<Watch> createdWatches = new ArrayList<Watch>();
-    private final List<Thread> mbeanCheckThreads = new ArrayList<Thread>();
+    private final List<Watch> createdWatches = new ArrayList<>();
+    private final List<Thread> mbeanCheckThreads = new ArrayList<>();
     static final String COMPONENT = "org.rioproject.watch.WatchInjector";
     static final Logger logger = LoggerFactory.getLogger(COMPONENT);
 
@@ -99,7 +98,7 @@ public class WatchInjector {
             throw new IllegalArgumentException("context is null");
         this.impl = impl;
         this.context = context;
-        Class aClass = impl.getClass();
+        Class<?> aClass = impl.getClass();
         BeanInfo bi = Introspector.getBeanInfo(aClass);
         pds = bi.getPropertyDescriptors();
     }
@@ -221,7 +220,7 @@ public class WatchInjector {
         pds = null;        
         createdWatches.clear();
         Thread[] threads =
-            mbeanCheckThreads.toArray(new Thread[mbeanCheckThreads.size()]);
+            mbeanCheckThreads.toArray(new Thread[0]);
         for(Thread t : threads) {
             if(t.isAlive())
                 t.interrupt();
@@ -230,14 +229,14 @@ public class WatchInjector {
 
     protected Watch createWatch(WatchDescriptor wDesc,
                                 Object bean,
-                                Configuration config) throws Exception {
+                                Configuration config) {
         return createWatch(wDesc, bean, null, config);
     }
 
     protected Watch createWatch(WatchDescriptor wDesc,
                                 Object bean,
                                 Method accessor,
-                                Configuration config) throws Exception {
+                                Configuration config) {
         SamplingWatch watch = null;
         if(wDesc.getObjectName()!=null) {
             if(wDesc.getMBeanServerConnection()==null) {
@@ -318,11 +317,8 @@ public class WatchInjector {
      * Modify an injected Watch
      *
      * @param wDesc The WatchDescriptor to modify, must not be null
-     *
-     * @throws ConfigurationException if there are errors reading the
-     * configuration
      */
-    public void modify(WatchDescriptor wDesc) throws ConfigurationException {
+    public void modify(WatchDescriptor wDesc) {
         if(wDesc == null)
             throw new IllegalArgumentException("wDesc is null");
         Watch watch = getWatch(wDesc.getName());

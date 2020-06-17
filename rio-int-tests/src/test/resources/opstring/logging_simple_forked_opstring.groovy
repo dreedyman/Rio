@@ -1,19 +1,24 @@
 package opstring
 
+import org.rioproject.config.Constants
+
+static String getCodebase() {
+    return System.getProperty(Constants.WEBSTER)
+}
+
 deployment(name:'ServiceLogEvent Test II') {
 
-    artifact id:'service', 'org.rioproject.test.simple:simple-logging-service:LATEST'
-    artifact id:'service-dl', 'org.rioproject.test.simple:simple-api:LATEST'
+    codebase getCodebase()
 
     groups System.getProperty('org.rioproject.groups')
 
     service(name: 'Simple Logging Forked Simon', fork:'yes') {
         interfaces {
             classes 'org.rioproject.test.simple.Simple'
-            artifact ref:'service-dl'
+            resources 'classes/groovy/test/'
         }
         implementation(class: 'org.rioproject.test.simple.logging.LoggingSimpleImpl') {
-            artifact ref:'service'
+            resources 'classes/groovy/test/'
         }
 
         maintain 1

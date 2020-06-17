@@ -38,62 +38,65 @@ class UsesVisitor extends CodeVisitorSupport {
     }
 
     @Override
-    public void visitMethodCallExpression(final MethodCallExpression call) {
+    void visitMethodCallExpression(final MethodCallExpression call) {
         if(call.getMethodAsString()=="using" || call.getMethodAsString()=="uses") {
             if(call.getArguments() instanceof ArgumentListExpression) {
                 ArgumentListExpression args = (ArgumentListExpression)call.getArguments()
                 for(Expression argExp : args.getExpressions()) {
                     String value = findValue(argExp.text, statements)
-                    resolve(value, classLoader)
+                    if (value != null) {
+                        resolve(value, classLoader)
+                    }
                 }
             }
         } else {
-            super.visitMethodCallExpression(call);
+            super.visitMethodCallExpression(call)
         }
     }
 
     private String findValue(final String reference, final List<Statement> statements) {
         if(Artifact.isArtifact(reference)) {
-            return reference;
+            return reference
         }
-        String value = null;
-        String[] items = reference.split(",");
+        String value = null
+        String[] items = reference.split(",")
         if(items.length==1) {
             try {
-                new URL(items[0]);
-                value = items[0];
+                new URL(items[0])
+                value = items[0]
             } catch (MalformedURLException e) {
-                String[] parts = reference.split("\\.");
+                String[] parts = reference.split("\\.")
                 for(Statement statement : statements) {
-                    Expression expression = ((ExpressionStatement) statement).getExpression();
+                    Expression expression = ((ExpressionStatement) statement).getExpression()
                     if(expression instanceof BinaryExpression) {
-                        BinaryExpression expr = (BinaryExpression)expression;
+                        BinaryExpression expr = (BinaryExpression)expression
                         if(expr.getLeftExpression().getText().equals(parts[0])) {
                             if(expr.getRightExpression() instanceof MapExpression) {
-                                MapExpression mExpr = (MapExpression)expr.getRightExpression();
+                                MapExpression mExpr = (MapExpression)expr.getRightExpression()
                                 for(MapEntryExpression entry : mExpr.getMapEntryExpressions()) {
                                     if(entry.getKeyExpression().getText().equals(parts[1])) {
-                                        value = entry.getValueExpression().getText();
-                                        break;
+                                        value = entry.getValueExpression().getText()
+                                        break
                                     }
                                 }
                             } else {
-                                value = expr.getRightExpression().getText();
-                                break;
+                                value = expr.getRightExpression().getText()
+                                break
                             }
                         }
                     }
                 }
             }
         }
-        return value;
+        return value
     }
 
     void resolve(final String value, final GroovyClassLoader classLoader) {
         if(Artifact.isArtifact(value))  {
-            String[] classPath = ResolverHelper.getResolver().getClassPathFor(value);
+            String[] classPath = ResolverHelper.getResolver().getClassPathFor(value)
+            println "===> ${Arrays.toString(classPath)}"
             for(String item : classPath) {
-                URL url = new File(item).toURI().toURL();
+                URL url = new File(item).toURI().toURL()
                 if(!hasURL(classLoader.getURLs(), url)) {
                     classLoader.addURL(url)
                 }
@@ -107,13 +110,13 @@ class UsesVisitor extends CodeVisitorSupport {
     }
 
     boolean hasURL(final URL[] urls, final URL url) {
-        boolean found = false;
+        boolean found = false
         for(URL u : urls) {
             if(u.equals(url)) {
-                found = true;
-                break;
+                found = true
+                break
             }
         }
-        return found;
+        return found
     }
 }

@@ -1,12 +1,17 @@
 group = 'org.rioproject.examples.workflow'
 description = 'Example :: Workflow Service Implementation'
 dependencies {
-  compile project(':examples:workflow:workflow-api')
-  compile project(':rio-lib')
-    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.5'
-  testCompile project(':rio-test')
-    testCompile group: 'org.apache.river', name: 'outrigger', version:'2.2.2'
-    testCompile group: 'org.apache.river', name: 'mahalo', version:'2.2.2'
-    testCompile group: 'junit', name: 'junit', version:'4.8.2'
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.11'
+    compile project(':examples:workflow:workflow-api')
+    compile project(':rio-lib')
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+    testCompile project(':rio-test')
+    /*testCompile group: 'org.apache.river', name: 'outrigger', version: '2.2.2'
+    testCompile group: 'org.apache.river', name: 'mahalo', version: '2.2.2'*/
+    testCompile group: 'junit', name: 'junit', version: '4.8.2'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.11'
+}
+
+test {
+    systemProperty 'java.security.policy', policyAll
+    systemProperty "rio.home", "${rootProject.projectDir.path}/distribution/build/rio-${version}"
 }

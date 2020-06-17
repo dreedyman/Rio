@@ -3,7 +3,7 @@ import org.rioproject.config.Constants
 
 import java.util.concurrent.TimeUnit
 
-def String getCodebase() {
+static String getCodebase() {
     return System.getProperty(Constants.WEBSTER)
 }
 

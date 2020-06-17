@@ -55,12 +55,12 @@ public class ServiceBeanSLAManager {
     private EventHandler slaEventHandler;
     /** List of SLAPolicyHandler instances that have been created */
     private final List<SLAPolicyHandler> slaPolicyHandlers =
-        Collections.synchronizedList(new ArrayList<SLAPolicyHandler>());
+        Collections.synchronizedList(new ArrayList<>());
     /* A WatchInjector */
     private WatchInjector watchInjector;
     /** Table of ThresholdManager instances to MeasurableCapability
      * registrations */
-    private final Map<ThresholdManager, MeasurableCapability> thresholdManagerReg = new HashMap<ThresholdManager, MeasurableCapability>();
+    private final Map<ThresholdManager, MeasurableCapability> thresholdManagerReg = new HashMap<>();
     /**
      * Transforms SLAThresholdEvents into JMX Notifications for SLAs that are
      * system related to those the service has declared
@@ -223,11 +223,11 @@ public class ServiceBeanSLAManager {
     public void updateSLAs(final SLA[] slas) {
         /* Create a representation of the current Collection so we
          * can determine if any SLAPolicyHandlers are no longer needed */
-        ArrayList<SLAPolicyHandler> toDiscardList = new ArrayList<SLAPolicyHandler>(slaPolicyHandlers);
+        ArrayList<SLAPolicyHandler> toDiscardList = new ArrayList<>(slaPolicyHandlers);
 
         /* List for new SLAs, that is SLAs that do not have an ID equal to
          * a current Watch */
-        ArrayList<SLA> toAddList = new ArrayList<SLA>();
+        ArrayList<SLA> toAddList = new ArrayList<>();
         for (SLA sla : slas) {
             SLAPolicyHandler slap = getSLAPolicyHandler(sla);
             if (slap == null) {
@@ -260,21 +260,16 @@ public class ServiceBeanSLAManager {
                     slap.setSLA(sla);
                     WatchDescriptor[] wds = sla.getWatchDescriptors();
                     for (WatchDescriptor wd : wds) {
-                        try {
-                            watchInjector.modify(wd);
-                        } catch (ConfigurationException e) {
-                            logger.warn("Modifying WatchDescriptor [{}] for SLA [{}]", wd.getName(), sla.getIdentifier(),e);
-                        }
+                        watchInjector.modify(wd);
                     }
                 }
             }
         }
         /* Add any new SLAs */
-        addSLAs(toAddList.toArray(new SLA[toAddList.size()]));
+        addSLAs(toAddList.toArray(new SLA[0]));
         /* Remove uneeded SLAs */
         SLAPolicyHandler[] toDiscard =
-            toDiscardList.toArray(
-                new SLAPolicyHandler[toDiscardList.size()]);
+            toDiscardList.toArray(new SLAPolicyHandler[0]);
         for (SLAPolicyHandler d : toDiscard) {
             removeSLAPolicyHandler(d);
         }
@@ -332,8 +327,7 @@ public class ServiceBeanSLAManager {
      *         zero-length array is returned
      */
     private SLAPolicyHandler[] getSLAPolicyHandlers() {
-        SLAPolicyHandler[] handlers = slaPolicyHandlers.toArray(new SLAPolicyHandler[slaPolicyHandlers.size()]);
-        return (handlers);
+        return slaPolicyHandlers.toArray(new SLAPolicyHandler[0]);
     }
 
     /*
@@ -381,7 +375,7 @@ public class ServiceBeanSLAManager {
         String[] createdWatches = watchInjector.getWatchNames();
         if(createdWatches.length==0)
             return;
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(createdWatches));
+        ArrayList<String> list = new ArrayList<>(Arrays.asList(createdWatches));
         WatchDescriptor[] configuredWatches = getWatchDescriptors(serviceSLAs);
 
         for (WatchDescriptor wd : configuredWatches) {
@@ -402,12 +396,12 @@ public class ServiceBeanSLAManager {
      * Get the WatchDescriptor instances from the SLA configs
      */
     private WatchDescriptor[] getWatchDescriptors(final SLA[] slas) {
-        ArrayList<WatchDescriptor> list = new ArrayList<WatchDescriptor>();
+        ArrayList<WatchDescriptor> list = new ArrayList<>();
         for (SLA sla : slas) {
             WatchDescriptor[] wDesc = sla.getWatchDescriptors();
             list.addAll(Arrays.asList(wDesc));
         }
-        return (list.toArray(new WatchDescriptor[list.size()]));
+        return list.toArray(new WatchDescriptor[0]);
     }
 
     /*

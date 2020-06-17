@@ -1,16 +1,24 @@
 package opstring
 
+import org.rioproject.config.Constants
+
+static String getCodebase() {
+    return System.getProperty(Constants.WEBSTER)
+}
+
 deployment(name:'Simple Test') {
+
+    codebase getCodebase()
 
     groups System.getProperty('org.rioproject.groups')
 
     service(name: 'Simple Simon') {
         interfaces {
             classes 'org.rioproject.test.simple.Simple'
-            artifact "org.rioproject:rio-int-tests:LATEST"
+            resources 'classes/groovy/test/'
         }
         implementation(class: 'org.rioproject.test.simple.service.SimpleImpl') {
-            artifact "org.rioproject:rio-int-tests:LATEST"
+            resources 'classes/groovy/test/'
         }
 
         parameters {

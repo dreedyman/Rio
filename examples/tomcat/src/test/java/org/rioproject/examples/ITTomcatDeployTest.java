@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.servicecore.Service;
+import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -28,6 +29,12 @@ import org.rioproject.watch.WatchDataSource;
  * Testing the Tomcat service using the Rio test framework
  */
 @RunWith(RioTestRunner.class)
+@RioTestConfig (
+        groups = "Tomcat",
+        numCybernodes = 1,
+        numMonitors = 1,
+        opstring = "src/main/opstring/tomcat.groovy"
+)
 public class ITTomcatDeployTest {
     @SetTestManager
     static TestManager testManager;
@@ -43,7 +50,7 @@ public class ITTomcatDeployTest {
         int wait = 0;
         long t0 = System.currentTimeMillis();
         boolean watchAttached = false;
-        while(wait<maxWait && !watchAttached) {
+        while(wait < maxWait && !watchAttached) {
             try {
                 for(WatchDataSource wds : service.fetch()) {
                     if(wds.getID().equals("Tomcat Thread Pool")) {

@@ -10,9 +10,8 @@ appender("STDOUT", ConsoleAppender) {
     }
 }
 
-//logger("org.rioproject.rmi.ResolvingLoader", INFO)
+logger("org.rioproject.rmi.ResolvingLoader", INFO)
 logger("org.rioproject.net.HostUtil", INFO)
-logger("org.rioproject.impl.client", TRACE)
 logger("sun.rmi.loader", INFO)
 logger ("unknown.jul.logger", OFF)
 logger("net.jini.config", OFF)

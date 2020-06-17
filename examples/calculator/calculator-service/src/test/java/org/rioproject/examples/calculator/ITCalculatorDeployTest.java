@@ -19,34 +19,38 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
+
+import java.rmi.RemoteException;
 
 /**
  * Testing the Calculator service using the Rio test framework
  */
 @RunWith (RioTestRunner.class)
-public class ITCalculatorDeployTest extends ITAbstractCalculatorTest {
+@RioTestConfig (
+        groups = "Calculator",
+        numCybernodes = 1,
+        numMonitors = 1,
+        opstring = "../src/main/opstring/calculator.groovy"
+)
+public class ITCalculatorDeployTest {
 	@SetTestManager
     static TestManager testManager;
     Calculator service;
+    CalculatorTester calculatorTester;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
+        calculatorTester = new CalculatorTester();
 	    Assert.assertNotNull(testManager);
-        service = (Calculator)testManager.waitForService(Calculator.class);
+        service = testManager.waitForService(Calculator.class);
     }
 
     @Test
-    public void test1() {
-        Throwable thrown = null;
-        try {
-            testService(service);
-        } catch (Exception e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull("Should not have thrown an exception", thrown);
+    public void test1() throws RemoteException {
+        calculatorTester.verify(service);
     }
 }

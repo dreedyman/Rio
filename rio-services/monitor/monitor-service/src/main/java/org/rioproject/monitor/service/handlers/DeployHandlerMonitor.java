@@ -36,11 +36,11 @@ import java.util.concurrent.TimeUnit;
  * Use DeployHandlers to provide hot deployment capability
  */
 public class DeployHandlerMonitor {
-    private DeployHandler[] deployHandlers;
-    private ScheduledExecutorService deployExecutor;
+    private final DeployHandler[] deployHandlers;
+    private final ScheduledExecutorService deployExecutor;
     private long lastRecordedTime;
-    private OpStringManagerController opStringMangerController;
-    private DeployAdmin deployAdmin;
+    private final OpStringManagerController opStringMangerController;
+    private final DeployAdmin deployAdmin;
     static Logger logger = LoggerFactory.getLogger(DeployHandlerMonitor.class.getName());
 
     public DeployHandlerMonitor(DeployHandler[] deployHandlers,
@@ -54,15 +54,13 @@ public class DeployHandlerMonitor {
         lastRecordedTime = System.currentTimeMillis();
         deployExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        deployExecutor.scheduleAtFixedRate(new Runnable() {
-                                                  public void run() {
-                                                      processDeployHandlers(new Date(lastRecordedTime));
-                                                      lastRecordedTime = System.currentTimeMillis();
-                                                  }
-                                              },
-                                              0,
-                                              deployScan,
-                                              TimeUnit.MILLISECONDS);
+        deployExecutor.scheduleAtFixedRate(() -> {
+                                               processDeployHandlers(new Date(lastRecordedTime));
+                                               lastRecordedTime = System.currentTimeMillis();
+                                           },
+                                           0,
+                                           deployScan,
+                                           TimeUnit.MILLISECONDS);
     }
 
     public void terminate() {

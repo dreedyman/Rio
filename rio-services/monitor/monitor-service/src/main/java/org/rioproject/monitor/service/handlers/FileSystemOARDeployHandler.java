@@ -37,9 +37,9 @@ import java.util.*;
  *
  */
 public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
-    private File dropDirectory;
-    private File installDirectory;
-    private final Map<String, Date> badOARs = new HashMap<String, Date>();
+    private final File dropDirectory;
+    private final File installDirectory;
+    private final Map<String, Date> badOARs = new HashMap<>();
 
     /**
      * Create a FileSystemOARDeployHandler with the same drop and install
@@ -89,7 +89,7 @@ public class FileSystemOARDeployHandler extends AbstractOARDeployHandler {
     }
 
     protected List<OperationalString> look(Date from) {
-        List<OperationalString> list = new ArrayList<OperationalString>();
+        List<OperationalString> list = new ArrayList<>();
         File[] files = dropDirectory.listFiles();
         for (File file : files) {
             if (!file.isDirectory()) {

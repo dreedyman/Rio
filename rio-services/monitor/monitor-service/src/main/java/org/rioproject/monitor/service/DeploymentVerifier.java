@@ -43,7 +43,7 @@ import java.util.*;
  * OperationalString is configured to use artifacts, that required artifacts have been resolved
  */
 public class DeploymentVerifier {
-    private static Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
     private final List<RemoteRepository> additionalRepositories = new ArrayList<RemoteRepository>();
     private final DiscoveryManagement discoveryManagement;
 

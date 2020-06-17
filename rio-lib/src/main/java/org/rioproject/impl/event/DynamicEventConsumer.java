@@ -42,9 +42,9 @@ import java.rmi.MarshalledObject;
  * @author Dennis Reedy
  */
 public class DynamicEventConsumer extends BasicEventConsumer {
-    private ServiceDiscoveryManager sdm;
-    private LookupCache lCache;
-    private static Logger logger = LoggerFactory.getLogger(DynamicEventConsumer.class);
+    private final ServiceDiscoveryManager sdm;
+    private final LookupCache lCache;
+    private static final Logger logger = LoggerFactory.getLogger(DynamicEventConsumer.class);
 
     /**
      * Create a DynamicEventConsumer with an EventDescriptor

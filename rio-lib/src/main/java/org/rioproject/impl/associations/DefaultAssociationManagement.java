@@ -27,10 +27,13 @@ import net.jini.core.lookup.*;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
 import net.jini.discovery.DiscoveryManagement;
+import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
+import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
+import net.jini.lookup.ServiceDiscoveryManager;
 import net.jini.lookup.entry.Name;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
@@ -578,7 +581,6 @@ public class DefaultAssociationManagement implements AssociationManagement {
         AssociationHandler handler = getAssociationHandler(aDesc);
         if (handler!=null) {
             logger.warn("Already managing [{}] for [{}]", aDesc.toString(), clientName);
-            association = handler.getAssociation();
         } else {
             if (aDesc.getAssociationType()==AssociationType.REQUIRES)
                 numRequires.incrementAndGet();
@@ -587,8 +589,8 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 associationHandlers.add(handler);
             }
             handler.exec();
-            association = handler.getAssociation();
         }
+        association = handler.getAssociation();
         return association;
     }
 
@@ -928,7 +930,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         if(c1.isAssignableFrom(c2))
             return true;
         String n1 = c1.getName();
-        for(Class sup = c2; sup != null; sup = sup.getSuperclass()) {
+        for(Class<?> sup = c2; sup != null; sup = sup.getSuperclass()) {
             if(n1.equals(sup.getName()))
                 return true;
         }
@@ -939,7 +941,8 @@ public class DefaultAssociationManagement implements AssociationManagement {
      * The AssociationHandler handle an Association created from
      * AssociationDescriptor.
      */
-    public class AssociationHandler extends ServiceDiscoveryAdapter implements FaultDetectionListener <ServiceID> {
+    public class AssociationHandler extends ServiceDiscoveryAdapter implements FaultDetectionListener<ServiceID>,
+                                                                               DiscoveryListener {
         /** The AssociationDescriptor */
         private final AssociationDescriptor associationDescriptor;
         /** Number of instances of the associated service */
@@ -958,6 +961,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
         /** A ProxyPreparer for discovered services */
         private ProxyPreparer proxyPreparer;
         private ServiceTemplate template;
+        private ServiceDiscoveryManager serviceDiscoveryManager;
 
         /**
          * Create an AssociationHandler
@@ -1029,8 +1033,24 @@ public class DefaultAssociationManagement implements AssociationManagement {
                     LookupCachePool lcPool = LookupCachePool.getInstance();
                     String sharedName = associationDescriptor.getOperationalStringName();
 
-                    lCache = lcPool.getLookupCache(sharedName, associationDescriptor.getGroups(), associationDescriptor.getLocators(), template);
-                    lCache.addListener(this);
+                    logger.info("Create ServiceDiscovery for {}", associationDescriptor.toString());
+
+                    LookupDiscoveryManager lookupDiscoveryManager =
+                            new LookupDiscoveryManager(associationDescriptor.getGroups(),
+                                                       associationDescriptor.getLocators(),
+                                                       this,
+                                                       config == null ? EmptyConfiguration.INSTANCE : config);
+
+                    serviceDiscoveryManager =
+                            new ServiceDiscoveryManager(lookupDiscoveryManager,
+                                                        new LeaseRenewalManager(EmptyConfiguration.INSTANCE),
+                                                        EmptyConfiguration.INSTANCE);
+
+                    lCache = serviceDiscoveryManager.createLookupCache(template, null, this);
+/*                    lCache = lcPool.getLookupCache(sharedName, associationDescriptor.getGroups(),
+                                                   associationDescriptor.getLocators(),
+                                                   template);
+                    lCache.addListener(this);*/
                     logger.debug("DefaultAssociationManagement for [{}], obtained LookupCache for [{}]",
                                  clientName, associationDescriptor.getName());
                 } else {
@@ -1066,6 +1086,9 @@ public class DefaultAssociationManagement implements AssociationManagement {
                 if (fdh != null) {
                     fdh.terminate();
                 }
+            }
+            if (serviceDiscoveryManager != null) {
+                serviceDiscoveryManager.terminate();
             }
             if(lookupServiceHandler != null)
                 lookupServiceHandler.terminate();
@@ -1291,6 +1314,18 @@ public class DefaultAssociationManagement implements AssociationManagement {
             fdh.register(this);
             fdh.monitor(service, serviceID);
             fdhTable.put(serviceID, fdh);
+        }
+
+        @Override
+        public void discovered(DiscoveryEvent discoveryEvent) {
+            logger.info("Discovered {} registrars, groups: {}", discoveryEvent.getRegistrars().length,
+                        discoveryEvent.getGroups());
+        }
+
+        @Override
+        public void discarded(DiscoveryEvent discoveryEvent) {
+            logger.info("Discarded {} registrars, groups: {}", discoveryEvent.getRegistrars().length,
+                        discoveryEvent.getGroups());
         }
     }
 

@@ -328,12 +328,6 @@ public class DiscoveryManagementPool {
                                                             LookupLocator[] locators,
                                                             DiscoveryListener listener,
                                                             Configuration config) throws IOException {
-            /*try {
-                return new LookupDiscoveryManager(groups, locators, listener,
-                                                  config == null ? EmptyConfiguration.INSTANCE : config);
-            } catch (ConfigurationException e) {
-                throw new IOException("Config failure", e);
-            }*/
             if(logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
                 if(groups==null) {

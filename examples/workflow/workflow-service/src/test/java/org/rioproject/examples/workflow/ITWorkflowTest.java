@@ -28,21 +28,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-@RunWith (Parameterized.class)
 public class ITWorkflowTest {
-    String opstring;
-    Master master;
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        String opstring = System.getProperty("opstring");
-        Assert.assertNotNull("no opstring given", opstring);
-        return Arrays.asList(new Object[][] {{ opstring }});
-    }
-
-    public ITWorkflowTest(String opstring) {
-        this.opstring = opstring;
-    }
+    private final String opstring = "../src/main/opstring/workflow.groovy";
+    private Master master;
 
     @Before
     public void setup() throws Exception {
@@ -63,17 +51,10 @@ public class ITWorkflowTest {
     }
 
     @Test
-    public void testBean() throws RemoteException {
+    public void testBean() throws RemoteException, WorkflowException {
         Assert.assertNotNull(master);
-        Exception thrown = null;
-        try {
-            System.out.println("Submitting Order ...");
-            WorkflowEntry result = master.process();
-            System.out.println("Order result is : "+result.value);
-        } catch (Exception e) {
-            e.printStackTrace();
-            thrown = e;
-        }
-        Assert.assertNull(thrown);
+        System.out.println("Submitting Order ...");
+        WorkflowEntry result = master.process();
+        System.out.println("Order result is : "+result.value);
     }
 }

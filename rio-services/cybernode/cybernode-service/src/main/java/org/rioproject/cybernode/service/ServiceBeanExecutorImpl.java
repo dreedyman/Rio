@@ -35,7 +35,6 @@ import org.rioproject.impl.container.ServiceLogUtil;
 import org.rioproject.impl.exec.JVMProcessMonitor;
 import org.rioproject.impl.exec.VirtualMachineHelper;
 import org.rioproject.impl.fdh.FaultDetectionListener;
-import org.rioproject.impl.fdh.JMXFaultDetectionHandler;
 import org.rioproject.impl.opstring.OpStringManagerProxy;
 import org.rioproject.impl.servicebean.ServiceBeanActivation;
 import org.rioproject.impl.servicebean.ServiceBeanAdapter;

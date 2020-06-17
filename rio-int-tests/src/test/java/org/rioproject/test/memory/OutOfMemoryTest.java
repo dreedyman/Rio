@@ -49,7 +49,7 @@ public class OutOfMemoryTest {
     static TestManager testManager;
 
     @Test
-    public void testForkedServiceOutOfMemory() {
+    public void testForkedServiceOutOfMemory() throws Exception {
         Assert.assertNotNull(testManager);
         sleep(1000);
         ServiceItem[] items = testManager.getServiceItems(ProvisionMonitor.class);
@@ -64,23 +64,10 @@ public class OutOfMemoryTest {
                                     "opstring"+File.separator+
                                     "outofmemory_test.groovy");
         OperationalStringManager mgr = testManager.deploy(opstring);
-        OutOfMemory outOfMemory = (OutOfMemory)testManager.waitForService(OutOfMemory.class);
-        try {
-            BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), l);
-            eventConsumer.register(items[0]);
-        } catch (Exception e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull(thrown);
-        thrown = null;
-        try {
-            outOfMemory.createOOME();
-        } catch (IOException e) {
-            thrown = e;
-            e.printStackTrace();
-        }
-        Assert.assertNull(thrown);
+        OutOfMemory outOfMemory = testManager.waitForService(OutOfMemory.class);
+        BasicEventConsumer eventConsumer = new BasicEventConsumer(ProvisionMonitorEvent.getEventDescriptor(), l);
+        eventConsumer.register(items[0]);
+        outOfMemory.createOOME();
         long waited = wait(l, true);
         System.out.println("Waited "+waited/1000+" seconds for failure to be observed");
         Assert.assertTrue("OutOfMemory should have failed", l.failed);
@@ -88,7 +75,6 @@ public class OutOfMemoryTest {
         System.out.println("Waited "+waited/1000+" seconds for re-creation to be observed");
         Assert.assertNotNull("OutOfMemory should be re-allocated", outOfMemory);
 
-        thrown = null;
         try {
             sleep(10*1000);
             testManager.undeploy(mgr.getOperationalString().getName());

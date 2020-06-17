@@ -11,27 +11,25 @@ import java.lang.management.MemoryMXBean;
  */
 public class OutOfMemoryServiceImpl implements OutOfMemory {
     public static final int MB = 1048576;
-    public final Object[] holder = new Object[MB];
+    public final Object[] holder = new Object[Integer.MAX_VALUE];
     static Logger logger = LoggerFactory.getLogger(OutOfMemoryServiceImpl.class);
    
     public void createOOME() {
         try {
-            new Thread(new Runnable() {
-                public void run() {
-                    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-                    int count = 0;
-                    for (; count < holder.length; count++) {
-                        holder[count] = new byte[MB];
-                        try {
-                            float used = memoryBean.getHeapMemoryUsage().getUsed();
-                            float max = memoryBean.getHeapMemoryUsage().getMax();
-                            float pctUsed = (used / max)*100;
-                            if(count % 100 == 0)
-                                logger.info("Percent Heap Memory Used: {}", pctUsed);
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            logger.error("Oops", e);
-                        }
+            new Thread(() -> {
+                MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+                int count = 0;
+                for (; count < holder.length; count++) {
+                    holder[count] = new byte[MB * 10];
+                    try {
+                        float used = memoryBean.getHeapMemoryUsage().getUsed();
+                        float max = memoryBean.getHeapMemoryUsage().getMax();
+                        float pctUsed = (used / max)*100;
+                        if(count % 100 == 0)
+                            logger.info("Percent Heap Memory Used: {}", pctUsed);
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        logger.error("Oops", e);
                     }
                 }
             }).start();

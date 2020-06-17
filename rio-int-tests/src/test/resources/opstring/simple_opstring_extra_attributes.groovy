@@ -1,11 +1,10 @@
 package opstring
 
 import org.rioproject.RioVersion
+import org.rioproject.test.simple.SimpleEntry
 
-def artifactTable = ["ref":"org.rioproject:rio-int-tests:LATEST"]
-
-def getEntries() {
-    return new org.rioproject.test.simple.SimpleEntry(RioVersion.VERSION)
+static def getEntries() {
+    return new SimpleEntry(RioVersion.VERSION)
 }
 
 deployment(name:'Simple Test') {
@@ -14,15 +13,15 @@ deployment(name:'Simple Test') {
 
     service(name: 'Simple Simon') {
 
-        attributes getEntries(); using artifactTable.api
+        attributes getEntries(); using 'classes/groovy/test/'
 
         interfaces {
             classes 'org.rioproject.test.simple.Simple'
-            artifact artifactTable["ref"]
+            resources 'classes/groovy/test/'
         }
 
         implementation(class: 'org.rioproject.test.simple.service.SimpleImpl') {
-            artifact artifactTable["ref"]
+            resources 'classes/groovy/test/'
         }
 
         parameters {
@@ -37,7 +36,6 @@ deployment(name:'Simple Test') {
                 String getFood() {
                     return 'fries'
                 }
-            }
-        '''
+            }'''
     }
 }

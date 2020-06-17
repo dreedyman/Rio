@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.rioproject.associations.Association;
 import org.rioproject.associations.AssociationDescriptor;
 import org.rioproject.impl.associations.DefaultAssociationManagement;
+import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
@@ -34,13 +35,21 @@ import java.util.concurrent.Future;
  * Tests the Calculator service using Rio association management as a client.
  */
 @RunWith (RioTestRunner.class)
-public class ITCalculatorClientTest extends ITAbstractCalculatorTest {
+@RioTestConfig (
+        groups = "CalculatorClient",
+        numCybernodes = 1,
+        numMonitors = 1,
+        opstring = "../src/main/opstring/calculator.groovy"
+)
+public class ITCalculatorClientTest {
 	@SetTestManager
     static TestManager testManager;
     Future<Calculator> future;
+    CalculatorTester calculatorTester;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
+        calculatorTester = new CalculatorTester();
 	    Assert.assertNotNull(testManager);
         /*
          * Call the static create method providing the service name, service
@@ -60,6 +69,6 @@ public class ITCalculatorClientTest extends ITAbstractCalculatorTest {
     public void testInjectedService() throws RemoteException, ExecutionException, InterruptedException {
         Calculator service = future.get();
         Assert.assertNotNull(service);
-        testService(service);
+        calculatorTester.verify(service);
     }
 }

@@ -46,7 +46,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AssociationVersionTest {
 
     @Test
-    public void testVersionedAssociations() throws ExecutionException, InterruptedException, IOException {
+    public void testVersionedAssociations() throws ExecutionException, InterruptedException, IOException,
+                                                   TimeoutException {
         AssociationManagement aMgr = new DefaultAssociationManagement();
         AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy",
                                                                         Dummy.class,
@@ -54,7 +55,7 @@ public class AssociationVersionTest {
         descriptor.setMatchOnName(false);
         descriptor.setVersion("2.1");
         Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
-        Dummy dummy = association.getServiceFuture().get();
+        Dummy dummy = association.getServiceFuture().get(1, TimeUnit.MINUTES);
         Assert.assertNotNull(dummy);
         Assert.assertEquals("Expected 1 got " + association.getServiceCount(),
                             1,
@@ -65,7 +66,8 @@ public class AssociationVersionTest {
     }
 
     @Test
-    public void testVersionedAssociationRange() throws ExecutionException, InterruptedException, IOException {
+    public void testVersionedAssociationRange() throws ExecutionException, InterruptedException, IOException,
+                                                       TimeoutException {
         AssociationManagement aMgr = new DefaultAssociationManagement();
         AssociationDescriptor descriptor = AssociationDescriptor.create("Dummy",
                                                                         Dummy.class,
@@ -73,7 +75,7 @@ public class AssociationVersionTest {
         descriptor.setMatchOnName(false);
         descriptor.setVersion("2.8");
         Association<Dummy> association = aMgr.addAssociationDescriptor(descriptor);
-        Dummy dummy = association.getServiceFuture().get();
+        Dummy dummy = association.getServiceFuture().get(1, TimeUnit.MINUTES);
         Assert.assertNotNull(dummy);
         Assert.assertEquals("Expected 1 got "+association.getServiceCount(),
                             1,
@@ -105,7 +107,7 @@ public class AssociationVersionTest {
     }
 
     @Test
-    public void testVersionedAssociationMatchesAll() throws ExecutionException, InterruptedException {
+    public void testVersionedAssociationMatchesAll() throws ExecutionException, InterruptedException, TimeoutException {
         AssociationManagement aMgr = new DefaultAssociationManagement();
         L listener = new L();
         aMgr.register(listener);
@@ -121,11 +123,11 @@ public class AssociationVersionTest {
         }
         Assert.assertNotNull(listener.association.get());
         waited = 0;
-        while(listener.association.get().getServiceCount()< 4 && waited < 100) {
+        while(listener.association.get().getServiceCount() < 4 && waited < 100) {
             Thread.sleep(100);
             waited++;
         }
-        Dummy dummy = association.getServiceFuture().get();
+        Dummy dummy = association.getServiceFuture().get(5, TimeUnit.SECONDS);
         Assert.assertNotNull(dummy);
         Assert.assertEquals("Expected 4 got "+association.getServiceCount(),
                             4,
