@@ -10,10 +10,6 @@ import java.io.*;
 /**
  * Input stream that supports redirecting data directly to an output stream.
  *
- * @see TeeInputStream
- * @see ForkOutputStream
- * @see RedirectingReader
- *
  * @author Dawid Kurzyniec
  * @version 1.0
  */

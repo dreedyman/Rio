@@ -41,34 +41,28 @@ public class ITTomcatDeployTest {
     Service service;
 
     @Test
-    public void verifyTomcatServiceDeployed() {
+    public void verifyTomcatServiceDeployed() throws Exception {
         Assert.assertNotNull(testManager);
         service = (Service)testManager.waitForService("Tomcat");
         Assert.assertNotNull(service);
-        Throwable thrown = null;
         int maxWait = 20;
         int wait = 0;
         long t0 = System.currentTimeMillis();
         boolean watchAttached = false;
         while(wait < maxWait && !watchAttached) {
-            try {
-                for(WatchDataSource wds : service.fetch()) {
-                    if(wds.getID().equals("Tomcat Thread Pool")) {
-                        watchAttached = true;
-                        break;
-                    }
+            for (WatchDataSource wds : service.fetch()) {
+                System.out.println("Watch: " + wds.getID());
+                if (wds.getID().equals("Tomcat Thread Pool")) {
+                    watchAttached = true;
+                    break;
                 }
-                wait++;
-                Thread.sleep(500);
-            } catch(Exception e) {
-                e.printStackTrace();
-                thrown = e;
             }
+            wait++;
+            Thread.sleep(500);
         }
         long t1 = System.currentTimeMillis();
-        System.out.println("Waited ("+(t1-t0)/1000+") seconds for Watch to be available");
+        System.out.println("Waited (" + (t1 - t0 ) / 1000 + ") seconds for Watch to be available");
         Assert.assertTrue("The \"Tomcat Thread Pool\" watch attach was unsuccessful", watchAttached);
-        Assert.assertNull(thrown);
     }
 
 }

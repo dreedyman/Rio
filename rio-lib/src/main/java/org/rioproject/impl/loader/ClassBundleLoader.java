@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -95,11 +96,12 @@ public class ClassBundleLoader {
             logger.debug("Load class {} using this codebase: {}", bundle.getClassName(), b.toString());
         }
         if(urls.length > 0) {
-            try {
+            /*try {
                 loader = new URIClassLoader(ServiceClassLoader.getURIs(urls), parent);
             } catch (URISyntaxException e) {
                 throw new MalformedURLException("Creating URIs");
-            }
+            }*/
+            loader = new URLClassLoader(urls, parent);
         }
         if(logger.isTraceEnabled()) {
             logger.trace("Using ClassLoader [{}] to load class {}", loader.getClass().getName(), className);

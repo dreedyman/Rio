@@ -7,3 +7,13 @@ dependencies {
     implementation group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
     implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
 }
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "Rio Project",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
+    }
+}

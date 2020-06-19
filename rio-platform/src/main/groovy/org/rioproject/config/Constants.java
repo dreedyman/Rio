@@ -100,7 +100,7 @@ public interface Constants {
     String RESOLVER_JAR = BASE_COMPONENT+".resolver.jar";
     /**
      * Property to indicate that Rio should limit the creation of utilities that
-     * create sockets (like {@link net.jini.export.Exporter}) to limit socket ports
+     * create sockets (like net.jini.export.Exporter) to limit socket ports
      * to within the specified port range. The port range is specified as &quot;-&quot; delimited
      * string, <tt>startRange-endRange</tt>, where <tt>startRange</tt> and <tt>endRange</tt>
      * are inclusive

@@ -65,7 +65,7 @@ public interface ProvisionManager {
      * @throws RemoteException If communication errors happen
      */
     EventRegistration register(MarshalledObject<ServiceBeanInstantiator> instantiator,
-                               MarshalledObject handback,
+                               MarshalledObject<?> handback,
                                ResourceCapability resourceCapability,
                                List<DeployedService> deployedServices,
                                int serviceLimit,

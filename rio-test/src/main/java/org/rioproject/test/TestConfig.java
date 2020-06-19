@@ -29,7 +29,6 @@ import java.util.Map;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class TestConfig {
-    public enum LoggingSystem { JUL, LOGBACK }
     private String groups;
     private String locators;
     private Integer numCybernodes;
@@ -43,7 +42,6 @@ public class TestConfig {
     private boolean runHarvester;
     private long timeout;
     private String testConfigLocation;
-    private LoggingSystem loggingSystem;
 
     TestConfig(String testClassName) {
         this.testClassName = testClassName;
@@ -72,13 +70,15 @@ public class TestConfig {
     TestConfig(RioTestConfig rioTestConfig, String testClassName) {
         autoDeploy = rioTestConfig.autoDeploy();
         groups = rioTestConfig.groups().length() == 0 ? null : rioTestConfig.groups();
+        if (groups != null) {
+            System.setProperty(Constants.GROUPS_PROPERTY_NAME, groups);
+        }
         locators = rioTestConfig.locators().length() == 0 ? null : rioTestConfig.locators();
         numCybernodes = rioTestConfig.numCybernodes();
         numMonitors = rioTestConfig.numMonitors();
         numLookups = rioTestConfig.numLookups();
         opString = rioTestConfig.opstring().length() == 0 ? null : rioTestConfig.opstring();
         autoDeploy = rioTestConfig.autoDeploy();
-        loggingSystem = LoggingSystem.valueOf(rioTestConfig.loggingSystem());
 
         if (opString == null) {
             autoDeploy = false;
@@ -137,10 +137,6 @@ public class TestConfig {
             runHarvester = b != null && b;
             String sTimeout = getString(configMap.get(component + ".timeout"));
             timeout = sTimeout==null?0:Long.parseLong(sTimeout);
-            loggingSystem = (LoggingSystem) configMap.get(component + ".loggingSystem");
-            if(loggingSystem==null) {
-                loggingSystem = LoggingSystem.LOGBACK;
-            }
         }
     }
 
@@ -188,10 +184,6 @@ public class TestConfig {
 
     public Long getTimeout() {
         return timeout;
-    }
-
-    public LoggingSystem getLoggingSystem() {
-        return loggingSystem;
     }
 
     public String getTestClassName() {

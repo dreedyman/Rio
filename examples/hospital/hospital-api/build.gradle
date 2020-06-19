@@ -1,5 +1,0 @@
-group = 'org.rioproject.examples.hospital'
-description = 'Example :: Hospital API'
-dependencies {
-  compile project(':rio-lib')
-}

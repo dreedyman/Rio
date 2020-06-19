@@ -29,7 +29,7 @@ import java.util.Map;
 public class DeploymentResult implements Serializable {
     static final long serialVersionUID = 1L;
     private final OperationalStringManager operationalStringManager;
-    private final Map<String, Throwable> errorMap = new HashMap<String, Throwable>();
+    private final Map<String, Throwable> errorMap = new HashMap<>();
 
     public DeploymentResult(final OperationalStringManager operationalStringManager,
                             final Map<String, Throwable> errorMap) {

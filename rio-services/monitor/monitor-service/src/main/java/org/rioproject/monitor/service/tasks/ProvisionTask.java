@@ -44,8 +44,8 @@ public class ProvisionTask implements Runnable {
     private ServiceBeanInstance jsbInstance = null;
     private Throwable thrown = null;
     private String failureReason = null;
-    private ServiceProvisionContext context;
-    private PendingManager pendingManager;
+    private final ServiceProvisionContext context;
+    private final PendingManager pendingManager;
     private final Logger logger = LoggerFactory.getLogger(ProvisionTask.class);
 
     /**
@@ -193,7 +193,7 @@ public class ProvisionTask implements Runnable {
                                     LoggingUtil.getLoggingName(request), ir.getInstantiator().getName());
                         if (logger.isTraceEnabled()) {
                             Object service = jsbInstance.getService();
-                            Class serviceClass = service.getClass();
+                            Class<?> serviceClass = service.getClass();
                             logger.trace("{} ServiceBeanInstance {}, Annotation {}",
                                           LoggingUtil.getLoggingName(request),
                                           jsbInstance,

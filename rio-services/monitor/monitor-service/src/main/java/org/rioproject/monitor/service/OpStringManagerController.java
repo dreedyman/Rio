@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -51,9 +50,9 @@ public class OpStringManagerController {
     private StateManager stateManager;
     private ServiceProvisioner serviceProvisioner;
     private Uuid uuid;
-    private static Logger logger = LoggerFactory.getLogger(OpStringManagerController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(OpStringManagerController.class.getName());
     private DeploymentVerifier deploymentVerifier;
-    private final ConcurrentHashMap<String, OpStringManager> opStringManagerTable = new ConcurrentHashMap<String, OpStringManager>();
+    private final ConcurrentHashMap<String, OpStringManager> opStringManagerTable = new ConcurrentHashMap<>();
 
     void setServiceProvisioner(final ServiceProvisioner serviceProvisioner) {
         this.serviceProvisioner = serviceProvisioner;
@@ -102,8 +101,11 @@ public class OpStringManagerController {
                                                                   ProvisionMonitorEvent.Action.OPSTRING_UNDEPLOYED,
                                                                   os));
         }
-        if (stateManager != null)
+        logger.info("Sent ProvisionMonitorEvent.OPSTRING_UNDEPLOYED for [{}]", opString.getName());
+        if (stateManager != null) {
+            logger.info("Update state for [{}]", opString.getName());
             stateManager.stateChanged(opStringManager, true);
+        }
     }
 
     /**
@@ -112,12 +114,12 @@ public class OpStringManagerController {
      * @return Array of OperationalString objects
      */
     public OperationalString[] getOperationalStrings() {
-        List<OperationalString> list = new ArrayList<OperationalString>();
+        List<OperationalString> list = new ArrayList<>();
         for(Map.Entry<String, OpStringManager> entry : opStringManagerTable.entrySet()) {
             if (entry.getValue().isTopLevel())
                 list.add(entry.getValue().doGetOperationalString());
         }
-        return list.toArray(new OperationalString[list.size()]);
+        return list.toArray(new OperationalString[0]);
     }
 
     /**
@@ -228,20 +230,24 @@ public class OpStringManagerController {
                                                 final ServiceProvisionListener listener) throws IOException {
         /* If there is no DeployAdmin active is true */
         boolean active = dAdmin == null;
-        OpStringManager opMgr = new DefaultOpStringManager(opString, parent, config, this);
+        DefaultOpStringManager opMgr = new DefaultOpStringManager(opString, parent, config, this);
         if (opStringManagerTable.putIfAbsent(opString.getName(), opMgr) == null) {
             if (logger.isInfoEnabled())
                 logger.info("Adding OpString [" + opString.getName() + "] active [" + active + "]");
-            ((DefaultOpStringManager) opMgr).setServiceProxy(serviceProxy);
-            ((DefaultOpStringManager) opMgr).setEventProcessor(eventProcessor);
-            ((DefaultOpStringManager) opMgr).setStateManager(stateManager);
+            opMgr.setServiceProxy(serviceProxy);
+            opMgr.setEventProcessor(eventProcessor);
+            opMgr.setStateManager(stateManager);
 
             opMgr.initialize(active);
             Map<String, Throwable> errorMap =
-                ((DefaultOpStringManager) opMgr).createServiceElementManagers(serviceProvisioner, uuid, listener);
+                opMgr.createServiceElementManagers(serviceProvisioner, uuid, listener);
+            if (!errorMap.isEmpty()) {
+                dumpOpStringError(errorMap);
+            }
             if (dAdmin != null) {
+                logger.info("Synch with active (peer) DeployAdmin");
                 OperationalStringManager activeMgr;
-                Map<ServiceElement, ServiceBeanInstance[]> elemInstanceMap = new HashMap<ServiceElement, ServiceBeanInstance[]>();
+                Map<ServiceElement, ServiceBeanInstance[]> elemInstanceMap = new HashMap<>();
                 try {
                     activeMgr = dAdmin.getOperationalStringManager(opString.getName());
                     ServiceElement[] elems = opString.getServices();
@@ -253,12 +259,12 @@ public class OpStringManagerController {
                             logger.warn("Getting ServiceBeanInstances from active testManager", e);
                         }
                     }
-                    ((DefaultOpStringManager) opMgr).startManager(listener, elemInstanceMap);
+                    opMgr.startManager(listener, elemInstanceMap);
                 } catch (Exception e) {
                     logger.warn("Getting active OperationalStringManager", e);
                 }
             } else {
-                ((DefaultOpStringManager) opMgr).startManager(listener);
+                opMgr.startManager(listener);
             }
 
             if (map != null)
@@ -301,7 +307,7 @@ public class OpStringManagerController {
 
     public OpStringManager[] getOpStringManagers() {
         Collection<OpStringManager> mgrs = opStringManagerTable.values();
-        return mgrs.toArray(new OpStringManager[mgrs.size()]);
+        return mgrs.toArray(new OpStringManager[0]);
     }
 
 
@@ -321,39 +327,23 @@ public class OpStringManagerController {
      *
      * @param errorMap The map containing exceptions
      */
-    public void dumpOpStringError(Map errorMap) {
+    public void dumpOpStringError(Map<String, Throwable> errorMap) {
         if (!errorMap.isEmpty()) {
-            Set keys = errorMap.keySet();
             StringBuilder sb = new StringBuilder();
             sb.append("+========================+\n");
             //int i = 0;
-            for (Object comp : keys) {
-                sb.append("Component: ");
-                sb.append(comp);
-                Object o = errorMap.get(comp);
-                if (o instanceof Throwable) {
-                    StackTraceElement[] els = ((Throwable) o).getStackTrace();
-                    for (StackTraceElement el : els) {
-                        sb.append("\tat ");
-                        sb.append(el);
-                        sb.append("\n");
-                    }
-                } else {
-                    sb.append(" ");
-                    sb.append(o.toString());
+            for (Map.Entry<String, Throwable> entry : errorMap.entrySet()) {
+                sb.append("Component: ").append(entry.getKey());
+                StackTraceElement[] els = entry.getValue().getStackTrace();
+                for (StackTraceElement el : els) {
+                    sb.append("\tat ");
+                    sb.append(el);
+                    sb.append("\n");
                 }
             }
             sb.append("\n+========================+");
             if (logger.isDebugEnabled())
                 logger.debug(sb.toString());
-        }
-    }
-
-    class Deployer implements Callable<OpStringManager> {
-
-        @Override
-        public OpStringManager call() throws Exception {
-            return null;
         }
     }
 }

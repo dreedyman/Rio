@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An <code>RMIClassLoader</code> provider that supports the resolving of artifacts based on the
- * {@link org.rioproject.url.artifact} protocol.
+ * <code>org.rioproject.url.artifact</code> protocol.
  *
  * <p>The <code>ResolvingLoader</code> uses a {@link org.rioproject.resolver.Resolver} to adapt codebases that
  * have <code>artifact:</code> URLs.</p>

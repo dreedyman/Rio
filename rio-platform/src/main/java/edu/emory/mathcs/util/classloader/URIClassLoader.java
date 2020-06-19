@@ -112,7 +112,7 @@ public class URIClassLoader extends URLClassLoader {
     }
 
     public URL[] getURLs() {
-        return (URL[])finder.getUrls().clone();
+        return finder.getUrls().clone();
     }
 
 //    public URL[] getAllResolvedURLs() {
@@ -126,24 +126,22 @@ public class URIClassLoader extends URLClassLoader {
      * @return the resulting class
      * @exception ClassNotFoundException if the class could not be found
      */
-    protected Class findClass(final String name)
+    protected Class<?> findClass(final String name)
         throws ClassNotFoundException
     {
         try {
-            return (Class)
-                AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                    public Object run() throws ClassNotFoundException {
-                        String path = name.replace('.', '/').concat(".class");
-                        ResourceHandle h = finder.getResource(path);
-                        if (h != null) {
-                            try {
-                                return defineClass(name, h);
-                            } catch (IOException e) {
-                                throw new ClassNotFoundException(name, e);
-                            }
-                        } else {
-                            throw new ClassNotFoundException(name);
+            return (Class<?>)
+                AccessController.doPrivileged((PrivilegedExceptionAction<?>) () -> {
+                    String path = name.replace('.', '/').concat(".class");
+                    ResourceHandle h = finder.getResource(path);
+                    if (h != null) {
+                        try {
+                            return defineClass(name, h);
+                        } catch (IOException e) {
+                            throw new ClassNotFoundException(name, e);
                         }
+                    } else {
+                        throw new ClassNotFoundException(name);
                     }
                 }, acc);
         } catch (PrivilegedActionException pae) {
@@ -151,7 +149,7 @@ public class URIClassLoader extends URLClassLoader {
         }
     }
 
-    protected Class defineClass(String name, ResourceHandle h) throws IOException {
+    protected Class<?> defineClass(String name, ResourceHandle h) throws IOException {
         int i = name.lastIndexOf('.');
         URL url = h.getCodeSourceURL();
         if (i != -1) { // check package
@@ -217,11 +215,7 @@ public class URIClassLoader extends URLClassLoader {
      */
     public URL findResource(final String name) {
         return
-            (URL) AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
-                    return finder.findResource(name);
-                }
-            }, acc);
+            (URL) AccessController.doPrivileged((PrivilegedAction<?>) () -> finder.findResource(name), acc);
     }
 
     /**
@@ -229,16 +223,11 @@ public class URIClassLoader extends URLClassLoader {
      * having the specified name.
      *
      * @param name the resource name
-     * @exception java.io.IOException if an I/O exception occurs
      * @return an <code>Enumeration</code> of <code>URL</code>s
      */
-    public Enumeration findResources(final String name) throws IOException {
+    public Enumeration findResources(final String name) {
         return
-            (Enumeration) AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
-                    return finder.findResources(name);
-                }
-            }, acc);
+            (Enumeration) AccessController.doPrivileged((PrivilegedAction<?>) () -> finder.findResources(name), acc);
     }
 
     /**
@@ -300,11 +289,7 @@ public class URIClassLoader extends URLClassLoader {
     protected ResourceHandle getResourceHandle(final String name)
     {
         return
-            (ResourceHandle) AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
-                    return finder.getResource(name);
-                }
-            }, acc);
+            (ResourceHandle) AccessController.doPrivileged((PrivilegedAction<?>) () -> finder.getResource(name), acc);
     }
 
     /**
@@ -348,11 +333,7 @@ public class URIClassLoader extends URLClassLoader {
     protected Enumeration getResourceHandles(final String name)
     {
         return
-            (Enumeration) AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
-                    return finder.getResources(name);
-                }
-            }, acc);
+            (Enumeration) AccessController.doPrivileged((PrivilegedAction<?>) () -> finder.getResources(name), acc);
     }
 
     protected URLStreamHandler getJarHandler() {

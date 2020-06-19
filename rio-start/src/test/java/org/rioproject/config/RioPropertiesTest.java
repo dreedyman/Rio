@@ -24,7 +24,7 @@ import org.junit.Test;
 public class RioPropertiesTest {
 
     @Test
-    public void testLoadFromEnv() throws Exception {
+    public void testLoadFromEnv() {
         try {
             System.setProperty(Constants.ENV_PROPERTY_NAME,
                                System.getProperty("user.dir") + "/src/test/resources/config/rio.env");
@@ -37,7 +37,7 @@ public class RioPropertiesTest {
     }
 
     @Test
-    public void testLoadFromRioHome() throws Exception {
+    public void testLoadFromRioHome()  {
         String oldRioHome = System.getProperty("rio.home");
         try {
             System.setProperty("rio.home", System.getProperty("user.dir") + "/src/test/resources");

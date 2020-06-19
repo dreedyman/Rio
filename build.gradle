@@ -1,3 +1,32 @@
+/*
+ * Copyright to the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import java.text.SimpleDateFormat
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+}
+
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
 allprojects {
     apply plugin: 'maven'
 
@@ -7,10 +36,14 @@ allprojects {
     ext {
         groovyVersion = "2.3.8"
         junitVersion = "4.12"
-        logbackVersion = "1.1.3"
+        log4jVersion = "2.13.3"
+        logbackVersion = "1.2.3"
         riverVersion = "2.2.2"
         slf4jVersion = "1.7.12"
         policyAll = file("${rootProject.projectDir}//distribution/src/main/policy/policy.all").absolutePath
+        def sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+        buildTime = sdf.format(new Date())
     }
 }
 
@@ -21,35 +54,20 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+    /*options.deprecation = true
+    options.incremental = true
+    options.encoding = 'UTF-8'
+    options.annotationProcessorPath = project.configurations.annotationProcessor
+    options.compilerArgs << "-Xlint:unchecked"*/
+
+    apply from: "${rootDir}/gradle/publishing.gradle"
+
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            url "http://www.rio-project.org/maven2"
-        }
-        maven {
-            url "http://repository.jboss.org/nexus/content/groups/public-jboss/"
-        }
-    }
-
-    if (project.name != "distribution") {
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    from components.java
-                }
-            }
-            repositories {
-                mavenLocal()
-                maven {
-                    url "http://www.rio-project.org/maven2"
-                }
-            }
-        }
-    }
 
 }

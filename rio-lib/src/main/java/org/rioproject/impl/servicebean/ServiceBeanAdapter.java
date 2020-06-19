@@ -43,7 +43,6 @@ import org.rioproject.entry.ServiceInfo;
 import org.rioproject.entry.*;
 import org.rioproject.event.EventDescriptor;
 import org.rioproject.event.EventHandler;
-import org.rioproject.event.EventProducer;
 import org.rioproject.impl.admin.ServiceAdminImpl;
 import org.rioproject.impl.bean.BeanAdapter;
 import org.rioproject.impl.config.ConfigHelper;
@@ -52,7 +51,6 @@ import org.rioproject.impl.container.DiscardManager;
 import org.rioproject.impl.container.ServiceLogUtil;
 import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.impl.fdh.HeartbeatClient;
-import org.rioproject.impl.logging.ServiceLogEventPublisherImpl;
 import org.rioproject.impl.persistence.PersistentStore;
 import org.rioproject.impl.service.Joiner;
 import org.rioproject.impl.service.LandlordLessor;
@@ -61,9 +59,6 @@ import org.rioproject.impl.service.ServiceResource;
 import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.impl.watch.WatchRegistry;
 import org.rioproject.loader.ServiceClassLoader;
-import org.rioproject.log.ServiceLogEvent;
-import org.rioproject.logging.ServiceLogEventHandler;
-import org.rioproject.logging.ServiceLogEventHandlerHelper;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.servicebean.*;
@@ -155,13 +150,13 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     private LandlordLessor monitorLandlord;
     /** The ServiceBeanState component, managing the state of the
      * ServiceBean */
-    private ServiceBeanState jsbState = new ServiceBeanState();
+    private final ServiceBeanState jsbState = new ServiceBeanState();
     /**
      * Component name we use to find items in the configuration. The value is
      * set to the package name of the concrete implementation of this class.
      * If the class has no package name, the component is the name of the class
      */
-    private String serviceBeanComponent;
+    private final String serviceBeanComponent;
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(ServiceBeanAdapter.class);
     /** The HeartbeatClient, which will manage sending heartbeat announcements */
@@ -173,7 +168,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     /** Length of time to sleep between unexport attempts */
     private long unexportRetryDelay;
     /** When this service was created */
-    private long started;
+    private final long started;
 
     /**
      * Construct a ServiceBeanAdapter
@@ -378,12 +373,12 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         getEventTable().put(slaEventDesc.eventID, slaEventHandler);
         addAttribute(slaEventDesc);
 
-        ServiceLogEventHandler appender = ServiceLogEventHandlerHelper.findInstance();
+        /*ServiceLogEventHandler appender = ServiceLogEventHandlerHelper.findInstance();
         if(appender!=null) {
             applyServiceLogEventHandlerProperties(appender, config);
         } else {
             logger.error("Unable to obtain a ServiceLogEventHandler");
-        }
+        }*/
 
         this.computeResource = context.getComputeResourceManager().getComputeResource();
         /*
@@ -394,26 +389,6 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         context.getServiceBeanManager().addListener(sElemChangeMgr);
 
         getServiceProxy();
-    }
-
-    /*
-     * Apply settings for a {@link ServiceLogEventHandler}.
-     *
-     * @param s The {@code ServiceLogEventHandler}
-     * @param config Configuration to use
-     * @throws IOException
-     */
-    private void applyServiceLogEventHandlerProperties(final ServiceLogEventHandler s, final Configuration config)
-        throws IOException {
-        if(s.getServiceLogEventPublisher()==null) {
-            EventDescriptor serviceLogEventDescriptor = ServiceLogEvent.getEventDescriptor();
-            EventHandler serviceLogEventHandler = new DispatchEventHandler(serviceLogEventDescriptor, config);
-            getEventTable().put(serviceLogEventDescriptor.eventID, serviceLogEventHandler);
-            ServiceLogEventPublisherImpl publisher = new ServiceLogEventPublisherImpl(serviceLogEventHandler,
-                                                                                      (EventProducer)getExportedProxy());
-            s.setServiceLogEventPublisher(publisher);
-            addAttribute(serviceLogEventDescriptor);
-        }
     }
 
     /**

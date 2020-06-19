@@ -31,7 +31,6 @@ import org.rioproject.impl.util.StringUtil;
 import org.rioproject.opstring.*;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverHelper;
-import org.rioproject.start.LogManagementHelper;
 import org.rioproject.url.artifact.ArtifactURLStreamHandlerFactory;
 
 import java.io.File;
@@ -87,7 +86,6 @@ public class StaticCybernode {
     }
 
     public StaticCybernode()  {
-        LogManagementHelper.setup();
         try {
             new URL("artifact:org.rioproject");
         } catch (MalformedURLException e) {

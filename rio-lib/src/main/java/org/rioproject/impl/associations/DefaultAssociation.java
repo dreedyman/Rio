@@ -413,6 +413,9 @@ public class DefaultAssociation<T> implements Association<T> {
         }
 
         public void serviceAdded(T service) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service added " + service.getClass().getName());
+            }
             ai.discovered(a, service);
         }
 

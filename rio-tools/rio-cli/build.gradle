@@ -1,4 +1,3 @@
-
 description = 'Module :: Rio Command Line Interface'
 dependencies {
   compileOnly project(':rio-lib')
@@ -6,4 +5,22 @@ dependencies {
   compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
   implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
   implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+}
+
+jar {
+  manifest {
+    attributes("Implementation-Title": "Rio Project",
+            "Implementation-Version": "${project.version}",
+            "Rio-Version" : "${project.version}",
+            "Rio-Build": buildTime,
+            "Main-Class" : "org.rioproject.tools.cli.CLI",
+            "Class-Path" : "rio-platform-${project.version}.jar rio-lib-${project.version}.jar webster-${project.version}.jar groovy-all-${groovyVersion}.jar"
+    )
+  }
+  from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+    include "org/rioproject/monitor/**"
+    include "org/rioproject/proxy/**"
+    include "net/jini/lookup/**"
+    include "net/jini/config/**"
+  }
 }

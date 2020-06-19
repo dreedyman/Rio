@@ -2,12 +2,11 @@ description = 'Module :: Rio Test Infrastructure'
 dependencies {
     compile project(':rio-lib')
     compile project(':cybernode-service')
-    implementation project(':rio-logging-support')
-    //compile group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    /*implementation project(':rio-logging-support')*/
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
-    compile "org.slf4j:jul-to-slf4j:$slf4jVersion"
     compile group: 'junit', name: 'junit', version: "${junitVersion}"
     compile project(':webster')
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 }
 
 sourceSets {
@@ -15,6 +14,8 @@ sourceSets {
         java { srcDirs = [] }
         groovy { srcDirs += ['src/main/java'] }
     }
+
 }
+
 
 test.enabled = false

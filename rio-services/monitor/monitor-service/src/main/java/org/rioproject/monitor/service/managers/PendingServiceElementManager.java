@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Abstract class which will manage ProvisionRequest instances that are waiting
@@ -44,7 +45,7 @@ import java.util.*;
  */
 public abstract class PendingServiceElementManager {
     /** Sorted collection of pending provision requests */
-    protected final TreeMap<Key, ProvisionRequest> collection;
+    protected final Map<Key, ProvisionRequest> collection = new ConcurrentSkipListMap<>();
     /** Index into the collection to insert elements */
     private long collectionIndex = 1;
     /** A descriptive String type */
@@ -56,7 +57,7 @@ public abstract class PendingServiceElementManager {
     /**
      * A key for the sortable set
      */
-    static class Key implements Comparable {
+    static class Key implements Comparable<Key> {
         int priority;
         ServiceElement sElem;
         long index;
@@ -72,12 +73,9 @@ public abstract class PendingServiceElementManager {
          * @see java.lang.Comparable#compareTo(java.lang.Object)
          */
         @Override
-        public int compareTo(Object o) {
-            if(!(o instanceof Key))
-                throw new ClassCastException();
-            if(this==o)
-                return(0);
-            Key that = (Key)o;
+        public int compareTo(Key that) {
+            if(this==that)
+                return 0;
             int comparison;
             long now = System.currentTimeMillis();
             /* The priority is the high order bit, if not set then check if
@@ -103,7 +101,7 @@ public abstract class PendingServiceElementManager {
                  * a lower one */
                 comparison = (this.priority>that.priority ? -1 : 1);
             }
-            return(comparison);
+            return comparison;
         }        
     }
     
@@ -114,11 +112,6 @@ public abstract class PendingServiceElementManager {
      */
 
     PendingServiceElementManager(String type, ServiceProvisionContext context) {
-        collection = new TreeMap<Key, ProvisionRequest>(new Comparator<Key>() {
-                public int compare(Key key1, Key key2) {
-                    return (key1).compareTo(key2);
-                }
-        });
         this.type = type;
         this.context = context;
     }
@@ -139,14 +132,10 @@ public abstract class PendingServiceElementManager {
      * collection
      */
     public long addProvisionRequest(ProvisionRequest request, long index) {
-        long ndx;
-        synchronized(collection) {                        
-            Long keyIndex = (index == 0 ? collectionIndex++ : index);
-            Key key = new Key(request.getServiceElement(), keyIndex, request.getTimestamp());
-            collection.put(key, request);
-            ndx = keyIndex;
-        }
-        return ndx;
+        long keyIndex = (index == 0 ? collectionIndex++ : index);
+        Key key = new Key(request.getServiceElement(), keyIndex, request.getTimestamp());
+        collection.put(key, request);
+        return keyIndex;
     }
 
     /**
@@ -155,11 +144,7 @@ public abstract class PendingServiceElementManager {
      * @return The size of the collection
      */
     int getSize() {
-        int size;
-        synchronized(collection) {
-            size = collection.size();
-        }
-        return size;
+        return collection.size();
     }
 
     /**
@@ -172,12 +157,10 @@ public abstract class PendingServiceElementManager {
      */
     int getCount(ServiceElement sElem) {
         int count = 0;
-        synchronized(collection) {
-            Collection<ProvisionRequest> provisionRequests = collection.values();
-            for (ProvisionRequest pr : provisionRequests) {
-                if (pr.getServiceElement().equals(sElem)) {
-                    count++;
-                }
+        Collection<ProvisionRequest> provisionRequests = collection.values();
+        for (ProvisionRequest pr : provisionRequests) {
+            if (pr.getServiceElement().equals(sElem)) {
+                count++;
             }
         }
         return count;
@@ -201,25 +184,21 @@ public abstract class PendingServiceElementManager {
                 removals = removals.subList((removals.size()-numToRemove), removals.size());
             }
             logger.info("{}: removing [{}] [{}] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
-            synchronized(collection) {
-                for (Key removal : removals) {
-                    ProvisionRequest pr = collection.remove(removal);
-                    removed.add(pr);
-                }
+            for (Key removal : removals) {
+                ProvisionRequest pr = collection.remove(removal);
+                removed.add(pr);
             }
         }
-        return removed.toArray(new ProvisionRequest[removed.size()]);
+        return removed.toArray(new ProvisionRequest[0]);
     }
 
     private List<Key> removeFromCollection(ServiceElement serviceElement) {
-        List<Key> removals = new ArrayList<Key>();
-        synchronized(collection) {
-            Set<Key> keys = collection.keySet();
-            for (Key key : keys) {
-                ProvisionRequest pr = collection.get(key);
-                if (pr != null && serviceElement.equals(pr.getServiceElement()))
-                    removals.add(key);
-            }
+        List<Key> removals = new ArrayList<>();
+        Set<Key> keys = collection.keySet();
+        for (Key key : keys) {
+            ProvisionRequest pr = collection.get(key);
+            if (pr != null && serviceElement.equals(pr.getServiceElement()))
+                removals.add(key);
         }
         context.getSelector().removeUninstantiable(serviceElement);
         return removals;
@@ -235,20 +214,18 @@ public abstract class PendingServiceElementManager {
      */
     public ProvisionRequest[] removeServiceElement(ServiceElement sElem) {
         List<Key> removals = removeFromCollection(sElem);
-        List<ProvisionRequest> removed = new ArrayList<ProvisionRequest>();
+        List<ProvisionRequest> removed = new ArrayList<>();
         
         if(!removals.isEmpty()) {
             logger.debug("{}: removing [{}] [{}] instances", type, removals.size(), LoggingUtil.getLoggingName(sElem));
-            synchronized(collection) {
-                for (Key removal : removals) {
-                    ProvisionRequest pr = collection.remove(removal);
-                    removed.add(pr);
-                }
+            for (Key removal : removals) {
+                ProvisionRequest pr = collection.remove(removal);
+                removed.add(pr);
             }
         } else {
             logger.debug("{}: There are no pending instances of [{}] to remove ", type, LoggingUtil.getLoggingName(sElem));
         }
-        return removed.toArray(new ProvisionRequest[removed.size()]);
+        return removed.toArray(new ProvisionRequest[0]);
     }
 
     /**
@@ -260,14 +237,12 @@ public abstract class PendingServiceElementManager {
      */
     public boolean hasServiceElement(ServiceElement sElem) {
         boolean contains = false;
-        synchronized(collection) {
-            Set<Key> keys = collection.keySet();
-            for (Key key : keys) {
-                ProvisionRequest pr = collection.get(key);
-                if (sElem.equals(pr.getServiceElement())) {
-                    contains = true;
-                    break;
-                }
+        Set<Key> keys = collection.keySet();
+        for (Key key : keys) {
+            ProvisionRequest pr = collection.get(key);
+            if (sElem.equals(pr.getServiceElement())) {
+                contains = true;
+                break;
             }
         }
         return (contains);
@@ -283,20 +258,18 @@ public abstract class PendingServiceElementManager {
      */
     public void updateProvisionRequests(ServiceElement sElem,
                                         ServiceProvisionListener listener) {
-        synchronized(collection) {
-            Set<Key> keys = collection.keySet();
-            for (Key key : keys) {
-                ProvisionRequest pr = collection.get(key);
-                if (sElem.equals(pr.getServiceElement())) {
-                    /* Preserve instance IDs */
-                    Long id = pr.getServiceElement().getServiceBeanConfig().getInstanceID();
-                    ServiceElement newElem = sElem;
-                    if (id != null)
-                        newElem = ServiceElementUtil.prepareInstanceID(sElem, id.intValue());
-                    pr.setServiceElement(newElem);
-                    if(listener!=null) {
-                        pr.setServiceProvisionListener(listener);
-                    }
+        Set<Key> keys = collection.keySet();
+        for (Key key : keys) {
+            ProvisionRequest pr = collection.get(key);
+            if (sElem.equals(pr.getServiceElement())) {
+                /* Preserve instance IDs */
+                Long id = pr.getServiceElement().getServiceBeanConfig().getInstanceID();
+                ServiceElement newElem = sElem;
+                if (id != null)
+                    newElem = ServiceElementUtil.prepareInstanceID(sElem, id.intValue());
+                pr.setServiceElement(newElem);
+                if(listener!=null) {
+                    pr.setServiceProvisionListener(listener);
                 }
             }
         }
@@ -320,26 +293,24 @@ public abstract class PendingServiceElementManager {
      * @return An array of ProvisionRequest instances
      */
     private ProvisionRequest[] getProvisionRequests(ServiceElement sElem) {
-        ProvisionRequest[] prs;        
-        synchronized(collection) {            
-            /* Get all ProvisionRequest instances */
-            if(sElem==null) {
-                Collection<ProvisionRequest> c = collection.values();
-                prs = c.toArray(new ProvisionRequest[c.size()]);
-            } else {
-                /* Get the ProvisionRequest instances for a ServiceElement */
-                ArrayList<ProvisionRequest> items = new ArrayList<ProvisionRequest>();
-                Set<Key> keys = collection.keySet();
-                for (Key key : keys) {
-                    ProvisionRequest pr = collection.get(key);
-                    if (sElem.equals(pr.getServiceElement())) {
-                        items.add(pr);
-                    }
+        ProvisionRequest[] prs;
+        /* Get all ProvisionRequest instances */
+        if(sElem==null) {
+            Collection<ProvisionRequest> c = collection.values();
+            prs = c.toArray(new ProvisionRequest[0]);
+        } else {
+            /* Get the ProvisionRequest instances for a ServiceElement */
+            ArrayList<ProvisionRequest> items = new ArrayList<ProvisionRequest>();
+            Set<Key> keys = collection.keySet();
+            for (Key key : keys) {
+                ProvisionRequest pr = collection.get(key);
+                if (sElem.equals(pr.getServiceElement())) {
+                    items.add(pr);
                 }
-                prs = items.toArray(new ProvisionRequest[items.size()]);
             }
+            prs = items.toArray(new ProvisionRequest[0]);
         }
-        return(prs);
+        return prs;
     }
     
     /**

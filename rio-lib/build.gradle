@@ -2,7 +2,6 @@ description = 'Module :: Rio Library'
 dependencies {
     compile project(':rio-platform')
     //compileOnly group: 'org.apache.commons', name: 'commons-compress', version: '[1.18,)'
-    implementation project(':rio-logging-support')
     implementation project(':rio-start')
     compile group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
     compile group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
@@ -11,7 +10,7 @@ dependencies {
     implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
     implementation files("${System.properties['java.home']}/../lib/tools.jar")
     testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
-    testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
+    /*testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"*/
 }
 
 sourceSets {
@@ -27,9 +26,18 @@ sourceSets {
 
 jar {
     manifest {
-        attributes("Class-Path": "jsk-lib-${riverVersion}.jar")
+        attributes("Class-Path": "jsk-lib-${riverVersion}.jar",
+                "Implementation-Title": "Rio Project",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
     }
 }
+
 test {
     systemProperty 'java.security.policy', policyAll
+    testLogging {
+        events "passed", "skipped", "failed"/*, "standardOut", "standardError"*/
+    }
 }

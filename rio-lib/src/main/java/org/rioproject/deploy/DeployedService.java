@@ -25,9 +25,9 @@ import java.io.Serializable;
  */
 public class DeployedService implements Serializable {
     static final long serialVersionUID = 1L;
-    private ServiceElement serviceElement;
-    private ServiceBeanInstance serviceBeanInstance;
-    private ComputeResourceUtilization computeResourceUtilization;
+    private final ServiceElement serviceElement;
+    private final ServiceBeanInstance serviceBeanInstance;
+    private final ComputeResourceUtilization computeResourceUtilization;
 
     public DeployedService(ServiceElement serviceElement,
                            ServiceBeanInstance serviceBeanInstance,

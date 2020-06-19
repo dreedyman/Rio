@@ -68,7 +68,7 @@ manager {
         '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.home}${/}policy${/}policy.all '+
         '-Drio.home=${rio.home} -Drio.test.attach '+
         '-Dorg.rioproject.groups=${org.rioproject.groups} '+
-        '-Dorg.rioproject.service=${service}'
+        '-Drio.log.dir=${rio.log.dir} -Dorg.rioproject.service=${service}'
 
     secureJvmOptions =
             '-Djavax.net.ssl.keyStore='+rioHome+'/config/ssl/rio.keystore.jks ' +

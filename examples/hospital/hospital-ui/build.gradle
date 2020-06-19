@@ -1,7 +1,0 @@
-group = 'org.rioproject.examples.hospital'
-description = 'Example :: Hospital UI'
-dependencies {
-    compile project(':examples:hospital:hospital-api')
-    compile project(':rio-lib')
-    compile group: 'jfree', name: 'jfreechart', version: '1.0.0'
-}

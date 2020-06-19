@@ -439,8 +439,8 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
             }
             //setChanged(StatusType.NORMAL);
         }
-        if (svcConsumer != null)
-            svcConsumer.updateMonitors();
+        /*if (svcConsumer != null)
+            svcConsumer.updateMonitors();*/
     }
 
     private int getInstantiatedServiceCount() {
@@ -1169,7 +1169,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     if(loaderLogger.isTraceEnabled())
                         loaderLogger.trace("Cancel allocation of {} activeServiceCounter=[{}] numPlannedServices=[{}]",
                                            ServiceLogUtil.logName(event), activeServiceCounter, numPlannedServices+"]");
-                    return(null);
+                    return null;
                 }
 
                 inProcess.add(event);
@@ -1228,7 +1228,7 @@ public class CybernodeImpl extends ServiceBeanAdapter implements Cybernode,
                     }
                     throw e;
                 }
-                return(deployedService);
+                return deployedService;
             } else {
                 throw new ServiceBeanInstantiationException("Service Limit of ["+serviceLimit+"] has been reached");
             }

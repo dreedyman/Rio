@@ -76,7 +76,6 @@ import java.util.List;
 public class ServiceStarter {
     static {
         RioProperties.load();
-        LogManagementHelper.checkConfigurationReset();
     }
     /**
      * Component name for service starter configuration entries
@@ -440,7 +439,6 @@ public class ServiceStarter {
      * @see net.jini.config.ConfigurationProvider
      */
     public static void main(String[] args) {
-        LogManagementHelper.setup();
         logger.debug("Entering {}", ServiceStarter.class.getName());
         ensureSecurityManager();
         try {

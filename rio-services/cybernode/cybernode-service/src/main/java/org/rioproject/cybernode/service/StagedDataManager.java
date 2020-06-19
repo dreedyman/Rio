@@ -41,13 +41,13 @@ import java.util.*;
 public class StagedDataManager {
     /** Collection of PlatformCapability instances that have been installed
      * by the ServiceBeanDelegateImpl */
-    private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<PlatformCapability>();
-    private final List<DownloadRecord> dlRecords = new ArrayList<DownloadRecord>();
-    private final Map<StagedData, DownloadRecord[]> downloadedArtifacts = new HashMap<StagedData, DownloadRecord[]>();
+    private final Collection<PlatformCapability> installedPlatformCapabilities = new ArrayList<>();
+    private final List<DownloadRecord> dlRecords = new ArrayList<>();
+    private final Map<StagedData, DownloadRecord[]> downloadedArtifacts = new HashMap<>();
     private ServiceElement sElem;
-    private ComputeResource computeResource;
+    private final ComputeResource computeResource;
     /** Logger */
-    static Logger logger = LoggerFactory.getLogger("org.rioproject.cybernode");
+    static Logger logger = LoggerFactory.getLogger(StagedDataManager.class.getName());
 
     /**
      * Create a StagedDataManager
@@ -89,7 +89,7 @@ public class StagedDataManager {
      * none were removed, return a zero-length array
      */
     public PlatformCapability[] removeInstalledPlatformCapabilities(boolean force) {
-        List<PlatformCapability> removed = new ArrayList<PlatformCapability>();
+        List<PlatformCapability> removed = new ArrayList<>();
         for (PlatformCapability pCap : installedPlatformCapabilities) {
             StagedSoftware[] software = pCap.getStagedSoftware();
             for(StagedSoftware sw : software) {
@@ -105,7 +105,7 @@ public class StagedDataManager {
             }
         }
 
-        return removed.toArray(new PlatformCapability[removed.size()]);
+        return removed.toArray(new PlatformCapability[0]);
     }
 
     /**
@@ -145,7 +145,7 @@ public class StagedDataManager {
      * was downloaded return a zero-length array
      */
     public DownloadRecord[] getDownloadRecords() {
-        return dlRecords.toArray(new DownloadRecord[dlRecords.size()]);
+        return dlRecords.toArray(new DownloadRecord[0]);
     }
 
     /**
@@ -188,18 +188,23 @@ public class StagedDataManager {
         }
 
         StagedData[] stagedData = sElem.getStagedData();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Service {} has {} staged data items", sElem.getName(), stagedData.length);
+        }
         for (StagedData data : stagedData) {
+            if (logger.isDebugEnabled()) {
+                logger.info("StagedData: {}", data.toString());
+            }
             DownloadRecord dlRec;
             if (data.getInstallRoot().startsWith(File.separator)) {
                 DownloadManager dlManager = new DownloadManager(data);
                 dlRec = dlManager.download();
-                dlRecords.add(dlRec);
             } else {
                 String provisionRoot = computeResource.getPersistentProvisioningRoot();
                 DownloadManager dlManager = new DownloadManager(provisionRoot, data);
                 dlRec = dlManager.download();
-                dlRecords.add(dlRec);
             }
+            dlRecords.add(dlRec);
             if (data.getPerms() != null) {
                 if (OperatingSystemType.isWindows()) {
                     logger.warn("Cannot apply permissions [{}] to StagedData on Windows", data.getPerms());
@@ -235,7 +240,7 @@ public class StagedDataManager {
         PlatformCapability[] platformCapabilities = computeResource.getPlatformCapabilities();
         SystemComponent[] jsbRequirements =
             sElem.getServiceLevelAgreements().getSystemRequirements().getSystemComponents();
-        ArrayList<SystemComponent> missing = new ArrayList<SystemComponent>();
+        ArrayList<SystemComponent> missing = new ArrayList<>();
 
         /*
          * If there are no PlatformCapability requirements we can return

@@ -1,36 +1,17 @@
-description = 'Module :: Rio Test Infrastructure'
+
+apply from: "${rootDir}/gradle/integrationTest.gradle"
+
+description = 'Module :: Rio Integration Tests'
 dependencies {
-    testCompile project(':rio-lib')
-    testCompile project(':rio-test')
-    testCompile project(':rio-logging-support')
-    testCompile group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
-    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
-    testRuntime group: 'ch.qos.logback', name: 'logback-core', version: "${logbackVersion}"
-    testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: "${logbackVersion}"
-    testRuntime "org.slf4j:jul-to-slf4j:$slf4jVersion"
-    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
-    testCompile group: 'org.apache.river', name: 'outrigger-dl', version: "${riverVersion}"
-    testCompile group: 'org.apache.river', name: 'outrigger', version: "${riverVersion}"
+    integrationTestCompile project(':rio-lib')
+    integrationTestCompile project(':rio-test')
+    integrationTestCompile group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+    integrationTestCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
 
+    integrationTestRuntime "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+    integrationTestRuntime "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+    integrationTestRuntime "org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}"
+    integrationTestRuntime "org.apache.logging.log4j:log4j-jul:${log4jVersion}"
 }
 
-sourceSets {
-    test {
-        java { srcDirs = [] }
-        groovy { srcDirs += ['src/test/java'] }
-    }
-}
-test {
-    dependsOn([":distribution:createDistribution",
-               ":cybernode-proxy:publishToMavenLocal",
-               ":monitor-proxy:publishToMavenLocal"])
-    systemProperty 'java.security.policy', policyAll
-    systemProperty "rio.home", "${project(":distribution").buildDir.path}/rio-${version}"
-    systemProperty "rio.test.home", "${projectDir.path}"
-    systemProperty "org.rioproject.test.manager.config", "${projectDir.path}/src/test/conf/manager-config.groovy"
-    //systemProperty "org.rioproject.test.config", "${projectDir.path}/src/test/conf/test-config.groovy"
-
-    testLogging {
-        events "passed", "skipped", "failed"/*, "standardOut", "standardError"*/
-    }
-}

@@ -22,20 +22,30 @@ import net.jini.config.ConfigurationProvider;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.exec.ExecDescriptor;
 //import org.rioproject.impl.system.measurable.SigarHelper;
+import org.rioproject.impl.jmx.JMXConnectionUtil;
 import org.rioproject.impl.system.measurable.cpu.CPU;
+import org.rioproject.impl.system.measurable.cpu.ProcessCPUHandler;
 import org.rioproject.impl.system.measurable.memory.Memory;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.servicebean.ServiceBean;
 import org.rioproject.servicebean.ServiceBeanContext;
+import org.rioproject.sla.SLA;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
+import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
+import org.rioproject.watch.WatchDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServerConnection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -153,17 +163,16 @@ public class ServiceExecutor {
     private ProcessManager processManager;
     private ExecDescriptor execDescriptor;
     private String shellTemplate;
-    //private SigarHelper sigar;
     private Memory memory;
     private CPU cpu;
-    private long actualPID=-1;
+    private long actualPID = -1;
+    private MBeanServerConnection mbsc;
     private static final String COMPONENT = ServiceExecutor.class.getPackage().getName();
     private int pidFileWaitTime = 60; // number of seconds
-    private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceExecutor.class.getName());
 
     public void setServiceBeanContext(final ServiceBeanContext context)
         throws ServiceBeanInstantiationException, IOException {
-        //private MBeanServerConnection mbsc;
         try {
             shellTemplate = (String)context.getConfiguration().getEntry(COMPONENT,
                                                                         "shellTemplate",
@@ -183,7 +192,7 @@ public class ServiceExecutor {
             logger.warn("Getting pidFileWaitTime, using default", e);
         }
         execDescriptor = context.getServiceElement().getExecDescriptor();
-        if(execDescriptor==null)
+        if(execDescriptor == null)
             throw new ServiceBeanInstantiationException("An ExecDescriptor is required " +
                                                 "by the ServiceExecutor," +
                                                 " unable to proceed.");
@@ -257,7 +266,7 @@ public class ServiceExecutor {
                 waited++;
             }
         }
-        if(actualPID==-1) {
+        if(actualPID == -1) {
             long managedPID = processManager.getPid();
             long waited = 0;
             long t0 = System.currentTimeMillis();
@@ -275,17 +284,17 @@ public class ServiceExecutor {
                         s.append(", ");
                     s.append(ids[i]);
                 }
-                System.out.println("JMX pids: ["+s.toString()+"]");
+                logger.info("JMX pids: ["+s.toString()+"]");
                 long[] pids = new long[ids.length];
                 for(int i=0; i<ids.length; i++)
                     pids[i] = new Long(ids[i]);
 
                 /* First check to see if the actualPID is in the list of JMX managed pids */
                 for(long pid : pids) {
-                    if(pid==managedPID) {
+                    if(pid == managedPID) {
                         actualPID = managedPID;
                         long t1 = System.currentTimeMillis();
-                        System.out.println("Time waiting for process to be under JMX management: "+(t1/t0)+" milliseconds");
+                        logger.info("Time waiting for process to be under JMX management: "+(t1 / t0)+" milliseconds");
                         break;
                     }
                 }
@@ -315,13 +324,11 @@ public class ServiceExecutor {
             if(actualPID==-1)
                 logger.warn("No SIGAR support available, unable to obtain PID");
         }*/
-        /*if(actualPID!=-1) {
+        if(actualPID != -1) {
             logger.info("PID of exec'd process obtained: "+actualPID);
             try {
                 mbsc = JMXConnectionUtil.attach(Long.toString(actualPID));
                 logger.info("JMX Attach succeeded to exec'd JVM with pid: "+actualPID);
-                createSystemWatches();
-                setThreadDeadlockDetector(context.getServiceElement());
                 checkWatchDescriptors(context.getServiceElement());
             } catch(Exception e) {
                 logger.warn("Could not attach to the exec'd JVM with PID: " +
@@ -331,7 +338,7 @@ public class ServiceExecutor {
         } else {
             logger.info("Could not obtain actual PID of exec'd process, " +
                         "process cpu and java memory utilization are not available");
-        }*/
+        }
 
     }
 
@@ -350,51 +357,15 @@ public class ServiceExecutor {
     /*private void setThreadDeadlockDetector(final ServiceElement elem) {
         ServiceElementUtil.setThreadDeadlockDetector(elem, mbsc);
     }
+    */
 
-    private void createSystemWatches() {
-        if(sigar!=null) {
-            int pidToUse = (int)(actualPID==-1?processManager.getPid():actualPID);
-            memory = new Memory(config);
-            ProcessMemoryMonitor memMonitor =
-                (ProcessMemoryMonitor)memory.getMeasurableMonitor();
-            memMonitor.setPID(pidToUse);
-            if(mbsc!=null) {
-                MemoryMXBean memBean =
-                    getPlatformMXBeanProxy(mbsc,
-                                           ManagementFactory.MEMORY_MXBEAN_NAME,
-                                           MemoryMXBean.class);
-                memMonitor.setMXBean(memBean);
-            } else {
-                memMonitor.setMXBean(null);
-            }
-
-            memory.start();
-
-            cpu = new CPU(config, SystemWatchID.PROC_CPU, true);
-            ProcessCPUHandler cpuMonitor = (ProcessCPUHandler)cpu.getMeasurableMonitor();
-            cpuMonitor.setPID(pidToUse);
-            OperatingSystemMXBean opSys =
-                getPlatformMXBeanProxy(mbsc,
-                                       ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME,
-                                       OperatingSystemMXBean.class);
-            cpuMonitor.setMXBean(opSys);
-            RuntimeMXBean runtime =
-                getPlatformMXBeanProxy(mbsc,
-                                       ManagementFactory.RUNTIME_MXBEAN_NAME,
-                                       RuntimeMXBean.class);
-            cpuMonitor.setStartTime(runtime.getStartTime());
-            cpu.start();
-
-            context.getWatchRegistry().register(memory, cpu);
-        }
-    }*/
 
    /* private <T> T getPlatformMXBeanProxy(final MBeanServerConnection mbsc,
                                          final String name,
                                          final Class<T> mxBeanInterface) {
         return JMXUtil.getPlatformMXBeanProxy(mbsc, name, mxBeanInterface);
     }
-
+    */
     private void checkWatchDescriptors(ServiceElement elem) {
         SLA[] slas = elem.getServiceLevelAgreements().getServiceSLAs();
         for(SLA sla : slas) {
@@ -404,7 +375,7 @@ public class ServiceExecutor {
                     wDesc.setMBeanServerConnection(mbsc);
             }
         }
-    }*/
+    }
 
     private String getCommandLine(final ExecDescriptor exec) {
         String cmd;
@@ -477,7 +448,7 @@ public class ServiceExecutor {
         long pid;
         try (BufferedReader in = new BufferedReader(new FileReader(f))) {
             String line = in.readLine().trim();
-            pid = Long.valueOf(line);
+            pid = Long.parseLong(line);
         }
         return pid;
     }

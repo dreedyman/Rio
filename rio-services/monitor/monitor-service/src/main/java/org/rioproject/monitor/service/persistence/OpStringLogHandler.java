@@ -19,7 +19,6 @@ import com.sun.jini.reliableLog.LogHandler;
 import org.rioproject.monitor.service.OpStringManager;
 import org.rioproject.monitor.service.OpStringManagerController;
 import org.rioproject.opstring.OperationalString;
-import org.rioproject.opstring.OperationalStringException;
 import org.rioproject.impl.persistence.SnapshotHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,17 +36,17 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
     /**
      * Collection of of recovered Operational Strings to add
      */
-    private final Collection<OperationalString> recoveredOpstrings = new ArrayList<OperationalString>();
+    private final Collection<OperationalString> recoveredOpstrings = new ArrayList<>();
     /**
      * Collection of of recovered Operational Strings to add
      */
-    private final Collection<RecordHolder> updatedOpstrings = new ArrayList<RecordHolder>();
+    private final Collection<RecordHolder> updatedOpstrings = new ArrayList<>();
     /**
      * flag to indicate whether OperationalStrings have been recovered
      */
     private boolean opStringsRecovered = false;
     /** Flag to indicate that we are in recover mode */
-    private AtomicBoolean inRecovery = new AtomicBoolean(false);
+    private final AtomicBoolean inRecovery = new AtomicBoolean(false);
     /** Log File must contain this many records before a snapshot is allowed */
     // TODO - allow this to be a user configurable parameter
     int logToSnapshotThresh = 10;
@@ -75,10 +74,9 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
         ObjectOutputStream oostream = new ObjectOutputStream(out);
         oostream.writeUTF(OpStringLogHandler.class.getName());
         oostream.writeInt(LOG_VERSION);
-        List<OperationalString> list = new ArrayList<OperationalString>();
         OperationalString[] opStrings = opStringMangerController.getOperationalStrings();
-        list.addAll(Arrays.asList(opStrings));
-        oostream.writeObject(new MarshalledObject<List<OperationalString>>(list));
+        List<OperationalString> list = new ArrayList<>(Arrays.asList(opStrings));
+        oostream.writeObject(new MarshalledObject<>(list));
         oostream.flush();
     }
 
@@ -95,8 +93,8 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
             throw new IOException("Log from wrong implementation");
         if (oistream.readInt() != LOG_VERSION)
             throw new IOException("Wrong log format version");
-        MarshalledObject mo = (MarshalledObject) oistream.readObject();
-        List<OperationalString> list = (List<OperationalString>) mo.get();
+        MarshalledObject<List<OperationalString>> mo = (MarshalledObject<List<OperationalString>>) oistream.readObject();
+        List<OperationalString> list = mo.get();
         for (OperationalString opString : list) {
             if (logger.isDebugEnabled())
                 logger.debug("Recovered : " + opString.getName());
@@ -150,7 +148,7 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
      *         been recovered or updated, otherwise <code>false</code>
      */
     boolean opStringsRecovered() {
-        return (opStringsRecovered);
+        return opStringsRecovered;
     }
 
     /**
@@ -160,12 +158,12 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
         for (OperationalString opString : recoveredOpstrings) {
             try {
                 if (!opStringMangerController.opStringExists(opString.getName())) {
-                    Map<String, Throwable> map = new HashMap<String, Throwable>();
+                    Map<String, Throwable> map = new HashMap<>();
                     opStringMangerController.addOperationalString(opString, map, null, null, null);
                     opStringMangerController.dumpOpStringError(map);
                 } else {
                     OpStringManager opMgr = opStringMangerController.getOpStringManager(opString.getName());
-                    Map map = opMgr.doUpdateOperationalString(opString);
+                    Map<String, Throwable> map = opMgr.doUpdateOperationalString(opString);
                     opStringMangerController.dumpOpStringError(map);
                 }
             } catch (Exception ex) {
@@ -177,23 +175,19 @@ public class OpStringLogHandler extends LogHandler implements SnapshotHandler {
 
     /**
      * Process updated OperationalString objects
-     *
-     * @throws org.rioproject.opstring.OperationalStringException
-     *          if there are errors processing
-     *          the OperationalStrings
      */
-    void processUpdatedOpStrings() throws OperationalStringException {
+    void processUpdatedOpStrings()  {
         for (RecordHolder holder : updatedOpstrings) {
             OperationalString opString = holder.getOperationalString();
             try {
                 if (holder.getAction() == RecordHolder.MODIFIED) {
                     if (!opStringMangerController.opStringExists(opString.getName())) {
-                        Map<String, Throwable> map = new HashMap<String, Throwable>();
+                        Map<String, Throwable> map = new HashMap<>();
                         opStringMangerController.addOperationalString(opString, map, null, null, null);
                         opStringMangerController.dumpOpStringError(map);
                     } else {
                         OpStringManager opMgr = opStringMangerController.getOpStringManager(opString.getName());
-                        Map map = opMgr.doUpdateOperationalString(opString);
+                        Map<String, Throwable> map = opMgr.doUpdateOperationalString(opString);
                         opStringMangerController.dumpOpStringError(map);
                     }
                 } /*else {

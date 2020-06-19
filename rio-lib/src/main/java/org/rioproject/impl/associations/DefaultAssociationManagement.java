@@ -1035,7 +1035,7 @@ public class DefaultAssociationManagement implements AssociationManagement {
 
                     logger.info("Create ServiceDiscovery for {}", associationDescriptor.toString());
 
-                    LookupDiscoveryManager lookupDiscoveryManager =
+                    /*LookupDiscoveryManager lookupDiscoveryManager =
                             new LookupDiscoveryManager(associationDescriptor.getGroups(),
                                                        associationDescriptor.getLocators(),
                                                        this,
@@ -1046,11 +1046,12 @@ public class DefaultAssociationManagement implements AssociationManagement {
                                                         new LeaseRenewalManager(EmptyConfiguration.INSTANCE),
                                                         EmptyConfiguration.INSTANCE);
 
-                    lCache = serviceDiscoveryManager.createLookupCache(template, null, this);
-/*                    lCache = lcPool.getLookupCache(sharedName, associationDescriptor.getGroups(),
+                    lCache = serviceDiscoveryManager.createLookupCache(template, null, this);*/
+                    lCache = lcPool.getLookupCache(sharedName,
+                                                   associationDescriptor.getGroups(),
                                                    associationDescriptor.getLocators(),
                                                    template);
-                    lCache.addListener(this);*/
+                    lCache.addListener(this);
                     logger.debug("DefaultAssociationManagement for [{}], obtained LookupCache for [{}]",
                                  clientName, associationDescriptor.getName());
                 } else {
@@ -1134,6 +1135,9 @@ public class DefaultAssociationManagement implements AssociationManagement {
          */
         public void serviceAdded(final ServiceDiscoveryEvent sdEvent) {
             ServiceItem item = sdEvent.getPostEventServiceItem();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service added " + item.service.getClass().getName());
+            }
             if(item.service==null) {
                 logger.warn("[{}] serviceAdded [{}], service is null, abort notification",
                             clientName, association.getName());

@@ -108,28 +108,13 @@ class TestManager {
         this.testConfig = testConfig
         config = loadManagerConfig()
         if(config.manager.cleanLogs) {
-            File logs = getCreatedLogsFile(testConfig.component)
-            if(logs.exists()) {
-                logs.eachLine { line ->
-                    File f = new File((String)line)
-                    if(f.exists()) {
-                        if(FileUtils.remove(f)) {
-                            log.debug "Removed ${f.name}"
-                        } else {
-                            log.debug "Could not remove ${f.name}, check permissions"
-                        }
-                    }
-                }
-                logs.delete()
-            }
+            cleanLogs()
         }
         rioHome = System.getProperty('rio.home')
         if(rioHome==null)
             throw new IllegalStateException('The rio.home system property must be set')
-        groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME)
-        if(groups==null)
-            throw new IllegalStateException("The ${Constants.GROUPS_PROPERTY_NAME} system "+
-                                            "property must be set")
+
+        groups = testConfig.groups
         log.info "Using [${groups}] group for discovery"
 
         DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance()
@@ -139,9 +124,10 @@ class TestManager {
             discoPool.setConfiguration(conf)
         }
 
-        DiscoveryManagement dMgr = discoPool.getDiscoveryManager(testConfig.component)
-        serviceDiscoveryManager =
-            new ServiceDiscoveryManager(dMgr, new LeaseRenewalManager())
+        DiscoveryManagement dMgr = discoPool.getDiscoveryManager(testConfig.component,
+                JiniClient.parseGroups(testConfig.groups),
+                JiniClient.parseLocators(testConfig.locators))
+        serviceDiscoveryManager = new ServiceDiscoveryManager(dMgr, new LeaseRenewalManager())
         //String hosts = System.getProperty(TEST_HOSTS, '')
 
         if(createShutdownHook) {
@@ -157,6 +143,23 @@ class TestManager {
         }
 
         startConfiguredServices()
+    }
+
+    void cleanLogs() {
+        File logs = getCreatedLogsFile(testConfig.component)
+        if(logs.exists()) {
+            logs.eachLine { line ->
+                File f = new File((String)line)
+                if(f.exists()) {
+                    if(FileUtils.remove(f)) {
+                        log.debug "Removed ${f.name}"
+                    } else {
+                        log.debug "Could not remove ${f.name}, check permissions"
+                    }
+                }
+            }
+            logs.delete()
+        }
     }
 
     private void startConfiguredServices() {
@@ -305,8 +308,9 @@ class TestManager {
 
         String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${m2Repo}"
         String rioTestHome = System.getProperty('rio.test.home')
+        String testRoots = System.getProperty("rio.test.webster.roots")
         if (rioTestHome != null) {
-            websterRoots = websterRoots +";${rioTestHome}/build/"
+            websterRoots = websterRoots +";${testRoots}"
         }
         Webster webster = new Webster(0, websterRoots)
         websters.add(webster)
@@ -460,7 +464,7 @@ class TestManager {
      * @param name The name of a deployed OperationalString
      * @param monitor The ProvisionMonitor instance to perform the undeployment
      */
-    boolean undeploy(String name, ProvisionMonitor monitor) {
+    static boolean undeploy(String name, ProvisionMonitor monitor) {
         if(monitor!=null) {
             DeployAdmin dAdmin = (DeployAdmin)monitor.admin
             return dAdmin.undeploy(name)
@@ -475,14 +479,18 @@ class TestManager {
      *
      * @param monitor The ProvisionMonitor instance to perform the undeployment
      */
-    def undeployAll(ProvisionMonitor monitor) {
-        DeployAdmin deployAdmin = (DeployAdmin) monitor.getAdmin()
-        OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers()
-        for (OperationalStringManager mgr : opStringMgrs) {
-            String opStringName = mgr.getOperationalString().name
-            log.debug "Undeploying ${opStringName} ..."
-            deployAdmin.undeploy(opStringName)
-            log.debug "Undeployed ${opStringName}"
+    static void undeployAll(ProvisionMonitor monitor) {
+        try {
+            DeployAdmin deployAdmin = (DeployAdmin) monitor.getAdmin()
+            OperationalStringManager[] opStringMgrs = deployAdmin.getOperationalStringManagers()
+            for (OperationalStringManager mgr : opStringMgrs) {
+                String opStringName = mgr.getOperationalString().name
+                log.debug "Undeploying ${opStringName} ..."
+                deployAdmin.undeploy(opStringName)
+                log.debug "Undeployed ${opStringName}"
+            }
+        } catch (Exception e) {
+            log.error("While undeploying", e)
         }
     }
 
@@ -681,16 +689,9 @@ class TestManager {
         if(!service.equals(("reggie")))
             classpathBuilder.append(buildClassPath(loggingLibDir, "rio-logging-support"))
 
-        /* Check if logback is being used, if so set logback configuration */
-        if(testConfig.getLoggingSystem()==TestConfig.LoggingSystem.LOGBACK) {
-            jvmOptions = jvmOptions+" -Dlogback.configurationFile=${rioHome}/config/logging/logback.groovy"
-            File logbackDir = new File(loggingLibDir, "logback")
-            classpathBuilder.append(buildClassPath(logbackDir))
-        } else {
-            jvmOptions = jvmOptions+" -Djava.util.logging.config.file=${rioHome}/config/logging/rio-logging.properties"
-            File julDir = new File(loggingLibDir, "jul")
-            classpathBuilder.append(buildClassPath(julDir))
-        }
+        jvmOptions = jvmOptions + " -Dlog4j.configurationFile=${rioHome}/config/logging/log4j2.xml "
+        jvmOptions = jvmOptions + " -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager "
+        jvmOptions = jvmOptions + " -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector "
 
         String logDir = null
         String mainClass = "${config.manager.mainClass}"
@@ -900,7 +901,7 @@ class TestManager {
         }
         service = serviceItem.service
         log.info "${sb.toString()} has been discovered, elapsed time: ${(System.currentTimeMillis()-t0)} millis"
-        return service
+        service
     }
 
     private String getJava() {

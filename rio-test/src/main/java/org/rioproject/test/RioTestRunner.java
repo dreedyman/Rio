@@ -26,14 +26,10 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
 import org.rioproject.RioVersion;
-import org.rioproject.logging.LoggingSystem;
 import org.rioproject.url.ProtocolRegistryService;
 import org.rioproject.url.artifact.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
-
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -43,7 +39,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.LogManager;
 
 /**
  * RioTestRunner is a custom extension of {@link BlockJUnit4ClassRunner}
@@ -57,20 +52,6 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         if (System.getSecurityManager() == null) {
             Utils.checkSecurityPolicy();
             System.setSecurityManager(new SecurityManager());
-        }
-        if(LoggingSystem.usingJUL()) {
-            if(System.getProperty("java.util.logging.config.file")==null) {
-                LogManager logManager = LogManager.getLogManager();
-                try {
-                    logManager.readConfiguration(
-                            Thread.currentThread().getClass().getResourceAsStream("/default-logging.properties"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            SLF4JBridgeHandler.install();
-            java.util.logging.LogManager.getLogManager().getLogger("").setLevel(java.util.logging.Level.FINEST);
         }
         /* If the artifact URL has not been configured, set it up */
         try {
@@ -313,8 +294,6 @@ public class RioTestRunner extends BlockJUnit4ClassRunner {
         sb.append("testManager:   ").append(testConfig.getTestManager().getClass().getName());
         sb.append("\n");
         sb.append("harvest:       ").append(testConfig.runHarvester());
-        sb.append("\n");
-        sb.append("loggingSystem: ").append(testConfig.getLoggingSystem().name().toLowerCase());
         sb.append("\n");
         sb.append("timeout:       ").append((testConfig.getTimeout()==0?
                 "<not declared>":testConfig.getTimeout()));

@@ -118,7 +118,7 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
     private final static Logger logger = LoggerFactory.getLogger(ServiceBeanDelegateImpl.class.getName());
     /** Result from loading the service */
     private ServiceBeanLoaderResult loadResult;
-    private AtomicBoolean isDiscarded = new AtomicBoolean(false);
+    private final AtomicBoolean isDiscarded = new AtomicBoolean(false);
 
     /**
      * Create a ServiceBeanDelegateImpl

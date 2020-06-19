@@ -81,23 +81,23 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     /** Indicates a JSB cannot be provisioned */
     public static final int BAD_CYBERNODE = 1 << 2;
     /** The Landlord that will manage leases for ServiceInstantiation resources */
-    private LandlordLessor landlord;
+    private final LandlordLessor landlord;
     /** ProvisionEvent sequence number */
-    private AtomicInteger serviceProvisionEventSequenceNumber = new AtomicInteger(0);
+    private final AtomicInteger serviceProvisionEventSequenceNumber = new AtomicInteger(0);
     /** EventRegistration sequence number */
-    private AtomicInteger eventRegistrationSequenceNumber = new AtomicInteger(0);
+    private final AtomicInteger eventRegistrationSequenceNumber = new AtomicInteger(0);
     /** Event source */
-    private Object eventSource;
+    private final Object eventSource;
     /** EventHandler to fire ProvisionFailureEvent notifications */
-    private EventHandler failureHandler;
+    private final EventHandler failureHandler;
     /** Executor for provision processing */
-    private ThreadPoolExecutor provisioningPool;
+    private final ThreadPoolExecutor provisioningPool;
     /** Executor for provision failure event processing */
-    private ThreadPoolExecutor provisionFailurePool;
+    private final ThreadPoolExecutor provisionFailurePool;
     /** Collection of in-process provision attempts */
-    private final List<ServiceElement> inProcess = Collections.synchronizedList(new ArrayList<ServiceElement>());
+    private final List<ServiceElement> inProcess = Collections.synchronizedList(new ArrayList<>());
     /** A Watch to measure provision time */
-    private GaugeWatch watch;
+    private final GaugeWatch watch;
     /** Manages pending provision dispatch requests for provision types of auto */
     private final PendingManager pendingMgr;
     /** Manages provision dispatch requests for provision types of station */
@@ -105,7 +105,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
     /** Manages the selection of ServiceResource objects for provisioning requests */
     private final ServiceResourceSelector selector;
     /** ProxyPreparer for ServiceInstantiator proxies */
-    private ProxyPreparer instantiatorPreparer;
+    private final ProxyPreparer instantiatorPreparer;
     private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** Logger instance */
     private static final Logger logger = LoggerFactory.getLogger(ServiceProvisioner.class);
@@ -244,7 +244,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @throws RemoteException for comm errors
      */
     EventRegistration register(final MarshalledObject<ServiceBeanInstantiator> sbi,
-                               final MarshalledObject handback,
+                               final MarshalledObject<?> handback,
                                final ResourceCapability resourceCapability,
                                final List<DeployedService> deployedServices,
                                final int serviceLimit,

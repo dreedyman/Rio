@@ -105,38 +105,6 @@ public class DiscoveryManagementPool {
     /**
      * This method will return an instance of <code>DiscoveryManagement</code>
      * based on matching the shared name, groups and locators as criteria. If there
-     * is an existing instance of <code>DiscoveryManagement</code> instantiated by 
-     * this utility, that instance will be returned. Otherwise a new
-     * <code>DiscoveryManagement</code> instance will be created and returned
-     * 
-     * <p>Note: Use of returned DiscoveryManagement
-     * instances must be used with care as changing the settings of the returned
-     * DiscoveryManagement instance may present problems for other users of
-     * DiscoveryManagement instance and is not advised.
-     * 
-     * @param sharedName The name the DiscoveryManagement instances are shared across
-     *
-     * @return A DiscoveryManagement object suitable for lookup discovery
-     * management using the following system properties:
-     * <ul>
-     * <li>org.rioproject.groups: a comma separated list of groups to use. If this
-     * property is not found LookupDiscoveryGroups will be set to
-     * LookupDiscovery.NO_GROUPS. Additionally, the value of "all" will be set
-     * to LookupDiscovery.ALL_GROUPS
-     * <li>org.rioproject.locators: a comma separated list of
-     * LookupLocator formatted URLs
-     *
-     * @throws IOException If the DiscoveryManagement instance cannot be created
-     */
-    public DiscoveryManagement getDiscoveryManager(String sharedName) throws IOException {
-        String[] groups = JiniClient.parseGroups(System.getProperty(Constants.GROUPS_PROPERTY_NAME));
-        LookupLocator[] locators = JiniClient.parseLocators(System.getProperty(Constants.LOCATOR_PROPERTY_NAME));
-        return getDiscoveryManager(sharedName, groups, locators, null, defaultConfig);
-    }
-
-    /**
-     * This method will return an instance of <code>DiscoveryManagement</code>
-     * based on matching the shared name, groups and locators as criteria. If there
      * is an existing instance of <code>DiscoveryManagement</code> instantiated by
      * this utility, that instance will be returned. Otherwise a new
      * <code>DiscoveryManagement</code> instance will be created and returned

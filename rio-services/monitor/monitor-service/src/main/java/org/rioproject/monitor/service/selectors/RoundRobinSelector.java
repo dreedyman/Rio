@@ -40,7 +40,7 @@ public class RoundRobinSelector extends ServiceResourceSelector {
      * Construct a RoundRobinSelector
      */
     public RoundRobinSelector() {
-        collection = new LinkedList<LeasedResource>();
+        collection = new LinkedList<>();
     }
 
     /**
@@ -48,10 +48,8 @@ public class RoundRobinSelector extends ServiceResourceSelector {
      */
     public void serviceResourceSelected(ServiceResource svcResource) {
         LinkedList<LeasedResource> list = (LinkedList<LeasedResource>)collection;
-        synchronized(collectionLock) {
-            list.remove(svcResource);
-            list.addLast(svcResource);
-        }
+        list.remove(svcResource);
+        list.addLast(svcResource);
     }
 
     /**
@@ -60,10 +58,8 @@ public class RoundRobinSelector extends ServiceResourceSelector {
     @Override
     protected void update(LeasedResource resource) {
         LinkedList<LeasedResource> list = (LinkedList<LeasedResource>)collection;
-        synchronized(collectionLock) {
-            int index = list.indexOf(resource);
-            if(index != -1)
-                list.set(index, resource);
-        }
+        int index = list.indexOf(resource);
+        if(index != -1)
+            list.set(index, resource);
     }
 }

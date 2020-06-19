@@ -36,7 +36,7 @@ public class ServiceProvisionContext {
     private final List<ServiceElement> inProcess;
     private ProvisionRequest request;
     private ServiceResource svcResource;
-    private Object eventSource;
+    private final Object eventSource;
     private final GaugeWatch watch;
     private final ServiceProvisionDispatcher dispatcher;
     private final ThreadPoolExecutor provisionFailurePool;

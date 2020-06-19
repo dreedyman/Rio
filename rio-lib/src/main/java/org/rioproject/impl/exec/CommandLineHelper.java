@@ -212,28 +212,24 @@ public final class CommandLineHelper {
 
     private static String getLoggerConfig(String inputArgs, String rioHome) {
         StringBuilder logger = new StringBuilder();
-        if(usingLogback()) {
-            /* Check if logback is being used, if so set logback configuration */
-            if(!inputArgs.contains("logback.configurationFile")) {
-                logger.append(getOption("logback.configurationFile",
-                                             buildDirectory(rioHome, "config", "logging")+"logback.groovy"));
-                logger.append(" ");
-            }
-        } else {
-            if(!inputArgs.contains("java.util.logging.config.file")) {
-                logger.append(getOption("java.util.logging.config.file",
-                                             buildDirectory(rioHome, "config", "logging")+"rio-logging.properties"));
+        if(usingLog4j()) {
+            /* Check if log4j is being used, if so set log4j configuration */
+            if (!inputArgs.contains("log4j.configurationFile")) {
+                logger.append(getOption("log4j.configurationFile",
+                                        buildDirectory(rioHome,
+                                                       "config",
+                                                       "logging") + "log4j2.xml"));
                 logger.append(" ");
             }
         }
         return logger.toString();
     }
 
-    private static boolean usingLogback() {
+    private static boolean usingLog4j() {
         File rioLib = new File(RioHome.get(), "lib");
         File rioLogging = new File(rioLib, "logging");
         String loggingJars = getFiles(rioLogging);
-        return loggingJars.contains("logback");
+        return loggingJars.contains("log4j");
     }
 
     private static String getOption(final String option, final String value) {

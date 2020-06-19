@@ -18,7 +18,6 @@ package org.rioproject.monitor.service;
 import com.sun.jini.proxy.BasicProxyTrustVerifier;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import net.jini.config.EmptyConfiguration;
 import net.jini.export.Exporter;
 import net.jini.id.Uuid;
 import net.jini.security.BasicProxyPreparer;
@@ -59,21 +58,21 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /** Component name we use to find items in the configuration */
     private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    private static Logger logger = LoggerFactory.getLogger(DefaultOpStringManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultOpStringManager.class);
 
     private OperationalString opString;
     /**
      * Collection of ServiceElementManager instances
      */
-    private final List<ServiceElementManager> svcElemMgrs = new ArrayList<ServiceElementManager>();
+    private final List<ServiceElementManager> svcElemMgrs = new ArrayList<>();
     /**
      * Collection of nested DefaultOpStringManager instances
      */
-    private final List<OpStringManager> nestedManagers = new ArrayList<OpStringManager>();
+    private final List<OpStringManager> nestedManagers = new ArrayList<>();
     /**
      * The DefaultOpStringManager parents for this DefaultOpStringManager
      */
-    private final List<OpStringManager> parents = new ArrayList<OpStringManager>();
+    private final List<OpStringManager> parents = new ArrayList<>();
     /**
      * Property that indicates the mode of the DefaultOpStringManager. If active is
      * true, the DefaultOpStringManager will inform it's ServiceElementmanager
@@ -95,11 +94,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * A List of scheduled TimerTasks
      */
-    private final List<TimerTask> scheduledTaskList = Collections.synchronizedList(new ArrayList<TimerTask>());
+    private final List<TimerTask> scheduledTaskList = Collections.synchronizedList(new ArrayList<>());
     /**
      * A list a deployed Dates
      */
-    private final List<Date> deployDateList = Collections.synchronizedList(new ArrayList<Date>());
+    private final List<Date> deployDateList = Collections.synchronizedList(new ArrayList<>());
     /**
      * Local copy of the deployment status of the OperationalString
      */
@@ -144,12 +143,14 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     public void initialize(final boolean mode) throws IOException {
         try {
             exporter = ExporterConfig.getExporter(config, CONFIG_COMPONENT, "opStringManagerExporter");
-            if (logger.isDebugEnabled())
-                logger.debug("Deployment [{}] using exporter {}", opString.getName(), exporter);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Deployment [{}] using exporter {}",
+                             opString.getName(),
+                             exporter);
+            }
 
             /* Get the ProxyPreparer for ServiceProvisionListener instances */
-            Configuration myConfig = (config == null ? EmptyConfiguration.INSTANCE : config);
-            serviceProvisionListenerPreparer = (ProxyPreparer) myConfig.getEntry(CONFIG_COMPONENT,
+            serviceProvisionListenerPreparer = (ProxyPreparer) config.getEntry(CONFIG_COMPONENT,
                                                                                  "serviceProvisionListenerPreparer",
                                                                                  ProxyPreparer.class,
                                                                                  new BasicProxyPreparer());
@@ -157,18 +158,31 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             logger.warn("Getting opStringManager Exporter", e);
         }
 
+        if (logger.isTraceEnabled()) {
+            logger.trace("Exporting manager");
+        }
         proxy = (OperationalStringManager) exporter.export(this);
 
+        if (logger.isTraceEnabled()) {
+            logger.trace("Manager exported");
+        }
+
         this.active.set(mode);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Determine");
+        }
         if (parent != null) {
             addParent(parent);
             parent.addNested(this);
             standAlone = false;
         } else {
-            standAlone = opString.getNestedOperationalStrings().length==0;
+            standAlone = opString.getNestedOperationalStrings().length == 0;
         }
-        if(logger.isDebugEnabled())
-            logger.debug("Manager for {} standAlone: {}", opString.getName(), standAlone);
+        if(logger.isDebugEnabled()) {
+            logger.debug("Manager for {} standAlone: {}",
+                         opString.getName(),
+                         standAlone);
+        }
         if (opString.loadedFrom() != null &&
             opString.loadedFrom().toExternalForm().startsWith("file") &&
             opString.loadedFrom().toExternalForm().endsWith(".oar")) {
@@ -179,6 +193,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             } catch (Exception e) {
                 logger.warn("Could no create OAR", e);
             }
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deployment manager initialized");
         }
     }
 
@@ -220,7 +238,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         synchronized (this) {
             if (active.get() != newActive) {
                 active.set(newActive);
-                List<ServiceElement> list = new ArrayList<ServiceElement>();
+                List<ServiceElement> list = new ArrayList<>();
                 ServiceElementManager[] mgrs = getServiceElementManagers();
                 for (ServiceElementManager mgr : mgrs) {
                     mgr.setActive(active.get());
@@ -230,13 +248,13 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                     logger.debug("OperationalStringManager for [{}] set active [{}] for OperationalString [{}]",
                                  getProxy().toString(), active, getName());
                 if (active.get()) {
-                    ServiceElement[] sElems = list.toArray(new ServiceElement[list.size()]);
+                    ServiceElement[] sElems = list.toArray(new ServiceElement[0]);
                     updateServiceElements(sElems);
                 }
 
                 /* Trickle down effect : update all nested managers of the 
                  * new active state */
-                OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[nestedManagers.size()]);
+                OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[0]);
                 for (OpStringManager nestedMgr : nestedMgrs) {
                     nestedMgr.setActive(newActive);
                 }
@@ -276,7 +294,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see org.rioproject.opstring.OperationalStringManager#getDeploymentDates
      */
     public Date[] getDeploymentDates() {
-        return deployDateList.toArray(new Date[deployDateList.size()]);
+        return deployDateList.toArray(new Date[0]);
     }
 
     /**
@@ -287,7 +305,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         deployStatus = status;
         if (deployStatus == OperationalString.UNDEPLOYED) {
             if (!nestedManagers.isEmpty()) {
-                OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[nestedManagers.size()]);
+                OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[0]);
                 for (OpStringManager nestedMgr : nestedMgrs) {
                     if (nestedMgr.getParentCount() == 1 && !nestedMgr.isStandAlone())
                         nestedMgr.setDeploymentStatus(OperationalString.UNDEPLOYED);
@@ -324,8 +342,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                                                         final ServiceProvisionListener listener) {
         this.provisioner = provisioner;
         this.uuid = uuid;
-        Map<String, Throwable> map = new HashMap<String, Throwable>();
+        Map<String, Throwable> map = new HashMap<>();
         ServiceElement[] sElems = opString.getServices();
+        logger.info("Creating [{}] ServiceElementManagers for [{}]", sElems.length, sElems[0].getName());
         for (ServiceElement sElem : sElems) {
             try {
                 if (sElem.getExportBundles().length > 0) {
@@ -346,7 +365,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 map.put(sElem.getName(), cause);
             }
         }
-        return (map);
+        return map;
     }
 
     /**
@@ -356,11 +375,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *                 of services are they are provisioned. This notification approach is
      *                 only valid at DefaultOpStringManager creation (deployment), when services are
      *                 provisioned at OperationalString deployment time
-     *                 
-     * @throws java.rmi.RemoteException If the DeployAdmin cannot be obtained
      */
-    void startManager(final ServiceProvisionListener listener) throws RemoteException {
-        startManager(listener, new HashMap());
+    void startManager(final ServiceProvisionListener listener)  {
+        startManager(listener, new HashMap<>());
     }
 
     /**
@@ -371,10 +388,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *                         only valid at DefaultOpStringManager creation (deployment), when services are
      *                         provisioned at OperationalString deployment time
      * @param knownInstanceMap Known ServiceBeanInstance objects.
-     * 
-     * @throws java.rmi.RemoteException If the DeployAdmin cannot be obtained
      */
-    void startManager(final ServiceProvisionListener listener, final Map knownInstanceMap) throws RemoteException {
+    void startManager(final ServiceProvisionListener listener,
+                      final Map<ServiceElement, ServiceBeanInstance[]> knownInstanceMap) {
+        logger.info("Starting manager");
         addDeploymentDate(new Date(System.currentTimeMillis()));
         setDeploymentStatus(OperationalString.DEPLOYED);
         ServiceElementManager[] mgrs = getServiceElementManagers();
@@ -385,7 +402,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
         for (ServiceElementManager mgr : mgrs) {
             ServiceElement elem = mgr.getServiceElement();
-            ServiceBeanInstance[] instances = (ServiceBeanInstance[]) knownInstanceMap.get(elem);
+            ServiceBeanInstance[] instances = knownInstanceMap.get(elem);
             try {
                 int alreadyRunning = mgr.startManager(listener, instances);
                 if(logger.isTraceEnabled()) {
@@ -412,7 +429,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
 
     private class IdleServiceListener implements ServiceChannelListener {
         final OpStringManager manager;
-        final Map<ServiceElement, Boolean> tracking = new HashMap<ServiceElement, Boolean>();
+        final Map<ServiceElement, Boolean> tracking = new HashMap<>();
 
         IdleServiceListener(OpStringManager manager) {
             this.manager = manager;
@@ -496,10 +513,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     }
 
     public RemoteRepository[] getRemoteRepositories() {
-        Collection<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+        Collection<RemoteRepository> remoteRepositories = new ArrayList<>();
         if (oar != null)
             remoteRepositories.addAll(oar.getRepositories());
-        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+        return remoteRepositories.toArray(new RemoteRepository[0]);
     }
 
     /**
@@ -512,9 +529,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (logger.isInfoEnabled()) {
             logger.info("Updating {} deployment", newOpString.getName());
         }
-        Map<String, Throwable> map = new HashMap<String, Throwable>();
+        Map<String, Throwable> map = new HashMap<>();
         ServiceElement[] sElems = newOpString.getServices();
-        List<ServiceElementManager> notRefreshed = new ArrayList<ServiceElementManager>(svcElemMgrs);
+        List<ServiceElementManager> notRefreshed = new ArrayList<>(svcElemMgrs);
         /* Refresh ServiceElementManagers */
         for (ServiceElement sElem : sElems) {
             try {
@@ -576,14 +593,13 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see OpStringManager#getParents()
      */
     public Collection<OpStringManager> getParents() {
-        Collection<OpStringManager> rents = new ArrayList<OpStringManager>();
-        rents.addAll(parents);
-        return rents;
+        return new ArrayList<>(parents);
     }
 
     private void stateChanged(final boolean remove) {
-        if(stateManager!=null)
+        if(stateManager != null) {
             stateManager.stateChanged(this, remove);
+        }
     }
 
     /**
@@ -615,7 +631,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (!isActive())
             return;
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
-        Map<InstantiatorResource, List<ServiceElement>> map =new HashMap<InstantiatorResource, List<ServiceElement>>();
+        Map<InstantiatorResource, List<ServiceElement>> map =new HashMap<>();
         for (ServiceResource resource : resources) {
             InstantiatorResource ir =
                 (InstantiatorResource) resource.getResource();
@@ -627,7 +643,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 if (count > 0) {
                     List<ServiceElement> list = map.get(ir);
                     if (list == null)
-                        list = new ArrayList<ServiceElement>();
+                        list = new ArrayList<>();
                     list.add(element);
                     map.put(ir, list);
                 }
@@ -638,7 +654,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             InstantiatorResource ir = entry.getKey();
             List<ServiceElement> list = entry.getValue();
 
-            ServiceElement[] elems = list.toArray(new ServiceElement[list.size()]);
+            ServiceElement[] elems = list.toArray(new ServiceElement[0]);
             try {
                 ServiceBeanInstantiator sbi = ir.getInstantiator();
                 if (logger.isTraceEnabled())
@@ -660,7 +676,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see OpStringManager#terminate(boolean)
      */
     public OperationalString[] terminate(final boolean killServices) {
-        List<OperationalString> terminated = new ArrayList<OperationalString>();
+        List<OperationalString> terminated = new ArrayList<>();
         terminated.add(doGetOperationalString());
         /* Cancel all scheduled Tasks */
         TimerTask[] tasks = getTasks();
@@ -676,17 +692,20 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
         /* Remove ourselves from the collection */
         if(opStringMangerController.remove(this)) {
-            if(logger.isDebugEnabled())
+            if(logger.isDebugEnabled()) {
                 logger.debug("Removed [{}]", getName());
+            }
         } else {
             logger.warn("Did not remove [{}] when terminating", getName());
         }
 
         /* Stop all ServiceElementManager instances */
+        if(logger.isDebugEnabled()) {
+            logger.debug("Stop all ServiceElementManager instances for [{}]", getName());
+        }
         for (ServiceElementManager mgr : svcElemMgrs) {
             mgr.stopManager(killServices);
         }
-        /* Adjust parent/nested relationships */
         if (!parents.isEmpty()) {
             for (OpStringManager parent : parents) {
                 parent.removeNested(this);
@@ -694,7 +713,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             parents.clear();
         }
 
-        OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[nestedManagers.size()]);
+        OpStringManager[] nestedMgrs = nestedManagers.toArray(new OpStringManager[0]);
         for (OpStringManager nestedMgr : nestedMgrs) {
             /* If the nested DefaultOpStringManager has only 1 parent, then
              * terminate (undeploy) that DefaultOpStringManager as well */
@@ -705,9 +724,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 nestedMgr.removeParent(this);
             }
         }
-        if (logger.isInfoEnabled())
+
+        if (logger.isInfoEnabled()) {
             logger.info("OpStringManager [{}] terminated", getName());
-        return (terminated.toArray(new OperationalString[terminated.size()]));
+        }
+        return terminated.toArray(new OperationalString[0]);
     }
 
     /**
@@ -1184,11 +1205,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see org.rioproject.opstring.OperationalStringManager#getServiceStatements
      */
     public ServiceStatement[] getServiceStatements() {
-        List<ServiceStatement> statements = new ArrayList<ServiceStatement>();
+        List<ServiceStatement> statements = new ArrayList<>();
         for (ServiceElementManager mgr : getServiceElementManagers()) {
             statements.add(mgr.getServiceStatement());
         }
-        return statements.toArray(new ServiceStatement[statements.size()]);
+        return statements.toArray(new ServiceStatement[0]);
     }
 
 
@@ -1196,7 +1217,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @see org.rioproject.opstring.OperationalStringManager#getDeploymentMap
      */
     public DeploymentMap getDeploymentMap() {
-        Map<ServiceElement, List<DeployedService>> map = new HashMap<ServiceElement, List<DeployedService>>();
+        Map<ServiceElement, List<DeployedService>> map = new HashMap<>();
         for (ServiceElementManager mgr : getServiceElementManagers()) {
             map.put(mgr.getServiceElement(), mgr.getServiceDeploymentList());
         }
@@ -1206,11 +1227,14 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /*
     * Redeploy the OperationalString  
     */
-    public void doRedeploy(final boolean clean, final boolean sticky, final ServiceProvisionListener listener) throws OperationalStringException {
+    public void doRedeploy(final boolean clean,
+                           final boolean sticky,
+                           final ServiceProvisionListener listener) throws OperationalStringException {
         if (!isActive())
             throw new OperationalStringException("not the primary OperationalStringManager");
-        for (ServiceElementManager mgr : svcElemMgrs.toArray(new ServiceElementManager[svcElemMgrs.size()]))
+        for (ServiceElementManager mgr : svcElemMgrs) {
             doRedeploy(mgr.getServiceElement(), null, clean, sticky, listener);
+        }
     }
 
     /*
@@ -1338,7 +1362,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @return All ServiceElementManager instances as an array
      */
     public ServiceElementManager[] getServiceElementManagers() {
-        return (svcElemMgrs.toArray(new ServiceElementManager[svcElemMgrs.size()]));
+        return svcElemMgrs.toArray(new ServiceElementManager[0]);
     }
 
     /**
@@ -1348,10 +1372,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         for (ServiceElementManager mgr : svcElemMgrs) {
             ServiceElement sElem1 = mgr.getServiceElement();
             if (sElem.equals(sElem1)) {
-                return (mgr);
+                return mgr;
             }
         }
-        return (null);
+        return null;
     }
 
     /**
@@ -1461,7 +1485,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      *         TimerTask instances return a zero-length array
      */
     TimerTask[] getTasks() {
-        return (scheduledTaskList.toArray(new TimerTask[scheduledTaskList.size()]));
+        return scheduledTaskList.toArray(new TimerTask[0]);
     }
 
     /**

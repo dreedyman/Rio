@@ -91,7 +91,7 @@ public class StagedData implements Serializable {
             }
             locationURL = new URL(location);
         }
-        return (locationURL);
+        return locationURL;
     }
 
     /**
@@ -100,7 +100,7 @@ public class StagedData implements Serializable {
      * @return The location of the download
      */
     public String getLocation() {
-        return (location);
+        return location;
     }
 
     public void setLocation(String location) {
@@ -118,7 +118,7 @@ public class StagedData implements Serializable {
      *         the downloading entity
      */
     public String getInstallRoot() {
-        return (installRoot);
+        return installRoot;
     }
 
     public void setInstallRoot(String installRoot) {
@@ -149,7 +149,7 @@ public class StagedData implements Serializable {
      * @return True if the download should be unarchived, false if not
      */
     public boolean unarchive() {
-        return (unarchive);
+        return unarchive;
     }
 
     /**
@@ -159,7 +159,7 @@ public class StagedData implements Serializable {
      *         termination, false if not
      */
     public boolean removeOnDestroy() {
-        return (removeOnDestroy);
+        return removeOnDestroy;
     }
 
     /**

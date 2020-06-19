@@ -70,9 +70,9 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
     private int serviceLimit;
     private final CybernodeAdapter adapter;
     /** Table of Lease instances to manage */
-    private final ConcurrentMap<ProvisionManager, ProvisionLeaseManager> leaseTable = new ConcurrentHashMap<ProvisionManager, ProvisionLeaseManager>();
+    private final ConcurrentMap<ProvisionManager, ProvisionLeaseManager> leaseTable = new ConcurrentHashMap<>();
     /** Collection of ProvisionMonitor instances */
-    private final ConcurrentMap<ServiceID, ProvisionManager> provisionerMap = new ConcurrentHashMap<ServiceID, ProvisionManager>();
+    private final ConcurrentMap<ServiceID, ProvisionManager> provisionerMap = new ConcurrentHashMap<>();
     /** LookupCache for ProvisionMonitor instances */
     private LookupCache lCache;
     /**
@@ -162,11 +162,8 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * Start the discovery of Provisioners
      * 
      * @param dm The DiscoveryManagement to use
-     *
-     * @throws IOException if discovery cannot be initialized
-     * @throws ConfigurationException if the configuration cannot be used
      */
-    void initializeProvisionDiscovery(final DiscoveryManagement dm) throws IOException, ConfigurationException {
+    void initializeProvisionDiscovery(final DiscoveryManagement dm) throws IOException {
         if(lCache==null) {
             ServiceTemplate template = new ServiceTemplate(null, new Class[] {ProvisionManager.class}, null);
             LookupCachePool lcPool = LookupCachePool.getInstance();
@@ -188,9 +185,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             if(lCache!=null)
                 lCache.removeListener(this);
             cancelRegistrations();
-            synchronized(provisionerMap) {
-                provisionerMap.clear();
-            }
+            provisionerMap.clear();
         } finally {
             destroyed = true;
         }
@@ -223,12 +218,10 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
 
         if(item == null || item.service == null)
             return;
-        synchronized(provisionerMap) {
-            if(provisionerMap.get(item.serviceID)!=null)
-                return;
-            logger.debug("ProvisionManager discovered {}", item.service.toString());
-            provisionerMap.put(item.serviceID, (ProvisionManager) item.service);
-        }
+        if(provisionerMap.get(item.serviceID)!=null)
+            return;
+        logger.debug("ProvisionManager discovered {}", item.service.toString());
+        provisionerMap.put(item.serviceID, (ProvisionManager) item.service);
         register(item.serviceID, (ProvisionManager)item.service);
     }
 
@@ -297,9 +290,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      */
     void cancelRegistrations() {
         logger.debug("Canceling all event registrations to Provisioner instances");
-        Map<ProvisionManager, ProvisionLeaseManager> map = new HashMap<ProvisionManager, ProvisionLeaseManager>();
-        map.putAll(leaseTable);
-        for(Map.Entry<ProvisionManager, ProvisionLeaseManager> entry : map.entrySet()) {
+        for(Map.Entry<ProvisionManager, ProvisionLeaseManager> entry : leaseTable.entrySet()) {
             cancelRegistration(entry.getKey());
         }
     }
@@ -344,12 +335,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
      * @param deployedServices List of deployed services
      */
     private void updateMonitors(final ResourceCapability resourceCapability, final List<DeployedService> deployedServices) {
-        ProvisionLeaseManager[] mgrs;
-        synchronized(leaseTable) {
-            Collection<ProvisionLeaseManager> c = leaseTable.values();
-            mgrs = c.toArray(new ProvisionLeaseManager[c.size()]);
-        }
-        if(mgrs.length == 0)
+        if(leaseTable.isEmpty())
             return;
         StringBuilder sb = new StringBuilder();
         sb.append("Deployed: ").append(deployedServices.size()).append(" Limit: ").append(serviceLimit);
@@ -369,11 +355,11 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             logger.trace(sb.toString());
         }
 
-        for (ProvisionLeaseManager mgr : mgrs) {
+        for (ProvisionLeaseManager mgr : leaseTable.values()) {
             try {
                 logger.trace("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: {}",
                              deployedServices.size());
-                mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
+                //mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Exception e) {
                 logger.warn("Failed updating ProvisionManager", e);
                 boolean connected = false;
@@ -410,7 +396,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         for(int i = 1; i <= provisionerRetryCount; i++) {
             try {
                 EventRegistration er = 
-                    provisioner.register(new MarshalledObject<ServiceBeanInstantiator>(adapter.getInstantiator()),
+                    provisioner.register(new MarshalledObject<>(adapter.getInstantiator()),
                                          null,
                                          adapter.getResourceCapability(),
                                          getServiceDeployments(),
@@ -536,6 +522,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
                 try {
                     Thread.sleep(leaseRenewalTime);
                 } catch(InterruptedException ie) {
+                    Thread.interrupted();
                     /* should not happen */
                 } catch(IllegalArgumentException iae) {
                     logger.warn("Lease renewal time incorrect : {}", leaseRenewalTime);

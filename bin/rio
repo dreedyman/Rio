@@ -117,21 +117,13 @@ installRioToLocalRepository() {
 
 # Build the classpath for SLF4J Logging
 for file in $RIO_HOME/lib/logging/*.jar; do
-    case $file in
-        *logback*)
-            logger="logback";;
-        *slf4j-jdk14*)
-            logger="jul";;
-    esac
     SLF4J_CLASSPATH="$SLF4J_CLASSPATH:$file"
 done
 SLF4J_CLASSPATH=`echo $SLF4J_CLASSPATH | cut -c2-`
 
-if [ "$logger" = "logback" ]; then
-    loggingConfig="-Dlogback.configurationFile=`toNative $RIO_HOME/config/logging/logback.groovy`"
-else
-    loggingConfig="-Djava.util.logging.config.file=`toNative $RIO_HOME/config/logging/rio-logging.properties`"
-fi
+loggingConfig="-Dlog4j.configurationFile=`toNative $RIO_HOME/config/logging/log4j2.xml`"
+loggingConfig="$loggingConfig -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+loggingConfig="$loggingConfig -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1

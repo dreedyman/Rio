@@ -33,8 +33,8 @@ public class ProvisionMonitorEventProcessor {
     /**
      * ThreadPool for sending ProvisionMonitorEvent notifications
      */
-    private Executor monitorEventPool;
-    private EventHandler monitorEventHandler;
+    private final Executor monitorEventPool;
+    private final EventHandler monitorEventHandler;
 
     public ProvisionMonitorEventProcessor(Configuration config) throws Exception {
         monitorEventPool = Executors.newCachedThreadPool();

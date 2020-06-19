@@ -107,7 +107,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     /** Component name we use to find items in the configuration */
     private static final String CONFIG_COMPONENT = "org.rioproject.monitor";
     /** ProvisionMonitor logger. */
-    private static Logger logger = LoggerFactory.getLogger(ProvisionMonitorImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProvisionMonitorImpl.class);
     /** The provisioner to use for provisioning */
     private ServiceProvisioner provisioner;
     /** OpStringLoader for loading XML OperationalStrings */
@@ -126,8 +126,6 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
 
     /**
      * Create a ProvisionMonitor
-     *
-     * @throws Exception If the ProvisionMonitorImpl cannot be created
      */
     @SuppressWarnings("unused")
     public ProvisionMonitorImpl() {
@@ -263,7 +261,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     @Override
     protected Object createProxy() {
-        Object proxy = ProvisionMonitorProxy.getInstance((ProvisionMonitor)getExportedProxy(), getUuid());
+        Remote proxy = ProvisionMonitorProxy.getInstance((ProvisionMonitor)getExportedProxy(), getUuid());
         /* Get the registry port */
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         int registryPort = Integer.parseInt(sPort);
@@ -271,7 +269,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         if(registryPort!=0) {
             try {
                 Registry registry = RegistryUtil.getRegistry(registryPort);
-                registry.bind(name, (Remote)proxy);
+                registry.bind(name, proxy);
                 logger.debug("Bound to RMI Registry on port={}", registryPort);
             } catch(RemoteException | UnknownHostException | AlreadyBoundException e) {
                 logger.warn("Binding {} to RMI Registry", name, e);
@@ -483,9 +481,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             URL opStringUrlToUse = opStringUrl;
             if(opStringUrl.toExternalForm().endsWith("oar")) {
                 oar = new OAR(opStringUrl);
-                StringBuilder sb = new StringBuilder();
-                sb.append("jar:").append(oar.getURL().toExternalForm()).append("!/").append(oar.getOpStringName());
-                opStringUrlToUse = new URL(sb.toString());
+                opStringUrlToUse = new URL("jar:" + oar.getURL().toExternalForm() + "!/" + oar.getOpStringName());
             }
             OperationalString[] opStrings = opStringLoader.parseOperationalString(opStringUrlToUse);
             if(opStrings != null && opStrings.length>0) {
@@ -528,9 +524,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         } catch(Exception e) {
             undeploy(opString.getName());
             logger.warn("Deploying OperationalString [{}]", opString.getName(), e);
-            if(!(e instanceof OperationalStringException))
-                throw new OperationalStringException(String.format("Deploying OperationalString [%s]", opString.getName()), e);
-            throw (OperationalStringException)e;
+            throw new OperationalStringException(String.format("Deploying OperationalString [%s]", opString.getName()), e);
         }
         return deploymentResult;
     }
@@ -543,10 +537,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         boolean undeployed = false;
         try {
             undeployed = undeploy(opStringName, true);
-        } catch(OperationalStringException e) {
+        } catch (Exception e) {
             logger.warn("Undeploying [{}]", opStringName, e);
         }
-        return(undeployed);
+        return undeployed;
     }
 
     /*
@@ -616,7 +610,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     public TabularData getDeployments() {
         String[] itemNames = new String[] {"Name", "Status", "Role", "Deployed"};
-        OpenType[] itemTypes = new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.DATE};
+        OpenType<?>[] itemTypes = new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.DATE};
         TabularDataSupport tabularDataSupport = null;
         try {
             CompositeType row = new CompositeType("Deployments", "Deployments", itemNames, itemNames, itemTypes);
@@ -652,7 +646,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             logger.warn(e.toString(), e);
         }
 
-        return(tabularDataSupport);
+        return tabularDataSupport;
     }
 
     /*
@@ -694,17 +688,17 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @see org.rioproject.deploy.ProvisionManager#register
      */
     public EventRegistration register(MarshalledObject<ServiceBeanInstantiator> instantiator,
-                                      MarshalledObject handback,
+                                      MarshalledObject<?> handback,
                                       ResourceCapability resourceCapability,
                                       List<DeployedService> deployedServices,
                                       int serviceLimit,
                                       long duration) throws LeaseDeniedException, RemoteException {
-        return (provisioner.register(instantiator,
-                                     handback,
-                                     resourceCapability,
-                                     deployedServices,
-                                     serviceLimit,
-                                     duration));
+        return provisioner.register(instantiator,
+                                    handback,
+                                    resourceCapability,
+                                    deployedServices,
+                                    serviceLimit,
+                                    duration);
     }
 
     /*
@@ -739,7 +733,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         for(ServiceResource s : resources) {
             list.add(((InstantiatorResource)s.getResource()).getServiceBeanInstantiator());
         }        
-        return list.toArray(new ServiceBeanInstantiator[list.size()]);
+        return list.toArray(new ServiceBeanInstantiator[0]);
     }
 
     /*

@@ -58,9 +58,6 @@ public class Utils {
         }
 
         checkSecurityPolicy();
-
-        if(System.getProperty(Constants.GROUPS_PROPERTY_NAME)==null)
-            System.setProperty(Constants.GROUPS_PROPERTY_NAME, "rio");
     }
 
     public static void checkSecurityPolicy() {

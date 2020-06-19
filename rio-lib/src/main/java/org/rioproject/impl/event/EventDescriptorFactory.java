@@ -93,7 +93,9 @@ public final class EventDescriptorFactory {
             }
             URLClassLoader loader;
             if(annotator!=null) {
-                loader = new ServiceClassLoader(ServiceClassLoader.getURIs(urls), annotator, Thread.currentThread().getContextClassLoader());
+                loader = new ServiceClassLoader(ServiceClassLoader.getURIs(urls),
+                                                annotator,
+                                                Thread.currentThread().getContextClassLoader());
             } else {
                 loader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
             }

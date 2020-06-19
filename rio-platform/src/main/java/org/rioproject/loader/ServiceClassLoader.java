@@ -32,11 +32,11 @@ import java.util.Properties;
  * @author Dennis Reedy
  */
 public class ServiceClassLoader extends URIClassLoader implements ClassAnnotation {
-    private URI[] searchPath;
+    private final URI[] searchPath;
     /** The ClassAnnotator to use */
-    private ClassAnnotator annotator;
+    private final ClassAnnotator annotator;
     /** Meta data associated with the classloader */
-    private Properties metaData = new Properties();
+    private final Properties metaData = new Properties();
 
     /**
      * Constructs a new ServiceClassLoader for the specified URLs having the

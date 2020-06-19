@@ -164,21 +164,21 @@ public class LookupCachePool {
         if(template==null)
             throw new IllegalArgumentException("template is null");
 
-        //SDMWrapper sdmWrapper;
+        SDMWrapper sdmWrapper;
         try {
-            LookupDiscoveryManager lookupDiscoveryManager = new LookupDiscoveryManager(groups, locators, null,
+            /*LookupDiscoveryManager lookupDiscoveryManager = new LookupDiscoveryManager(groups, locators, null,
                                                                                        config == null ? EmptyConfiguration.INSTANCE : config);
 
             ServiceDiscoveryManager serviceDiscoveryManager =
                     new ServiceDiscoveryManager(lookupDiscoveryManager,
                                                 new LeaseRenewalManager(EmptyConfiguration.INSTANCE),
-                                                EmptyConfiguration.INSTANCE);
-            //sdmWrapper = getSDMWrapper(sharedName, groups, locators);
-            return serviceDiscoveryManager.createLookupCache(template, null, null);
+                                                EmptyConfiguration.INSTANCE);*/
+            sdmWrapper = getSDMWrapper(sharedName, groups, locators);
+            //return serviceDiscoveryManager.createLookupCache(template, null, null);
         } catch(ConfigurationException e) {
             throw new IOException("Configuration problem creating a SDMWrapper", e);
         }
-        //return sdmWrapper.getLookupCache(template, true);
+        return sdmWrapper.getLookupCache(template, true);
     }
     
     /**
@@ -234,7 +234,7 @@ public class LookupCachePool {
                 pool.add(sdmWrapper);
             }
         }
-        return(sdmWrapper);
+        return sdmWrapper;
     }
     
     /**
@@ -378,7 +378,7 @@ public class LookupCachePool {
                 }
             }
             if(lCache==null && create) {
-                ServiceItemFilter filter = (sharedName==null?null: new OpStringFilter(sharedName));
+                ServiceItemFilter filter = sharedName==null ? null : new OpStringFilter(sharedName);
                 LookupCache lc = sdm.createLookupCache(templateToMatch, filter, null);
                 lCache = new SharedLookupCache(lc, templateToMatch, this);
                 lCache.setServiceItemFilter(filter);
@@ -494,7 +494,7 @@ public class LookupCachePool {
          * @see LookupCache#lookup(ServiceItemFilter, int)
          */
         public ServiceItem[] lookup(final ServiceItemFilter filter, final int maxMatches) {
-            return(lCache.lookup(filter, maxMatches));
+            return lCache.lookup(filter, maxMatches);
         }
 
         /* (non-Javadoc)

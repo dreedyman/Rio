@@ -14,6 +14,13 @@ dependencies {
 }
 
 jar {
+    manifest {
+        attributes("Implementation-Title": "Rio Project",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
+    }
     from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
         include "org/rioproject/monitor/**"
         include "org/rioproject/proxy/**"

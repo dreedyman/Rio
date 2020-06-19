@@ -20,7 +20,12 @@ sourceSets {
 
 jar {
     manifest {
-        attributes("Class-Path": "jsk-platform-${riverVersion}.jar")
+        attributes("Class-Path": "jsk-platform-${riverVersion}.jar",
+                "Implementation-Title": "Rio Project",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
     }
 }
 

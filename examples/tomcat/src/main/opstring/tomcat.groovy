@@ -38,7 +38,7 @@ deployment(name: 'Tomcat Deploy') {
          *
          * overwrite: 'no', removeOnDestroy: false
          */
-        software(name: 'Tomcat', version: '9.0.36', removeOnDestroy: false) {
+        software(name: 'Tomcat', version: '9.0.36', removeOnDestroy: true) {
             install source: 'https://us.mirrors.quenda.co/apache/tomcat/tomcat-9/v9.0.36/bin/apache-tomcat-9.0.36.zip',
                     target: 'tomcat',
                     unarchive: true
@@ -66,7 +66,7 @@ deployment(name: 'Tomcat Deploy') {
         sla(id:'ThreadPool', high: 100) {
             policy type: 'notify'
             monitor name: 'Tomcat Thread Pool',
-                    objectName: "Catalina:name=http-8080,type=ThreadPool",
+                    objectName: "Catalina:name=http-nio-8080,type=ThreadPool",
                     attribute: 'currentThreadsBusy', period: 5000
         }
 

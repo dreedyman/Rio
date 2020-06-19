@@ -45,11 +45,11 @@ import java.util.*;
 public class JiniClient {
     public static final String GROUPS_PROPERTY_NAME = org.rioproject.config.Constants.GROUPS_PROPERTY_NAME;
     public static final String LOCATOR_PROPERTY_NAME = org.rioproject.config.Constants.LOCATOR_PROPERTY_NAME;
-    private DiscoveryManagement discoverer = null;
-    public Listener listener = null;
-    private List<ServiceRegistrar> regArray;
+    private DiscoveryManagement discoverer;
+    public Listener listener;
+    private final List<ServiceRegistrar> regArray;
     private boolean createdDiscoverer = false;
-    private static Logger logger = LoggerFactory.getLogger(JiniClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(JiniClient.class);
 
     /**
      * Create an instance of a JiniClient <br>
@@ -79,7 +79,7 @@ public class JiniClient {
      * @throws Exception if any errors occur
      */
     public JiniClient(DiscoveryManagement dm) throws Exception {
-        regArray = Collections.synchronizedList(new ArrayList<ServiceRegistrar>());
+        regArray = Collections.synchronizedList(new ArrayList<>());
         listener = new Listener();
         if(dm != null) {
             discoverer = dm;
@@ -184,7 +184,7 @@ public class JiniClient {
                 logger.debug("Use unicast discovery");
             StringTokenizer st = new StringTokenizer(locatorUrls,
                                                      " \t\n\r\f,");
-            List<LookupLocator> list = new LinkedList<LookupLocator>();
+            List<LookupLocator> list = new LinkedList<>();
             while (st.hasMoreTokens()) {
                 String locator = st.nextToken();
                 if(!locator.startsWith("jini://"))
@@ -193,7 +193,7 @@ public class JiniClient {
                 if(logger.isDebugEnabled())
                     logger.debug("Add locator : " + locator);
             }
-            locators = list.toArray(new LookupLocator[list.size()]);
+            locators = list.toArray(new LookupLocator[0]);
         }
         return locators;
     }
@@ -257,12 +257,12 @@ public class JiniClient {
             throw new IllegalArgumentException("aDesc is null");
         ServiceTemplate template  ;
         String[] iNames = aDesc.getInterfaceNames();
-        Class[] interfaces = new Class[iNames.length];
+        Class<?>[] interfaces = new Class[iNames.length];
         ClassLoader loader = cl;
         if(loader==null) {
             final Thread currentThread = Thread.currentThread();
             loader = AccessController.doPrivileged(
-                    (PrivilegedAction<ClassLoader>) () -> (currentThread.getContextClassLoader()));
+                    (PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
         }
         for(int i = 0; i < interfaces.length; i++) {
             interfaces[i] = Class.forName(iNames[i], false, loader);

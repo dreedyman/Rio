@@ -63,7 +63,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     /** The collection of ServiceResource objects to manage */
     protected Collection<LeasedResource> collection;
     /* Semaphore for access to modifying the collection */
-    final Object collectionLock = new Object();
+    //final Object collectionLock = new Object();
     private static final Logger logger = LoggerFactory.getLogger(ServiceResourceSelector.class);
     /**
      * The LandlordLessor which will be registered to, and will provide Lease
@@ -101,7 +101,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                                                             provisionRequest.getServiceElement().getName()));
             return null;
         }
-        return (selectServiceResource(provisionRequest, svcResources));
+        return selectServiceResource(provisionRequest, svcResources);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
     ServiceResource getServiceResource(final ProvisionRequest provisionRequest,
                                        final Uuid uuid,
                                        final boolean inclusive) throws ProvisionException {
-        return (selectServiceResource(provisionRequest, getServiceResources(uuid, inclusive)));
+        return selectServiceResource(provisionRequest, getServiceResources(uuid, inclusive));
     }
 
     /**
@@ -148,7 +148,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         /* Filter out isolated associations and max per machine levels set
          * at the physical level */
         ServiceResource[] filteredResources = filterMachineBoundaries(provisionRequest, svcResources);
-        if(filteredResources.length>0) {
+        if(filteredResources.length > 0) {
             filteredResources = filterIsolated(provisionRequest, filteredResources);
         } else {
             provisionRequest.addFailureReason(String.format("There are no available Cybernodes, unable to provision %s",
@@ -189,8 +189,9 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             logger.trace("{} has [{}] instance(s), planned [{}] of [{}/{}]",
                          ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
             if (actual >= planned) {
-                String message = String.format("%s has already allocated [%s] of planned [%s] instances of [%s/%s]",
-                                               ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
+                String message =
+                        String.format("%s has already allocated [%s] of planned [%s] instances of [%s/%s]",
+                                      ir.getName(), actual, planned, sElem.getOperationalStringName(), sElem.getName());
                 provisionRequest.addFailureReason(message);
                 continue;
             }
@@ -204,17 +205,18 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                         return (svcResource);
                     }
                 } catch (Exception e) {
-                    logger.warn("[{}] during canProvision check for [{}]",
+                    logger.warn("[{}] during canProvision check for [{}] {}",
                                 ir.getName(), sElem.getOperationalStringName(), sElem.getName(),
                                 e);
-                    if(e instanceof ProvisionException)
-                        throw (ProvisionException)e;
+                    if(e instanceof ProvisionException) {
+                        throw (ProvisionException) e;
+                    }
                 }
             } else {
                 logger.trace("{}, dynamic enabled: {}", ir.getName(), ir.getDynamicEnabled());
             }
         }
-        return (null);
+        return null;
     }
 
     /**
@@ -229,9 +231,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         /* For the set of candidate instantiator resources, remove the
          * candidate instantiator resources that have the same host name */
         InstantiatorResource[] known = getInstantiatorResources(provisionRequest.getServiceElement(), true);
-        
-        List<ServiceResource> candidateList = new ArrayList<ServiceResource>();
-        candidateList.addAll(Arrays.asList(candidates));
+
+        List<ServiceResource> candidateList = new ArrayList<>(Arrays.asList(candidates));
         for (ServiceResource candidate1 : candidates) {
             InstantiatorResource candidate = (InstantiatorResource) candidate1.getResource();
             if (!AssociationMatcher.meetsIsolatedRequirements(provisionRequest.getServiceElement(), candidate, known)) {
@@ -245,7 +246,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                          provisionRequest.getServiceElement().getOperationalStringName(),
                          provisionRequest.getServiceElement().getName());
         }
-        return(candidateList.toArray(new ServiceResource[candidateList.size()]));
+        return candidateList.toArray(new ServiceResource[0]);
     }
 
     /*
@@ -260,7 +261,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
         int maxPerMachine = elem.getMaxPerMachine();
         if(!(maxPerMachine!=-1 &&
              elem.getMachineBoundary()==ServiceElement.MachineBoundary.PHYSICAL)) {
-            return(candidates);
+            return candidates;
         }
 
         /*
@@ -269,18 +270,18 @@ public abstract class ServiceResourceSelector implements LeaseListener {
          * 2. Count the number services each cybernode has on each host
          * 3. Remove table entries that exceed the count per host
          */
-        Map<String, List<ServiceResource>> table = new HashMap<String, List<ServiceResource>>();
+        Map<String, List<ServiceResource>> table = new HashMap<>();
 
         for (ServiceResource candidate : candidates) {
             InstantiatorResource ir = (InstantiatorResource)candidate.getResource();
             List<ServiceResource> list = table.get(ir.getHostAddress());
             if(list==null)
-                list = new ArrayList<ServiceResource>();
+                list = new ArrayList<>();
             list.add(candidate);
             table.put(ir.getHostAddress(), list);
         }
 
-        List<String> remove = new ArrayList<String>();
+        List<String> remove = new ArrayList<>();
         for(Map.Entry<String, List<ServiceResource>> entry : table.entrySet()) {
             List<ServiceResource> list = entry.getValue();
             int serviceCount = 0;
@@ -297,7 +298,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             table.remove(s);
         }
 
-        List<ServiceResource> candidateList = new ArrayList<ServiceResource>();
+        List<ServiceResource> candidateList = new ArrayList<>();
         for(Map.Entry<String, List<ServiceResource>> entry : table.entrySet()) {
             List<ServiceResource> list = entry.getValue();
             for(int i=0; i<list.size(); i++) {
@@ -309,12 +310,14 @@ public abstract class ServiceResourceSelector implements LeaseListener {
             }
         }
 
-        if(logger.isDebugEnabled() && candidateList.isEmpty() && elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
+        if(logger.isDebugEnabled()
+                && candidateList.isEmpty()
+                && elem.getProvisionType().equals(ServiceElement.ProvisionType.DYNAMIC)) {
             logger.debug("Service [{}/{}] has a physical machine boundary constraint and an " +
                          "instance of the service has been found on all known machines.",
                          elem.getOperationalStringName(), elem.getName());
         }
-        return(candidateList.toArray(new ServiceResource[candidateList.size()]));
+        return candidateList.toArray(new ServiceResource[0]);
     }
 
     /**
@@ -341,7 +344,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     public ServiceResource[] getServiceResources(final ProvisionRequest provisionRequest) throws ProvisionException {
         ServiceResource[] svcResources = getServiceResources();
-        ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
+        ArrayList<ServiceResource> list = new ArrayList<>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             try {
@@ -354,11 +357,12 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                             provisionRequest.getServiceElement().getOperationalStringName(),
                             provisionRequest.getServiceElement().getName(),
                             e);
-                if(e instanceof ProvisionException)
-                    throw (ProvisionException)e;
+                if(e instanceof ProvisionException) {
+                    throw (ProvisionException) e;
+                }
             }
         } 
-        return list.toArray(new ServiceResource[list.size()]);
+        return list.toArray(new ServiceResource[0]);
     }
 
     /**
@@ -374,18 +378,20 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     private ServiceResource[] getServiceResources(final Uuid uuid, final boolean inclusive) {
         ServiceResource[] svcResources = getServiceResources();
-        ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
+        ArrayList<ServiceResource> list = new ArrayList<>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             if (ir.getInstantiatorUuid().equals(uuid)) {
-                if (inclusive)
+                if (inclusive) {
                     list.add(svcResource);
+                }
             } else {
-                if (!inclusive)
+                if (!inclusive) {
                     list.add(svcResource);
+                }
             }
         } 
-        return list.toArray(new ServiceResource[list.size()]);
+        return list.toArray(new ServiceResource[0]);
     }
 
     /**
@@ -400,7 +406,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of ServiceResource instances that match the host address
      */
     public ServiceResource[] getServiceResources(final String hostAddress, final boolean inclusive) {
-        return(getServiceResources(getServiceResources(), hostAddress, inclusive));
+        return getServiceResources(getServiceResources(), hostAddress, inclusive);
     }
 
     /**
@@ -416,18 +422,20 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return Array of ServiceResource instances that match the host address
      */
     private ServiceResource[] getServiceResources(final ServiceResource[] svcResources, final String hostAddress, final boolean inclusive) {
-        ArrayList<ServiceResource> list = new ArrayList<ServiceResource>();
+        ArrayList<ServiceResource> list = new ArrayList<>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             if (ir.getHostAddress().equals(hostAddress)) {
-                if (inclusive)
+                if (inclusive) {
                     list.add(svcResource);
+                }
             } else {
-                if (!inclusive)
+                if (!inclusive) {
                     list.add(svcResource);
+                }
             }
         }
-        return list.toArray(new ServiceResource[list.size()]);
+        return list.toArray(new ServiceResource[0]);
     }
 
     /**
@@ -455,15 +463,16 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @return An array of ServiceResource instances
      */
     public ServiceResource[] getServiceResources() {
-        LeasedResource[] resources;
-        synchronized(collectionLock) {
-            resources = collection.toArray(new LeasedResource[collection.size()]);
-        }
+        LeasedResource[] resources = collection.toArray(new LeasedResource[0]);
         ServiceResource[] svcResources = new ServiceResource[resources.length];
-        for(int i=0; i<resources.length; i++)
-            svcResources[i] = (ServiceResource)resources[i];
-        if(logger.isTraceEnabled())
-            logger.trace("Landlord returned {} instances, ServiceResource count: {}", resources.length, svcResources.length);
+        for(int i=0; i<resources.length; i++) {
+            svcResources[i] = (ServiceResource) resources[i];
+        }
+        if(logger.isTraceEnabled()) {
+            logger.trace("Landlord returned {} instances, ServiceResource count: {}",
+                         resources.length,
+                         svcResources.length);
+        }
         return svcResources;
     }
 
@@ -473,8 +482,9 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @param resource The resource associated with the expiration
      */
     public void expired(final LeasedResource resource) {
-        if(resource != null)
+        if(resource != null) {
             remove(resource);
+        }
     }
 
     /**
@@ -483,8 +493,9 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * @param resource The resource associated with the removal
      */
     public void removed(final LeasedResource resource) {
-        if(resource != null)
+        if(resource != null) {
             remove(resource);
+        }
     }
 
     /**
@@ -522,9 +533,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     protected void add(final LeasedResource resource) {
         try {
-            synchronized(collectionLock) {
-                collection.add(resource);
-            }
+            collection.add(resource);
         } catch(UnsupportedOperationException e) {
             logger.warn("Adding LeasedResource Failed", e);
         }
@@ -539,10 +548,8 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     protected void remove(final LeasedResource resource) {
         try {
-            synchronized(collectionLock) {
-                if(resource != null) {
-                    collection.remove(resource);
-                }
+            if(resource != null) {
+                collection.remove(resource);
             }
         } catch(UnsupportedOperationException e) {
             logger.warn("Removing LeasedResource Failed", e);
@@ -558,9 +565,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     protected void update(final LeasedResource resource) {
         try {
-            synchronized(collectionLock) {
-                collection.add(resource);
-            }
+            collection.add(resource);
         } catch(UnsupportedOperationException e) {
             logger.warn("Updating LeasedResource Failed", e);
         }
@@ -575,7 +580,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      * the ServiceElement
      */
     public InstantiatorResource[] getInstantiatorResources(final ServiceElement sElem) {
-        return(getInstantiatorResources(sElem, false));
+        return getInstantiatorResources(sElem, false);
     }
 
     /**
@@ -589,7 +594,7 @@ public abstract class ServiceResourceSelector implements LeaseListener {
      */
     private InstantiatorResource[] getInstantiatorResources(final ServiceElement sElem, final boolean includeInProcess) {
         ServiceResource[] svcResources = getServiceResources();
-        ArrayList<InstantiatorResource> list = new ArrayList<InstantiatorResource>();
+        ArrayList<InstantiatorResource> list = new ArrayList<>();
         for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             if (includeInProcess) {
@@ -601,6 +606,6 @@ public abstract class ServiceResourceSelector implements LeaseListener {
                     list.add(ir);
             }
         }            
-        return list.toArray(new InstantiatorResource[list.size()]);
+        return list.toArray(new InstantiatorResource[0]);
     }
 }

@@ -1,13 +1,21 @@
 group = 'org.rioproject.monitor'
 description = 'Module :: Monitor Service Proxy'
 dependencies {
-    compile project(':rio-lib')
+    compileOnly project(':rio-lib')
     implementation group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
     implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 }
 
 jar {
-    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+    manifest {
+        attributes("Implementation-Title": "Rio Project",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
+    }
+    from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
         include "org/rioproject/monitor/**"
         include "org/rioproject/proxy/**"
     }
