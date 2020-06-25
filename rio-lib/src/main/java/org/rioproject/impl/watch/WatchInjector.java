@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The WatchInjector provides support for declarative Watch management, by
@@ -394,7 +396,8 @@ public class WatchInjector {
                 oName = new ObjectName(wDesc.getObjectName());
                 int iterations = 0;
                 while(alive) {
-                    proceed = wDesc.getMBeanServerConnection().isRegistered(oName);
+                    Set<ObjectInstance> instances = wDesc.getMBeanServerConnection().queryMBeans(oName, null);
+                    proceed = instances.size() > 0;
                     if(!proceed) {
                         try {
                             if(iterations++%5==0)
