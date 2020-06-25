@@ -73,10 +73,6 @@ public final class Installer {
             }
             /* Install Rio main (parent) pom */
             File pomDir = new File(rioHome + File.separator + "config" + File.separator + "poms");
-            //Artifact rioParent = new Artifact("org.rioproject:main:" + RioVersion.VERSION);
-            //install(rioParent, FileHelper.find(pomDir, "rio-main"), null, aetherServiceInstance);
-
-            //File libDir = new File(rioHome + File.separator + "lib");
 
             /* Install client and proxy jars */
             formatAndAddToMap("org.rioproject.cybernode:cybernode-proxy", "cybernode-proxy", rioArtifactJars);
