@@ -285,15 +285,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     @Override
     protected ServiceInfo getServiceInfo() {
-        URL implUrl = getClass().getProtectionDomain().getCodeSource().getLocation();
-        RioManifest rioManifest;
-        String build = null;
-        try {
-            rioManifest = new RioManifest(implUrl);
-            build = rioManifest.getRioBuild();
-        } catch(IOException e) {
-            logger.warn("Getting Rio Manifest", e);
-        }
+        String build = RioVersion.getBuildNumber();
         if(build==null)
             build="0";
         return new ServiceInfo(context.getServiceElement().getName(),
