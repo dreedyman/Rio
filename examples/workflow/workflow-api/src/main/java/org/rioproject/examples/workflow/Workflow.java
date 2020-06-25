@@ -37,6 +37,6 @@ enum State  {
                 next = CLOSED;
                 break;
         }
-        return(next);
+        return next;
     }
 }

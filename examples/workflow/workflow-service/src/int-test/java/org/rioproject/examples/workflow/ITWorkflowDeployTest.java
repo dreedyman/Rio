@@ -26,6 +26,8 @@ import org.rioproject.test.TestManager;
 
 import java.rmi.RemoteException;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Testing the Workflow example using the Rio test framework
  */
@@ -34,7 +36,7 @@ import java.rmi.RemoteException;
         groups = "Workflow",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "../src/main/opstring/workflow.groovy"
+        opstring = "deploy/workflow.groovy"
 )
 public class ITWorkflowDeployTest {
     @SetTestManager
@@ -43,13 +45,13 @@ public class ITWorkflowDeployTest {
 
     @BeforeClass
     public static void setup(){
-	    Assert.assertNotNull(testManager);
+	    assertNotNull(testManager);
         master = testManager.waitForService(Master.class);
     }
 
     @Test
     public void testBean() throws RemoteException, WorkflowException {
-        Assert.assertNotNull(master);
+        assertNotNull(master);
         System.out.println("Submitting Order ...");
         WorkflowEntry result = master.process();
         System.out.println("Order result is : " + result.value);

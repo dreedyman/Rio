@@ -16,43 +16,43 @@
 package org.rioproject.examples.springbean;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rioproject.test.RioTestConfig;
-import org.rioproject.test.RioTestRunner;
-import org.rioproject.test.SetTestManager;
-import org.rioproject.test.TestManager;
+import org.junit.runners.Parameterized;
+import org.rioproject.cybernode.StaticCybernode;
 
+import java.io.File;
 import java.rmi.RemoteException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 /**
- * Testing the SpringBean service using the Rio test framework
+ * Example testing the SpringBean service
  */
-@RunWith(RioTestRunner.class)
-@RioTestConfig (
-        groups = "SpringBean",
-        numCybernodes = 1,
-        numMonitors = 1,
-        opstring = "../src/main/opstring/springbean.groovy"
-)
-public class ITSpringBeanDeployTest {
-	@SetTestManager
-    static TestManager testManager;
-    static Hello service;
+public class SpringBeanTest {
+    Hello springBean;
 
-    @BeforeClass
-    public static void setup() {
-	    Assert.assertNotNull(testManager);       
-        service = testManager.waitForService(Hello.class);
+    @Before
+    public void setupSpringBean() throws Exception {
+        StaticCybernode cybernode = new StaticCybernode();
+        String opstring = "../src/main/opstring/springbean.groovy";
+        Map<String, Object> map = cybernode.activate(new File(opstring));
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String beanName = entry.getKey();
+            Object beanImpl = entry.getValue();
+            if (beanName.equals("Hello"))
+                springBean = (Hello) beanImpl;
+        }
     }
 
     @Test
     public void testBean() throws RemoteException {
-        Assert.assertNotNull(service);
+        Assert.assertNotNull(springBean);
         for(int i=1; i<10; i++) {
-            String result = service.hello("Test Client");
+            String result = springBean.hello("Test Client");
             Assert.assertEquals("Hello visitor : "+i, result);
         }
-    }
+    }    
 }

@@ -40,7 +40,7 @@ public class WorkflowEntry implements Entry {
 
     public Entry execute() {
         state = state.next();
-        if(state.equals(State.CLOSED)) {
+        if (state.equals(State.CLOSED)) {
             value = "Closed at ["+new Date(System.currentTimeMillis())+"]";
         }
         return(this);
@@ -48,10 +48,6 @@ public class WorkflowEntry implements Entry {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("WorkflowEntry");
-        sb.append(" [state=").append(state);
-        sb.append(']');
-        return sb.toString();
+        return String.format("WorkflowEntry [state=%s]", state);
     }
 }

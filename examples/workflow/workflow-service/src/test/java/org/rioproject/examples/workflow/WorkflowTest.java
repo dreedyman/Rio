@@ -28,13 +28,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-public class ITWorkflowTest {
-    private final String opstring = "../src/main/opstring/workflow.groovy";
+public class WorkflowTest {
     private Master master;
 
     @Before
     public void setup() throws Exception {
         StaticCybernode cybernode = new StaticCybernode();
+        String opstring = "deploy/workflow.groovy";
         Map<String, Object> map = cybernode.activate(new File(opstring));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String beanName = entry.getKey();
@@ -44,7 +44,7 @@ public class ITWorkflowTest {
                 System.out.println("Check if Master has been advertised...");
                 while(!((MasterImpl)beanImpl).hasBeenAdvertised()) {
                     System.out.println("Wait for Master to be advertised...");
-                    Thread.sleep(1000l);
+                    Thread.sleep(1000L);
                 }
             }
         }

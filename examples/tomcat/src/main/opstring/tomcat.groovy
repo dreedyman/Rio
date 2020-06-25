@@ -66,7 +66,7 @@ deployment(name: 'Tomcat Deploy') {
         sla(id:'ThreadPool', high: 100) {
             policy type: 'notify'
             monitor name: 'Tomcat Thread Pool',
-                    objectName: "Catalina:name=http-nio-8080,type=ThreadPool",
+                    objectName: "Catalina:type=ThreadPool,name=\"http-nio-8080\"",
                     attribute: 'currentThreadsBusy', period: 5000
         }
 
