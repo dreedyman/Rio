@@ -67,15 +67,16 @@ if(!new File(rioHome, "lib").exists()) {
     System.err.println("Invalid location of Rio: "+rioHome)
     System.exit(2)
 }
-def getJar(File dir, String name) {
+
+static def getJar(File dir, String name) {
     File jar = null
     for(File file : dir.listFiles()) {
         if (file.name.startsWith(name)) {
             jar = file
-            break;
+            break
         }
     }
-    return jar
+    jar
 }
 StringBuilder classPath = new StringBuilder()
 File rioLib= new File(rioHome, "lib")
@@ -99,11 +100,8 @@ File logDir = new File(rioHome+File.separator+"logs")
 if(!logDir.exists())
     logDir.mkdirs()
 File installerLog = new File(logDir, "install.log")
-if(!installerLog.exists()) {
-    installerLog.createNewFile()
-} else {
-    println "Skip install, install.log exists"
-    return
+if(installerLog.exists()) {
+    installerLog.delete()
 }
 println "Install Rio artifacts locally..."
 
