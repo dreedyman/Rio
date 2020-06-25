@@ -19,3 +19,18 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compileOnly group: 'net.jini', name: 'jsk-platform', version: '2.2.2'
 }
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "Rio Project",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
+    }
+
+    into("META-INF/maven/$project.group/$project.name") {
+        from { generatePomFileForMavenJavaPublication }
+        rename ".*", "pom.xml"
+    }
+}

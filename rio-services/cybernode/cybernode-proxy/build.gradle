@@ -34,6 +34,13 @@ jar {
     from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
         include "org/rioproject/cybernode/**"
         include "org/rioproject/proxy/**"
+        include "org/rioproject/entry/**"
+        include "com/artima/lookup/**"
+    }
+
+    into("META-INF/maven/$project.group/$project.name") {
+        from { generatePomFileForMavenJavaPublication }
+        rename ".*", "pom.xml"
     }
 }
 
