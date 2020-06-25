@@ -35,32 +35,43 @@ import java.net.*;
  */
 public class RioManifest {
     public static final Attributes.Name RIO_BUILD = new Attributes.Name("Rio-Build");
-    private JarInputStream jarIn = null;
+    public static final Attributes.Name RIO_VERSION = new Attributes.Name("Rio-Version");
     /** Holds value of property manifest. */
     private Manifest manifest;
     
-    public RioManifest(URL url) throws IOException {
+    public RioManifest(URL url) {
         URL u = url;
-        if(!u.getProtocol().equals("jar")) {
-            u = new URL("jar:" + u.toExternalForm() + "!/");
+        try {
+            if(!u.getProtocol().equals("jar")) {
+                u = new URL("jar:" + u.toExternalForm() + "!/");
+            }
+            JarURLConnection uc = (JarURLConnection) u.openConnection();
+            this.manifest = uc.getManifest();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        JarURLConnection uc = (JarURLConnection) u.openConnection();
-        this.manifest = uc.getManifest();
+
     }
-    
-    public void close() throws IOException {
-        if(jarIn != null)
-            jarIn.close();        
-    }    
 
     /**
      * Get the Rio Build from a Jar file
      *
      * @return the Rio Build from a Jar file, or null if not defined.
      */
-    public String getRioBuild() throws IOException {
+    public String getRioBuild() {
         return getMainAttribute(RIO_BUILD);
     }
+
+
+    /**
+     * Get the Rio version from a Jar file
+     *
+     * @return the Rio version from a Jar file, or null if not defined.
+     */
+    public String getRioVersion() {
+        return getMainAttribute(RIO_VERSION);
+    }
+
     
     /**
      * Get an Attribute from a Jar file
@@ -68,7 +79,7 @@ public class RioManifest {
      * @param name the name of the main attribute entry
      * @return the value of the main attribute from a Jar file, or null if not defined.
      */
-    public String getMainAttribute(Attributes.Name name) throws IOException {
+    public String getMainAttribute(Attributes.Name name) {
         if(manifest==null)
             throw new IllegalArgumentException("there is no manifest");
         Attributes attributes = manifest.getMainAttributes();
@@ -83,7 +94,7 @@ public class RioManifest {
      * @param name the name of the entry
      * @return the attributes for the entry or null if not defined
      */
-    public Attributes getEntry(String name) throws IOException {
+    public Attributes getEntry(String name) {
         if(manifest==null)
             throw new IllegalArgumentException("there is no manifest");
         return manifest.getAttributes(name);

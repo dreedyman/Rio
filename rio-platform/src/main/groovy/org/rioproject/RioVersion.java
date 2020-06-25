@@ -16,8 +16,6 @@
 package org.rioproject;
 
 import org.rioproject.util.RioManifest;
-
-import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -26,8 +24,8 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public final class RioVersion {
-    /** Current version of Rio */ 
-    public static final String VERSION = "6.0.0";
+    private static final RioManifest MANIFEST = loadManifest();
+    public static final String VERSION = MANIFEST.getRioVersion();
 
     private RioVersion() {}
 
@@ -37,15 +35,11 @@ public final class RioVersion {
      * @return The build number for the current release of Rio.
      */
     public static String getBuildNumber() {
-        String build;
+        return MANIFEST.getRioBuild();
+    }
+
+    private static RioManifest loadManifest() {
         URL implUrl = RioVersion.class.getProtectionDomain().getCodeSource().getLocation();
-        try {
-            RioManifest rioManifest = new RioManifest(implUrl);
-            build = rioManifest.getRioBuild();
-        } catch (IOException e) {
-            e.printStackTrace();
-            build = e.getClass().getName()+": "+e.getMessage();
-        }
-        return build;
-    }    
+        return new RioManifest(implUrl);
+    }
 }
