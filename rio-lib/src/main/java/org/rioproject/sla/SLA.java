@@ -84,7 +84,7 @@ public class SLA extends ThresholdValues implements Serializable {
      * there is no identifier, this method returns an empty String
      */
     public String getIdentifier() {
-        return (identifier);
+        return identifier;
     }
 
     /**
@@ -100,7 +100,7 @@ public class SLA extends ThresholdValues implements Serializable {
         WatchDescriptor[] wds = new WatchDescriptor[watchDescriptors.length];
         System.arraycopy(watchDescriptors, 0, wds, 0,
                          watchDescriptors.length);
-        return(wds);
+        return wds;
     }
 
     /**
