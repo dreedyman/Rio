@@ -19,8 +19,8 @@
 # This script provides the command and control utility for starting
 # Rio services and the Rio command line interface.
 
-scriptDir="`dirname $0`"
-scriptName=`basename "$0"`
+scriptDir="$(dirname $0)"
+scriptName=$(basename "$0")
 scriptPath="$scriptDir/$scriptName"
 command_line=$*
 
@@ -28,8 +28,8 @@ if [ "$1" = "start" ]; then
     start=1
     shift
     command_line=$*
-elif [ "$1" = "create-project" ]; then
-    project=1
+elif [ "$1" = "browser" ]; then
+    browser=1
     shift
     command_line=$*
 elif [ "$1" = "install" ]; then
@@ -50,7 +50,7 @@ if [ -z "$RIO_HOME" ] ; then
 fi
 
 # Convert to absolute path
-RIO_HOME=`cd "$RIO_HOME" && pwd`
+RIO_HOME=$(cd "$RIO_HOME" && pwd)
 
 RIO_LIB=$RIO_HOME/lib
 
@@ -65,9 +65,9 @@ fi
 getStarterConfig() {
     service="$1"
     if [ -f "$RIO_HOME/config/start-$service.groovy" ] ; then
-	    starterConfig="`toNative $RIO_HOME/config/start-$service.groovy`"
+	    starterConfig="$(toNative $RIO_HOME/config/start-$service.groovy)"
     elif [ -f "$service" ] ; then
-        starterConfig="`toNative $service`"
+        starterConfig="$(toNative $service)"
     else
 	    echo "Cannot locate expected service starter file [start-$service.groovy] in [$RIO_HOME/config], exiting"
 	    exit 1
@@ -100,14 +100,15 @@ toWindows() {
 # -----------------------------------
 rioVersion=@rioV@
 groovyVersion=@groovyV@
+riverVersion=@riverV@
 
 # Call the install script, do not assume that Groovy has been installed.
 installRioToLocalRepository() {
     if [ ! -f "$RIO_HOME/logs/install.log" ]; then
         if [ -f "$RIO_LIB/groovy-all-$groovyVersion.jar" ]; then
-            groovyClasspath="-cp `toNative $RIO_LIB/groovy-all-$groovyVersion.jar`"
-            ""$JAVACMD"" $groovyClasspath org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain \
-            $scriptDir/install.groovy $JAVA_HOME `toNative $RIO_HOME`
+            groovyClasspath="-cp $(toNative $RIO_LIB/groovy-all-$groovyVersion.jar)"
+            """$JAVACMD""" $groovyClasspath org.codehaus.groovy.tools.GroovyStarter --main groovy.ui.GroovyMain \
+            $scriptDir/install.groovy $JAVA_HOME "$(toNative $RIO_HOME)"
         else
             echo "The required Rio environment does not exist, it seems either that the configured or derived setting of RIO_HOME [$RIO_HOME] is invalid."
             exit 1
@@ -119,14 +120,10 @@ installRioToLocalRepository() {
 for file in $RIO_HOME/lib/logging/*.jar; do
     SLF4J_CLASSPATH="$SLF4J_CLASSPATH:$file"
 done
-SLF4J_CLASSPATH=`echo $SLF4J_CLASSPATH | cut -c2-`
+SLF4J_CLASSPATH=$(echo $SLF4J_CLASSPATH | cut -c2-)
 
-loggingConfig="-Dlogback.configurationFile=`toNative $RIO_HOME/config/logging/logback.groovy`"
-loggingConfig="$loggingConfig -Djava.util.logging.config.file=`toNative $RIO_HOME/config/logging/logging.properties`"
-
-#loggingConfig="-Dlog4j.configurationFile=`toNative $RIO_HOME/config/logging/log4j2.xml`"
-#loggingConfig="$loggingConfig -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
-#loggingConfig="$loggingConfig -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+loggingConfig="-Dlogback.configurationFile=$(toNative $RIO_HOME/config/logging/logback.groovy)"
+loggingConfig="$loggingConfig -Djava.util.logging.config.file=$(toNative $RIO_HOME/config/logging/logging.properties)"
 
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1
@@ -153,12 +150,12 @@ fi
 # Otherwise invoke the CLI
 if [ "$start" = "1" ]; then
     if [ -z "$RIO_NATIVE_DIR" ] ; then
-        RIO_NATIVE_DIR="`toNative $RIO_LIB/native`"
+        RIO_NATIVE_DIR="$(toNative $RIO_LIB/native)"
     fi
     
     if [ -d $RIO_NATIVE_DIR ]; then
         # Check for running on OS/X
-        opSys=`uname -s`
+        opSys=$(uname -s)
         if [ $opSys = "Darwin" ] ; then
             export DYLD_LIBRARY_PATH=$RIO_NATIVE_DIR:$DYLD_LIBRARY_PATH
             libpath="-Djava.library.path=$DYLD_LIBRARY_PATH"
@@ -173,7 +170,9 @@ if [ "$start" = "1" ]; then
         fi
         USER_OPTS="-Drio.native.dir=$RIO_NATIVE_DIR $USER_OPTS"
     fi
-    classpath="-cp `toNative $RIO_LIB/rio-start-$rioVersion.jar:$JAVA_HOME/lib/tools.jar:$RIO_LIB/groovy-all-$groovyVersion.jar:$SLF4J_CLASSPATH`"
+    classpath="-cp $(toNative $RIO_LIB/rio-start-$rioVersion.jar:$JAVA_HOME/lib/tools.jar)"
+    classpath="$classpath:$(toNative $RIO_LIB/groovy-all-$groovyVersion.jar)"
+    classpath="$classpath:$(toNative $SLF4J_CLASSPATH)"
     agentpath="-javaagent:`toNative $RIO_LIB/rio-start-$rioVersion.jar`"
     launchTarget=org.rioproject.start.ServiceStarter
     if [ -z "$1" ] ; then
@@ -204,13 +203,13 @@ if [ "$start" = "1" ]; then
 
     serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
 
-    ""$JAVACMD"" -server $JAVA_MEM_OPTIONS $JAVA_RMI_OPTIONS $JAVA_GC_OPTIONS \
+    """$JAVACMD""" -server $JAVA_MEM_OPTIONS $JAVA_RMI_OPTIONS $JAVA_GC_OPTIONS \
         -XX:+HeapDumpOnOutOfMemoryError \
         -XX:OnOutOfMemoryError="`toNative $RIO_HOME/bin/rio` restart %p $service" \
-        -XX:HeapDumpPath=`toNative $RIO_HOME/logs` \
+        -XX:HeapDumpPath="$(toNative $RIO_HOME/logs)" \
         $classpath $libpath $RIO_OPTS \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
-        -Djava.security.policy=`toNative $RIO_HOME/policy/policy.all` \
+        -Djava.security.policy="$(toNative $RIO_HOME/policy/policy.all)" \
         $loggingConfig \
         -Djdk.serialFilter=$serialFilter \
         -Djava.net.preferIPv4Stack=true \
@@ -218,18 +217,19 @@ if [ "$start" = "1" ]; then
         -Dsun.rmi.transport.dgcFilter=$serialFilter \
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
-        -Drio.home=`toNative $RIO_HOME` \
-        -Drio.log.dir=`toNative $RIO_HOME/logs/` \
+        -Drio.home="$(toNative $RIO_HOME)" \
+        -Drio.log.dir="$(toNative $RIO_HOME/logs/)" \
         -Drio.script.mainClass="$launchTarget" \
         $USER_OPTS \
         $NETWORK $DEBUG $launchTarget $starterConfig $command_line
-elif [ "$project" = "1" ] ;then
-    echo "Create project"
-    mvn archetype:generate \
-    -DarchetypeGroupId=org.rioproject \
-    -DarchetypeArtifactId=rio-archetype \
-    -DarchetypeRepository=http://www.rio-project.org/maven2 \
-    -DarchetypeVersion=5.8.0
+elif [ "$browser" = "1" ] ;then
+      classpath="-cp $(toNative $RIO_LIB/rio-start-$rioVersion.jar:$RIO_LIB/browser-1.0.jar:$RIO_LIB/rio-lib-$rioVersion.jar)"
+      classpath="$classpath:$(toNative $RIO_LIB/groovy-all-$groovyVersion.jar)"
+      classpath="$classpath:$(toNative $SLF4J_CLASSPATH)"
+      classpath="$classpath:$(toNative $RIO_LIB/../lib-dl/serviceui-$riverVersion.jar)"
+
+    """$JAVACMD"""  $loggingConfig -Drio.home=$RIO_HOME -Djava.security.policy="$(toNative $RIO_HOME/policy/policy.all)" \
+    $classpath org.apache.river.examples.browser.Browser
 elif [ "$install" = "1" ] ;then
     # Run installer
     installRioToLocalRepository
