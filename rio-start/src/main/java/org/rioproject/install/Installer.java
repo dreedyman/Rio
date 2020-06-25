@@ -54,16 +54,17 @@ public final class Installer {
         String rioHome = System.getProperty("rio.home", RioHome.get());
         if (rioHome == null)
             throw new RuntimeException("RIO_HOME property not declared");
-        Map<Artifact, String> rioArtifactJars = new HashMap<Artifact, String>();
+        Map<Artifact, String> rioArtifactJars = new HashMap<>();
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
         try {
             Resolver r = ResolverHelper.getResolver();
             ClassLoader resolverLoader = r.getClass().getClassLoader();
             Thread.currentThread().setContextClassLoader(resolverLoader);
-            Object aetherServiceInstance = null;
+            Object aetherServiceInstance;
             try {
                 Class<?> aetherService = resolverLoader.loadClass("org.rioproject.resolver.aether.AetherService");
                 Method getDefaultInstance = aetherService.getDeclaredMethod("getDefaultInstance");
+                getDefaultInstance.setAccessible(true);
                 aetherServiceInstance = getDefaultInstance.invoke(null);
             } catch (Exception e) {
                 throw new IOException("Could not get an instance of the Resolver", e);
@@ -72,19 +73,16 @@ public final class Installer {
             }
             /* Install Rio main (parent) pom */
             File pomDir = new File(rioHome + File.separator + "config" + File.separator + "poms");
-            Artifact rioParent = new Artifact("org.rioproject:main:" + RioVersion.VERSION);
-            install(rioParent, FileHelper.find(pomDir, "rio-main"), null, aetherServiceInstance);
+            //Artifact rioParent = new Artifact("org.rioproject:main:" + RioVersion.VERSION);
+            //install(rioParent, FileHelper.find(pomDir, "rio-main"), null, aetherServiceInstance);
 
-            File libDir = new File(rioHome + File.separator + "lib");
+            //File libDir = new File(rioHome + File.separator + "lib");
 
             /* Install client and proxy jars */
             formatAndAddToMap("org.rioproject.cybernode:cybernode-proxy", "cybernode-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject.cybernode:cybernode-ui", "cybernode-ui", rioArtifactJars);
             formatAndAddToMap("org.rioproject.monitor:monitor-proxy", "monitor-proxy", rioArtifactJars);
             formatAndAddToMap("org.rioproject:watch-ui", "watch-ui", rioArtifactJars);
-
-            formatAndAddToMap("org.rioproject.event-collector:event-collector-api", "event-collector-api", rioArtifactJars);
-            formatAndAddToMap("org.rioproject.event-collector:event-collector-proxy", "event-collector-proxy", rioArtifactJars);
 
             File libDlDir = new File(rioHome + File.separator + "lib-dl");
             for (Map.Entry<Artifact, String> entry : rioArtifactJars.entrySet()) {
@@ -138,9 +136,9 @@ public final class Installer {
                                final File pomFile,
                                final File artifactFile,
                                final Object aetherService) throws IOException {
-        if(artifact==null)
+        if (artifact == null)
             throw new IllegalArgumentException("artifact must not be null");
-        if(artifactFile==null && pomFile==null)
+        if (artifactFile == null && pomFile == null)
             throw new IllegalArgumentException("if pomFile is not provided, the artifactFile must not be null");
         File localRepository = Repository.getLocalRepository();
         StringBuilder sb = new StringBuilder();
@@ -155,10 +153,10 @@ public final class Installer {
         sb.append(version);
         sb.append(File.separator);
 
-        if(artifactFile!=null) {
+        if (artifactFile != null) {
             int ndx = artifactFile.getName().lastIndexOf(".");
             String jarName = artifactFile.getName().substring(0, ndx);
-            String extension = artifactFile.getName().substring(ndx, artifactFile.getName().length());
+            String extension = artifactFile.getName().substring(ndx);
             sb.append(jarName).append(extension);
             File jar = new File(localRepository, sb.toString());
             if (jar.exists()) {
@@ -170,12 +168,14 @@ public final class Installer {
              */
             if (workingPomFile == null) {
                 String line;
-                List<String> pomListing = new ArrayList<String>();
+                List<String> pomListing = new ArrayList<>();
                 JarFile jarFile = new JarFile(artifactFile);
                 sb.delete(0, sb.length());
                 sb.append("META-INF/maven/").append(groupId).append("/").append(artifactId).append("/").append("pom.xml");
                 JarEntry pomEntry = jarFile.getJarEntry(sb.toString());
                 if (pomEntry == null) {
+                    System.out.println(String.format("Unable to find jar entry [%s], in [%s], cannot install %s:%s:%s",
+                                  sb.toString(), artifactFile.getPath(), groupId, artifactId, version));
                     logger.error("Unable to find jar entry [{}], in [{}], cannot install {}:{}:{}",
                                  sb.toString(), artifactFile.getPath(), groupId, artifactId, version);
                     return;
@@ -199,7 +199,7 @@ public final class Installer {
             }
         }
 
-        if(artifactFile==null) {
+        if(artifactFile == null) {
             sb.append(artifactId).append("-").append(version).append(".pom");
             File targetPom = new File(localRepository, sb.toString());
             if(targetPom.exists()) {
