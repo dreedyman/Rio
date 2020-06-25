@@ -16,4 +16,9 @@ jar {
                 "Rio-Build": buildTime
         )
     }
+
+    into("META-INF/maven/$project.group/$project.name") {
+        from { generatePomFileForMavenJavaPublication }
+        rename ".*", "pom.xml"
+    }
 }
