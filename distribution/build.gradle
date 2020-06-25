@@ -31,6 +31,7 @@ configurations {
 
 dependencies {
     distribution "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    distribution "org.apache.river.examples:browser:1.0"
     distribution "org.apache.river:start:$riverVersion"
     distribution "org.apache.river:reggie:$riverVersion"
     distribution "org.apache.river:reggie-dl:$riverVersion"
@@ -158,7 +159,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                 include "**"
                 fileMode = 0755
                 filter(ReplaceTokens,
-                        tokens: [rioV: project.version, groovyV: groovyVersion])
+                        tokens: [rioV: project.version, groovyV: groovyVersion, riverV: riverVersion])
             }
             into "${distDir}-${version}/bin"
         }
