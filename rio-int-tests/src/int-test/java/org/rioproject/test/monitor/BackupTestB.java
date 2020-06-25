@@ -141,12 +141,12 @@ public class BackupTestB {
             
             // 9. STOP THE PREVIOUS PROVISION MONITOR
             logger.info("Stopping the previous Provision Monitor ...");
-            testManager.stopProvisionMonitor(pm);
+            TestManager.stopProvisionMonitor(pm);
             logger.info("The previous Provision Monitor has been stopped");
             
             // 10. STOP THE PREVIOUS CYBERNODE
             logger.info("Stopping the previous Cybernode ...");
-            testManager.stopCybernode(cybernode);
+            TestManager.stopCybernode(cybernode);
             logger.info("The previous Cybernode has been stopped");
             
             pmMon.waitFor(1);
@@ -172,7 +172,7 @@ public class BackupTestB {
         
         // 13. STOP THE LAST PROVISION MONITOR
         logger.info("Stopping the last Provision Monitor ...");
-        testManager.stopProvisionMonitor(pm);
+        TestManager.stopProvisionMonitor(pm);
         logger.info("The last Provision Monitor has been stopped");
         
         cyMon.waitFor(2);
@@ -180,7 +180,7 @@ public class BackupTestB {
         
         // 14. STOP THE CYBERNODE RUNNING THE SERVICE
         logger.info("Stopping the busy Cybernode ...");
-        testManager.stopCybernode(cybernode);
+        TestManager.stopCybernode(cybernode);
         logger.info("The busy Cybernode has been stopped");
         
         // 15. ASSERTION: THE SERVICE SHOULD NOT APPEAR
@@ -188,7 +188,7 @@ public class BackupTestB {
         simpleMon.waitFor(0);
 
         for(Cybernode c : cyMon.getServices()) {
-            testManager.stopCybernode(c);
+            TestManager.stopCybernode(c);
         }
         cyMon.waitFor(0);
 

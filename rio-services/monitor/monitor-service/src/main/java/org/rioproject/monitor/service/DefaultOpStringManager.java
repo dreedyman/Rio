@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -94,11 +95,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     /**
      * A List of scheduled TimerTasks
      */
-    private final List<TimerTask> scheduledTaskList = Collections.synchronizedList(new ArrayList<>());
+    private final List<TimerTask> scheduledTaskList = new CopyOnWriteArrayList<>();
     /**
      * A list a deployed Dates
      */
-    private final List<Date> deployDateList = Collections.synchronizedList(new ArrayList<>());
+    private final List<Date> deployDateList = new CopyOnWriteArrayList<>();
     /**
      * Local copy of the deployment status of the OperationalString
      */
@@ -344,7 +345,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         this.uuid = uuid;
         Map<String, Throwable> map = new HashMap<>();
         ServiceElement[] sElems = opString.getServices();
-        logger.info("Creating [{}] ServiceElementManagers for [{}]", sElems.length, sElems[0].getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating [{}] ServiceElementManagers", sElems.length);
+        }
         for (ServiceElement sElem : sElems) {
             try {
                 if (sElem.getExportBundles().length > 0) {
@@ -391,7 +394,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      */
     void startManager(final ServiceProvisionListener listener,
                       final Map<ServiceElement, ServiceBeanInstance[]> knownInstanceMap) {
-        logger.info("Starting manager");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting manager");
+        }
         addDeploymentDate(new Date(System.currentTimeMillis()));
         setDeploymentStatus(OperationalString.DEPLOYED);
         ServiceElementManager[] mgrs = getServiceElementManagers();
@@ -423,7 +428,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             }
         }
         if(logger.isTraceEnabled()) {
-            logger.info("Started managers for {}", opString.getName());
+            logger.trace("Started managers for {}", opString.getName());
         }
     }
 
@@ -445,7 +450,9 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 }
             }
             if(undeploy) {
-                logger.info("Terminating [{}] due to idle services", getName());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Terminating [{}] due to idle services", getName());
+                }
                 opStringMangerController.undeploy(manager, true);
             }
         }
@@ -495,7 +502,10 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 logger.warn("Primary testManager not located, force state to active for [{}]", getName());
                 setActive(true);
             } else {
-                logger.info("Forwarding update request to primary testManager for [{}]", getName());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Forwarding update request to primary testManager for [{}]",
+                                getName());
+                }
                 return (primary.update(newOpString));
             }
         }
@@ -526,8 +536,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (newOpString == null)
             throw new IllegalArgumentException("OperationalString cannot be null");
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Updating {} deployment", newOpString.getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Updating {} deployment", newOpString.getName());
         }
         Map<String, Throwable> map = new HashMap<>();
         ServiceElement[] sElems = newOpString.getServices();
@@ -834,8 +844,11 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             logger.warn("UNABLE to remove ServiceElementManager for [{}/{}]",
                            sElem.getOperationalStringName(), sElem.getName());
         else {
-            logger.info(String.format("Removed ServiceElementManager for [%s/%s]",
-                                      sElem.getOperationalStringName(), sElem.getName()));
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.format("Removed ServiceElementManager for [%s/%s]",
+                                          sElem.getOperationalStringName(),
+                                          sElem.getName()));
+            }
             opString.removeService(sElem);
             stateChanged(true);
         }

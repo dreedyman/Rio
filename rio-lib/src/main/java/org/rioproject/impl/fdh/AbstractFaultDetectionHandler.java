@@ -1,12 +1,12 @@
 /*
- * Copyright 2008 the original author or authors.
- *
+ * Copyright to the original author or authors.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,8 +52,8 @@ import static org.rioproject.impl.fdh.Options.*;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public abstract class AbstractFaultDetectionHandler implements FaultDetectionHandler<ServiceID> {
     private static final int DEFAULT_RETRY_COUNT = 3;
-    private static final long DEFAULT_RETRY_TIMEOUT = 1000;
-    private static final long DEFAULT_INVOCATION_DELAY = TimeUnit.SECONDS.toMillis(1);
+    private static final long DEFAULT_RETRY_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
+    private static final long DEFAULT_INVOCATION_DELAY = TimeUnit.SECONDS.toMillis(3);
     /** Object that can be used to communicate to the service */
     protected Object proxy;
     long invocationDelay = DEFAULT_INVOCATION_DELAY;
@@ -76,7 +76,7 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
     /** Class which provides service monitoring */
     ServiceMonitor serviceMonitor;
     /** A Logger */
-    private static Logger logger = LoggerFactory.getLogger(AbstractFaultDetectionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractFaultDetectionHandler.class);
 
     @Override public void configure(Properties properties) {
         if(properties.getProperty(INVOCATION_DELAY)!=null) {
@@ -146,8 +146,6 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
      * Get the class which implements the ServiceMonitor
      *
      * @return A ServiceMonitor
-     *
-     * @throws Exception if the ServiceMonitor cannot be created
      */
     protected abstract ServiceMonitor getServiceMonitor();
 
@@ -194,7 +192,7 @@ public abstract class AbstractFaultDetectionHandler implements FaultDetectionHan
     protected void notifyListeners() {
         FaultDetectionListener<ServiceID>[] ls;
         synchronized(listeners) {
-            ls = listeners.toArray(new FaultDetectionListener[listeners.size()]);
+            ls = listeners.toArray(new FaultDetectionListener[0]);
         }
         for(FaultDetectionListener<ServiceID> l : ls) {
             l.serviceFailure(proxy, serviceID);

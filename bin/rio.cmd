@@ -28,8 +28,8 @@ set SLF4J_CLASSPATH="%RIO_HOME%\lib\logging\*";"%RIO_HOME%\config\logging"
 set RIO_LIB=%RIO_HOME%\lib
 
 :: Set Versions
-set rioVersion=6.0.0
-set groovyVersion=2.3.8
+set rioVersion=@rioV@
+set groovyVersion=@groovyV@
 
 if "%JAVA_HOME%" == "" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\java.exe" goto noJavaHome
@@ -92,9 +92,10 @@ set agentpath=-javaagent:"%RIO_HOME%\lib\rio-start-%rioVersion%.jar"
 
 set launchTarget=org.rioproject.start.ServiceStarter
 
-set loggingConfig="%RIO_HOME%\config\logging\rio-logging.properties"
+set logbackConfig="%RIO_HOME%\config\logging\logback.groovy"
+set loggingConfig="%RIO_HOME%\config\logging\logging.properties"
 
-"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.rmi.server.useCodebaseOnly=false -Djava.util.logging.config.file=%loggingConfig% -Dorg.rioproject.service=%service% %USER_OPTS% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -Drio.home="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -Drio.native.dir=%RIO_NATIVE_DIR% -Drio.log.dir=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
+"%JAVA_HOME%\bin\java" -server %JAVA_MEM_OPTIONS% %classpath% %agentpath% -Djava.protocol.handler.pkgs=org.rioproject.url -Djava.rmi.server.useCodebaseOnly=false -Dlogback.configurationFile=%logbackConfig% -Djava.util.logging.config.file=%loggingConfig% -Dorg.rioproject.service=%service% %USER_OPTS% -Djava.security.policy="%RIO_HOME%"\policy\policy.all -Djava.library.path=%RIO_NATIVE_DIR% -Drio.home="%RIO_HOME%" -Dorg.rioproject.home="%RIO_HOME%" -Drio.native.dir=%RIO_NATIVE_DIR% -Drio.log.dir=%RIO_LOG_DIR% -Drio.script.mainClass=%launchTarget% %launchTarget% "%starterConfig%"
 goto end
 
 :noStarter

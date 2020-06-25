@@ -10,7 +10,7 @@ dependencies {
     testCompile project(':resolver-aether')
     testCompile project(':rio-start')
     testCompile group: 'org.apache.river', name: 'reggie', version: "${riverVersion}"
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: "${logbackVersion}"
+    testCompile logRuntime
 }
 
 jar {
@@ -28,5 +28,5 @@ jar {
 }
 
 test {
-    systemProperties 'java.security.policy': policyAll
+    systemProperty 'java.security.policy', policyAll
 }

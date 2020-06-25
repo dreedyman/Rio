@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class PlatformCapabilityWriter {
      * @param pCap The <tt>PlatformCapability</tt> to write
      * @param configPath Parent directory to store the generated file
      */
-    public String write(PlatformCapability pCap, String configPath) {
+    static String write(PlatformCapability pCap, String configPath) {
 
         Map<String, Object> capabilities = pCap.getCapabilities()
         def pCapVersion = ""

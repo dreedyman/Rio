@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,8 +66,7 @@ import java.util.*;
  */
 public class StaticCybernode {
     private ServiceBeanContainerImpl instantiator;
-    //private final Map<Object, Object> serviceMap = new HashMap<Object, Object>();
-    private final Set<ActivatedService> serviceSet = new HashSet<ActivatedService>();
+    private final Set<ActivatedService> serviceSet = new HashSet<>();
 
     static {
         Policy.setPolicy(
@@ -152,7 +151,7 @@ public class StaticCybernode {
     public Map<String, Object> activate(File opstring, String... beans) throws Exception {
          if(opstring==null)
             throw new IllegalArgumentException("opstring file must not be null");
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         OpStringLoader opl = new OpStringLoader();
         OperationalString[] opStrings = opl.parseOperationalString(opstring);
         for(OperationalString ops : opStrings) {
@@ -185,7 +184,7 @@ public class StaticCybernode {
             throw new OperationalStringException("Artifact "+artifact+" not resolvable");
         OAR oar = new OAR(new File(opStringURL.toURI()));
         OperationalString[] opStrings = oar.loadOperationalStrings();
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         for(OperationalString ops : opStrings) {
             if(beans!=null && beans.length>0)
@@ -211,7 +210,7 @@ public class StaticCybernode {
         throws ServiceBeanInstantiationException {
         if(opstring==null)
             throw new IllegalArgumentException("opstring must not be null");
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         for(ServiceElement elem : opstring.getServices()) {
             for(String bean : beans) {
                 if(elem.getName().equals(bean)) {
@@ -236,7 +235,7 @@ public class StaticCybernode {
      */
     public Map<String, Object> activate(OperationalString opstring)
         throws ServiceBeanInstantiationException {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         for(ServiceElement elem : opstring.getServices()) {
             map.put(elem.getName(), instantiateBean(elem));
         }
@@ -400,7 +399,7 @@ public class StaticCybernode {
         }
         try {
             StaticCybernode sbc = new StaticCybernode();
-            List<String> options = new ArrayList<String>(Arrays.asList(args));
+            List<String> options = new ArrayList<>(Arrays.asList(args));
             String option = options.get(0);
             if(option.endsWith(".xml") || option.endsWith(".groovy")) {
                 options.remove(option);

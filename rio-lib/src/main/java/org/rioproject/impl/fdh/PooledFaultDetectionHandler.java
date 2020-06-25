@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,20 +30,19 @@ import java.util.concurrent.*;
 /**
  * @author Dennis Reedy
  */
-public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<ServiceID>*/ extends AbstractFaultDetectionHandler {
-    private final Set<ServiceEntry> serviceSet;
+public class PooledFaultDetectionHandler extends AbstractFaultDetectionHandler {
+    private final Set<ServiceEntry> serviceSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static final Logger logger = LoggerFactory.getLogger(PooledFaultDetectionHandler.class);
-
-    public PooledFaultDetectionHandler() {
-        Map<ServiceEntry, Boolean> concurrentMap = new ConcurrentHashMap<>();
-        serviceSet = Collections.newSetFromMap(concurrentMap);
-    }
 
     @Override public void configure(Properties properties) {
         super.configure(properties);
         long invocationDelay = getInvocationDelay();
+        logger.debug("invocationDelay: " + invocationDelay);
         scheduler.scheduleAtFixedRate(new Reaper(), 0, invocationDelay, TimeUnit.MILLISECONDS);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Properties: " + properties);
+        }
     }
 
     int getServiceCount() {
@@ -65,7 +64,9 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
     }
 
     @Override public void terminate() {
-        System.out.println("Terminate: "+serviceSet.size());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Terminate: " + serviceSet.size());
+        }
         scheduler.shutdownNow();
         super.terminate();
     }
@@ -74,21 +75,25 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
 
         @Override public void run() {
             List<ServiceEntry> removals = new ArrayList<>();
-            System.out.println("Reaper: "+serviceSet.size());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Reaper: " + serviceSet.size() + " services to verify");
+            }
             for(ServiceEntry entry : serviceSet) {
                 if(entry.administrable!=null) {
                     boolean verified = false;
                     try {
                         entry.administrable.getAdmin();
                         verified = true;
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         //e.printStackTrace();
                     }
                     if(!verified) {
                         removals.add(entry);
                     }
                 } else {
-                    logger.debug("Skipped {}, it is not Administrable", entry.serviceID) ;
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Skipped {}, it is not Administrable", entry.serviceID);
+                    }
                 }
             }
             for(final ServiceEntry entry : removals) {
@@ -135,12 +140,12 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
 
         @Override public void run() {
             boolean reachable = false;
-            for(int i = 0; i < retryCount; i++) {
+            for (int i = 0; i < retryCount; i++) {
                 reachable = verify();
-                if(!reachable) {
+                if (!reachable) {
                     break;
                 }
-                if(retryTimeout > 0) {
+                if (retryTimeout > 0) {
                     try {
                         Thread.sleep(retryTimeout);
                     } catch(InterruptedException ie) {
@@ -154,11 +159,11 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
                 }
             }
 
-            if(logger.isTraceEnabled())
+            if (logger.isTraceEnabled())
                 logger.trace("FDH: service [{}], proxy [{}] is reachable [{}]",
                              NameHelper.getName(serviceEntry.item.attributeSets),
                              serviceEntry.proxy.getClass().getName(), reachable);
-            if(!reachable) {
+            if (!reachable) {
                 getListeners().stream().forEach(l -> l.serviceFailure(serviceEntry.proxy, serviceEntry.serviceID));
             }
         }
@@ -166,18 +171,18 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
         boolean verify() {
             boolean verified = false;
             try {
-                if(logger.isTraceEnabled())
+                if (logger.isTraceEnabled())
                     logger.trace("Invoke getAdmin() on : {}", serviceEntry.proxy.getClass().getName());
                 serviceEntry.administrable.getAdmin();
-                if(logger.isTraceEnabled())
+                if (logger.isTraceEnabled())
                     logger.trace("Invocation to getAdmin() on : {} returned", serviceEntry.proxy.getClass().getName());
                 verified = true;
-            } catch(RemoteException e) {
-                if(logger.isDebugEnabled())
+            } catch (RemoteException e) {
+                if (logger.isDebugEnabled())
                     logger.debug("RemoteException reaching service, service cannot be reached");
-            } catch(Throwable t) {
-                if(!ThrowableUtil.isRetryable(t)) {
-                    if(logger.isDebugEnabled())
+            } catch (Throwable t) {
+                if (!ThrowableUtil.isRetryable(t)) {
+                    if (logger.isDebugEnabled())
                         logger.debug("Unrecoverable Exception invoking getAdmin()", t);
                 }
             }
@@ -188,7 +193,7 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
     /*
      * Holds a reference to a service proxy and service id
      */
-    private class ServiceEntry {
+    private static class ServiceEntry {
         Object proxy;
         ServiceID serviceID;
         Administrable administrable;
@@ -212,7 +217,7 @@ public class PooledFaultDetectionHandler /*implements FaultDetectionHandler<Serv
             if (o == null || getClass() != o.getClass())
                 return false;
             ServiceEntry that = (ServiceEntry) o;
-            return !(serviceID != null ? !serviceID.equals(that.serviceID) : that.serviceID != null);
+            return Objects.equals(serviceID, that.serviceID);
         }
 
         public int hashCode() {

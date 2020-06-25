@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -359,7 +359,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
             try {
                 logger.trace("Updating ProvisionMonitor with ResourceCapability. Number of deployed services: {}",
                              deployedServices.size());
-                //mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
+                mgr.provisioner.update(adapter.getInstantiator(), resourceCapability, deployedServices, serviceLimit);
             } catch (Exception e) {
                 logger.warn("Failed updating ProvisionManager", e);
                 boolean connected = false;
@@ -447,7 +447,7 @@ public class ServiceConsumer extends ServiceDiscoveryAdapter {
         }
         /* If we're not connected, set lease to null and return */
         if(!connected)
-            lease=null;                    
+            lease = null;
         return lease;
     }        
 

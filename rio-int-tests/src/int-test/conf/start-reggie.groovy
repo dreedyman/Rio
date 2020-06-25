@@ -1,8 +1,3 @@
-/*
- * This configuration is used by the com.sun.jini.start utility to start a
- * ProvisionMonitor, including an embedded Webster, JMX Connector Service and
- * a Jini Lookup Service
- */
 
 import org.rioproject.config.Component
 
@@ -16,9 +11,9 @@ class StartReggieConfig {
         String rioHome = System.getProperty('rio.home')
         String rioTestHome = System.getProperty('rio.test.home')
 
-        def websterRoots = [rioHome+'/lib-dl', ';',
-                            rioHome+'/lib',    ';',
-                            rioTestHome+'/build/']
+        def websterRoots = [rioHome + '/lib-dl', ';',
+                            rioHome + '/lib',    ';',
+                            rioTestHome + '/build/']
 
         String policyFile = rioHome+'/policy/policy.all'
         def reggieConfigs = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']

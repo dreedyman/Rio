@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 package org.rioproject.impl.opstring;
 
 import org.rioproject.opstring.ClassBundle;
-import org.rioproject.opstring.OperationalString;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.util.PropertyHelper;
 import org.slf4j.Logger;
@@ -36,25 +35,7 @@ import java.net.URLConnection;
  * @author Dennis Reedy
  */
 public class OpStringUtil {
-    private static Logger logger = LoggerFactory.getLogger(OpStringUtil.class.getPackage().getName());
-
-    /**
-     * Check if the codebase is null or the codebase needs to be resolved
-     *
-     * @param opstring The OperationalString to check
-     * @param codebase If the codebase is not set, set it to this value
-     *
-     * @throws java.io.IOException If the jars cannot be served
-     */
-    public static void checkCodebase(OperationalString opstring, String codebase) throws IOException {
-        for (ServiceElement elem : opstring.getServices()) {
-            checkCodebase(elem, codebase);
-        }
-        OperationalString[] nesteds = opstring.getNestedOperationalStrings();
-        for (OperationalString nested : nesteds) {
-            checkCodebase(nested, codebase);
-        }
-    }
+    private static final Logger logger = LoggerFactory.getLogger(OpStringUtil.class.getPackage().getName());
 
     /**
      * Check if the codebase is null or the codebase needs to be resolved
@@ -118,36 +99,34 @@ public class OpStringUtil {
     }
 
     private static void canServe(String name, String codebase) throws IOException {
-        if(name.startsWith("rio-api")    ||
-           name.startsWith("jsk-dl")     ||
-           name.startsWith("serviceui"))
+        if (name.startsWith("rio-lib") || name.startsWith("jsk-dl") || name.startsWith("serviceui")) {
             return;
+        }
+        URL url = new URL(codebase + name);
+        if(codebase.startsWith("file:")) {
+            try {
+                File f = new File(url.toURI());
+                if (!f.exists()) {
+                    throw new IOException("Could not create URI from " + codebase);
+                }
+            } catch (URISyntaxException e) {
+                throw new IOException("Could not create URI from " + codebase, e);
+            }
+        }
+
         InputStream is = null;
         URLConnection conn = null;
         try {
-            URL url = new URL(codebase + name);
-            if(codebase.startsWith("file:")) {
-                try {
-                    File f = new File(url.toURI());
-                    if(!f.exists())
-                        throw new IOException("Could not create URI from "+codebase);
-                } catch (URISyntaxException e) {
-                    throw new IOException("Could not create URI from "+codebase, e);
-                }
-
-            } else {
-                conn = url.openConnection();
-                is = conn.getInputStream();
-                if(logger.isTraceEnabled())
-                    logger.trace("Opened connection for {}", url.toExternalForm());
+            conn = url.openConnection();
+            is = conn.getInputStream();
+            if(logger.isTraceEnabled()) {
+                logger.trace("Opened connection for {}", url.toExternalForm());
             }
-
         } finally {
-            if(is!=null)
+            if(is != null)
                 is.close();
-            if(conn!=null && conn instanceof HttpURLConnection)
+            if(conn instanceof HttpURLConnection)
                 ((HttpURLConnection)conn).disconnect();
         }
     }
-
 }

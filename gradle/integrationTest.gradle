@@ -49,7 +49,9 @@ configurations {
  * configured source directory and uses the correct classpath.\
  */
 task integrationTest(type: Test) {
-    if (!file("${project(":distribution").buildDir.path}/rio-${version}").exists()) {
+    group = 'verification'
+    String rioHome = "${project(":distribution").buildDir.path}/rio-${version}"
+    if (! new File(rioHome, "lib").exists()) {
         dependsOn([":distribution:createDistribution",
                    ":cybernode-proxy:publishToMavenLocal",
                    ":monitor-proxy:publishToMavenLocal"])
@@ -57,22 +59,17 @@ task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
 
-    String serialFilter = "org.rioproject.**;net.jini.**;com.sun.**"
     systemProperty 'java.security.policy', policyAll
-    systemProperty "rio.home", "${project(":distribution").buildDir.path}/rio-${version}"
+    systemProperty "rio.home", "${rioHome}"
     systemProperty "rio.test.home", "${projectDir.path}"
     systemProperty "rio.test.webster.roots", "${projectDir.path}/build/classes/java/;${projectDir.path}/build/classes/groovy/"
     systemProperty "org.rioproject.test.manager.config", "${projectDir.path}/src/int-test/conf/manager-config.groovy"
-    systemProperty "sun.rmi.registry.registryFilter", serialFilter
-    systemProperty "sun.rmi.transport.dgcFilter", serialFilter
     systemProperty "java.rmi.server.useCodebaseOnly", "false"
-    systemProperty "jdk.serialFilter", serialFilter
+    systemProperty "logback.configurationFile", "${rioHome}/config/logging/logback.groovy"
+    systemProperty "java.util.logging.config.file", "${rioHome}/config/logging/logging.properties"
     systemProperty "rio.log.dir", "/tmp/${System.getProperty("user.name")}/logs"
-    systemProperty "log4j.configurationFile", "${project(":distribution").buildDir.path}/rio-${version}/config/logging/log4j2.xml"
 
-    testLogging {
-        events "passed", "skipped", "failed"/*, "standardOut", "standardError"*/
-    }
+    mustRunAfter test
 
     /* If you want to ensure that integration tests are run every time when you invoke
      * this task, uncomment the following line. */
@@ -80,7 +77,4 @@ task integrationTest(type: Test) {
 }
 
 /* Ensure that the check task fails the build if there are failing integration tests. */
-check.dependsOn integrationTest
-
-/* Ensure that our unit tests are run before our integration tests */
-integrationTest.mustRunAfter test
+tasks.check.dependsOn integrationTest

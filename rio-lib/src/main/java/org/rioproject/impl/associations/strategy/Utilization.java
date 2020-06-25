@@ -1,12 +1,12 @@
 /*
- * Copyright 2008 the original author or authors.
- *
+ * Copyright to the original author or authors.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -56,11 +56,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
     private SLA sla;
-    private final List<ServiceCapability<T>> services = Collections.synchronizedList(new ArrayList<ServiceCapability<T>>());
+    private final List<ServiceCapability<T>> services = new CopyOnWriteArrayList<>();
     private OperationalStringManager opMgr;
     /** Scheduler for Cybernode utilization gathering */
     private ScheduledExecutorService scheduler;
-    private static Logger logger = LoggerFactory.getLogger(Utilization.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Utilization.class.getName());
 
     @Override
     public void setAssociation(final Association<T> association) {
@@ -209,7 +209,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         }
 
         if(!alreadyHaveIt) {
-            services.add(new ServiceCapability(item.service, uuid));
+            services.add(new ServiceCapability<>((T) item.service, uuid));
             logger.trace("Adding new ServiceCapability, service count now {}", services.size());
         } else {
             logger.trace("Already have {}, service count now {}", item, services.size());
@@ -218,7 +218,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
 
     private boolean removeService(final T service) {
         boolean removed = false;
-        for(ServiceCapability sc : getServices()) {
+        for(ServiceCapability<T> sc : getServices()) {
             if(sc.getService().equals(service)) {
                 removed = services.remove(sc);
             }
@@ -228,14 +228,14 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
 
     @SuppressWarnings("unchecked")
     private ServiceCapability<T>[] getServices() {
-        return services.toArray(new ServiceCapability[services.size()]);
+        return services.toArray(new ServiceCapability[0]);
     }
 
     class ComputeResourceUtilizationFetcher implements Runnable {
         final OperationalStringManager opMgr;
         final String opStringName;
-        final List<DeployedService> list = new ArrayList<DeployedService>();
-        final List<ServiceElement> serviceElements = new ArrayList<ServiceElement>();
+        final List<DeployedService> list = new ArrayList<>();
+        final List<ServiceElement> serviceElements = new ArrayList<>();
 
         ComputeResourceUtilizationFetcher(final OperationalStringManager opMgr,
                                           final String opStringName) {
@@ -266,7 +266,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
                 ServiceBeanInstance sbi = deployed.getServiceBeanInstance();
                 ComputeResourceUtilization cru =
                     deployed.getComputeResourceUtilization();
-                for(ServiceCapability sc : services) {
+                for(ServiceCapability<T> sc : services) {
                     if(sc.uuid.equals(sbi.getServiceBeanID())) {
                         logger.trace("Obtained ComputeResourceUtilization for [{}]", association.getName());
                         sc.setComputeResourceUtilization(cru);
@@ -277,16 +277,16 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         }
 
         private List<ServiceElement> getMatchingServiceElements(final DeploymentMap dMap) {
-            List<ServiceElement> matching = new ArrayList<ServiceElement>();
+            List<ServiceElement> matching = new ArrayList<>();
             AssociationDescriptor ad = association.getAssociationDescriptor();
             String[] adInterfaces = ad.getInterfaceNames();
             Arrays.sort(adInterfaces);
             for(ServiceElement elem : dMap.getServiceElements()) {
-                List<String> list = new ArrayList<String>();
+                List<String> list = new ArrayList<>();
                 for(ClassBundle cb : elem.getExportBundles()) {
                     list.add(cb.getClassName());
                 }
-                String[] cbInterfaces = list.toArray(new String[list.size()]);
+                String[] cbInterfaces = list.toArray(new String[0]);
                 if(Arrays.equals(adInterfaces, cbInterfaces)) {
                     if(ad.matchOnName()) {
                         if(ad.getName().equals(elem.getName())) {
@@ -324,7 +324,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
         }
 
         List<MeasuredResource> getMeasuredResourcesAsList() {
-            List<MeasuredResource> list = new ArrayList<MeasuredResource>();
+            List<MeasuredResource> list = new ArrayList<>();
             if(cru!=null) {
                 synchronized(updateLock) {
                     list.addAll(cru.getMeasuredResources());
@@ -349,7 +349,7 @@ public class Utilization<T> extends AbstractServiceSelectionStrategy<T> {
 
                     } else {
                         if(logger.isDebugEnabled()) {
-                            List<MeasuredResource> breached = new ArrayList<MeasuredResource>();
+                            List<MeasuredResource> breached = new ArrayList<>();
                             for(MeasuredResource mRes : cru.getMeasuredResources()) {
                                 if(mRes.thresholdCrossed()) {
                                     breached.add(mRes);

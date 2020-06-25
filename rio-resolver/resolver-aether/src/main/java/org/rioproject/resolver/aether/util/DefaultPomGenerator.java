@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.rioproject.resolver.aether.util;
 import org.eclipse.aether.artifact.Artifact;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Generates a Maven pom
@@ -27,13 +28,11 @@ import java.io.*;
 public class DefaultPomGenerator {
 
     public static void writeTo(File pomFile, Artifact artifact) throws IOException {
-        Writer writer = null;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pomFile), "utf-8"));
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pomFile),
+                                                                       StandardCharsets.UTF_8))) {
             writer.write(DefaultPomGenerator.getContents(artifact));
-        } finally {
-            try {writer.close();} catch (Exception ex) {/*ignore*/}
         }
+        /*ignore*/
     }
     public static String getContents(Artifact artifact) {
         StringBuilder sb = new StringBuilder();

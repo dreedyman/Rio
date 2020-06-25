@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import java.lang.reflect.Method;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class ServiceStarter {
     /**
      * Array of strong references to transient services
      */
-    private static final List<Object> transientServiceRefs = new ArrayList<Object>();
+    private static final List<Object> transientServiceRefs = new ArrayList<>();
     /**
      * Object returned by {@link ServiceStarter#start}
      */
@@ -182,14 +183,10 @@ public class ServiceStarter {
                                             final Configuration config,
                                             final LoginContext loginContext) throws Exception {
         loginContext.login();
-        Result[] results = null;
+        Result[] results;
         try {
             results = Subject.doAsPrivileged(loginContext.getSubject(),
-                new PrivilegedExceptionAction<Result[]>() {
-                    public Result[] run() throws Exception {
-                        return create(descs, config);
-                    }
-                },
+                                             (PrivilegedExceptionAction<Result[]>) () -> create(descs, config),
                 null);
         } catch (PrivilegedActionException pae) {
             throw pae.getException();
@@ -215,12 +212,11 @@ public class ServiceStarter {
      *         <code>descs</code>, which contains the details for each service
      *         creation attempt.
      *
-     * @throws Exception If there was a problem creating the service.
      * @see Result
      * @see ServiceDescriptor
      * @see net.jini.config.Configuration
      */
-    private static Result[] create(final ServiceDescriptor[] descs, final Configuration config) throws Exception {
+    private static Result[] create(final ServiceDescriptor[] descs, final Configuration config) {
         List<Result> proxies = new ArrayList<Result>();
         logger.debug("Starting {} service(s)", descs.length);
         for (ServiceDescriptor desc : descs) {
@@ -236,7 +232,7 @@ public class ServiceStarter {
                 proxies.add(new Result(desc, result, problem));
             }
         }
-        return proxies.toArray(new Result[proxies.size()]);
+        return proxies.toArray(new Result[0]);
     }
 
     /**
@@ -267,10 +263,8 @@ public class ServiceStarter {
      * each transient service started. If there are no transient services
      * started, a zero-length list is returned. A new list is allocated each
      * time.
-     *
-     * @throws Exception If there are errors starting the services
      */
-    public static List<ServiceReference> start(ServiceDescriptor... descriptors) throws Exception {
+    public static List<ServiceReference> start(ServiceDescriptor... descriptors) {
         Result[] results = create(descriptors, EmptyConfiguration.INSTANCE);
         checkResultFailures(results);
         List<ServiceReference> serviceRefs = getServiceReferences(results);
@@ -355,11 +349,11 @@ public class ServiceStarter {
     * transient services from getting garbage collected.
     */
     private static List<ServiceReference> getServiceReferences(Result[] results) {
-        List<ServiceReference> refs = new ArrayList<ServiceReference>();
+        List<ServiceReference> refs = new ArrayList<>();
         if (results.length == 0)
             return refs;
         for (Result result : results) {
-            Class rDescClass = result.descriptor.getClass();
+            Class<?> rDescClass = result.descriptor.getClass();
             if (result.result != null) {
                 if(NonActivatableServiceDescriptor.class.equals(rDescClass)) {
                     NonActivatableServiceDescriptor.Created created =
@@ -400,21 +394,17 @@ public class ServiceStarter {
      * Utility routine that prints out warning messages for each service
      * descriptor that produced an exception or that was null.
      */
-    private static boolean checkResultFailures(Result[] results) {
+    private static void checkResultFailures(Result[] results) {
         if (results.length == 0)
-            return false;
-        boolean failures = false;
+            return;
         for (int i = 0; i < results.length; i++) {
             if (results[i].exception != null) {
-                failures = true;
                 logger.warn("service.creation.unknown", results[i].exception);
                 logger.warn("service.creation.unknown.detail {} {}", i, results[i].descriptor);
             } else if (results[i].descriptor == null) {
-                failures = true;
                 logger.warn("service.creation.null {}", i);
             }
         }
-        return failures;
     }
 
     /**

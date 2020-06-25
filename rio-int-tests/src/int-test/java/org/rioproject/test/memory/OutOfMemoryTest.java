@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *        http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.impl.event.BasicEventConsumer;
-import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.monitor.ProvisionMonitor;
 import org.rioproject.monitor.ProvisionMonitorEvent;
@@ -55,11 +54,11 @@ public class OutOfMemoryTest {
         ServiceItem[] items = testManager.getServiceItems(ProvisionMonitor.class);
         Assert.assertNotNull(items);
         Assert.assertTrue(items.length>0);
-        Listener l= new Listener();
+        Listener l = new Listener();
         Throwable thrown = null;
         File opstring = new File(System.getProperty("user.dir")+File.separator+
                                     "src"+File.separator+
-                                    "test"+File.separator+
+                                    "int-test"+File.separator+
                                     "resources"+File.separator+
                                     "opstring"+File.separator+
                                     "outofmemory_test.groovy");
@@ -69,10 +68,10 @@ public class OutOfMemoryTest {
         eventConsumer.register(items[0]);
         outOfMemory.createOOME();
         long waited = wait(l, true);
-        System.out.println("Waited "+waited/1000+" seconds for failure to be observed");
+        System.out.println("Waited "+ waited / 1000 + " seconds for failure to be observed");
         Assert.assertTrue("OutOfMemory should have failed", l.failed);
         waited = wait(l, false);
-        System.out.println("Waited "+waited/1000+" seconds for re-creation to be observed");
+        System.out.println("Waited "+ waited / 1000 + " seconds for re-creation to be observed");
         Assert.assertNotNull("OutOfMemory should be re-allocated", outOfMemory);
 
         try {
@@ -98,7 +97,7 @@ public class OutOfMemoryTest {
             sleep(1000);                    
         }
         long t1 = System.currentTimeMillis();
-        return t1-t0;
+        return t1 - t0;
     }
 
     private void sleep(long t) {
@@ -109,16 +108,15 @@ public class OutOfMemoryTest {
         }
     }
 
-    static class Listener implements RemoteServiceEventListener {
+    static class Listener implements RemoteServiceEventListener<ProvisionMonitorEvent> {
         boolean added;
         boolean failed;
 
-        public void notify(RemoteServiceEvent event) {
-            ProvisionMonitorEvent pme = (ProvisionMonitorEvent)event;
-            System.out.println("ProvisionMonitorEvent->"+pme.getAction());
-            if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_FAILED))
+        public void notify(ProvisionMonitorEvent event) {
+            System.out.println("ProvisionMonitorEvent->"+event.getAction());
+            if(event.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_FAILED))
                 failed = true;
-            if(pme.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED))
+            if(event.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_PROVISIONED))
                 added = true;
         }
     }

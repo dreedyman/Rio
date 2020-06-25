@@ -58,17 +58,21 @@ manager {
     String serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
 
     jvmOptions =
-        '-Djava.protocol.handler.pkgs=org.rioproject.url '+
-        '-Djava.rmi.server.useCodebaseOnly=false '+
-        '-Djdk.serialFilter='+serialFilter+' '+
-        '-Dsun.rmi.registry.registryFilter='+serialFilter+' '+
-        '-Dsun.rmi.transport.dgcFilter='+serialFilter+' '+
-        '-Djava.net.preferIPv4Stack=true '+
-        '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+AggressiveOpts -XX:HeapDumpPath=${rio.home}${/}logs '+
-        '-server -Xms8m -Xmx256m -Djava.security.policy=${rio.home}${/}policy${/}policy.all '+
-        '-Drio.home=${rio.home} -Drio.test.home=${rio.test.home} -Drio.test.attach '+
-        '-Dorg.rioproject.groups=${org.rioproject.groups} '+
-        '-Drio.log.dir=${rio.log.dir} -Dorg.rioproject.service=${service}'
+            '-Djava.protocol.handler.pkgs=org.rioproject.url '+
+                    '-Djava.rmi.server.useCodebaseOnly=false '+
+                    '-Djdk.serialFilter='+serialFilter+' '+
+                    '-Dsun.rmi.registry.registryFilter='+serialFilter+' '+
+                    '-Dsun.rmi.transport.dgcFilter='+serialFilter+' '+
+                    '-Djava.net.preferIPv4Stack=true '+
+                    '-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC ' +
+                    '-XX:+AggressiveOpts -XX:HeapDumpPath=${rio.home}${/}logs '+
+                    '-server -Xms8m -Xmx256m ' +
+                    '-Djava.security.policy=${rio.home}/policy/policy.all '+
+                    '-Dlogback.configurationFile=${rio.home}/config/logging/logback.groovy ' +
+                    '-Djava.util.logging.config.file=${rio.home}/config/logging/logging.properties ' +
+                    '-Drio.home=${rio.home} -Drio.test.home=${rio.test.home} -Drio.test.attach '+
+                    '-Dorg.rioproject.groups=${org.rioproject.groups} '+
+                    '-Drio.log.dir=${rio.log.dir} -Dorg.rioproject.service=${service}'
 
     secureJvmOptions =
             '-Djavax.net.ssl.keyStore='+rioHome+'/config/ssl/rio.keystore.jks ' +

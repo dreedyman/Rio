@@ -98,8 +98,8 @@ toWindows() {
 # -----------------------------------
 # Versions of jars used in the script
 # -----------------------------------
-rioVersion=6.0.0
-groovyVersion=2.3.8
+rioVersion=@rioV@
+groovyVersion=@groovyV@
 
 # Call the install script, do not assume that Groovy has been installed.
 installRioToLocalRepository() {
@@ -121,9 +121,12 @@ for file in $RIO_HOME/lib/logging/*.jar; do
 done
 SLF4J_CLASSPATH=`echo $SLF4J_CLASSPATH | cut -c2-`
 
-loggingConfig="-Dlog4j.configurationFile=`toNative $RIO_HOME/config/logging/log4j2.xml`"
-loggingConfig="$loggingConfig -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
-loggingConfig="$loggingConfig -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+loggingConfig="-Dlogback.configurationFile=`toNative $RIO_HOME/config/logging/logback.groovy`"
+loggingConfig="$loggingConfig -Djava.util.logging.config.file=`toNative $RIO_HOME/config/logging/logging.properties`"
+
+#loggingConfig="-Dlog4j.configurationFile=`toNative $RIO_HOME/config/logging/log4j2.xml`"
+#loggingConfig="$loggingConfig -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+#loggingConfig="$loggingConfig -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 
 #DEBUG=-Dorg.rioproject.tools.webster.debug
 #NETWORK=-Djava.rmi.server.hostname=130.0.0.1

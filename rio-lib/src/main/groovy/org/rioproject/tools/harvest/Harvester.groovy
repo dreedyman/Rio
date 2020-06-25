@@ -21,6 +21,6 @@ import java.rmi.RemoteException
 /**
  * Remote interface for a Harvester
  */
-public interface Harvester extends Remote {
+interface Harvester extends Remote {
     HarvesterSession connect() throws RemoteException;
 }

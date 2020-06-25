@@ -127,17 +127,17 @@ public class BackupTestA {
         for (int i = 0; i < N - 1; i++) {
             try {
 
-                // 5. STOP PROVISION MONTIOR
+                // 5. STOP PROVISION MONITOR
                 logger.info("---> Stopping Provision Monitor [" + i + "] ...");
                 ProvisionMonitor pm = pms.get(i);
-                testManager.stopProvisionMonitor(pm);
+                TestManager.stopProvisionMonitor(pm);
                 //pms.remove(pm);
                 logger.info("Provision Monitor [" + i + "] has been stopped");
 
                 // 6. STOP CYBERNODE RUNNING THE SERVICE
                 logger.info("---> Stopping the busy Cybernode ...");
                 Cybernode cybernode = CybernodeUtils.findBusy(cybernodes);
-                testManager.stopCybernode(cybernode);
+                TestManager.stopCybernode(cybernode);
                 cybernodes.remove(cybernode);
                 logger.info("---> The busy Cybernode has been stopped");
 
@@ -159,7 +159,7 @@ public class BackupTestA {
         
         // 9. STOP THE LAST PROVISION MONITOR
         logger.info("Stopping the last Provision Monitor ...");
-        testManager.stopService(pms.get(N-1), "Monitor");
+        TestManager.stopService(pms.get(N-1), "Monitor");
         logger.info("The last Provision Monitor has been stopped");
         
         cyMon.waitFor(2);
@@ -167,7 +167,7 @@ public class BackupTestA {
         
         // 10. STOP THE CYBERNODE RUNNING THE SERVICE
         logger.info("Stopping the busy Cybernode ...");
-        testManager.stopCybernode(cybernodes.get(0));
+        TestManager.stopCybernode(cybernodes.get(0));
         logger.info("The busy Cybernode has been stopped");
         cyMon.waitFor(1);
         
@@ -176,7 +176,7 @@ public class BackupTestA {
         simpleMon.waitFor(0);
         
         // Cleanup
-        testManager.stopCybernode(cybernodes.get(1));
+        TestManager.stopCybernode(cybernodes.get(1));
         testManager.shutdown();
 
         logger.info("\n*******************\nScenario A completed\n*******************");

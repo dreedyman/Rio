@@ -1,12 +1,12 @@
 /*
- * Copyright 2008 the original author or authors.
- *
+ * Copyright to the original author or authors.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Returns the first service in the {@link org.rioproject.associations.Association}. If
@@ -44,7 +43,7 @@ import java.util.List;
  */
 public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
     private String hostAddress;
-    private final List<ServiceItem> serviceList = Collections.synchronizedList(new ArrayList<ServiceItem>());
+    private final List<ServiceItem> serviceList = new CopyOnWriteArrayList<>();
     static final Logger logger = LoggerFactory.getLogger(FailOver.class.getName());
 
     @SuppressWarnings("unchecked")
@@ -140,7 +139,7 @@ public class FailOver<T> extends AbstractServiceSelectionStrategy<T> {
      * remove a service
      */
     private void remove(T service) {
-        ServiceItem[] items = serviceList.toArray(new ServiceItem[serviceList.size()]);
+        ServiceItem[] items = serviceList.toArray(new ServiceItem[0]);
         ServiceItem item = null;
         for (ServiceItem si : items) {
             if (si.service.equals(service)) {

@@ -26,7 +26,6 @@ repositories {
 }
 
 if (project.name != "distribution" && project.name != "rio-int-tests") {
-
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
@@ -62,4 +61,24 @@ if (project.name != "distribution" && project.name != "rio-int-tests") {
             }
         }*/
     }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    publications = ['mavenPublication']
+
+    pkg {
+        repo = 'myAwesomeLib'
+        name = 'myAwesomeLib'
+        userOrg = 'reflectoring'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/thombergs/my-awesome-lib.git'
+        version {
+            name = '1.0.0'
+            desc = '1.0.0'
+            released  = new Date()
+        }
+    }
+
 }

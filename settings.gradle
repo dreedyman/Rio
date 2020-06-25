@@ -15,6 +15,8 @@ include ':webster'
 include ':watch-ui'
 include ':rio-test'
 include ':rio-int-tests'
+include ':distribution'
+
 include ':examples:calculator:calculator-api'
 include ':examples:calculator:calculator-service'
 include ':examples:calculator'
@@ -23,15 +25,13 @@ include ':examples:events:events-proxy'
 include ':examples:events:events-service'
 include ':examples:events:events-ui'
 include ':examples:events'
-include ':examples:hospital'
-include ':examples:springbean:springbean-api'
+/*include ':examples:springbean:springbean-api'
 include ':examples:springbean:springbean-service'
 include ':examples:springbean'
 include ':examples:workflow:workflow-api'
 include ':examples:workflow:workflow-service'
 include ':examples:workflow'
-include ':examples:tomcat'
-include ':distribution'
+include ':examples:tomcat'*/
 
 project(':rio-start').projectDir = "$rootDir/rio-start" as File
 project(':rio-lib').projectDir = "$rootDir/rio-lib" as File
@@ -59,11 +59,12 @@ project(':examples:events:events-proxy').projectDir = "$rootDir/examples/events/
 project(':examples:events:events-service').projectDir = "$rootDir/examples/events/events-service" as File
 project(':examples:events:events-ui').projectDir = "$rootDir/examples/events/events-ui" as File
 project(':examples:events').projectDir = "$rootDir/examples/events" as File
-project(':examples:hospital').projectDir = "$rootDir/examples/hospital" as File
+
+/*
 project(':examples:springbean:springbean-api').projectDir = "$rootDir/examples/springbean/springbean-api" as File
 project(':examples:springbean:springbean-service').projectDir = "$rootDir/examples/springbean/springbean-service" as File
 project(':examples:springbean').projectDir = "$rootDir/examples/springbean" as File
 project(':examples:workflow:workflow-api').projectDir = "$rootDir/examples/workflow/workflow-api" as File
 project(':examples:workflow:workflow-service').projectDir = "$rootDir/examples/workflow/workflow-service" as File
 project(':examples:workflow').projectDir = "$rootDir/examples/workflow" as File
-project(':examples:tomcat').projectDir = "$rootDir/examples/tomcat" as File
+project(':examples:tomcat').projectDir = "$rootDir/examples/tomcat" as File*/

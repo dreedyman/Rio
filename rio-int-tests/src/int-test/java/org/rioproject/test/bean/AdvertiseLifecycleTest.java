@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *        http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import org.rioproject.associations.AssociationType;
 import org.rioproject.cybernode.Cybernode;
 import org.rioproject.deploy.ServiceBeanInstance;
 import org.rioproject.impl.event.BasicEventConsumer;
-import org.rioproject.event.RemoteServiceEvent;
 import org.rioproject.event.RemoteServiceEventListener;
 import org.rioproject.impl.opstring.OpString;
 import org.rioproject.monitor.ProvisionFailureEvent;
@@ -62,7 +61,7 @@ public class AdvertiseLifecycleTest {
         monitorItems = testManager.getServiceItems(ProvisionMonitor.class);
         Assert.assertEquals(1, monitorItems.length);
         monitor = (ProvisionMonitor)monitorItems[0].service;
-        cybernode = (Cybernode)testManager.waitForService(Cybernode.class);
+        cybernode = testManager.waitForService(Cybernode.class);
     }
 
     @Test
@@ -220,11 +219,11 @@ public class AdvertiseLifecycleTest {
                                               int planned)  {
         ServiceElement elem = new ServiceElement();
         ClassBundle main = new ClassBundle(implClass,
-                                           new String[]{System.getProperty("user.dir")+"/build/classes/groovy/test/"},
+                                           new String[]{System.getProperty("user.dir")+"/build/classes/java/integrationTest/"},
                                            "file://");
         elem.setComponentBundle(main);
         ClassBundle export = new ClassBundle(org.rioproject.servicecore.Service.class.getName(),
-                                             new String[]{System.getProperty("user.dir")+"/build/classes/groovy/test/"},
+                                             new String[]{System.getProperty("user.dir")+"/build/classes/java/integrationTest/"},
                                              "file://");
 
         elem.setExportBundles(export);
@@ -240,15 +239,15 @@ public class AdvertiseLifecycleTest {
         return elem;
     }
 
-    class PFEListener implements RemoteServiceEventListener {
+    static class PFEListener implements RemoteServiceEventListener<ProvisionFailureEvent> {
         ProvisionFailureEvent failed;
 
-        public void notify(RemoteServiceEvent event) {
-            failed = (ProvisionFailureEvent)event;
+        public void notify(ProvisionFailureEvent event) {
+            failed = event;
         }
     }
 
-    class PMEListener implements RemoteServiceEventListener {
+    static class PMEListener implements RemoteServiceEventListener<ProvisionMonitorEvent> {
         ProvisionMonitorEvent event;
         ProvisionMonitorEvent.Action actionToMatch;
 
@@ -256,9 +255,9 @@ public class AdvertiseLifecycleTest {
             this.actionToMatch = actionToMatch;
         }
 
-        public void notify(RemoteServiceEvent rEvent) {
-            if(((ProvisionMonitorEvent)rEvent).getAction().equals(actionToMatch))
-                event = (ProvisionMonitorEvent)rEvent;
+        public void notify(ProvisionMonitorEvent rEvent) {
+            if(rEvent.getAction().equals(actionToMatch))
+                event = rEvent;
         }
     }
 }

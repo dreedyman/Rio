@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,8 +60,7 @@ public class ServiceBeanContainerImpl implements ServiceBeanContainer {
     /** Uuid for the container */
     private Uuid uuid;
     /** Collection of ServiceBeanContainerListeners */
-    private final List<ServiceBeanContainerListener> listeners =
-        Collections.synchronizedList(new ArrayList<>());
+    private final List<ServiceBeanContainerListener> listeners = new CopyOnWriteArrayList<>();
     /** Configuration object, which is also used as the shared configuration */
     private final Configuration config;
     /** Logger */

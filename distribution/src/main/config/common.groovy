@@ -31,7 +31,7 @@ import org.rioproject.impl.config.ExporterConfig
 @Component('org.rioproject')
 class ExporterConfiguration {
     static  Exporter getDefaultExporter() {
-        return new BasicJeriExporter(ExporterConfig.getServerEndpoint(), new BasicILFactory())
+        new BasicJeriExporter(ExporterConfig.getServerEndpoint(), new BasicILFactory())
     }
 }
 
@@ -41,10 +41,10 @@ class ExporterConfiguration {
 @Component('org.rioproject.bean')
 class POJOExporter extends ExporterConfiguration {
     Exporter getServerExporter() {
-        return new BasicJeriExporter(ExporterConfig.getServerEndpoint(),
-                                     new BeanInvocationLayerFactory(),
-                                     false,
-                                     true)
+        new BasicJeriExporter(ExporterConfig.getServerEndpoint(),
+                new BeanInvocationLayerFactory(),
+                false,
+                true)
     }
 }
 
@@ -54,7 +54,7 @@ class POJOExporter extends ExporterConfiguration {
 @Component('org.rioproject.watch')
 class WatchConfig extends ExporterConfiguration {
     Exporter getWatchDataSourceExporter() {
-        return getDefaultExporter()
+        getDefaultExporter()
     }
 }
 
@@ -65,7 +65,7 @@ class WatchConfig extends ExporterConfiguration {
 @Component('net.jini.lookup.ServiceDiscoveryManager')
 class SDMConfig extends ExporterConfiguration {
     Exporter getEventListenerExporter() {
-        return getDefaultExporter()
+        getDefaultExporter()
     }
 }
 
@@ -76,6 +76,6 @@ class SDMConfig extends ExporterConfiguration {
 @Component('net.jini.discovery.LookupDiscovery')
 class LookupDiscoConfig {
     long getMulticastAnnouncementInterval() {
-        return 5000
+        5000
     }
 }

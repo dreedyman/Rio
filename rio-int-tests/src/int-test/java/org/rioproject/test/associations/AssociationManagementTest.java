@@ -45,7 +45,7 @@ public class AssociationManagementTest {
     @SetTestManager
     static TestManager testManager;
     private OperationalStringManager manager;
-    private Logger logger = LoggerFactory.getLogger(AssociationManagementTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(AssociationManagementTest.class);
 
     @Before
     public void setup() {
@@ -56,30 +56,28 @@ public class AssociationManagementTest {
     @Test
     public void testServiceDiscoveryTimeout() throws Exception {
         Dummy darrel = testManager.waitForService(Dummy.class);
-        new Thread(new Runnable() {
-            @Override public void run() {
-                ServiceElement elem = new ServiceElement();
-                elem.setPlanned(1);
-                try {
-                    OperationalString operationalString = manager.getOperationalString();
-                    URL exportURL = operationalString.getServices()[0].getExportURLs()[0];
-                    String codebase = "http://"+exportURL.getHost()+":"+exportURL.getPort();
-                    elem.setExportBundles(makeClassBundle(Dummy.class.getName(), codebase));
-                    elem.setComponentBundle(makeClassBundle(DummyImpl.class.getName(), codebase));
+        new Thread(() -> {
+            ServiceElement elem = new ServiceElement();
+            elem.setPlanned(1);
+            try {
+                OperationalString operationalString = manager.getOperationalString();
+                URL exportURL = operationalString.getServices()[0].getExportURLs()[0];
+                String codebase = "http://"+exportURL.getHost()+":"+exportURL.getPort();
+                elem.setExportBundles(makeClassBundle(Dummy.class.getName(), codebase));
+                elem.setComponentBundle(makeClassBundle(DummyImpl.class.getName(), codebase));
 
-                    ServiceBeanConfig sbc = new ServiceBeanConfig();
-                    sbc.setName("Add");
-                    sbc.setGroups(System.getProperty("org.rioproject.groups"));
-                    sbc.setOperationalStringName(operationalString.getName());
-                    elem.setServiceBeanConfig(sbc);
+                ServiceBeanConfig sbc = new ServiceBeanConfig();
+                sbc.setName("Add");
+                sbc.setGroups(System.getProperty("org.rioproject.groups"));
+                sbc.setOperationalStringName(operationalString.getName());
+                elem.setServiceBeanConfig(sbc);
 
-                    logger.info("Wait 5 seconds to deploy another dummy...");
-                    Thread.sleep(5*1000);
-                    logger.info("Deploying another dummy...");
-                    manager.addServiceElement(elem, null);
-                } catch (Exception e) {
-                    logger.error("Deploy failed", e);
-                }
+                logger.info("Wait 5 seconds to deploy another dummy...");
+                Thread.sleep(5 * 1000);
+                logger.info("Deploying another dummy...");
+                manager.addServiceElement(elem, null);
+            } catch (Exception e) {
+                logger.error("Deploy failed", e);
             }
         }).start();
 
@@ -89,7 +87,7 @@ public class AssociationManagementTest {
 
     ClassBundle makeClassBundle(String className, String codebase) {
         ClassBundle classBundle = new ClassBundle();
-        classBundle.addJAR("classes/groovy/int-test/");
+        classBundle.addJAR("integrationTest/");
         classBundle.setClassName(className);
         classBundle.setCodebase(codebase);
         return classBundle;

@@ -20,8 +20,9 @@ import net.jini.config.*
 import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.lang.reflect.Constructor
+
 /**
- * Provides support for Groovy based configuration.
+ * Provide s support for Groovy based configuration.
  *
  * @author Dennis Reedy
  */
@@ -41,11 +42,11 @@ class GroovyConfig implements net.jini.config.Configuration {
     /**
      * Constructor required for Jini Configuration
      */
-    public GroovyConfig(String[] args, ClassLoader loader) {
+    GroovyConfig(String[] args, ClassLoader loader) {
         if(args==null || args.length==0) {
             configFile = new ConfigurationFile(args, loader)
         } else {
-            if(args[0].endsWith(".config") || args[0].equals("-")) {
+            if(args[0].endsWith(".config") || args[0] == "-") {
                 log.debug("Delegate to ConfigurationFile for {}", args[0])
                 configFile = new ConfigurationFile(args, loader)
             } else {
@@ -57,7 +58,7 @@ class GroovyConfig implements net.jini.config.Configuration {
         }
     }
 
-    def checkInputs(String[] args) {
+    static void checkInputs(String[] args) {
         for(String arg : args) {
             if(arg.endsWith(".groovy")) {
                 log.trace(arg)
@@ -67,7 +68,7 @@ class GroovyConfig implements net.jini.config.Configuration {
                     buffer.append(a).append(' ')
                 }
                 throw new ConfigurationException('When providing multiple configuration files, '+
-                                                 'they must all be Groovy configurations ['+buffer.toString()+']');
+                                                 'they must all be Groovy configurations ['+buffer.toString()+']')
             }
         }
     }
@@ -113,7 +114,6 @@ class GroovyConfig implements net.jini.config.Configuration {
             }
         } finally {
             Thread.currentThread().setContextClassLoader(cCL)
-            gcl = null
         }
     }
 
@@ -139,8 +139,6 @@ class GroovyConfig implements net.jini.config.Configuration {
                 load(newCl.loadClass(name))
             } catch(Throwable t) {
                 throw t
-            } finally {
-                newCl = null
             }
         } else {
             gcl.parseClass(groovyCodeSource)
@@ -150,7 +148,7 @@ class GroovyConfig implements net.jini.config.Configuration {
         }
     }
 
-    def load(Class groovyClass)  {
+    def load(Class<?> groovyClass)  {
         log.debug("Loading {}", groovyClass.name)
         if(visited.contains(groovyClass.name))
             return
@@ -169,52 +167,52 @@ class GroovyConfig implements net.jini.config.Configuration {
                     log.debug("Derived component: ${component} from metaclass")
                 }
                 if (!validQualifiedIdentifier(component)) {
-                    throw new IllegalArgumentException("component must be a valid qualified identifier");
+                    throw new IllegalArgumentException("component must be a valid qualified identifier")
                 }
                 groovyConfigs.put(component, gO)
             }
         }
     }
 
-    def String getComponentName(MetaClass mc) {
+    static String getComponentName(MetaClass mc) {
         String component = mc.getTheClass().name
         component = component.replace("_", ".")
         return component
     }
 
-    def Object getEntry(String component, String name, Class type) {
-        return getEntry(component, name, type, NO_DEFAULT);
+    def getEntry(String component, String name, Class type) {
+        return getEntry(component, name, type, NO_DEFAULT)
     }
 
-    def Object getEntry(String component, String name, Class type, Object defaultValue) {
-        return getEntry(component, name, type, defaultValue, NO_DATA);
+    def getEntry(String component, String name, Class type, Object defaultValue) {
+        return getEntry(component, name, type, defaultValue, NO_DATA)
     }
 
-    def Object getEntry(String component, String name, Class type, Object defaultValue, Object data) {
+    def getEntry(String component, String name, Class type, Object defaultValue, Object data) {
         if(configFile!=null)
             return configFile.getEntry(component, name, type, defaultValue, data)
         log.debug("component=${component}, name=${name}, type=${type.getName()}, defautValue=${defaultValue}, data=${data}")
         if (component == null) {
-            throw new NullPointerException("component cannot be null");
+            throw new NullPointerException("component cannot be null")
         } else if (name == null) {
-            throw new NullPointerException("name cannot be null");
+            throw new NullPointerException("name cannot be null")
         } else if (type == null) {
-            throw new NullPointerException("type cannot be null");
+            throw new NullPointerException("type cannot be null")
         } else if (defaultValue != NO_DEFAULT) {
             if (type.isPrimitive() ?
                 (defaultValue == null ||
                  getPrimitiveType(defaultValue.getClass()) != type) :
                 (defaultValue != null && !type.isAssignableFrom(defaultValue.getClass()))) {
-                throw new IllegalArgumentException("defaultValue is of wrong type");
+                throw new IllegalArgumentException("defaultValue is of wrong type")
             }
         }
 
-        GroovyObject groovyConfig = null;
+        GroovyObject groovyConfig = null
         for(Map.Entry<String, GroovyObject> entry : groovyConfigs)  {
             log.debug("component: ${component}, found: ${entry.key}")
-            if(entry.key.equals(component)) {
-                groovyConfig = entry.value;
-                break;
+            if(entry.key == component) {
+                groovyConfig = entry.value
+                break
             }
         }
         if(groovyConfig==null) {
@@ -222,7 +220,7 @@ class GroovyConfig implements net.jini.config.Configuration {
                 throw new NoSuchEntryException("component name [${component}] not found in Groovy files, "+
                                                "and no default value was given.")
             else
-                return defaultValue;
+                return defaultValue
         }
 
         Object value
@@ -232,18 +230,18 @@ class GroovyConfig implements net.jini.config.Configuration {
                 log.trace "Configuration entry [${component}.${name}] found in "+
                           "GroovyObject ${groovyConfig}, assign returned value: ${value}"
             } catch(MissingPropertyException e) {
-                if(!e.getProperty().equals(name))
+                if(e.getProperty() != name)
                     throw new ConfigurationException(e.getMessage(), e)
 
                 log.trace("${e.getClass().getName()}: looking for configuration entry "+
                              "[${component}.${name}] in GroovyObject "+
                              groovyConfig)
                 if(defaultValue==NO_DEFAULT) {
-                    throw new NoSuchEntryException("entry not found for component: $component, name: $name", e);
+                    throw new NoSuchEntryException("entry not found for component: $component, name: $name", e)
                 } else {
                     log.trace "Configuration entry [${component}.${name}] not found in "+
                               "GroovyObject ${groovyConfig}, assign provided default: ${defaultValue}"
-                    value = defaultValue;
+                    value = defaultValue
                 }
             }
         } else {
@@ -256,23 +254,23 @@ class GroovyConfig implements net.jini.config.Configuration {
                         log.trace "Found matching method name [${methodName}], check for type match"
                         Class[] paramTypes = m.nativeParameterTypes
                         if(paramTypes.length==1 && paramTypes[0].isAssignableFrom(data.class)) {
-                            mm = m;
-                            break;
+                            mm = m
+                            break
                         }
                     }
                 }
                 if(mm==null) {
                     if(defaultValue==NO_DEFAULT)
                         throw new NoSuchEntryException("entry not found for component: $component, "+
-                                                       "name: $name, data argument: $data");
+                                                       "name: $name, data argument: $data")
 
-                    value = defaultValue;
+                    value = defaultValue
                 } else {
                     value = mm.invoke(groovyConfig, data)
                 }
             } catch(MissingPropertyException e) {
                 throw new NoSuchEntryException("entry not found for component: $component, name: $name, "+
-                                               "data argument: $data", e);
+                                               "data argument: $data", e)
             }
         }
 
@@ -288,8 +286,7 @@ class GroovyConfig implements net.jini.config.Configuration {
             if(mismatch) {
                 throw new ConfigurationException("entry for component $component, name $name "+
                                                  "is of wrong type: ${value.getClass().name}, "+
-                                                 "value: ${value}",
-                                                 "expected: ${type.name}, ${gr}");
+                                                 "value: ${value} ,expected: ${type.name}" )
             }
         }
         return value
@@ -302,25 +299,25 @@ class GroovyConfig implements net.jini.config.Configuration {
      * @param type the wrapper type
      * @return the associated primitive type or null
      */
-    def getPrimitiveType(Class type) {
+    static def getPrimitiveType(Class type) {
         if (type == Boolean.class) {
-            return Boolean.TYPE;
+            return Boolean.TYPE
         } else if (type == Byte.class) {
-            return Byte.TYPE;
+            return Byte.TYPE
         } else if (type == Character.class) {
-            return Character.TYPE;
+            return Character.TYPE
         } else if (type == Short.class) {
-            return Short.TYPE;
+            return Short.TYPE
         } else if (type == Integer.class) {
-            return Integer.TYPE;
+            return Integer.TYPE
         } else if (type == Long.class) {
-            return Long.TYPE;
+            return Long.TYPE
         } else if (type == Float.class) {
-            return Float.TYPE;
+            return Float.TYPE
         } else if (type == Double.class) {
-            return Double.TYPE;
+            return Double.TYPE
         } else {
-            return null;
+            return null
         }
     }
 
@@ -332,7 +329,7 @@ class GroovyConfig implements net.jini.config.Configuration {
      * @return <code>true</code> if <code>name</code> is a valid
      * 	       <i>Identifier</i>, else <code>false</code>
      */
-    boolean validIdentifier(String name) {
+    static boolean validIdentifier(String name) {
         if (name == null || name.length() == 0 ||
             !Character.isJavaIdentifierStart(name.charAt(0))) {
             return false
@@ -367,7 +364,7 @@ class GroovyConfig implements net.jini.config.Configuration {
      * @return <code>true</code> if <code>name</code> is a valid
      * 	       <i>QualifiedIdentifier</i>, else <code>false</code>
      */
-    boolean validQualifiedIdentifier(String name) {
+    static boolean validQualifiedIdentifier(String name) {
         if (name == null)
             return false
         int offset = 0
@@ -376,9 +373,9 @@ class GroovyConfig implements net.jini.config.Configuration {
             dot = name.indexOf('.', offset)
             String id = name.substring(offset, dot < 0 ? name.length() : dot)
             if (!validIdentifier(id))
-                return false;
-            offset = dot + 1;
+                return false
+            offset = dot + 1
         }
-        return true;
+        return true
     }
 }

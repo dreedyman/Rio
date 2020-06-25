@@ -1,5 +1,3 @@
-import org.codehaus.groovy.runtime.GStringImpl
-
 /*
  * Copyright to the original author or authors.
  *
@@ -15,6 +13,9 @@ import org.codehaus.groovy.runtime.GStringImpl
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.codehaus.groovy.runtime.GStringImpl
 
 /* Build a distribution  */
 
@@ -34,11 +35,8 @@ dependencies {
     distribution "org.apache.river:reggie:$riverVersion"
     distribution "org.apache.river:reggie-dl:$riverVersion"
     distribution "net.jini.lookup:serviceui:$riverVersion"
-    distribution "org.apache.logging.log4j:log4j-core:${log4jVersion}"
-    distribution "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
-    distribution "org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}"
-    distribution "org.apache.logging.log4j:log4j-jul:${log4jVersion}"
-    distribution "com.lmax:disruptor:3.4.2"
+    distribution "org.slf4j:jul-to-slf4j:$slf4jVersion"
+    distribution "ch.qos.logback:logback-classic:$logbackVersion"
 }
 
 ext {
@@ -65,7 +63,7 @@ task gatherDeps() {
                 String dest
                 if (file.path.contains("-dl") || (file.path.contains("ui"))) {
                     dest = "lib-dl"
-                } else if (file.path.contains("log4j") || file.path.contains("disrupt") || file.path.contains("slf4j")) {
+                } else if (file.path.contains("logback") || file.path.contains("slf4j")) {
                     dest = "lib/logging"
                 } else {
                     dest = "lib"
@@ -80,7 +78,7 @@ task gatherDeps() {
 }
 
 static boolean filter(artifact) {
-    def exclusions = ["examples", "rio-int-tests", "distribution", "rio-logging"/*, "jsk-platform", "jsk-resources"*/]
+    def exclusions = ["examples", "rio-int-tests", "distribution", "rio-logging"]
     boolean include = true
     for(String exclude : exclusions) {
         if(artifact.contains(exclude))  {
@@ -101,7 +99,6 @@ task createDistribution(dependsOn: [":rio-platform:install",
                                     ":monitor-service:install",
                                     ":rio-cli:install",
                                     ":rio-test:install",
-                                    //":rio-ui:install",
                                     ":watch-ui:install",
                                     gatherDeps]) {
     description 'Creates a Rio distribution'
@@ -160,6 +157,8 @@ task createDistribution(dependsOn: [":rio-platform:install",
             from("${project.rootProject.projectDir}/bin") {
                 include "**"
                 fileMode = 0755
+                filter(ReplaceTokens,
+                        tokens: [rioV: project.version, groovyV: groovyVersion])
             }
             into "${distDir}-${version}/bin"
         }

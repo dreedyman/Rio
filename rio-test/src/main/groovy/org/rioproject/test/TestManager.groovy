@@ -1,11 +1,11 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright to the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *        http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.rioproject.test
+
 import groovy.util.logging.Slf4j
 import net.jini.config.Configuration
 import net.jini.core.entry.Entry
@@ -307,9 +308,8 @@ class TestManager {
         String rioHome = System.getProperty('rio.home')
 
         String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${m2Repo}"
-        String rioTestHome = System.getProperty('rio.test.home')
         String testRoots = System.getProperty("rio.test.webster.roots")
-        if (rioTestHome != null) {
+        if (testRoots != null) {
             websterRoots = websterRoots +";${testRoots}"
         }
         Webster webster = new Webster(0, websterRoots)
@@ -530,7 +530,7 @@ class TestManager {
      *
      * @param service The Cybernode service proxy
      */
-    def stopCybernode(service) {
+    static void stopCybernode(service) {
         stopService(service, "Cybernode")
     }
 
@@ -539,7 +539,7 @@ class TestManager {
      *
      * @param service The ProvisionMonitor service proxy
      */
-    def stopProvisionMonitor(service) {
+    static void stopProvisionMonitor(service) {
         stopService(service, "Monitor")
     }
 
@@ -549,7 +549,7 @@ class TestManager {
      * @param service The service proxy
      * @param name The name of the service to stop
      */
-    def stopService(service, String name) {
+    static void stopService(service, String name) {
         if(service==null)
             throw new IllegalArgumentException("service proxy is null for ${name}")
 
@@ -633,25 +633,8 @@ class TestManager {
      *
      * @return A {@link org.rioproject.tools.harvest.Harvester} instance
      */
-    def getHarvester(DiscoveryManagement dMgr) {
-        return new HarvesterBean(dMgr)
-    }
-
-    private String buildClassPath(File dir, String match) {
-        StringBuilder classpathBuilder = new StringBuilder()
-        for(File file : dir.listFiles()) {
-            if(file.name.startsWith(match))
-                classpathBuilder.append(File.pathSeparator).append(file.path)
-        }
-        return classpathBuilder.toString()
-    }
-
-    private String buildClassPath(File dir) {
-        StringBuilder classpathBuilder = new StringBuilder()
-        for(File file : dir.listFiles()) {
-            classpathBuilder.append(File.pathSeparator).append(file.path)
-        }
-        return classpathBuilder.toString()
+    static HarvesterBean getHarvester(DiscoveryManagement dMgr) {
+        new HarvesterBean(dMgr)
     }
 
     def addExecProperty(String key, String value) {
@@ -662,7 +645,7 @@ class TestManager {
         additionalExecProps.putAll(options)
     }
 
-    String getAdditonalExecProps() {
+    String getAdditionalExecProps() {
         StringBuilder s = new StringBuilder()
         additionalExecProps.each {k, v ->
             if(s.length()>0)
@@ -680,22 +663,18 @@ class TestManager {
         jvmOptions = "${PropertyHelper.expandProperties(jvmOptions)}"
         if(config.manager.inheritOptions)
             jvmOptions = JVMOptionChecker.getJVMInputArgs(jvmOptions)
-        jvmOptions = jvmOptions+ getAdditonalExecProps()
+        jvmOptions = jvmOptions+ getAdditionalExecProps()
         jvmOptions = jvmOptions+' -D'+Constants.RIO_TEST_EXEC_DIR+'='+System.getProperty("user.dir")
 
         StringBuilder classpathBuilder = new StringBuilder()
         classpathBuilder.append(classpath)
-        File loggingLibDir = new File("$rioHome/lib/logging")
-        if(!service.equals(("reggie")))
-            classpathBuilder.append(buildClassPath(loggingLibDir, "rio-logging-support"))
 
-        jvmOptions = jvmOptions + " -Dlog4j.configurationFile=${rioHome}/config/logging/log4j2.xml "
-        jvmOptions = jvmOptions + " -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager "
-        jvmOptions = jvmOptions + " -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector "
+        jvmOptions = jvmOptions + " -Dlogback.configurationFile=${rioHome}/config/logging/logback.groovy "
+        jvmOptions = jvmOptions + " -Djava.util.logging.config.file=${rioHome}/config/logging/logging.properties "
 
         String logDir = null
         String mainClass = "${config.manager.mainClass}"
-        if(config.manager.log.size()>0) {
+        if (config.manager.log.size() > 0) {
             logDir = "${config.manager.log}${File.separator}${testConfig.component}"
             File f = new File(logDir)
             if(!f.exists()) {
@@ -705,14 +684,18 @@ class TestManager {
             }
         }
 
-        jvmOptions = jvmOptions+' -Drio.log.dir='+logDir+' -Drio.watch.log.dir='+logDir
+        jvmOptions = jvmOptions + ' -Drio.log.dir=' + logDir + ' '
+
         StringBuilder cmdLineBuilder = new StringBuilder()
-        if(System.getProperty("os.name").contains("Windows"))
+        if (System.getProperty("os.name").contains("Windows")) {
             cmdLineBuilder.append("cmd.exe /c")
+        }
+
         cmdLineBuilder.append(getJava()).append(" ")
                 .append(jvmOptions)
                 .append(" -cp ").append(classpathBuilder.toString()).append(" ")
                 .append(mainClass).append(" ").append(starter)
+
         String cmdLine = cmdLineBuilder.toString()
         log.info "Logging for $service will be sent to ${logDir}"
         log.info "Starting ${service}, using starter config [${starter}]"
@@ -770,15 +753,15 @@ class TestManager {
     }
 
     private int countLookups() {
-        return countServices(ServiceRegistrar.class)
+        countServices(ServiceRegistrar.class)
     }
 
     private int countMonitors() {
-        return countServices(ProvisionMonitor.class)
+        countServices(ProvisionMonitor.class)
     }
 
     private int countCybernodes() {
-        return countServices(Cybernode.class)
+        countServices(Cybernode.class)
     }
 
     private int countServices(Class serviceInterface) {
@@ -786,7 +769,7 @@ class TestManager {
         ServiceItem[] items = getServiceItems(serviceInterface)
         log.info "Discovered $items.length instances of ${serviceInterface.name}, "+
                  "elapsed time: ${(System.currentTimeMillis()-t0)} millis"
-        return items.length
+        items.length
     }
 
     /**
@@ -834,9 +817,9 @@ class TestManager {
                                                              Integer.MAX_VALUE,
                                                              null)
         def services = []
-        for(int i=0; i<items.length; i++)
+        for(int i = 0; i < items.length; i++)
             services << items[i].service
-        return services
+        services
     }
 
     /**
@@ -849,7 +832,7 @@ class TestManager {
      * @throws TimeoutException is the service is not discovered in 60 seconds
      */
     public <T> T waitForService(Class<T> type) {
-        return waitForService(type, null)
+        waitForService(type, null)
     }
 
     /**
@@ -862,7 +845,7 @@ class TestManager {
      * @throws TimeoutException is the service is not discovered in 60 seconds
      */
     def waitForService(String serviceName) {
-        return waitForService(null, serviceName)
+        waitForService(null, serviceName)
     }
 
     /**
@@ -901,10 +884,10 @@ class TestManager {
         }
         service = serviceItem.service
         log.info "${sb.toString()} has been discovered, elapsed time: ${(System.currentTimeMillis()-t0)} millis"
-        service
+        service as T
     }
 
-    private String getJava() {
+    private static String getJava() {
         StringBuilder jvmBuilder = new StringBuilder()
         jvmBuilder.append(System.getProperty("java.home"))
         jvmBuilder.append(File.separator)
@@ -912,53 +895,57 @@ class TestManager {
         jvmBuilder.append(File.separator)
         jvmBuilder.append("java")
         jvmBuilder.append(" ")
-        return jvmBuilder.toString()
+        jvmBuilder.toString()
     }
 
-    private def loadManagerConfig() {
+    private static def loadManagerConfig() {
         String defaultManagerConfig =
             "jar:file:${Utils.getRioHome()}/lib/rio-test-${RioVersion.VERSION}.jar!/default-manager-config.groovy"
         String mgrConfig = System.getProperty('org.rioproject.test.manager.config',
                                               defaultManagerConfig)
         log.info "Using TestManager configuration ${mgrConfig}"
-        URL url
+        URL url = loadManagerConfig(mgrConfig)
+        if (url == null) {
+            url = loadManagerConfig(defaultManagerConfig)
+        }
+        if (url == null) {
+            throw new RuntimeException(
+                    "Cannot load [${mgrConfig}], or [${defaultManagerConfig}]. This file is needed "+
+                            "by the Rio TestManager to initialize. Check the setting of the "+
+                            "org.rioproject.test.manager.config system property.")
+        }
+        new ConfigSlurper().parse(url)
+    }
+
+    private static URL loadManagerConfig(String mgrConfig) {
+        URL url = null
         try {
             url = new URL(mgrConfig)
         } catch (MalformedURLException e) {
             File mgrConfigFile = new File(mgrConfig)
-            if(!mgrConfigFile.exists())
-                throw new RuntimeException(
-                    "Cannot load [${mgrConfig}], it is not found in it's default "+
-                    "location of [${defaultManagerConfig}], or "+
-                    "your location of the file is incorrect. This file is needed "+
-                    "by the Rio TestManager to initialize. Check the setting of the "+
-                    "org.rioproject.test.manager.config system property, and/or copy this "+
-                    "file from the Rio project distribution to the location "+
-                    "mentioned above.", e)
-            url = mgrConfigFile.toURI().toURL()
+            if (mgrConfigFile.exists()) {
+                url = mgrConfigFile.toURI().toURL()
+            }
         }
-
-        def config = new ConfigSlurper().parse(url)
-        return config
+        url
     }
 
-    private File getCreatedLogsFile(String testName) {
+    private static File getCreatedLogsFile(String testName) {
         File parent = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio")
-        File logs = new File(parent, "$testName-test-logs")
-        return logs
+        new File(parent, "$testName-test-logs")
     }
 
-    private File getAndCreateCreatedLogsFile(String testName) {
+    private static File getAndCreateCreatedLogsFile(String testName) {
         File dir = new File(System.getProperty('java.io.tmpdir')+File.separator+".rio")
         if(!dir.exists())
             dir.mkdirs()
         File logs = new File(dir, "$testName-test-logs")
         if(!logs.exists())
             logs.createNewFile()
-        return logs
+        logs
     }
 
-    private boolean starterConfigOk(def starter) {
-        return starter instanceof String
+    private static boolean starterConfigOk(def starter) {
+        starter instanceof String
     }
 }

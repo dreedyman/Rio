@@ -1,3 +1,18 @@
+/*
+ * Copyright to the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.rioproject.tools.jetty;
 
 import org.junit.Test;
@@ -26,7 +41,7 @@ public class JettyTest {
     public void testSecure() throws Exception {
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
-        File fileDir = new File(projectDir+"/target/files-0");
+        File fileDir = new File(projectDir+"/build/files-0");
         if(fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
         Jetty jetty = new Jetty().setRoots(fileDir.getPath()).setPutDir(fileDir.getPath());
@@ -42,7 +57,7 @@ public class JettyTest {
     public void testUpload() throws Exception {
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
-        File fileDir = new File(projectDir+"/target/files-1");
+        File fileDir = new File(projectDir+"/build/files-1");
         if(fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
 
@@ -65,7 +80,7 @@ public class JettyTest {
     public void testStart() throws Exception {
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
-        File fileDir = new File(projectDir+"/target/files-2");
+        File fileDir = new File(projectDir+"/build/files-2");
         if(fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
         Jetty jetty = new Jetty().setRoots(resources).setPutDir(fileDir.getPath());

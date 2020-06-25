@@ -1,23 +1,19 @@
-/*
- * This configuration is used by the com.sun.jini.start utility to start a
- * ProvisionMonitor, including an embedded Webster
- */
 
 import org.rioproject.config.Component
 
-import org.rioproject.util.ServiceDescriptorUtil;
+import org.rioproject.util.ServiceDescriptorUtil
 import com.sun.jini.start.ServiceDescriptor
-import org.rioproject.resolver.maven2.Repository;
+import org.rioproject.resolver.maven2.Repository
 
 @Component('org.rioproject.start')
 class StartMonitorConfig {
 
-    String[] getMonitorConfigArgs(String rioHome) {
+    static String[] getMonitorConfigArgs(String rioHome) {
         def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/monitor.groovy']
         return configArgs as String[]
     }
 
-    ServiceDescriptor[] getServiceDescriptors() {
+    static ServiceDescriptor[] getServiceDescriptors() {
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('rio.home')
         String rioTestHome = System.getProperty('rio.test.home')
@@ -25,8 +21,10 @@ class StartMonitorConfig {
         def websterRoots = [rioHome+'/lib-dl', ';',
                             rioHome+'/lib',    ';',
                             rioHome+'/deploy', ';',
-                            m2Repo,    ';',
-                            rioTestHome+'/build/']
+                            m2Repo, ';',
+                            rioTestHome+'/build/classes/java/', ";",
+                            rioTestHome+'/build/classes/groovy/'
+        ]
 
         String policyFile = rioHome+'/policy/policy.all'
 

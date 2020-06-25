@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -63,29 +64,28 @@ import java.util.concurrent.Executors;
  */
 public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
     /** The remote ref (e.g. stub or dynamic proxy) for the BasicEventConsumer */
-    private EventConsumer eventConsumer;
+    private final EventConsumer eventConsumer;
     /** The Exporter for the BasicEventConsumer */
-    private Exporter exporter;
+    private final Exporter exporter;
     /** The proxyPreparer for EventRegistration */
-    private ProxyPreparer eventLeasePreparer;
-    protected final List<RemoteServiceEventListener> eventSubscribers =
-        Collections.synchronizedList(new ArrayList<RemoteServiceEventListener>());
-    protected final Hashtable<ServiceID, EventLeaseManager> leaseTable = new Hashtable<ServiceID, EventLeaseManager>();
-    protected final Map<Long, EventRegistration> eventRegistrationTable = new Hashtable<Long, EventRegistration>();
+    private final ProxyPreparer eventLeasePreparer;
+    protected final List<RemoteServiceEventListener<?>> eventSubscribers = new CopyOnWriteArrayList<>();
+    protected final Hashtable<ServiceID, EventLeaseManager> leaseTable = new Hashtable<>();
+    protected final Map<Long, EventRegistration> eventRegistrationTable = new Hashtable<>();
     protected EventDescriptor edTemplate;
     protected int received = 0;
     protected long sktime, ektime;
-    protected MarshalledObject handback = null;
+    protected MarshalledObject<?> handback;
     /** Default Lease duration is 5 minutes */
     protected static final long DEFAULT_LEASE_DURATION = TimeConstants.FIVE_MINUTES;
-    protected long leaseDuration = DEFAULT_LEASE_DURATION;
+    protected long leaseDuration;
     protected StopWatch responseWatch = null;
     protected WatchDataSourceRegistry watchRegistry = null;
     /** Number of retries to attempt to connect to an EventProducer */
-    private int connectRetries;
+    private final int connectRetries;
     private static final int DEFAULT_CONNECT_RETRY_COUNT = 3;
     /** How long to wait between retries */
-    private long retryWait;
+    private final long retryWait;
     private static final long DEFAULT_RETRY_WAIT = TimeConstants.ONE_SECOND;
     public static final String RESPONSE_WATCH = "Response Time";
     static final String COMPONENT = "org.rioproject.event";
@@ -112,7 +112,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(final RemoteServiceEventListener listener) throws Exception {
+    public BasicEventConsumer(final RemoteServiceEventListener<?> listener) throws Exception {
         this(null, listener, null, null);
     }
 
@@ -125,7 +125,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      *
      * @throws Exception If the BasicEventConsumer cannot be created
      */
-    public BasicEventConsumer(final EventDescriptor edTemplate, final RemoteServiceEventListener listener)
+    public BasicEventConsumer(final EventDescriptor edTemplate, final RemoteServiceEventListener<?> listener)
         throws Exception {
         this(edTemplate, listener, null, null);
     }
@@ -141,7 +141,7 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @throws Exception If the BasicEventConsumer cannot be created
      */
     public BasicEventConsumer(final EventDescriptor edTemplate,
-                              final RemoteServiceEventListener listener,
+                              final RemoteServiceEventListener<?> listener,
                               final Configuration config) throws Exception {
         this(edTemplate, listener, null, config);
     }
@@ -159,8 +159,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
      * @throws Exception If the BasicEventConsumer cannot be created
      */                                  
     public BasicEventConsumer(final EventDescriptor edTemplate,
-                              final RemoteServiceEventListener listener,
-                              final MarshalledObject handback,
+                              final RemoteServiceEventListener<?> listener,
+                              final MarshalledObject<?> handback,
                               final Configuration config) throws Exception {
         ProxyPreparer basicLeasePreparer = new BasicProxyPreparer();
 
@@ -220,8 +220,8 @@ public class BasicEventConsumer implements EventConsumer, ServerProxyTrust  {
         if(service!=null)
             service.shutdownNow();
         /* Deregister all listeners */
-        RemoteServiceEventListener[] listeners = getListeners();
-        for (RemoteServiceEventListener listener : listeners) {
+        RemoteServiceEventListener<?>[] listeners = getListeners();
+        for (RemoteServiceEventListener<?> listener : listeners) {
             try {
                 deregister(listener);
             } catch (Exception e) {

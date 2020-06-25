@@ -1,7 +1,8 @@
 
-apply from: "${rootDir}/gradle/integrationTest.gradle"
-
 description = 'Module :: Rio Integration Tests'
+
+dependencyCheck.skip = true
+
 dependencies {
     integrationTestCompile project(':rio-lib')
     integrationTestCompile project(':rio-test')
@@ -9,9 +10,5 @@ dependencies {
     integrationTestCompile group: 'junit', name: 'junit', version: "${junitVersion}"
     testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
 
-    integrationTestRuntime "org.apache.logging.log4j:log4j-core:${log4jVersion}"
-    integrationTestRuntime "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
-    integrationTestRuntime "org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}"
-    integrationTestRuntime "org.apache.logging.log4j:log4j-jul:${log4jVersion}"
+    integrationTestRuntime logRuntime
 }
-

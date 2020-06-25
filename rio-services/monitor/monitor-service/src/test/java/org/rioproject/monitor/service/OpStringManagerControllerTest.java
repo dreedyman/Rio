@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,7 @@ import java.util.concurrent.FutureTask;
  * @author Dennis Reedy
  */
 public class OpStringManagerControllerTest {
+
     @Test
     public void testAddRemove() throws Exception {
         OperationalString opString = new OpString("test", null);
@@ -50,7 +51,7 @@ public class OpStringManagerControllerTest {
                                                                                TestUtil.createEventHandler(),
                                                                                null));
         opStringManagerController.setUuid(UuidFactory.generate());
-        Map<String, Throwable> map = new HashMap<String, Throwable>();
+        Map<String, Throwable> map = new HashMap<>();
         OpStringManager manager = opStringManagerController.addOperationalString(opString, map, null, null, null);
         Assert.assertNotNull(manager);
         Assert.assertTrue(opStringManagerController.opStringExists(manager.getName()));
@@ -68,10 +69,11 @@ public class OpStringManagerControllerTest {
         opStringManagerController.setConfig(new DynamicConfiguration());
         OperationalString opString = new OpString("concurrent", null);
 
-        List<Future<OpStringManager>> futures = new ArrayList<Future<OpStringManager>>();
+        List<Future<OpStringManager>> futures = new ArrayList<>();
         for(int i=0; i<100; i++) {
-            Callable<OpStringManager> deployer = new Deployer(opStringManagerController, opString);
-            FutureTask<OpStringManager> task = new FutureTask<OpStringManager>(deployer);
+            Callable<OpStringManager> deployer = new Deployer(opStringManagerController,
+                                                              opString);
+            FutureTask<OpStringManager> task = new FutureTask<>(deployer);
             futures.add(task);
             new Thread(task).start();
         }
@@ -83,7 +85,7 @@ public class OpStringManagerControllerTest {
         Assert.assertEquals(1, opStringManagerController.getOpStringManagers().length);
     }
 
-    class Deployer implements Callable<OpStringManager> {
+    static class Deployer implements Callable<OpStringManager> {
         final OpStringManagerController opStringManagerController;
         final OperationalString operationalString;
 
@@ -92,9 +94,9 @@ public class OpStringManagerControllerTest {
             this.operationalString = operationalString;
         }
 
-        public OpStringManager call() throws Exception {
+        public OpStringManager call() {
             OpStringManager opStringManager = null;
-            Map<String, Throwable> errorMap = new HashMap<String, Throwable>();
+            Map<String, Throwable> errorMap = new HashMap<>();
             try {
                 opStringManager = opStringManagerController.addOperationalString(operationalString,
                                                                                  errorMap,

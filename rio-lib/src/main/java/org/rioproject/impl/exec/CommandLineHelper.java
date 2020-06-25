@@ -1,12 +1,12 @@
 /*
  * Copyright to the original author or authors.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -212,24 +212,17 @@ public final class CommandLineHelper {
 
     private static String getLoggerConfig(String inputArgs, String rioHome) {
         StringBuilder logger = new StringBuilder();
-        if(usingLog4j()) {
-            /* Check if log4j is being used, if so set log4j configuration */
-            if (!inputArgs.contains("log4j.configurationFile")) {
-                logger.append(getOption("log4j.configurationFile",
-                                        buildDirectory(rioHome,
-                                                       "config",
-                                                       "logging") + "log4j2.xml"));
-                logger.append(" ");
-            }
+        if(!inputArgs.contains("logback.configurationFile")) {
+            logger.append(getOption("logback.configurationFile",
+                                    buildDirectory(rioHome, "config", "logging")+"logback.groovy"));
+            logger.append(" ");
+        }
+        if(!inputArgs.contains("java.util.logging.config.file")) {
+            logger.append(getOption("java.util.logging.config.file",
+                                    buildDirectory(rioHome, "config", "logging")+"logging.properties"));
+            logger.append(" ");
         }
         return logger.toString();
-    }
-
-    private static boolean usingLog4j() {
-        File rioLib = new File(RioHome.get(), "lib");
-        File rioLogging = new File(rioLib, "logging");
-        String loggingJars = getFiles(rioLogging);
-        return loggingJars.contains("log4j");
     }
 
     private static String getOption(final String option, final String value) {
