@@ -36,7 +36,6 @@ import java.net.*;
 public class RioManifest {
     public static final Attributes.Name RIO_BUILD = new Attributes.Name("Rio-Build");
     public static final Attributes.Name RIO_VERSION = new Attributes.Name("Rio-Version");
-    /** Holds value of property manifest. */
     private Manifest manifest;
     
     public RioManifest(URL url) {
@@ -50,7 +49,6 @@ public class RioManifest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -62,7 +60,6 @@ public class RioManifest {
         return getMainAttribute(RIO_BUILD);
     }
 
-
     /**
      * Get the Rio version from a Jar file
      *
@@ -72,7 +69,6 @@ public class RioManifest {
         return getMainAttribute(RIO_VERSION);
     }
 
-    
     /**
      * Get an Attribute from a Jar file
      *
@@ -80,11 +76,13 @@ public class RioManifest {
      * @return the value of the main attribute from a Jar file, or null if not defined.
      */
     public String getMainAttribute(Attributes.Name name) {
-        if(manifest==null)
-            throw new IllegalArgumentException("there is no manifest");
-        Attributes attributes = manifest.getMainAttributes();
-        if(attributes == null)
+        if(manifest==null) {
             return null;
+        }
+        Attributes attributes = manifest.getMainAttributes();
+        if(attributes == null) {
+            return null;
+        }
         return (String)attributes.get(name);
     }
         
@@ -95,8 +93,6 @@ public class RioManifest {
      * @return the attributes for the entry or null if not defined
      */
     public Attributes getEntry(String name) {
-        if(manifest==null)
-            throw new IllegalArgumentException("there is no manifest");
-        return manifest.getAttributes(name);
+        return manifest == null ? null : manifest.getAttributes(name);
     }
 }
