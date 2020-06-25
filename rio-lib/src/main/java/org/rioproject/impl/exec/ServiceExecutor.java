@@ -311,15 +311,17 @@ public class ServiceExecutor {
             try {
                 mbsc = JMXConnectionUtil.attach(Long.toString(actualPID));
                 logger.info("JMX Attach succeeded to exec'd JVM with pid: "+actualPID);
-                Set<ObjectInstance> mBeans = mbsc.queryMBeans(null, null);
-                StringBuilder b = new StringBuilder();
-                for (ObjectInstance instance : mBeans) {
-                    if (b.length() > 0) {
-                        b.append("\n");
+                if (logger.isTraceEnabled()) {
+                    Set<ObjectInstance> mBeans = mbsc.queryMBeans(null,null);
+                    StringBuilder b = new StringBuilder();
+                    for (ObjectInstance instance : mBeans) {
+                        if (b.length() > 0) {
+                            b.append("\n");
+                        }
+                        b.append(instance.getObjectName().toString());
                     }
-                    b.append(instance.getObjectName().toString());
+                    logger.trace("Available MBeans\n" + b.toString());
                 }
-                logger.info("Available MBeans\n" + b.toString());
                 checkWatchDescriptors(context.getServiceElement());
             } catch(Exception e) {
                 logger.warn("Could not attach to the exec'd JVM with PID: " +
