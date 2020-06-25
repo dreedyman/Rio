@@ -18,6 +18,7 @@ dependencies {
   compileOnly project(':rio-lib')
   compileOnly project(':webster')
   compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+  compileOnly group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
   implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
   implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
 }
@@ -32,10 +33,11 @@ jar {
             "Class-Path" : "rio-platform-${project.version}.jar rio-lib-${project.version}.jar webster-${project.version}.jar groovy-all-${groovyVersion}.jar"
     )
   }
-  from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+  from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
     include "org/rioproject/monitor/**"
     include "org/rioproject/proxy/**"
     include "net/jini/lookup/**"
     include "net/jini/config/**"
+    include "com/artima/lookup/**"
   }
 }
