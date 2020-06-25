@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.impl.watch;
+package org.rioproject.watch;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class StatisticsTest {
 
         final int N = 100;
         for (int size = 0; size < N; size++) {
-            List<Double> list = new ArrayList<Double>();
+            List<Double> list = new ArrayList<>();
             for (int j = 0; j < size; j++) {
                 list.add((double) j);
             }
@@ -54,7 +54,7 @@ public class StatisticsTest {
             Assert.assertNotSame(list, stat.getValues());
         }
 
-        List<Double> list = new ArrayList<Double>();
+        List<Double> list = new ArrayList<>();
         Statistics stat = new Statistics(list);
         Assert.assertEquals(0, stat.count());
         list.add((double) 0);
@@ -81,7 +81,7 @@ public class StatisticsTest {
             assertClean(stat);
         }
 
-        List<Double> list = new ArrayList<Double>();
+        List<Double> list = new ArrayList<>();
         list.add((double) 0);
         list.add((double) 1);
         list.add((double) 2);
@@ -103,7 +103,7 @@ public class StatisticsTest {
         Statistics stat = new Statistics();
 
         for (int i = 0; i < 10; i++) {
-            Vector<Double> v = new Vector<Double>();
+            Vector<Double> v = new Vector<>();
             int count = (int) (Math.random() * 1000);
             for (int j = 0; j < count; j++) {
                 double d = Math.random();
@@ -126,7 +126,7 @@ public class StatisticsTest {
         Assert.assertEquals(new Vector(), stat.getValues());
 
         for (int i = 0; i < 10; i++) {
-            Vector<Double> v = new Vector<Double>();
+            Vector<Double> v = new Vector<>();
             int count = (int) (Math.random() * 1000);
             for (int j = 0; j < count; j++) {
                 double d = Math.random();
@@ -138,7 +138,7 @@ public class StatisticsTest {
             Assert.assertEquals(new Vector(), stat.getValues());
         }
 
-        Vector<Double> v = new Vector<Double>();
+        Vector<Double> v = new Vector<>();
         stat.setValues(v);
         Assert.assertEquals(v, stat.getValues());
         Assert.assertNotSame(v, stat.getValues());
@@ -151,7 +151,7 @@ public class StatisticsTest {
     public void testAddValue1() {
         Statistics stat = new Statistics();
         for (int i = 0; i < 10; i++) {
-            Vector<Double> v = new Vector<Double>();
+            Vector<Double> v = new Vector<>();
             int count = (int) (Math.random() * 100);
             for (int j = 0; j < count; j++) {
                 Double d = Math.random();
@@ -178,7 +178,7 @@ public class StatisticsTest {
         Statistics stat = new Statistics();
 
         for (int i = 0; i < 10; i++) {
-            Vector<Double> v = new Vector<Double>();
+            Vector<Double> v = new Vector<>();
             int count = (int) (Math.random() * 100);
             for (int j = 0; j < count; j++) {
                 double d = Math.random();
@@ -199,7 +199,7 @@ public class StatisticsTest {
         Statistics stat = new Statistics();
 
         for (int i = 0; i < 10; i++) {
-            Vector<Double> v = new Vector<Double>();
+            Vector<Double> v = new Vector<>();
             int count = (int) (Math.random() * 100);
             for (int j = 0; j < count; j++) {
                 v.add(Math.random());
@@ -209,7 +209,7 @@ public class StatisticsTest {
             }
         }
 
-        List<Double> v = new ArrayList<Double>();
+        List<Double> v = new ArrayList<>();
         stat.setValues(v);
         Assert.assertEquals(0, stat.count());
         v.add((double) 0);
