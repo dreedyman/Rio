@@ -21,10 +21,8 @@ import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import org.rioproject.deploy.ServiceBeanInstantiationException;
 import org.rioproject.exec.ExecDescriptor;
-//import org.rioproject.impl.system.measurable.SigarHelper;
 import org.rioproject.impl.jmx.JMXConnectionUtil;
 import org.rioproject.impl.system.measurable.cpu.CPU;
-import org.rioproject.impl.system.measurable.cpu.ProcessCPUHandler;
 import org.rioproject.impl.system.measurable.memory.Memory;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.servicebean.ServiceBean;
@@ -32,23 +30,21 @@ import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.sla.SLA;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.MeasuredResource;
-import org.rioproject.system.SystemWatchID;
 import org.rioproject.system.capability.PlatformCapability;
 import org.rioproject.watch.WatchDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides support to execute an external service. If the external service is
@@ -309,26 +305,21 @@ public class ServiceExecutor {
                 waited++;
             }
         }
-        /*if(sigar!=null) {
-            if(actualPID==-1) {
-                logger.info("Try to obtain actual pid of exec'd process using SIGAR");
-                String[] ids = new String[0];
-                try {
-                    ids = VirtualMachineHelper.listIDs();
-                } catch (Exception e) {
-                    logger.error("Cannot load the Attach API", e);
-                }
-                actualPID = sigar.matchChild(processManager.getPid(), ids);
-            }
-        } else {
-            if(actualPID==-1)
-                logger.warn("No SIGAR support available, unable to obtain PID");
-        }*/
+
         if(actualPID != -1) {
             logger.info("PID of exec'd process obtained: "+actualPID);
             try {
                 mbsc = JMXConnectionUtil.attach(Long.toString(actualPID));
                 logger.info("JMX Attach succeeded to exec'd JVM with pid: "+actualPID);
+                Set<ObjectInstance> mBeans = mbsc.queryMBeans(null, null);
+                StringBuilder b = new StringBuilder();
+                for (ObjectInstance instance : mBeans) {
+                    if (b.length() > 0) {
+                        b.append("\n");
+                    }
+                    b.append(instance.getObjectName().toString());
+                }
+                logger.info("Available MBeans\n" + b.toString());
                 checkWatchDescriptors(context.getServiceElement());
             } catch(Exception e) {
                 logger.warn("Could not attach to the exec'd JVM with PID: " +
@@ -367,11 +358,14 @@ public class ServiceExecutor {
     }
     */
     private void checkWatchDescriptors(ServiceElement elem) {
-        SLA[] slas = elem.getServiceLevelAgreements().getServiceSLAs();
-        for(SLA sla : slas) {
-            WatchDescriptor[] wDescs = sla.getWatchDescriptors();
-            for(WatchDescriptor wDesc : wDescs) {
-                if(wDesc.getObjectName()!=null)
+        logger.info("Check WatchDescriptor for {}, SLAs: {}",
+                    elem.getName(), elem.getServiceLevelAgreements().getServiceSLAs().length);
+        for(SLA sla : elem.getServiceLevelAgreements().getServiceSLAs()) {
+            logger.info("Getting WatchDescriptor for " + sla.getIdentifier() + ", count: "
+                                + sla.getWatchDescriptors().length);
+            for(WatchDescriptor wDesc : sla.getWatchDescriptors()) {
+                logger.info("WatchDescriptor objectName: " + wDesc.getObjectName());
+                if(wDesc.getObjectName() != null)
                     wDesc.setMBeanServerConnection(mbsc);
             }
         }
