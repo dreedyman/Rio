@@ -65,7 +65,7 @@ task integrationTest(type: Test) {
     systemProperty "rio.test.webster.roots", "${projectDir.path}/build/classes/java/;${projectDir.path}/build/classes/groovy/"
     systemProperty "org.rioproject.test.manager.config", "${projectDir.path}/src/int-test/conf/manager-config.groovy"
     systemProperty "java.rmi.server.useCodebaseOnly", "false"
-    systemProperty "logback.configurationFile", "${rioHome}/config/logging/logback.groovy"
+    systemProperty "logback.configurationFile", "${projectDir.path}/src/int-test/conf/logback.groovy"
     systemProperty "java.util.logging.config.file", "${rioHome}/config/logging/logging.properties"
     systemProperty "rio.log.dir", "/tmp/${System.getProperty("user.name")}/logs"
 
