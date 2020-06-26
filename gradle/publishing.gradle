@@ -20,9 +20,9 @@ repositories {
     /*maven {
         url "http://www.rio-project.org/maven2"
     }*/
-    maven {
+    /*maven {
         url "http://repository.jboss.org/nexus/content/groups/public-jboss/"
-    }
+    }*/
 }
 
 if (project.name != "distribution" && project.name != "rio-int-tests") {
