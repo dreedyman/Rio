@@ -7,12 +7,19 @@
     <version>2.0</version>
     <packaging>pom</packaging>
 
-   
     <modules>
         <module>project-api</module>
         <module>project-service</module>
-    </modules> 
+    </modules>
 
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+
+    </repositories>
 
 </project>
 
