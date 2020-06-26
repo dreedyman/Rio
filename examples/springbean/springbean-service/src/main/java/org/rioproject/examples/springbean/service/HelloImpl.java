@@ -38,7 +38,7 @@ public class HelloImpl implements Hello {
         }
     }
 
-    public String hello(String message) throws RemoteException {
+    public String hello(String message) {
         System.out.println("Client says hello : "+message);
         return("Hello visitor : "+visitorNumber++);
     }    
