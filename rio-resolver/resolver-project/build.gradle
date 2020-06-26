@@ -18,7 +18,7 @@ description = 'Module :: Project Module Resolver'
 dependencies {
     compile project(':resolver-aether')
     compile project(':rio-platform')
-    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.8'
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
     compile group: 'org.eclipse.aether', name: 'aether-api', version: '0.9.0.M3'
     compile group: 'org.eclipse.aether', name: 'aether-spi', version: '0.9.0.M3'
     compile group: 'org.eclipse.aether', name: 'aether-util', version: '0.9.0.M3'

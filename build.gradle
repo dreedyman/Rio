@@ -36,7 +36,7 @@ allprojects {
     version = '6.0.0'
 
     ext {
-        groovyVersion = "2.3.8"
+        groovyVersion = "2.4.19"
         junitVersion = "4.12"
         logbackVersion = "1.2.3"
         riverVersion = "2.2.2"
