@@ -1,4 +1,4 @@
-rootProject.name = 'main'
+rootProject.name = 'rio'
 
 include ':rio-start'
 include ':rio-lib'
