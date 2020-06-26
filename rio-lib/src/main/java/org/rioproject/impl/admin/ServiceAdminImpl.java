@@ -61,7 +61,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
     /** The time the service was started */
     private final long started;
     /** A Logger */
-    private static Logger logger = LoggerFactory.getLogger("org.rioproject.admin");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.admin");
 
     /**
      * Create a ServiceAdmin Impl
@@ -83,9 +83,9 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public ServiceAdminImpl(ServiceBeanAdapter service, 
                             Exporter exporter, 
                             SnapshotHandler snapshotHandler)  {
-        if(service==null)
+        if (service==null)
             throw new IllegalArgumentException("service is null");
-        if(service.getServiceBeanContext()==null)
+        if (service.getServiceBeanContext()==null)
             throw new IllegalArgumentException("context is null");
         this.service = service;
         this.exporter = exporter;
@@ -99,11 +99,11 @@ public class ServiceAdminImpl implements ServiceAdmin {
      */
     public ServiceRegistrar[] getJoinSet() {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null)
+        if (mgr!=null)
             return(mgr.getJoinSet());
         else
             logger.warn("JoinManager is null");
-        return(new ServiceRegistrar[0]);
+        return new ServiceRegistrar[0];
     }
 
     /**
@@ -114,11 +114,11 @@ public class ServiceAdminImpl implements ServiceAdmin {
      * @throws RemoteException if an communication errors occur
      */
     public ServiceAdmin getServiceAdmin() throws RemoteException {
-        if(adminProxy==null) {
+        if (adminProxy==null) {
             ServiceAdmin serviceAdminRemoteRef = (ServiceAdmin)exporter.export(this);
             adminProxy = ServiceAdminProxy.getInstance(serviceAdminRemoteRef, UuidFactory.generate());
         }
-        return(adminProxy);
+        return adminProxy;
     }
 
     /**
@@ -128,10 +128,10 @@ public class ServiceAdminImpl implements ServiceAdmin {
      */
     @SuppressWarnings("unused")
     public void unexport(boolean force) {
-        if(exporter!=null) {
+        if (exporter!=null) {
             try {
                 exporter.unexport(true);
-            } catch(IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 logger.warn("ServiceAdminImpl not exported");
             }
         }
@@ -146,7 +146,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
      * This method terminates the service
      */
     public void destroy() {
-        if(service!=null) {
+        if (service != null) {
             service.destroy();
             service = null;
         }
@@ -158,14 +158,14 @@ public class ServiceAdminImpl implements ServiceAdmin {
     
     /** @see org.rioproject.admin.ServiceBeanAdmin#getServiceElement */
     public ServiceElement getServiceElement() {
-        return(service.getServiceBeanContext().getServiceElement());
+        return service.getServiceBeanContext().getServiceElement();
     }
     
     /** @see org.rioproject.admin.ServiceBeanAdmin#setServiceElement */
     public void setServiceElement(ServiceElement sElem) {
         try {
             ServiceBeanContext sbc = service.getServiceBeanContext();
-            if(sbc instanceof DefaultServiceBeanContext)
+            if (sbc instanceof DefaultServiceBeanContext)
                 ((DefaultServiceBeanContext)sbc).setServiceElement(sElem);
             else
                 logger.warn("ServiceBeanContext {} not an instance of DefaultServiceBeanContext. Unable to set ServiceElement",
@@ -177,12 +177,12 @@ public class ServiceAdminImpl implements ServiceAdmin {
     
     /** @see org.rioproject.admin.ServiceBeanAdmin#getUpTime */
     public long getUpTime() {
-        return(System.currentTimeMillis()-started);
+        return System.currentTimeMillis()-started;
     }
 
     /** @see org.rioproject.admin.ServiceBeanAdmin#getServiceBeanInstantiatorUuid */
     public Uuid getServiceBeanInstantiatorUuid() {
-        return(service.getServiceBeanInstantiatorUuid());
+        return service.getServiceBeanInstantiatorUuid();
     }
     
 
@@ -197,10 +197,10 @@ public class ServiceAdminImpl implements ServiceAdmin {
         Object proxy;
         try {
             proxy = service.start(context);
-        } catch(Throwable t) {
-            throw new ServiceBeanControlException("start failed", t);
+        } catch (Exception e) {
+            throw new ServiceBeanControlException("start failed", e);
         }
-        return(proxy);
+        return proxy ;
     }
 
     /**
@@ -209,8 +209,8 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public void stop(boolean force) throws ServiceBeanControlException {
         try {
             service.stop(force);
-        } catch(Throwable t) {
-            throw new ServiceBeanControlException("stop failed", t);
+        } catch (Exception e) {
+            throw new ServiceBeanControlException("stop failed", e);
         }
     }
 
@@ -219,16 +219,16 @@ public class ServiceAdminImpl implements ServiceAdmin {
      */
     public void advertise() throws ServiceBeanControlException {
         try {
-            if(context!=null) {
+            if (context != null) {
                 Entry[] configuredAttrs = ServiceAdvertiser.getConfiguredAttributes(context);
-                if(configuredAttrs.length>0)
+                if (configuredAttrs.length > 0)
                     service.addAttributes(configuredAttrs);
             } else {
                 logger.warn("ServiceBeanContext is null");
             }
             service.advertise();
-        } catch(Throwable t) {
-            throw new ServiceBeanControlException("advertise failed", t);
+        } catch (Exception e) {
+            throw new ServiceBeanControlException("advertise failed", e);
         }
     }
 
@@ -238,8 +238,8 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public void unadvertise() throws ServiceBeanControlException {
         try {
             service.unadvertise();
-        } catch(Throwable t) {
-            throw new ServiceBeanControlException("unadvertise failed", t);
+        } catch (Exception e) {
+            throw new ServiceBeanControlException("unadvertise failed", e);
         }
     }
 
@@ -249,7 +249,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
      * @param context The ServiceBeanContext
      */
     public void setServiceBeanContext(ServiceBeanContext context) {
-        if(context==null)
+        if (context==null)
             throw new IllegalArgumentException("context is null");        
         this.context = context;
     }
@@ -259,24 +259,24 @@ public class ServiceAdminImpl implements ServiceAdmin {
      *-------------*/
     public Entry[] getLookupAttributes() {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null)
-            return(mgr.getAttributes());
+        if (mgr != null)
+            return mgr.getAttributes();
         else {
             logger.debug("JoinManager is null");
         }
-        return(new Entry[0]);
+        return new Entry[0];
     }
 
     public void addLookupAttributes(Entry[] attrs) {
         //service.addAttributes(attrs);
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
-            if(attrs != null && attrs.length != 0)
+        if (mgr != null) {
+            if (attrs != null && attrs.length != 0)
                 mgr.addAttributes(attrs, true);
-            if(snapshotHandler!=null) {
+            if (snapshotHandler!=null) {
                 try {
                     snapshotHandler.takeSnapshot();
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     logger.warn("Persisting Added Lookup Attributes", ioe);
                 }
             }
@@ -287,12 +287,12 @@ public class ServiceAdminImpl implements ServiceAdmin {
 
     public void modifyLookupAttributes(Entry[] attrSetTemplates, Entry[] attrSets) {        
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr != null) {
             mgr.modifyAttributes(attrSetTemplates, attrSets, true);
-            if(snapshotHandler!=null) {
+            if (snapshotHandler != null) {
                 try {
                     snapshotHandler.takeSnapshot();
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     logger.warn("Persisting Modified Lookup Attributes", ioe);
                 }
             }
@@ -304,39 +304,37 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public String[] getLookupGroups() {
         DiscoveryManagement dm;
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr != null) {
             dm = mgr.getDiscoveryManager();
         } else {
             try {
                 dm = service.getServiceBeanContext().getDiscoveryManagement();
             } catch (IOException e) {
-                logger.warn(
-                           "Getting DiscoveryManagement ", 
-                           e);
-                return(new String[0]);
+                logger.warn("Getting DiscoveryManagement ", e);
+                return new String[0];
             }
         }                    
         DiscoveryGroupManagement dgm = (DiscoveryGroupManagement)dm;
-        return(dgm.getGroups());        
+        return dgm.getGroups();        
     }
 
     public void addLookupGroups(String[] groups) {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr != null) {
             try {
                 DiscoveryManagement dm = mgr.getDiscoveryManager();
                 DiscoveryGroupManagement dgm = (DiscoveryGroupManagement)dm;
                 dgm.addGroups(groups);                
-                if(snapshotHandler!=null) {
+                if (snapshotHandler != null) {
                     try {
                         snapshotHandler.takeSnapshot();
-                    } catch(IOException ioe) {
+                    } catch (IOException ioe) {
                         logger.warn("Persisting Added Lookup groups", ioe);
                     }
                 }
                 /* Update ServiceBeanConfig */
                 setGroups(dgm.getGroups());
-            } catch(IOException ioe) {
+            } catch (IOException ioe) {
                 logger.warn("Adding Lookup Groups", ioe);                
             }
         } else
@@ -345,21 +343,21 @@ public class ServiceAdminImpl implements ServiceAdmin {
 
     public void removeLookupGroups(String[] groups) {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr!=null) {
             try {
                 DiscoveryManagement dm = mgr.getDiscoveryManager();
                 DiscoveryGroupManagement dgm = (DiscoveryGroupManagement)dm;
                 dgm.removeGroups(groups);
-                if(snapshotHandler!=null) {
+                if (snapshotHandler!=null) {
                     try {
                         snapshotHandler.takeSnapshot();
-                    } catch(IOException ioe) {
+                    } catch (IOException ioe) {
                         logger.warn("Persisting removed Lookup groups", ioe);
                     }
                 }
                 /* Update ServiceBeanConfig */
                 setGroups(dgm.getGroups());
-            } catch(Exception e) {
+            } catch (Exception e) {
                 logger.warn("Removing Lookup groups", e);
             }
         } 
@@ -367,21 +365,21 @@ public class ServiceAdminImpl implements ServiceAdmin {
 
     public void setLookupGroups(String[] groups) {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr!=null) {
             try {
                 DiscoveryManagement dm = mgr.getDiscoveryManager();
                 DiscoveryGroupManagement dgm = (DiscoveryGroupManagement)dm;
                 dgm.setGroups(groups);
-                if(snapshotHandler!=null) {
+                if (snapshotHandler!=null) {
                     try {
                         snapshotHandler.takeSnapshot();
-                    } catch(IOException ioe) {
+                    } catch (IOException ioe) {
                         logger.warn("Persisting Lookup groups", ioe);
                     }
                 }
                 /* Update ServiceBeanConfig */
                 setGroups(dgm.getGroups());
-            } catch(IOException ioe) {
+            } catch (IOException ioe) {
                 logger.warn("Setting Lookup groups", ioe);                
             }
         } 
@@ -390,12 +388,12 @@ public class ServiceAdminImpl implements ServiceAdmin {
     public LookupLocator[] getLookupLocators() {
         DiscoveryManagement dm;
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr!=null) {
             dm = mgr.getDiscoveryManager();
         } else {
             try {
                 dm = service.getServiceBeanContext().getDiscoveryManagement();
-            } catch(IOException e) {
+            } catch (IOException e) {
                 logger.warn( "Getting DiscoveryManagement", e);
                 return(new LookupLocator[0]);
             }
@@ -406,14 +404,14 @@ public class ServiceAdminImpl implements ServiceAdmin {
 
     public void addLookupLocators(LookupLocator[] locators) {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr!=null) {
             DiscoveryManagement dm = mgr.getDiscoveryManager();
             DiscoveryLocatorManagement dlm = (DiscoveryLocatorManagement)dm;
             dlm.addLocators(locators);
-            if(snapshotHandler!=null) {
+            if (snapshotHandler!=null) {
                 try {
                     snapshotHandler.takeSnapshot();
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     logger.warn( "Persisting Added LookupLocators", ioe);
                 }
             }
@@ -425,14 +423,14 @@ public class ServiceAdminImpl implements ServiceAdmin {
 
     public void removeLookupLocators(LookupLocator[] locators) {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr!=null) {
             DiscoveryManagement dm = mgr.getDiscoveryManager();
             DiscoveryLocatorManagement dlm = (DiscoveryLocatorManagement)dm;
             dlm.removeLocators(locators);
-            if(snapshotHandler!=null) {
+            if (snapshotHandler!=null) {
                 try {
                     snapshotHandler.takeSnapshot();
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     logger.warn("Persisting removed LookupLocators", ioe);
                 }
             }
@@ -444,14 +442,14 @@ public class ServiceAdminImpl implements ServiceAdmin {
 
     public void setLookupLocators(LookupLocator[] locators) {
         JoinManager mgr = service.getJoinManager();
-        if(mgr!=null) {
+        if (mgr!=null) {
             DiscoveryManagement dm = mgr.getDiscoveryManager();
             DiscoveryLocatorManagement dlm = (DiscoveryLocatorManagement)dm;
             dlm.setLocators(locators);
-            if(snapshotHandler!=null) {
+            if (snapshotHandler!=null) {
                 try {
                     snapshotHandler.takeSnapshot();
-                } catch(IOException ioe) {
+                } catch (IOException ioe) {
                     logger.warn("Persisting LookupLocators", ioe);
                 }
             }
@@ -472,7 +470,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
         sbConfig.setGroups(groups);
         try {
             service.getServiceBeanContext().getServiceBeanManager().update(sbConfig);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("Setting groups", e);
         }
     }
@@ -488,7 +486,7 @@ public class ServiceAdminImpl implements ServiceAdmin {
         sbConfig.setLocators(locators);
         try {
             service.getServiceBeanContext().getServiceBeanManager().update(sbConfig);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("Setting LookupLocators", e);
         }
     }
