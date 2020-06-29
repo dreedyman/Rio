@@ -15,7 +15,6 @@
  */
 package org.rioproject.examples.workflow;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;

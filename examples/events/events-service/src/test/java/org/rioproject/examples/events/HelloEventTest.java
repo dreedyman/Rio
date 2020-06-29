@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Example testing the events example.
  */
-public class ITHelloEventTest {
+public class HelloEventTest {
     String opstring = "deploy/events.groovy";
     Hello eventProducer;
     HelloEventConsumer eventConsumer;

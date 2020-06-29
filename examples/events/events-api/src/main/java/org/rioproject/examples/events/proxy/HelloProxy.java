@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.examples.events.service;
+package org.rioproject.examples.events.proxy;
 
 import net.jini.id.ReferentUuid;
 import net.jini.id.Uuid;
@@ -38,7 +38,7 @@ public final class HelloProxy implements Hello, ReferentUuid, Serializable {
      * @param id - The Uuid of the Hello
      * @return An instance of the HelloProxy
      */
-    static HelloProxy getInstance(Hello hello, Uuid id) {
+    public static HelloProxy getInstance(Hello hello, Uuid id) {
         return (new HelloProxy(hello, id));
     }
 

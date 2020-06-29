@@ -18,6 +18,7 @@ package org.rioproject.examples.events.service;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
 import org.rioproject.annotation.CreateProxy;
+import org.rioproject.examples.events.proxy.HelloProxy;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.impl.event.DispatchEventHandler;
 import org.rioproject.event.EventHandler;

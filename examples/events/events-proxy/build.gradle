@@ -1,6 +1,0 @@
-group = 'org.rioproject.examples.events'
-description = 'Example :: Events Proxy'
-dependencies {
-  compile project(':examples:events:events-api')
-    compileOnly group: 'net.jini', name: 'jsk-platform', version:'2.2.2'
-}
