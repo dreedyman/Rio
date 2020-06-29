@@ -16,10 +16,10 @@
 description = 'Module :: Rio Test Infrastructure'
 dependencies {
     compile project(':rio-lib')
-    compile project(':cybernode-service')
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
-    compile group: 'junit', name: 'junit', version: "${junitVersion}"
-    compile project(':webster')
+    compileOnly project(':cybernode-service')
+    compileOnly group: 'junit', name: 'junit', version: "${junitVersion}"
+    compileOnly project(':webster')
     implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
     compile project(':resolver-aether')
 }
@@ -30,6 +30,20 @@ sourceSets {
         groovy { srcDirs += ['src/main/java'] }
     }
 
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "Rio Test",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
+    }
+    from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
+        include "org/rioproject/tools/**"
+        include "org/rioproject/cybernode/**"
+    }
 }
 
 

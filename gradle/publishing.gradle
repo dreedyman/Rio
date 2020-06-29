@@ -17,15 +17,12 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    /*maven {
-        url "http://www.rio-project.org/maven2"
-    }*/
-    /*maven {
-        url "http://repository.jboss.org/nexus/content/groups/public-jboss/"
-    }*/
 }
 
-if (project.name != "distribution" && project.name != "rio-int-tests") {
+project.apply plugin: 'com.jfrog.bintray'
+apply from: "${rootDir}/gradle/poms.gradle"
+
+if (project.name != "distribution" && project.name != "rio-int-tests" && !project.path.contains("example")) {
     task sourcesJar(type: Jar, dependsOn: classes) {
         classifier = 'sources'
         from sourceSets.main.allSource
@@ -52,33 +49,36 @@ if (project.name != "distribution" && project.name != "rio-int-tests") {
                 artifact javadocJar {
                     classifier "javadoc"
                 }
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode('description', "$project.description")
+                    root.appendNode('name', "${project.name}")
+                    root.appendNode('url', 'https://github.com/dreedyman/Rio')
+                    root.children().last() + pomConfig
+                }
             }
         }
-        /*repositories {
-            mavenLocal()
-            maven {
-                url "http://www.rio-project.org/maven2"
-            }
-        }*/
     }
 }
 
 bintray {
-    user = System.getProperty('bintray.user')
-    key = System.getProperty('bintray.key')
-    publications = ['mavenPublication']
+    dryRun = true
+    user = project.property('bintray.user')
+    key = project.property('bintray.key')
+    publications = project.name == "distribution" ? ['distribution'] : ['mavenJava']
 
     pkg {
-        repo = 'myAwesomeLib'
-        name = 'myAwesomeLib'
-        userOrg = 'reflectoring'
+        repo = 'Rio'
+        name = project.archivesBaseName
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/thombergs/my-awesome-lib.git'
+        publish = true
+        desc = project.description
+        vcsUrl = 'https://github.com/dreedyman/Rio'
         version {
-            name = '1.0.0'
-            desc = '1.0.0'
-            released  = new Date()
+            name = project.version
+            gpg {
+                sign = true
+            }
         }
     }
-
 }

@@ -24,14 +24,12 @@ buildscript {
 }
 
 plugins {
-    id "com.jfrog.bintray" version "1.7.3"
+    id "com.jfrog.bintray" version "1.8.5" apply false
     id 'org.owasp.dependencycheck' version '5.2.2' apply false
     //id 'com.github.hierynomus.license' version '0.15.0'
 }
 
 allprojects {
-    apply plugin: 'maven'
-
     group = 'org.rioproject'
     version = '6.0.0'
 
@@ -41,6 +39,7 @@ allprojects {
         logbackVersion = "1.2.3"
         riverVersion = "2.2.2"
         slf4jVersion = "1.7.12"
+        rioVersion = version
         policyAll = file("${rootProject.projectDir}//distribution/src/main/policy/policy.all").absolutePath
         def sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
@@ -48,15 +47,16 @@ allprojects {
 
         logRuntime = ["org.slf4j:jul-to-slf4j:$slf4jVersion",
                       "ch.qos.logback:logback-classic:$logbackVersion"]
-
     }
     //apply from: "${rootDir}/gradle/license.gradle"
 }
 
 subprojects {
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'java'
     apply plugin: 'groovy'
-    apply plugin: 'maven-publish'
+
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
@@ -65,8 +65,11 @@ subprojects {
     }
 
     apply from: "${rootDir}/gradle/integrationTest.gradle"
-    apply from: "${rootDir}/gradle/publishing.gradle"
     apply from: "${rootDir}/gradle/cve.gradle"
+
+    if (!project.path.contains("example") && project.name != "rio-int-tests") {
+        apply from: "${rootDir}/gradle/publishing.gradle"
+    }
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -77,17 +80,17 @@ subprojects {
         options.compilerArgs << "-Xlint:unchecked"
     }
 
-}
-
-clean.doLast {
-    subprojects {
-        ["${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1",
-         "${System.getProperty('user.home')}/.m2/repository"].each { repo ->
-            File file = repo.contains(".m2") ? new File(repo, "${project.group}/${project.name}".replace(".", "/")) :
-                    new File("${repo}/${project.group}/${project.name}")
-            if (file.exists()) {
-                file.deleteDir()
+    clean.doLast {
+        subprojects {
+            ["${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1",
+             "${System.getProperty('user.home')}/.m2/repository"].each { repo ->
+                File file = repo.contains(".m2") ? new File(repo, "${project.group}/${project.name}".replace(".", "/")) :
+                        new File("${repo}/${project.group}/${project.name}")
+                if (file.exists()) {
+                    file.deleteDir()
+                }
             }
         }
     }
 }
+

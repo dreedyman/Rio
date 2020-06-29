@@ -43,41 +43,6 @@ public class Jetty {
     private final ContextHandlerCollection contexts = new ContextHandlerCollection();
     private static final Logger logger = LoggerFactory.getLogger(Jetty.class);
 
-    /*public Jetty(int port, String... roots) throws Exception {
-        this(port, roots, System.getProperty("webster.put.dir"));
-    }
-
-    public Jetty(int port, String[] roots, String putDir) throws Exception {
-        this(port, roots, putDir, 0, 0);
-    }
-
-    public Jetty(int port, String[] roots, String putDir, int maxThreads, int minThreads) throws Exception {
-        if(maxThreads>0) {
-            QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads);
-            server = new Server(threadPool);
-        } else {
-            server = new Server();
-        }
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(port);
-        String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
-        connector.setHost(address);
-        server.setConnectors(new Connector[] { connector });
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        for(String root : roots) {
-            logger.info("Adding {}", new File(root).getName());
-            File dir = new File(root);
-            contexts.addHandler(createContextHandler(dir, new ResourceHandler()));
-
-        }
-        if(putDir!=null) {
-            File dir = new File(putDir);
-            contexts.addHandler(createContextHandler(dir, new PutHandler(dir)));
-        }
-        server.setHandler(contexts);
-        server.start();
-    }*/
-
     public Jetty setRoots(String... roots) {
         for(String root : roots) {
             logger.info("Adding {}", new File(root).getName());

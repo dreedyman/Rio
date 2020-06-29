@@ -17,6 +17,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 group = 'org.rioproject.examples.calculator'
 description = 'Example :: Calculator Service Implementation'
+
 dependencies {
     compile project(':examples:calculator:calculator-api')
     compile group: 'org.rioproject', name: 'rio-lib', version: "${rioVersion}"

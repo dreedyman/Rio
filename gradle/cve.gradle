@@ -19,5 +19,5 @@ dependencyCheck {
     autoUpdate=true
     cveValidForHours=1
     //suppressionFile = "${rootProject.projectDir.path}/config/owasp/suppressions.xml"
-    skipConfigurations=['codenarc', 'checkstyle', 'liquibaseRuntime', 'functionalTestCompileClasspath', 'functionalTestRuntimeClasspath']
+    //skipConfigurations=['']
 }

@@ -18,6 +18,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.codehaus.groovy.runtime.GStringImpl
 
 /* Build a distribution  */
+description = 'Module :: Rio Distribution'
 
 apply plugin: 'base'
 apply plugin: 'maven'
@@ -181,18 +182,95 @@ task distribution(type: Zip, dependsOn: [createDistribution]) {
     }
 }
 
+archivesBaseName = "distribution"
 def rioDistribution = file("build/distribution-${version}.zip")
 artifacts {
     archives file: rioDistribution, name: 'distribution', type: 'zip', builtBy: distribution
 }
 
+/*def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    }
+    developers {
+        developer {
+            name "Dennis Reedy"
+            email "dennis.reedy@gmail.com"
+        }
+    }
+
+    contributors {
+        contributor {
+            name "Jim Clarke"
+            organization "Oracle"
+        }
+        contributor {
+            name "Larry Mitchell"
+        }
+        contributor {
+            name "Kevin Hartig"
+        }
+        contributor {
+            name "Ron Bowers"
+            organization "Army Research Laboratories"
+            organizationUrl "http://www.arl.army.mil/"
+        }
+        contributor {
+            name "Fabrizio Giuduci"
+            organization "Tidalwave"
+            organizationUrl "http://bluemarine.tidalwave.it/"
+        }
+        contributor {
+            name "Jerome Bernard"
+            organization "Kalixia"
+        }
+        contributor {
+            name "Jeff Ramsdale"
+        }
+    }
+
+    scm {
+        url "https://github.com/dreedyman/Rio"
+    }
+}*/
+
+apply from: "${rootDir}/gradle/poms.gradle"
+
 publishing {
     publications {
         distribution(MavenPublication) {
             artifact rioDistribution
+            groupId = project.group
+            artifactId = project.archivesBaseName
+            version = project.version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', "$project.description")
+                root.appendNode('name', "${project.name}")
+                root.appendNode('url', 'https://github.com/dreedyman/Rio')
+                root.children().last() + distPomConfig
+            }
         }
     }
-    repositories {
-        maven { url "http://www.rio-project.org/maven2" }
+}
+
+bintray {
+    dryRun = true
+    user = project.property('bintray.user')
+    key = project.property('bintray.key')
+    publications = ['distribution']
+
+    pkg {
+        repo = 'Rio'
+        name = project.archivesBaseName
+        licenses = ['Apache-2.0']
+        publish = true
+        vcsUrl = 'https://github.com/dreedyman/Rio'
+        version {
+            name = project.version
+        }
     }
 }

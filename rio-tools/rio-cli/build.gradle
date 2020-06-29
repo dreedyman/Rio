@@ -25,7 +25,7 @@ dependencies {
 
 jar {
   manifest {
-    attributes("Implementation-Title": "Rio Project",
+    attributes("Implementation-Title": "Rio Command Line Interface",
             "Implementation-Version": "${project.version}",
             "Rio-Version" : "${project.version}",
             "Rio-Build": buildTime,

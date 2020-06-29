@@ -38,7 +38,7 @@ dependencies {
 jar {
     manifest {
         attributes("Class-Path": "resolver-aether-${version}.jar",
-                "Implementation-Title": "Rio Project",
+                "Implementation-Title": "Rio Project Resolver",
                 "Implementation-Version": "${project.version}",
                 "Rio-Version" : "${project.version}",
                 "Rio-Build": buildTime
