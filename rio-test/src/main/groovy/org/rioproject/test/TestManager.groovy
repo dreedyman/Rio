@@ -353,7 +353,10 @@ class TestManager {
         if(Artifact.isArtifact(opStringToDeploy)) {
             return deploy(opStringToDeploy)
         } else {
-            opStringURL = new File(opStringToDeploy).toURI().toURL()
+            opStringURL = TestManager.class.getClassLoader().getResource(opStringToDeploy)
+            if (opStringURL == null) {
+                opStringURL = new File(opStringToDeploy).toURI().toURL()
+            }
         }
         return deploy(opStringURL)
     }
