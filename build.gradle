@@ -30,7 +30,7 @@ plugins {
 
 allprojects {
     group = 'org.rioproject'
-    version = '6.0.0'
+    version = '5.9.0'
 
     ext {
         groovyVersion = "2.4.19"
