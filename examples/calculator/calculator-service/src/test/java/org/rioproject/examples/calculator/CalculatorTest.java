@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.rioproject.cybernode.StaticCybernode;
 
 import java.io.File;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Map;
 
@@ -31,13 +32,16 @@ import static org.junit.Assert.assertNotNull;
  * <tt>OperationalString</tt>
  */
 public class CalculatorTest {
-    String opstring = "deploy/calculator.groovy";
+    String opstring = "opstring/calculator.groovy";
     Calculator calculator;
 
     @Before
     public void setupCalculator() throws Exception {
         StaticCybernode cybernode = new StaticCybernode();
-        Map<String, Object> map = cybernode.activate(new File(opstring));
+        URL url = CalculatorTest.class.getClassLoader().getResource(opstring);
+        assertNotNull(url);
+        File opStringFile = new File(url.toURI());
+        Map<String, Object> map = cybernode.activate(opStringFile);
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String beanName = entry.getKey();
             Object beanImpl = entry.getValue();

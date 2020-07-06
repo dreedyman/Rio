@@ -33,7 +33,7 @@ import org.rioproject.watch.WatchDataSource;
         groups = "Tomcat",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "src/main/opstring/tomcat.groovy"
+        opstring = "opstring/tomcat.groovy"
 )
 public class ITTomcatDeployTest {
     @SetTestManager

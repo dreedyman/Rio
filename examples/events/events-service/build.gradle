@@ -27,14 +27,11 @@ dependencies {
 }
 
 test {
-    dependsOn([':examples:events:events-api:install', install, "opstring"])
+    dependsOn([':examples:events:events-api:install', install])
     systemProperty 'java.security.policy', policyAll
     systemProperty "rio.home", "${rootProject.projectDir.path}/distribution/build/rio-${version}"
 }
 
-task opstring(type: Copy) {
-    from "${project.projectDir.path}/../src/main/opstring"
-    into "${project.projectDir.path}/deploy"
-    include "events.groovy"
+processResources {
     filter(ReplaceTokens, tokens: [version: project.version])
 }

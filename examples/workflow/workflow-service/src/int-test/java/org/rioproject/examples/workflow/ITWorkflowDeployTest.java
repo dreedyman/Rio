@@ -35,7 +35,7 @@ import static org.junit.Assert.assertNotNull;
         groups = "Workflow",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "deploy/workflow.groovy"
+        opstring = "opstring/workflow.groovy"
 )
 public class ITWorkflowDeployTest {
     @SetTestManager

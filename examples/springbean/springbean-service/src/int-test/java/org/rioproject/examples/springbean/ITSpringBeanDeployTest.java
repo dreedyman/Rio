@@ -34,7 +34,7 @@ import java.rmi.RemoteException;
         groups = "SpringBean",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "deploy/springbean.groovy"
+        opstring = "opstring/springbean.groovy"
 )
 public class ITSpringBeanDeployTest {
 	@SetTestManager

@@ -21,6 +21,7 @@ import org.rioproject.cybernode.StaticCybernode;
 import org.rioproject.examples.events.service.HelloEventConsumer;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -30,14 +31,16 @@ import static org.junit.Assert.assertNotNull;
  * Example testing the events example.
  */
 public class HelloEventTest {
-    String opstring = "deploy/events.groovy";
+    String opstring = "opstring/events.groovy";
     Hello eventProducer;
     HelloEventConsumer eventConsumer;
 
     @Before
     public void setup() throws Exception {
         StaticCybernode cybernode = new StaticCybernode();
-        Map<String, Object> map = cybernode.activate(new File(opstring));
+        URL url = HelloEventTest.class.getClassLoader().getResource(opstring);
+        assertNotNull(url);
+        Map<String, Object> map = cybernode.activate(new File(url.toURI()));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String beanName = entry.getKey();
             Object beanImpl = entry.getValue();

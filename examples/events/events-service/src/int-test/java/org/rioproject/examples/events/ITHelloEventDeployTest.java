@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
         groups = "HelloEvent",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "deploy/events.groovy"
+        opstring = "opstring/events.groovy"
 )
 public class ITHelloEventDeployTest {
     @SetTestManager

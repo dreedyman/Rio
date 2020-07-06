@@ -1,3 +1,4 @@
+package opstring
 /*
  * Copyright to the original author or authors.
  * 

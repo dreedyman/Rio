@@ -39,7 +39,7 @@ import java.util.concurrent.Future;
         groups = "CalculatorClient",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "deploy/calculator.groovy"
+        opstring = "opstring/calculator.groovy"
 )
 public class ITCalculatorClientTest {
 	@SetTestManager

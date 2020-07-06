@@ -23,10 +23,13 @@ import org.junit.runners.Parameterized;
 import org.rioproject.cybernode.StaticCybernode;
 
 import java.io.File;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Example testing the SpringBean service
@@ -37,8 +40,10 @@ public class SpringBeanTest {
     @Before
     public void setupSpringBean() throws Exception {
         StaticCybernode cybernode = new StaticCybernode();
-        String opstring = "../src/main/opstring/springbean.groovy";
-        Map<String, Object> map = cybernode.activate(new File(opstring));
+        String opstring = "opstring/springbean.groovy";
+        URL url = SpringBeanTest.class.getClassLoader().getResource(opstring);
+        assertNotNull(url);
+        Map<String, Object> map = cybernode.activate(new File(url.toURI()));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String beanName = entry.getKey();
             Object beanImpl = entry.getValue();

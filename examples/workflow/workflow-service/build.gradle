@@ -29,14 +29,11 @@ dependencies {
 }
 
 test {
-    dependsOn([':examples:workflow:workflow-api:install', install, "opstring"])
+    dependsOn([':examples:workflow:workflow-api:install', install])
     systemProperty 'java.security.policy', policyAll
     systemProperty "rio.home", "${rootProject.projectDir.path}/distribution/build/rio-${version}"
 }
 
-task opstring(type: Copy) {
-    from "${project.projectDir.path}/../src/main/opstring"
-    into "${project.projectDir.path}/deploy"
-    include "*.groovy"
+processResources {
     filter(ReplaceTokens, tokens: [version: project.version])
 }

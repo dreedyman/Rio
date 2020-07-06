@@ -34,7 +34,7 @@ import java.rmi.RemoteException;
         groups = "Calculator",
         numCybernodes = 1,
         numMonitors = 1,
-        opstring = "deploy/calculator.groovy"
+        opstring = "opstring/calculator.groovy"
 )
 public class ITCalculatorDeployTest {
 	@SetTestManager

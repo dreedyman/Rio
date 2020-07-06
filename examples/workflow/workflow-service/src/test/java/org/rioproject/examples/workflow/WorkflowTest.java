@@ -23,10 +23,13 @@ import org.junit.runners.Parameterized;
 import org.rioproject.cybernode.StaticCybernode;
 
 import java.io.File;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
 
 public class WorkflowTest {
     private Master master;
@@ -34,8 +37,10 @@ public class WorkflowTest {
     @Before
     public void setup() throws Exception {
         StaticCybernode cybernode = new StaticCybernode();
-        String opstring = "deploy/workflow.groovy";
-        Map<String, Object> map = cybernode.activate(new File(opstring));
+        String opstring = "opstring/workflow.groovy";
+        URL url = WorkflowTest.class.getClassLoader().getResource(opstring);
+        assertNotNull(url);
+        Map<String, Object> map = cybernode.activate(new File(url.toURI()));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String beanName = entry.getKey();
             Object beanImpl = entry.getValue();
