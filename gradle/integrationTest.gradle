@@ -53,8 +53,9 @@ task integrationTest(type: Test) {
     String rioHome = "${project(":distribution").buildDir.path}/rio-${version}"
     if (! new File(rioHome, "lib").exists()) {
         dependsOn([":distribution:createDistribution",
-                   ":cybernode-proxy:publishToMavenLocal",
-                   ":monitor-proxy:publishToMavenLocal"])
+                   ":cybernode-proxy:install",
+                   ":monitor-proxy:install",
+                   ":rio-test:install"])
     }
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
