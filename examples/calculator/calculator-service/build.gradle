@@ -28,7 +28,7 @@ dependencies {
 }
 
 test {
-    dependsOn([':examples:calculator:calculator-api:publishToMavenLocal', publishToMavenLocal, "opstring"])
+    dependsOn([':examples:calculator:calculator-api:install', install, "opstring"])
     dependsOn("opstring")
     systemProperty 'java.security.policy', policyAll
     systemProperty "rio.home", "${rootProject.projectDir.path}/distribution/build/rio-${version}"

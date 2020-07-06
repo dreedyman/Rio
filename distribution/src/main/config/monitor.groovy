@@ -1,7 +1,7 @@
 /*
  * Copyright to the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -33,12 +33,7 @@ import net.jini.constraint.BasicMethodConstraints
 import net.jini.core.constraint.ConnectionRelativeTime
 import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
-import net.jini.core.entry.Entry
 import org.rioproject.util.PortUtil
-import org.rioproject.entry.UIDescriptorFactory
-import org.rioproject.RioVersion
-import net.jini.lookup.ui.MainUI
-import org.rioproject.serviceui.UIFrameFactory
 
 /*
 * Declare Provision Monitor properties
@@ -51,15 +46,15 @@ class MonitorConfig {
 
     String[] getInitialLookupGroups() {
         String groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
-        return groups.split(",")
+        groups.split(",")
     }
 
     RemoteRepository[] getRemoteRepositories() {
-        RemoteRepository remoteRepository = new RemoteRepository();
+        RemoteRepository remoteRepository = new RemoteRepository()
         remoteRepository.setId(serviceName.replaceAll(" ", ""))
         remoteRepository.setUrl(System.getProperty(Constants.CODESERVER))
         def repositories = [remoteRepository]
-        return repositories as RemoteRepository[]
+        repositories as RemoteRepository[]
     }
 
     LookupLocator[] getInitialLookupLocators() {
@@ -73,14 +68,7 @@ class MonitorConfig {
     }
 
     ServiceResourceSelector getServiceResourceSelector() {
-        return new RoundRobinSelector()
-    }
-
-    Entry[] getServiceUIs(String codebase) {
-        String uiClass = 'org.rioproject.tools.ui.ServiceUIWrapper'
-        URL url = new URL("artifact:org.rioproject:rio-ui:${RioVersion.VERSION}")
-        def entry = [UIDescriptorFactory.getUIDescriptor(MainUI.ROLE, new UIFrameFactory(url, uiClass))]
-        return entry as Entry[]
+        new RoundRobinSelector() as ServiceResourceSelector
     }
 
     /*
@@ -91,13 +79,13 @@ class MonitorConfig {
         String portRange = System.getProperty(Constants.PORT_RANGE)
         if(portRange!=null)
             port = PortUtil.getPortFromRange(portRange)
-        return new JrmpExporter(port)
+        new JrmpExporter(port) as Exporter
     }
     
     ProxyPreparer getInstantiatorPreparer() {
         MethodConstraints serviceListenerConstraints =
                 new BasicMethodConstraints(new InvocationConstraints(new ConnectionRelativeTime(30000),
                                                                      null))
-        return  new BasicProxyPreparer(false, serviceListenerConstraints, null);        
+        new BasicProxyPreparer(false, serviceListenerConstraints, null) as ProxyPreparer
     }
 }

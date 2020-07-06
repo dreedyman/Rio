@@ -49,6 +49,6 @@ class StartAllConfig {
             ServiceDescriptorUtil.getCybernode(policyFile, cybernodeConfigs as String[])
         ]
 
-        return serviceDescriptors as ServiceDescriptor[]
+        serviceDescriptors as ServiceDescriptor[]
     }
 }

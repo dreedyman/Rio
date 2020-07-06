@@ -316,8 +316,10 @@ public class InstantiatorResource {
         ServiceBeanInstance removedInstance = null;
         if(serviceElementMap.containsKey(sElem)) {
             List<DeployedService> list = serviceElementMap.get(sElem);
+            list.removeIf(Objects::isNull);
             for (DeployedService deployedService : list) {
-                if (deployedService.getServiceBeanInstance().getServiceBeanID().equals(uuid)) {
+                if (deployedService.getServiceBeanInstance() != null
+                        && deployedService.getServiceBeanInstance().getServiceBeanID().equals(uuid)) {
                     list.remove(deployedService);
                     removedInstance = deployedService.getServiceBeanInstance();
                     break;

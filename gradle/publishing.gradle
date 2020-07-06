@@ -62,7 +62,8 @@ if (project.name != "distribution" && project.name != "rio-int-tests" && !projec
 }
 
 bintray {
-    dryRun = true
+    //dryRun = true
+    override = true
     user = project.property('bintray.user')
     key = project.property('bintray.key')
     publications = project.name == "distribution" ? ['distribution'] : ['mavenJava']
@@ -76,9 +77,6 @@ bintray {
         vcsUrl = 'https://github.com/dreedyman/Rio'
         version {
             name = project.version
-            gpg {
-                sign = true
-            }
         }
     }
 }

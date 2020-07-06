@@ -37,7 +37,7 @@ allprojects {
         junitVersion = "4.12"
         logbackVersion = "1.2.3"
         riverVersion = "2.2.2"
-        slf4jVersion = "1.7.12"
+        slf4jVersion = "1.7.25"
         rioVersion = version
         policyAll = file("${rootProject.projectDir}//distribution/src/main/policy/policy.all").absolutePath
         def sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -76,6 +76,11 @@ subprojects {
         options.encoding = 'UTF-8'
         options.annotationProcessorPath = project.configurations.annotationProcessor
         options.compilerArgs << "-Xlint:unchecked"
+    }
+
+    repositories {
+        mavenLocal()
+        jcenter()
     }
 
     clean.doLast {

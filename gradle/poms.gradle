@@ -20,39 +20,37 @@ def distributionPomConfig = {
             url "http://www.apache.org/licenses/LICENSE-2.0.txt"
         }
     }
+
     developers {
         developer {
             name "Dennis Reedy"
             email "dennis.reedy@gmail.com"
         }
-    }
-
-    contributors {
-        contributor {
+        developer {
             name "Jim Clarke"
             organization "Oracle"
         }
-        contributor {
+        developer {
             name "Larry Mitchell"
         }
-        contributor {
+        developer {
             name "Kevin Hartig"
         }
-        contributor {
+        developer {
             name "Ron Bowers"
             organization "Army Research Laboratories"
             organizationUrl "http://www.arl.army.mil/"
         }
-        contributor {
+        developer {
             name "Fabrizio Giuduci"
             organization "Tidalwave"
             organizationUrl "http://bluemarine.tidalwave.it/"
         }
-        contributor {
+        developer {
             name "Jerome Bernard"
             organization "Kalixia"
         }
-        contributor {
+        developer {
             name "Jeff Ramsdale"
         }
     }

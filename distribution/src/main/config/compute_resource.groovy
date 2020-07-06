@@ -44,7 +44,7 @@ class ComputeResourceConfig {
      * the @link ResourceCapability.
      * */
     long getReportInterval() {
-        return 60000
+        60000
     }
 
     /*
@@ -58,7 +58,7 @@ class ComputeResourceConfig {
      * relocate to a different host, or simply not be allocated to this machine.
      */
     double getSystemThreshold() {
-        return Runtime.getRuntime().availableProcessors()
+        Runtime.getRuntime().availableProcessors()
     }
 }
 
@@ -70,24 +70,24 @@ class ComputeResourceConfig {
 class BasicMeasurable {
     /* Report every 5 seconds */
     long getReportRate() {
-        return 5000
+        5000
     }
 
     /* Include a single metric in the set of samples used to produce a result */
     int getSampleSize() {
-        return 1
+        1
     }
 
     /* Maintain a collection size of 50 calculables */
     int getCollectionSize() {
-        return 50
+        50
     }
 
     /*
      * Low threshold of 0, high threshold of 1 (100%)
      */
     ThresholdValues getThresholdValues() {
-        return new ThresholdValues(0.0, 1.0)
+        new ThresholdValues(0.0, 1.0)
     }
 }
 
@@ -100,9 +100,9 @@ class BasicMeasurable {
 class MeasurableCPU extends BasicMeasurable {
     MeasurableMonitor getMonitor() {
         if(OperatingSystemType.isLinux())
-            return new LinuxHandler()
+            new LinuxHandler()
         else
-            return new SystemCPUHandler()
+            new SystemCPUHandler()
     }
     /*
      * High threshold is the number of CPUs on the system
@@ -110,7 +110,7 @@ class MeasurableCPU extends BasicMeasurable {
     @Override
     ThresholdValues getThresholdValues() {
         int numCPUs = Runtime.getRuntime().availableProcessors()
-        return new ThresholdValues(0.0, numCPUs);
+        new ThresholdValues(0.0, numCPUs);
     }
 
 }
@@ -128,7 +128,7 @@ class MeasurableJVMCPU extends BasicMeasurable {
     @Override
     ThresholdValues getThresholdValues() {
         int numCPUs = Runtime.getRuntime().availableProcessors()
-        return new ThresholdValues(0.0, numCPUs);
+        new ThresholdValues(0.0, numCPUs);
     }
 }
 
@@ -144,7 +144,7 @@ class MeasurableMemory extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        return new ThresholdValues(0.0, 0.80);
+        new ThresholdValues(0.0, 0.80);
     }
 }
 
@@ -189,7 +189,7 @@ class MemoryPools extends BasicMeasurable {
                 memoryPools << new MemoryPool(mBean.name, config, new ThresholdValues(0.0, 0.80))
             }
         }
-        return memoryPools as MemoryPool[]
+        memoryPools as MemoryPool[]
     }
 
 }

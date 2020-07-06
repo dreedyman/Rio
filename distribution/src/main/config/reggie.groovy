@@ -28,14 +28,14 @@ class ReggieConfig {
 
     String[] getInitialMemberGroups() {
         String groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
-        return groups.split(",")
+        groups.split(",")
     }
 
     String getUnicastDiscoveryHost() {
-        return HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
+        HostUtil.getHostAddressFromProperty("java.rmi.server.hostname")
     }
 
     Exporter getServerExporter() {
-        return ExporterConfiguration.getDefaultExporter()
+        ExporterConfiguration.getDefaultExporter()
     }
 }

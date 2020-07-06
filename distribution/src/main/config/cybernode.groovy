@@ -34,7 +34,7 @@ class CybernodeConfig {
 
     String[] getInitialLookupGroups() {
         String groups = System.getProperty(Constants.GROUPS_PROPERTY_NAME, System.getProperty('user.name'))
-        return groups.split(",")
+        groups.split(",")
     }
 
     LookupLocator[] getInitialLookupLocators() {
@@ -56,10 +56,10 @@ class CybernodeConfig {
             String name = System.getProperty('user.name')
             serviceLogRootDirectory = rootLogDir+File.separator+name+File.separator+'logs'+File.separator+logExt
         }
-        return serviceLogRootDirectory
+        serviceLogRootDirectory
     }
 
     String getNativeLibDirectory() {
-        return System.getProperty("rio.native.dir")
+        System.getProperty("rio.native.dir")
     }
 }

@@ -899,20 +899,22 @@ class TestManager {
     }
 
     private static def loadManagerConfig() {
-        String defaultManagerConfig =
-            "jar:file:${Utils.getRioHome()}/lib/rio-test-${RioVersion.VERSION}.jar!/default-manager-config.groovy"
-        String mgrConfig = System.getProperty('org.rioproject.test.manager.config',
-                                              defaultManagerConfig)
+        String mgrConfig = System.getProperty('org.rioproject.test.manager.config')
         log.info "Using TestManager configuration ${mgrConfig}"
         URL url = loadManagerConfig(mgrConfig)
         if (url == null) {
+            def classpath =
+                    ResolverHelper.getResolver().getClassPathFor(String.format("org.rioproject:rio-test:%s",
+                            RioVersion.VERSION)) as String[]
+            def testJar = classpath.toList().stream().filter { s -> s.contains('rio-test') }.find()
+            String defaultManagerConfig = String.format("jar:file:%s!/default-manager-config.groovy", testJar)
             url = loadManagerConfig(defaultManagerConfig)
-        }
-        if (url == null) {
-            throw new RuntimeException(
-                    "Cannot load [${mgrConfig}], or [${defaultManagerConfig}]. This file is needed "+
-                            "by the Rio TestManager to initialize. Check the setting of the "+
-                            "org.rioproject.test.manager.config system property.")
+            if (url == null) {
+                throw new RuntimeException(
+                        "Cannot load [${mgrConfig}], or [${defaultManagerConfig}]. This file is needed " +
+                                "by the Rio TestManager to initialize. Check the setting of the " +
+                                "org.rioproject.test.manager.config system property.")
+            }
         }
         new ConfigSlurper().parse(url)
     }

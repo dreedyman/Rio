@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  * @author Dennis Reedy
  */
 public class IdleServiceManager {
-    private final Map<ServiceActivityProvider, Long> activityMap = new ConcurrentHashMap<ServiceActivityProvider, Long>();
+    private final Map<ServiceActivityProvider, Long> activityMap = new ConcurrentHashMap<>();
     private final Long maxIdleTime;
     private final ServiceElement serviceElement;
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -79,7 +79,7 @@ public class IdleServiceManager {
         public void run() {
             try {
                 long now = System.currentTimeMillis();
-                List<ServiceActivityProvider> idleServices = new ArrayList<ServiceActivityProvider>();
+                List<ServiceActivityProvider> idleServices = new ArrayList<>();
                 for (Map.Entry<ServiceActivityProvider, Long> entry : activityMap.entrySet()) {
                     try {
                         if (!entry.getKey().isActive()) {

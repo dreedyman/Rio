@@ -53,7 +53,7 @@ public class ProvisionRequest {
     //long priority = 0;
     /** The time the ProvisionRequest was created */
     private final long timestamp;
-    private final List<String> failureReasons = new ArrayList<String>();
+    private final List<String> failureReasons = new ArrayList<>();
 
     /**
      * Create a ProvisionRequest 

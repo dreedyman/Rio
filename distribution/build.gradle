@@ -80,7 +80,7 @@ task gatherDeps() {
 }
 
 static boolean filter(artifact) {
-    def exclusions = ["examples", "rio-int-tests", "distribution", "rio-logging"]
+    def exclusions = ["examples", "rio-int-tests", "distribution"]
     boolean include = true
     for(String exclude : exclusions) {
         if(artifact.contains(exclude))  {
@@ -100,7 +100,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                                     ":cybernode-ui:install",
                                     ":monitor-service:install",
                                     ":rio-cli:install",
-                                    ":rio-test:install",
+                                    //":rio-test:install",
                                     ":watch-ui:install",
                                     gatherDeps]) {
     description 'Creates a Rio distribution'
@@ -133,7 +133,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                                 into target
                             }
                         } else {
-                            println "Archive does not exist ${jar.archivePath}"
+                            println "Archive excluded ${jar.archivePath}"
                         }
                     }
                 }
@@ -170,72 +170,23 @@ task createDistribution(dependsOn: [":rio-platform:install",
 task distribution(type: Zip, dependsOn: [createDistribution]) {
     description 'Creates a Rio distribution archive'
     doFirst {
-        println "Zipping distribution rio-${version} -> distribution-${version}.zip"
+        println "Zipping distribution rio-${version} -> rio-${version}.zip"
     }
     //compression = Compression.GZIP // for Tar type
-    baseName = "distribution"
+    baseName = "rio"
     destinationDir = project.buildDir
     from("${project.buildDir.path}/rio-${version}")
-    into "distribution-${version}"
+    into "rio-${version}"
     doLast {
         println "Complete"
     }
 }
 
-archivesBaseName = "distribution"
-def rioDistribution = file("build/distribution-${version}.zip")
+//archivesBaseName = "distribution"
+def rioDistribution = file("build/rio-${version}.zip")
 artifacts {
-    archives file: rioDistribution, name: 'distribution', type: 'zip', builtBy: distribution
+    archives file: rioDistribution, name: 'rio', type: 'zip', builtBy: distribution
 }
-
-/*def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-        }
-    }
-    developers {
-        developer {
-            name "Dennis Reedy"
-            email "dennis.reedy@gmail.com"
-        }
-    }
-
-    contributors {
-        contributor {
-            name "Jim Clarke"
-            organization "Oracle"
-        }
-        contributor {
-            name "Larry Mitchell"
-        }
-        contributor {
-            name "Kevin Hartig"
-        }
-        contributor {
-            name "Ron Bowers"
-            organization "Army Research Laboratories"
-            organizationUrl "http://www.arl.army.mil/"
-        }
-        contributor {
-            name "Fabrizio Giuduci"
-            organization "Tidalwave"
-            organizationUrl "http://bluemarine.tidalwave.it/"
-        }
-        contributor {
-            name "Jerome Bernard"
-            organization "Kalixia"
-        }
-        contributor {
-            name "Jeff Ramsdale"
-        }
-    }
-
-    scm {
-        url "https://github.com/dreedyman/Rio"
-    }
-}*/
 
 apply from: "${rootDir}/gradle/poms.gradle"
 
@@ -253,24 +204,6 @@ publishing {
                 root.appendNode('url', 'https://github.com/dreedyman/Rio')
                 root.children().last() + distPomConfig
             }
-        }
-    }
-}
-
-bintray {
-    dryRun = true
-    user = project.property('bintray.user')
-    key = project.property('bintray.key')
-    publications = ['distribution']
-
-    pkg {
-        repo = 'Rio'
-        name = project.archivesBaseName
-        licenses = ['Apache-2.0']
-        publish = true
-        vcsUrl = 'https://github.com/dreedyman/Rio'
-        version {
-            name = project.version
         }
     }
 }

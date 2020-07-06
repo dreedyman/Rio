@@ -30,12 +30,12 @@ class StartMonitorConfig {
 
     String[] getMonitorConfigArgs(String rioHome) {
         def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/monitor.groovy']
-        return configArgs as String[]
+        configArgs as String[]
     }
 
     String[] getLookupConfigArgs(String rioHome) {
         def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']
-        return configArgs as String[]
+        configArgs as String[]
     }
 
     ServiceDescriptor[] getServiceDescriptors() {
@@ -53,7 +53,7 @@ class StartMonitorConfig {
             ServiceDescriptorUtil.getMonitor(policyFile, getMonitorConfigArgs(rioHome))
         ]
 
-        return serviceDescriptors as ServiceDescriptor[]
+        serviceDescriptors as ServiceDescriptor[]
     }
 
 }

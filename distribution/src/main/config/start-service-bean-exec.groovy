@@ -38,7 +38,7 @@ class StartServiceBeanExecConfig {
         configArgs.addAll(FileHelper.getIfExists(common, rioHome + '/config/common.groovy'))
         configArgs.addAll(FileHelper.getIfExists(cybernode, rioHome + '/config/forked_service.groovy'))
         configArgs.addAll(FileHelper.getIfExists(computeResource, rioHome + '/config/compute_resource.groovy'))
-        return configArgs as String[]
+        configArgs as String[]
     }
 
     ServiceDescriptor[] getServiceDescriptors() {
@@ -57,6 +57,6 @@ class StartServiceBeanExecConfig {
                                      (String[]) configArgs)
         ]
 
-        return serviceDescriptors as ServiceDescriptor[]
+        serviceDescriptors as ServiceDescriptor[]
     }
 }

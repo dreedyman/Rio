@@ -29,19 +29,11 @@ statusListener(NopStatusListener)
 def appenders = []
 
 appender("Console-Appender", ConsoleAppender) {
-    if (!System.getProperty("os.name").startsWith("Windows")) {
-        withJansi = true
-        encoder(PatternLayoutEncoder) {
-            pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %magenta([%thread]) %cyan(%logger{36}) - %msg%n%rEx"
-        }
-    } else {
-        encoder(PatternLayoutEncoder) {
-            pattern = "%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n%rEx"
-        }
+    encoder(PatternLayoutEncoder) {
+        pattern = "%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n%rEx"
     }
 }
 appenders << "Console-Appender"
-
 
 /* Set up loggers */
 logger("org.rioproject.cybernode.service", INFO)
