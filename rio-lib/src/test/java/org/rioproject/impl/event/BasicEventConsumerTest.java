@@ -114,7 +114,11 @@ public class BasicEventConsumerTest {
         EventRegistration eventRegistration = consumer.register(serviceItem);
         Assert.assertNotNull(eventRegistration);
         System.err.println("Waiting 5 seconds for lease to timeout...");
-        Thread.sleep(5 * 1000);
+        int i = 1;
+        while (i < 50) {
+            Thread.sleep(100);
+            i++;
+        }
         p.fire();
         assertEquals("Should have not been notified, but got: " + listener.counter.get(), 0, listener.counter.get());
     }
