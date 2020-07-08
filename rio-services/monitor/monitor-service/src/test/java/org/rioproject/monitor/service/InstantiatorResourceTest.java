@@ -16,7 +16,6 @@
 package org.rioproject.monitor.service;
 
 import net.jini.config.Configuration;
-import net.jini.core.event.UnknownEventException;
 import net.jini.id.Uuid;
 import net.jini.id.UuidFactory;
 import org.junit.Assert;
@@ -47,11 +46,13 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.rmi.RemoteException;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dennis Reedy
@@ -95,7 +96,7 @@ public class InstantiatorResourceTest {
     @Before
     public void setup() throws IOException {
         SBI sbi = new SBI();
-        List<MeasuredResource> measuredResources = new ArrayList<MeasuredResource>();
+        List<MeasuredResource> measuredResources = new ArrayList<>();
         ComputeResourceUtilization resourceUtilization = new ComputeResourceUtilization("test",
                                                                                         sbi.inetAddress.getHostAddress(),
                                                                                         sbi.inetAddress.getHostName(),
@@ -132,43 +133,43 @@ public class InstantiatorResourceTest {
 
 
     @Test
-    public void testMeetsGeneralRequirements() throws Exception {
+    public void testMeetsGeneralRequirements() {
         ProvisionRequest request = createProvisionRequest();
-        Assert.assertTrue(instantiatorResource.meetsGeneralRequirements(request));
+        assertTrue(instantiatorResource.meetsGeneralRequirements(request));
     }
 
     @Test
-    public void testMeetsQualitativeRequirements() throws Exception {
+    public void testMeetsQualitativeRequirements() {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement().setServiceLevelAgreements(createServiceLevelAgreements(true, true));
         Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        Assert.assertEquals(0, notSupported.size());
+        assertEquals(0, notSupported.size());
     }
 
     @Test
-    public void testDoesNotMeetArchitectureRequirements() throws Exception {
+    public void testDoesNotMeetArchitectureRequirements() {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement().setServiceLevelAgreements(createServiceLevelAgreements(false, true));
         Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        Assert.assertTrue(notSupported.size() > 0);
+        assertTrue(notSupported.size() > 0);
     }
 
     @Test
-    public void testDoesNotMeetOperatingSystemRequirements() throws Exception {
+    public void testDoesNotMeetOperatingSystemRequirements() {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement().setServiceLevelAgreements(createServiceLevelAgreements(true, false));
         Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        Assert.assertTrue(notSupported.size() > 0);
+        assertTrue(notSupported.size() > 0);
     }
 
     @Test
-    public void testMeetsQuantitativeRequirements() throws Exception {
+    public void testMeetsQuantitativeRequirements() {
         ProvisionRequest request = createProvisionRequest();
-        Assert.assertTrue(instantiatorResource.meetsQuantitativeRequirements(request));
+        assertTrue(instantiatorResource.meetsQuantitativeRequirements(request));
     }
 
     @Test
-    public void testMeetsClusterRequirements() throws UnknownHostException, SocketException {
+    public void testMeetsClusterRequirements() throws SocketException {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(false,
                                                                                                   HostUtil.getFirstNonLoopbackAddress(
@@ -176,7 +177,7 @@ public class InstantiatorResourceTest {
                                                                                                           false).getHostAddress()));
 
         Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        Assert.assertTrue(notSupported.size() == 0);
+        assertEquals(0, notSupported.size());
     }
 
     @Test
@@ -188,22 +189,22 @@ public class InstantiatorResourceTest {
                                                                                                           false).getHostAddress(),
                                                                                                   "192.168.1.9"));
         Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        Assert.assertTrue(notSupported.size() == 0);
+        assertEquals(0, notSupported.size());
     }
 
     @Test
-    public void testMeetsExcludeClusterRequirements() throws UnknownHostException, SocketException {
+    public void testMeetsExcludeClusterRequirements() throws SocketException {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(true,
                                                                                                   HostUtil.getFirstNonLoopbackAddress(
                                                                                                           true,
                                                                                                           false).getHostAddress()));
         Collection<SystemComponent> notSupported = instantiatorResource.meetsQualitativeRequirements(request);
-        Assert.assertTrue(notSupported.size() == 1);
+        assertEquals(1, notSupported.size());
     }
 
     @Test
-    public void testMeetsExcludeMultipleClusterRequirements() throws UnknownHostException, ProvisionException, SocketException {
+    public void testMeetsExcludeMultipleClusterRequirements() throws ProvisionException, SocketException {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement
                 ().setServiceLevelAgreements(createClusterServiceLevelAgreements(true,
@@ -215,10 +216,10 @@ public class InstantiatorResourceTest {
     }
 
     @Test
-    public void testMeetsExcludeWithMatching() throws UnknownHostException, ProvisionException {
+    public void testMeetsExcludeWithMatching() throws ProvisionException {
         ProvisionRequest request = createProvisionRequest();
         request.getServiceElement().setServiceLevelAgreements(createClusterServiceLevelAgreements(true, "10.0.1.33"));
-        Assert.assertTrue(instantiatorResource.canProvision(request));
+        assertTrue(instantiatorResource.canProvision(request));
     }
 
     private ServiceElement createServiceElement() {
@@ -258,7 +259,7 @@ public class InstantiatorResourceTest {
     }
 
     private ServiceLevelAgreements createClusterServiceLevelAgreements(boolean exclude,
-                                                                       String... addresses) throws UnknownHostException {
+                                                                       String... addresses) {
         ServiceLevelAgreements slas = new ServiceLevelAgreements();
         SystemRequirements systemRequirements = new SystemRequirements();
         slas.setServiceRequirements(systemRequirements);
@@ -283,16 +284,11 @@ public class InstantiatorResourceTest {
                                         }
                                     },
                                     manager,
-                                    new InstanceIDManager() {
-                                        @Override
-                                        public long getNextInstanceID() {
-                                            return 0;
-                                        }
-                                    }
+                () -> 0
         );
     }
 
-    class SBI implements ServiceBeanInstantiator, Serializable {
+    static class SBI implements ServiceBeanInstantiator, Serializable {
         final Uuid uuid = UuidFactory.generate();
         final InetAddress inetAddress;
 
@@ -300,8 +296,7 @@ public class InstantiatorResourceTest {
             inetAddress = InetAddress.getLocalHost();
         }
 
-        public DeployedService instantiate(ServiceProvisionEvent event) throws ServiceBeanInstantiationException,
-                UnknownEventException {
+        public DeployedService instantiate(ServiceProvisionEvent event) {
             return null;
         }
 
@@ -324,11 +319,11 @@ public class InstantiatorResourceTest {
             return new ServiceBeanInstance[0];
         }
 
-        public String getName() throws RemoteException {
+        public String getName() {
             return "test";
         }
 
-        public Uuid getInstantiatorUuid() throws RemoteException {
+        public Uuid getInstantiatorUuid() {
             return uuid;
         }
 
