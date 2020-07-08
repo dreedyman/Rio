@@ -22,4 +22,4 @@ branches:
   only:
     - master
 
-script: gradlew check
+script: ./gradlew check
