@@ -70,7 +70,7 @@ manager {
                     '-Djava.security.policy=${rio.home}/policy/policy.all '+
                     '-Dlogback.configurationFile=${rio.home}/config/logging/logback.groovy ' +
                     '-Djava.util.logging.config.file=${rio.home}/config/logging/logging.properties ' +
-                    '-Drio.home=${rio.home} -Drio.test.home=${rio.test.home} -Drio.test.attach '+
+                    '-Drio.home=${rio.home} -Drio.test.attach '+
                     '-Dorg.rioproject.groups=${org.rioproject.groups} '+
                     '-Drio.log.dir=${rio.log.dir} -Dorg.rioproject.service=${service}'
 

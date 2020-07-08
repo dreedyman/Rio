@@ -903,8 +903,11 @@ class TestManager {
 
     private static def loadManagerConfig() {
         String mgrConfig = System.getProperty('org.rioproject.test.manager.config')
-        log.info "Using TestManager configuration ${mgrConfig}"
-        URL url = loadManagerConfig(mgrConfig)
+        URL url = null
+        if (mgrConfig != null) {
+            log.info "Using TestManager configuration ${mgrConfig}"
+            url = loadManagerConfig(mgrConfig)
+        }
         if (url == null) {
             def classpath =
                     ResolverHelper.getResolver().getClassPathFor(String.format("org.rioproject:rio-test:%s",
