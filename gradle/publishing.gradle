@@ -61,22 +61,24 @@ if (project.name != "distribution" && project.name != "rio-int-tests" && !projec
     }
 }
 
-bintray {
-    //dryRun = true
-    override = true
-    user = project.property('bintray.user')
-    key = project.property('bintray.key')
-    publications = project.name == "distribution" ? ['distribution'] : ['mavenJava']
+if (project.hasProperty('bintray.user')) {
+    bintray {
+        //dryRun = true
+        override = true
+        user = project.property('bintray.user')
+        key = project.property('bintray.key')
+        publications = project.name == "distribution" ? ['distribution'] : ['mavenJava']
 
-    pkg {
-        repo = 'Rio'
-        name = project.archivesBaseName
-        licenses = ['Apache-2.0']
-        publish = true
-        desc = project.description
-        vcsUrl = 'https://github.com/dreedyman/Rio'
-        version {
-            name = project.version
+        pkg {
+            repo = 'Rio'
+            name = project.archivesBaseName
+            licenses = ['Apache-2.0']
+            publish = true
+            desc = project.description
+            vcsUrl = 'https://github.com/dreedyman/Rio'
+            version {
+                name = project.version
+            }
         }
     }
 }
