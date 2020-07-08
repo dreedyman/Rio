@@ -21,12 +21,18 @@ buildscript {
         mavenCentral()
         jcenter()
     }
+    dependencies {
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.3.1'
+    }
 }
 
 plugins {
     id "com.jfrog.bintray" version "1.8.5" apply false
     id 'org.owasp.dependencycheck' version '5.2.2' apply false
+    id 'com.github.hierynomus.license' version '0.15.0'
 }
+
+def buildNumber = System.env.BUILD_BUILDNUMBER ? "$System.env.BUILD_BUILDNUMBER" : "0001"
 
 allprojects {
     group = 'org.rioproject'
@@ -46,7 +52,12 @@ allprojects {
 
         logRuntime = ["org.slf4j:jul-to-slf4j:$slf4jVersion",
                       "ch.qos.logback:logback-classic:$logbackVersion"]
+
+        snapshotSuffix = project.hasProperty('snapshotSuffix')
+                ? snapshotSuffix
+                : "SNAPSHOT-b${buildNumber.padLeft(3, '0')}-g<sha>"
     }
+    apply plugin: 'com.cinnober.gradle.semver-git'
 }
 
 subprojects {

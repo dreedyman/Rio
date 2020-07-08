@@ -47,6 +47,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Tests event consumer behavior
  */
@@ -70,7 +73,7 @@ public class BasicEventConsumerTest {
     @Test
     public void testCreateBasicEventConsumerWithNullRemoteServiceEventListener() throws Exception {
         /* Expect that we should be able to create a BEC with a null RemoteServiceEventListener */
-        new BasicEventConsumer((RemoteServiceEventListener) null);
+        new BasicEventConsumer((RemoteServiceEventListener<?>) null);
     }
 
     @Test
@@ -80,10 +83,7 @@ public class BasicEventConsumerTest {
 
     @Test
     public void testCreateBasicEventConsumerWithRemoteServiceEventListener() throws Exception {
-        new BasicEventConsumer(new RemoteServiceEventListener() {
-            public void notify(RemoteServiceEvent event) {
-            }
-        });
+        new BasicEventConsumer((RemoteServiceEventListener<?>) event -> { });
     }
 
     @Test
@@ -108,15 +108,19 @@ public class BasicEventConsumerTest {
         Listener listener = new Listener();
         consumer.register(listener);
         Producer p = new Producer();
-        p.setLeaseTime(3*1000);
+        p.setLeaseTime(3 * 1000);
         p.createDEH();
         ServiceItem serviceItem = createServiceItem(p);
         EventRegistration eventRegistration = consumer.register(serviceItem);
         Assert.assertNotNull(eventRegistration);
         System.err.println("Waiting 5 seconds for lease to timeout...");
-        Thread.sleep(5*1000);
+        int i = 1;
+        while (i < 50) {
+            Thread.sleep(100);
+            i++;
+        }
         p.fire();
-        Assert.assertTrue("Should have not been notified, but got: "+listener.counter.get(), listener.counter.get()==0);
+        assertEquals("Should have not been notified, but got: " + listener.counter.get(), 0, listener.counter.get());
     }
 
     //@Test
@@ -139,10 +143,10 @@ public class BasicEventConsumerTest {
         p.fire();
         System.err.println("Wait 1 second to catch up...");
         Thread.sleep(1000);
-        Assert.assertTrue("Should have gotten 2, got "+watch.getCalculables().values().size(),
-                          watch.getCalculables().values().size()==2);
+        assertEquals("Should have gotten 2, got " + watch.getCalculables().values().size(), 2,
+                watch.getCalculables().values().size());
         Calculable[] calculables = watch.getWatchDataSource().getCalculable();
-        Assert.assertTrue("Should have gotten 2, got "+calculables.length, calculables.length==2);
+        assertEquals("Should have gotten 2, got " + calculables.length, 2, calculables.length);
         for (Calculable calculable : calculables)
             System.out.println("==> " + calculable.getValue());
 
@@ -173,9 +177,12 @@ public class BasicEventConsumerTest {
         for(int i=0; i<6; i++)
             p.fire();
 
-        Assert.assertTrue("Should have gotten 2, got "+listener1.counter.get(), listener1.countDown.await(5, TimeUnit.SECONDS));
-        Assert.assertTrue("Should have gotten 2, got "+listener2.counter.get(), listener2.countDown.await(5, TimeUnit.SECONDS));
-        Assert.assertTrue("Should have gotten 2, got "+listener3.counter.get(), listener3.countDown.await(5, TimeUnit.SECONDS));
+        assertTrue("Should have gotten 2, got " + listener1.counter.get(),
+                listener1.countDown.await(5, TimeUnit.SECONDS));
+        assertTrue("Should have gotten 2, got " + listener2.counter.get(),
+                listener2.countDown.await(5, TimeUnit.SECONDS));
+        assertTrue("Should have gotten 2, got " + listener3.counter.get(),
+                listener3.countDown.await(5, TimeUnit.SECONDS));
     }
 
     private ServiceItem createServiceItem(Producer p) throws Exception {
@@ -194,7 +201,7 @@ public class BasicEventConsumerTest {
         AtomicLong sequenceCounter = new AtomicLong();
         LandlordLessor landlordLessor;
         EventHandler eventHandler;
-        long leaseTime = 30*1000;
+        long leaseTime = 30 * 1000;
 
         Producer() throws Exception {
             Exporter exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
@@ -242,7 +249,7 @@ public class BasicEventConsumerTest {
         }
     }
 
-    class Listener implements RemoteServiceEventListener {
+    static class Listener implements RemoteServiceEventListener {
         AtomicInteger counter = new AtomicInteger();
         CountDownLatch countDown;
 

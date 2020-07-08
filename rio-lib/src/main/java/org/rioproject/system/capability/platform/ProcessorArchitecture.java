@@ -69,22 +69,19 @@ public class ProcessorArchitecture extends PlatformCapability {
                     String theirMapping = (String) entry.getValue();
                     if (key.equals(AVAILABLE)) {
                         // verify number of processors
-                        supports = checkNumberOfProcessors(myMapping,
-                                                           theirMapping);
-                        if (!supports)
-                            break;
+                        supports = checkNumberOfProcessors(myMapping, theirMapping);
                     } else {
                         supports = matches(theirMapping, myMapping);
-                        if (!supports)
-                            break;
                     }
+                    if (!supports)
+                        break;
                 } else {
                     supports = false;
                     break;
                 }
             }
         }
-        return(supports);
+        return supports;
     }
 
     /*

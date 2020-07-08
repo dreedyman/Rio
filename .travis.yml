@@ -15,11 +15,13 @@
 #
 
 language: java
+install: skip
+
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 branches:
   only:
     - master
 
-script: gradle check
+script: ./gradlew test
