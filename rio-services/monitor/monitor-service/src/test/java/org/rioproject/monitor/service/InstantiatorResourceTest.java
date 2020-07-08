@@ -229,17 +229,29 @@ public class InstantiatorResourceTest {
     }
 
     private ServiceLevelAgreements createServiceLevelAgreements(boolean matchArchitecture, boolean matchOpSys) {
-        String[] architectures;
+        List<String> architectures = new ArrayList<>();
         if (matchArchitecture) {
-            architectures = new String[]{"x86", "x86_64"};
+            architectures.add("x86");
+            architectures.add("x86_64");
+            if (!architectures.contains(System.getProperty("os.arch"))) {
+                architectures.add(System.getProperty("os.arch"));
+            }
         } else {
-            architectures = new String[]{"sparc", "amd"};
+            architectures.add("sparc");
+            architectures.add("amd");
         }
-        String[] operatingSystems;
+        List<String> operatingSystems = new ArrayList<>();
         if (matchOpSys) {
-            operatingSystems = new String[]{"Mac OS X", "Windows", "Linux"};
+            operatingSystems.add("Mac OS X");
+            operatingSystems.add("Windows");
+            operatingSystems.add("Linux");
+            if (!operatingSystems.contains(System.getProperty("os.name"))) {
+                operatingSystems.add(System.getProperty("os.name"));
+            }
+
         } else {
-            operatingSystems = new String[]{"ES/390", "Ubuntu"};
+            operatingSystems.add("ES/390");
+            operatingSystems.add("Ubuntu");
         }
         ServiceLevelAgreements slas = new ServiceLevelAgreements();
         SystemRequirements systemRequirements = new SystemRequirements();
