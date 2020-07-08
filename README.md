@@ -25,7 +25,8 @@ Rio is built using Gradle.
 *  To create a distribution only, run `./gradlew distribution`
 
 ### Use in your project
-First, look at the examples directory for how to use Rio in your project.
+First, look at the [Rio Examples repository](https://github.com/dreedyman/rio-examples) for how to use Rio in your project.
+
 Until getting synched with jcenter(), add the following repository declaration into your build:  
 
 ```
