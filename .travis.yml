@@ -20,6 +20,6 @@ jdk:
 
 branches:
   only:
-    - develop
+    - master
 
-#script: mvn verify
+script: gradlew check
