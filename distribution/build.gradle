@@ -42,7 +42,7 @@ dependencies {
 }
 
 ext {
-    distDir = "${project.buildDir.path}/rio" as GStringImpl
+    distDir = "${project.buildDir.path}/rio-${project.version}"
 }
 
 /*
@@ -52,7 +52,7 @@ task gatherDeps() {
     description = "Gather up and organize distribution dependencies"
 
     doLast {
-        File dir = file("${distDir}-${version}")
+        File dir = file("${distDir}")
         if (dir.exists()) {
             delete dir
             println "Removed distribution $dir"
@@ -72,7 +72,7 @@ task gatherDeps() {
                 }
                 copy {
                     from file
-                    into "$distDir-${version}/$dest"
+                    into "$distDir/$dest"
                 }
             }
         }
@@ -91,6 +91,12 @@ static boolean filter(artifact) {
     include
 }
 
+task createDistributionIfNotExist() {
+    if (!new File("$distDir").exists()) {
+        dependsOn(":distribution:distribution")
+    }
+}
+
 task createDistribution(dependsOn: [":rio-platform:install",
                                     ":rio-start:install",
                                     ":rio-lib:install",
@@ -105,10 +111,10 @@ task createDistribution(dependsOn: [":rio-platform:install",
                                     gatherDeps]) {
     description 'Creates a Rio distribution'
     doLast {
-        File rioLibDir = file("$distDir-${version}/lib/")
-        File rioDlDir = file("$distDir-${version}/lib-dl")
-        File rioLoggingDir = file("$distDir-${version}/lib/logging")
-        File rioResolverDir = file("$distDir-${version}/lib/resolver")
+        File rioLibDir = file("$distDir/lib/")
+        File rioDlDir = file("$distDir/lib-dl")
+        File rioLoggingDir = file("$distDir/lib/logging")
+        File rioResolverDir = file("$distDir/lib/resolver")
 
         rootProject.subprojects.each { project ->
             boolean include = filter(project.path)
@@ -144,7 +150,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
             from("${project.rootProject.projectDir}") {
                 include "LICENSE.txt"
             }
-            into "${distDir}-${version}"
+            into "${distDir}"
         }
 
         copy {
@@ -152,7 +158,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                 include "config/**"
                 include "policy/**"
             }
-            into "${distDir}-${version}"
+            into "${distDir}"
         }
 
         copy {
@@ -162,7 +168,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                 filter(ReplaceTokens,
                         tokens: [rioV: project.version, groovyV: groovyVersion, riverV: riverVersion])
             }
-            into "${distDir}-${version}/bin"
+            into "${distDir}/bin"
         }
     }
 }

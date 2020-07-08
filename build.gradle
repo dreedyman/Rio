@@ -84,14 +84,18 @@ subprojects {
     }
 
     clean.doLast {
-        subprojects {
-            ["${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1",
-             "${System.getProperty('user.home')}/.m2/repository"].each { repo ->
-                File file = repo.contains(".m2") ? new File(repo, "${project.group}/${project.name}".replace(".", "/")) :
-                        new File("${repo}/${project.group}/${project.name}")
-                if (file.exists()) {
-                    file.deleteDir()
-                }
+        if (project.name == "rio-int-tests") {
+            File logDir = new File(project.projectDir, "logs")
+            if (logDir.exists()) {
+                logDir.deleteDir()
+            }
+        }
+        ["${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1",
+         "${System.getProperty('user.home')}/.m2/repository"].each { repo ->
+            File file = repo.contains(".m2") ? new File(repo, "${project.group}/${project.name}".replace(".", "/")) :
+                    new File("${repo}/${project.group}/${project.name}")
+            if (file.exists()) {
+                file.deleteDir()
             }
         }
     }

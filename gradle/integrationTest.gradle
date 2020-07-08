@@ -51,12 +51,10 @@ configurations {
 task integrationTest(type: Test) {
     group = 'verification'
     String rioHome = "${project(":distribution").buildDir.path}/rio-${version}"
-    if (! new File(rioHome, "lib").exists()) {
-        dependsOn([":distribution:createDistribution",
-                   ":cybernode-proxy:install",
-                   ":monitor-proxy:install",
-                   ":rio-test:install"])
-    }
+    dependsOn([":distribution:createDistributionIfNotExist",
+               ":cybernode-proxy:install",
+               ":monitor-proxy:install",
+               ":rio-test:install"])
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
 
@@ -79,3 +77,4 @@ task integrationTest(type: Test) {
 
 /* Ensure that the check task fails the build if there are failing integration tests. */
 tasks.check.dependsOn integrationTest
+tasks.check.dependsOn ":distribution:createDistributionIfNotExist"
