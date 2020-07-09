@@ -42,4 +42,29 @@ public class HostUtilTest {
         InetAddress inetAddress = HostUtil.getInetAddressFromProperty("foo");
         Assert.assertNotNull(inetAddress);
     }
+
+    @Test
+    public void testGetHostAddressMultiple() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            InetAddress address = HostUtil.getFirstNonLoopbackAddress(true,
+                                                                      false);
+            Assert.assertNotNull(address);
+        }
+        for (int i = 0; i < 10; i++) {
+            InetAddress address = HostUtil.getFirstNonLoopbackAddress(false,
+                                                                      true);
+            Assert.assertNotNull(address);
+        }
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetBoth() throws Exception {
+        HostUtil.getFirstNonLoopbackAddress(true, true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetNeither() throws Exception {
+        HostUtil.getFirstNonLoopbackAddress(false, false);
+    }
 }

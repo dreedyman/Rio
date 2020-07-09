@@ -20,12 +20,15 @@ import org.slf4j.LoggerFactory;
 
 import java.net.*;
 import java.util.Enumeration;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Utility for getting host name and address.
  */
 public final class HostUtil {
-    private static Logger logger = LoggerFactory.getLogger(HostUtil.class);
+    private static final AtomicReference<InetAddress> firstNonIpV4LoopbackAddress = new AtomicReference<>();
+    private static final AtomicReference<InetAddress> firstNonIpV6LoopbackAddress = new AtomicReference<>();
+    private static final Logger logger = LoggerFactory.getLogger(HostUtil.class);
 
     private HostUtil() {
     }
@@ -41,15 +44,15 @@ public final class HostUtil {
     public static InetAddress getInetAddress() throws UnknownHostException {
         InetAddress address = null;
         try {
-            if(logger.isDebugEnabled())
+            if (logger.isDebugEnabled())
                 logger.debug("Getting first non loopback address");
             address = getFirstNonLoopbackAddress(true, false);
             if(logger.isDebugEnabled())
                 logger.debug("Address return as: {}", address);
         } catch (SocketException e) {
-            e.printStackTrace();
+            logger.warn("Problem getting InetAddress", e);
         }
-        if(address==null) {
+        if (address == null) {
             address = InetAddress.getLocalHost();
         }
         return address;
@@ -101,7 +104,7 @@ public final class HostUtil {
     public static InetAddress getInetAddressFromProperty(final String property) throws UnknownHostException {
         InetAddress inetAddress;
         String value = System.getProperty(property);
-        if(value != null) {
+        if (value != null) {
             inetAddress = InetAddress.getByName(value);
         } else {
             inetAddress = getInetAddress();
@@ -119,33 +122,38 @@ public final class HostUtil {
      * @throws SocketException If an I/O error occurs.
      */
     public static InetAddress getFirstNonLoopbackAddress(boolean preferIpv4, boolean preferIPv6) throws SocketException {
-        Enumeration en = NetworkInterface.getNetworkInterfaces();
-        while (en.hasMoreElements()) {
-            NetworkInterface i = (NetworkInterface) en.nextElement();
-            if(logger.isDebugEnabled())
-                logger.debug("Checking NetworkInterface: {}", i);
-            for (Enumeration en2 = i.getInetAddresses(); en2.hasMoreElements();) {
-                InetAddress addr = (InetAddress) en2.nextElement();
-                if (!addr.isLoopbackAddress()) {
-                    if (addr instanceof Inet4Address) {
-                        if (preferIPv6) {
-                            continue;
+        if (preferIpv4 && preferIPv6) {
+            throw new IllegalArgumentException("Cannot have both ipv4 and ipv6");
+        }
+        if (!preferIpv4 && !preferIPv6) {
+            throw new IllegalArgumentException("Must have either ipv4 or ipv6");
+        }
+        AtomicReference<InetAddress> ref = preferIpv4 ? firstNonIpV4LoopbackAddress : firstNonIpV6LoopbackAddress;
+        if (ref.get() == null) {
+            Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+            while (en.hasMoreElements()) {
+                NetworkInterface i = en.nextElement();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Checking NetworkInterface: {}",
+                                 i);
+                }
+                for (Enumeration<InetAddress> en2 = i.getInetAddresses(); en2.hasMoreElements(); ) {
+                    InetAddress addr = en2.nextElement();
+                    if (!addr.isLoopbackAddress()) {
+                        if (addr instanceof Inet4Address && preferIpv4) {
+                            ref.set(addr);
+                            return ref.get();
                         }
-                        if(preferIpv4)
-                            return addr;
+                        if (addr instanceof Inet6Address && preferIPv6) {
+                            ref.set(addr);
+                            return ref.get();
+
+                        }
                     }
-                    if (addr instanceof Inet6Address) {
-                        if (preferIpv4) {
-                            continue;
-                        }
-                        if(preferIPv6)
-                            return addr;
-                    } else
-                        return addr;
                 }
             }
         }
-        return null;
+        return ref.get();
     }
 
 }
