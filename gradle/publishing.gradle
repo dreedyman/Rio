@@ -20,7 +20,6 @@ repositories {
 }
 
 project.apply plugin: 'com.jfrog.bintray'
-apply from: "${rootDir}/gradle/poms.gradle"
 
 if (project.name != "distribution" && project.name != "rio-int-tests" && !project.path.contains("example")) {
     task sourcesJar(type: Jar, dependsOn: classes) {
@@ -49,12 +48,19 @@ if (project.name != "distribution" && project.name != "rio-int-tests" && !projec
                 artifact javadocJar {
                     classifier "javadoc"
                 }
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', "$project.description")
-                    root.appendNode('name', "${project.name}")
-                    root.appendNode('url', 'https://github.com/dreedyman/Rio')
-                    root.children().last() + pomConfig
+                pom {
+                    description = project.description
+                    name = project.name
+                    url = 'https://github.com/dreedyman/Rio'
+                    licenses {
+                        license {
+                            name = "The Apache Software License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    scm {
+                        url = "https://github.com/dreedyman/Rio"
+                    }
                 }
             }
         }

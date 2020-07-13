@@ -194,8 +194,6 @@ artifacts {
     archives file: rioDistribution, name: 'rio', type: 'zip', builtBy: distribution
 }
 
-apply from: "${rootDir}/gradle/poms.gradle"
-
 publishing {
     publications {
         distribution(MavenPublication) {
@@ -203,12 +201,19 @@ publishing {
             groupId = project.group
             artifactId = project.archivesBaseName
             version = project.version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', "$project.description")
-                root.appendNode('name', "${project.name}")
-                root.appendNode('url', 'https://github.com/dreedyman/Rio')
-                root.children().last() + distPomConfig
+            pom {
+                description = project.description
+                name = project.name
+                url = 'https://github.com/dreedyman/Rio'
+                licenses {
+                    license {
+                        name = "The Apache Software License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                scm {
+                    url = "https://github.com/dreedyman/Rio"
+                }
             }
         }
     }
