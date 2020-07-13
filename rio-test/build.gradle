@@ -22,6 +22,10 @@ dependencies {
     compileOnly project(':webster')
     implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
     compile project(':resolver-aether')
+    testCompile project(':cybernode-service')
+    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    testCompile group: 'org.springframework', name: 'spring-context', version: '5.2.7.RELEASE'
+    testCompile logRuntime
 }
 
 sourceSets {
@@ -46,5 +50,6 @@ jar {
     }
 }
 
-
-test.enabled = false
+test {
+    systemProperty 'java.security.policy', policyAll
+}

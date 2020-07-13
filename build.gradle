@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import java.text.SimpleDateFormat
 
 buildscript {
@@ -21,11 +22,15 @@ buildscript {
         mavenCentral()
         jcenter()
     }
+    dependencies {
+        classpath group: 'com.cinnober.gradle', name: 'semver-git', version: '2.3.1'
+    }
 }
 
 plugins {
     id "com.jfrog.bintray" version "1.8.5" apply false
     id 'org.owasp.dependencycheck' version '5.2.2' apply false
+    id 'com.github.hierynomus.license' version '0.15.0'
 }
 
 allprojects {
@@ -46,7 +51,10 @@ allprojects {
 
         logRuntime = ["org.slf4j:jul-to-slf4j:$slf4jVersion",
                       "ch.qos.logback:logback-classic:$logbackVersion"]
+
+        snapshotSuffix = "<count>.g<sha>-SNAPSHOT"
     }
+    apply plugin: 'com.cinnober.gradle.semver-git'
 }
 
 subprojects {
@@ -84,14 +92,18 @@ subprojects {
     }
 
     clean.doLast {
-        subprojects {
-            ["${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1",
-             "${System.getProperty('user.home')}/.m2/repository"].each { repo ->
-                File file = repo.contains(".m2") ? new File(repo, "${project.group}/${project.name}".replace(".", "/")) :
-                        new File("${repo}/${project.group}/${project.name}")
-                if (file.exists()) {
-                    file.deleteDir()
-                }
+        if (project.name == "rio-int-tests") {
+            File logDir = new File(project.projectDir, "logs")
+            if (logDir.exists()) {
+                logDir.deleteDir()
+            }
+        }
+        ["${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1",
+         "${System.getProperty('user.home')}/.m2/repository"].each { repo ->
+            File file = repo.contains(".m2") ? new File(repo, "${project.group}/${project.name}".replace(".", "/")) :
+                    new File("${repo}/${project.group}/${project.name}")
+            if (file.exists()) {
+                file.deleteDir()
             }
         }
     }

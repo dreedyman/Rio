@@ -39,14 +39,14 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class DefaultServiceBeanFactory implements ServiceBeanFactory {
     /** Component name logging */
-    private static String COMPONENT = "org.rioproject.impl.servicebean";
+    private static final String COMPONENT = "org.rioproject.impl.servicebean";
     /** A Logger */
     private static final Logger logger = LoggerFactory.getLogger(COMPONENT);
     /** Constructor types for a JSK service */
-    private static final Class[] activationTypes = {String[].class,
+    private static final Class<?>[] activationTypes = {String[].class,
                                                     LifeCycle.class};
     /** ServiceBean start method type */
-    private static final Class[] startType = {ServiceBeanContext.class};
+    private static final Class<?>[] startType = {ServiceBeanContext.class};
 
     /* (non-Javadoc)
      * @see org.rioproject.cybernode.ServiceBeanFactory#create(org.rioproject.core.servicebean.ServiceBeanContext)
@@ -61,7 +61,7 @@ public class DefaultServiceBeanFactory implements ServiceBeanFactory {
             logger.trace("Loading class [{}], using ClassLoader: {}", jsbBundle.getClassName(), jsbCL.toString());
             Class<?> implClass = jsbCL.loadClass(jsbBundle.getClassName());
             if(useActivationConstructor(implClass) && !isServiceBean(implClass)) {
-                Constructor constructor = implClass.getDeclaredConstructor(activationTypes);
+                Constructor<?> constructor = implClass.getDeclaredConstructor(activationTypes);
                 logger.trace("Obtained implementation constructor: {}", constructor);
                 constructor.setAccessible(true);
                 LifeCycle lifeCycle = (LifeCycle)context.getServiceBeanManager().getDiscardManager();
@@ -92,7 +92,7 @@ public class DefaultServiceBeanFactory implements ServiceBeanFactory {
             } else {
                 if(isServiceBean(implClass)) {
                     logger.trace("Activating as ServiceBean");
-                    Constructor constructor = implClass.getConstructor((Class[])null);
+                    Constructor<?> constructor = implClass.getConstructor((Class<?>[])null);
                     logger.trace("Obtained implementation constructor: {}", constructor);
                     Object impl = constructor.newInstance((Object[])null);
                     ServiceBean instance = (ServiceBean)impl;

@@ -116,10 +116,10 @@ deployment(name:'Calculator') {
 
     service(name: 'Calculator') {
         interfaces {
-            classes 'org.rioproject.examples.calculator.Calculator'
+            classes 'org.rioproject.cybernode.test.calculator.Calculator'
             artifact ref:'service-dl'
         }
-        implementation(class:'org.rioproject.examples.calculator.service.CalculatorImpl') {
+        implementation(class:'org.rioproject.cybernode.test.calculator.service.CalculatorImpl') {
             artifact ref:'service'
         }
         associations {
