@@ -20,7 +20,6 @@ import org.rioproject.opstring.OperationalString;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -39,7 +38,7 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class OpStringLoader {
-    private ClassLoader loader;
+    private final ClassLoader loader;
     private String[] groups;
     /** Path location of an OperationalString loaded from the file system */
     private String loadPath;
@@ -138,13 +137,8 @@ public class OpStringLoader {
         URL propFile = cl.getResource(OPSTRING_PARSER_SELECTION_STRATEGY_LOCATION);
         if (propFile != null) {
             String strategyClassName;
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new InputStreamReader(propFile.openStream()));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(propFile.openStream()))) {
                 strategyClassName = reader.readLine();
-            } finally {
-                if (reader != null)
-                    reader.close();
             }
             Class<OpStringParserSelectionStrategy> strategyClass =
                     (Class<OpStringParserSelectionStrategy>) cl.loadClass(strategyClassName);
@@ -162,7 +156,7 @@ public class OpStringLoader {
         }
         // parse the source
         List<OpString> opstrings = parser.parse(source, loader, groups, loadPath);
-        return opstrings.toArray(new OperationalString[opstrings.size()]);
+        return opstrings.toArray(new OperationalString[0]);
     }
 
     /**
@@ -180,8 +174,6 @@ public class OpStringLoader {
         if(location==null)
             throw new IllegalArgumentException("location is null");
         URL url = getURL(location);
-        if (url == null)
-            throw new FileNotFoundException("OperationalString Location ["+location+"] not found");
         return parseOperationalString(url);
     }
 

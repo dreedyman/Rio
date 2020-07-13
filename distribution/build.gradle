@@ -80,7 +80,7 @@ task gatherDeps() {
 }
 
 static boolean filter(artifact) {
-    def exclusions = ["examples", "rio-int-tests", "distribution"]
+    def exclusions = ["rio-int-tests", "distribution"]
     boolean include = true
     for(String exclude : exclusions) {
         if(artifact.contains(exclude))  {

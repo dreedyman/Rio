@@ -72,18 +72,18 @@ class GroovyDSLOpStringParser implements OpStringParser {
     def logger = LoggerFactory.getLogger(getClass().name);
 
     @Deprecated
-    public List<OpString> parse(final Object source,
-                                final ClassLoader loader,
-                                String[] defaultExportJars,
-                                final String[] defaultGroups,
-                                final Object loadPath) {
+    List<OpString> parse(final Object source,
+                         final ClassLoader loader,
+                         String[] defaultExportJars,
+                         final String[] defaultGroups,
+                         final Object loadPath) {
         return parse(source, loader, defaultGroups, loadPath)
     }
 
-    public List<OpString> parse(final Object source,
-                                final ClassLoader loader,
-                                final String[] defaultGroups,
-                                final Object loadPath) {
+    List<OpString> parse(final Object source,
+                         final ClassLoader loader,
+                         final String[] defaultGroups,
+                         final Object loadPath) {
         logger.debug "Parsing source $source"
         ExpandoMetaClass.enableGlobally()
 

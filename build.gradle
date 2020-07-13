@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import java.text.SimpleDateFormat
 
 buildscript {
@@ -31,8 +32,6 @@ plugins {
     id 'org.owasp.dependencycheck' version '5.2.2' apply false
     id 'com.github.hierynomus.license' version '0.15.0'
 }
-
-def buildNumber = System.env.BUILD_BUILDNUMBER ? "$System.env.BUILD_BUILDNUMBER" : "0001"
 
 allprojects {
     group = 'org.rioproject'
@@ -53,9 +52,7 @@ allprojects {
         logRuntime = ["org.slf4j:jul-to-slf4j:$slf4jVersion",
                       "ch.qos.logback:logback-classic:$logbackVersion"]
 
-        snapshotSuffix = project.hasProperty('snapshotSuffix')
-                ? snapshotSuffix
-                : "SNAPSHOT-b${buildNumber.padLeft(3, '0')}-g<sha>"
+        snapshotSuffix = "<count>.g<sha>-SNAPSHOT"
     }
     apply plugin: 'com.cinnober.gradle.semver-git'
 }
