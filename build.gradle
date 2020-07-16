@@ -82,7 +82,6 @@ subprojects {
         options.deprecation = true
         options.incremental = true
         options.encoding = 'UTF-8'
-        options.annotationProcessorPath = project.configurations.annotationProcessor
         options.compilerArgs << "-Xlint:unchecked"
     }
 

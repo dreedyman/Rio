@@ -2,9 +2,9 @@ group = 'org.rioproject.monitor'
 description = 'Module :: Monitor Service Proxy'
 dependencies {
     compileOnly project(':rio-lib')
-    implementation group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
-    implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+    compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    compileOnly group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 }
 
 jar {

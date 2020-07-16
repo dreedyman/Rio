@@ -18,8 +18,8 @@ description = 'Module :: Cybernode Service Proxy'
 
 dependencies {
     compileClasspath project(':rio-lib')
-    implementation group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
-    implementation group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
+    compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+    compileOnly group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
 }
 
 jar {
