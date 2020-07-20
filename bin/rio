@@ -229,6 +229,7 @@ elif [ "$browser" = "1" ] ;then
       classpath="$classpath:$(toNative $RIO_LIB/../lib-dl/serviceui-$riverVersion.jar)"
 
     """$JAVACMD"""  $loggingConfig -Drio.home=$RIO_HOME -Djava.security.policy="$(toNative $RIO_HOME/policy/policy.all)" \
+    -Djava.protocol.handler.pkgs=org.rioproject.url \
     $classpath org.apache.river.examples.browser.Browser
 elif [ "$install" = "1" ] ;then
     # Run installer

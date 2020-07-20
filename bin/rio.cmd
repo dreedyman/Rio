@@ -71,8 +71,9 @@ goto end
 :browser
 set RIO_LIB="%RIO_HOME%\lib
 set RIO_LIB-DL="%RIO_HOME%\lib-dl
+set urlProp="-Djava.protocol.handler.pkgs=org.rioproject.url"
 set classpath=-cp "%RIO_LIB%/rio-start-%rioVersion%.jar:%RIO_LIB%/browser-1.0.jar:%RIO_LIB%/rio-lib-%rioVersion%.jar:%RIO_LIB%/groovy-all-%groovyVersion%.jar:%SLF4J_CLASSPATH%:%RIO_LIB-DL%/serviceui-%riverVersion%.jar"
-"%JAVACMD%" %classpath% %logbackConfig% %loggingConfig -Djava.security.policy="%RIO_HOME%\policy\policy.all" -Drio.home=%RIO_HOME%  org.apache.river.examples.browser.Browser
+"%JAVACMD%" %classpath% %logbackConfig% %loggingConfig -Djava.security.policy="%RIO_HOME%\policy\policy.all" -Drio.home=%RIO_HOME%  %urlProp% org.apache.river.examples.browser.Browser
 goto end
 
 :start
