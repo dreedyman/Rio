@@ -522,9 +522,9 @@ public class ServiceBeanDelegateImpl implements ServiceBeanDelegate {
                             context = loadResult.getServiceBeanContext();
                             associationManagement = context.getAssociationManagement();
                             serviceProxy = loadResult.getMarshalledInstance().get(false);
-                            logger.info("YAY: {}", serviceProxy);
+                            logger.debug("Obtained service proxy: {}", serviceProxy);
                         } catch (Exception e) {
-                            logger.info("FAILED", e);
+                            logger.warn("FAILED getting service proxy", e);
                             throw e;
                         } finally {
                             Thread.currentThread().setContextClassLoader(currentCL);

@@ -33,8 +33,6 @@ import org.rioproject.opstring.OperationalStringManager;
 import org.rioproject.proxy.admin.ServiceAdminProxy;
 import org.rioproject.system.ComputeResourceUtilization;
 import org.rioproject.system.ResourceCapability;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -51,7 +49,6 @@ import java.rmi.RemoteException;
 public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements ProvisionMonitorAdmin, Serializable {
     private static final long serialVersionUID = 2L;
     final ProvisionMonitorAdmin monitorAdminProxy;
-    private final static Logger logger = LoggerFactory.getLogger(ProvisionMonitorAdminProxy.class);
 
     /**
      * Creates a ProvisionMonitorAdmin proxy, returning an instance that implements 
@@ -201,10 +198,7 @@ public class ProvisionMonitorAdminProxy extends ServiceAdminProxy implements Pro
      * @see org.rioproject.deploy.DeployAdmin#undeploy
      */
     public boolean undeploy(final String opStringName) throws OperationalStringException, RemoteException {
-        logger.info("Undeploying {}", opStringName);
-        boolean result = monitorAdminProxy.undeploy(opStringName);
-        logger.info("Undeployed {}", opStringName);
-        return result;
+        return monitorAdminProxy.undeploy(opStringName);
     }
 
     /**

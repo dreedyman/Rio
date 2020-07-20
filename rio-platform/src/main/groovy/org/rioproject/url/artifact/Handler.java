@@ -62,7 +62,7 @@ import java.util.concurrent.*;
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class Handler extends URLStreamHandler {
     private static final Logger logger = LoggerFactory.getLogger(Handler.class.getName());
-    private static Resolver resolver;
+    private static final Resolver resolver;
     static {
         try {
             resolver = ResolverHelper.getResolver();
@@ -83,10 +83,10 @@ public class Handler extends URLStreamHandler {
     }
 
     protected URLConnection openConnection(URL url) throws IOException {
-        if(url==null)
+        if (url == null)
             throw new MalformedURLException("url cannot be null");
         String path = url.getPath();
-        if(path==null)
+        if (path == null)
             throw new MalformedURLException("url has null path");
 
         ArtifactURLConfiguration configuration = new ArtifactURLConfiguration(path);
@@ -101,20 +101,20 @@ public class Handler extends URLStreamHandler {
         URL u;
         try {
             u = cache.get(a);
-            if(u==null) {
+            if (u == null) {
                 u = resolver.getLocation(artifact, a.getType(), configuration.getRepositories());
                 cache.put(a, u);
                 if(logger.isDebugEnabled())
-                    logger.debug("Location of {} is {}", a, u==null?"<NULL>":u.toExternalForm());
+                    logger.debug("Location of {} is {}", a, u == null ? "<NULL>" : u.toExternalForm());
             }
         } catch (ResolverException e) {
             logger.warn(String.format("Could not resolve %s", a), e);
             throw new IOException(e.getLocalizedMessage());
         }
 
-        if(u!=null)
+        if (u != null) {
             return u.openConnection();
-
+        }
         return null;
     }
 
@@ -133,9 +133,10 @@ public class Handler extends URLStreamHandler {
                     removals.add(entry.getKey());
                 }
             }
-            for(Artifact a : removals) {
-                if(logger.isDebugEnabled())
-                    logger.debug("Removing "+a.toString()+" from cache");
+            for (Artifact a : removals) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Removing " + a.toString() + " from cache");
+                }
                 cache.remove(a);
             }
         }

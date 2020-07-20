@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Dennis Reedy
  */
 public class ServiceThatThrowsDuringAdvertiseCallbacks {
-    private final Map<String, Object> parameters = new HashMap<String, Object>();
+    private final Map<String, Object> parameters = new HashMap<>();
 
     @SetParameters
     public void setParams(Map<String, Object> p) {
@@ -38,14 +38,16 @@ public class ServiceThatThrowsDuringAdvertiseCallbacks {
     @PreAdvertise
     public void preAdv() {
         Boolean throwOnPreAdvertise = (Boolean) parameters.get("throwOnPreAdvertise");
-        if(throwOnPreAdvertise)
-            throw new RuntimeException("something bad happened");
+        if(throwOnPreAdvertise) {
+            throw new RuntimeException("Its okay, I'm configured to throwOnPreAdvertise");
+        }
     }
 
     @PostUnAdvertise
     public void postUnadvertise() {
         Boolean throwOnPostUnAdvertise = (Boolean) parameters.get("throwOnPostUnAdvertise");
-        if(throwOnPostUnAdvertise)
-            throw new RuntimeException("something bad happened");
+        if(throwOnPostUnAdvertise) {
+            throw new RuntimeException("Its okay, I'm configured to throwOnPostUnAdvertise");
+        }
     }
 }
