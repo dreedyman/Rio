@@ -170,9 +170,9 @@ public class AdvertiseLifecycleTest {
         OperationalStringManager manager = testManager.deploy(opString, monitor);
         Assert.assertNotNull(manager);
         ServiceBeanInstance[] instances = new ServiceBeanInstance[0];
-        for(int i=0; i<10; i++) {
+        for (int i = 0; i < 20; i++) {
             instances = cybernode.getServiceBeanInstances(element1);
-            if(instances.length>0){
+            if(instances.length > 0){
                 break;
             }
             Thread.sleep(500);
@@ -184,7 +184,7 @@ public class AdvertiseLifecycleTest {
         eventConsumer.register(monitorItems[0]);
 
         testManager.waitForService("DependsOn");
-        for(int i=0; i<10; i++) {
+        for(int i = 0; i < 20; i++) {
             if(listener.event!=null &&
                listener.event.getAction().equals(ProvisionMonitorEvent.Action.SERVICE_BEAN_DECREMENTED)) {
                 break;
@@ -200,8 +200,8 @@ public class AdvertiseLifecycleTest {
         Assert.assertEquals(0, instances.length);
         OperationalString operationalString = manager.getOperationalString();
         ServiceElement element1AfterDecrement = null;
-        for(ServiceElement service : operationalString.getServices()) {
-            if(service.getName().equals("Test")) {
+        for (ServiceElement service : operationalString.getServices()) {
+            if (service.getName().equals("Test")) {
                 element1AfterDecrement = service;
                 break;
             }

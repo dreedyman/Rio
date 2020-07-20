@@ -33,7 +33,7 @@ import java.io.IOException;
 @Ignore
 public class ITResolverUsingRioDepsTest {
     
-    private static String RESOLVER_PRUNE_PLATFORM="org.rioproject.resolver.prune.platform";
+    private static final String RESOLVER_PRUNE_PLATFORM="org.rioproject.resolver.prune.platform";
 
     @Before
     public void setup() throws IOException {
