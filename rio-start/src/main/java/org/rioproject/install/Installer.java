@@ -136,6 +136,8 @@ public final class Installer {
             throw new IllegalArgumentException("artifact must not be null");
         if (artifactFile == null && pomFile == null)
             throw new IllegalArgumentException("if pomFile is not provided, the artifactFile must not be null");
+        boolean overwrite =
+                Boolean.parseBoolean(System.getProperty("org.rioproject.install.overwrite","false"));
         File localRepository = Repository.getLocalRepository();
         StringBuilder sb = new StringBuilder();
         String groupId = artifact.getGroupId();
@@ -155,8 +157,11 @@ public final class Installer {
             String extension = artifactFile.getName().substring(ndx);
             sb.append(jarName).append(extension);
             File jar = new File(localRepository, sb.toString());
-            if (jar.exists()) {
+            if (jar.exists() && overwrite) {
                 logger.info("Overwriting {}", jar.getPath());
+            } else {
+                logger.info("Skipping {}", jar.getPath());
+                return;
             }
 
             /*
@@ -198,8 +203,11 @@ public final class Installer {
         if(artifactFile == null) {
             sb.append(artifactId).append("-").append(version).append(".pom");
             File targetPom = new File(localRepository, sb.toString());
-            if(targetPom.exists()) {
+            if (targetPom.exists() && overwrite) {
                 logger.info("Overwriting {}", targetPom.getPath());
+            } else {
+                logger.info("Skipping {}", targetPom.getPath());
+                return;
             }
         }
 
