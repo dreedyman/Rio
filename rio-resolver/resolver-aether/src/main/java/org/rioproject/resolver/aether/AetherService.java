@@ -322,8 +322,10 @@ public final class AetherService {
      * @throws InstallationException if the requested installation is unsuccessful
      * @throws IllegalArgumentException if the groupId, artifactId, version or pomFile is null.
      */
-    public void install(final String groupId, final String artifactId, final String version, final File pomFile, final File artifactFile)
-        throws InstallationException {
+    public void install(final String groupId, final String artifactId,
+                        final String version,
+                        final File pomFile,
+                        final File artifactFile) throws InstallationException {
         install(groupId, artifactId, version, null, pomFile, artifactFile);
     }
 
@@ -342,22 +344,26 @@ public final class AetherService {
      * @throws InstallationException if the requested installation is unsuccessful
      * @throws IllegalArgumentException if the groupId, artifactId, version or pomFile is null.
      */
-    private void install(final String groupId, final String artifactId, final String version, final String classifier, final File pomFile, final File artifactFile)
-        throws InstallationException {
+    private void install(final String groupId,
+                         final String artifactId,
+                         final String version,
+                         final String classifier,
+                         final File pomFile,
+                         final File artifactFile) throws InstallationException {
 
-        InstallRequest installRequest = new InstallRequest();
-        if(artifactFile!=null) {
+        InstallRequest installRequest;
+        if (artifactFile != null) {
             String name = artifactFile.getName();
             String type = name.substring(artifactFile.getName().lastIndexOf(".")+1);
             Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, classifier, type, version);
             jarArtifact = jarArtifact.setFile(artifactFile);
             Artifact pomArtifact = new SubArtifact(jarArtifact, classifier, "pom");
             pomArtifact = pomArtifact.setFile(pomFile);
-            installRequest = installRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
+            installRequest = new InstallRequest().addArtifact(jarArtifact).addArtifact(pomArtifact);
         } else {
             Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, classifier, "pom", version);
             pomArtifact = pomArtifact.setFile(pomFile);
-            installRequest = installRequest.addArtifact(pomArtifact);
+            installRequest  = new InstallRequest().addArtifact(pomArtifact);
         }
         repositorySystem.install(getRepositorySystemSession(), installRequest);
     }
@@ -369,7 +375,7 @@ public final class AetherService {
                        final File artifactFile,
                        final File pomFile,
                        final String repositoryId,
-                       final String repositoryURL) throws DeploymentException, SettingsBuildingException {
+                       final String repositoryURL) throws DeploymentException {
 
         deploy(groupId, artifactId, version, null, artifactFile, pomFile, repositoryId, repositoryURL);
     }
@@ -384,19 +390,19 @@ public final class AetherService {
                        final String repositoryId,
                        final String repositoryURL) throws DeploymentException {
 
-        DeployRequest deployRequest = new DeployRequest();
-        if(artifactFile!=null) {
+        DeployRequest deployRequest;
+        if (artifactFile != null) {
             String name = artifactFile.getName();
-            String type = name.substring(artifactFile.getName().lastIndexOf(".")+1, name.length());
+            String type = name.substring(artifactFile.getName().lastIndexOf(".") + 1);
             Artifact jarArtifact = new DefaultArtifact(groupId, artifactId, classifier, type, version);
             jarArtifact = jarArtifact.setFile(artifactFile);
             Artifact pomArtifact = new SubArtifact(jarArtifact, classifier, "pom");
             pomArtifact = pomArtifact.setFile(pomFile);
-            deployRequest = deployRequest.addArtifact(jarArtifact).addArtifact(pomArtifact);
+            deployRequest = new DeployRequest().addArtifact(jarArtifact).addArtifact(pomArtifact);
         } else {
             Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, classifier, "pom", version);
             pomArtifact = pomArtifact.setFile(pomFile);
-            deployRequest = deployRequest.addArtifact(pomArtifact);
+            deployRequest = new DeployRequest().addArtifact(pomArtifact);
         }
 
         RemoteRepository repository = new RemoteRepository.Builder(repositoryId, "default", repositoryURL).build();
@@ -417,15 +423,14 @@ public final class AetherService {
      * @return The {@code DependencyFilter} to use
      */
     private DependencyFilter getDependencyFilter(final Artifact a) {
-        Collection<DependencyFilter> filters = new ArrayList<DependencyFilter>();
+        Collection<DependencyFilter> filters = new ArrayList<>();
         if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
             filters.add(new ClassifierFilter(a.getClassifier()));
         else
             filters.add(new ExcludePlatformFilter());
         filters.add(DependencyFilterUtils.classpathFilter(dependencyFilterScope==null?
                                                           JavaScopes.RUNTIME:dependencyFilterScope));
-        for(DependencyFilter filter : dependencyFilters)
-            filters.add(filter);
+        filters.addAll(dependencyFilters);
         return DependencyFilterUtils.andFilter(filters);
     }
 
@@ -438,11 +443,9 @@ public final class AetherService {
      * @return The location of the artifact
      *
      * @throws MalformedURLException if the resolved artifact cannot be converted to a URL
-     * @throws SettingsBuildingException If errors are encountered handling settings
      */
     URL getLocation(final String artifactCoordinates, final String artifactExt) throws ArtifactResolutionException,
                                                                                        MalformedURLException,
-                                                                                       SettingsBuildingException,
                                                                                        VersionRangeResolutionException {
         return getLocation(artifactCoordinates, artifactExt, getRemoteRepositories());
     }
@@ -458,13 +461,11 @@ public final class AetherService {
      * @return The location of the artifact
      *
      * @throws MalformedURLException if the resolved artifact cannot be converted to a URL
-     * @throws SettingsBuildingException If errors are encountered handling settings
      */
     URL getLocation(final String artifactCoordinates,
                     final String artifactExt,
                     final List<RemoteRepository> repositories) throws ArtifactResolutionException,
                                                                              MalformedURLException,
-                                                                             SettingsBuildingException,
                                                                              VersionRangeResolutionException {
         List<RemoteRepository> myRepositories;
         if(repositories==null || repositories.isEmpty())
@@ -531,8 +532,7 @@ public final class AetherService {
      */
     List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
-        List<RemoteRepository> myRepositories = new ArrayList<>();
-        myRepositories.addAll(configuredRepositories);
+        List<RemoteRepository> myRepositories = new ArrayList<>(configuredRepositories);
         for(String activeProfile : activeProfiles) {
             for(Profile profile : effectiveSettings.getProfiles()) {
                 if(profile.getId().equals(activeProfile)) {
@@ -689,7 +689,7 @@ public final class AetherService {
      * @return A {@code List} of {@code RemoteRepository}
      */
     private List<RemoteRepository> asList(final RemoteRepository r) {
-        List<RemoteRepository> list = new ArrayList<RemoteRepository>();
+        List<RemoteRepository> list = new ArrayList<>();
         list.add(r);
         return list;
     }

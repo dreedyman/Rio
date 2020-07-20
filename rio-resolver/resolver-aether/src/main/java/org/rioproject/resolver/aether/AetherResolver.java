@@ -15,7 +15,6 @@
  */
 package org.rioproject.resolver.aether;
 
-import org.apache.maven.settings.building.SettingsBuildingException;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.collection.DependencyCollectionException;
@@ -65,7 +64,7 @@ public class AetherResolver implements Resolver, SettableResolver {
         ResolutionRequest request = new ResolutionRequest(artifact);
         synchronized (resolvingMap) {
             future = resolvingMap.get(request);
-            if(future==null) {
+            if (future == null) {
                 future = resolverExecutor.submit(new ResolvingRequestTask(request));
                 resolvingMap.put(request, future);
                 if(logger.isDebugEnabled()) {
@@ -100,11 +99,10 @@ public class AetherResolver implements Resolver, SettableResolver {
     public String[] getClassPathFor(String artifact, RemoteRepository[] repositories) throws ResolverException {
         String[] classPath;
         Future<String[]> future;
-        ResolutionRequest request = new ResolutionRequest(artifact,
-                                                          repositories);
+        ResolutionRequest request = new ResolutionRequest(artifact, repositories);
         synchronized (resolvingMap) {
             future = resolvingMap.get(request);
-            if(future==null) {
+            if (future == null) {
                 future = resolverExecutor.submit(new ResolvingRequestTask(request));
                 resolvingMap.put(request, future);
                 if(logger.isDebugEnabled()) {
@@ -142,9 +140,6 @@ public class AetherResolver implements Resolver, SettableResolver {
                 throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
         } catch (MalformedURLException e) {
             throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
-                                                      artifact, e.getLocalizedMessage()));
-        } catch (SettingsBuildingException e) {
-            throw new ResolverException(String.format("Error loading settings for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
         } catch (VersionRangeResolutionException e) {
             throw new ResolverException(String.format("Error resolving latest version for %s: %s",
@@ -189,9 +184,6 @@ public class AetherResolver implements Resolver, SettableResolver {
                 throw new ResolverException(String.format("Error locating %s: %s", artifact, e.getLocalizedMessage()));
         } catch (MalformedURLException e) {
             throw new ResolverException(String.format("Error creating URL for resolved artifact %s: %s",
-                                                      artifact, e.getLocalizedMessage()));
-        } catch (SettingsBuildingException e) {
-            throw new ResolverException(String.format("Error loading settings for resolved artifact %s: %s",
                                                       artifact, e.getLocalizedMessage()));
         } catch (VersionRangeResolutionException e) {
             throw new ResolverException(String.format("Error resolving latest version for %s: %s",

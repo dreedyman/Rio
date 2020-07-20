@@ -4,7 +4,6 @@ dependencies {
     compileOnly project(':rio-lib')
     compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
     compileOnly group: 'net.jini', name: 'jsk-platform', version: "${riverVersion}"
-    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 }
 
 jar {
