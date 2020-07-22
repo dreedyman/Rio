@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.rioproject.config.PlatformCapabilityConfig;
 import org.rioproject.config.PlatformLoader;
-import org.rioproject.impl.system.capability.PlatformCapabilityWriter;
 import org.rioproject.system.capability.PlatformCapability;
 
 import java.io.File;
@@ -32,15 +31,14 @@ public class PlatformCapabilityWriterTest {
     @Test
     public void testWrite() throws Exception {
         String cwd = System.getProperty("user.dir");
-        File target = new File(cwd, "target");
+        File target = new File(cwd, "build");
         File platform = new File(target, "platform-file");
         platform.mkdirs();
         PlatformCapability pCap = new PlatformCapability();
         pCap.define(PlatformCapability.NAME, "Foo");
         pCap.define(PlatformCapability.VERSION, "1.0");
-        pCap.setClassPath(new String[]{cwd+File.separator+"target"+File.separator+"classes"+File.separator});
-        PlatformCapabilityWriter writer = new PlatformCapabilityWriter();
-        String fileName = writer.write(pCap, platform.getPath());
+        pCap.setClassPath(new String[]{cwd+File.separator+"build"+File.separator+"classes"+File.separator});
+        String fileName = PlatformCapabilityWriter.write(pCap, platform.getPath());
         Assert.assertNotNull(fileName);
         PlatformLoader platformLoader = new PlatformLoader();
         PlatformCapabilityConfig[] pCapConfigs = platformLoader.parsePlatform(platform.getPath());
