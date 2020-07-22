@@ -31,7 +31,10 @@ class StartAllConfig {
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = RioHome.get()
 
-        def websterRoots = [rioHome+'/deploy', ';', m2Repo]
+        def websterRoots = [ rioHome+'/lib-dl',  ';',
+                             rioHome+'/lib',     ';',
+                             rioHome+'/deploy',  ';',
+                             m2Repo]
 
         String policyFile = rioHome+'/policy/policy.all'
         def monitorConfigs = [rioHome+'/config/common.groovy',

@@ -50,7 +50,9 @@ class StartCybernodeConfig {
     ServiceDescriptor[] getServiceDescriptors() {
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = RioHome.get()
-        def websterRoots = [rioHome + '/lib', ';', m2Repo]
+        def websterRoots = [rioHome + '/lib-dl', ';',
+                            rioHome + '/lib',    ';',
+                            m2Repo]
 
         String policyFile = rioHome + '/policy/policy.all'
 
