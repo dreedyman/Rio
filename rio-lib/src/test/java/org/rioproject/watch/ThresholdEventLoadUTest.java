@@ -46,8 +46,11 @@ public class ThresholdEventLoadUTest {
         ThresholdEvent event1 = new ThresholdEvent(new Dummy(), calculable, values, ThresholdType.BREACHED);
         ThresholdEvent event2 = new ThresholdEvent(new Dummy(), calculable, values, ThresholdType.CLEARED);
 
-        File v2Cleared = new File("src/test/resources/ThresholdEventClearedv2.ser");
-        File v2Breached = new File("src/test/resources/ThresholdEventBreachedv2.ser");
+        String cwd = System.getProperty("user.dir");
+        File target = new File(cwd, "build");
+
+        File v2Cleared = new File(target, "ThresholdEventClearedv2.ser");
+        File v2Breached = new File(target, "ThresholdEventBreachedv2.ser");
 
         writeThresholdEvent(v2Breached, event1);
         writeThresholdEvent(v2Cleared, event2);
