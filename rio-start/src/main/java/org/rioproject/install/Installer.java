@@ -160,8 +160,10 @@ public final class Installer {
             if (jar.exists() && overwrite) {
                 logger.info("Overwriting {}", jar.getPath());
             } else {
-                logger.info("Skipping {}", jar.getPath());
-                return;
+                if (jar.exists() && !overwrite) {
+                    logger.info("Skipping {}", jar.getPath());
+                    return;
+                }
             }
 
             /*
@@ -206,8 +208,10 @@ public final class Installer {
             if (targetPom.exists() && overwrite) {
                 logger.info("Overwriting {}", targetPom.getPath());
             } else {
-                logger.info("Skipping {}", targetPom.getPath());
-                return;
+                if (targetPom.exists() && !overwrite) {
+                    logger.info("Skipping {}", targetPom.getPath());
+                    return;
+                }
             }
         }
 
