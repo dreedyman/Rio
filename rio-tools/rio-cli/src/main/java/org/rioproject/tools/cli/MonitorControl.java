@@ -553,16 +553,19 @@ public class MonitorControl {
     }
 
     static Map<String, DeployAdmin> getDeployedOpStrings(final ServiceItem[] items) {
-        Map<String, DeployAdmin> map = new HashMap<String, DeployAdmin>();
+        Map<String, DeployAdmin> map = new HashMap<>();
         for (ServiceItem item : items) {
             try {
                 DeployAdmin deployAdmin = (DeployAdmin) CLI.getInstance().getServiceFinder().
                         getPreparedAdmin(item.service);
                 OperationalStringManager[] opMgrs = deployAdmin.getOperationalStringManagers();
                 for (OperationalStringManager opMgr : opMgrs) {
-                    OperationalString opString = opMgr.getOperationalString();
-                    if (opMgr.isManaging()) {
-                        map.put(opString.getName(), deployAdmin);
+                    try {
+                        if (opMgr.isManaging()) {
+                            map.put(opMgr.getOperationalStringName(), deployAdmin);
+                        }
+                    } catch (Throwable t) {
+                        System.out.println(t.getClass().getName() +": " + t.getMessage());
                     }
                 }
             } catch (Exception e) {

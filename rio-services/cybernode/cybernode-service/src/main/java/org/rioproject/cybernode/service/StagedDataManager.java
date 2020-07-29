@@ -176,8 +176,7 @@ public class StagedDataManager {
             throw new IllegalStateException("ServiceElement has not been set");
         /* If there are provisionable capabilities, or data staging, perform
          * the stagedData/installation */
-        Collection<SystemComponent> installableComponents =
-            sElem.getProvisionablePlatformCapabilities();
+        Collection<SystemComponent> installableComponents = sElem.getProvisionablePlatformCapabilities();
         install(installableComponents);
 
         /* Verify missing components. If there are any, go get them */

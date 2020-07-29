@@ -34,9 +34,9 @@ public class OpString implements OperationalString, Serializable {
     /** Name of the OperationalString */
     private String name;
     /** Collection of services within the OperationalString */
-    private final List<ServiceElement> services = new ArrayList<ServiceElement>();
+    private final List<ServiceElement> services = new ArrayList<>();
     /** Collection of nested OperationalString */
-    private final List<OperationalString> nestedOpStrings = new ArrayList<OperationalString>();
+    private final List<OperationalString> nestedOpStrings = new ArrayList<>();
     /** The deployed state of the OperationalString */
     private int deployedStatus = OperationalString.UNDEPLOYED;
     /** The URL OperationalString was loaded from */
@@ -61,10 +61,6 @@ public class OpString implements OperationalString, Serializable {
      * @see OperationalString#setDeployed
      */
     public void setDeployed(int deployed) {
-        if(deployed < OperationalString.UNDEPLOYED && 
-            deployed > OperationalString.DEPLOYED)
-            throw new IllegalArgumentException("bad deployment status "+
-                                               "["+deployed+"]");
         synchronized(this) {
             deployedStatus = deployed;
         }                
@@ -197,11 +193,11 @@ public class OpString implements OperationalString, Serializable {
         OperationalString[] ops;
         synchronized(nestedOpStrings) {
             ops = new OperationalString[nestedOpStrings.size()];
-            for(int i=0; i<ops.length; i++) {
+            for (int i=0; i<ops.length; i++) {
                 ops[i] = nestedOpStrings.get(i);
             }
         }
-        return(ops);
+        return ops;
     }
 
     /**
@@ -209,9 +205,9 @@ public class OpString implements OperationalString, Serializable {
      */
     public int hashCode() {
         int hc = 17;
-        hc = 37*hc+name.hashCode();
-        hc = 37*hc+services.hashCode();
-        return(hc); 
+        hc = 37 * hc + name.hashCode();
+        hc = 37 * hc + services.hashCode();
+        return hc;
     }
 
     /**
@@ -219,10 +215,11 @@ public class OpString implements OperationalString, Serializable {
      * names are the same and they have they same ServiceElements
      */
     public boolean equals(Object obj) {
-        if(this == obj)
-            return(true);
-        if(!(obj instanceof OpString)) {            
-            return(false);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof OpString)) {
+            return false;
         }        
         OpString that = (OpString)obj;
         if(this.name.equals(that.name)) {
@@ -240,12 +237,12 @@ public class OpString implements OperationalString, Serializable {
                         }
                     }
                     if (!matched)
-                        return (false);
+                        return false;
                 }
-                return(true);
+                return true;
             } 
         }
-        return(false);
+        return false;
     }
 
     /**
@@ -267,7 +264,7 @@ public class OpString implements OperationalString, Serializable {
                 }
             }
         }
-        return(found);
+        return found;
     }
 
     /**
@@ -288,7 +285,7 @@ public class OpString implements OperationalString, Serializable {
                 }
             }
         }
-        return(foundService);
+        return foundService;
     }
 
     /**
@@ -310,7 +307,7 @@ public class OpString implements OperationalString, Serializable {
                 }
             }
         }
-        return(found);
+        return found;
     }
 
     /**
@@ -330,14 +327,14 @@ public class OpString implements OperationalString, Serializable {
                 }
             }
         }
-        return(nested);
+        return nested;
     }
     
     /**
      * @see OperationalString#loadedFrom
      */
     public URL loadedFrom() {
-        return(loadedFrom);
+        return loadedFrom;
     }
 
     /**

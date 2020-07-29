@@ -55,20 +55,20 @@ public class ServiceElement implements Serializable {
          * ServiceBean's operational criteria */
         FIXED}
 
-    /** Provision type, default to DYNAMIC */
-    private ProvisionType provisionType = ProvisionType.DYNAMIC;
+    /** Provision type */
+    private ProvisionType provisionType;
     /** The ServiceBeanConfig, providing configuration information for the 
      * ServiceBean */
     private ServiceBeanConfig sbConfig;    
     /** Array of AssociationDescriptor instances, describing associations the 
      * ServiceElement has to other services */
-    private final List<AssociationDescriptor> associations = new ArrayList<AssociationDescriptor>();
+    private final List<AssociationDescriptor> associations = new ArrayList<>();
     /** The ClassBundle for the ServiceBean */
     private ClassBundle componentBundle;
     /** Array of ClassBundles containing the export codebase */
     private ClassBundle[] exportBundles = new ClassBundle[0];
     /** Collection of provisionable PlatformCapability objects  */
-    private final Collection<SystemComponent> provisionableCapabilities = new ArrayList<SystemComponent>();
+    private final Collection<SystemComponent> provisionableCapabilities = new ArrayList<>();
     /** The ServiceLevelAgreements object defines system and service level 
      * objectives that are to be monitored, metered and acted on by policy 
      * handlers */
@@ -101,7 +101,7 @@ public class ServiceElement implements Serializable {
      * The machine boundary property, only used if the maxPerMachine property
      * is set
      */
-    private MachineBoundary machineBoundary=MachineBoundary.VIRTUAL;
+    private MachineBoundary machineBoundary = MachineBoundary.VIRTUAL;
     /** Number of actual instances */
     private int actual;    
     /** Array of machines that have been identified as part of a cluster of
@@ -112,11 +112,11 @@ public class ServiceElement implements Serializable {
     /** ExecDescriptor, providing attributes for an external service to execute */
     private ExecDescriptor execDescriptor;
     /** Collection of artifacts to download for the service */
-    private final List<StagedData> stagedData = new ArrayList<StagedData>();
+    private final List<StagedData> stagedData = new ArrayList<>();
     /** Whether the service executes in it's own JVM */
     private boolean fork = false;
-    private final List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
-    private final List<RuleMap> ruleMaps = new ArrayList<RuleMap>();
+    private final List<RemoteRepository> remoteRepositories = new ArrayList<>();
+    private final List<RuleMap> ruleMaps = new ArrayList<>();
 
     /**
      * Construct a ServiceElement
@@ -149,7 +149,7 @@ public class ServiceElement implements Serializable {
                           ServiceLevelAgreements slAgreements,
                           ClassBundle[] exports) {
 
-        this(provisionType, sbConfig, slAgreements, exports, null, null);
+        this (provisionType, sbConfig, slAgreements, exports, null, null);
     }
 
     /**
@@ -170,9 +170,9 @@ public class ServiceElement implements Serializable {
                           ClassBundle fdhBundle,
                           ClassBundle componentBundle) {
 
-        if(sbConfig==null)
+        if (sbConfig == null)
             throw new IllegalArgumentException("sbConfig is null");
-        if(exports == null)
+        if (exports == null)
             throw new IllegalArgumentException("exports is null");
         this.fdhBundle = fdhBundle;
         this.provisionType = provisionType;
@@ -207,9 +207,9 @@ public class ServiceElement implements Serializable {
      * @return The name of the ServiceElement
      */
     public String getName() {
-        if(sbConfig==null)
+        if (sbConfig == null)
             return null;
-        return(sbConfig.getName());
+        return sbConfig.getName();
     }        
 
     /**
@@ -221,7 +221,7 @@ public class ServiceElement implements Serializable {
      * @throws IllegalArgumentException if planned is less then 0
      */
     public void setPlanned(int planned) {
-        if(planned<0)
+        if (planned < 0)
             throw new IllegalArgumentException("planned cannot be < 0");
         this.planned = planned;
     }
@@ -240,7 +240,7 @@ public class ServiceElement implements Serializable {
      * does nothing
      */
     public void decrementPlanned() {
-        if(planned > 0)
+        if (planned > 0)
             planned--;
     }
 
@@ -283,7 +283,7 @@ public class ServiceElement implements Serializable {
      * @throws IllegalArgumentException if maxPerMachine is less then -1
      */
     public void setMaxPerMachine(int maxPerMachine) {
-        if(maxPerMachine < -1)
+        if (maxPerMachine < -1)
             throw new IllegalArgumentException("maxPerMachine cannot be less then -1");
         this.maxPerMachine = maxPerMachine;
     }
@@ -340,7 +340,7 @@ public class ServiceElement implements Serializable {
      * @return An array of machines to provision the ServiceBean to
      */
     public String[] getCluster() {
-        if(machineCluster == null)
+        if (machineCluster == null)
             return new String[0];
         String[] cluster = new String[machineCluster.length];
         System.arraycopy(machineCluster, 0, cluster, 0, machineCluster.length);
@@ -374,7 +374,7 @@ public class ServiceElement implements Serializable {
      * @param sbConfig The ServiceBeanConfig to set
      */
     public void setServiceBeanConfig(ServiceBeanConfig sbConfig) {
-        if(sbConfig==null)
+        if (sbConfig == null)
             throw new IllegalArgumentException("sbConfig is null");
         this.sbConfig = sbConfig;
     }
@@ -395,7 +395,7 @@ public class ServiceElement implements Serializable {
      * @return Name of the OperationalString
      */
     public String getOperationalStringName() {
-        if(sbConfig==null)
+        if (sbConfig == null)
             return null;
         return sbConfig.getOperationalStringName();
     }
@@ -411,12 +411,12 @@ public class ServiceElement implements Serializable {
      * @throws IllegalArgumentException if the name is null
      */
     public void setOperationalStringName(String name) {
-        if(name==null)
+        if (name == null)
             throw new IllegalArgumentException("name cannot be null");
         String oldName = getOperationalStringName();
         sbConfig.setOperationalStringName(name);
-        for(AssociationDescriptor aDesc : getAssociationDescriptors()) {
-            if(aDesc.getOperationalStringName()!=null &&
+        for (AssociationDescriptor aDesc : getAssociationDescriptors()) {
+            if (aDesc.getOperationalStringName() != null &&
                 aDesc.getOperationalStringName().equals(oldName))
                 aDesc.setOperationalStringName(name);
         }
@@ -545,7 +545,7 @@ public class ServiceElement implements Serializable {
      */
     public ClassBundle[] getExportBundles() {
         ClassBundle[] bundle;
-        if(exportBundles!=null) {
+        if (exportBundles != null) {
             bundle = new ClassBundle[exportBundles.length];
             System.arraycopy(exportBundles, 0, bundle, 0, exportBundles.length);
         } else {
@@ -565,16 +565,16 @@ public class ServiceElement implements Serializable {
      * @throws MalformedURLException If the URLs are incorrect
      */
     public URL[] getExportURLs() throws MalformedURLException {
-        ArrayList<URL> list = new ArrayList<URL>();
-        if(exportBundles!=null) {
+        ArrayList<URL> list = new ArrayList<>();
+        if (exportBundles != null) {
             for (ClassBundle exportBundle : exportBundles) {
-                if(exportBundle.getCodebase()!=null) {
+                if (exportBundle.getCodebase()!=null) {
                     URL[] urls = exportBundle.getJARs();
                     list.addAll(Arrays.asList(urls));
                 }
             }
         }
-        return list.toArray(new URL[list.size()]);
+        return list.toArray(new URL[0]);
     }
   
     /**
@@ -595,8 +595,9 @@ public class ServiceElement implements Serializable {
      * objectives that are to be monitored, metered and acted on by policy handlers
      */
     public ServiceLevelAgreements getServiceLevelAgreements() {
-        if(slAgreements==null)
-            slAgreements=new ServiceLevelAgreements();
+        if (slAgreements == null) {
+            slAgreements = new ServiceLevelAgreements();
+        }
         return slAgreements;
     }
 
@@ -607,7 +608,7 @@ public class ServiceElement implements Serializable {
      */
     public void setAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
         associations.clear();
-        if(associationDescriptors!=null) {
+        if (associationDescriptors != null) {
             Collections.addAll(associations, associationDescriptors);
         }
     }
@@ -618,7 +619,7 @@ public class ServiceElement implements Serializable {
      * @param associationDescriptors {@code AssociationDescriptor} to add
      */
     public void addAssociationDescriptors(AssociationDescriptor... associationDescriptors) {
-        if(associationDescriptors!=null) {
+        if (associationDescriptors != null) {
             Collections.addAll(associations, associationDescriptors);
         }
     }
@@ -630,7 +631,7 @@ public class ServiceElement implements Serializable {
      * AssociationDescriptor objects, this method returns a zero-length array
      */
     public AssociationDescriptor[] getAssociationDescriptors() {
-        return associations.toArray(new AssociationDescriptor[associations.size()]);
+        return associations.toArray(new AssociationDescriptor[0]);
     }
     
     /**
@@ -638,12 +639,9 @@ public class ServiceElement implements Serializable {
      * 
      * @param downloadableCapabilities The downloadableCapabilities
      */
-    public void setProvisionablePlatformCapabilities(
-        Collection<SystemComponent> downloadableCapabilities) {
-        synchronized(provisionableCapabilities) {
-            provisionableCapabilities.clear();
-            provisionableCapabilities.addAll(downloadableCapabilities);
-        }
+    public void setProvisionablePlatformCapabilities(Collection<SystemComponent> downloadableCapabilities) {
+        provisionableCapabilities.clear();
+        provisionableCapabilities.addAll(downloadableCapabilities);
     }
 
     /**
@@ -656,11 +654,7 @@ public class ServiceElement implements Serializable {
      * empty Collection.
      */
     public Collection<SystemComponent> getProvisionablePlatformCapabilities() {
-        Collection<SystemComponent> collection = new ArrayList<SystemComponent>();
-        synchronized(provisionableCapabilities) {
-            collection.addAll(provisionableCapabilities);
-        }
-        return collection;
+        return new ArrayList<>(provisionableCapabilities);
     }
 
     /**
@@ -690,8 +684,9 @@ public class ServiceElement implements Serializable {
      * nothing
      */
     public void setStagedData(StagedData... stagedData) {
-        if(stagedData !=null)
+        if (stagedData != null) {
             this.stagedData.addAll(Arrays.asList(stagedData));
+        }
     }
 
     /**
@@ -701,7 +696,7 @@ public class ServiceElement implements Serializable {
      * StagedData for the service, a zero-length array is returned.
      */
     public StagedData[] getStagedData() {
-        return stagedData.toArray(new StagedData[stagedData.size()]);
+        return stagedData.toArray(new StagedData[0]);
     }
 
     /**
@@ -724,11 +719,11 @@ public class ServiceElement implements Serializable {
     }
 
     public RemoteRepository[] getRemoteRepositories() {
-        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+        return remoteRepositories.toArray(new RemoteRepository[0]);
     }
 
     public void setRemoteRepositories(Collection<RemoteRepository> remoteRepositories) {
-        if(remoteRepositories!=null)
+        if (remoteRepositories!=null)
             this.remoteRepositories.addAll(remoteRepositories);
     }
 
@@ -745,37 +740,39 @@ public class ServiceElement implements Serializable {
      */
     public int hashCode() {
         int hc = 17;
-        hc = 37*hc+getName().hashCode();
-        hc = 37*hc+getOperationalStringName().hashCode();
+        hc = 37 * hc + getName().hashCode();
+        hc = 37 * hc + getOperationalStringName().hashCode();
         for (ClassBundle exportBundle : exportBundles)
             hc = 37 * hc + exportBundle.hashCode();
-        hc = 37*hc+(componentBundle==null?0:componentBundle.hashCode());
-        return(hc);
+        hc = 37 * hc + (componentBundle == null ? 0 : componentBundle.hashCode());
+        return hc;
     }
 
     /**
      * Override equals
      */
     public boolean equals(Object obj) {
-        if(this == obj)
+        if (this == obj)
             return true;
-        if(!(obj instanceof ServiceElement)) {
+        if (!(obj instanceof ServiceElement)) {
             return false;
         }
         ServiceElement that = (ServiceElement)obj;        
-        if(this.getName().equals(that.getName()) && 
+        if (this.getName().equals(that.getName()) && 
             this.getOperationalStringName().equals(that.getOperationalStringName())) {
             /* If they exportBundles are different lengths, then the ServiceElements 
              * are not equal */            
-            if(this.exportBundles.length!=that.exportBundles.length) {
+            if (this.exportBundles.length != that.exportBundles.length) {
                 return false;
             }
             /* The ServiceElements should have the same export jar names */
             for (ClassBundle exportBundle1 : this.exportBundles) {
                 boolean matched = false;
                 for (ClassBundle exportBundle : that.exportBundles) {
-                    if (exportBundle1.equals(exportBundle))
+                    if (exportBundle1.equals(exportBundle)) {
                         matched = true;
+                        break;
+                    }
                 }
                 if (!matched) {
                     return false;
@@ -783,11 +780,11 @@ public class ServiceElement implements Serializable {
             }
             /* If we've matched the exports and both ServiceElements dont have 
              * components bundles they are the same */
-            if(this.componentBundle==null && that.componentBundle==null)
+            if (this.componentBundle==null && that.componentBundle == null)
                 return true;
             /* If the ServiceElements do have components, make sure the component
              * jar names are equal */
-            if(this.componentBundle!=null && that.componentBundle!=null) {
+            if (this.componentBundle!=null && that.componentBundle != null) {
                 return this.componentBundle.equals(that.componentBundle);
             }
         }        

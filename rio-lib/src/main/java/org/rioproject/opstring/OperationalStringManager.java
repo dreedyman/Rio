@@ -38,8 +38,16 @@ import java.util.Map;
  */
 public interface OperationalStringManager extends Remote {
     /**
-     * Get the OperationalString the {@code OperationalStringManager} is managing
+     * Get the OperationalString name
      * 
+     * @return The OperationalString's name
+     * @throws RemoteException If communication errors occur
+     */
+    String getOperationalStringName() throws RemoteException;
+
+    /**
+     * Get the OperationalString the {@code OperationalStringManager}
+     *
      * @return The OperationalString
      * @throws RemoteException If communication errors occur
      */

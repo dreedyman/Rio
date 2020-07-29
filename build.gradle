@@ -51,6 +51,7 @@ allprojects {
                       "ch.qos.logback:logback-classic:$logbackVersion"]
 
         snapshotSuffix = "<count>.g<sha>-SNAPSHOT"
+        nextVersion = "5.12.1"
     }
     apply plugin: 'com.cinnober.gradle.semver-git'
 }

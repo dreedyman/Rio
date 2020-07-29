@@ -76,19 +76,23 @@ public class ListHandler implements OptionHandler {
         Integer listLength = (Integer) CLI.getInstance().settings.get(CLI.LIST_LENGTH);
         ServiceItem[] items = null;
         boolean genericLister = true;
-        if("all".equals(lookfor)) {
-            items = CLI.getInstance().finder.find(null, attrs);
-        } else if(lookfor.equals(CYBERNODE)) {
-            items = CLI.getInstance().finder.findCybernodes(null, attrs);
-            genericLister = false;
-            Formatter.cybernodeLister(items, br, out);
-        } else if(lookfor.equals(MONITOR)) {
-            items = CLI.getInstance().finder.findMonitors(null, attrs);
-            genericLister = false;
-            Formatter.provisionManagerLister(items, br, out);
+        switch (lookfor) {
+            case "all":
+                items = CLI.getInstance().finder.find(null, attrs);
+                break;
+            case CYBERNODE:
+                items = CLI.getInstance().finder.findCybernodes(null, attrs);
+                genericLister = false;
+                Formatter.cybernodeLister(items, br, out);
+                break;
+            case MONITOR:
+                items = CLI.getInstance().finder.findMonitors(null, attrs);
+                genericLister = false;
+                Formatter.provisionManagerLister(items, br, out);
+                break;
         }
-        if(items!=null && items.length>0) {
-            if(genericLister) {
+        if (items != null && items.length > 0) {
+            if (genericLister) {
                 String[] array = Formatter.formattedArray(items);
                 for(int i=0, lineCounter=1; i<array.length; i++,lineCounter++) {
                     if(lineCounter % listLength==0 && array.length > lineCounter) {

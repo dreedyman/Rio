@@ -33,31 +33,31 @@ public interface OperationalString {
     /**
      * Indicates the OperationalString is not deployed
      */
-    public static final int UNDEPLOYED = 0;
+    int UNDEPLOYED = 0;
     /**
      * @deprecated No longer supported
      */
     @Deprecated
-    public static final int SCHEDULED = 1;
+    int SCHEDULED = 1;
     /**
      * Indicates the OperationalString is deployed
      */
-    public static final int DEPLOYED = 2;
+    int DEPLOYED = 2;
     /**
      * Indicates the OperationalString is deployed and is broken, where all
      * required services are not available
      */
-    public static final int BROKEN = 3;
+    int BROKEN = 3;
     /**
      * Indicates the OperationalString is deployed and is compromised, where
      * some specified services are not available
      */
-    public static final int COMPROMISED = 4;
+    int COMPROMISED = 4;
     /**
      * Indicates the OperationalString is deployed and is intact, where all
      * specified services are available
      */
-    public static final int INTACT = 5;
+    int INTACT = 5;
 
     /**
      * Get the status of the OperationalString

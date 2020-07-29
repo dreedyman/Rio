@@ -59,13 +59,10 @@ public class OpStringManagerProxy {
      *
      * @return A generated proxy
      *
-     * @throws ConfigurationException If the LookupCachePool cannot be accessed
-     * or created
      * @throws IOException If DiscoveryManagement has problems
      */
     public static OperationalStringManager getProxy(String name,
-                                                    OperationalStringManager manager)
-        throws ConfigurationException, IOException {
+                                                    OperationalStringManager manager) throws IOException {
 
         if(discoMgmt==null) {
             throw new IllegalStateException("DiscoveryManagement has not been set into proxy");
@@ -84,18 +81,15 @@ public class OpStringManagerProxy {
      *
      * @return A generated proxy
      *
-     * @throws ConfigurationException If the LookupCachePool cannot be accessed
-     * or created
      * @throws IOException If DiscoveryManagement has problems
      */
     public static OperationalStringManager getProxy(String name,
                                                     OperationalStringManager manager,
-                                                    DiscoveryManagement dMgr)
-        throws ConfigurationException, IOException {
+                                                    DiscoveryManagement dMgr) throws IOException {
 
         assert name!=null;
         assert dMgr!=null;
-        if(discoMgmt==null)
+        if(discoMgmt == null)
             discoMgmt = dMgr;
         return (OperationalStringManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                                                                  new Class[]{OpStringManager.class},
@@ -112,12 +106,12 @@ public class OpStringManagerProxy {
         DiscoveryManagement dMgr;
         LookupCache lCache;
         boolean terminated = false;
-        final List<ProvisionManager> monitors = new ArrayList<ProvisionManager>();
+        final List<ProvisionManager> monitors = new ArrayList<>();
         final Logger logger = LoggerFactory.getLogger(OpStringManagerDispatcher.class);
 
         public OpStringManagerDispatcher(String name,
                                          OperationalStringManager manager,
-                                         DiscoveryManagement dMgr) throws ConfigurationException, IOException {
+                                         DiscoveryManagement dMgr) throws IOException {
             this.name = name;
             this.manager = manager;
             this.dMgr = dMgr;
@@ -222,8 +216,6 @@ public class OpStringManagerProxy {
                         synchronized(monitors) {
                             if(!monitors.isEmpty())
                                 monitors.remove(monitor);
-                            else
-                                toThrow = t;
                         }
                     }
                 }
@@ -277,7 +269,7 @@ public class OpStringManagerProxy {
         return discoMgmt;
     }
 
-    public static interface OpStringManager extends OperationalStringManager {
+    public interface OpStringManager extends OperationalStringManager {
         void terminate();
     }
 

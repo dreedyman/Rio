@@ -137,12 +137,12 @@ public class ServiceFinder {
         ServiceItem[] results = new ServiceItem[0];
         try {
             ServiceItemFilter filter = null;
-            if((machines!=null && machines.length>0) || attrs!=null && attrs.length>0)
+            if ((machines != null && machines.length > 0) || attrs != null && attrs.length > 0)
                 filter = new ServiceFilter(machines, attrs);
             if(!CLI.getInstance().commandLine) {
                 results = allServicesCache.lookup(filter, Integer.MAX_VALUE);
-                if(results.length==0)
-                    System.out.println("num lookups "+ getDiscoveryManagement().getRegistrars().length+
+                if (results.length == 0)
+                    System.out.println("num lookups "+ getDiscoveryManagement().getRegistrars().length +
                                        ", total services "+results.length);
                 else
                     System.out.println("total services "+results.length);
@@ -152,9 +152,8 @@ public class ServiceFinder {
                 results = sdm.lookup(allServices, 1, Integer.MAX_VALUE, filter, timeOut);
                 long t1 = System.currentTimeMillis();
                 System.out.println("total "+results.length);
-                System.out.println("discovery time "+(t1-t0)+" millis, "+
-                                   ((t1-t0)/1000)+" seconds, "+
-                                   "timeout used "+timeOut);
+                System.out.println("discovery time "+(t1-t0)+" millis, " + ((t1-t0)/1000) + " seconds, "
+                        + "timeout used "+timeOut);
             }
         } catch (Exception e) {
             e.printStackTrace();

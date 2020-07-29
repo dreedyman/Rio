@@ -118,8 +118,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
             }
         }
         String annotation = artifact==null?loaderAnnotation:artifact;
-        if(logger.isDebugEnabled())
+        if(logger.isDebugEnabled()) {
             logger.debug("Annotation for {} is {}", aClass.getName(), annotation);
+        }
         return annotation;
     }
 
@@ -136,9 +137,9 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     private String resolveCodebase(final String codebase) {
         String adaptedCodebase;
-        if(codebase!=null && codebase.startsWith("artifact:")) {
+        if (codebase != null && codebase.startsWith("artifact:")) {
             adaptedCodebase = artifactToCodebase.get(codebase);
-            if(adaptedCodebase==null) {
+            if (adaptedCodebase == null) {
                 try {
                     logger.debug("Resolve {} ", codebase);
                     StringBuilder builder = new StringBuilder();
@@ -146,7 +147,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     ArtifactURLConfiguration artifactURLConfiguration = new ArtifactURLConfiguration(path);
                     String[] cp = resolver.getClassPathFor(artifactURLConfiguration.getArtifact(),
                                                            artifactURLConfiguration.getRepositories());
-                    for(String s : cp) {
+                    for (String s : cp) {
                         if(builder.length()>0)
                             builder.append(" ");
                         builder.append(new File(s).toURI().toURL().toExternalForm());
@@ -186,13 +187,13 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     }
 
     private static boolean isDescendantOf(ClassLoader toCheck, ClassLoader loader) {
-        if(toCheck==null)
+        if (toCheck == null)
             return false;
-        if(toCheck.equals(loader))
+        if (toCheck.equals(loader))
             return true;
         boolean descendantOf = false;
         ClassLoader parent = toCheck.getParent();
-        while(parent!=null) {
+        while (parent != null) {
             if(parent.equals(loader)) {
                 descendantOf = true;
                 break;

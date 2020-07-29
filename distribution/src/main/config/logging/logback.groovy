@@ -110,7 +110,7 @@ if (System.getProperty("org.rioproject.service")!=null) {
 
 /* Set up loggers */
 logger("org.rioproject.cybernode.service", INFO)
-logger("org.rioproject.cybernode.loader", DEBUG)
+logger("org.rioproject.cybernode.loader", INFO)
 logger("org.rioproject.config", INFO)
 logger("org.rioproject.resources.servicecore", INFO)
 logger("org.rioproject.system", DEBUG)
@@ -126,6 +126,7 @@ logger("org.rioproject.impl.servicebean", INFO)
 logger("org.rioproject.tools.webster", OFF)
 
 logger("org.rioproject.monitor.service", INFO)
+
 logger("org.rioproject.resolver.aether", OFF)
 logger("org.rioproject.resolver.aether.ProjectWorkspaceReader", WARN)
 
