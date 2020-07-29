@@ -43,7 +43,7 @@ public interface OperationalStringManager extends Remote {
      * @return The OperationalString's name
      * @throws RemoteException If communication errors occur
      */
-    String getOperationalStringName() throws RemoteException;
+    String getName() throws RemoteException;
 
     /**
      * Get the OperationalString the {@code OperationalStringManager}

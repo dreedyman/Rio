@@ -562,7 +562,7 @@ public class MonitorControl {
                 for (OperationalStringManager opMgr : opMgrs) {
                     try {
                         if (opMgr.isManaging()) {
-                            map.put(opMgr.getOperationalStringName(), deployAdmin);
+                            map.put(opMgr.getName(), deployAdmin);
                         }
                     } catch (Throwable t) {
                         System.out.println(t.getClass().getName() +": " + t.getMessage());

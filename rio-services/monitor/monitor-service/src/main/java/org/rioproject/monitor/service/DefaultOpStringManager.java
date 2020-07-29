@@ -201,10 +201,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
     }
 
-    public String getOperationalStringName() {
-        return opString.getName();
-    }
-
     public OperationalStringManager getOperationalStringManager() {
         return proxy;
     }
@@ -751,7 +747,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
      * @return The name of this Operational String
      */
     public String getName() {
-        return (opString.getName());
+        return opString.getName();
     }
 
     /*
