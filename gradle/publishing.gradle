@@ -76,7 +76,7 @@ if (project.hasProperty('bintray.user')) {
         publications = project.name == "distribution" ? ['distribution'] : ['mavenJava']
 
         pkg {
-            repo = 'Rio'
+            repo = 'maven'
             name = project.archivesBaseName
             licenses = ['Apache-2.0']
             publish = true
