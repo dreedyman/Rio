@@ -63,11 +63,11 @@ if (System.console() != null) {
             withJansi = true
 
             encoder(PatternLayoutEncoder) {
-                pattern = "%highlight(%-5level) %d{HH:mm:ss.SSS} %magenta([%thread]) %cyan(%logger{36}) - %msg%n%rEx"
+                pattern = "%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} %highlight(%-5level) %magenta([%thread]) %cyan(%-36.36logger{36}) : %msg%n%rEx"
             }
         } else {
             encoder(PatternLayoutEncoder) {
-                pattern = "%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n%rEx"
+                pattern = "%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} %-5level [%thread] %-36.36logger{36} : %msg%n%rEx"
             }
         }
     }
@@ -97,7 +97,7 @@ if (System.getProperty("org.rioproject.service")!=null) {
 
         }
         encoder(PatternLayoutEncoder) {
-            pattern = "%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n%rEx"
+            pattern = "%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} %-5level [%thread] %-36.36logger{36} : %msg%n%rEx"
         }
     }
 
