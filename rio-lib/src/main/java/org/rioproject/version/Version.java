@@ -32,7 +32,7 @@ public class Version {
     }
 
     public String getVersion() {
-        if(minorVersionSupport() || majorVersionSupport()) {
+        if (minorVersionSupport() || majorVersionSupport()) {
             return version.substring(0, version.length()-1).trim();
         }
         return version.trim();
@@ -44,7 +44,7 @@ public class Version {
     }
 
     public String getEndRange() {
-        if(!isRange())
+        if (!isRange())
             return getVersion();
         String[] parts = version.split(",", 2);
         return parts[1].trim();
@@ -60,10 +60,12 @@ public class Version {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
         Version version1 = (Version) o;
         return version.equals(version1.version);
 
