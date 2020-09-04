@@ -205,7 +205,7 @@ if [ "$start" = "1" ]; then
 
     """$JAVACMD""" -server $JAVA_MEM_OPTIONS $JAVA_RMI_OPTIONS $JAVA_GC_OPTIONS \
         -XX:+HeapDumpOnOutOfMemoryError \
-        -XX:OnOutOfMemoryError="`toNative $RIO_HOME/bin/rio` restart %p $service" \
+        -XX:OnOutOfMemoryError="$(toNative $RIO_HOME/bin/rio) restart %p $service" \
         -XX:HeapDumpPath="$(toNative $RIO_HOME/logs)" \
         $classpath $libpath $RIO_OPTS \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
@@ -217,6 +217,7 @@ if [ "$start" = "1" ]; then
         -Dsun.rmi.transport.dgcFilter=$serialFilter \
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
+        -Dorg.rioproject.keyStore="$(toNative $RIO_HOME/config/security/rio-cert.ks)" \
         -Drio.home="$(toNative $RIO_HOME)" \
         -Drio.log.dir="$(toNative $RIO_HOME/logs/)" \
         -Drio.script.mainClass="$launchTarget" \
@@ -238,13 +239,14 @@ else
     # Set system properties
     PROPS="-Drio.home=$RIO_HOME"
     #cliExt="$RIO_HOME/config/rio-cli.groovy"
-    cliExt="`toNative $RIO_HOME/config/tools.groovy`"
+    cliExt="$(toNative $RIO_HOME/config/tools.groovy)"
     launchTarget=org.rioproject.tools.cli.CLI
-    classpath="-cp `toNative $RIO_LIB/rio-cli-$rioVersion.jar:$SLF4J_CLASSPATH`"
+    classpath="-cp $(toNative $RIO_LIB/rio-cli-$rioVersion.jar:$SLF4J_CLASSPATH)"
     "$JAVACMD" $classpath $JAVA_MEM_OPTIONS  $RIO_OPTS \
         -Djava.security.policy=$RIO_HOME/policy/policy.all \
         -Djava.protocol.handler.pkgs=org.rioproject.url \
         -Djava.rmi.server.useCodebaseOnly=false \
+        -Dorg.rioproject.keyStore="$(toNative $RIO_HOME/config/security/rio-cert.ks)" \
         $loggingConfig \
         $PROPS \
         $NETWORK \

@@ -33,31 +33,15 @@ import static org.junit.Assert.*;
  */
 public class WebsterUTest {
     @Test
-    public void createWebsterWithConfig() {
-        Throwable t = null;
-        Webster w = null;
-        try {
-            w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
-        } catch (BindException e) {
-            t = e;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        assertNull(t);
+    public void createWebsterWithConfig() throws Exception {
+        Webster w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
         assertNotNull(w);
         w.terminate();
     }
 
     @Test
-    public void createWebsterWithPortAndRoots() {
-        Throwable t = null;
-        Webster w = null;
-        try {
-            w = new Webster(9000, System.getProperty("user.dir"));
-        } catch (BindException e) {
-            t = e;
-        }
-        assertNull(t);
+    public void createWebsterWithPortAndRoots() throws Exception {
+        Webster w = new Webster(9000, System.getProperty("user.dir"));
         assertNotNull(w);
         assertEquals(9000, w.getPort());
         assertEquals(System.getProperty("user.dir"), w.getRoots());
@@ -65,15 +49,8 @@ public class WebsterUTest {
     }
 
     @Test
-    public void createWebsterWithPortAndRootsAndInetAddress() {
-        Throwable t = null;
-        Webster w = null;
-        try {
-            w = new Webster(9000, System.getProperty("user.dir"), InetAddress.getLocalHost().getHostAddress());
-        } catch (Exception e) {
-            t = e;
-        }
-        assertNull(t);
+    public void createWebsterWithPortAndRootsAndInetAddress() throws Exception {
+        Webster w = new Webster(9000, System.getProperty("user.dir"), InetAddress.getLocalHost().getHostAddress());
         assertNotNull(w);
         assertEquals(9000, w.getPort());
         assertEquals(System.getProperty("user.dir"), w.getRoots());
@@ -81,39 +58,25 @@ public class WebsterUTest {
     }
 
     @Test
-    public void createWebsterWithOptionsAsArray() {
+    public void createWebsterWithOptionsAsArray() throws Exception {
         int port = 40000;
         String root = System.getProperty("user.dir");
-        Throwable t = null;
-        Webster w = null;
-        try {
-            String[] options = new String[]{"-port", Integer.toString(port),
-                                            "-roots", root,
-                                            "-bindAddress", InetAddress.getLocalHost().getHostAddress()};
-            w = new Webster(options, null);
-        } catch (Exception e) {
-            t = e;
-        }
-        assertNull(t);
+        String[] options = new String[]{"-port", Integer.toString(port),
+                "-roots", root,
+                "-bindAddress", InetAddress.getLocalHost().getHostAddress()};
+        Webster w = new Webster(options, null);
         assertNotNull(w);
         assertEquals(port, w.getPort());
         assertEquals(System.getProperty("user.dir"), w.getRoots());
     }
 
     @Test
-    public void createWebsterWithPortRangeUsingOptions() {
-        Throwable t = null;
-        Webster w = null;
+    public void createWebsterWithPortRangeUsingOptions() throws Exception {
         String root = System.getProperty("user.dir");
-        try {
-            String[] options = new String[]{"-portRange", "10000-10005",
-                                            "-roots", root,
-                                            "-bindAddress", InetAddress.getLocalHost().getHostAddress()};
-            w = new Webster(options, null);
-        } catch (Exception e) {
-            t = e;
-        }
-        assertNull(t);
+        String[] options = new String[]{"-portRange", "10000-10005",
+                "-roots", root,
+                "-bindAddress", InetAddress.getLocalHost().getHostAddress()};
+        Webster w = new Webster(options, null);
         assertNotNull(w);
         int port = w.getPort();
         assertTrue("Port " + port + " should be >= 10000", port >= 10000);
@@ -121,16 +84,10 @@ public class WebsterUTest {
     }
 
     @Test
-    public void createWebsterWithPortRangeServerSocketFactory() {
+    public void createWebsterWithPortRangeServerSocketFactory() throws Exception {
         Throwable t = null;
-        Webster w = null;
         String root = System.getProperty("user.dir");
-        try {
-            w = new Webster(new PortRangeServerSocketFactory(10000, 10005), root, null);
-        } catch (Exception e) {
-            t = e;
-        }
-        assertNull(t);
+        Webster w = new Webster(new PortRangeServerSocketFactory(10000, 10005), root, null);
         assertNotNull(w);
         int port = w.getPort();
         assertTrue("Port " + port + " should be >= 10000", port >= 10000);
@@ -138,25 +95,17 @@ public class WebsterUTest {
     }
 
     @Test
-    public void verifyGetFromWebster() {
-        Throwable t = null;
-        Webster w = null;
-        try {
-            w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
-        } catch (BindException | MalformedURLException e) {
-            t = e;
-        }
-        assertNull(t);
+    public void verifyGetURI() throws Exception {
+        Webster webster = new Webster(9010, System.getProperty("user.dir"));
+        URI uri = webster.getURI();
+        assertNotNull(uri);
+    }
+
+    @Test
+    public void verifyGetFromWebster() throws Exception {
+        Webster w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
         assertNotNull(w);
-        t = null;
-        List<String> items = null;
-        try {
-            items = get(w.getPort());
-        } catch (Exception e) {
-            t = e;
-            e.printStackTrace();
-        }
-        assertNull(t);
+        List<String> items = get(w.getPort());
         assertNotNull(items);
         File cwd = new File(System.getProperty("user.dir"));
         assertTrue(items.size() == cwd.list().length);

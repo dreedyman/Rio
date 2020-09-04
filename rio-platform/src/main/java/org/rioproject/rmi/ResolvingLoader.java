@@ -67,13 +67,13 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     public Class<?> loadClass(final String codebase,
                               final String name,
                               final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             logger.trace("Load class {}, with codebase {}, defaultLoader {}",
                          name, codebase, defaultLoader==null?"NULL":defaultLoader.getClass().getName());
         }
         String resolvedCodebase = resolveCodebase(codebase);
         Class<?> cl = loader.loadClass(resolvedCodebase, name, defaultLoader);
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             logger.trace("Class {} loaded by {}", name, cl.getClassLoader());
         }
         return cl;
@@ -83,13 +83,14 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     public Class<?> loadProxyClass(final String codebase,
                                    final String[] interfaces,
                                    final ClassLoader defaultLoader) throws MalformedURLException, ClassNotFoundException {
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             logger.trace("Load proxy classes {}, with codebase {}, defaultLoader {}",
-                         Arrays.toString(interfaces), codebase, defaultLoader==null?"NULL":defaultLoader.getClass().getName());
+                         Arrays.toString(interfaces), codebase, defaultLoader==null
+                                 ? "NULL" : defaultLoader.getClass().getName());
         }
         String resolvedCodebase = resolveCodebase(codebase);
         Class<?> proxyClass = loader.loadProxyClass(resolvedCodebase, interfaces, defaultLoader);
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             logger.trace("Proxy classes {} loaded by {}", Arrays.toString(interfaces), proxyClass.getClassLoader());
         }
         return proxyClass;
@@ -99,7 +100,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     public ClassLoader getClassLoader(String codebase) throws MalformedURLException {
         String resolvedCodebase = resolveCodebase(codebase);
         ClassLoader classLoader = loader.getClassLoader(resolvedCodebase);
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             logger.trace("ClassLoader for codebase {}, resolved as {} is {}", codebase, resolvedCodebase, classLoader);
         }
         return classLoader;
@@ -109,16 +110,16 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     public String getClassAnnotation(final Class<?> aClass) {
         String loaderAnnotation = loader.getClassAnnotation(aClass);
         String artifact = null;
-        if(loaderAnnotation!=null) {
-            for(Map.Entry<String, String> entry : artifactToCodebase.entrySet()) {
-                if(entry.getValue().equals(loaderAnnotation)) {
+        if (loaderAnnotation!=null) {
+            for (Map.Entry<String, String> entry : artifactToCodebase.entrySet()) {
+                if (entry.getValue().equals(loaderAnnotation)) {
                     artifact = entry.getKey();
                     break;
                 }
             }
         }
-        String annotation = artifact==null?loaderAnnotation:artifact;
-        if(logger.isDebugEnabled()) {
+        String annotation = artifact == null ? loaderAnnotation : artifact;
+        if (logger.isDebugEnabled()) {
             logger.debug("Annotation for {} is {}", aClass.getName(), annotation);
         }
         return annotation;
@@ -126,11 +127,12 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
 
     public static void release(final ClassLoader serviceLoader) {
         try {
-            Field loaderTable = sun.rmi.server.LoaderHandler.class.getDeclaredField("loaderTable");
+            Class<?> loaderHandler = ResolvingLoader.class.getClassLoader().loadClass("sun.rmi.server.LoaderHandler");
+            Field loaderTable = loaderHandler.getDeclaredField("loaderTable");
             loaderTable.setAccessible(true);
             HashMap<?,?> loaderTableMap = (HashMap<?,?>)loaderTable.get(null);
             findAndRemove(serviceLoader, loaderTableMap);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (Exception e) {
             logger.warn("Failure accessing the loaderTable field", e);
         }
     }
@@ -148,7 +150,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     String[] cp = resolver.getClassPathFor(artifactURLConfiguration.getArtifact(),
                                                            artifactURLConfiguration.getRepositories());
                     for (String s : cp) {
-                        if(builder.length()>0)
+                        if (builder.length()>0)
                             builder.append(" ");
                         builder.append(new File(s).toURI().toURL().toExternalForm());
                     }
@@ -170,7 +172,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     }
 
     private synchronized static void findAndRemove(ClassLoader loader, Map<?,?> loaderTable) {
-        for(Object o : loaderTable.entrySet()) {
+        for (Object o : loaderTable.entrySet()) {
             Map.Entry<?,?> entry = (Map.Entry<?,?>) o;
             Object key = entry.getKey();
             try {
@@ -187,14 +189,16 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
     }
 
     private static boolean isDescendantOf(ClassLoader toCheck, ClassLoader loader) {
-        if (toCheck == null)
+        if (toCheck == null) {
             return false;
-        if (toCheck.equals(loader))
+        }
+        if (toCheck.equals(loader)) {
             return true;
+        }
         boolean descendantOf = false;
         ClassLoader parent = toCheck.getParent();
         while (parent != null) {
-            if(parent.equals(loader)) {
+            if (parent.equals(loader)) {
                 descendantOf = true;
                 break;
             }

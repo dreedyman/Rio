@@ -17,7 +17,6 @@ package org.rioproject.test.config;
 
 import org.junit.Assert;
 import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
 import net.jini.config.EmptyConfiguration;
 import net.jini.id.UuidFactory;
 import org.junit.Test;
@@ -32,7 +31,6 @@ import org.rioproject.impl.system.ComputeResource;
 import org.rioproject.tools.webster.Webster;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -45,7 +43,7 @@ import java.util.List;
 public class LoadConfigurationAsHttpResourceTest {
 
     @Test
-    public void testLoadingConfigurationAsHttpResource() throws IOException, ConfigurationException {
+    public void testLoadingConfigurationAsHttpResource() throws Exception {
         Webster webster = new Webster(0, System.getProperty("user.dir")+"/src/int-test/resources");
         System.setProperty("TEST_PORT", Integer.toString(webster.getPort()));
         OpStringParser opStringParser = new GroovyDSLOpStringParser();

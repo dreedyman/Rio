@@ -133,10 +133,9 @@ logger("org.rioproject.resolver.aether.ProjectWorkspaceReader", WARN)
 logger("org.rioproject.rmi.ResolvingLoader", OFF)
 logger("org.rioproject.config.GroovyConfig", INFO)
 
-logger("net.jini", TRACE)
-logger("com.sun.jini", TRACE)
-logger("net.jini.lookup.JoinManager", OFF)
 logger("org.rioproject.resolver.aether.util.ConsoleRepositoryListener", WARN)
+
+logger("org.eclipse", INFO)
 
 root(INFO, appenders)
 

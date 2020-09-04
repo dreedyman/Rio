@@ -32,7 +32,7 @@ import java.security.CodeSource;
  */
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class InternalWebster {
-    private static Logger logger = LoggerFactory.getLogger("org.rioproject.tools.webster");
+    private static final Logger logger = LoggerFactory.getLogger("org.rioproject.tools.webster");
 
     /**
      * Start an internal webster, setting the webster root to the location
@@ -47,9 +47,9 @@ public class InternalWebster {
      *
      * @return The port Webster has been started on
      *
-     * @throws IOException If there are errors creating Webster
+     * @throws Exception If there are errors creating Webster
      */
-    public static int startWebster(final String exportJar) throws IOException {
+    public static int startWebster(final String exportJar) throws Exception {
         String parentPath;
         InetAddress ip = InetAddress.getLocalHost();
         String localIPAddress = ip.getHostAddress();
@@ -91,7 +91,7 @@ public class InternalWebster {
 
     public static void main(String[] args) {
         try {            
-            startWebster("rio-api.jar");
+            startWebster("rio-lib.jar");
         } catch(Exception ex) {
             ex.printStackTrace();
         }

@@ -429,7 +429,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
      * @return The Object used to communicate to this service
      */
     protected Remote getExportedProxy() {
-        return (serviceBeanRemoteRef);
+        return serviceBeanRemoteRef;
     }
 
     /**
@@ -448,7 +448,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
     protected Object createProxy() {
         Remote remoteRef = getExportedProxy();
         Object customProxy = BeanAdapter.getCustomProxy(this, remoteRef);
-        return customProxy==null?remoteRef:customProxy;
+        return customProxy == null ? remoteRef : customProxy;
     }
 
     /**
@@ -465,7 +465,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
         if (this.proxy == null) {
             this.proxy = createProxy();
         }
-        return (proxy);
+        return proxy;
     }
 
     /**

@@ -18,15 +18,20 @@
  * This configuration is used to start a service that will exec a single service bean
  */
 
-import org.rioproject.start.RioServiceDescriptor
-import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
+import org.rioproject.config.Component
+import org.rioproject.security.SecureEnv
+import org.rioproject.start.RioServiceDescriptor
 import org.rioproject.util.FileHelper
 import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil
 
 @Component('org.rioproject.start')
 class StartServiceBeanExecConfig {
+
+    StartServiceBeanExecConfig() {
+        SecureEnv.setup()
+    }
 
     String[] getConfigArgs(String rioHome) {
         ServiceDescriptorUtil.checkForLoopback()

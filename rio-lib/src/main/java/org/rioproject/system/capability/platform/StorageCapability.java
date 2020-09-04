@@ -56,7 +56,7 @@ public class StorageCapability extends ByteOrientedDevice implements WatchDataRe
      * @return Return true is the available amount of disk space is less then
      * the request amount
      */
-    public boolean supports(int requestedSize) {
+    public boolean supports(long requestedSize) {
         double available = 0;
         Double dAvail = (Double)getValue(AVAILABLE);
         if(dAvail!=null)

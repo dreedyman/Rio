@@ -169,9 +169,6 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
 
         this.active.set(mode);
-        if (logger.isTraceEnabled()) {
-            logger.trace("Determine");
-        }
         if (parent != null) {
             addParent(parent);
             parent.addNested(this);
@@ -179,7 +176,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         } else {
             standAlone = opString.getNestedOperationalStrings().length == 0;
         }
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("Manager for {} standAlone: {}",
                          opString.getName(),
                          standAlone);
@@ -402,7 +399,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         ServiceElementManager[] mgrs = getServiceElementManagers();
         IdleServiceListener idleServiceListener = null;
         UndeployOption undeployOption = opString.getUndeployOption();
-        if(undeployOption!=null && undeployOption.getType().equals(UndeployOption.Type.WHEN_IDLE)) {
+        if (undeployOption!=null && undeployOption.getType().equals(UndeployOption.Type.WHEN_IDLE)) {
             idleServiceListener = new IdleServiceListener(this);
         }
         for (ServiceElementManager mgr : mgrs) {
@@ -410,14 +407,14 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             ServiceBeanInstance[] instances = knownInstanceMap.get(elem);
             try {
                 int alreadyRunning = mgr.startManager(listener, instances);
-                if(logger.isTraceEnabled()) {
+                if (logger.isTraceEnabled()) {
                     logger.trace("{} ServiceElementManager has {} instances already running {}",
                                 opString.getName(), elem.getName(), alreadyRunning);
                 }
                 if (alreadyRunning > 0) {
                     updateServiceElements(new ServiceElement[]{mgr.getServiceElement()});
                 }
-                if(idleServiceListener !=null) {
+                if (idleServiceListener != null) {
                     logger.info("Deployment {} has an IDLE undeploy option; when: {}, timeUnit: {}",
                                 opString.getName(), undeployOption.getWhen(), undeployOption.getTimeUnit());
                     mgr.setIdleTime(undeployOption.getTimeUnit().toMillis(undeployOption.getWhen()));
@@ -427,7 +424,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 logger.warn("Starting ServiceElementManager", e);
             }
         }
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             logger.trace("Started managers for {}", opString.getName());
         }
     }
@@ -444,12 +441,12 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
             boolean undeploy = true;
             tracking.put(event.getServiceElement(), true);
             for(ServiceElementManager manager : getServiceElementManagers()) {
-                if(manager.isTrackingIdleBehavior() && !tracking.containsKey(event.getServiceElement())) {
+                if (manager.isTrackingIdleBehavior() && !tracking.containsKey(event.getServiceElement())) {
                     undeploy = false;
                     break;
                 }
             }
-            if(undeploy) {
+            if (undeploy) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Terminating [{}] due to idle services", getName());
                 }
@@ -607,7 +604,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
     }
 
     private void stateChanged(final boolean remove) {
-        if(stateManager != null) {
+        if (stateManager != null) {
             stateManager.stateChanged(this, remove);
         }
     }
@@ -701,8 +698,8 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
                 logger.debug("OperationalStringManager not unexported");
         }
         /* Remove ourselves from the collection */
-        if(opStringMangerController.remove(this)) {
-            if(logger.isDebugEnabled()) {
+        if (opStringMangerController.remove(this)) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Removed [{}]", getName());
             }
         } else {
@@ -710,7 +707,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         }
 
         /* Stop all ServiceElementManager instances */
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("Stop all ServiceElementManager instances for [{}]", getName());
         }
         for (ServiceElementManager mgr : svcElemMgrs) {
@@ -789,7 +786,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (sElem.getExportBundles().length > 0) {
 
             /*File pomFile = null;
-            if(oar!=null) {
+            if (oar!=null) {
                 File dir = new File(oar.getDeployDir());
                 pomFile = OARUtil.find("pom.xml", dir);
             }*/
@@ -1045,7 +1042,7 @@ public class DefaultOpStringManager implements OperationalStringManager, OpStrin
         if (svcElemMgr == null)
             throw new OperationalStringException("Unmanaged ServiceBeanInstance [" + instance.toString() + "]", false);
         ServiceElement sElem = svcElemMgr.decrement(instance, recommended, destroy);
-        if(sElem==null)
+        if (sElem==null)
             return;
         stateChanged(false);
         updateServiceElements(new ServiceElement[]{sElem});

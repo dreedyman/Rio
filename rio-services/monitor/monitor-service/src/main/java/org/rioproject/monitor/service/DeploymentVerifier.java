@@ -44,7 +44,7 @@ import java.util.*;
  */
 public class DeploymentVerifier {
     private static final Logger logger = LoggerFactory.getLogger(DeploymentVerifier.class.getName());
-    private final List<RemoteRepository> additionalRepositories = new ArrayList<RemoteRepository>();
+    private final List<RemoteRepository> additionalRepositories = new ArrayList<>();
     private final DiscoveryManagement discoveryManagement;
 
     public DeploymentVerifier(final Configuration config, final DiscoveryManagement discoveryManagement) {
@@ -53,7 +53,7 @@ public class DeploymentVerifier {
                                                                                          "remoteRepositories",
                                                                                          RemoteRepository[].class,
                                                                                          new RemoteRepository[0]);
-            if(remoteRepositories.length>0) {
+            if (remoteRepositories.length>0) {
                 Collections.addAll(additionalRepositories, remoteRepositories);
                 logger.debug("Configured {} additional repositories", additionalRepositories);
             }
@@ -86,7 +86,7 @@ public class DeploymentVerifier {
                                                final RemoteRepository[] repositories)
         throws IOException, ResolverException {
         /* Check the component bundle for deployment as an artifact, easier check this way */
-        if(service.getComponentBundle().getArtifact()!=null) {
+        if (service.getComponentBundle().getArtifact()!=null) {
             resolveOperationalStringService(service, resolver, repositories);
         } else {
             OpStringUtil.checkCodebase(service, System.getProperty(Constants.WEBSTER));
@@ -102,7 +102,7 @@ public class DeploymentVerifier {
         StringBuilder sb1 = new StringBuilder();
         boolean didResolve = false;
         for (ClassBundle export : service.getExportBundles()) {
-            if(export.getArtifact()!=null) {
+            if (export.getArtifact()!=null) {
                 sb.append(" (").append(export.getArtifact()).append("): ");
                 resolve(export, resolver, repositories);
                 didResolve = true;
@@ -112,8 +112,8 @@ public class DeploymentVerifier {
                 sb1.append(export.getCodebase()).append(jar);
             }
         }
-        if(didResolve) {
-            List<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+        if (didResolve) {
+            List<RemoteRepository> remoteRepositories = new ArrayList<>();
             remoteRepositories.addAll(additionalRepositories);
             remoteRepositories.addAll(resolver.getRemoteRepositories());
             service.setRemoteRepositories(remoteRepositories);
@@ -128,54 +128,52 @@ public class DeploymentVerifier {
         logger.trace("Artifact: {}, resolver: {}", bundle.getArtifact(), resolver.getClass().getName());
         String artifact = bundle.getArtifact();
         if (artifact != null) {
-            List<String> jars = new ArrayList<String>();
+            List<String> jars = new ArrayList<>();
             String[] artifactParts = artifact.split(" ");
             for(String artifactPart : artifactParts) {
                 String[] classPath = resolver.getClassPathFor(artifactPart, repositories);
                 for (String jar : classPath) {
                     jar = ResolverHelper.handleWindows(jar);
-                    if(!jars.contains(jar))
+                    if (!jars.contains(jar))
                         jars.add(jar);
                 }
             }
             bundle.setCodebase("file://");
-            bundle.setJARs(jars.toArray(new String[jars.size()]));
+            bundle.setJARs(jars.toArray(new String[0]));
         }
     }
 
     RemoteRepository[] mergeRepositories(final RemoteRepository[] r1, final RemoteRepository[] r2) {
-        Set<RemoteRepository> remoteRepositories = new HashSet<RemoteRepository>();
+        Set<RemoteRepository> remoteRepositories = new HashSet<>();
         Collections.addAll(remoteRepositories, r1);
-        for(RemoteRepository r : r2) {
-            remoteRepositories.add(r);
-        }
-        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+        Collections.addAll(remoteRepositories, r2);
+        return remoteRepositories.toArray(new RemoteRepository[0]);
     }
 
     void ensureGroups(final ServiceElement serviceElement) throws IOException {
-        if(serviceElement.getServiceBeanConfig().getGroups()==DiscoveryGroupManagement.ALL_GROUPS) {
+        if (serviceElement.getServiceBeanConfig().getGroups()==DiscoveryGroupManagement.ALL_GROUPS) {
             throw new IOException(String.format("Service %s has been declared for ALL_GROUPS", serviceElement.getName()));
         }
         for(ServiceRegistrar registrar : discoveryManagement.getRegistrars()) {
             try {
-                List<String> toAdd = new ArrayList<String>();
+                List<String> toAdd = new ArrayList<>();
                 DiscoveryAdmin admin = (DiscoveryAdmin) ((Administrable)registrar).getAdmin();
                 String[] knownGroups = admin.getMemberGroups();
                 for(String serviceGroup : serviceElement.getServiceBeanConfig().getGroups()) {
                     boolean found = false;
                     for(String known : knownGroups) {
-                        if(serviceGroup.equals(known)) {
+                        if (serviceGroup.equals(known)) {
                             found = true;
                             break;
                         }
                     }
-                    if(!found) {
+                    if (!found) {
                         toAdd.add(serviceGroup);
                     }
                 }
-                if(!toAdd.isEmpty()) {
-                    admin.addMemberGroups(toAdd.toArray(new String[toAdd.size()]));
-                    if(logger.isDebugEnabled()) {
+                if (!toAdd.isEmpty()) {
+                    admin.addMemberGroups(toAdd.toArray(new String[0]));
+                    if (logger.isDebugEnabled()) {
                         logger.debug("Added {} to ServiceRegistrar at {}:{}",
                                      toAdd, registrar.getLocator().getHost(), registrar.getLocator().getPort());
                     }

@@ -69,6 +69,7 @@ public class CybernodeAdminProxy extends ServiceAdminProxy implements CybernodeA
         super(serviceAdmin, uuid);
         cybernodeAdminProxy = serviceAdmin;
     }
+
     /**
      * A subclass of CybernodeAdminProxy that implements RemoteMethodControl.
      */
@@ -234,7 +235,7 @@ public class CybernodeAdminProxy extends ServiceAdminProxy implements CybernodeA
         /**
          * Implement TrustVerifier
          */
-        public boolean isTrustedObject(final Object obj, final TrustVerifier.Context ctx) throws RemoteException {
+        public boolean isTrustedObject(final Object obj, final TrustVerifier.Context ctx) {
             if (obj == null || ctx == null) {
                 throw new IllegalArgumentException();
             } else if (!(obj instanceof ConstrainableCybernodeAdminProxy)) {

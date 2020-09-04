@@ -47,14 +47,14 @@ public class PlatformCapabilityLoader {
             return(new URL[0]);
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         CommonClassLoader cCL = CommonClassLoader.getInstance();
-        URL[] loadedURLs = null;
+        URL[] loadedURLs;
         try {
             Thread.currentThread().setContextClassLoader(cCL);
             loadedURLs = cCL.getURLs();
         } finally {
             Thread.currentThread().setContextClassLoader(currentCL);
         }
-        List<URL> loadables = new ArrayList<URL>();
+        List<URL> loadables = new ArrayList<>();
         URL[] urls = PlatformCapabilityConfig.toURLs(classPath);
         for (URL url : urls) {
             boolean loaded = false;
@@ -67,6 +67,6 @@ public class PlatformCapabilityLoader {
             if (!loaded)
                 loadables.add(url);
         }
-        return(loadables.toArray(new URL[loadables.size()]));
+        return loadables.toArray(new URL[0]);
     }
 }

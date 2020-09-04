@@ -125,9 +125,9 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                        final Object eventSource,
                        final EventHandler failureHandler,
                        final GaugeWatch watch) throws Exception {
-        if(config==null)
+        if (config==null)
             throw new IllegalArgumentException("config is null");
-        if(failureHandler==null)
+        if (failureHandler==null)
             throw new IllegalArgumentException("failureHandler is null");
         /* 5 minute default Lease time */
         long DEFAULT_LEASE_TIME = TimeConstants.FIVE_MINUTES;
@@ -258,7 +258,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             throw new LeaseDeniedException("Could not load ServiceBeanInstantiator, "+e.getLocalizedMessage());
         }
 
-        if(instantiator instanceof RemoteMethodControl)
+        if (instantiator instanceof RemoteMethodControl)
             instantiator = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(instantiator);
         String name;
         try {
@@ -277,7 +277,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                                                                  serviceLimit);
         for (LeasedResource lr : landlord.getLeasedResources()) {
             InstantiatorResource ir = (InstantiatorResource)((ServiceResource)lr).getResource();
-            if(ir.equals(resource)) {
+            if (ir.equals(resource)) {
                 throw new LeaseDeniedException("Already registered");
             }
         }
@@ -326,12 +326,12 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                         final List<DeployedService> deployedServices,
                         final int serviceLimit) throws UnknownLeaseException, RemoteException {
         ServiceBeanInstantiator preparedResource = resource;
-        if(resource instanceof RemoteMethodControl)
+        if (resource instanceof RemoteMethodControl)
             preparedResource = (ServiceBeanInstantiator)instantiatorPreparer.prepareProxy(resource);
-        if(logger.isTraceEnabled())
+        if (logger.isTraceEnabled())
             logger.trace("Calling {}", selector.getClass().getName());
         ServiceResource[] svcResources = selector.getServiceResources();
-        if(svcResources.length == 0) {
+        if (svcResources.length == 0) {
             logger.warn("{} is updating resource information, but we don't have any registered Cybernodes. " +
                         "Force removal of all Leases", resource.getName());
             landlord.removeAll();
@@ -339,16 +339,16 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
         }
         boolean updated = false;
         ServiceResource couldNotEnsureLease = null;
-        for(ServiceResource svcResource : svcResources) {
+        for (ServiceResource svcResource : svcResources) {
             InstantiatorResource ir = (InstantiatorResource) svcResource.getResource();
             logger.trace("Checking for InstantiatorResource match");
-            if(ir.getInstantiator().equals(preparedResource)) {
+            if (ir.getInstantiator().equals(preparedResource)) {
                 logger.trace("Update from {}, current serviceCount {}, serviceLimit {}",
                              ir.getName(),
                              deployedServices.size(),
                              serviceLimit);
                 logger.trace("Matched InstantiatorResource");
-                if(!landlord.ensure(svcResource)) {
+                if (!landlord.ensure(svcResource)) {
                     couldNotEnsureLease = svcResource;
                     break;
                 }
@@ -374,12 +374,12 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
             }
         }
 
-        if(couldNotEnsureLease!=null) {
+        if (couldNotEnsureLease!=null) {
             selector.dropServiceResource(couldNotEnsureLease);
             throw new UnknownLeaseException("Could not ensure lease. Lease expiration: "+couldNotEnsureLease.getExpiration()+", " +
                                             "current time: "+System.currentTimeMillis());
         }
-        if(!updated) {
+        if (!updated) {
             logger.warn("Update failed, no matching registration found for {}", resource.getName());
             throw new UnknownLeaseException("Update failed, no matching registration found");
         }
@@ -408,12 +408,12 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
      * @param index Index of the ServiceElement in the pending collection
      */
     public void dispatch(final ProvisionRequest request, final ServiceResource resource, final long index) {
-        if(terminating || terminated) {
+        if (terminating || terminated) {
             logger.info("Request to dispatch {} ignored, utility has terminated", LoggingUtil.getLoggingName(request));
             return;
         }
         try {
-            if(resource != null) {
+            if (resource != null) {
                 inProcess.add(request.getServiceElement());
                 provisioningPool.execute(new ProvisionTask(getServiceProvisionContext(request, resource),
                                                            pendingMgr,
@@ -423,7 +423,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
 
                 /* If we have a ServiceProvisionListener, notify the
                  * listener */
-                if(request.getServiceProvisionListener()!=null) {
+                if (request.getServiceProvisionListener()!=null) {
                     try {
                         request.getServiceProvisionListener().failed(request.getServiceElement(), true);
                     } catch(NoSuchObjectException e) {
@@ -436,7 +436,7 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                     }
                 }
                 /* If this is not the result of a relocation request, add to the pending testManager */
-                if(!request.getType().equals(ProvisionRequest.Type.RELOCATE)) {
+                if (!request.getType().equals(ProvisionRequest.Type.RELOCATE)) {
                     pendingMgr.addProvisionRequest(request, index);
                     logger.debug("Wrote [{}] to {}", LoggingUtil.getLoggingName(request), pendingMgr.getType());
                     pendingMgr.dumpCollection();

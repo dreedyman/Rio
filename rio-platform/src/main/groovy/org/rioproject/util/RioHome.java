@@ -26,7 +26,7 @@ import java.io.File;
  * @author Dennis Reedy
  */
 public class RioHome {
-    static final Logger logger = LoggerFactory.getLogger(RioHome.class);
+    private static final Logger logger = LoggerFactory.getLogger(RioHome.class);
 
     /**
      * Get the location of Rio home if it is not set. If the location
@@ -40,7 +40,7 @@ public class RioHome {
      */
     public static String get() {
         String rioHome = System.getProperty("rio.home", System.getenv("RIO_HOME"));
-        if(rioHome==null) {
+        if (rioHome == null) {
             Class clazz = RioHome.class;
             String className = clazz.getSimpleName() + ".class";
             String classPath = clazz.getResource(className).toString();
@@ -55,7 +55,7 @@ public class RioHome {
                 logger.debug("directory: {}, exists? {}", directory.getPath(), directory.exists());
                 rioHome = directory.exists() ? directory.getPath() : null;
             }
-            if(rioHome!=null) {
+            if (rioHome != null) {
                 logger.info("Derived and set \"rio.home\" to {}", rioHome);
                 System.setProperty("rio.home", rioHome);
             }

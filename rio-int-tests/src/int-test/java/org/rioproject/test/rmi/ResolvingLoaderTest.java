@@ -51,6 +51,11 @@ public class ResolvingLoaderTest {
     }
 
     @Test
+    public void testRelease() {
+        ResolvingLoader.release(ClassLoader.getSystemClassLoader());
+    }
+
+    @Test
     public void testGetClassLoader() throws MalformedURLException, ClassNotFoundException {
         ResolvingLoader loader = new ResolvingLoader();
         assertNotNull(loader);

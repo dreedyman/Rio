@@ -63,6 +63,9 @@ logger("net.jini", TRACE)
 logger("com.sun.jini", TRACE)
 logger("net.jini.lookup.JoinManager", OFF)
 logger("org.rioproject.resolver.aether.util.ConsoleRepositoryListener", WARN)
+logger("org.rioproject.tools.jetty", DEBUG)
+
+//logger("org.eclipse", DEBUG)
 
 root(INFO, appenders)
 

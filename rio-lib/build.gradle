@@ -47,3 +47,7 @@ jar {
         )
     }
 }
+
+test {
+    systemProperty "org.rioproject.keystore", "${rootProject.projectDir}/distribution/src/main/config/security/rio-cert.ks"
+}

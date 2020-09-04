@@ -18,6 +18,7 @@ package org.rioproject.test.associations;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.config.Constants;
 import org.rioproject.opstring.*;
 import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
@@ -61,8 +62,7 @@ public class AssociationManagementTest {
             elem.setPlanned(1);
             try {
                 OperationalString operationalString = manager.getOperationalString();
-                URL exportURL = operationalString.getServices()[0].getExportURLs()[0];
-                String codebase = "http://"+exportURL.getHost()+":"+exportURL.getPort();
+                String codebase = System.getProperty(Constants.WEBSTER);
                 elem.setExportBundles(makeClassBundle(Dummy.class.getName(), codebase));
                 elem.setComponentBundle(makeClassBundle(DummyImpl.class.getName(), codebase));
 

@@ -35,11 +35,15 @@ sourceSets {
 
 jar {
     manifest {
-        attributes("Class-Path": "jsk-platform-${riverVersion}.jar",
+        attributes("Class-Path": "jsk-platform-${riverVersion}.jar groovy-all-${groovyVersion}",
                 "Implementation-Title": "Rio Project",
                 "Implementation-Version": "${project.version}",
                 "Rio-Version" : "${project.version}",
                 "Rio-Build": buildTime
         )
     }
+}
+
+test {
+    systemProperty "org.rioproject.keystore", "${rootProject.projectDir}/distribution/src/main/config/security/rio-cert.ks"
 }

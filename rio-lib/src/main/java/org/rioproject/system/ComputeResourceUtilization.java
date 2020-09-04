@@ -35,13 +35,13 @@ import java.util.List;
  *
  * @author Dennis Reedy
  */
-public class ComputeResourceUtilization implements Comparable, Serializable {
+public class ComputeResourceUtilization implements Comparable<ComputeResourceUtilization>, Serializable {
     @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /**
      * Description of the ComputeResource
      */
-    private String description;
+    private final String description;
     /**
      * The host name of the compute resource
      */
@@ -49,7 +49,7 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
     /**
      * The IP Address of the compute resource
      */
-    private String address;
+    private final String address;
     /**
      * The utilization of the compute resource, which is a summation of
      * {@link MeasuredResource} components, representing a
@@ -59,7 +59,7 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
     /**
      * Collection of measurable capability utilization values
      */
-    private final List<MeasuredResource> mRes = new ArrayList<MeasuredResource>();
+    private final List<MeasuredResource> mRes = new ArrayList<>();
 
     /**
      * Construct a ComputeResourceUtilization
@@ -270,23 +270,8 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
             if (measuredResource.thresholdCrossed())
                 return (false);
         }
-        return(true);
+        return true;
     }
-
-    /**
-     * Compares this ComputeResourceUtilization object with another
-     * ComputeResourceUtilization object for order using the computed
-     * utilization of the ComputeResourceUtilization
-     * 
-     * @param o Object to compare to
-     */
-    public int compareTo(Object o) {
-        // will throw a ClassCastException if the obj is not the right type
-        ComputeResourceUtilization that = (ComputeResourceUtilization)o;
-        // return -1 if I am less than the object being compared
-        return (this.utilization.compareTo(that.utilization));
-    }
-
 
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -295,5 +280,10 @@ public class ComputeResourceUtilization implements Comparable, Serializable {
         builder.append("address: ").append(address).append(", utilization: ").append(utilization).append(", ");
         builder.append("measured resources: ").append(mRes);
         return  builder.toString();
+    }
+
+    @Override
+    public int compareTo(ComputeResourceUtilization that) {
+        return this.utilization.compareTo(that.utilization);
     }
 }

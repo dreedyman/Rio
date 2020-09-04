@@ -83,19 +83,16 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     /**
      * The parameter types for the constructor.
      */
-    private static final Class[] actTypes = {String[].class, LifeCycle.class};
+    private static final Class<?>[] actTypes = { String[].class, LifeCycle.class };
     private final String codebase;
     private final String policy;
     private final String classpath;
     private final String implClassName;
     private final String[] serverConfigArgs;
     private final LifeCycle lifeCycle;
-    private static final LifeCycle NoOpLifeCycle = new LifeCycle() { // default, no-op
-                                                               // object
-        public boolean unregister(Object impl) {
-            return false;
-        }
-    };
+    // default, no-op
+// object
+    private static final LifeCycle NoOpLifeCycle = impl -> false;
     private static AggregatePolicyProvider globalPolicy = null;
     private static Policy initialGlobalPolicy = null;
     /**
@@ -143,7 +140,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                 // Optional Args
                                 final LifeCycle lifeCycle,
                                 final String... serverConfigArgs) {
-        if(codebase == null || policy == null || classpath == null || implClassName == null)
+        if (codebase == null || policy == null || classpath == null || implClassName == null)
             throw new IllegalArgumentException("Codebase, policy, classpath, and implementation cannot be null");
         this.codebase = codebase;
         this.policy = policy;
@@ -177,25 +174,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                 final String... serverConfigArgs) {
         this(codebase, policy, classpath, implClassName, null, serverConfigArgs);
     }
-    
-    /**
-     * Codebase accessor method.
-     * 
-     * @return The codebase string associated with this service descriptor.
-     */
-    public String getCodebase() {
-        return codebase;
-    }
 
-    /**
-     * Policy accessor method.
-     * 
-     * @return The policy string associated with this service descriptor.
-     */
-    public String getPolicy() {
-        return policy;
-    }
-        
     /**
      * <code>LifeCycle</code> accessor method.
      *
@@ -205,25 +184,6 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     @SuppressWarnings("unused")
     public LifeCycle getLifeCycle() {
         return lifeCycle;
-    }
-    
-    /**
-     * LifCycle accessor method.
-     * 
-     * @return The classpath string associated with this service descriptor.
-     */
-    public String getClasspath() {
-        return classpath;
-    }
-
-    /**
-     * Implementation class accessor method.
-     * 
-     * @return The implementation class string associated with this service
-     * descriptor.
-     */
-    public String getImplClassName() {
-        return implClassName;
     }
 
     /**
@@ -236,7 +196,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         return (serverConfigArgs != null)? serverConfigArgs.clone(): null;
     }    
     
-    synchronized void ensureSecurityManager() {
+    void ensureSecurityManager() {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
@@ -247,17 +207,18 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      */
     public Object create(final Configuration config) throws Exception {
         ensureSecurityManager();
-        Object proxy = null;
+        Object proxy;
 
         /* Warn user of inaccessible codebase(s) */
-        if(getCodebase().startsWith("http"))
-            HTTPDStatus.httpdWarning(getCodebase());
+        if (codebase.startsWith("http")) {
+            HTTPDStatus.httpdWarning(codebase);
+        }
 
         /* Set common JARs to the CommonClassLoader */
         String defaultDir;
         String rioHome = System.getProperty("rio.home");
-        List<URL> urlList = new ArrayList<URL>();
-        if(rioHome==null) {
+        List<URL> urlList = new ArrayList<>();
+        if (rioHome == null) {
             logger.warn("rio.home not defined, no default platformDir");
         } else {
             defaultDir = rioHome+ File.separator+"config"+File.separator+"platform";
@@ -270,7 +231,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             }
 
             String platformDir = (String)config.getEntry(COMPONENT, "platformDir", String.class, defaultDir);
-            if(logger.isDebugEnabled())
+            if (logger.isDebugEnabled())
                 logger.debug("Platform directory set as {}", platformDir);
             caps = platformLoader.parsePlatform(platformDir);
             for (PlatformCapabilityConfig cap : caps) {
@@ -283,16 +244,16 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         URL[] commonJARs = urlList.toArray(new URL[0]);
 
         /*
-        if(commonJARs.length==0)
+        if (commonJARs.length==0)
             throw new RuntimeException("No commonJARs have been defined");
         */
         CommonClassLoader commonCL = CommonClassLoader.getInstance();
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Created {}", commonCL.getClass().getName());
-        if(logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled()) {
             StringBuilder buffer = new StringBuilder();
-            for(int i=0; i<commonJARs.length; i++) {
-                if(i>0)
+            for (int i = 0; i < commonJARs.length; i++) {
+                if (i > 0)
                     buffer.append("\n");
                 buffer.append(commonJARs[i].toExternalForm());
             }
@@ -302,30 +263,30 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         final Thread currentThread = Thread.currentThread();
         ClassLoader currentClassLoader = currentThread.getContextClassLoader();
 
-        ClassAnnotator annotator = new ClassAnnotator(ClassLoaderUtil.getCodebaseURLs(getCodebase()));
+        ClassAnnotator annotator = new ClassAnnotator(ClassLoaderUtil.getCodebaseURLs(codebase));
 
         String serviceClassPath;
-        if(Artifact.isArtifact(getClasspath())) {
-            String[] classPath = ResolverHelper.getResolver().getClassPathFor(getClasspath());
+        if (Artifact.isArtifact(classpath)) {
+            String[] classPath = ResolverHelper.getResolver().getClassPathFor(classpath);
             StringBuilder classPathBuilder = new StringBuilder();
             for(String jar:classPath) {
-                if(classPathBuilder.length()>0)
+                if (classPathBuilder.length()>0)
                     classPathBuilder.append(File.pathSeparator);
                 classPathBuilder.append(jar);
             }
             serviceClassPath = classPathBuilder.toString();
         } else {
-            serviceClassPath = getClasspath();
+            serviceClassPath = classpath;
         }
         ServiceClassLoader serviceCL =
             new ServiceClassLoader(ServiceClassLoader.getURIs(ClassLoaderUtil.getClasspathURLs(serviceClassPath)),
                                    annotator,
                                    commonCL);
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Created {}", serviceCL);
 
         currentThread.setContextClassLoader(serviceCL);
-        if(logger.isTraceEnabled())
+        if (logger.isTraceEnabled())
             logger.trace("{}", ClassLoaderUtil.getContextClassLoaderTree());
         /* Get the ProxyPreparer */
         ProxyPreparer servicePreparer = (ProxyPreparer)Config.getNonNullEntry(config,
@@ -335,12 +296,12 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                                                                               new BasicProxyPreparer());
         synchronized(RioServiceDescriptor.class) {
             /* supplant global policy 1st time through */
-            if(globalPolicy == null) {
+            if (globalPolicy == null) {
                 //initialGlobalPolicy = Policy.getPolicy();
-                initialGlobalPolicy = new PolicyFileProvider(getPolicy());
+                initialGlobalPolicy = new PolicyFileProvider(policy);
                 globalPolicy = new AggregatePolicyProvider(initialGlobalPolicy);
                 Policy.setPolicy(globalPolicy);
-                if(logger.isTraceEnabled())
+                if (logger.isTraceEnabled())
                     logger.trace("Global policy set: {}", globalPolicy.toString());
             }
             /*DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(getPolicy()));
@@ -351,39 +312,53 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         Object impl;
         try {
             Class<?> implClass;
-            implClass = Class.forName(getImplClassName(), false, serviceCL);
-            if(logger.isTraceEnabled())
+            implClass = Class.forName(implClassName, false, serviceCL);
+            if (logger.isTraceEnabled())
                 logger.trace("Attempting to get implementation constructor");
-            Constructor constructor = implClass.getDeclaredConstructor(actTypes);
-            if(logger.isTraceEnabled())
+            Constructor<?> constructor = implClass.getDeclaredConstructor(actTypes);
+            if (logger.isTraceEnabled())
                 logger.trace("Obtained implementation constructor: {}", constructor.toString());
             constructor.setAccessible(true);
             impl = constructor.newInstance(getServerConfigArgs(), lifeCycle);
-            if(logger.isTraceEnabled())
+            if (logger.isTraceEnabled())
                 logger.trace("Obtained implementation instance: {}", impl.toString());
-            if(impl instanceof ServiceProxyAccessor) {
+            if (impl instanceof ServiceProxyAccessor) {
                 proxy = ((ServiceProxyAccessor)impl).getServiceProxy();
-            } else if(impl instanceof ProxyAccessor) {
+            } else if (impl instanceof ProxyAccessor) {
                 proxy = ((ProxyAccessor)impl).getProxy();
             } else {
                 proxy = null; // just for insurance
             }
-            if(proxy != null) {
+            if (proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            if(logger.isTraceEnabled())
+            if (logger.isTraceEnabled())
                 logger.trace("Proxy:  {}", proxy==null?"<NULL>":proxy.toString());
             currentThread.setContextClassLoader(currentClassLoader);
         } catch(InvocationTargetException e) {
-            Throwable t = e.getCause()==null? e.getTargetException(): e.getCause();
-            if(t!=null && t instanceof Exception)
+            Throwable t = e.getCause() == null ? e.getTargetException(): e.getCause();
+            if (t instanceof Exception)
                 throw (Exception)t;
             throw e;
-
         } finally {
             currentThread.setContextClassLoader(currentClassLoader);
         }
-        return(new Created(impl, proxy));
+        return new Created(impl, proxy);
+    }
+
+    private Object load(Class<?> implClass) throws Exception {
+        Constructor<?> constructor;
+        try {
+            constructor = implClass.getDeclaredConstructor(actTypes);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Obtained implementation constructor: {}", constructor.toString());
+            }
+            constructor.setAccessible(true);
+            return constructor.newInstance(getServerConfigArgs(), lifeCycle);
+        } catch (NoSuchMethodException e) {
+            constructor = implClass.getDeclaredConstructor(Configuration.class);
+        }
+        return constructor;
     }
 
     /*
@@ -391,20 +366,20 @@ public class RioServiceDescriptor implements ServiceDescriptor {
      * manifest setting. If there is, append the settings to the classpath
      */
     private String setClasspath(final String cp) {
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Create classpath from [{}]", cp);
         StringBuilder buff = new StringBuilder();
         for(String s : toArray(cp, "," + File.pathSeparator)) {
-            if(buff.length()>0 && !buff.toString().endsWith(File.pathSeparator))
+            if (buff.length()>0 && !buff.toString().endsWith(File.pathSeparator))
                 buff.append(File.pathSeparator);
             buff.append(s);
             File f = new File(s);
             try {
                 String jarPath = f.getParentFile().getCanonicalPath();
-                if(!jarPath.endsWith(File.separator)) {
+                if (!jarPath.endsWith(File.separator)) {
                     jarPath = jarPath+File.separator;
                 }
-                if(logger.isDebugEnabled())
+                if (logger.isDebugEnabled())
                     logger.debug("Creating jar file path from [{}]", f.getCanonicalPath());
                 JarFile jar = new JarFile(f);
                 Manifest man = jar.getManifest();
@@ -418,7 +393,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                     continue;
                 }
                 String values = (String)attributes.get(new Attributes.Name("Class-Path"));
-                if(values!=null) {
+                if (values!=null) {
                     for(String v : toArray(values, " ," + File.pathSeparator)) {
                         buff.append(File.pathSeparator);
                         String name = jarPath+v;
@@ -432,7 +407,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
                 logger.warn("While trying to create classpath", e);
             }
         }
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Classpath created [{}]", buff.toString());
         return buff.toString();
     }

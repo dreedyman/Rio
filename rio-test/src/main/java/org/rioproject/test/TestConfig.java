@@ -42,6 +42,7 @@ public class TestConfig {
     private boolean runHarvester;
     private long timeout;
     private String testConfigLocation;
+    private boolean https;
 
     TestConfig(String testClassName) {
         this.testClassName = testClassName;
@@ -79,6 +80,7 @@ public class TestConfig {
         numLookups = rioTestConfig.numLookups();
         opString = rioTestConfig.opstring().length() == 0 ? null : rioTestConfig.opstring();
         autoDeploy = rioTestConfig.autoDeploy();
+        https = rioTestConfig.https();
 
         if (opString == null) {
             autoDeploy = false;
@@ -192,6 +194,10 @@ public class TestConfig {
 
     public String getTestConfigLocation() {
         return testConfigLocation;
+    }
+
+    public boolean useHttps() {
+        return https;
     }
 
     private boolean hasConfigurationFor(final String component, final Map<String, Object> map) {

@@ -18,14 +18,38 @@ package org.rioproject.start;
 import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
 
+import java.lang.reflect.Constructor;
+import java.net.URLClassLoader;
+
 /**
  * @author Dennis Reedy
  */
 public class ConfigurationServiceDescriptor implements ServiceDescriptor {
-    public static String COMPONENT =  "ConfigurationServiceDescriptor";
+    private final String classPath;
+    private final String implClassName;
+    private final Configuration configuration;
+
+    public ConfigurationServiceDescriptor(String classPath,
+                                          String implClassName,
+                                          Configuration configuration) {
+        this.classPath = classPath;
+        this.implClassName = implClassName;
+        this.configuration = configuration;
+    }
 
     @Override public Object create(Configuration config) throws Exception {
-        //config.getEntry();
-        return null;
+        Thread currentThread = Thread.currentThread();
+        ClassLoader currentClassLoader = currentThread.getContextClassLoader();
+
+        URLClassLoader serviceCL = new URLClassLoader(ClassLoaderUtil.getClasspathURLs(classPath));
+        currentThread.setContextClassLoader(serviceCL);
+        try {
+            Class<?> implClass = serviceCL.loadClass(implClassName);
+            Constructor<?> constructor = implClass.getDeclaredConstructor(Configuration.class);
+            Object impl = constructor.newInstance(configuration);
+            return new RioServiceDescriptor.Created(impl, null);
+        } finally {
+            currentThread.setContextClassLoader(currentClassLoader);
+        }
     }
 }

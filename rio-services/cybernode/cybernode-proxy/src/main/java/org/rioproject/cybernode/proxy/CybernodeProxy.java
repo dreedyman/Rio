@@ -133,17 +133,17 @@ public class CybernodeProxy extends AbstractProxy implements Cybernode, Serializ
      * @see org.rioproject.deploy.ServiceBeanInstantiator#getName
      */
     public String getName() throws RemoteException {
-        if(name == null) {
+        if (name == null) {
             name = cybernodeProxy.getName();
         }
-        return(name);
+        return name;
     }
 
     /**
      * @see org.rioproject.deploy.ServiceBeanInstantiator#getInstantiatorUuid()
      */
-    public Uuid getInstantiatorUuid() throws RemoteException {
-        return(getReferentUuid());
+    public Uuid getInstantiatorUuid() {
+        return getReferentUuid();
     }
 
     /**
@@ -253,7 +253,7 @@ public class CybernodeProxy extends AbstractProxy implements Cybernode, Serializ
         }
 
         /* Implement TrustVerifier */
-        public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx) throws RemoteException {
+        public boolean isTrustedObject(Object obj, TrustVerifier.Context ctx) {
             if (obj == null || ctx == null) {
                 throw new IllegalArgumentException();
             } else if (!(obj instanceof ConstrainableCybernodeProxy)) {

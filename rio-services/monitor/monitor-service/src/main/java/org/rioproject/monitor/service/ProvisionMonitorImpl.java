@@ -587,7 +587,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     public boolean hasDeployed(String opStringName) {
         if(opStringName == null)
             throw new IllegalArgumentException("Parameters cannot be null");
-        for(OpStringManager opMgr : opStringMangerController.getOpStringManagers()) {
+        for (OpStringManager opMgr : opStringMangerController.getOpStringManagers()) {
             if(opStringName.equals(opMgr.getName())) {
                 return (true);
             }
@@ -707,7 +707,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             new ArrayList<>();
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
         logger.info("Returned {} service resources", resources.length);
-        for(ServiceResource s : resources) {
+        for (ServiceResource s : resources) {
             marshalledWrappers.add(((InstantiatorResource)s.getResource()).getWrappedServiceBeanInstantiator());
         }
         return marshalledWrappers;
@@ -720,7 +720,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         ServiceResource[] resources = provisioner.getServiceResourceSelector().getServiceResources();
         logger.info("Returned {} service resources", resources.length);
         List<ServiceBeanInstantiator> list = new ArrayList<>();
-        for(ServiceResource s : resources) {
+        for (ServiceResource s : resources) {
             list.add(((InstantiatorResource)s.getResource()).getServiceBeanInstantiator());
         }        
         return list.toArray(new ServiceBeanInstantiator[0]);
@@ -899,7 +899,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             }
             if(logger.isDebugEnabled()) {
                 StringBuilder builder = new StringBuilder();
-                for(String s : initialOpStrings) {
+                for (String s : initialOpStrings) {
                     if(builder.length()>0)
                         builder.append(", ");
                     builder.append(s);

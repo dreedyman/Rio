@@ -275,14 +275,28 @@ public final class ServiceDescriptorUtil {
 
     public static ServiceDescriptor getJetty(final String sPort,
                                              final String[] roots) {
-        return getJetty(sPort, roots, null, 0, 0);
+        return getJetty(sPort, roots, null, 0, 0, true);
+
+    }
+
+    public static ServiceDescriptor getJetty(final String sPort,
+                                             final String[] roots, boolean secure) {
+        return getJetty(sPort, roots, null, 0, 0, secure);
 
     }
 
     public static ServiceDescriptor getJetty(final String sPort,
                                              final String[] roots,
                                              final String putDir) {
-        return getJetty(sPort, roots, putDir, 0, 0);
+        return getJetty(sPort, roots, putDir, 0, 0, true);
+
+    }
+
+    public static ServiceDescriptor getJetty(final String sPort,
+                                             final String[] roots,
+                                             final String putDir,
+                                             final boolean secure) {
+        return getJetty(sPort, roots, putDir, 0, 0, secure);
 
     }
 
@@ -290,12 +304,14 @@ public final class ServiceDescriptorUtil {
                                              final String[] roots,
                                              final String putDir,
                                              final int minThreads,
-                                             final int maxThreads) {
+                                             final int maxThreads,
+                                             final boolean secure) {
 
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome==null)
+        if(rioHome == null) {
             throw new RuntimeException("rio.home property not declared or derivable");
-        String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
+        }
+        String webster = rioHome + File.separator + "lib" + File.separator + createVersionedJar("webster");
 
         DynamicConfiguration config = new DynamicConfiguration();
         config.setEntry("org.rioproject.tools.jetty",
@@ -303,27 +319,32 @@ public final class ServiceDescriptorUtil {
                         int.class,
                         Integer.parseInt(sPort));
         config.setEntry("org.rioproject.tools.jetty",
-                        "port",
+                        "roots",
                         String[].class,
                         roots);
+        config.setEntry("org.rioproject.tools.jetty",
+                        "secure",
+                        Boolean.class,
+                        secure);
         if(putDir!=null)
             config.setEntry("org.rioproject.tools.jetty",
                             "putDir",
                             String.class,
                             putDir);
-        if(minThreads>0)
+        if(minThreads > 0)
             config.setEntry("org.rioproject.tools.jetty",
                             "minThreads",
                             int.class,
                             minThreads);
-        if(maxThreads>0)
+        if(maxThreads > 0)
             config.setEntry("org.rioproject.tools.jetty",
                             "maxThreads",
                             int.class,
                             maxThreads);
+
         String jettyClass = "org.rioproject.tools.jetty.Jetty";
 
-        return new ConfigurationServiceDescriptor();
+        return new ConfigurationServiceDescriptor(webster, jettyClass, config);
     }
 
     /**
@@ -410,7 +431,7 @@ public final class ServiceDescriptorUtil {
     }
 
     static String createAnnotatedArtifactURL(final String artifact) throws UnknownHostException {
-        return String.format("%s;http://%s:%s",
+        return String.format("%s;https://%s:%s",
                              artifact,
                              HostUtil.getHostAddressFromProperty("java.rmi.server.hostname"),
                              port);

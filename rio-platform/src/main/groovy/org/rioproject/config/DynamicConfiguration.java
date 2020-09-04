@@ -31,7 +31,7 @@ public class DynamicConfiguration extends AbstractConfiguration {
     /**
      * Maps entry names to entry objects.
      */
-    private final Map<String, Entry> entries = new HashMap<String, Entry>();
+    private final Map<String, Entry> entries = new HashMap<>();
 
 
     /**
@@ -53,7 +53,7 @@ public class DynamicConfiguration extends AbstractConfiguration {
      * @param type      the entry type
      * @param value     the entry value
      */
-    public void setEntry(String component, String name, Class type, Object value) {
+    public void setEntry(String component, String name, Class<?> type, Object value) {
         if (component == null || name == null || type == null) {
             throw new IllegalArgumentException("Component, name, and type cannot be null");
         }
@@ -92,7 +92,7 @@ public class DynamicConfiguration extends AbstractConfiguration {
      * The class represents an entry.
      */
     private static class Entry {
-        public Class type;
+        public Class<?> type;
         public Object value;
     }
 }

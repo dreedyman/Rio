@@ -49,9 +49,13 @@ import org.rioproject.opstring.ServiceElement
 import org.rioproject.resolver.Artifact
 import org.rioproject.resolver.ResolverHelper
 import org.rioproject.resolver.maven2.Repository
+import org.rioproject.security.SecureEnv
+import org.rioproject.tools.webster.Webster
+import org.rioproject.util.RioHome
+import org.rioproject.web.WebsterService
 import org.rioproject.tools.harvest.HarvesterAgent
 import org.rioproject.tools.harvest.HarvesterBean
-import org.rioproject.tools.webster.Webster
+import org.rioproject.tools.jetty.Jetty
 import org.rioproject.util.PropertyHelper
 
 import java.util.concurrent.Executors
@@ -64,7 +68,7 @@ import java.util.concurrent.ThreadPoolExecutor
 @Slf4j
 class TestManager {
     static final String TEST_HOSTS = 'org.rioproject.test.hosts'
-    List<Webster> websters = new ArrayList<Webster>()
+    List<WebsterService> websters = new ArrayList<>()
     List<Process> processes = new ArrayList<Process>()
     JiniClient client
     String rioHome
@@ -78,6 +82,9 @@ class TestManager {
     TestConfig testConfig
     def additionalExecProps=  [:]
     ThreadPoolExecutor execPool = (ThreadPoolExecutor) Executors.newCachedThreadPool()
+    static {
+        SecureEnv.setup("${RioHome.get()}/config/security/rio-cert.ks")
+    }
 
     /**
      * Create a TestManager without installing a shutdown hook
@@ -303,18 +310,28 @@ class TestManager {
      *
      * @return The started Webster
      */
-    Webster startWebster() {
+    WebsterService startWebster() {
         String m2Repo = Repository.getLocalRepository().absolutePath
         String rioHome = System.getProperty('rio.home')
 
-        String websterRoots = "${rioHome}/lib-dl;${rioHome}/lib;${m2Repo}"
         String testRoots = System.getProperty("rio.test.webster.roots")
+        def roots = ["${rioHome}/lib-dl", "${rioHome}/lib", "${m2Repo}"]
         if (testRoots != null) {
-            websterRoots = websterRoots +";${testRoots}"
+            Collections.addAll(roots, testRoots.split(";"))
         }
-        Webster webster = new Webster(0, websterRoots)
+
+        WebsterService webster
+        if (testConfig.useHttps()) {
+            //SecureEnv.setup("${rioHome}/config/security/rio-cert.ks")
+            webster = new Jetty().setRoots(roots as String[])
+            webster.startSecure()
+        } else {
+            //webster = new Jetty().setRoots(roots as String[])
+            webster = new Webster(0, null).setRoots(roots as String[])
+            webster.start()
+        }
         websters.add(webster)
-        return webster
+        webster
     }
 
     /**
@@ -565,7 +582,7 @@ class TestManager {
      * Shutdown all started services
      */
     def shutdown() {
-        for (Webster w : websters)
+        for (WebsterService w : websters)
             w.terminate()
         /* Make sure all services are terminated */
         for (Process p : processes) {

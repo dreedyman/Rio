@@ -41,7 +41,7 @@ import java.util.concurrent.RejectedExecutionException;
  */
 public class ProvisionTask implements Runnable {
     private long index;
-    private ServiceBeanInstance jsbInstance = null;
+    private ServiceBeanInstance serviceBeanInstance = null;
     private Throwable thrown = null;
     private String failureReason = null;
     private final ServiceProvisionContext context;
@@ -74,7 +74,7 @@ public class ProvisionTask implements Runnable {
 
     public void run() {
         try {
-            jsbInstance = null;
+            serviceBeanInstance = null;
             int result = doProvision(context.getProvisionRequest(), context.getServiceResource());
             if ((result & ServiceProvisioner.PROVISION_FAILURE) != 0) {
                 boolean resubmitted = true;
@@ -127,7 +127,7 @@ public class ProvisionTask implements Runnable {
                     }
                 }
             } else {
-                if (jsbInstance == null) {
+                if (serviceBeanInstance == null) {
                     if (logger.isDebugEnabled()) {
                         String addr = ((InstantiatorResource) context.getServiceResource().getResource()).getHostAddress();
                         String name = ((InstantiatorResource) context.getServiceResource().getResource()).getName();
@@ -139,13 +139,13 @@ public class ProvisionTask implements Runnable {
                 }
                 /* Notify ServiceProvisionListener of success */
                 context.getProvisionRequest().getListener()
-                    .serviceProvisioned(jsbInstance,
+                    .serviceProvisioned(serviceBeanInstance,
                                         (InstantiatorResource) context.getServiceResource().getResource());
-                /* If we have an ServiceBeanInstantiatorListener, 
+                /* If we have an ServiceBeanInstantiatorListener,
                  * notify the listener */
                 if (context.getProvisionRequest().getServiceProvisionListener() != null) {
                     try {
-                        context.getProvisionRequest().getServiceProvisionListener().succeeded(jsbInstance);
+                        context.getProvisionRequest().getServiceProvisionListener().succeeded(serviceBeanInstance);
                     } catch (Exception e) {
                         logger.trace("Notifying ServiceProvisionListeners on success.", e);
                     }
@@ -187,7 +187,7 @@ public class ProvisionTask implements Runnable {
                     }
                     DeployedService deployedService = ir.getInstantiator().instantiate(event);
                     if (deployedService != null) {
-                        jsbInstance = deployedService.getServiceBeanInstance();
+                        serviceBeanInstance = deployedService.getServiceBeanInstance();
                         ir.addDeployedService(deployedService);
                         if (logger.isDebugEnabled()) {
                             logger.info("Allocated [{}] on {}",
@@ -195,11 +195,11 @@ public class ProvisionTask implements Runnable {
                                         ir.getInstantiator().getName());
                         }
                         if (logger.isTraceEnabled()) {
-                            Object service = jsbInstance.getService();
+                            Object service = serviceBeanInstance.getService();
                             Class<?> serviceClass = service.getClass();
                             logger.trace("{} ServiceBeanInstance {}, Annotation {}",
                                           LoggingUtil.getLoggingName(request),
-                                          jsbInstance,
+                                         serviceBeanInstance,
                                           RMIClassLoader.getClassAnnotation(serviceClass));
                         }
                         break;
