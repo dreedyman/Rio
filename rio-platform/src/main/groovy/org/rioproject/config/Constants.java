@@ -35,6 +35,10 @@ public interface Constants {
      */
     String WEBSTER_ROOTS = WEBSTER+".roots";
     /**
+     * System property that points to a keystore
+     */
+    String KEYSTORE = BASE_COMPONENT+".keystore";
+    /**
      * System property set when an RMI Registry is started
      */
     String REGISTRY_PORT = BASE_COMPONENT+".registryPort";

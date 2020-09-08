@@ -15,6 +15,8 @@
  */
 package org.rioproject.tools.jetty;
 
+import groovy.util.ConfigObject;
+import groovy.util.ConfigSlurper;
 import net.jini.config.Configuration;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.*;
@@ -30,14 +32,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Embedded Jetty server
  *
  * Created by Dennis Reedy on 6/19/17.
  */
+@SuppressWarnings({"unused", "unchecked"})
 public class Jetty implements WebsterService {
     private int port;
     private int minThreads;
@@ -48,9 +55,72 @@ public class Jetty implements WebsterService {
     private static final Logger logger = LoggerFactory.getLogger(Jetty.class);
     static final String COMPONENT = "org.rioproject.tools.jetty";
 
+    /**
+     * Create a Jetty instance.
+     */
     public Jetty() {
     }
 
+    /**
+     * Create a Jetty instance with a Groovy configuration.
+     *
+     * @param jettyConfig The configuration.
+     *
+     * @throws Exception If the server cannot be started.
+     */
+    public Jetty(File jettyConfig) throws Exception {
+        if (!jettyConfig.exists()) {
+            throw new FileNotFoundException("Config file " + jettyConfig.getPath() + "does not exist");
+        }
+        ConfigSlurper configSlurper = new ConfigSlurper();
+        Map<String, String> map = System.getProperties().entrySet().stream().collect(
+                Collectors.toMap(
+                        e -> e.getKey().toString(),
+                        e -> e.getValue().toString()
+                )
+        );
+        configSlurper.setBinding(map);
+        ConfigObject config = configSlurper.parse(jettyConfig.toURI().toURL());
+        Map<?, ?> flattened = config.flatten();
+        if (flattened.get("jetty.port") != null) {
+            setPort((Integer) flattened.get("jetty.port"));
+        } else {
+            if (System.getProperty("jetty.port") != null) {
+                setPort(Integer.parseInt(System.getProperty("jetty.port")));
+            }
+        }
+        if (flattened.get("jetty.roots") != null) {
+            List<String> roots = (List<String>) flattened.get("jetty.roots");
+            for (String root : roots) {
+                addRoot(root);
+            }
+        }
+        if (flattened.get("jetty.secure") != null) {
+            setSecure((Boolean) flattened.get("jetty.secure"));
+        }
+        if (flattened.get("jetty.minThreads") != null) {
+            setMinThreads((Integer) flattened.get("jetty.minThreads"));
+        }
+        if (flattened.get("jetty.maxThreads") != null) {
+            setMaxThreads((Integer) flattened.get("jetty.maxThreads"));
+        }
+        if (flattened.get("jetty.putDirectory") != null) {
+            setPutDir((String) flattened.get("jetty.putDirectory"));
+        }
+        if (isSecure) {
+            startSecure();
+        } else {
+            start();
+        }
+    }
+
+    /**
+     * Create a Jetty instance using a River configuration.
+     *
+     * @param config The configuration.
+     *
+     * @throws Exception If the server cannot be started.
+     */
     public Jetty(Configuration config) throws Exception {
         setPort((Integer) config.getEntry(COMPONENT,"port", int.class, 0))
                 .setRoots((String[]) config.getEntry(COMPONENT, "roots", String[].class,null))
@@ -73,15 +143,17 @@ public class Jetty implements WebsterService {
             if (";".equals(root)) {
                 continue;
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("Adding {}", new File(root).getPath());
-            }
-            File dir = new File(root);
-            //contexts.addHandler(createContextHandler(dir, new ResourceHandler()));
-            //contexts.addHandler(createHandler(dir));
-            handlers.addHandler(createHandler(dir));
+            addRoot(root);
         }
         return this;
+    }
+
+    private void addRoot(String root) {
+        File dir = new File(root);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding {}",dir.getPath());
+        }
+        handlers.addHandler(createHandler(dir));
     }
 
     public Jetty setPort(int port) {
@@ -129,7 +201,8 @@ public class Jetty implements WebsterService {
     @Override
     public void startSecure() throws Exception {
         logger.info("Starting in secure mode");
-        String keyStorePath = String.format("%s/config/security/rio-cert.ks", RioHome.get());
+        String defaultKeyStorePath = String.format("%s/config/security/rio-cert.ks", RioHome.get());
+        String keyStorePath = System.getProperty(Constants.KEYSTORE, defaultKeyStorePath);
         if (logger.isDebugEnabled()) {
             logger.debug("KeyStore file: {}", keyStorePath);
         }
@@ -240,6 +313,14 @@ public class Jetty implements WebsterService {
 
     private void setSecure(boolean isSecure) {
         this.isSecure = isSecure;
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length == 0) {
+            throw new RuntimeException("You must provide an argument that points to a Jetty configuration file");
+        }
+        File configFile = new File(args[0]);
+        new Jetty(configFile);
     }
 
 }

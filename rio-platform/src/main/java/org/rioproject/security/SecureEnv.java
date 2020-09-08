@@ -15,6 +15,7 @@
  */
 package org.rioproject.security;
 
+import org.rioproject.config.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +29,9 @@ import java.util.List;
  */
 public class SecureEnv {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecureEnv.class);
-    public static final String KEYSTORE = "org.rioproject.keystore";
 
     public static boolean setup() throws Exception {
-        String keyStores = System.getProperty(KEYSTORE);
+        String keyStores = System.getProperty(Constants.KEYSTORE);
         if (keyStores != null) {
             setup(keyStores.split(","));
             return true;

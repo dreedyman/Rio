@@ -2,6 +2,7 @@ package org.rioproject.security;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.rioproject.config.Constants;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -20,7 +21,7 @@ public class AggregateTrustManagerTest {
     private KeyStore keyStore;
     @Before
     public void setup() throws Exception {
-        keyStoreFile = new File(System.getProperty("org.rioproject.keystore"));
+        keyStoreFile = new File(System.getProperty(Constants.KEYSTORE));
         keyStore = KeyStoreHelper.load(keyStoreFile);
     }
 

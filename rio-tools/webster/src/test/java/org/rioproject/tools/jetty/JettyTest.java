@@ -104,6 +104,15 @@ public class JettyTest {
     }
 
     @Test
+    public void testStartWithGroovyConfig() throws Exception {
+        String projectDir = System.getProperty("projectDir");
+        String resources = new File(projectDir+"/src/test/resources").getPath();
+        File config = new File(resources +"/jetty.groovy");
+        Jetty jetty = new Jetty(config);
+        assertEquals(9029, jetty.getPort());
+    }
+
+    @Test
     public void testStartWithDescriptor() {
         Assert.assertNotNull(System.getProperty("java.security.policy"));
         String webster = System.getProperty("WEBSTER_JAR");

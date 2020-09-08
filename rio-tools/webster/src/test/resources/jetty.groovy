@@ -11,5 +11,5 @@ jetty {
     roots = [System.properties['user.dir']]
     putDirectory = System.properties['user.dir']
     secure = true
-    port = 9020
+    port = 9029
 }

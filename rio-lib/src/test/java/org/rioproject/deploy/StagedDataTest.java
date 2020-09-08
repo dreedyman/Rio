@@ -18,7 +18,8 @@ public class StagedDataTest {
     @Test
     public void testGetDownloadSize() throws IOException {
         StagedData stagedData = new StagedData();
-        stagedData.setLocation("https://us.mirrors.quenda.co/apache/tomcat/tomcat-9/v9.0.36/bin/apache-tomcat-9.0.36.zip");
+        stagedData.setLocation("https://downloads.apache.org/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip");
+
         long size = stagedData.getDownloadSize();
         assertTrue(size != -1);
     }
