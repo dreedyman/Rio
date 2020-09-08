@@ -1,6 +1,7 @@
 package opstring
 
 import net.jini.lookup.entry.Location
+import org.rioproject.config.Constants
 
 static def getEntries() {
     Location location = new Location()
@@ -8,7 +9,13 @@ static def getEntries() {
     location
 }
 
+static String getCodebase() {
+    return System.getProperty(Constants.WEBSTER)
+}
+
 deployment(name:'Simple Test') {
+
+    codebase getCodebase()
 
     groups System.getProperty('org.rioproject.groups')
 

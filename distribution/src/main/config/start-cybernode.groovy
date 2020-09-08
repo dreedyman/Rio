@@ -19,19 +19,23 @@
  */
 
 import com.sun.jini.start.ServiceDescriptor
+
+import org.rioproject.config.Component
+import org.rioproject.resolver.maven2.Repository
+import org.rioproject.security.SecureEnv
 import org.rioproject.url.ProtocolRegistryService
 import org.rioproject.url.artifact.Handler
 import org.rioproject.util.FileHelper
 import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil
-import org.rioproject.config.Component
-import org.rioproject.resolver.maven2.Repository
 
 @Component('org.rioproject.start')
 class StartCybernodeConfig {
+    final boolean secure
 
     StartCybernodeConfig() {
-        ProtocolRegistryService.create().register("artifact", new Handler());
+        ProtocolRegistryService.create().register("artifact", new Handler())
+        secure = SecureEnv.setup()
     }
 
     String[] getConfigArgs(String rioHome) {
@@ -57,7 +61,8 @@ class StartCybernodeConfig {
         String policyFile = rioHome + '/policy/policy.all'
 
         def serviceDescriptors = [
-                ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+                //ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+                ServiceDescriptorUtil.getJetty('0', websterRoots as String[], secure),
                 ServiceDescriptorUtil.getCybernode(policyFile, getConfigArgs(rioHome))
         ]
         serviceDescriptors as ServiceDescriptor[]

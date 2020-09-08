@@ -1,11 +1,18 @@
 
 import org.rioproject.config.Component
 
-import org.rioproject.util.ServiceDescriptorUtil;
-import com.sun.jini.start.ServiceDescriptor;
+import org.rioproject.security.SecureEnv
+import org.rioproject.util.RioHome
+import org.rioproject.util.ServiceDescriptorUtil
+import com.sun.jini.start.ServiceDescriptor
 
 @Component('org.rioproject.start')
 class StartReggieConfig {
+    final boolean secure
+
+    StartReggieConfig() {
+        secure = SecureEnv.setup()
+    }
 
     ServiceDescriptor[] getServiceDescriptors() {
         String rioHome = System.getProperty('rio.home')
@@ -19,7 +26,8 @@ class StartReggieConfig {
         def reggieConfigs = [rioHome+'/config/common.groovy', rioHome+'/config/reggie.groovy']
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+            //ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+            ServiceDescriptorUtil.getJetty('0', websterRoots as String[], secure),
             ServiceDescriptorUtil.getLookup(policyFile, reggieConfigs as String[])
         ]
 

@@ -116,8 +116,9 @@ public class ServiceBeanLoader {
      * @param elem The ServiceElement to use as a reference
      */
     public static void unload(final ClassLoader loader, final ServiceElement elem) {
-        if(globalPolicy!=null)
+        if (globalPolicy != null) {
             globalPolicy.setPolicy(loader, null);
+        }
         checkAndMaybeCleanProvisionedResources(elem);
         service.submit(() -> ResolvingLoader.release(loader));
     }
@@ -134,22 +135,21 @@ public class ServiceBeanLoader {
     private static void checkAndMaybeCleanProvisionedResources(final ServiceElement elem) {
         List<ProvisionedResources> toRemove = new ArrayList<>();
         ProvisionedResources[] copy = provisionedResources.toArray(new ProvisionedResources[0]);
-        for(ProvisionedResources pr : copy) {
-            if(elem.getComponentBundle()!=null &&
-               elem.getComponentBundle().getArtifact()!=null)
-            if(pr.getArtifact()!=null &&
-               pr.getArtifact().equals(elem.getComponentBundle().getArtifact())) {
-                toRemove.add(pr);
+        for (ProvisionedResources pr : copy) {
+            if (elem.getComponentBundle() != null && elem.getComponentBundle().getArtifact() != null) {
+                if (pr.getArtifact() != null && pr.getArtifact().equals(elem.getComponentBundle().getArtifact())) {
+                    toRemove.add(pr);
+                }
             }
         }
-        for(ProvisionedResources pr : toRemove) {
+        for (ProvisionedResources pr : toRemove) {
             AtomicInteger count = counterTable.get(pr.getArtifact());
-            if(count!=null) {
+            if (count != null) {
                 int using = count.decrementAndGet();
-                if(logger.isTraceEnabled()) {
+                if (logger.isTraceEnabled()) {
                     logger.trace("Number of [{}] artifacts still active={}", pr.getArtifact(), using);
                 }
-                if(using==0) {
+                if (using == 0) {
                     provisionedResources.remove(pr);
                 } else {
                     counterTable.put(pr.getArtifact(), count);
@@ -187,18 +187,18 @@ public class ServiceBeanLoader {
          */
         URL[] exports = new URL[0];
         URL[] implJARs = new URL[0];
-        if(System.getProperty("StaticCybernode")==null) {
+        if (System.getProperty("StaticCybernode") == null) {
             try {
                 Resolver resolver = ResolverHelper.getResolver();
                 boolean install = computeResource.getPersistentProvisioning();
                 Map<String, ProvisionedResources> serviceResources = provisionService(sElem, resolver, install);
                 ProvisionedResources dlPR = serviceResources.get("dl");
                 ProvisionedResources implPR = serviceResources.get("impl");
-                if(dlPR.getJars().length==0 && dlPR.getArtifact()!=null) {
+                if (dlPR.getJars().length == 0 && dlPR.getArtifact() != null) {
                     String convertedArtifact = dlPR.getArtifact().replaceAll(":", "/");
                     String[] artifactParts = convertedArtifact.split(" ");
                     List<URL> exportURLList = new ArrayList<>();
-                    for(String artifactPart : artifactParts) {
+                    for (String artifactPart : artifactParts) {
                         // TODO: if the repositories is default maven central, still need to add?
                         exportURLList.add(new URL("artifact:"+artifactPart+dlPR.getRepositories()));
                     }
@@ -220,7 +220,7 @@ public class ServiceBeanLoader {
             ClassBundle jsbBundle = sElem.getComponentBundle();
             /*
             URL[] implJARs;
-            if(jsbBundle!=null && jsbBundle.getCodebase()!=null)
+            if (jsbBundle!=null && jsbBundle.getCodebase()!=null)
                 implJARs = jsbBundle.getJARs();
             else
                 implJARs = new URL[0];
@@ -232,8 +232,8 @@ public class ServiceBeanLoader {
             PlatformCapability[] matched = ServiceElementUtil.getMatchedPlatformCapabilities(sElem, pCaps);
             for (PlatformCapability pCap : matched) {
                 URL[] urls = PlatformCapabilityLoader.getLoadableClassPath(pCap);
-                for(URL url : urls) {
-                    if(!urlList.contains(url))
+                for (URL url : urls) {
+                    if (!urlList.contains(url))
                         urlList.add(url);
                 }
             }
@@ -252,19 +252,19 @@ public class ServiceBeanLoader {
                 new ServiceClassLoader(classpath, annotator, commonCL);
                 */
             currentThread.setContextClassLoader(jsbCL);
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 StringBuilder buffer = new StringBuilder();
-                if(implJARs.length==0) {
+                if (implJARs.length==0) {
                     buffer.append("<empty>");
                 } else {
-                    for(int i=0; i<implJARs.length; i++) {
-                        if(i>0)
+                    for (int i=0; i<implJARs.length; i++) {
+                        if (i>0)
                             buffer.append(", ");
                         buffer.append(implJARs[i].toExternalForm());
                     }
                 }
                 String className = (jsbBundle==null?"<not defined>": jsbBundle.getClassName());
-                if(logger.isDebugEnabled()) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("Create ServiceClassLoader for {}, classpath {}, codebase {}",
                                  className, buffer.toString(), jsbCL.getClassAnnotation());
                 }
@@ -274,12 +274,12 @@ public class ServiceBeanLoader {
              * property has not been set use the policy set for the VM */
             String servicePolicyFile = System.getProperty("rio.service.security.policy",
                                                           System.getProperty("java.security.policy"));
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("{} Service security policy file {}",
                              ServiceLogUtil.logName(sElem), servicePolicyFile);
             }
-            if(servicePolicyFile!=null) {
-                if(logger.isTraceEnabled()) {
+            if (servicePolicyFile!=null) {
+                if (logger.isTraceEnabled()) {
                     logger.trace("Set {} service security to LoaderSplitPolicyProvider", ServiceLogUtil.logName(sElem));
                 }
                 DynamicPolicyProvider service_policy = new DynamicPolicyProvider(new PolicyFileProvider(servicePolicyFile));
@@ -317,7 +317,7 @@ public class ServiceBeanLoader {
              * message and continue
              */
             LoggerConfig[] loggerConfigs = context.getServiceBeanConfig().getLoggerConfigs();
-            if(loggerConfigs != null) {
+            if (loggerConfigs != null) {
                 for (LoggerConfig loggerConfig : loggerConfigs) {
                     try {
                         loggerConfig.getLogger();
@@ -334,7 +334,7 @@ public class ServiceBeanLoader {
                                                            "serviceBeanFactory",
                                                            ServiceBeanFactory.class,
                                                            new DefaultServiceBeanFactory());
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("service = {}, serviceBeanFactory = {}",
                              ServiceLogUtil.logName(sElem), serviceBeanFactory);
             }
@@ -343,9 +343,9 @@ public class ServiceBeanLoader {
             Object impl = created.getImpl();
             logger.trace("Obtained implementation: {}", impl);
             
-            if(context.getServiceElement().getComponentBundle()==null) {
+            if (context.getServiceElement().getComponentBundle()==null) {
                 String compName = impl.getClass().getName();
-                if(compName.indexOf(".")>0) {
+                if (compName.indexOf(".")>0) {
                     int index = compName.lastIndexOf(".");
                     compName = compName.substring(0, index);
                 }
@@ -353,7 +353,7 @@ public class ServiceBeanLoader {
             }
 
             /* Get the ProxyPreparer */
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Get the ProxyPreparer for {}", ServiceLogUtil.logName(sElem));
             }
             
@@ -362,23 +362,23 @@ public class ServiceBeanLoader {
                                                                                   "servicePreparer",
                                                                                   ProxyPreparer.class,
                                                                                   new BasicProxyPreparer());
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Getting the proxy");
             }
             Object proxy = created.getProxy();
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Obtained the proxy: {}", proxy);
             }
-            if(proxy != null) {
+            if (proxy != null) {
                 proxy = servicePreparer.prepareProxy(proxy);
             }
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Proxy: {}, prepared? {}", proxy, (proxy==null?"not prepared, returned proxy was null": "yes"));
             }
             /*
              * Set the MarshalledInstance into the ServiceBeanManager
              */
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Set the MarshalledInstance into the ServiceBeanManager");
             }
             marshalledProxy = new MarshalledInstance(proxy);
@@ -386,9 +386,9 @@ public class ServiceBeanLoader {
             /*
              * The service may have created it's own serviceID
              */
-            if(proxy instanceof ReferentUuid) {
+            if (proxy instanceof ReferentUuid) {
                 serviceIDToUse = ((ReferentUuid)proxy).getReferentUuid();
-                if(logger.isDebugEnabled()) {
+                if (logger.isDebugEnabled()) {
                     logger.debug("Service has provided Uuid: {}", serviceIDToUse);
                 }
                 ((DefaultServiceBeanManager)context.getServiceBeanManager()).setServiceID(serviceIDToUse);
@@ -399,21 +399,21 @@ public class ServiceBeanLoader {
              * ServiceBeanControl, set the ServiceBeanControl in the 
              * DefaultAssociationManagement object
              */
-            if(proxy instanceof Administrable) {
+            if (proxy instanceof Administrable) {
                 Object adminObject = ((Administrable)proxy).getAdmin();               
-                if(adminObject instanceof ServiceBeanControl) {
+                if (adminObject instanceof ServiceBeanControl) {
                     context.getAssociationManagement().setServiceBeanControl((ServiceBeanControl)adminObject);
                 }                    
             }
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Proxy =  {}", proxy);
             }
         } catch(Exception e) {
             ServiceBeanInstantiationException sbe;
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Loading ServiceBean", e);
             }
-            if(e instanceof ServiceBeanInstantiationException)
+            if (e instanceof ServiceBeanInstantiationException)
                 sbe = (ServiceBeanInstantiationException)e;
             else
                 sbe = new ServiceBeanInstantiationException(e.getClass().getName()+ ": "+ e.getLocalizedMessage(), e);
@@ -435,12 +435,12 @@ public class ServiceBeanLoader {
                                elem.getComponentBundle().getArtifact(): null);
         ProvisionedResources implPR = getProvisionedResources(implArtifact);
 
-        if(implPR==null) {
+        if (implPR == null) {
             implPR = new ProvisionedResources(implArtifact);
-            if(elem.getComponentBundle()!=null) {
-                if(System.getProperty("StaticCybernode")==null) {
-                    if(elem.getComponentBundle().getArtifact()!=null && resolver!=null) {
-                        if(!supportsInstallation)
+            if (elem.getComponentBundle() != null) {
+                if (System.getProperty("StaticCybernode") == null) {
+                    if (elem.getComponentBundle().getArtifact() != null && resolver != null) {
+                        if (!supportsInstallation)
                             throw new ServiceBeanInstantiationException("Service ["+elem.getName()+"] " +
                                                                         "cannot be instantiated, the Cybernode " +
                                                                         "does not support persistent provisioning, " +
@@ -449,13 +449,13 @@ public class ServiceBeanLoader {
                         URL[] jars;
                         try {
                             StringBuilder builder = new StringBuilder();
-                            for(RemoteRepository repository: elem.getRemoteRepositories()) {
-                                if(builder.length()>0){
+                            for (RemoteRepository repository: elem.getRemoteRepositories()) {
+                                if (builder.length() > 0){
                                     builder.append(", ");
                                 }
                                 builder.append(repository.getUrl());
                             }
-                            if(logger.isInfoEnabled()) {
+                            if (logger.isInfoEnabled()) {
                                 logger.info("Resolve {} using these repositories [{}]",
                                             elem.getComponentBundle().getArtifact(), builder.toString());
                             }
@@ -464,41 +464,44 @@ public class ServiceBeanLoader {
                                                           elem.getRemoteRepositories());
                         } catch (ResolverException e) {
                             Throwable thrown = e;
-                            if(e.getCause()!=null)
+                            if (e.getCause() != null) {
                                 thrown = e.getCause();
+                            }
                             throw new ServiceBeanInstantiationException("Could not resolve implementation artifact", thrown);
                         }
                         implJARs = jars;
                     } else {
                         /* RIO-228 */
-                        if(System.getProperty("StaticCybernode")!=null)
+                        if (System.getProperty("StaticCybernode") != null) {
                             implJARs = new URL[0];
-                        else
+                        } else {
                             implJARs = elem.getComponentBundle().getJARs();
+                        }
                     }
                 }
             } else {
                 implJARs = new URL[0];
             }
-            if(implJARs!=null)
+            if (implJARs != null) {
                 implPR.setJars(implJARs);
+            }
         }
 
         String exportArtifact = null;
-        for(ClassBundle cb : elem.getExportBundles()) {
-            if(cb.getArtifact()!=null) {
+        for (ClassBundle cb : elem.getExportBundles()) {
+            if (cb.getArtifact()!=null) {
                 exportArtifact = cb.getArtifact();
                 break;
             }
         }
         ProvisionedResources dlPR = getProvisionedResources(exportArtifact);
-        if(dlPR==null) {
+        if (dlPR == null) {
             dlPR = new ProvisionedResources(exportArtifact);
             dlPR.setJars(elem.getExportURLs());
-            for(RemoteRepository repository: elem.getRemoteRepositories()) {
+            for (RemoteRepository repository: elem.getRemoteRepositories()) {
                 StringBuilder repositoryString = new StringBuilder();
                 repositoryString.append(repository.getUrl());
-                if(repository.getId()!=null) {
+                if (repository.getId()!=null) {
                     repositoryString.append("@");
                     repositoryString.append(repository.getId());
                 }
@@ -506,15 +509,15 @@ public class ServiceBeanLoader {
             }
         }
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Service ").append(ServiceLogUtil.logName(elem)).append(" ");
-            if(implArtifact!=null)
+            if (implArtifact!=null)
                 sb.append("impl artifact: [").append(implPR.getArtifact()).append("] ");
             sb.append("impl jars: ");
             sb.append(implPR.getJarsAsString());
             sb.append(", ");
-            if(dlPR.getArtifact()!=null)
+            if (dlPR.getArtifact()!=null)
                 sb.append("export artifact: [").append(dlPR.getArtifact()).append("] ");
             sb.append("export jars: ");
             sb.append(dlPR.getJarsAsString());
@@ -530,9 +533,9 @@ public class ServiceBeanLoader {
 
     private static ProvisionedResources getProvisionedResources(final String artifact) {
         ProvisionedResources pr = null;
-        if(artifact!=null && !artifact.contains("SNAPSHOT")) {
-            for(ProvisionedResources alreadyProvisioned : provisionedResources) {
-                if(alreadyProvisioned.getArtifact()!=null &&
+        if (artifact!=null && !artifact.contains("SNAPSHOT")) {
+            for (ProvisionedResources alreadyProvisioned : provisionedResources) {
+                if (alreadyProvisioned.getArtifact()!=null &&
                    alreadyProvisioned.getArtifact().equals(artifact)) {
                     pr = alreadyProvisioned;
                     break;
@@ -543,26 +546,26 @@ public class ServiceBeanLoader {
     }
 
     private static void addProvisionedResources(final Map<String, ProvisionedResources> map) {
-        for(Map.Entry<String, ProvisionedResources> entry : map.entrySet()) {
+        for (Map.Entry<String, ProvisionedResources> entry : map.entrySet()) {
             ProvisionedResources pr = entry.getValue();
-            if(pr.getArtifact()!=null && !pr.getArtifact().contains("SNAPSHOT")) {
-                if(!provisionedResources.contains(pr))
+            if (pr.getArtifact()!=null && !pr.getArtifact().contains("SNAPSHOT")) {
+                if (!provisionedResources.contains(pr))
                     provisionedResources.add(pr);
             }
         }
     }
 
     private static void registerArtifactCounts(final Map<String, ProvisionedResources> map) {
-        for(Map.Entry<String, ProvisionedResources> entry : map.entrySet()) {
+        for (Map.Entry<String, ProvisionedResources> entry : map.entrySet()) {
             ProvisionedResources pr = entry.getValue();
-            if(pr.getArtifact()!=null && !pr.getArtifact().contains("SNAPSHOT")) {
+            if (pr.getArtifact()!=null && !pr.getArtifact().contains("SNAPSHOT")) {
                 AtomicInteger count = counterTable.get(pr.getArtifact());
-                if(count==null)
+                if (count==null)
                     count = new AtomicInteger(1);
                 else
                     count.incrementAndGet();
                 counterTable.put(pr.getArtifact(), count);
-                if(logger.isTraceEnabled()) {
+                if (logger.isTraceEnabled()) {
                     logger.trace("Counter for [{}] is now {}", pr.getArtifact(), count.get());
                 }
             }

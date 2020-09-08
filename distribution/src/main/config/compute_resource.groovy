@@ -100,9 +100,9 @@ class BasicMeasurable {
 class MeasurableCPU extends BasicMeasurable {
     MeasurableMonitor getMonitor() {
         if(OperatingSystemType.isLinux())
-            new LinuxHandler()
+            new LinuxHandler() as MeasurableMonitor
         else
-            new SystemCPUHandler()
+            new SystemCPUHandler() as MeasurableMonitor
     }
     /*
      * High threshold is the number of CPUs on the system
@@ -110,7 +110,7 @@ class MeasurableCPU extends BasicMeasurable {
     @Override
     ThresholdValues getThresholdValues() {
         int numCPUs = Runtime.getRuntime().availableProcessors()
-        new ThresholdValues(0.0, numCPUs);
+        new ThresholdValues(0.0, numCPUs)
     }
 
 }
@@ -128,7 +128,7 @@ class MeasurableJVMCPU extends BasicMeasurable {
     @Override
     ThresholdValues getThresholdValues() {
         int numCPUs = Runtime.getRuntime().availableProcessors()
-        new ThresholdValues(0.0, numCPUs);
+        new ThresholdValues(0.0, numCPUs)
     }
 }
 
@@ -144,7 +144,7 @@ class MeasurableMemory extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        new ThresholdValues(0.0, 0.80);
+        new ThresholdValues(0.0, 0.80)
     }
 }
 
@@ -157,9 +157,9 @@ class MeasurableSystemMemory extends BasicMeasurable {
 
     MeasurableMonitor getMonitor() {
         if(OperatingSystemType.isLinux())
-            return new MemInfoMonitor()
+            return new MemInfoMonitor() as MeasurableMonitor
         else
-            return new SystemMemoryMonitor();
+            return new SystemMemoryMonitor() as MeasurableMonitor
     }
 
     /*
@@ -167,7 +167,7 @@ class MeasurableSystemMemory extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        return new ThresholdValues(0.0, 0.999);
+        new ThresholdValues(0.0, 0.999)
     }
 }
 

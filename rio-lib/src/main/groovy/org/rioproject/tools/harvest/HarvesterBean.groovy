@@ -28,7 +28,6 @@ import net.jini.lease.LeaseRenewalManager
 import net.jini.lookup.JoinManager
 import net.jini.lookup.entry.Name
 import org.rioproject.config.Constants
-import org.rioproject.deploy.ProvisionManager
 import org.rioproject.net.HostUtil
 import org.slf4j.LoggerFactory
 
@@ -39,12 +38,11 @@ import java.rmi.Remote
  */
 class HarvesterBean implements Harvester {
     JoinManager joiner
-    ProvisionManager monitor
     final List<HarvesterSession> agentsHandled = new ArrayList<HarvesterSession>()
     def logger = LoggerFactory.getLogger(HarvesterBean.class.getName())
     String harvestDir
 
-    def HarvesterBean(DiscoveryManagement dMgr) {
+    HarvesterBean(DiscoveryManagement dMgr) {
         advertise(export(), dMgr)
     }
 
@@ -62,7 +60,7 @@ class HarvesterBean implements Harvester {
     def advertise(Remote remoteRef, DiscoveryManagement dMgr) {
         Uuid uuid = UuidFactory.generate()
         ServiceID serviceID = new ServiceID(uuid.getMostSignificantBits(),
-                                            uuid.getLeastSignificantBits());
+                                            uuid.getLeastSignificantBits())
         def name = [new Name("Harvester")]
         joiner = new JoinManager(remoteRef,
                                  name as Entry[],
@@ -77,7 +75,7 @@ class HarvesterBean implements Harvester {
     }
 
     HarvesterSession connect() {
-        String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
+        //String address = HostUtil.getHostAddressFromProperty(Constants.RMI_HOST_ADDRESS)
         //ServerSocket server = new ServerSocket(0, 50, InetAddress.getByName(address))
         ServerSocket server = new ServerSocket(0)
         HarvesterSession hSession = new HarvesterSession(server.localPort, InetAddress.localHost.hostName)
@@ -85,29 +83,31 @@ class HarvesterBean implements Harvester {
         Thread.start {
             File parent
             if (harvestDir) {
-                if (harvestDir.startsWith(File.separator))
+                if (harvestDir.startsWith(File.separator)) {
                     parent = new File(harvestDir)
-                else
+                } else {
                     parent = new File(System.getProperty("user.dir"), harvestDir)
+                }
             } else {
                 parent = new File(System.getProperty("user.dir"), "logs")
             }
 
-            if (!parent.exists())
+            if (!parent.exists()) {
                 parent.mkdirs()
+            }
 
             logger.info "Harvesting to directory ${parent.absolutePath}"
-            handleConnect(server, hSession, parent)
+            handleConnect(server, parent)
             server.close()
             synchronized (agentsHandled) {
                 agentsHandled.add(hSession)
             }
         }
-        return hSession
+        hSession
     }
 
-    List<File> handleConnect(ServerSocket server, HarvesterSession hSession, File parent) {
-        List<File> harvested = new ArrayList<File>()
+    List<File> handleConnect(ServerSocket server, File parent) {
+        List<File> harvested = new ArrayList<>()
         Socket socket = server.accept()
         /*iSocketAddress sockAddr = socket.remoteSocketAddress
         if (logger.isInfoEnabled())
@@ -126,8 +126,9 @@ class HarvesterBean implements Harvester {
                         String parentDir = filename.substring(0, ndx)
                         //println "===> parentDir = ${parentDir}"
                         File p = new File(parent, parentDir)
-                        if (!p.exists())
+                        if (!p.exists()) {
                             p.mkdirs()
+                        }
                     }
                     file = new File(parent, filename)
                     if (!file.exists()) {

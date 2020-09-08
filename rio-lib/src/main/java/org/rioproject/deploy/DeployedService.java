@@ -58,7 +58,7 @@ public class DeployedService implements Serializable {
 
         DeployedService that = (DeployedService) o;
 
-        return !(serviceBeanInstance != null?
+        return !(serviceBeanInstance != null ?
                 !serviceBeanInstance.equals(that.serviceBeanInstance):
                 that.serviceBeanInstance != null);
 

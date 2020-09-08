@@ -31,6 +31,7 @@ import org.rioproject.impl.discovery.ReggieStat;
 import org.rioproject.impl.jmx.JMXUtil;
 import org.rioproject.impl.service.ServiceStopHandler;
 import org.rioproject.rmi.RegistryUtil;
+import org.rioproject.security.SecureEnv;
 import org.rioproject.tools.webster.Webster;
 import org.rioproject.util.TimeUtil;
 import org.slf4j.Logger;
@@ -1572,7 +1573,8 @@ public class CLI {
         }
     }
        
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws Exception {
+        SecureEnv.setup();
         ensureSecurityManager();
         try {
             initCLI(args);

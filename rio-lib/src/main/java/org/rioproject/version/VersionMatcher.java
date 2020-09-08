@@ -66,7 +66,7 @@ import java.io.Serializable;
  * @author Dennis Reedy
  */
 public class VersionMatcher implements Serializable {
-    private static final long serialVersionUID = 1l;
+    private static final long serialVersionUID = 1L;
     
     /**
      * Determine if versions are supported
@@ -79,14 +79,16 @@ public class VersionMatcher implements Serializable {
      * @throws IllegalArgumentException if either of the parameters are {@code null}.
      */
     public boolean versionSupported(final String requiredVersion, final String publishedVersion) {
-        if(requiredVersion == null)
+        if (requiredVersion == null) {
             throw new IllegalArgumentException("requiredVersion is null");
-        if(publishedVersion == null)
+        }
+        if (publishedVersion == null) {
             throw new IllegalArgumentException("publishedVersion is null");
+        }
         boolean supported;
         Version versionRequired = new Version(requiredVersion);
         Version versionBeingTested = new Version(publishedVersion);
-        if(versionRequired.minorVersionSupport() || versionRequired.majorVersionSupport()) {
+        if (versionRequired.minorVersionSupport() || versionRequired.majorVersionSupport()) {
             boolean minorVersionSupport = versionRequired.minorVersionSupport();
             int[] required;
             int[] configured;
@@ -95,30 +97,30 @@ public class VersionMatcher implements Serializable {
                 required = toIntArray(versionRequired.getVersion().split("\\D"));
                 configured = toIntArray(versionBeingTested.getVersion().split("\\D"));
             } catch(NumberFormatException e) {
-                return (false);
+                return false;
             }
-            if(required.length == 0)
-                return (true);
+            if (required.length == 0)
+                return true;
 
-            if(minorVersionSupport) {
+            if (minorVersionSupport) {
                 supported = checkMinorVersion(required, configured);
             } else {
                 supported = checkMajorVersion(required, configured);
             }
-            if(!supported && isRange) {
+            if (!supported && isRange) {
                 try {
                     configured = toIntArray(versionBeingTested.getEndRange().split("\\D"));
                 } catch(NumberFormatException e) {
-                    return (false);
+                    return false;
                 }
-                if(minorVersionSupport) {
+                if (minorVersionSupport) {
                     supported = checkMinorVersion(required, configured);
                 } else {
                     supported = checkMajorVersion(required, configured);
                 }
             }
         } else {
-            if(versionBeingTested.isRange()) {
+            if (versionBeingTested.isRange()) {
                 supported = withinRange(versionBeingTested, versionRequired);
             } else {
                 supported = versionBeingTested.equals(versionRequired);
@@ -133,50 +135,50 @@ public class VersionMatcher implements Serializable {
         int[] version = toIntArray(requiredVersion.getVersion().split("\\D"));
         boolean startRangePassed = false;
         boolean same = false;
-        for(int i=0;;i++) {
-            if(i>=startRange.length) {
+        for (int i = 0 ; ;i++) {
+            if (i >= startRange.length) {
                 startRangePassed = true;
                 break;
             }
-            if(i>=version.length) {
+            if (i >= version.length) {
                 startRangePassed = !same;
                 break;
             }
-            if(version[i]>startRange[i]) {
+            if (version[i] > startRange[i]) {
                 startRangePassed = true;
                 break;
             }
-            if(version[i]<startRange[i]) {
+            if (version[i] < startRange[i]) {
                 break;
             }
-            same = version[i]==startRange[i];
+            same = version[i] == startRange[i];
         }
         boolean endRangePassed = false;
-        if(startRangePassed) {
+        if (startRangePassed) {
             same = false;
-            for(int i=0;;i++) {
-                if(i>=endRange.length) {
-                    endRangePassed = !(i<version.length && same);
+            for (int i = 0; ; i++) {
+                if (i >= endRange.length) {
+                    endRangePassed = !(i < version.length && same);
                     break;
                 }
-                if(version[i]<endRange[i]) {
+                if (version[i] < endRange[i]) {
                     endRangePassed = true;
                     break;
                 }
-                if(version[i]>endRange[i]) {
+                if (version[i] > endRange[i]) {
                     break;
                 }
-                same = version[i]==endRange[i];
+                same = version[i] == endRange[i];
             }
         }
-        return startRangePassed&&endRangePassed;
+        return startRangePassed && endRangePassed;
     }
 
     private boolean checkMinorVersion(int[] required, int[] configured) {
         boolean supported = true;
-        for(int i = 0; i < required.length; i++) {
-            if(configured.length >= (i+1)) {
-                if(configured[i] != required[i]) {
+        for (int i = 0; i < required.length; i++) {
+            if (configured.length >= (i+1)) {
+                if (configured[i] != required[i]) {
                     supported = false;
                     break;
                 }
@@ -187,15 +189,15 @@ public class VersionMatcher implements Serializable {
 
     private boolean checkMajorVersion(int[] required, int[] configured) {
         boolean supported = true;
-        for(int i = 0; i < required.length; i++) {
-            if(configured.length >= (i+1)) {
-                if(configured[i] > required[i]) {
+        for (int i = 0; i < required.length; i++) {
+            if (configured.length >= (i+1)) {
+                if (configured[i] > required[i]) {
                     break;
                 }
-                if(configured[i] == required[i]) {
+                if (configured[i] == required[i]) {
                     continue;
                 }
-                if(configured[i] < required[i]) {
+                if (configured[i] < required[i]) {
                     supported = false;
                     break;
                 }
@@ -214,13 +216,13 @@ public class VersionMatcher implements Serializable {
      */
     private int[] toIntArray(final String[] a) throws NumberFormatException {
         int[] array = new int[a.length];
-        for(int i = 0; i < array.length; i++) {
-            if(a[i].length() == 0) {
+        for (int i = 0; i < array.length; i++) {
+            if (a[i].length() == 0) {
                 array[i] = Integer.parseInt("0");
             } else {
                 array[i] = Integer.parseInt(a[i]);
             }
         }
-        return (array);
+        return array;
     }
 }

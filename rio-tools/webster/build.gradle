@@ -15,10 +15,13 @@
  */
 description = 'Module :: Webster'
 dependencies {
-    compile project(':rio-start')
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.30.v20200611'
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
-    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+    compileOnly project(':rio-platform')
+    compileOnly project(':rio-start')
+    compileOnly group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.30.v20200611'
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+    compileOnly group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+    testCompile project(':rio-start')
+    testCompile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.30.v20200611'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile logRuntime
 }
@@ -27,4 +30,21 @@ test {
     systemProperty "java.security.policy", policyAll
     systemProperty "WEBSTER_JAR", "${project.buildDir.path}/webster-${project.version}.jar"
     systemProperty "projectDir", project.projectDir.path
+    systemProperty "build.dir", project.buildDir.path
+    systemProperty "rio.home", "${rootProject.projectDir}/distribution/src/main"
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "Rio Webster",
+                "Implementation-Version": "${project.version}",
+                "Rio-Version" : "${project.version}",
+                "Rio-Build": buildTime
+        )
+    }
+    from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
+        include "org/eclipse/jetty/**"
+        include "javax/servlet/**"
+        include "org/rioproject/web/**"
+    }
 }

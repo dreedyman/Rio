@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
 
@@ -95,7 +94,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
         if(config==null)
             throw new IllegalArgumentException("config is null");
         
-        List<MeasurableCapability> measurables = new ArrayList<MeasurableCapability>();
+        List<MeasurableCapability> measurables = new ArrayList<>();
         /* Create the Memory MeasurableCapability. This will measure memory
          * for the JVM */
         MeasurableCapability memory =  new Memory(config);
@@ -150,7 +149,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
         } catch (ConfigurationException e) {
             logger.warn("Loading MeasurableCapability array", e);
         }
-        return(measurables.toArray(new MeasurableCapability[measurables.size()]));
+        return measurables.toArray(new MeasurableCapability[0]);
     }        
 
     /**
@@ -163,7 +162,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
      * zero-length array will be returned.
      */
     public PlatformCapability[] getPlatformCapabilities(Configuration config) {
-        List<PlatformCapability> platforms = new ArrayList<PlatformCapability>();
+        List<PlatformCapability> platforms = new ArrayList<>();
         try {
             /* 
              * Load default platform (qualitative) capabilities
@@ -180,12 +179,11 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             PlatformCapability j2se = new J2SESupport();
             platforms.add(j2se);
 
-            List<PlatformCapability> platformCapabilityList = new ArrayList<PlatformCapability>();
             PlatformCapability[] pCaps = (PlatformCapability[])config.getEntry(COMPONENT,
                                                                                "platformCapabilities",
                                                                                PlatformCapability[].class,
                                                                                new PlatformCapability[0]);
-            platformCapabilityList.addAll(Arrays.asList(pCaps));
+            List<PlatformCapability> platformCapabilityList = new ArrayList<>(Arrays.asList(pCaps));
 
             PlatformCapability[] addCaps = (PlatformCapability[])config.getEntry(COMPONENT,
                                                                                  "addPlatformCapabilities",
@@ -213,7 +211,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             /*
              * Get the final array of PlatformCapability instances
              */
-            pCaps = platformCapabilityList.toArray(new PlatformCapability[platformCapabilityList.size()]);
+            pCaps = platformCapabilityList.toArray(new PlatformCapability[0]);
             for (PlatformCapability pCap : pCaps) {
                 if (pCap.getClass().getName().equals(RIO)) {
                     if (getRioHome() != null) {
@@ -246,7 +244,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
 
             /* Create NativeLibrarySupport objects */ 
             String nativeLibDirs = System.getProperty(NATIVE_LIBS);
-            List<File> dirList = new ArrayList<File>();
+            List<File> dirList = new ArrayList<>();
             if(nativeLibDirs!=null && nativeLibDirs.length()>0) {
                 StringTokenizer st = new StringTokenizer(nativeLibDirs, File.pathSeparator+" ");
                 while(st.hasMoreTokens()) {
@@ -262,47 +260,46 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
                     }                       
                 }
                 final String[] libExtensions = getLibExtensions();
-                File[] dirs = dirList.toArray(new File[dirList.size()]);
+                File[] dirs = dirList.toArray(new File[0]);
                 for (File dir : dirs) {
-                    File[] files = dir.listFiles(new FileFilter() {
-                        public boolean accept(File pathName) {
-                            try {
-                                if(FileUtils.isSymbolicLink(pathName)) {
-                                    return false;
-                                }
-                            } catch (IOException e) {
-                                logger.warn( "Trying to determine whether the file is a symbolic link", e);
+                    File[] files = dir.listFiles(pathName -> {
+                        try {
+                            if(FileUtils.isSymbolicLink(pathName)) {
+                                return false;
                             }
-                            boolean matches = false;
-                            for(String libExtension : libExtensions) {
-                                if(pathName.getName().endsWith(libExtension)) {
-                                    matches = true;
-                                    break;
-                                }
-                            }
-                            return matches;
+                        } catch (IOException e) {
+                            logger.warn( "Trying to determine whether the file is a symbolic link", e);
                         }
+                        boolean matches = false;
+                        for(String libExtension : libExtensions) {
+                            if(pathName.getName().endsWith(libExtension)) {
+                                matches = true;
+                                break;
+                            }
+                        }
+                        return matches;
                     });
-
-                    for (File file : files) {
-                        String fileName = file.getName();
-                        int index = fileName.lastIndexOf(".");
-                        if (index != -1) {
-                            if (logger.isDebugEnabled())
-                                logger.debug("Create NativeLibrarySupport object for [{}]", fileName);
-                            PlatformCapability nLib = getPlatformCapability(NATIVE_LIB_CLASS);
-                            String name;
-                            /*if (!OperatingSystemType.isWindows()) {
-                                name = fileName.substring(3, index);
-                            } else {*/
-                            name = fileName.substring(0, index);
-                            //}
-                            nLib.define(NativeLibrarySupport.NAME, name);
-                            nLib.define(NativeLibrarySupport.FILENAME, fileName);
-                            nLib.setPath(dir.getCanonicalPath());
-                            platforms.add(nLib);
-                        } else {
-                            logger.warn("Illegal Shared Library name="+fileName);
+                    if (files != null) {
+                        for (File file : files) {
+                            String fileName = file.getName();
+                            int index = fileName.lastIndexOf(".");
+                            if (index != -1) {
+                                if (logger.isDebugEnabled())
+                                    logger.debug("Create NativeLibrarySupport object for [{}]", fileName);
+                                PlatformCapability nLib = getPlatformCapability(NATIVE_LIB_CLASS);
+                                String name;
+                                /*if (!OperatingSystemType.isWindows()) {
+                                   name = fileName.substring(3, index);
+                                } else {*/
+                                name = fileName.substring(0, index);
+                                //}
+                                nLib.define(NativeLibrarySupport.NAME, name);
+                                nLib.define(NativeLibrarySupport.FILENAME, fileName);
+                                nLib.setPath(dir.getCanonicalPath());
+                                platforms.add(nLib);
+                            } else {
+                                logger.warn("Illegal Shared Library name=" + fileName);
+                            }
                         }
                     }
                 }
@@ -312,7 +309,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
             logger.error("Getting PlatformCapability objects", t);
         }
 
-        return(platforms.toArray(new PlatformCapability[platforms.size()]));
+        return platforms.toArray(new PlatformCapability[0]);
     }
 
     /**
@@ -321,7 +318,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
      * @return A Map of PlatformCapability names to PlatformCapability classnames
      */
     public Map<String, String> getPlatformCapabilityNameTable() {
-        Map<String, String> nameTable = new HashMap<String, String>();
+        Map<String, String> nameTable = new HashMap<>();
         nameTable.put("ConnectivityCapability", CAPABILITY+".connectivity.ConnectivityCapability");
         nameTable.put("TCPConnectivity", TCPIP);
         nameTable.put("J2SESupport", J2SE);
@@ -366,7 +363,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     }
 
     protected PlatformCapability getPlatformCapability(String className) throws Exception {
-        Class pCapClass = Class.forName(className);
+        Class<?> pCapClass = Class.forName(className);
         return((PlatformCapability)pCapClass.newInstance());
     }
 
@@ -428,7 +425,7 @@ public class SystemCapabilities implements SystemCapabilitiesLoader {
     private PlatformCapability[] createPlatformCapabilities(PlatformCapabilityConfig[] caps) throws Exception {
         PlatformCapability[] pCaps = new PlatformCapability[caps.length];
         for(int i=0; i<caps.length; i++) {
-            Map<String, Object> attrs = new HashMap<String, Object>();
+            Map<String, Object> attrs = new HashMap<>();
             attrs.put(PlatformCapability.NAME, caps[i].getName());
             if(caps[i].getDescription()!=null)
                 attrs.put(PlatformCapability.DESCRIPTION, caps[i].getDescription());

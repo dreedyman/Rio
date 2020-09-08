@@ -37,7 +37,7 @@ public class ResolverConfigTest {
     private String artifactFileName = "darkside-deathstar-2.0-deploy.config";
 
     @Before
-    public void setup() throws IOException {
+    public void setup() throws Exception {
         File repo = new File(System.getProperty("user.dir")+"/build/repo");
         repo.mkdirs();
 

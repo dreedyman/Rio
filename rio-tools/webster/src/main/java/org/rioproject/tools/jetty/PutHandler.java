@@ -45,17 +45,19 @@ public class PutHandler extends DefaultHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String method = request.getMethod();
-        logger.info("Method: {}", method);
         if (!HttpMethod.PUT.is(method)) {
             super.handle(target, baseRequest, request, response);
             return;
         }
-        System.out.println("================ PUT ================");
-        System.out.println("target: " + target);
-        System.out.println("baseRequest: " + baseRequest);
-        System.out.println("HttpServletRequest: " + request);
-        System.out.println("HttpServletResponse: " + response);
-
+        logger.info("Method: {}", method);
+        if (logger.isDebugEnabled()) {
+            String s = "================ PUT ================\n" +
+                    "target: " + target + "\n" +
+                    "baseRequest: " + baseRequest + "\n" +
+                    "HttpServletRequest: " + request + "\n" +
+                    "HttpServletResponse: " + response + "\n";
+            logger.debug("\n" + s);
+        }
         put(target, baseRequest, response);
 
         baseRequest.setHandled(true);
@@ -69,7 +71,9 @@ public class PutHandler extends DefaultHandler {
         } else {
             response.setStatus(HttpServletResponse.SC_CREATED);
             File parentDir = putFile.getParentFile();
-            System.out.println("Parent: " + parentDir.getPath() + ", exists? " + parentDir.exists());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Parent: {}, exists? {}", parentDir.getPath(), parentDir.exists());
+            }
             if (!parentDir.exists()) {
                 parentDir.mkdirs();
             }
@@ -78,17 +82,22 @@ public class PutHandler extends DefaultHandler {
         try(DataOutputStream requestedFileOutputStream = new DataOutputStream(new FileOutputStream(putFile))) {
             int read;
             long amountRead = 0;
-            byte[] buffer = new byte[length < BUFFER_SIZE ? length : BUFFER_SIZE];
+            byte[] buffer = new byte[Math.min(length, BUFFER_SIZE)];
             while (amountRead < length) {
                 read = baseRequest.getInputStream().read(buffer);
                 requestedFileOutputStream.write(buffer, 0, read);
                 amountRead += read;
             }
             requestedFileOutputStream.flush();
-            System.out.println("Wrote: " + putFile.getPath() + " size: " + putFile.length());
-            System.out.println("HEADERS");
-            for(String n : response.getHeaderNames())
-                System.out.println("\t"+response.getHeader(n));
+            if (logger.isDebugEnabled()) {
+                StringBuilder s = new StringBuilder();
+                s.append("Wrote: ").append(putFile.getPath()).append(" size: ").append(putFile.length()).append("\n");
+                s.append("HEADERS\n");
+                for (String n : response.getHeaderNames()) {
+                    s.append("\t").append(response.getHeader(n)).append("\n");
+                }
+                logger.debug("\n{}", s.toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

@@ -52,7 +52,7 @@ class HarvesterTest {
         Assert.assertTrue "Expected at least 1 ProvisionMonitor", monitors.length>0
         Cybernode[] cybernodes = testManager.getServices(Cybernode.class)
         int waited = 0
-        while(cybernodes.length < 2 && waited < 120) {
+        while (cybernodes.length < 2 && waited < 120) {
             Thread.sleep(500)
             waited++
             cybernodes = testManager.getServices(ServiceBeanInstantiator.class)
@@ -69,11 +69,11 @@ class HarvesterTest {
         HarvesterBean h = new HarvesterBean(testManager.serviceDiscoveryManager.discoveryManager)        
         long timeout = 1000*60
         long duration = 0
-        while(h.agentsHandledCount<hosts.size()) {
+        while (h.agentsHandledCount < hosts.size()) {
             Thread.sleep(1000)
             duration += 1000
-            if(duration >= timeout)
-                break;
+            if (duration >= timeout)
+                break
         }
         Assert.assertTrue("Agents handled should be greater than 0, actual=${h.agentsHandledCount}", h.agentsHandledCount>0)
         ServiceMonitor sMon = new ServiceMonitor(testManager.serviceDiscoveryManager,

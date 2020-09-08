@@ -21,6 +21,7 @@ import net.jini.export.Exporter;
 import net.jini.jeri.BasicILFactory;
 import net.jini.jeri.BasicJeriExporter;
 import net.jini.jeri.ServerEndpoint;
+import net.jini.jeri.ssl.SslServerEndpoint;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.rioproject.config.Constants;
 import org.rioproject.net.HostUtil;
@@ -80,19 +81,22 @@ public class ExporterConfig {
     public static Exporter getExporter(Configuration config, String component, String entry) throws ConfigurationException {
 
         Exporter exporter = (Exporter) config.getEntry(component, entry, Exporter.class, null);
-        if(exporter==null) {
+        if (exporter == null) {
             exporter = (Exporter) config.getEntry(DEFAULT_COMPONENT, ENTRY_NAME, Exporter.class, null);
-            if(exporter==null) {
+            if (exporter == null) {
                 try {
                     exporter = new BasicJeriExporter(getServerEndpoint(), new BasicILFactory(), false, true);
                 } catch (UnknownHostException e) {
                     logger.warn("Unable to get host address, defaulting to localhost", e);
                     exporter = new BasicJeriExporter(TcpServerEndpoint.getInstance(0), new BasicILFactory(), false, true);
                 }
+            } else {
+                logger.debug("Obtained exporter: " + exporter);
             }
         }
-        if(logger.isTraceEnabled())
+        if (logger.isTraceEnabled()) {
             logger.trace(String.format("Created %s for %s.%s", exporter, component, entry));
+        }
         return exporter;
     }
 
@@ -100,12 +104,14 @@ public class ExporterConfig {
         InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
         String range = System.getProperty(Constants.PORT_RANGE);
         ServerSocketFactory factory = null;
-        if(range!=null) {
+        if (range != null) {
             String[] parts = range.split("-");
             int start = Integer.parseInt(parts[0]);
             int end = Integer.parseInt(parts[1]);
             factory = new PortRangeServerSocketFactory(start, end);
         }
+
+        //return SslServerEndpoint.getInstance(address.getHostAddress(), 0, null, factory);
         return TcpServerEndpoint.getInstance(address.getHostAddress(), 0, null, factory);
     }
 }

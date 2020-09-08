@@ -16,11 +16,17 @@
 package org.rioproject.deploy;
 
 import org.rioproject.util.PropertyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 
 /**
  * The StagedData class defines the attributes needed to download and stage
@@ -61,6 +67,7 @@ public class StagedData implements Serializable {
      * Optional permissions to set on the staged data.
      */
     private String perms;
+    private static final Logger LOGGER = LoggerFactory.getLogger(StagedData.class);
 
     /**
      * Get the download size
@@ -69,9 +76,9 @@ public class StagedData implements Serializable {
      *
      * @throws java.io.IOException If there are errors accessing the location
      */
-    public int getDownloadSize() throws IOException {
+    public long getDownloadSize() throws IOException {
         getLocationURL();
-        return (locationURL.openConnection().getContentLength());
+        return locationURL.openConnection().getContentLengthLong();
     }
 
     /**
@@ -79,18 +86,19 @@ public class StagedData implements Serializable {
      *
      * @return The location of the download
      *
-     * @throws MalformedURLException if the source locatiion <tt>URL</tt>
+     * @throws MalformedURLException if the source location <tt>URL</tt>
      * cannot be created
      */
     public URL getLocationURL() throws MalformedURLException {
-        if(locationURL==null) {
-            if(location.contains(PropertyHelper.PARSETIME[0]) ||
+        if (locationURL==null) {
+            if (location.contains(PropertyHelper.PARSETIME[0]) ||
                location.contains(PropertyHelper.RUNTIME[0])) {
                 location = PropertyHelper.expandProperties(location, PropertyHelper.PARSETIME);
                 location = PropertyHelper.expandProperties(location, PropertyHelper.RUNTIME);
             }
             locationURL = new URL(location);
         }
+        LOGGER.info("Using locationURL: " + locationURL.toExternalForm());
         return locationURL;
     }
 
@@ -175,7 +183,7 @@ public class StagedData implements Serializable {
     /**
      * File permissions to set on the downloaded data. If the downloaded data
      * is extracted, this permission string will be applied recursively to the
-     * extracted directory structure
+     * extracted directory strurlConnectionture
      *
      * @return Permissions to set on the staged data. The
      * permissions need to be in the form of what the <tt>chmod</tt> command
@@ -195,5 +203,17 @@ public class StagedData implements Serializable {
                ", overwrite=" + overwrite +
                ", perms='" + perms + '\'' +
                '}';
+    }
+
+    private void set() {
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        } };
     }
 }

@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import java.lang.reflect.Method;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -109,12 +108,7 @@ public class ServiceStarter {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("ServiceReference");
-            sb.append("{proxy=").append(proxy);
-            sb.append(", impl=").append(impl);
-            sb.append('}');
-            return sb.toString();
+            return String.format("ServiceReference, {proxy=%s, impl=%s}", proxy, impl);
         }
     }
     
@@ -149,10 +143,8 @@ public class ServiceStarter {
         }
 
         public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append(this.getClass()).append(":[descriptor=").append(descriptor).append(", ");
-            builder.append("result=").append(result).append(", exception=").append(exception).append("]");
-            return builder.toString();
+            return String.format("%s:[descriptor=%s, result=%s, exception=%s]",
+                    this.getClass().getName(), descriptor, result, exception);
         }
     }
 
@@ -217,7 +209,7 @@ public class ServiceStarter {
      * @see net.jini.config.Configuration
      */
     private static Result[] create(final ServiceDescriptor[] descs, final Configuration config) {
-        List<Result> proxies = new ArrayList<Result>();
+        List<Result> proxies = new ArrayList<>();
         logger.debug("Starting {} service(s)", descs.length);
         for (ServiceDescriptor desc : descs) {
             Object result = null;
@@ -336,10 +328,11 @@ public class ServiceStarter {
         logger.debug("Obtained {} service descriptors to start", descs.length);
         LoginContext loginContext = (LoginContext)config.getEntry(COMPONENT, "loginContext", LoginContext.class, null);
         Result[] results;
-        if (loginContext != null)
+        if (loginContext != null) {
             results = createWithLogin(descs, config, loginContext);
-        else
+        } else {
             results = create(descs, config);
+        }
         return results;
     }
 
@@ -350,8 +343,9 @@ public class ServiceStarter {
     */
     private static List<ServiceReference> getServiceReferences(Result[] results) {
         List<ServiceReference> refs = new ArrayList<>();
-        if (results.length == 0)
+        if (results.length == 0) {
             return refs;
+        }
         for (Result result : results) {
             Class<?> rDescClass = result.descriptor.getClass();
             if (result.result != null) {
@@ -378,8 +372,9 @@ public class ServiceStarter {
      * collected.
      */
     private static void maintainNonActivatableReferences(Result[] results) {
-        if (results.length == 0)
+        if (results.length == 0) {
             return;
+        }
         for (Result result : results) {
             if (result != null && result.result != null &&
                 (NonActivatableServiceDescriptor.class.equals(result.descriptor.getClass()) ||
@@ -395,8 +390,9 @@ public class ServiceStarter {
      * descriptor that produced an exception or that was null.
      */
     private static void checkResultFailures(Result[] results) {
-        if (results.length == 0)
+        if (results.length == 0) {
             return;
+        }
         for (int i = 0; i < results.length; i++) {
             if (results[i].exception != null) {
                 logger.warn("service.creation.unknown", results[i].exception);
@@ -405,6 +401,14 @@ public class ServiceStarter {
                 logger.warn("service.creation.null {}", i);
             }
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        for (Object ref : transientServiceRefs) {
+            logger.debug("Could shutdown " + ref.getClass().getName());
+        }
+        super.finalize();
     }
 
     /**

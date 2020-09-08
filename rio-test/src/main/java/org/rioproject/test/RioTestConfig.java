@@ -34,4 +34,5 @@ public @interface RioTestConfig {
     int numLookups() default 0;
     String opstring() default "";
     boolean autoDeploy() default true;
+    boolean https() default true;
 }

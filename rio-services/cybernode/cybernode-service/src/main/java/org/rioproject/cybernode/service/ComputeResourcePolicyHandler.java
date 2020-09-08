@@ -64,7 +64,7 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
     }
 
     public void notify(Calculable calculable, ThresholdValues thresholdValues, ThresholdType type) {
-        if(terminate.get())
+        if (terminate.get())
             return;
         String status = type.name().toLowerCase();
         logger.debug("Threshold={}, Status={}, Value={}, Low={}, High={}",
@@ -74,27 +74,27 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
                      thresholdValues.getLowThreshold(),
                      thresholdValues.getHighThreshold());
 
-        if(type==ThresholdType.BREACHED)  {
+        if (type == ThresholdType.BREACHED)  {
             double tValue = calculable.getValue();
-            if(tValue>thresholdValues.getCurrentHighThreshold()) {
-                if(serviceConsumer!=null) {
+            if (tValue>thresholdValues.getCurrentHighThreshold()) {
+                if (serviceConsumer!=null) {
                     serviceConsumer.updateMonitors();
                 }
-                if(calculable.getId().equals(SystemWatchID.JVM_MEMORY)) {
+                if (calculable.getId().equals(SystemWatchID.JVM_MEMORY)) {
                     logger.warn("Memory utilization is {}, threshold set at {}, request immediate garbage collection",
                                 calculable.getValue(), thresholdValues.getCurrentHighThreshold());
                     System.gc();
                 }
-                if(calculable.getId().contains(SystemWatchID.JVM_PERM_GEN)) {
+                if (calculable.getId().contains(SystemWatchID.JVM_PERM_GEN)) {
                     logger.warn("Perm Gen has breached with utilization > {}", thresholdValues.getCurrentHighThreshold());
-                    //if(isEnlisted())
+                    //if (isEnlisted())
                     //release(false);
                     //svcConsumer.cancelRegistrations();
                 }
 
             }
-        } else if(type== ThresholdType.CLEARED) {
-            if(serviceConsumer!=null) {
+        } else if (type == ThresholdType.CLEARED) {
+            if (serviceConsumer!=null) {
                 serviceConsumer.updateMonitors();
             }
         }

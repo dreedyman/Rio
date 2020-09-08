@@ -19,14 +19,20 @@
  * a Lookup Service
  */
 
+import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.config.Component
+import org.rioproject.resolver.maven2.Repository
+import org.rioproject.security.SecureEnv
 import org.rioproject.util.RioHome
 import org.rioproject.util.ServiceDescriptorUtil;
-import com.sun.jini.start.ServiceDescriptor
-import org.rioproject.resolver.maven2.Repository
 
 @Component('org.rioproject.start')
 class StartMonitorConfig {
+    final boolean secure
+
+    StartMonitorConfig() {
+        secure = SecureEnv.setup()
+    }
 
     String[] getMonitorConfigArgs(String rioHome) {
         def configArgs = [rioHome+'/config/common.groovy', rioHome+'/config/monitor.groovy']
@@ -51,7 +57,8 @@ class StartMonitorConfig {
         String policyFile = rioHome+'/policy/policy.all'
 
         def serviceDescriptors = [
-            ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+            //ServiceDescriptorUtil.getWebster(policyFile, '0', websterRoots as String[]),
+            ServiceDescriptorUtil.getJetty('0', websterRoots as String[], secure),
             ServiceDescriptorUtil.getLookup(policyFile, getLookupConfigArgs(rioHome)),
             ServiceDescriptorUtil.getMonitor(policyFile, getMonitorConfigArgs(rioHome))
         ]
