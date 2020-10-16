@@ -47,6 +47,8 @@ jar {
     from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
         include "org/rioproject/tools/**"
         include "org/rioproject/cybernode/**"
+        include "org/eclipse/**"
+        include "javax/servlet/**"
     }
 }
 
