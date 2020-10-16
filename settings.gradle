@@ -11,6 +11,7 @@ include ':cybernode-ui'
 include ':monitor-proxy'
 include ':monitor-service'
 include ':rio-cli'
+include ':rio-ui'
 include ':webster'
 include ':watch-ui'
 include ':rio-test'
@@ -28,6 +29,7 @@ project(':cybernode-ui').projectDir = "$rootDir/rio-services/cybernode/cybernode
 project(':monitor-proxy').projectDir = "$rootDir/rio-services/monitor/monitor-proxy" as File
 project(':monitor-service').projectDir = "$rootDir/rio-services/monitor/monitor-service" as File
 project(':rio-cli').projectDir = "$rootDir/rio-tools/rio-cli" as File
+project(':rio-ui').projectDir = "$rootDir/rio-tools/rio-ui" as File
 project(':webster').projectDir = "$rootDir/rio-tools/webster" as File
 project(':watch-ui').projectDir = "$rootDir/rio-tools/watch-ui" as File
 project(':rio-test').projectDir = "$rootDir/rio-test" as File
