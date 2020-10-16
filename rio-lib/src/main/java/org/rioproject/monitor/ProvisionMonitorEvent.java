@@ -91,9 +91,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
         EXTERNAL_SERVICE_DISCOVERED
     }
     /** The action for the event */
-    private Action action;
+    private final Action action;
     /** The OperationalString name */
-    private String opStringName;
+    private final String opStringName;
     /** The ServiceElement. May be null */
     private ServiceElement sElem;
     /** The OperationalString. May be null */
@@ -102,7 +102,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
     private Object[] redeploymentParms;
     /** The ServiceBeanInstance. May be null */
     private ServiceBeanInstance instance;
-    private final Collection<RemoteRepository> remoteRepositories = new ArrayList<RemoteRepository>();
+    private final Collection<RemoteRepository> remoteRepositories = new ArrayList<>();
 
     /**
      * Create a ProvisionMonitorEvent for a ServiceElement add, remove or change
@@ -114,8 +114,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      */
     public ProvisionMonitorEvent(Object source, Action action, ServiceElement sElem) {
         super(source);
-        if(sElem==null)
+        if (sElem == null) {
             throw new IllegalArgumentException("sElem is null");
+        }
         opStringName = sElem.getOperationalStringName();
         this.action = action;
         this.sElem = sElem;
@@ -131,8 +132,9 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      */
     public ProvisionMonitorEvent(Object source, Action action, OperationalString opString) {
         super(source);
-        if(opString==null)
+        if (opString == null) {
             throw new IllegalArgumentException("opString is null");
+        }
         this.action = action;
         this.opString = opString;
         opStringName = opString.getName();
@@ -148,10 +150,12 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      */
     public ProvisionMonitorEvent(Object source, String opStringName, ServiceBeanInstance instance) {
         super(source);
-        if(opStringName==null)
+        if (opStringName == null) {
             throw new IllegalArgumentException("opStringName cannot be null");
-        if(instance==null)
+        }
+        if (instance == null) {
             throw new IllegalArgumentException("instance is null");
+        }
         this.action = Action.SERVICE_BEAN_INSTANCE_UPDATED;
         this.instance = instance;
         this.opStringName = opStringName;
@@ -173,10 +177,12 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
                                  ServiceElement sElem,
                                  ServiceBeanInstance instance) {
         super(source);
-        if(opStringName==null)
+        if (opStringName == null) {
             throw new IllegalArgumentException("opStringName cannot be null");
-        if(sElem==null)
+        }
+        if (sElem == null) {
             throw new IllegalArgumentException("sElem is null");
+        }
         this.action = action;
         this.sElem = sElem;
         this.instance = instance;
@@ -199,10 +205,12 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
                                  ServiceBeanInstance instance,
                                  Object[] args) {
         super(source);        
-        if(opStringName==null)
+        if (opStringName == null) {
             throw new IllegalArgumentException("opStringName cannot be null");
-        if(args==null)
+        }
+        if (args == null) {
             throw new IllegalArgumentException("redeployment args cannot be null");
+        }
         this.action = Action.REDEPLOY_REQUEST;
         this.opStringName = opStringName;
         this.sElem = sElem;
@@ -226,7 +234,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * @return The name of the OperationalString associated with this event
      */
     public String getOperationalStringName() {
-        return(opStringName);
+        return opStringName;
     }
     
     /**
@@ -250,7 +258,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * OPSTRING_UNDEPLOYED
      */
     public OperationalString getOperationalString() {
-        return(opString);
+        return opString;
     }    
     
     /**
@@ -262,7 +270,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * SERVICE_PROVISIONED or SERVICE_FAILED
      */
     public ServiceBeanInstance getServiceBeanInstance() {
-        return(instance);
+        return instance;
     }
         
     /**
@@ -274,7 +282,7 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * property will be null if the action type is not REDEPLOY_REQUEST
      */
     public Object[] getRedeploymentParms() {
-        return(redeploymentParms);
+        return redeploymentParms;
     }
 
     /**
@@ -283,11 +291,11 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
      * @return The EventDescriptor for this event
      */
     public static EventDescriptor getEventDescriptor(){
-        return(new EventDescriptor(ProvisionMonitorEvent.class, ID));
+        return new EventDescriptor(ProvisionMonitorEvent.class, ID);
     }
 
     public RemoteRepository[] getRemoteRepositories() {
-        return remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]);
+        return remoteRepositories.toArray(new RemoteRepository[0]);
     }
     
     public void setRemoteRepositories(RemoteRepository[] repositories) {
@@ -302,10 +310,12 @@ public class ProvisionMonitorEvent extends RemoteServiceEvent implements Seriali
         sb.append("ProvisionMonitorEvent: ");
         sb.append("action=").append(action);
         sb.append(", opStringName='").append(opStringName);
-        if(sElem!=null)
+        if (sElem != null) {
             sb.append(", service=").append(sElem.getName());
-        if(redeploymentParms!=null)
+        }
+        if (redeploymentParms != null) {
             sb.append(", redeploymentParms=").append(Arrays.asList(redeploymentParms).toString());
+        }
         sb.append(", when: ").append(formatter.format(getDate()));
         return sb.toString();
     }
