@@ -105,7 +105,6 @@ public class CPU extends MeasurableCapability {
             if(monitorJVM) {
                 ProcessCPUHandler cpuHandler = new ProcessCPUHandler();
                 cpuHandler.setMXBean(ManagementFactory.getOperatingSystemMXBean());
-                cpuHandler.setStartTime(ManagementFactory.getRuntimeMXBean().getStartTime());
                 defaultMonitor = cpuHandler;
             } else {
                 SystemCPUHandler cpuHandler = new SystemCPUHandler();

@@ -33,19 +33,13 @@ import java.lang.management.OperatingSystemMXBean;
  */
 public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
     private com.sun.management.OperatingSystemMXBean osMBean;
-    private double startTime;
-    private double cpuBefore;
     private String id;
     private ThresholdValues tVals;
 
     public void setMXBean(OperatingSystemMXBean mxBean) {
-        if(mxBean instanceof com.sun.management.OperatingSystemMXBean) {
+        if (mxBean instanceof com.sun.management.OperatingSystemMXBean) {
             osMBean = (com.sun.management.OperatingSystemMXBean)mxBean;
         }
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
     }
 
     public void setID(String id) {
@@ -56,7 +50,7 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
         this.tVals = tVals;
     }
 
-    public MeasuredResource getMeasuredResource() {
+    public ProcessCpuUtilization getMeasuredResource() {
         return getUtilization();
     }
 
@@ -69,23 +63,15 @@ public class ProcessCPUHandler implements MXBeanMonitor<OperatingSystemMXBean> {
     }
 
     private double getUtilizationUsingJMX() {
-        double utilization = 0;
         checkMXBean();
-        if(osMBean==null)
+        if (osMBean == null) {
             return 0;
-        double cpuAfter = osMBean.getProcessCpuTime();
-        double endTime = System.nanoTime();
-
-        if(endTime>startTime) {
-            utilization = (cpuAfter-cpuBefore)/(endTime-startTime);
         }
-        startTime = endTime;
-        cpuBefore = cpuAfter;
-        return utilization;
+        return osMBean.getProcessCpuLoad();
     }
 
     private void checkMXBean() {
-        if(osMBean==null) {
+        if (osMBean == null) {
             OperatingSystemMXBean mxBean = ManagementFactory.getOperatingSystemMXBean();
             setMXBean(mxBean);
         }
