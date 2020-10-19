@@ -20,19 +20,19 @@
 import net.jini.core.discovery.LookupLocator
 import net.jini.export.Exporter
 import net.jini.jrmp.JrmpExporter
-
-import org.rioproject.config.Component
-import org.rioproject.config.Constants
-import org.rioproject.monitor.service.selectors.RoundRobinSelector
-import org.rioproject.monitor.service.selectors.ServiceResourceSelector
-import org.rioproject.resolver.RemoteRepository
-import org.rioproject.impl.client.JiniClient
 import net.jini.security.BasicProxyPreparer
 import net.jini.core.constraint.InvocationConstraints
 import net.jini.constraint.BasicMethodConstraints
 import net.jini.core.constraint.ConnectionRelativeTime
 import net.jini.security.ProxyPreparer
 import net.jini.core.constraint.MethodConstraints
+
+import org.rioproject.config.Component
+import org.rioproject.config.Constants
+import org.rioproject.impl.client.JiniClient
+import org.rioproject.monitor.service.selectors.RoundRobinSelector
+import org.rioproject.monitor.service.selectors.ServiceResourceSelector
+import org.rioproject.resolver.RemoteRepository
 import org.rioproject.util.PortUtil
 
 /*

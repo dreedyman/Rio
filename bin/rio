@@ -28,10 +28,6 @@ if [ "$1" = "start" ]; then
     start=1
     shift
     command_line=$*
-elif [ "$1" = "browser" ]; then
-    browser=1
-    shift
-    command_line=$*
 elif [ "$1" = "install" ]; then
     install=1
     shift
@@ -223,15 +219,6 @@ if [ "$start" = "1" ]; then
         -Drio.script.mainClass="$launchTarget" \
         $USER_OPTS \
         $NETWORK $DEBUG $launchTarget $starterConfig $command_line
-elif [ "$browser" = "1" ] ;then
-      classpath="-cp $(toNative $RIO_LIB/rio-start-$rioVersion.jar:$RIO_LIB/browser-1.0.jar:$RIO_LIB/rio-lib-$rioVersion.jar)"
-      classpath="$classpath:$(toNative $RIO_LIB/groovy-all-$groovyVersion.jar)"
-      classpath="$classpath:$(toNative $SLF4J_CLASSPATH)"
-      classpath="$classpath:$(toNative $RIO_LIB/../lib-dl/serviceui-$riverVersion.jar)"
-
-    """$JAVACMD"""  $loggingConfig -Drio.home=$RIO_HOME -Djava.security.policy="$(toNative $RIO_HOME/policy/policy.all)" \
-    -Djava.protocol.handler.pkgs=org.rioproject.url \
-    $classpath org.apache.river.examples.browser.Browser
 elif [ "$install" = "1" ] ;then
     # Run installer
     installRioToLocalRepository

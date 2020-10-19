@@ -99,7 +99,7 @@ class BasicMeasurable {
 @Component('org.rioproject.system.measurable.cpu')
 class MeasurableCPU extends BasicMeasurable {
     MeasurableMonitor getMonitor() {
-        if(OperatingSystemType.isLinux())
+        if (OperatingSystemType.isLinux())
             new LinuxHandler() as MeasurableMonitor
         else
             new SystemCPUHandler() as MeasurableMonitor
@@ -109,8 +109,7 @@ class MeasurableCPU extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        int numCPUs = Runtime.getRuntime().availableProcessors()
-        new ThresholdValues(0.0, numCPUs)
+        new ThresholdValues(0.0, 1.0)
     }
 
 }
@@ -127,8 +126,7 @@ class MeasurableJVMCPU extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        int numCPUs = Runtime.getRuntime().availableProcessors()
-        new ThresholdValues(0.0, numCPUs)
+        new ThresholdValues(0.0, 1.0)
     }
 }
 
@@ -144,7 +142,7 @@ class MeasurableMemory extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        new ThresholdValues(0.0, 0.80)
+        new ThresholdValues(0.0, 0.95)
     }
 }
 
@@ -156,7 +154,7 @@ class MeasurableMemory extends BasicMeasurable {
 class MeasurableSystemMemory extends BasicMeasurable {
 
     MeasurableMonitor getMonitor() {
-        if(OperatingSystemType.isLinux())
+        if (OperatingSystemType.isLinux())
             return new MemInfoMonitor() as MeasurableMonitor
         else
             return new SystemMemoryMonitor() as MeasurableMonitor
@@ -167,7 +165,7 @@ class MeasurableSystemMemory extends BasicMeasurable {
      */
     @Override
     ThresholdValues getThresholdValues() {
-        new ThresholdValues(0.0, 0.999)
+        new ThresholdValues(0.0, 0.99)
     }
 }
 
@@ -180,12 +178,14 @@ class MeasurableDiskSpace extends BasicMeasurable {    }
 
 @Component('org.rioproject.system.memory.pool')
 class MemoryPools extends BasicMeasurable {
+
     MemoryPool[] getMemoryPools(Configuration config) {
         def memoryPools = []
-        for(MemoryPoolMXBean mBean : ManagementFactory.getMemoryPoolMXBeans()) {
-            if(mBean.name.contains("Perm Gen"))
+        for (MemoryPoolMXBean mBean : ManagementFactory.getMemoryPoolMXBeans()) {
+            if (mBean.name.contains("Perm Gen")) {
                 memoryPools << new MemoryPool(mBean.name, config, new ThresholdValues(0.0, 0.80))
-            if(mBean.getType()==MemoryType.HEAP && mBean.isUsageThresholdSupported()) {
+            }
+            if (mBean.getType()==MemoryType.HEAP && mBean.isUsageThresholdSupported()) {
                 memoryPools << new MemoryPool(mBean.name, config, new ThresholdValues(0.0, 0.80))
             }
         }

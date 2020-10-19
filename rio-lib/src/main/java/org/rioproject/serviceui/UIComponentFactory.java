@@ -21,10 +21,15 @@ import net.jini.lookup.ui.factory.JComponentFactory;
 import javax.swing.*;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The UIComponentFactory class is a helper for use with the ServiceUI
@@ -33,12 +38,18 @@ import java.security.PrivilegedAction;
  */
 public class UIComponentFactory implements JComponentFactory, Serializable {
     static final long serialVersionUID = 1L;
-    private String className;
+    private final String className;
     private URL[] exportURL;
+    private String urlString;
 
     public UIComponentFactory(URL exportUrl, String className) {
         this.className = className;
         this.exportURL = new URL[]{exportUrl};
+    }
+
+    public UIComponentFactory(String urlString, String className) {
+        this.className = className;
+        this.urlString = urlString;
     }
 
     public UIComponentFactory(URL[] exportURL, String className) {
@@ -47,52 +58,74 @@ public class UIComponentFactory implements JComponentFactory, Serializable {
     }
 
     public JComponent getJComponent(Object roleObject) {
-        if(!(roleObject instanceof ServiceItem)) {
+        if (!(roleObject instanceof ServiceItem)) {
             throw new IllegalArgumentException("ServiceItem required");
         }
         ClassLoader cl = ((ServiceItem)roleObject).service.getClass().getClassLoader();
-        JComponent component = null;
+        JComponent component;
         try {
+            if (urlString != null) {
+                exportURL = expandUrlString();
+            }
+            StringBuilder b = new StringBuilder();
+            for (URL url : exportURL) {
+                if (b.length() > 0) {
+                    b.append(":");
+                }
+                b.append(url.toExternalForm());
+            }
+            System.out.println("Load: " + className + ", from: " + b.toString());
             final URLClassLoader uiLoader = new URLClassLoader(exportURL, cl);
             final Thread currentThread = Thread.currentThread();
             final ClassLoader parentLoader = 
-                AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                    public ClassLoader run() {
-                        return (currentThread.getContextClassLoader());
-                    }
-                });
+                AccessController.doPrivileged((PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
             try {
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(uiLoader);
-                        return (null);
-                    }
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(uiLoader);
+                    return null;
                 });
-                Class clazz  ;
+                Class<?> clazz  ;
                 try {
                     clazz = uiLoader.loadClass(className);
-                } catch(ClassNotFoundException ex) {
+                } catch (ClassNotFoundException ex) {
                     ex.printStackTrace();
                     throw ex;
                 }
-                Constructor constructor = clazz.getConstructor(Object.class);
+                Constructor<?> constructor = clazz.getConstructor(Object.class);
                 Object instanceObj = constructor.newInstance(roleObject);
                 component = (JComponent)instanceObj;
             } finally {
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        currentThread.setContextClassLoader(parentLoader);
-                        return (null);
-                    }
+                AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                    currentThread.setContextClassLoader(parentLoader);
+                    return null;
                 });
             }
-        } catch(Throwable t) {
-            if(t.getCause() != null)
+        } catch (Throwable t) {
+            if (t.getCause() != null) {
                 t = t.getCause();
-            IllegalArgumentException e = new IllegalArgumentException("Unable to instantiate ServiceUI :"+className);
-            e.initCause(t);
-            throw e;
+            }
+            throw new IllegalArgumentException("Unable to instantiate ServiceUI :" + className, t);
         }
-        return (component);
+        return component;
+    }
+
+    URL[] expandUrlString() throws MalformedURLException {
+        URL[] urls = new URL[1];
+        String regex = "\\$\\{(.+?)\\}";
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(urlString);
+        StringBuilder s = new StringBuilder();
+        int last = 0;
+        while (matcher.find()) {
+            s.append(urlString,
+                     last,
+                     matcher.start());
+            String match = urlString.substring(matcher.start(), matcher.end());
+            last = matcher.end();
+            String property = match.substring(2, match.length() - 1);
+            s.append(System.getProperty(property));
+        }
+        urls[0] = new URL(s.toString());
+        return urls;
     }
 }

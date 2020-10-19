@@ -441,10 +441,10 @@ public class ServiceProvisioner implements ServiceProvisionDispatcher {
                     logger.debug("Wrote [{}] to {}", LoggingUtil.getLoggingName(request), pendingMgr.getType());
                     pendingMgr.dumpCollection();
                 }
-                processProvisionFailure(new ProvisionFailureEvent(eventSource,
+                /*processProvisionFailure(new ProvisionFailureEvent(eventSource,
                                                                   request.getServiceElement(),
                                                                   request.getFailureReasons(),
-                                                                  null));
+                                                                  null));*/
             }
         } catch(Throwable t) {
             logger.warn("Dispatching ProvisionRequest", t);
