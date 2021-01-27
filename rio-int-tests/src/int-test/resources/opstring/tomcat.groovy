@@ -40,12 +40,12 @@ deployment(name: 'Tomcat Deploy') {
          * overwrite: 'no', removeOnDestroy: false
          */
         software(name: 'Tomcat', version: '9.0.36', removeOnDestroy: true) {
-            install source: 'https://downloads.apache.org/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip',
+            install source: 'https://downloads.apache.org/tomcat/tomcat-9/v9.0.38/bin/apache-tomcat-9.0.38.zip',
                     target: 'tomcat',
                     unarchive: true
             postInstall(removeOnCompletion: false) {
                 if (!System.properties['os.name'].toLowerCase().contains('windows')) {
-                    execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-9.0.37/bin/*sh'
+                    execute command: '/bin/chmod +x ${rio.home}/system/external/tomcat/apache-tomcat-9.0.38/bin/*sh'
                 }
             }
         }

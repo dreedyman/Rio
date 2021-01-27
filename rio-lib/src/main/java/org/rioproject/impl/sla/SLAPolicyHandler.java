@@ -33,10 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * A SLAPolicyHandler handles thresholds for a ThresholdWatch, registering to a
@@ -341,8 +338,10 @@ public class SLAPolicyHandler implements SettableThresholdListener {
        public void run() {
             while (true) {
                 try {
-                    SLAThresholdEvent event = eventQ.take();
-                    eventHandler.fire(event);
+                    SLAThresholdEvent event = eventQ.poll(1, TimeUnit.MINUTES);
+                    if (event != null) {
+                        eventHandler.fire(event);
+                    }
                 } catch(InterruptedException e) {
                     /* */
                     break;

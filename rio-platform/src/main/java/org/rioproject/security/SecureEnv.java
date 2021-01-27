@@ -46,9 +46,9 @@ public class SecureEnv {
             File keyStoreFile = new File(keyStorePath);
             keyStores.add(KeyStoreHelper.load(keyStoreFile));
         }
-        LOGGER.info("Initialize AggregateTrustManager");
-        org.rioproject.security.AggregateTrustManager.initialize(keyStores.toArray(new KeyStore[0]));
-        LOGGER.info("Allow all host names");
+        LOGGER.debug("Initialize AggregateTrustManager");
+        AggregateTrustManager.initialize(keyStores.toArray(new KeyStore[0]));
+        LOGGER.debug("Allow all host names");
         javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((hostname, sslSession) -> true);
     }
 }

@@ -32,7 +32,6 @@ configurations {
 
 dependencies {
     distribution "org.codehaus.groovy:groovy-all:${groovyVersion}"
-    distribution "org.apache.river.examples:browser:1.0"
     distribution "org.apache.river:start:$riverVersion"
     distribution "org.apache.river:reggie:$riverVersion"
     distribution "org.apache.river:reggie-dl:$riverVersion"
@@ -106,6 +105,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                                     ":cybernode-ui:install",
                                     ":monitor-service:install",
                                     ":rio-cli:install",
+                                    ":rio-ui:install",
                                     //":rio-test:install",
                                     ":watch-ui:install",
                                     gatherDeps]) {
@@ -123,8 +123,12 @@ task createDistribution(dependsOn: [":rio-platform:install",
                 project.tasks.withType(Jar).each { jar ->
                     File target
                     String name = jar.archiveName
-                    if(!name.contains("sources") && !name.contains("javadoc")) {
-                        if (name.indexOf('dl') > 0 || name.indexOf('ui') > 0 || name.indexOf('proxy') > 0) {
+                    if (!name.contains("sources") && !name.contains("javadoc")) {
+                        if (name.indexOf('dl') > 0
+                                || name.startsWith('cybernode-ui')
+                                || name.startsWith('watch-ui')
+                                || name.startsWith('serviceui')
+                                || name.indexOf('proxy') > 0) {
                             target = rioDlDir
                         } else if (name.contains("resolver")) {
                             target = rioResolverDir

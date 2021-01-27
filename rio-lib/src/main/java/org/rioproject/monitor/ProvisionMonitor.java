@@ -31,8 +31,7 @@ import java.util.Collection;
  *
  * @author Dennis Reedy
  */
-public interface
-    ProvisionMonitor extends ProvisionManager, Service {
+public interface ProvisionMonitor extends ProvisionManager, Service {
 
     /**
      * Assign the ProvisionMonitor as a backup for another ProvisionMonitor
@@ -97,12 +96,12 @@ public interface
      * Contains information about ProvisionMonitor peers involved in providing 
      * support for backup approach 
      */
-    static class PeerInfo implements Comparable, Serializable {
+    class PeerInfo implements Comparable<PeerInfo>, Serializable {
         private static final long serialVersionUID = 2L;
-        private ProvisionMonitor service;
+        private final ProvisionMonitor service;
         private Integer backupCount;
-        private String address;
-        private Long id;
+        private final String address;
+        private final Long id;
         public final static int INITIAL_DEPLOYMENTS_PENDING = 0;
         public final static int LOADING_INITIAL_DEPLOYMENTS = 1;
         public final static int LOADED_INITIAL_DEPLOYMENTS = 2;
@@ -117,9 +116,9 @@ public interface
          * is running on
          */
         public PeerInfo(ProvisionMonitor service, long id, String address) {
-            if(service==null)
+            if (service==null)
                 throw new IllegalArgumentException("service is null");
-            if(address==null)
+            if (address==null)
                 throw new IllegalArgumentException("address is null");
             this.service = service;            
             this.address = address;
@@ -128,7 +127,7 @@ public interface
         }
 
         public Long getID() {
-            return(id);
+            return id;
         }
         
         /**
@@ -138,7 +137,7 @@ public interface
          * @return The address of the machine the ProvisionMonitor is running on
          */
         public String getAddress() {
-            return(address);    
+            return address;
         }
         
         /**
@@ -148,8 +147,9 @@ public interface
          * ProvisionMonitor is a backup for
          */
         public void setBackupCount(int bCount) {
-            if(bCount<0)
+            if (bCount < 0) {
                 throw new IllegalArgumentException("backupCount must be positive");
+            }
             synchronized(this) {
                 this.backupCount = bCount;
             }
@@ -165,7 +165,7 @@ public interface
             synchronized(this) {
                 bCount = backupCount;
             }
-            return(bCount);
+            return bCount;
         }
         
         /**
@@ -174,7 +174,7 @@ public interface
          * @return The ProvisionMonitor
          */
         public ProvisionMonitor getService() {
-            return(service);
+            return service;
         }
 
         /**
@@ -185,7 +185,7 @@ public interface
          * @throws IllegalStateException if the new state is not valid
          */
         public void setInitialDeploymentLoadState(int state) {
-            if(state < INITIAL_DEPLOYMENTS_PENDING ||
+            if (state < INITIAL_DEPLOYMENTS_PENDING ||
                state > LOADED_INITIAL_DEPLOYMENTS)
                 throw new IllegalStateException("state must be between "+
                                                 INITIAL_DEPLOYMENTS_PENDING+" " +
@@ -200,14 +200,14 @@ public interface
          * @return The initial deployment state
          */
         public int getInitialDeploymentLoadState() {
-            return(initialDeploymentState);
+            return initialDeploymentState;
         }
 
         /**
          * Override hashCode to return the hashCode of the service
          */
         public int hashCode() {
-            return (service.hashCode());
+            return service.hashCode();
         }
 
         /**
@@ -215,24 +215,24 @@ public interface
          * instance is equal
          */
         public boolean equals(Object o) {
-            if(!(o instanceof PeerInfo))
-                return (false);
+            if (!(o instanceof PeerInfo)) {
+                return false;
+            }
             PeerInfo that = (PeerInfo)o;
-            return (this.service.equals(that.service));
+            return this.service.equals(that.service);
         }
 
         /**
          * Compare PeerInfo instances to each other to determine natural order.
          * Order is determined by backup count and lastly random ID
          */
-        public int compareTo(Object o) {
-            if(!(o instanceof PeerInfo))
-                throw new ClassCastException();
-            PeerInfo that = (PeerInfo)o;
-            if(this.backupCount.equals(that.backupCount))
-                return (this.id.compareTo(that.id));
-            else
-                return (this.backupCount.compareTo(that.backupCount));
+       @Override
+        public int compareTo(PeerInfo that) {
+            if (this.backupCount.equals(that.backupCount)) {
+                return this.id.compareTo(that.id);
+            } else {
+                return this.backupCount.compareTo(that.backupCount);
+            }
         }
     }
 

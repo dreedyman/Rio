@@ -49,7 +49,6 @@ if "%JAVA_MEM_OPTIONS%" == "" set JAVA_MEM_OPTIONS="-XX:MaxPermSize=256m"
 :: Parse command line
 if "%1"=="" goto interactive
 if "%1"=="start" goto start
-if "%1"=="browser" goto browser
 
 :interactive
 :: set cliExt="%RIO_HOME%"\config\rio_cli.groovy
@@ -67,14 +66,6 @@ set ipv4="-Djava.net.preferIPv4Stack=true"
 set keystore="-Dorg.rioproject.keystore="%RIO_HOME%"\config\security\rio-cert.ks"
 
 "%JAVACMD%" %classpath% -Xms256m -Xmx256m -Djava.protocol.handler.pkgs=org.rioproject.url -Drio.home="%RIO_HOME%" %keystore% %urlProp% %rmiProps% %secProps% %ipv4% %serialProps% %launchTarget% %cliExt% %command_line%
-goto end
-
-:browser
-set RIO_LIB="%RIO_HOME%\lib
-set RIO_LIB-DL="%RIO_HOME%\lib-dl
-set urlProp="-Djava.protocol.handler.pkgs=org.rioproject.url"
-set classpath=-cp "%RIO_LIB%/rio-start-%rioVersion%.jar:%RIO_LIB%/browser-1.0.jar:%RIO_LIB%/rio-lib-%rioVersion%.jar:%RIO_LIB%/groovy-all-%groovyVersion%.jar:%SLF4J_CLASSPATH%:%RIO_LIB-DL%/serviceui-%riverVersion%.jar"
-"%JAVACMD%" %classpath% %logbackConfig% %loggingConfig -Djava.security.policy="%RIO_HOME%\policy\policy.all" -Drio.home=%RIO_HOME% %keystore% %urlProp% org.apache.river.examples.browser.Browser
 goto end
 
 :start

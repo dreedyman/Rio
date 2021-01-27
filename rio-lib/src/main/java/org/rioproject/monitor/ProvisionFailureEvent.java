@@ -38,7 +38,7 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
     private Throwable exception;
     /** The ServiceElement that could not be provisioned */
     private ServiceElement sElem;
-    private final List<String> failureReasons = new ArrayList<String>();
+    private final List<String> failureReasons = new ArrayList<>();
 
     /**
      * Create a ProvisionFailureEvent with attributes
@@ -76,7 +76,7 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
      * @return The ServiceElement
      */
     public ServiceElement getServiceElement() {
-        return (sElem);
+        return sElem;
     }
 
     /**
@@ -86,7 +86,7 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
      */
     @Deprecated
     public String getReason() {
-        return (failureReasons.toString());
+        return failureReasons.toString();
     }
 
     /**
@@ -96,9 +96,7 @@ public class ProvisionFailureEvent extends RemoteServiceEvent implements Seriali
      * an empty {@code List} is returned.
      */
     public List<String> getFailureReasons() {
-        List<String> list = new ArrayList<String>();
-        list.addAll(failureReasons);
-        return list;
+        return new ArrayList<>(failureReasons);
     }
 
     /**

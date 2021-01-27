@@ -30,7 +30,7 @@ resolver {
     jar = "${rioHome()}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
 
     repositories {
-        remote = ["bintray": "https://dl.bintray.com/dreedyman/Rio",
+        remote = ["bintray": "https://dl.bintray.com/dreedyman/maven",
                   "rio"    : "http://www.rio-project.org/maven2",
                   "central": "https://repo1.maven.org/maven2"]
 

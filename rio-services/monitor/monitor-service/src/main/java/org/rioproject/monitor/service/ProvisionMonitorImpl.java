@@ -175,24 +175,30 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     public void destroy() {
         logger.debug("ProvisionMonitor: destroy() notification");
         /* stop the provisioner */
-        if(provisioner!=null)
+        if (provisioner != null) {
             provisioner.terminate();
+        }
         /* Cleanup opStringManagers */
         opStringMangerController.shutdownAllManagers();
-        if(deployMonitor!=null)
+        if (deployMonitor != null) {
             deployMonitor.terminate();
+        }
         /* Remove watches */
-        if(provisionWatch != null)
+        if (provisionWatch != null) {
             getWatchRegistry().deregister(provisionWatch);
-        if(taskTimer!=null)
+        }
+        if (taskTimer != null) {
             taskTimer.cancel();
+        }
         /* stop the provisionMonitorPeer */
-        if(provisionMonitorPeer!=null)
+        if (provisionMonitorPeer != null) {
             provisionMonitorPeer.terminate();
+        }
         /* destroy the PersistentStore */
-        if(snapshotter != null)
+        if (snapshotter != null) {
             snapshotter.interrupt();
-        if(store != null) {
+        }
+        if (store != null) {
             try {
                 store.destroy();
             } catch(Exception t) {
@@ -201,8 +207,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         }
         super.destroy();
         logger.info("Destroyed Monitor");
-        if(lifeCycle!=null)
+        if (lifeCycle != null) {
             lifeCycle.unregister(this);
+        }
     }
 
     /**
@@ -212,18 +219,21 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     @Override
     public Object getAdmin() {
-        if(inShutdown.get())
+        if (inShutdown.get()) {
             return null;
+        }
         Object adminProxy = null;
         try {
             if (admin == null) {
                 Exporter adminExporter = getAdminExporter();
-                if (contextMgr != null)
+                if (contextMgr != null) {
                     admin = new ProvisionMonitorAdminImpl(this,
                                                           adminExporter,
                                                           contextMgr.getContextAttributeLogHandler());
-                else
-                    admin = new ProvisionMonitorAdminImpl(this, adminExporter);
+                } else {
+                    admin = new ProvisionMonitorAdminImpl(this,
+                                                          adminExporter);
+                }
             }
             adminProxy = admin.getServiceAdmin();
         } catch (Exception e) {
@@ -238,7 +248,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @return The ComputeResource associated with this ProvisionMonitor
      */
     public ComputeResource getComputeResource() {
-        return(computeResource);
+        return computeResource;
     }
 
 
@@ -250,7 +260,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      *
      */
     public TrustVerifier getProxyVerifier() {
-        return (new ProvisionMonitorProxy.Verifier(getExportedProxy()));
+        return new ProvisionMonitorProxy.Verifier(getExportedProxy());
     }
 
     /**
@@ -264,12 +274,12 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         String sPort = System.getProperty(Constants.REGISTRY_PORT, "0");
         int registryPort = Integer.parseInt(sPort);
         String name = context.getServiceBeanConfig().getName();
-        if(registryPort!=0) {
+        if (registryPort != 0) {
             try {
                 Registry registry = RegistryUtil.getRegistry(registryPort);
                 registry.bind(name, proxy);
                 logger.debug("Bound to RMI Registry on port={}", registryPort);
-            } catch(RemoteException | UnknownHostException | AlreadyBoundException e) {
+            } catch (RemoteException | UnknownHostException | AlreadyBoundException e) {
                 logger.warn("Binding {} to RMI Registry", name, e);
             }
         } else {
@@ -284,8 +294,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     @Override
     protected ServiceInfo getServiceInfo() {
         String build = RioVersion.getBuildNumber();
-        if(build==null)
-            build="0";
+        if (build == null) {
+            build = "0";
+        }
         return new ServiceInfo(context.getServiceElement().getName(),
                                "Asarian Technologies LLC",
                                "Rio Project",
@@ -298,8 +309,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
     protected ServiceType getServiceType(final String name, final String comment) {
         StandardServiceType sType = new StandardServiceType();
         sType.name = name;
-        if(comment!=null)
+        if (comment != null) {
             sType.description = comment;
+        }
         sType.iconName = "icon/rio-service.jpg";
         return sType;
     }
@@ -308,8 +320,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @see org.rioproject.monitor.DeployAdmin#getOperationalStringManagers
      */
     public OperationalStringManager[] getOperationalStringManagers() {
-        if(opStringMangerController.getOpStringManagers().length==0)
+        if (opStringMangerController.getOpStringManagers().length == 0) {
             return (new OperationalStringManager[0]);
+        }
         ArrayList<OpStringManager> list =
             new ArrayList<>(Arrays.asList(opStringMangerController.getOpStringManagers()));
         OperationalStringManager[] os = new OperationalStringManager[list.size()];
@@ -317,25 +330,25 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         for (OpStringManager opMgr : list) {
             os[i++] = opMgr.getProxy();
         }
-        return (os);
+        return os;
     }
 
     /*
      * @see org.rioproject.monitor.DeployAdmin#getOperationalStringManager
      */
     public OperationalStringManager getOperationalStringManager(String name) throws OperationalStringException {
-        if(name==null)
+        if (name==null)
             throw new IllegalArgumentException("name is null");
         OperationalStringManager opStringManager = null;
         OpStringManager opMgr = opStringMangerController.getOpStringManager(name);
-        if(opMgr!=null && opMgr.isActive()) {
+        if (opMgr!=null && opMgr.isActive()) {
             opStringManager = opMgr.getProxy();
         } else  {
             try {
                 DeployAdmin dAdmin = opStringMangerController.getPrimaryDeployAdmin(name);
-                if(dAdmin!=null) {
+                if (dAdmin!=null) {
                     OperationalStringManager mgr = dAdmin.getOperationalStringManager(name);
-                    if(mgr.isManaging()) {
+                    if (mgr.isManaging()) {
                         opStringManager = mgr;
                     }
                 }
@@ -346,8 +359,9 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             }
         }
 
-        if(opStringManager==null)
-            throw new OperationalStringException(String.format("Unmanaged OperationalString [%s]",name ), false);
+        if (opStringManager == null) {
+            throw new OperationalStringException(String.format("Unmanaged OperationalString [%s]", name), false);
+        }
         return(opStringManager);
     }
 
@@ -355,20 +369,22 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @see org.rioproject.monitor.ProvisionMonitorImplMBean#deploy
      */
     public DeploymentResult deploy(String opStringLocation) throws MalformedURLException {
-        if(opStringLocation == null)
+        if (opStringLocation == null) {
             throw new IllegalArgumentException("argument cannot be null");
+        }
         URL opStringURL = null;
         try {
             opStringURL = getArtifactURL(opStringLocation);
         } catch (OperationalStringException e) {
-            e.printStackTrace();
+            logger.warn("Getting artifact URL", e);
         }
-        if(opStringURL==null) {
+        if (opStringURL == null) {
             File f = new File(opStringLocation);
-            if(f.exists())
+            if (f.exists()) {
                 opStringURL = f.toURI().toURL();
-            else
+            } else {
                 opStringURL = new URL(opStringLocation);
+            }
         }
 
         DeploymentResult deploymentResult;
@@ -390,7 +406,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                         return (getClass().getClassLoader());
                     }
                 });
-            if(swapCLs) {
+            if (swapCLs) {
                 AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     currentThread.setContextClassLoader(myCL);
                     return (null);
@@ -399,14 +415,14 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             deploymentResult = deploy(opStringURL, null);
         } catch(OperationalStringException e) {
             Throwable cause =  e.getCause();
-            if(cause==null)
+            if (cause==null)
                 cause = e;
             Map<String, Throwable> m = new HashMap<>();
             m.put(cause.getClass().getName(), cause);
             deploymentResult = new DeploymentResult(null, m);
             logger.warn("Deploying {}", opStringURL, e);
         } finally {
-            if(swapCLs) {
+            if (swapCLs) {
                 AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     currentThread.setContextClassLoader(cCL);
                     return (null);
@@ -425,11 +441,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             /* no-op */
         }
         URL opStringURL = null;
-        if(isArtifact) {
+        if (isArtifact) {
             try {
                 Resolver r = ResolverHelper.getResolver();
                 opStringURL = r.getLocation(a, "oar");
-                if(opStringURL==null)
+                if (opStringURL==null)
                     throw new OperationalStringException(String.format("Artifact %s not resolvable", a));
             } catch (ResolverException e) {
                 throw new OperationalStringException(e.getLocalizedMessage(), e);
@@ -443,11 +459,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     public DeploymentResult deploy(String opStringLocation, ServiceProvisionListener listener)
         throws OperationalStringException {
-        if(opStringLocation == null)
+        if (opStringLocation == null)
             throw new IllegalArgumentException("OperationalString location cannot be null");
 
         URL opStringURL = getArtifactURL(opStringLocation);
-        if(opStringURL==null) {
+        if (opStringURL==null) {
             try {
                 opStringURL = new URL(opStringLocation);
             } catch (MalformedURLException e) {
@@ -463,18 +479,18 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     public DeploymentResult deploy(final URL opStringUrl, ServiceProvisionListener listener)
     throws OperationalStringException {
-        if(opStringUrl == null)
+        if (opStringUrl == null)
             throw new IllegalArgumentException("OperationalString URL cannot be null");
         DeploymentResult deploymentResult;
         try {
             OAR oar;
             URL opStringUrlToUse = opStringUrl;
-            if(opStringUrl.toExternalForm().endsWith("oar")) {
+            if (opStringUrl.toExternalForm().endsWith("oar")) {
                 oar = new OAR(opStringUrl);
                 opStringUrlToUse = new URL("jar:" + oar.getURL().toExternalForm() + "!/" + oar.getOpStringName());
             }
             OperationalString[] opStrings = opStringLoader.parseOperationalString(opStringUrlToUse);
-            if(opStrings != null && opStrings.length>0) {
+            if (opStrings != null && opStrings.length>0) {
                 deploymentResult = deploy(opStrings[0], listener);
             } else {
                 throw new OperationalStringException("After parsing "+opStringUrl.toExternalForm()+", " +
@@ -492,11 +508,11 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      */
     public DeploymentResult deploy(OperationalString opString, ServiceProvisionListener listener)
     throws OperationalStringException {
-        if(opString == null)
+        if (opString == null)
             throw new IllegalArgumentException("OperationalString cannot be null");
         DeploymentResult deploymentResult;
         try {
-            if(!opStringMangerController.opStringExists(opString.getName())) {
+            if (!opStringMangerController.opStringExists(opString.getName())) {
                 logger.info("Deploying Operational String [{}]", opString.getName());
 
                 DeployRequest request = new DeployRequest(opString, null);
@@ -506,7 +522,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                 OpStringManager manager = opStringMangerController.addOperationalString(opString, map, null, null, listener);
                 deploymentResult = new DeploymentResult(manager.getOperationalStringManager(), map);
             } else {
-                if(logger.isInfoEnabled())
+                if (logger.isInfoEnabled())
                     logger.info("Operational String [{}] already deployed", opString.getName());
                 OperationalStringManager manager = opStringMangerController.getOpStringManager(opString.getName()).getOperationalStringManager();
                 deploymentResult = new DeploymentResult(manager, null);
@@ -537,12 +553,12 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @see org.rioproject.monitor.DeployAdmin#undeploy
      */
     public boolean undeploy(final String name, boolean terminate) throws OperationalStringException  {
-        if(name == null)
+        if (name == null)
             throw new IllegalArgumentException("name cannot be null");
         String opStringName = name;
         logger.info("Undeploying {}", opStringName);
         URL artifactURL = getArtifactURL(name);
-        if(artifactURL!=null) {
+        if (artifactURL!=null) {
             try {
                 OAR oar = new OAR(artifactURL);
                 OperationalString[] opstring = oar.loadOperationalStrings();
@@ -555,12 +571,12 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
         boolean undeployed = false;
         OpStringManager opMgr = opStringMangerController.getOpStringManager(opStringName);
         logger.trace("OpStringManager: {}", opMgr);
-        if(opMgr == null || (!opMgr.isActive())) {
+        if (opMgr == null || (!opMgr.isActive())) {
             try {
                 DeployAdmin dAdmin = opStringMangerController.getPrimaryDeployAdmin(opStringName);
-                if(dAdmin!=null) {
+                if (dAdmin!=null) {
                     OperationalStringManager mgr = dAdmin.getOperationalStringManager(opStringName);
-                    if(mgr.isManaging()) {
+                    if (mgr.isManaging()) {
                         dAdmin.undeploy(name);
                         undeployed = true;
                     }
@@ -575,7 +591,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             opStringMangerController.undeploy(opMgr, terminate);
             undeployed = true;
         }
-        if(!undeployed) {
+        if (!undeployed) {
             throw new OperationalStringException(String.format("No deployment for [%s] found", opStringName));
         }
         return true;
@@ -585,10 +601,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
      * @see org.rioproject.monitor.DeployAdmin#hasDeployed
      */
     public boolean hasDeployed(String opStringName) {
-        if(opStringName == null)
+        if (opStringName == null)
             throw new IllegalArgumentException("Parameters cannot be null");
         for (OpStringManager opMgr : opStringMangerController.getOpStringManagers()) {
-            if(opStringName.equals(opMgr.getName())) {
+            if (opStringName.equals(opMgr.getName())) {
                 return (true);
             }
         }
@@ -751,7 +767,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                                                                             "logDirectory",
                                                                             String.class,
                                                                             null);
-            if(logDirName != null) {
+            if (logDirName != null) {
                 stateManager = new StateManager(logDirName, opStringMangerController);
                 logger.info("ProvisionMonitor: using absolute logdir path [{}]", store.getStoreLocation());
                 store.snapshot();
@@ -786,7 +802,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             opStringMangerController.setServiceProxy(getEventProxy());
             opStringMangerController.setDeploymentVerifier(deploymentVerifier);
 
-            if(System.getProperty(Constants.WEBSTER)==null) {
+            if (System.getProperty(Constants.WEBSTER)==null) {
                 System.setProperty(Constants.WEBSTER, context.getExportCodebase());
                 logger.warn("The system property [{}] has not been set, it has been resolved to: {}",
                                Constants.WEBSTER, System.getProperty(Constants.WEBSTER));
@@ -815,7 +831,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             * If we have a persistent store, process recovered or updated
             * OperationalString elements
             */
-            if(stateManager!=null) {
+            if (stateManager!=null) {
                 stateManager.processRecoveredOpStrings();
                 stateManager.processUpdatedOpStrings();
             }
@@ -854,12 +870,12 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
                             "milliseconds. Continuing on with initialization.",
                             deployMonitorPeriod, e);
             }
-            if(logger.isDebugEnabled())
+            if (logger.isDebugEnabled())
                 logger.debug("Configured to scan for OAR deployments every {}", TimeUtil.format(deployMonitorPeriod));
 
-            if(deployMonitorPeriod>0) {
+            if (deployMonitorPeriod>0) {
                 String rioHome = RioHome.get();
-                if(!rioHome.endsWith("/"))
+                if (!rioHome.endsWith("/"))
                     rioHome = rioHome+"/";
                 File deployDir = new File(rioHome+"deploy");
                 DeployHandler fsDH = new FileSystemOARDeployHandler(deployDir, deploymentVerifier);
@@ -897,10 +913,10 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             } catch(ConfigurationException e) {
                 logger.warn("Exception getting initialOpStrings", e);
             }
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 StringBuilder builder = new StringBuilder();
                 for (String s : initialOpStrings) {
-                    if(builder.length()>0)
+                    if (builder.length()>0)
                         builder.append(", ");
                     builder.append(s);
                 }
@@ -913,7 +929,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
              */
             long now = System.currentTimeMillis();
             DeployAdmin dAdmin = getLocalDeployAdmin();
-            if(initialOpStrings.length>0)
+            if (initialOpStrings.length>0)
                 taskTimer.schedule(new InitialOpStringLoadTask(initialOpStrings,
                                                                dAdmin,
                                                                provisionMonitorPeer,
@@ -924,7 +940,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
             * If we were booted without a serviceID (perhaps using RMI
             * Activation), then create one
             */
-            if(serviceID == null) {
+            if (serviceID == null) {
                 serviceID = new ServiceID(getUuid().getMostSignificantBits(), getUuid().getLeastSignificantBits());
                 logger.debug("Created new ServiceID: {}", serviceID.toString());
             }
@@ -932,7 +948,7 @@ public class ProvisionMonitorImpl extends ServiceBeanAdapter implements Provisio
              * Force a snapshot so the persistent store reflects the current
              * state of the Provisioner
              */
-            if(store != null)
+            if (store != null)
                 store.snapshot();
 
             MBeanServer mbs = MBeanServerFactory.getMBeanServer();

@@ -1,0 +1,50 @@
+/*
+ * Copyright to the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+description = 'Module :: Rio User Interface'
+dependencies {
+  compileOnly project(':rio-lib')
+  compileOnly project(':webster')
+  compileOnly group: 'net.jini', name: 'jsk-lib', version: "${riverVersion}"
+  compileOnly group: 'net.jini.lookup', name: 'serviceui', version: "${riverVersion}"
+  compileOnly group: 'org.swinglabs', name: 'swingx', version: '1.6.1'
+  compileOnly files('lib/prefuse-2007.10.21.jar')
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
+  compileOnly group: 'org.slf4j', name: 'slf4j-nop', version: "${slf4jVersion}"
+  implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
+}
+
+jar {
+  manifest {
+    attributes("Implementation-Title": "Rio Command Line Interface",
+            "Implementation-Version": "${project.version}",
+            "Rio-Version" : "${project.version}",
+            "Rio-Build": buildTime,
+            "Main-Class" : "org.rioproject.tools.ui.Main",
+            "Class-Path" : "groovy-all-${groovyVersion}.jar"
+    )
+  }
+  from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
+    include "org/rioproject/**"
+    include "net/jini/**"
+    include "com/sun/jini/**"
+    include "com/artima/lookup/**"
+    include "org/swinglabs/**"
+    include "org/jdesktop/**"
+    include "org/prefuse/**"
+    include "prefuse/**"
+    include "org/slf4j/**"
+  }
+}
