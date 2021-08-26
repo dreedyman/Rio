@@ -85,7 +85,6 @@ public class WebsterUTest {
 
     @Test
     public void createWebsterWithPortRangeServerSocketFactory() throws Exception {
-        Throwable t = null;
         String root = System.getProperty("user.dir");
         Webster w = new Webster(new PortRangeServerSocketFactory(10000, 10005), root, null);
         assertNotNull(w);
@@ -108,24 +107,36 @@ public class WebsterUTest {
         List<String> items = get(w.getPort());
         assertNotNull(items);
         File cwd = new File(System.getProperty("user.dir"));
-        assertTrue(items.size() == cwd.list().length);
+        assertEquals(items.size(), cwd.list().length);
+    }
+
+    @Test(expected = IOException.class)
+    public void testDirectoryTraversal() throws Exception {
+        Webster w = new Webster(0, System.getProperty("user.dir"));
+        get(w.getPort(), "/%2e%2e/");
+    }
+
+    @Test
+    public void testGetDirectory() throws Exception {
+        Webster w = new Webster(0, System.getProperty("user.dir"));
+        get(w.getPort(), "/%2e/");
     }
 
     private List<String> get(int port) throws IOException {
-        URL url = new URL("http://" + InetAddress.getLocalHost().getHostName()+ ":" + port);
-        System.out.println("===> "+url.toExternalForm());
+        return get(port, "");
+    }
+
+    private List<String> get(int port, String path) throws IOException {
+        URL url = new URL("http://" + InetAddress.getLocalHost().getHostName()+ ":" + port + path);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
         connection.setRequestMethod("GET");
-
         List<String> items = new ArrayList<>();
-
         connection.connect();
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-        String line;
-        while ((line = in.readLine()) != null) {
-            items.add(line);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                items.add(line);
+            }
         }
         return items;
     }
