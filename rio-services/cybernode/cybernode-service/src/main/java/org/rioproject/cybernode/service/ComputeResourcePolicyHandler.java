@@ -43,19 +43,19 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
     private final EventHandler thresholdEventHandler;
     private final ServiceElement serviceElement;
     private final Executor thresholdTaskPool = Executors.newCachedThreadPool();
-    private final ServiceConsumer serviceConsumer;
+    private final ProvisionManagerHandler provisionManagerHandler;
     private final ServiceBeanInstance instance;
     private final AtomicBoolean terminate = new AtomicBoolean(false);
     private static final Logger logger = LoggerFactory.getLogger(ComputeResourcePolicyHandler.class.getName());
 
     public ComputeResourcePolicyHandler(final ServiceElement serviceElement,
                                         final EventHandler thresholdEventHandler,
-                                        final ServiceConsumer serviceConsumer,
+                                        final ProvisionManagerHandler provisionManagerHandler,
                                         final ServiceBeanInstance instance) {
         this.serviceElement = serviceElement;
         this.thresholdEventHandler = thresholdEventHandler;
         this.instance = instance;
-        this.serviceConsumer = serviceConsumer;
+        this.provisionManagerHandler = provisionManagerHandler;
     }
 
 
@@ -77,8 +77,8 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
         if (type == ThresholdType.BREACHED)  {
             double tValue = calculable.getValue();
             if (tValue>thresholdValues.getCurrentHighThreshold()) {
-                if (serviceConsumer!=null) {
-                    serviceConsumer.updateMonitors();
+                if (provisionManagerHandler !=null) {
+                    provisionManagerHandler.updateMonitors();
                 }
                 if (calculable.getId().equals(SystemWatchID.JVM_MEMORY)) {
                     logger.warn("Memory utilization is {}, threshold set at {}, request immediate garbage collection",
@@ -94,8 +94,8 @@ public class ComputeResourcePolicyHandler implements ThresholdListener {
 
             }
         } else if (type == ThresholdType.CLEARED) {
-            if (serviceConsumer!=null) {
-                serviceConsumer.updateMonitors();
+            if (provisionManagerHandler !=null) {
+                provisionManagerHandler.updateMonitors();
             }
         }
 

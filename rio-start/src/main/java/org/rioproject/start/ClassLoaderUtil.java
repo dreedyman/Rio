@@ -44,12 +44,12 @@ public final class ClassLoaderUtil {
     private ClassLoaderUtil() {
     }
 
-    public static URL[] getClasspathURLs(String classpath) throws IOException, MalformedURLException {
+    public static URL[] getClasspathURLs(String classpath) throws IOException {
         StringTokenizer st = new StringTokenizer(classpath, File.pathSeparator);
         URL[] urls = new URL[st.countTokens()];
         if (logger.isTraceEnabled())
             logger.trace("Create URLs from {}", classpath);
-        for(int i = 0; st.hasMoreTokens(); ++i) {
+        for (int i = 0; st.hasMoreTokens(); ++i) {
             String next = st.nextToken();
             File f = new File(next);
             if (logger.isTraceEnabled())
@@ -65,7 +65,7 @@ public final class ClassLoaderUtil {
         URL[] urls = new URL[st.countTokens()];
         if (logger.isTraceEnabled())
             logger.trace("Create codebase from {}", codebase);
-        for(int i = 0; st.hasMoreTokens(); ++i) {
+        for (int i = 0; st.hasMoreTokens(); ++i) {
             urls[i] = new URL(st.nextToken());
         }
 

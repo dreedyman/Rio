@@ -19,6 +19,7 @@ import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
 
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.net.URLClassLoader;
 
 /**
@@ -41,7 +42,8 @@ public class ConfigurationServiceDescriptor implements ServiceDescriptor {
         Thread currentThread = Thread.currentThread();
         ClassLoader currentClassLoader = currentThread.getContextClassLoader();
 
-        URLClassLoader serviceCL = new URLClassLoader(ClassLoaderUtil.getClasspathURLs(classPath));
+        URLClassLoader serviceCL = new URLClassLoader(ClassLoaderUtil.getClasspathURLs(classPath),
+                                                      currentClassLoader);
         currentThread.setContextClassLoader(serviceCL);
         try {
             Class<?> implClass = serviceCL.loadClass(implClassName);

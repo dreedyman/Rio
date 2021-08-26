@@ -166,7 +166,7 @@ public final class AetherService {
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
         session.setTransferListener(new ConsoleTransferListener());
         session.setRepositoryListener(new ConsoleRepositoryListener());
-        if(workspaceReader!=null)
+        if (workspaceReader != null)
             session.setWorkspaceReader(workspaceReader);
         return session;
     }
@@ -238,7 +238,7 @@ public final class AetherService {
                                                      workspaceReader,
                                                      SettingsUtil.getLocalRepositoryLocation(effectiveSettings));
         List<RemoteRepository> myRepositories;
-        if(repositories==null || repositories.isEmpty())
+        if (repositories==null || repositories.isEmpty())
             myRepositories = getRemoteRepositories();
         else
             myRepositories = repositories;
@@ -248,7 +248,7 @@ public final class AetherService {
 
         String actualVersion = version;
 
-        if(version.endsWith("LATEST")) {
+        if (version.endsWith("LATEST")) {
             DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, "[0,)");
             Map.Entry<String, RemoteRepository> result = getLatestVersion(artifact, session, repositoriesToUse);
             if (result != null) {
@@ -261,10 +261,10 @@ public final class AetherService {
         DefaultArtifact artifact = new DefaultArtifact(groupId, artifactId, classifier, extension, actualVersion);
         Dependency dependency = new Dependency(artifact, dependencyFilterScope==null?JavaScopes.RUNTIME:dependencyFilterScope);
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             StringBuilder builder = new StringBuilder();
-            for(RemoteRepository r : repositoriesToUse) {
-                if(builder.length()>0)
+            for (RemoteRepository r : repositoriesToUse) {
+                if (builder.length()>0)
                     builder.append(", ");
                 builder.append(r.getUrl());
             }
@@ -279,8 +279,8 @@ public final class AetherService {
         dependencyRequest.setCollectRequest(collectRequest);
 
         try {
-            List<ArtifactResult> artifactResults = repositorySystem.resolveDependencies(session,
-                                                                                        dependencyRequest).getArtifactResults();
+            List<ArtifactResult> artifactResults =
+                    repositorySystem.resolveDependencies(session, dependencyRequest).getArtifactResults();
             return new ResolutionResult(artifact, artifactResults);
         } catch(NullPointerException e) {
             /* catch and throw a DependencyCollectionException */
@@ -424,7 +424,7 @@ public final class AetherService {
      */
     private DependencyFilter getDependencyFilter(final Artifact a) {
         Collection<DependencyFilter> filters = new ArrayList<>();
-        if(a.getClassifier()!=null && a.getClassifier().equals("dl"))
+        if (a.getClassifier() != null && a.getClassifier().equals("dl"))
             filters.add(new ClassifierFilter(a.getClassifier()));
         else
             filters.add(new ExcludePlatformFilter());
@@ -468,16 +468,16 @@ public final class AetherService {
                                                                              MalformedURLException,
                                                                              VersionRangeResolutionException {
         List<RemoteRepository> myRepositories;
-        if(repositories==null || repositories.isEmpty())
+        if (repositories==null || repositories.isEmpty())
             myRepositories = getRemoteRepositories();
         else
             myRepositories = repositories;
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             StringBuilder builder = new StringBuilder();
-            if( myRepositories.size()>0) {
-                for(RemoteRepository r : myRepositories) {
-                    if(builder.length()>0)
+            if ( myRepositories.size()>0) {
+                for (RemoteRepository r : myRepositories) {
+                    if (builder.length()>0)
                         builder.append(", ");
                     builder.append(r.getUrl());
                 }
@@ -493,7 +493,7 @@ public final class AetherService {
         List<RemoteRepository> repositoriesToUse = applyAuthentication(myRepositories);
 
         Artifact a = new DefaultArtifact(artifactCoordinates);
-        if(a.getVersion().endsWith("LATEST")) {
+        if (a.getVersion().endsWith("LATEST")) {
             DefaultArtifact artifact = new DefaultArtifact(a.getGroupId(),
                                                            a.getArtifactId(),
                                                            a.getClassifier(),
@@ -533,11 +533,11 @@ public final class AetherService {
     List<RemoteRepository> getRemoteRepositories() {
         List<String> activeProfiles = effectiveSettings.getActiveProfiles();
         List<RemoteRepository> myRepositories = new ArrayList<>(configuredRepositories);
-        for(String activeProfile : activeProfiles) {
-            for(Profile profile : effectiveSettings.getProfiles()) {
-                if(profile.getId().equals(activeProfile)) {
-                    for(org.apache.maven.settings.Repository r : profile.getRepositories()) {
-                        if(!alreadyHaveRepository(myRepositories, r.getId())) {
+        for (String activeProfile : activeProfiles) {
+            for (Profile profile : effectiveSettings.getProfiles()) {
+                if (profile.getId().equals(activeProfile)) {
+                    for (org.apache.maven.settings.Repository r : profile.getRepositories()) {
+                        if (!alreadyHaveRepository(myRepositories, r.getId())) {
                             RepositoryPolicy snapShotPolicy = createRepositoryPolicy(r.getSnapshots());
                             RepositoryPolicy releasesPolicy = createRepositoryPolicy(r.getReleases());
                             RemoteRepository.Builder builder = new RemoteRepository.Builder(r.getId(), "default", r.getUrl());
@@ -551,8 +551,8 @@ public final class AetherService {
             }
         }
 
-        /*if(!alreadyHaveRepository(myRepositories, "central")) {
-            RemoteRepository central = new RemoteRepository.Builder("central", "default", "http://repo1.maven.org/maven2/").build();
+        /*if (!alreadyHaveRepository(myRepositories, "central")) {
+            RemoteRepository central = new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build();
             myRepositories.add(central);
         }*/
         return myRepositories;
@@ -566,13 +566,13 @@ public final class AetherService {
      * @return A {@code List} of {@code RemoteRepository}s with authentication applied
      */
     private List<RemoteRepository> applyAuthentication(final List<RemoteRepository> repositories) {
-        if(effectiveSettings.getServers().isEmpty())
+        if (effectiveSettings.getServers().isEmpty())
             return repositories;
         Set<RemoteRepository> appliedRepositories = new HashSet<>();
-        for(Server server : effectiveSettings.getServers()) {
-            for(RemoteRepository remoteRepository : repositories) {
-                if(server.getId().equals(remoteRepository.getId())) {
-                    if(server.getUsername()!=null) {
+        for (Server server : effectiveSettings.getServers()) {
+            for (RemoteRepository remoteRepository : repositories) {
+                if (server.getId().equals(remoteRepository.getId())) {
+                    if (server.getUsername() != null) {
                         Authentication authentication =
                             new AuthenticationBuilder()
                                 .addUsername(server.getUsername())
@@ -616,7 +616,7 @@ public final class AetherService {
     MirrorSelector getMirrorSelector(final List<RemoteRepository> repositories) {
         DefaultMirrorSelector mirrorSelector = new DefaultMirrorSelector();
         List<Mirror> mirrors = effectiveSettings.getMirrors();
-        if(!mirrors.isEmpty()) {
+        if (!mirrors.isEmpty()) {
 
             List<RemoteRepository> repositoryMirrors = new ArrayList<>();
             for (Mirror mirror : mirrors) {
@@ -631,8 +631,8 @@ public final class AetherService {
 
             /*for (RemoteRepository mirror : repositoryMirrors) {
                 List<RemoteRepository> mirroredRepositories = new ArrayList<RemoteRepository>();
-                for(RemoteRepository r : repositories) {
-                    if(mirrorSelector.getMirror(r)!=null) {
+                for (RemoteRepository r : repositories) {
+                    if (mirrorSelector.getMirror(r) != null) {
                         mirroredRepositories.add(r);
                         r.setUrl(mirror.getUrl());
                     }
@@ -654,7 +654,7 @@ public final class AetherService {
         boolean enabled = true;
         String updatePolicy = "";
         String checksumPolicy = "";
-        if(r!=null) {
+        if (r != null) {
             enabled = r.isEnabled();
             checksumPolicy = r.getChecksumPolicy();
             updatePolicy = r.getUpdatePolicy();
@@ -672,8 +672,8 @@ public final class AetherService {
      */
     private boolean alreadyHaveRepository(List<RemoteRepository> repositories, String id) {
         boolean hasRepository = false;
-        for(RemoteRepository r : repositories) {
-            if(id.equals(r.getId())) {
+        for (RemoteRepository r : repositories) {
+            if (id.equals(r.getId())) {
                 hasRepository = true;
                 break;
             }

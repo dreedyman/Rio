@@ -34,20 +34,15 @@ import java.util.List;
 public class CybernodeAdapter {
     private final ServiceBeanInstantiator instantiator;
     private final CybernodeImpl impl;
-    private final ComputeResource computeResource;
 
     public CybernodeAdapter(final ServiceBeanInstantiator instantiator,
-                            final CybernodeImpl impl,
-                            final ComputeResource computeResource) {
-        if (instantiator == null)
-            throw new IllegalArgumentException("instantiator is null");
-        if (impl == null)
+                            final CybernodeImpl impl) {
+        if (impl == null) {
             throw new IllegalArgumentException("impl is null");
-        if (computeResource == null)
-            throw new IllegalArgumentException("computeResource is null");
+        }
+
         this.instantiator = instantiator;
         this.impl = impl;
-        this.computeResource = computeResource;
     }
 
     public ServiceBeanInstantiator getInstantiator() {
@@ -55,15 +50,15 @@ public class CybernodeAdapter {
     }
 
     public ComputeResource getComputeResource() {
-        return computeResource;
+        return impl.getComputeResource();
     }
 
     public ResourceCapability getResourceCapability() {
-        return computeResource.getResourceCapability();
+        return impl.getComputeResource().getResourceCapability();
     }
 
     public List<DeployedService> getDeployedServices() {
-        List<DeployedService> list = new ArrayList<DeployedService>();
+        List<DeployedService> list = new ArrayList<>();
 
         for (ServiceRecord record :
             impl.getServiceRecords(ServiceRecord.ACTIVE_SERVICE_RECORD)) {
