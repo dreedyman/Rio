@@ -172,15 +172,15 @@ class TestManager {
 
     private void startConfiguredServices() {
         startWebster()
-        if (testConfig.getNumLookups()>0) {
+        if (testConfig.getNumLookups() > 0) {
             int lookupCount = testConfig.getNumLookups()-countLookups()
             for (int i=0; i<lookupCount; i++)
                 startReggie()
         }
 
-        if (testConfig.getNumMonitors()>0) {
+        if (testConfig.getNumMonitors() > 0) {
             int monitorCount = testConfig.getNumMonitors()-countMonitors()
-            if (monitorCount>0) {
+            if (monitorCount > 0) {
                 for (int i=0; i<monitorCount; i++)
                     startProvisionMonitor()
                 /*
@@ -206,7 +206,7 @@ class TestManager {
 
         if (testConfig.getOpString() != null) {
             setOpStringToDeploy(testConfig.getOpString())
-            if (testConfig.autoDeploy()) {
+            if (testConfig.autoDeploy() && testConfig.getNumMonitors() > 0) {
                 OperationalStringManager mgr = deploy()
                 setDeployedOperationalStringManager(mgr)
             }
@@ -315,19 +315,20 @@ class TestManager {
         String rioHome = System.getProperty('rio.home')
 
         String testRoots = System.getProperty("rio.test.webster.roots")
-        def roots = ["${rioHome}/lib-dl", "${rioHome}/lib", "${m2Repo}"]
+        String roots = "${rioHome}/lib-dl;${rioHome}/lib;${m2Repo}"
         if (testRoots != null) {
-            Collections.addAll(roots, testRoots.split(";"))
+            roots = testRoots + ";" + roots
         }
 
         WebsterService webster
         if (testConfig.useHttps()) {
             //SecureEnv.setup("${rioHome}/config/security/rio-cert.ks")
-            webster = new Jetty().setRoots(roots as String[])
+            webster = new Jetty().setRoots(roots.split(";") as String[])
             webster.startSecure()
         } else {
             //webster = new Jetty().setRoots(roots as String[])
-            webster = new Webster(0, null).setRoots(roots as String[])
+            StringBuilder rootBuilder = new StringBuilder()
+            webster = new Webster(0, roots)
             webster.start()
         }
         websters.add(webster)
@@ -670,7 +671,7 @@ class TestManager {
     String getAdditionalExecProps() {
         StringBuilder s = new StringBuilder()
         additionalExecProps.each { k, v ->
-            if (s.length()>0)
+            if (s.length() > 0)
                 s.append(" ")
             s.append("-D").append(k).append("=").append(v)
         }
@@ -893,7 +894,7 @@ class TestManager {
         if (type!=null)
             sb.append(type.name)
         if (name!=null) {
-            if (sb.length()>0)
+            if (sb.length() > 0)
                 sb.append(", ")
             sb.append("name: ").append(name)
         }
