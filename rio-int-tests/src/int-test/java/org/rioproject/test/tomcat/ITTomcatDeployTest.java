@@ -18,12 +18,21 @@ package org.rioproject.test.tomcat;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.rioproject.deploy.StagedSoftware;
+import org.rioproject.impl.opstring.OpStringLoader;
+import org.rioproject.opstring.OperationalString;
+import org.rioproject.opstring.ServiceElement;
 import org.rioproject.servicecore.Service;
 import org.rioproject.test.RioTestConfig;
 import org.rioproject.test.RioTestRunner;
 import org.rioproject.test.SetTestManager;
 import org.rioproject.test.TestManager;
 import org.rioproject.watch.WatchDataSource;
+
+import java.io.File;
+import java.net.HttpURLConnection;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Testing the Tomcat service using the Rio test framework
@@ -43,6 +52,7 @@ public class ITTomcatDeployTest {
 
     @Test
     public void verifyTomcatServiceDeployed() throws Exception {
+        assumeTrue(urlIsAvailable());
         Assert.assertNotNull(testManager);
         service = (Service)testManager.waitForService("Tomcat");
         Assert.assertNotNull(service);
@@ -64,6 +74,20 @@ public class ITTomcatDeployTest {
         long t1 = System.currentTimeMillis();
         System.out.println("Waited (" + (t1 - t0 ) / 1000 + ") seconds for Watch to be available");
         Assert.assertTrue("The \"Tomcat Thread Pool\" watch attach was unsuccessful", watchAttached);
+    }
+
+    private boolean urlIsAvailable() throws Exception {
+        OpStringLoader loader = new OpStringLoader();
+        OperationalString operationalString =
+                loader.parseOperationalString(new File(testManager.getOpStringToDeploy()))[0];
+        ServiceElement serviceElement = operationalString.getServices()[0];
+        StagedSoftware stagedSoftware = serviceElement.getServiceLevelAgreements()
+                                                      .getSystemRequirements()
+                                                      .getSystemComponents()[0].getStagedSoftware();
+        HttpURLConnection huc = (HttpURLConnection) stagedSoftware.getLocationURL().openConnection();
+        huc.setRequestMethod("HEAD");
+        int responseCode = huc.getResponseCode();
+        return responseCode == HttpURLConnection.HTTP_OK;
     }
 
 }
