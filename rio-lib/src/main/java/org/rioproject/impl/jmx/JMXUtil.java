@@ -127,7 +127,7 @@ public class JMXUtil {
                                                     final String compositeTypeName,
                                                     final String compositeTypeDescription) throws OpenDataException {
         String [] keys = new String[m.size()];
-        OpenType [] types = new OpenType[m.size()];
+        OpenType<?> [] types = new OpenType[m.size()];
         int index = 0;
         for (Object o : m.keySet()) {
             String key = (String) o;
@@ -151,27 +151,27 @@ public class JMXUtil {
      * classString argument is not a valid open type
      */
     public static OpenType getOpenType(final String classString, final OpenType defaultType) {
-        if(classString==null)
+        if (classString == null)
             throw new IllegalArgumentException("classString is null");
-        if(classString.equals("void")) {
+        if (classString.equals("void")) {
             return SimpleType.VOID;
         }
-        if(!isOpenType(classString)) {
+        if (!isOpenType(classString)) {
             throw new InvalidOpenTypeException(classString);
         }
-        if(classString.equals(String.class.getName())) {
+        if (classString.equals(String.class.getName())) {
             return SimpleType.STRING;
-        } else if(classString.equals(Boolean.class.getName())) {
+        } else if (classString.equals(Boolean.class.getName())) {
             return SimpleType.BOOLEAN;
-        } else if(classString.equals(Long.class.getName())) {
+        } else if (classString.equals(Long.class.getName())) {
             return SimpleType.LONG;
-        } else if(classString.equals(Integer.class.getName())) {
+        } else if (classString.equals(Integer.class.getName())) {
             return SimpleType.INTEGER;
-        } else if(classString.equals(Float.class.getName())) {
+        } else if (classString.equals(Float.class.getName())) {
             return SimpleType.FLOAT;
-        } else if(classString.equals(Double.class.getName())) {
+        } else if (classString.equals(Double.class.getName())) {
             return SimpleType.DOUBLE;
-        } else if(defaultType != null) {
+        } else if (defaultType != null) {
             return defaultType;
         }
         throw new InvalidOpenTypeException("Unsupported type: "+classString);
@@ -214,7 +214,7 @@ public class JMXUtil {
      */
     public static String getJMXName(final ServiceBeanContext context,
                                     final String defaultDomain) {
-        if(context==null)
+        if (context == null)
             throw new IllegalArgumentException("context is null");
         Uuid uuid = context.getServiceBeanManager().getServiceID();
         Map<String, Object> configParms = context.getServiceBeanConfig().getConfigurationParameters();
@@ -222,20 +222,20 @@ public class JMXUtil {
         ClassBundle[] exports = context.getServiceElement().getExportBundles();        
         String type = "Service";
         String domain = null;
-        if(exports.length>0) {
+        if (exports.length > 0) {
             String exportClass =  exports[0].getClassName();
             int ndx = exportClass.lastIndexOf(".");
-            if(ndx>0) {
+            if (ndx>0) {
                 type = exportClass.substring(ndx+1);
                 domain = exportClass.substring(0, ndx);
             }
         }
-        if(jmxName==null) {
-            jmxName = (domain==null?defaultDomain:domain)+":"+"type="+type;
+        if (jmxName == null) {
+            jmxName = (domain == null ? defaultDomain : domain) + ":" + "type=" + type;
             configParms.put(ServiceBeanConfig.JMX_NAME, jmxName);
             context.getServiceBeanConfig().setConfigurationParameters(configParms);
         }
-        return (jmxName+","+"uuid="+uuid);
+        return jmxName + "," + "uuid=" + uuid;
     }
 
     /**
@@ -282,7 +282,7 @@ public class JMXUtil {
                                            final String id) throws MalformedObjectNameException {
         String jmxName = getJMXName(context, defaultDomain);
         String oName = jmxName+","+"name="+name+","+"id="+id;
-        return (ObjectName.getInstance(oName));
+        return ObjectName.getInstance(oName);
     }
 
 

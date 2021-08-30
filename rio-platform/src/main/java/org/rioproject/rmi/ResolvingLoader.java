@@ -52,13 +52,13 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
      * artifact.
      */
     private final Map<String, String> artifactToCodebase = new ConcurrentHashMap<>();
-    private static final Resolver resolver;
+    private static Resolver RESOLVER;
     private static final Logger logger = LoggerFactory.getLogger(ResolvingLoader.class.getName());
     static {
         try {
-            resolver = ResolverHelper.getResolver();
+            RESOLVER = ResolverHelper.getResolver();
         } catch (ResolverException e) {
-            throw new RuntimeException(e);
+            logger.error("Could not load Resolver", e);
         }
     }
     private static final RMIClassLoaderSpi loader = RMIClassLoader.getDefaultProviderInstance();
@@ -147,7 +147,7 @@ public class ResolvingLoader extends RMIClassLoaderSpi {
                     StringBuilder builder = new StringBuilder();
                     String path =  codebase.substring(codebase.indexOf(":")+1);
                     ArtifactURLConfiguration artifactURLConfiguration = new ArtifactURLConfiguration(path);
-                    String[] cp = resolver.getClassPathFor(artifactURLConfiguration.getArtifact(),
+                    String[] cp = RESOLVER.getClassPathFor(artifactURLConfiguration.getArtifact(),
                                                            artifactURLConfiguration.getRepositories());
                     for (String s : cp) {
                         if (builder.length()>0)

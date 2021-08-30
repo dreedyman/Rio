@@ -54,7 +54,7 @@ public interface EventProducer extends Remote {
      */
     EventRegistration register(EventDescriptor descriptor,
                                RemoteEventListener listener,
-                               MarshalledObject handback, 
+                               MarshalledObject<?> handback,
                                long duration)
         throws LeaseDeniedException, UnknownEventException, RemoteException;
 }

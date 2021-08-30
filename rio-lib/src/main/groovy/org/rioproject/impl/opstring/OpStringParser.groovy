@@ -22,12 +22,12 @@ package org.rioproject.impl.opstring
  */
 interface OpStringParser {
 
-    def List<OpString> parse(source, ClassLoader loader, String[] defaultGroups, loadPath)
+    List<OpString> parse(source, ClassLoader loader, String[] defaultGroups, loadPath)
 
     @Deprecated
-    def List<OpString> parse(source,
-                             ClassLoader loader,
-                             String[] defaultExportJars,
-                             String[] defaultGroups,
-                             loadPath)
+    List<OpString> parse(source,
+                         ClassLoader loader,
+                         String[] defaultExportJars,
+                         String[] defaultGroups,
+                         loadPath)
 }

@@ -112,7 +112,7 @@ public abstract class ServiceProvider implements Service {
      */
     public void setConfiguration(Configuration config) {
         this.config = config;
-        if(config != null) {
+        if (config != null) {
             try {
                 listenerPreparer =(ProxyPreparer)Config.getNonNullEntry(config,
                                                                         COMPONENT,
@@ -131,7 +131,7 @@ public abstract class ServiceProvider implements Service {
      * @return The Configuration
      */
     public Configuration getConfiguration() {
-        return (config);
+        return config;
     }
 
     /**
@@ -139,31 +139,31 @@ public abstract class ServiceProvider implements Service {
      */
     public EventRegistration register(EventDescriptor descriptor,
                                       RemoteEventListener listener,
-                                      MarshalledObject handback,
+                                      MarshalledObject<?> handback,
                                       long duration)
     throws LeaseDeniedException, UnknownEventException, RemoteException {
 
-        if(descriptor == null)
+        if (descriptor == null)
             throw new IllegalArgumentException("descriptor is null");
-        if(descriptor.eventID == null)
+        if (descriptor.eventID == null)
             throw new UnknownEventException("Event ID is null");
         EventHandler eHandler = eventTable.get(descriptor.eventID);
-        if(eHandler == null)
+        if (eHandler == null)
             throw new UnknownEventException("Unknown event ID "+descriptor.eventID);
 
         /* Prepare the RemoteEventListener */
         RemoteEventListener preparedListener = (RemoteEventListener)listenerPreparer.prepareProxy(listener);
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Register listener {} for Event {}", preparedListener.toString(), descriptor.toString());
         Object o = getServiceProxy();
-        if(!(o instanceof EventProducer)) {
+        if (!(o instanceof EventProducer)) {
             String reason = "Proxy returned from getServiceProxy() does " +
                            "not implement "+EventProducer.class.getName();
             logger.warn(reason);
             throw new ClassCastException(reason);
         }
         
-        return (eHandler.register(o, preparedListener, handback, duration));
+        return eHandler.register(o, preparedListener, handback, duration);
     }
 
     /**
@@ -196,12 +196,12 @@ public abstract class ServiceProvider implements Service {
      */
     public WatchDataSource[] fetch() {
         WatchDataSource[] wds = new WatchDataSource[0];
-        if(watchRegistry != null) {
+        if (watchRegistry != null) {
             wds = watchRegistry.fetch();
         } else {
             logger.warn("WatchRegistry is null");
         }
-        return(wds);
+        return wds;
     }
 
     /**
@@ -209,12 +209,12 @@ public abstract class ServiceProvider implements Service {
      */
     public WatchDataSource fetch(String id) {
         WatchDataSource wds = null;
-        if(watchRegistry!=null) {
+        if (watchRegistry != null) {
             wds = watchRegistry.fetch(id);
         } else {
             logger.warn("WatchRegistry is null");
         }
-        return(wds);
+        return wds;
     }    
 
     /**
@@ -241,7 +241,7 @@ public abstract class ServiceProvider implements Service {
      * @return The WatchRegistry
      */
     public WatchRegistry getWatchRegistry() {
-        return (watchRegistry);
+        return watchRegistry;
     }
 
     /**

@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.openmbean.*;
-import java.beans.IntrospectionException;
-import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 
 /**
@@ -246,15 +244,7 @@ public class Watch implements WatchMBean {
                 tabularDataSupport.put(compositeData);
             }
             return tabularDataSupport;
-        } catch (OpenDataException e) {
-            logger.warn(e.toString(), e);
-        } catch (IntrospectionException e) {
-            logger.warn(e.toString(), e);
-        } catch (IllegalAccessException e) {
-            logger.warn(e.toString(), e);
-        } catch (InvocationTargetException e) {
-            logger.warn(e.toString(), e);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             logger.warn(e.toString(), e);
         }
         return null;

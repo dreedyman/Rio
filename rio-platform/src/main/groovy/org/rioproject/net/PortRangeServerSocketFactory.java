@@ -15,6 +15,9 @@
  */
 package org.rioproject.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.net.ServerSocketFactory;
 import java.io.IOException;
 import java.net.BindException;
@@ -36,6 +39,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
     private int lastPort;
     private final static Random random = new Random();
     public static final int RANGE_END = 65535;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortRangeServerSocketFactory.class);
 
     /**
      * Creates a {@link javax.net.ServerSocketFactory} that allocates
@@ -63,11 +67,13 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
      */
     public PortRangeServerSocketFactory(int start, int end) {
         if (start < 0 || end > RANGE_END || start > end) {
-            throw new IllegalArgumentException(
-                    "illegal port range: [" + start + "," + end + "]");
+            throw new IllegalArgumentException( "illegal port range: [" + start + "," + end + "]");
         }
         this.start = start;
         this.end = end;
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Created " + toString());
+        }
     }
 
     public int getStart() {
@@ -174,9 +180,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("PortRangeServerSocketFactory {").append(start).append(":").append(end).append("}");
-        return sb.toString();
+        return "PortRangeServerSocketFactory {" + start + ":" + end + "}";
     }
 
     /**
@@ -197,14 +201,17 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
         do {
             try {
                 ServerSocket ss = null;
-                if(addr==null) {
-                    if(backlog<0) {
+                if (addr == null) {
+                    if (backlog < 0) {
                         ss = new ServerSocket(p);
                         lastPort = p;
                     }
                 } else  {
                     ss = new ServerSocket(p, backlog, addr);
                     lastPort = p;
+                }
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Created ServerSocket with port: " +lastPort);
                 }
                 return ss;
             } catch (BindException e) {
@@ -213,7 +220,7 @@ public class PortRangeServerSocketFactory extends ServerSocketFactory {
             p = next(p);
         } while (p != start);
 
-        throw new BindException("No available port within provided range: "+toString());
+        throw new BindException("No available port within provided range: " + toString());
     }
 
     /**

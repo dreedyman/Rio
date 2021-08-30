@@ -50,7 +50,7 @@ import java.util.concurrent.*;
  *     <li>An artifact URL for groupId, artifactId and version<br/>
  *     <code>artifact:org.rioproject.examples.calculator/calculator-service/2.0.1</code></li>
  *     <li>An artifact URL for groupId, artifactId, version and repository with an id<br/>
- *     <code>artifact:org.rioproject.examples.calculator/calculator-proxy/2.0.1;http://www.rio-project.org@rio</code></li>
+ *     <code>artifact:org.rioproject.examples.calculator/calculator-proxy/2.0.1;https://repo.repsy.io/mvn/dreedy/maven@rio</code></li>
  * </ul>
  *
  * <p>Once an artifact has been resolved to an {@code URL}, the {@code artifact:URL} pair is

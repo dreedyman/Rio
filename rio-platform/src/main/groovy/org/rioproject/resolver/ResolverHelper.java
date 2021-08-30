@@ -15,6 +15,7 @@
  */
 package org.rioproject.resolver;
 
+import org.rioproject.config.Constants;
 import org.rioproject.util.RioHome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +54,11 @@ public final class ResolverHelper {
     private static final Logger logger = LoggerFactory.getLogger(ResolverHelper.class.getName());
     private static final ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
     static {
-            Resolver resolver = doGetResolver(Thread.currentThread().getContextClassLoader());
-            if(resolver!=null) {
-                resolverLoader = (URLClassLoader) resolver.getClass().getClassLoader();
-            }
-        if(resolverLoader==null) {
+        Resolver resolver = doGetResolver(Thread.currentThread().getContextClassLoader());
+        if (resolver != null) {
+            resolverLoader = (URLClassLoader) resolver.getClass().getClassLoader();
+        }
+        if (resolverLoader == null) {
             File resolverJar = new File(getResolverJarFile());
             try {
                 resolverLoader = new URLClassLoader(new URL[]{resolverJar.toURI().toURL()},
@@ -88,35 +89,35 @@ public final class ResolverHelper {
     public static URL[] resolve(final String artifact, final Resolver resolver, final RemoteRepository[] repositories)
         throws ResolverException {
 
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Using Resolver {}", resolver.getClass().getName());
         List<URL> jars = new ArrayList<>();
         if (artifact != null) {
             String[] artifactParts = artifact.split(" ");
-            for(String artifactPart : artifactParts) {
+            for (String artifactPart : artifactParts) {
                 String[] classPath = resolver.getClassPathFor(artifactPart, repositories);
                 for (String jar : classPath) {
                     String s = null;
                     File jarFile = new File(jar);
-                    if(jarFile.exists()) {
+                    if (jarFile.exists()) {
                         s = jarFile.toURI().toString();
                     } else {
                         logger.warn("{} NOT FOUND", jarFile.getPath());
                     }
-                    if(s!=null) {
+                    if (s != null) {
                         URL url;
                         try {
                             url = new URL(handleWindows(s));
                         } catch (MalformedURLException e) {
                             throw new ResolverException("Invalid classpath element: "+s, e);
                         }
-                        if(!jars.contains(url))
+                        if (!jars.contains(url))
                             jars.add(url);
                     }
                 }
             }
         }
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Artifact: {}, resolved jars {}", artifact, jars);
         return jars.toArray(new URL[0]);
     }
@@ -139,12 +140,12 @@ public final class ResolverHelper {
 
     private static String getResolverJarFile() {
         String resolverJarFile = resolverConfiguration.getResolverJar();
-        if(resolverJarFile!=null && !new File(resolverJarFile).exists()) {
+        if (resolverJarFile != null && !new File(resolverJarFile).exists()) {
             logger.warn("The configured resolver jar file [{}] does not exist, will attempt to load default resolver",
                         resolverJarFile);
             resolverJarFile = null;
         }
-        if(resolverJarFile==null) {
+        if (resolverJarFile == null) {
             String resolverJarPrefix = "resolver-aether";
             String rioHome = RioHome.get();
             if (rioHome == null || rioHome.length() == 0) {
@@ -171,7 +172,7 @@ public final class ResolverHelper {
                 throw new RuntimeException(message);
             }
         }
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
             logger.debug("Resolver JAR file: {}", resolverJarFile);
         return resolverJarFile;
     }
@@ -196,20 +197,20 @@ public final class ResolverHelper {
         ClassLoader resourceLoader = (cl != null) ? cl : Thread.currentThread().getContextClassLoader();
         try {
             r = doGetResolver(resourceLoader);
-            if(logger.isDebugEnabled())
-                logger.debug("Selected Resolver: {}", (r==null?"No Resolver configuration found":r.getClass().getName()));
-            if(r==null) {
+            if (logger.isDebugEnabled())
+                logger.debug("Selected Resolver: {}", (r == null?"No Resolver configuration found":r.getClass().getName()));
+            if (r == null) {
                 throw new ResolverException("No Resolver configuration found");
             }
-            if(r instanceof SettableResolver) {
+            if (r instanceof SettableResolver) {
                 SettableResolver settableResolver = (SettableResolver) r;
                 settableResolver.setRemoteRepositories(resolverConfiguration.getRemoteRepositories())
                                 .setFlatDirectories(resolverConfiguration.getFlatDirectories());
             }
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 StringBuilder message = new StringBuilder();
-                for(RemoteRepository rr : r.getRemoteRepositories()) {
-                    if(message.length()>0)
+                for (RemoteRepository rr : r.getRemoteRepositories()) {
+                    if (message.length()>0)
                         message.append("\n");
                     message.append(rr);
                 }
@@ -218,11 +219,11 @@ public final class ResolverHelper {
                 } else {
                     logger.debug("Configured resolver repositories: {}\n{}", r.getRemoteRepositories().size(), message.toString());
                 }
-                if(r instanceof SettableResolver) {
+                if (r instanceof SettableResolver) {
                     StringBuilder flatDirs = new StringBuilder();
                     SettableResolver settableResolver = (SettableResolver) r;
                     for (File f : settableResolver.getFlatDirectories()) {
-                        if(flatDirs.length()>0)
+                        if (flatDirs.length()>0)
                             flatDirs.append("\n");
                         flatDirs.append(f.getPath());
                     }
@@ -232,7 +233,7 @@ public final class ResolverHelper {
             }
 
         } catch (Exception e) {
-            if(e instanceof ResolverException)
+            if (e instanceof ResolverException)
                 throw (ResolverException)e;
             throw new ResolverException("Creating Resolver", e);
         }
@@ -245,19 +246,20 @@ public final class ResolverHelper {
     private static Resolver doGetResolver(final ClassLoader cl) {
         Resolver resolver = null;
         ServiceLoader<Resolver> loader =  ServiceLoader.load(Resolver.class, cl);
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             int num = 0;
-            for(Resolver r : loader) {
-                if(sb.length()>0)
+            for (Resolver r : loader) {
+                if (sb.length() > 0) {
                     sb.append(", ");
+                }
                 sb.append(r.getClass().getName());
                 num++;
             }            
             logger.debug("Found {} Resolvers: [{}]", num, sb.toString());
         }
-        for(Resolver r : loader) {
-            if(r!=null) {
+        for (Resolver r : loader) {
+            if (r != null) {
                 resolver = r;
                 break;
             }
@@ -271,9 +273,9 @@ public final class ResolverHelper {
     public static String handleWindows(final String s) {
         String newString = s;
         if (System.getProperty("os.name").startsWith("Windows")) {
-            if(s.startsWith("/"))
+            if (s.startsWith("/"))
                 newString = s.substring(1);
-            if(s.startsWith("file:"))
+            if (s.startsWith("file:"))
                 newString = s.replace('/', '\\');
         }
         return newString;

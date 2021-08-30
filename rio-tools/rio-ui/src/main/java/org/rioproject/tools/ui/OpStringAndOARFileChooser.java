@@ -35,14 +35,14 @@ import java.net.URL;
  * @author Dennis Reedy
  */
 public class OpStringAndOARFileChooser {
-    private JFileChooser chooser;
-    private JFrame frame;
-    private JDialog dialog;
-    private ChooserListener listener;
-    private JTextField artifactField;
-    private enum LastFocused {artifactField, other}
+    private final JFileChooser chooser;
+    private final JFrame frame;
+    private final JDialog dialog;
+    private final ChooserListener listener;
+    private final JTextField artifactField;
+    private final JButton deployButton;
+    private enum LastFocused { artifactField, other }
     private LastFocused lastFocused;
-    private JButton deployButton;
 
     /**
      * Create a OpStringAndOARFileChooser
@@ -55,7 +55,7 @@ public class OpStringAndOARFileChooser {
                                      File path,
                                      String lastArtifact) {
         this.frame = frame;
-        if(path == null)
+        if (path == null)
             chooser = new JFileChooser();
         else
             chooser = new JFileChooser(path);
@@ -65,7 +65,7 @@ public class OpStringAndOARFileChooser {
 
         dialog = new JDialog(frame, title, true);
         Dimension d;
-        if(OperatingSystemType.isMac())
+        if (OperatingSystemType.isMac())
             d = new Dimension(635, 440);
         else
             d = new Dimension(635, 497);
@@ -119,10 +119,10 @@ public class OpStringAndOARFileChooser {
         chooser.setFileView(new FileView() {
             @Override
             public Icon getIcon(File file) {
-                if(!file.isDirectory()) {
-                    if(file.getName().endsWith("groovy"))
+                if (!file.isDirectory()) {
+                    if (file.getName().endsWith("groovy"))
                         return groovy;
-                    if(file.getName().endsWith("xml"))
+                    if (file.getName().endsWith("xml"))
                         return xml;
                 }
                 return super.getIcon(file);
@@ -131,7 +131,7 @@ public class OpStringAndOARFileChooser {
         chooser.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                if(file.isDirectory())
+                if (file.isDirectory())
                     return(true);
                 return file.getName().endsWith(".xml") ||
                        file.getName().endsWith(".groovy") ||
@@ -147,7 +147,7 @@ public class OpStringAndOARFileChooser {
 
         //deployButton.setEnabled(false);
         artifactField.addFocusListener(focusListener);
-        if(lastArtifact!=null) {
+        if (lastArtifact!=null) {
             artifactField.setText(lastArtifact);
         }
     }
@@ -156,8 +156,8 @@ public class OpStringAndOARFileChooser {
 
         public void focusGained(FocusEvent event) {
             lastFocused = LastFocused.artifactField;
-            /*if(artifactField.getText().length()>=0 || chooser.getSelectedFile()!=null) {
-                if(!deployButton.isEnabled()) {
+            /*if (artifactField.getText().length()>=0 || chooser.getSelectedFile()!=null) {
+                if (!deployButton.isEnabled()) {
                     deployButton.setEnabled(true);
                 }
             }*/
@@ -165,7 +165,7 @@ public class OpStringAndOARFileChooser {
 
         public void focusLost(FocusEvent event) {
             Component c = event.getOppositeComponent();
-            if(!(c instanceof JButton && ((JButton)c).getText().equals("Deploy")))
+            if (!(c instanceof JButton && ((JButton)c).getText().equals("Deploy")))
                 lastFocused = LastFocused.other;
         }
     }
@@ -178,19 +178,19 @@ public class OpStringAndOARFileChooser {
     public String getName() {
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
-        if(listener.isApproved()) {
+        if (listener.isApproved()) {
             String selected = null;
-            if(artifactHasBeenProvided()) {
+            if (artifactHasBeenProvided()) {
                 selected = artifactField.getText();
             } else {
                 File file = chooser.getSelectedFile();
-                if(file!=null) {
+                if (file!=null) {
                     selected = file.getAbsolutePath();
                 }
             }
             return selected;
         } else
-            return(null);
+            return null;
     }
 
     private boolean artifactHasBeenProvided() {
@@ -220,24 +220,23 @@ public class OpStringAndOARFileChooser {
             }
             if (action.getActionCommand().equals("Deploy")) {
                 boolean canApprove = true;
-                if(artifactHasBeenProvided()) {
+                if (artifactHasBeenProvided()) {
                     String a = artifactField.getText();
                     try {
                         new Artifact(a);
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         canApprove = false;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<html><body>The artifact <font color=red>")
-                        .append(a).append("</font> is not valid. The artifact <br>must be in the form of " +
-                                          "groupId:artifactId:version</body></html>");
+                        String sb = "<html><body>The artifact <font color=red>" 
+                                + a + "</font> is not valid. The artifact <br>must be in the form of " 
+                                + "groupId:artifactId:version</body></html>";
                         JOptionPane.showMessageDialog(frame,
-                                                      sb.toString(),
+                                                      sb,
                                                       "Deployment Failure",
                                                       JOptionPane.ERROR_MESSAGE);
 
                     }
                 }
-                if(canApprove){
+                if (canApprove){
                     approved = true;
                     dialog.setVisible(false);
                     dialog.dispose();
@@ -262,11 +261,11 @@ public class OpStringAndOARFileChooser {
 
         private void handle(DocumentEvent event) {
             Document doc = event.getDocument();
-            if(doc.getLength()>0) {
-                if(!deployButton.isEnabled())
+            if (doc.getLength()>0) {
+                if (!deployButton.isEnabled())
                     deployButton.setEnabled(true);
             } else {
-                if(deployButton.isEnabled())
+                if (deployButton.isEnabled())
                     deployButton.setEnabled(false);
             }
         }
@@ -277,7 +276,7 @@ public class OpStringAndOARFileChooser {
         URL url = OpStringAndOARFileChooser.class.getClassLoader().getResource(location);
         if (url != null)
             icon = new ImageIcon(url);
-        return (icon);
+        return  icon;
     }
 
     private String getImageToLoad(String image) {

@@ -70,14 +70,14 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
     /** Get the ServiceBean's join specifics */
     private DiscoveryManagement serviceDiscoMgmt;
     /** The ComputeResource this ServiceBean has been instantiated on */
-    private ComputeResource computeResource;
+    private final ComputeResource computeResource;
     /**
      * The exportCodebase attribute identifies the codebase used to export
      * ServiceBean JARs
      */
     private String exportCodebase;
     /** List of PlatformCapability instances that were created */
-    private final List<PlatformCapability> platformList = new ArrayList<PlatformCapability>();
+    private final List<PlatformCapability> platformList = new ArrayList<>();
     /** DefaultAssociationManagement for the ServiceBean */
     private AssociationManagement associationManagement;
     /** Shared Configuration for the ServiceBean to use*/
@@ -90,9 +90,9 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * ServiceProvider has advertised will consult the eventTable to determine
      * the correct EventHandler to use in order to return an event registration
      */
-    private final Map<Long, EventHandler> eventTable = new HashMap<Long, EventHandler>();
+    private final Map<Long, EventHandler> eventTable = new HashMap<>();
     /** Collection of attributes */
-    private final List<Entry> attrs = new ArrayList<Entry>();
+    private final List<Entry> attrs = new ArrayList<>();
     /** The service's configuration, created lazily */
     private Configuration  serviceBeanConfig;
     /** Optional configuration files */
@@ -100,7 +100,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
     /* The Subject used to authenticate the service */
     private Subject subject;
     /** A Logger instance for this component */
-    private static Logger logger = LoggerFactory.getLogger(DefaultServiceBeanContext.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DefaultServiceBeanContext.class.getName());
 
     /**
      * Create a DefaultServiceBeanContext
@@ -117,11 +117,11 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
                                      final ComputeResource computeResource,
                                      /* Optional */
                                      final Configuration sharedConfig) {
-        if(sElem == null)
+        if (sElem == null)
             throw new IllegalArgumentException("sElem is null");
-        if(serviceBeanManager == null)
+        if (serviceBeanManager == null)
             throw new IllegalArgumentException("serviceBeanManager is null");
-        if(computeResource == null)
+        if (computeResource == null)
             throw new IllegalArgumentException("computeResource is null");
         this.sElem = sElem;
         this.serviceBeanManager = serviceBeanManager;
@@ -130,11 +130,11 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
         watchRegistry = new WatchDataSourceRegistry();
         watchRegistry.setServiceBeanContext(this);
         ClassLoader cCL = Thread.currentThread().getContextClassLoader();
-        if(cCL instanceof ServiceClassLoader) {
+        if (cCL instanceof ServiceClassLoader) {
             ServiceClassLoader scl = (ServiceClassLoader)cCL;
-            URL urls[] = scl.getURLs();
-            if(urls!=null && urls.length>0) {
-                if(urls[0].getProtocol().equals("artifact"))
+            URL[] urls = scl.getURLs();
+            if (urls != null && urls.length>0) {
+                if (urls[0].getProtocol().equals("artifact"))
                     exportCodebase = urls[0].toExternalForm();
                 else
                     exportCodebase = urls[0].getProtocol()+"://"+urls[0].getHost()+":"+urls[0].getPort()+"/";
@@ -166,14 +166,14 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @param newElem The ServiceElement
      */
     public void setServiceElement(final ServiceElement newElem) {
-        if(newElem == null)
+        if (newElem == null)
             throw new IllegalArgumentException("sElem is null");
-        boolean update = (sElem != null);
+        boolean update = (sElem  !=  null);
         sElem = newElem;        
-        if(serviceBeanManager instanceof DefaultServiceBeanManager)
+        if (serviceBeanManager instanceof DefaultServiceBeanManager)
             ((DefaultServiceBeanManager)serviceBeanManager).setServiceElement(sElem);
-        if(update && associationManagement!=null) {
-            if(associationManagement instanceof DefaultAssociationManagement) {
+        if (update && associationManagement != null) {
+            if (associationManagement instanceof DefaultAssociationManagement) {
                 ((DefaultAssociationManagement)associationManagement).setServiceBeanContext(this);
             }
         }
@@ -190,7 +190,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ServiceBeanContext#getConfiguration
      */
     public Configuration getConfiguration() throws ConfigurationException {
-        if(serviceBeanConfig==null) {
+        if (serviceBeanConfig ==  null) {
             logger.debug("Getting configuration for {}/{}", sElem.getOperationalStringName(), sElem.getName());
             ClassLoader cCL = Thread.currentThread().getContextClassLoader();
             String[] args;
@@ -203,16 +203,16 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
             } catch (IOException e) {
                 throw new ConfigurationException("Could not create configuration", e);
             }
-            if(logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder();
                 for(String s : args) {
-                    if(sb.length()>0)
+                    if (sb.length()>0)
                         sb.append("\n");
                     sb.append("\t").append(s);
                 }
                 logger.debug("{}/{} CONFIG ARGS: \n{}", sElem.getOperationalStringName(), sElem.getName(), sb);
             }
-            if(sharedConfig!=null) {
+            if (sharedConfig != null) {
                 serviceBeanConfig =  new AggregateConfig(sharedConfig, args, cCL);
             } else {
                 serviceBeanConfig = ConfigurationProvider.getInstance(args, cCL);
@@ -220,14 +220,14 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
 
             /* If a temporary file was created remove it */
             try {
-                if(args.length==1 &&
+                if (args.length ==  1 &&
                    (args[0].endsWith(".config") || args[0].endsWith(".groovy"))) {
                     File file = new File(args[0]);
                     File parent = file.getParentFile().getCanonicalFile();
                     File tmpDir = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
-                    if(parent.equals(tmpDir) &&
+                    if (parent.equals(tmpDir) &&
                        file.getName().startsWith("tmp")) {
-                        if(file.delete() && logger.isTraceEnabled())
+                        if (file.delete() && logger.isTraceEnabled())
                             logger.trace("Deleted temporary configuration file {}", file.getName());
 
                     }
@@ -275,7 +275,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @param serviceBeanManager The ServiceBeanManager
      */
      public void setServiceBeanManager(final ServiceBeanManager serviceBeanManager) {
-        if(serviceBeanManager==null)
+        if (serviceBeanManager ==  null)
             throw new IllegalArgumentException("serviceBeanManager us null");
         this.serviceBeanManager = serviceBeanManager;
     }
@@ -298,7 +298,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ServiceBeanContext#getInitParameter
      */
     public Object getInitParameter(final String name) {
-        if(name==null)
+        if (name ==  null)
             throw new IllegalArgumentException("name is null");
         return(sElem.getServiceBeanConfig().getInitParameters().get(name));
     }
@@ -323,40 +323,40 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ServiceBeanContext#getDiscoveryManagement()
      */
     public DiscoveryManagement getDiscoveryManagement() throws IOException {
-        if(serviceDiscoMgmt == null) {
+        if (serviceDiscoMgmt == null) {
             logger.trace("Create DiscoveryManagement for {}/{}", sElem.getOperationalStringName(), sElem.getName());
             DiscoveryManagementPool discoPool = DiscoveryManagementPool.getInstance();
 
             String locatorString = System.getProperty(Constants.LOCATOR_PROPERTY_NAME);
-            List<LookupLocator> locators = new ArrayList<LookupLocator>();
-            if(sElem.getServiceBeanConfig().getLocators()!=null)
+            List<LookupLocator> locators = new ArrayList<>();
+            if (sElem.getServiceBeanConfig().getLocators() != null)
                 locators.addAll(
                     Arrays.asList(sElem.getServiceBeanConfig().getLocators()));
 
-            if(locatorString!=null) {
+            if (locatorString != null) {
                 LookupLocator[] systemLocators = JiniClient.parseLocators(locatorString);
-                if(locators.isEmpty()) {
+                if (locators.isEmpty()) {
                     locators.addAll(Arrays.asList(systemLocators));
                 } else {
-                    List<LookupLocator> toAdd = new ArrayList<LookupLocator>();
+                    List<LookupLocator> toAdd = new ArrayList<>();
                     for(LookupLocator lookLoc : systemLocators) {
                         boolean add = true;
                         for(LookupLocator ll : locators) {
-                            if(ll.equals(lookLoc)) {
+                            if (ll.equals(lookLoc)) {
                                 add = false;
                                 break;
                             }
                         }
-                        if(add)
+                        if (add) {
                             toAdd.add(lookLoc);
+                        }
                     }
-                    for(LookupLocator ll : toAdd)
-                        locators.add(ll);
+                    locators.addAll(toAdd);
                 }
             }
-            LookupLocator[] locatorsToUse = locators.isEmpty()?null:
-                                            locators.toArray(new LookupLocator[locators.size()]);
-            if(sElem.getDiscoveryManagementPooling()) { 
+            LookupLocator[] locatorsToUse = locators.isEmpty() ? null :
+                                            locators.toArray(new LookupLocator[0]);
+            if (sElem.getDiscoveryManagementPooling()) { 
                 serviceDiscoMgmt = discoPool.getDiscoveryManager(getOperationalStringName(),
                                                                  sElem.getServiceBeanConfig().getGroups(),
                                                                  locatorsToUse);
@@ -382,7 +382,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ServiceBeanContext#getAssociationManagement
      */
     public org.rioproject.associations.AssociationManagement getAssociationManagement() {
-        if(associationManagement==null) {
+        if (associationManagement ==  null) {
             this.associationManagement = new DefaultAssociationManagement();
         }            
         return (associationManagement);
@@ -419,7 +419,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ServiceBeanContext#addAttribute
      */
     public void addAttribute(final Entry attribute) {
-        if(attribute!=null)
+        if (attribute != null)
             attrs.add(attribute);
     }
 
@@ -443,10 +443,9 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ComputeResourceManager#getPlatformCapability
      */
     public PlatformCapability getPlatformCapability(final String name) {
-        if(name == null)
+        if (name == null)
             throw new IllegalArgumentException("name is null");
-        PlatformCapability pCap = computeResource.getPlatformCapability(name);
-        return (pCap);
+        return computeResource.getPlatformCapability(name);
     }
 
     /**
@@ -473,19 +472,19 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      */
     public static PlatformCapability createPlatformCapability(final String className, final Map<String, Object> mapping)
     throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        if(className == null)
+        if (className == null)
             throw new IllegalArgumentException("className is null");
         PlatformCapability pCap;
-        if(className.equals(SoftwareSupport.class.getSimpleName())) {
+        if (className.equals(SoftwareSupport.class.getSimpleName())) {
             pCap = new SoftwareSupport();
-        } else if(className.equals(SoftwareSupport.class.getName())) {
+        } else if (className.equals(SoftwareSupport.class.getName())) {
             pCap = new SoftwareSupport();
         } else {
             CommonClassLoader cl = CommonClassLoader.getInstance();
-            Class clazz = cl.loadClass(className);
+            Class<?> clazz = cl.loadClass(className);
             pCap = (PlatformCapability)clazz.newInstance();
         }
-        if(mapping!=null)
+        if (mapping != null)
             pCap.defineAll(mapping);
         return (pCap);
     }
@@ -504,7 +503,7 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
      * @see org.rioproject.servicebean.ComputeResourceManager#getMatchedMeasurableCapabilities
      */
     public MeasurableCapability[] getMatchedMeasurableCapabilities() {
-        List<MeasurableCapability> list = new ArrayList<MeasurableCapability>();
+        List<MeasurableCapability> list = new ArrayList<>();
         SLA[] slas = sElem.getServiceLevelAgreements().getServiceSLAs();
         MeasurableCapability[] mCaps = computeResource.getMeasurableCapabilities();
         /*
@@ -517,6 +516,6 @@ public class DefaultServiceBeanContext implements ServiceBeanContext, ComputeRes
                 }
             }
         }
-        return (list.toArray(new MeasurableCapability[list.size()]));
+        return list.toArray(new MeasurableCapability[0]);
     }     
 }

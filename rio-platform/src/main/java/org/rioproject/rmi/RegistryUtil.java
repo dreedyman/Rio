@@ -161,7 +161,7 @@ public class RegistryUtil {
         Registry registry = null;
         synchronized(RegistryUtil.class) {
             int[] portRange = getRegistryPortRange();
-            if(portRange!=null) {
+            if (portRange!=null) {
                 try {
                     PortRangeRMIServerSocketFactory socketFactory =
                         new PortRangeRMIServerSocketFactory(portRange[0], portRange[1]);
@@ -171,9 +171,9 @@ public class RegistryUtil {
                     registry = createRegistry(registryPort);
                     System.setProperty(Constants.REGISTRY_PORT, Integer.toString(registryPort));
                 } catch (IOException e) {
-                    if(logger.isTraceEnabled())
-                        logger.trace("Failed to create RMI Registry for port range {}-{}"+
-                                     portRange[0], portRange[1]);
+                    if (logger.isTraceEnabled())
+                        logger.trace("Failed to create RMI Registry for port range "
+                                             + portRange[0] + "-" + portRange[1]);
                 }
             } else {
                 registryPort = DEFAULT_PORT;
@@ -183,17 +183,17 @@ public class RegistryUtil {
                         registry = createRegistry(registryPort);
                         break;
                     } catch(IOException e1) {
-                        if(logger.isTraceEnabled())
+                        if (logger.isTraceEnabled())
                             logger.trace("Failed to create RMI Registry using port [{}], increment port and try again",
                                          registryPort);
                     }
                     registryPort++;
                 }
-                if(registry==null) {
+                if (registry == null) {
                     logger.warn("Unable to create RMI Registry using ports {} through {}", originalPort, registryPort);
                 } else {
                     System.setProperty(Constants.REGISTRY_PORT, Integer.toString(registryPort));
-                    if(logger.isDebugEnabled())
+                    if (logger.isDebugEnabled())
                         logger.debug("Created RMI Registry on port={}", System.getProperty(Constants.REGISTRY_PORT));
                 }
             }
@@ -224,12 +224,12 @@ public class RegistryUtil {
     private static int[] getRegistryPortRange() {
         String registryPortRange = System.getProperty(Constants.PORT_RANGE);
         int[] portRange = null;
-        if(registryPortRange!=null) {
+        if (registryPortRange!=null) {
             try {
                 String[] range = registryPortRange.split("-");
                 portRange = new int[2];
-                portRange[0] = Integer.valueOf(range[0]);
-                portRange[1] = Integer.valueOf(range[1]);
+                portRange[0] = Integer.parseInt(range[0]);
+                portRange[1] = Integer.parseInt(range[1]);
             } catch (Exception e) {
                 portRange = null;
                 logger.warn("Illegal range value specified, continue using default registryPort settings.", e);

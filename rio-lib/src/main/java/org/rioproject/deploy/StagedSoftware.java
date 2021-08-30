@@ -71,11 +71,11 @@ public class StagedSoftware extends StagedData {
         /**
          * PostInstall attributes
          */
-        private StagedData stagedData;
+        private final StagedData stagedData;
         /**
          * Specifies a utility that will be run to configure the StagedSoftware
          */
-        private ExecDescriptor execDescriptor;
+        private final ExecDescriptor execDescriptor;
 
         /**
          * Create a PostInstallAttributes instance
@@ -100,7 +100,7 @@ public class StagedSoftware extends StagedData {
          *         configure downloaded StagedSoftware.
          */
         public ExecDescriptor getExecDescriptor() {
-            return (execDescriptor);
+            return execDescriptor;
         }
 
         /**
@@ -111,7 +111,7 @@ public class StagedSoftware extends StagedData {
          *         will be null
          */
         public StagedData getStagedData() {
-            return (stagedData);
+            return stagedData;
         }
     }
 }

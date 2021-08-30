@@ -110,7 +110,7 @@ public class SystemRequirements implements Serializable {
      *         no values return an empty map
      */
     public Map<String, ThresholdValues> getSystemThresholds() {
-        Map<String, ThresholdValues> map = new HashMap<String, ThresholdValues>();
+        Map<String, ThresholdValues> map = new HashMap<>();
         synchronized (systemThresholds) {
             map.putAll(systemThresholds);
         }

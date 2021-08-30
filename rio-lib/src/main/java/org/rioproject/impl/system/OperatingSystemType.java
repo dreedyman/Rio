@@ -58,7 +58,7 @@ public class OperatingSystemType {
      */
     public static boolean isLinux() {
         String opSys = System.getProperty("os.name");
-        return (opSys.equalsIgnoreCase(LINUX));
+        return opSys.equalsIgnoreCase(LINUX);
     }
 
     /**
@@ -69,7 +69,7 @@ public class OperatingSystemType {
      */
     public static boolean isSolaris() {
         String opSys = System.getProperty("os.name");
-        return (opSys.equalsIgnoreCase(SOLARIS));
+        return opSys.equalsIgnoreCase(SOLARIS);
     }
 
     /**
@@ -80,7 +80,7 @@ public class OperatingSystemType {
      */
     public static boolean isMac() {
         String opSys = System.getProperty("os.name");
-        return (opSys.startsWith(MACINTOSH));
+        return opSys.startsWith(MACINTOSH);
     }
 
     /**
@@ -91,7 +91,7 @@ public class OperatingSystemType {
      */
     public static boolean isHP() {
         String opSys = System.getProperty("os.name");
-        return (opSys.equals(HP_UX));
+        return opSys.equals(HP_UX);
     }
 
     /**
@@ -102,7 +102,7 @@ public class OperatingSystemType {
      */
     public static boolean isWindows() {
         String opSys = System.getProperty("os.name");
-        return (opSys.startsWith(WINDOWS));
+        return opSys.startsWith(WINDOWS);
     }
 
     /**
@@ -113,7 +113,7 @@ public class OperatingSystemType {
      */
     public static boolean isWindows2K() {
         String opSys = System.getProperty("os.name");
-        return (opSys.startsWith(WINDOWS_2K));
+        return opSys.startsWith(WINDOWS_2K);
     }
 
     /**
@@ -124,7 +124,7 @@ public class OperatingSystemType {
      */
     public static boolean isWindowsXP() {
         String opSys = System.getProperty("os.name");
-        return (opSys.startsWith(WINDOWS_XP));
+        return opSys.startsWith(WINDOWS_XP);
     }
 
 }

@@ -37,15 +37,15 @@ public class FileHelper {
      * @throws IllegalArgumentException if either argument is {@code null}
      */
     public static File find(File dir, String baseName) {
-        if(dir==null)
+        if (dir == null)
             throw new IllegalArgumentException("directory can not be null");
-        if(baseName==null)
+        if (baseName == null)
             throw new IllegalArgumentException("baseName can not be null");
         File found = null;
         File[] files = dir.listFiles();
-        if(files!=null) {
-            for(File file : files) {
-                if(file.getName().startsWith(baseName)) {
+        if (files!=null) {
+            for (File file : files) {
+                if (file.getName().startsWith(baseName)) {
                     found = file;
                     break;
                 }
@@ -65,17 +65,17 @@ public class FileHelper {
      * default (as long as the provided default is not {@code null}.
      */
     public static List<String> getIfExists(File dir, String defaultFilePath) {
-        if(dir==null)
+        if (dir == null)
             throw new IllegalArgumentException("directory can not be null");
-        List<String> files = new ArrayList<String>();
+        List<String> files = new ArrayList<>();
         if (dir.exists()) {
             File[] list = dir.listFiles();
-            if(list!=null) {
+            if (list!=null) {
                 for (File f : list)
                     files.add(f.getPath());
             }
         }
-        if(files.size()==0 && defaultFilePath!=null) {
+        if (files.size() == 0 && defaultFilePath!=null) {
             files.add(defaultFilePath);
         }
         return files;
@@ -91,11 +91,11 @@ public class FileHelper {
      * @throws IllegalArgumentException if the {@code name} argument is {@code null}
      */
     public static String getJarVersion(String name) {
-        if(name==null)
-            throw new IllegalArgumentException("name can not be null");
+        if (name == null)
+            throw new IllegalArgumentException("name cannot be null");
         int startIndex = name.lastIndexOf("-");
         int lastIndex = name.lastIndexOf(".");
-        if(startIndex==-1 || lastIndex==-1)
+        if (startIndex == -1 || lastIndex == -1)
             return null;
         return name.substring(startIndex+1, lastIndex);
     }

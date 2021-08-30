@@ -33,12 +33,12 @@ public class ServiceBeanConfig implements Serializable {
     @SuppressWarnings("unused")
     static final long serialVersionUID = 1L;
     /** Initialization Properties for the ServiceBean */
-    private final Map<String, Object> initParameters = new HashMap<String, Object>();
+    private final Map<String, Object> initParameters = new HashMap<>();
     /** Configuration parameters in the form of name,value pairs */
-    private final Map<String, Object> configParms = new HashMap<String, Object>();
+    private final Map<String, Object> configParms = new HashMap<>();
     /** A collection on {@code LoggerConfigs}*/
-    private final Collection<LoggerConfig> loggerConfigs = new ArrayList<LoggerConfig>();
-    private final List<Entry> additionalEntries = new ArrayList<Entry>();
+    private final Collection<LoggerConfig> loggerConfigs = new ArrayList<>();
+    private final List<Entry> additionalEntries = new ArrayList<>();
     /** The configArgs property used to create the Configuration object for the
      * ServiceBean */
     private String[] configArgs;
@@ -103,15 +103,13 @@ public class ServiceBeanConfig implements Serializable {
      * are null
      */
     public ServiceBeanConfig(final Map<String, Object> configMap, final String[] configArgs) {
-        if(configMap == null)
+        if (configMap == null)
             throw new IllegalArgumentException("configMap is null");
-        if(configArgs == null)
+        if (configArgs == null)
             throw new IllegalArgumentException("configArgs is null");
         configParms.putAll(configMap);
-        if(configParms.get(HOST_HISTORY)==null)
-            configParms.put(HOST_HISTORY, new ArrayList<String>());
-        if(configParms.get(INSTANCE_ID)==null)
-            configParms.put(INSTANCE_ID, (long) 0);
+        configParms.computeIfAbsent(HOST_HISTORY, k -> new ArrayList<String>());
+        configParms.computeIfAbsent(INSTANCE_ID, k -> (long) 0);
         this.configArgs = new String[configArgs.length];
         System.arraycopy(configArgs, 0, this.configArgs, 0, this.configArgs.length);
     }
@@ -122,7 +120,7 @@ public class ServiceBeanConfig implements Serializable {
      * @param name for the ServiceBean
      */
     public void setName(final String name) {
-        if(name!=null)
+        if (name != null)
             configParms.put(NAME, name);
     }
     
@@ -133,7 +131,7 @@ public class ServiceBeanConfig implements Serializable {
      */
     public String getName() {
         String name = (String)configParms.get(NAME);
-        return ((name==null?"":name));
+        return ((name == null?"":name));
     }
     
     /**
@@ -144,7 +142,7 @@ public class ServiceBeanConfig implements Serializable {
      */
     public String getOperationalStringName() {
         String name = (String)configParms.get(OPSTRING);
-        return ((name==null?"":name));
+        return ((name == null?"":name));
     }
     
     /**
@@ -153,7 +151,7 @@ public class ServiceBeanConfig implements Serializable {
      * @param name of the OperationalString. 
      */
     public void setOperationalStringName(final String name) {
-        if(name!=null)
+        if (name != null)
             configParms.put(OPSTRING, name);
     }
 
@@ -182,7 +180,7 @@ public class ServiceBeanConfig implements Serializable {
      * @param loggerConfigs The {@code LoggerConfig}s to add. If {@code null} no-op.
      */
     public void addLoggerConfig(LoggerConfig... loggerConfigs) {
-        if(loggerConfigs!=null) {
+        if (loggerConfigs != null) {
             Collections.addAll(this.loggerConfigs, loggerConfigs);
         }
     }
@@ -203,7 +201,7 @@ public class ServiceBeanConfig implements Serializable {
      * @param entries Additional {@code Entry} attributes
      */
     public void addAdditionalEntries(Entry... entries) {
-        if(entries!=null) {
+        if (entries != null) {
             Collections.addAll(additionalEntries, entries);
         }
     }
@@ -231,13 +229,13 @@ public class ServiceBeanConfig implements Serializable {
      */
     public void setGroups(final String... groups) {
         String[] g;
-        if(groups == ALL_GROUPS)
+        if (groups == ALL_GROUPS)
             g = new String[]{"all"};
         else {
             g = new String[groups.length];
             System.arraycopy(groups, 0, g, 0, groups.length);
             for(int i=0; i<g.length; i++) {
-                if(g[i].equals(""))
+                if (g[i].equals(""))
                     g[i] = "public";
             }
         }
@@ -261,14 +259,14 @@ public class ServiceBeanConfig implements Serializable {
      */
     public String[] getGroups() {
         String[] groups = (String[])configParms.get(GROUPS);
-        if(groups == null || groups.length == 0)
+        if (groups == null || groups.length == 0)
             groups = NO_GROUPS;
-        if(groups.length > 0) {
-            if(groups.length == 1 && groups[0].equals("all")) {
+        if (groups.length > 0) {
+            if (groups.length == 1 && groups[0].equals("all")) {
                 groups = ALL_GROUPS;
             } else {
                 for(int i = 0; i < groups.length; i++) {
-                    if(groups[i].equals("public"))
+                    if (groups[i].equals("public"))
                         groups[i] = "";
                 }
             }
@@ -300,7 +298,7 @@ public class ServiceBeanConfig implements Serializable {
 
     public Properties getFDHProperties() {
         Properties props = (Properties) configParms.get(FDH);
-        if(props==null)
+        if (props == null)
             props = new Properties();
         return props;
     }
@@ -315,7 +313,7 @@ public class ServiceBeanConfig implements Serializable {
      * @throws IllegalArgumentException if the name parameter is null
      */
     public void addInitParameter(final String name, final Object value) {
-        if(name == null)
+        if (name == null)
             throw new IllegalArgumentException("name is null");
         initParameters.put(name, value);
     }
@@ -336,9 +334,7 @@ public class ServiceBeanConfig implements Serializable {
      * allocated each time this method is invoked
      */
     public Map<String, Object> getConfigurationParameters() {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.putAll(configParms);
-        return (map);
+        return new HashMap<>(configParms);
     }
 
     /**
@@ -362,7 +358,7 @@ public class ServiceBeanConfig implements Serializable {
     }
 
     public void setConfigArgs(final String... configArgs) {
-        if(configArgs == null)
+        if (configArgs == null)
             throw new IllegalArgumentException("configArgs is null");
         this.configArgs = new String[configArgs.length];
         System.arraycopy(configArgs, 0, this.configArgs, 0, this.configArgs.length);
@@ -376,7 +372,7 @@ public class ServiceBeanConfig implements Serializable {
      * object.
      */
     public String[] getConfigArgs() {
-        if(configArgs == null)
+        if (configArgs == null)
             return (new String[]{"-"});
         String[] args = new String[configArgs.length];
         System.arraycopy(configArgs, 0, args, 0, configArgs.length);
@@ -393,11 +389,11 @@ public class ServiceBeanConfig implements Serializable {
         buffer.append("opStringName=").append(configParms.get(OPSTRING)).append("\n");
         String[] groups = (String[])configParms.get(GROUPS);
         buffer.append("lookupGroups={");
-        if(groups==null) {
+        if (groups == null) {
             buffer.append("null");
         } else {
             for(int i=0; i<groups.length; i++) {
-                if(i>0)
+                if (i>0)
                     buffer.append(", ");
                 buffer.append(groups[i]);
             }
@@ -405,9 +401,9 @@ public class ServiceBeanConfig implements Serializable {
         buffer.append("}\n");
         LookupLocator[] locators = (LookupLocator[])configParms.get(LOCATORS);
         buffer.append("lookupLocators={");
-        if(locators!=null) {
+        if (locators != null) {
             for(int i=0; i<locators.length; i++) {
-                if(i>0)
+                if (i>0)
                     buffer.append(", ");
                 buffer.append("\t").append(locators[i].toString()).append("\n");
             }
@@ -416,7 +412,7 @@ public class ServiceBeanConfig implements Serializable {
         }
         buffer.append("}\n");
 
-        if(!loggerConfigs.isEmpty()) {
+        if (!loggerConfigs.isEmpty()) {
             buffer.append("loggerConfig=\n");
             for (Object lConfig : loggerConfigs) {
                 buffer.append(lConfig.toString());
@@ -428,9 +424,9 @@ public class ServiceBeanConfig implements Serializable {
         buffer.append("Initialization Parameters=\n");
         buffer.append(initParameters.toString()).append("\n");
         buffer.append("Configuration Properties=\n");
-        if(configArgs!=null) {
+        if (configArgs != null) {
             for(int i=0; i<configArgs.length; i++) {
-                if(i>0)
+                if (i>0)
                     buffer.append("\n");
                 buffer.append(configArgs[i]);
             }

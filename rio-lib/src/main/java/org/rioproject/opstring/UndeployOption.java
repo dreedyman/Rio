@@ -70,7 +70,7 @@ public class UndeployOption implements Serializable {
      * @throws IllegalArgumentException if the when is <= 0, type is {@code null} or {@code timeUnit} is {@code null}.
      */
     public UndeployOption(final Long when, final Type type, final TimeUnit timeUnit) {
-        if(when<=0 || type==null || timeUnit==null)
+        if (when <= 0 || type == null || timeUnit == null)
             throw new IllegalArgumentException("parameters cannot be null");
         this.when = when;
         this.type = type;

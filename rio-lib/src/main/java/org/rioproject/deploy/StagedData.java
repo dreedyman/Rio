@@ -24,9 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 
 /**
  * The StagedData class defines the attributes needed to download and stage

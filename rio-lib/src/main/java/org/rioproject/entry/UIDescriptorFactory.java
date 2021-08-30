@@ -49,7 +49,7 @@ public class UIDescriptorFactory {
     * @throws IOException if the MarshalledObject cannot be created
     */
     public static UIDescriptor getJComponentDesc(String artifact, String className) throws IOException {
-        if(artifact == null)
+        if (artifact  ==  null)
             throw new IllegalArgumentException("artifact is null");
         return (getJComponentDesc(artifact, new String[]{""}, className));
     }
@@ -64,7 +64,7 @@ public class UIDescriptorFactory {
      * @throws IOException if the MarshalledObject cannot be created
      */
     public static UIDescriptor getJComponentDesc(String codebase, String jarName, String className) throws IOException {
-        if(jarName == null)
+        if (jarName  ==  null)
             throw new IllegalArgumentException("jarName is null");
         return (getJComponentDesc(codebase, new String[]{jarName}, className));
     }
@@ -79,11 +79,11 @@ public class UIDescriptorFactory {
      * @throws IOException if the MarshalledObject cannot be created
      */
     public static UIDescriptor getJComponentDesc(String codebase, String[] jars, String className) throws IOException {
-        if(codebase == null)
+        if (codebase  ==  null)
             throw new IllegalArgumentException("codebase is null");
-        if(jars == null)
+        if (jars  ==  null)
             throw new IllegalArgumentException("jars are null");
-        if(className == null)
+        if (className  ==  null)
             throw new IllegalArgumentException("className is null");
         return getUIDescriptor(MainUI.ROLE, JComponentFactory.TYPE_NAME, codebase, jars, className);
     }
@@ -102,11 +102,11 @@ public class UIDescriptorFactory {
                                              String jarName,
                                              String className)
         throws IOException {
-        if(codebase == null)
+        if (codebase  ==  null)
             throw new IllegalArgumentException("codebase is null");
-        if(jarName == null)
+        if (jarName  ==  null)
             throw new IllegalArgumentException("jarName is null");
-        if(className == null)
+        if (className  ==  null)
             throw new IllegalArgumentException("className is null");
         return getUIDescriptor(MainUI.ROLE, JFrameFactory.TYPE_NAME, codebase, new String[]{jarName}, className);
     }
@@ -122,11 +122,11 @@ public class UIDescriptorFactory {
      */
     public static UIDescriptor getJFrameDesc(String codebase, String[] jars, String className)
     throws IOException {
-        if(codebase==null)
+        if (codebase == null)
             throw new IllegalArgumentException("codebase is null");
-        if(jars==null)
+        if (jars == null)
             throw new IllegalArgumentException("jars are null");
-        if(className==null)
+        if (className == null)
             throw new IllegalArgumentException("className is null");
         return getUIDescriptor(MainUI.ROLE, JFrameFactory.TYPE_NAME, codebase, jars, className);
     }
@@ -148,15 +148,15 @@ public class UIDescriptorFactory {
                                                String codebase,
                                                String[] jars,
                                                String className) throws IOException {
-        if(role == null)
+        if (role  ==  null)
             throw new IllegalArgumentException("role is null");
-        if(typeName == null)
+        if (typeName  ==  null)
             throw new IllegalArgumentException("typeName is null");
-        if(codebase == null)
+        if (codebase  ==  null)
             throw new IllegalArgumentException("codebase is null");
-        if(jars == null)
+        if (jars  ==  null)
             throw new IllegalArgumentException("jars are null");
-        if(className == null)
+        if (className  ==  null)
             throw new IllegalArgumentException("className is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
@@ -168,21 +168,21 @@ public class UIDescriptorFactory {
             urls[i] = new URL(codebase+(codebase.endsWith("/")?"":"/")+jars[i]);
         }
         
-        if(typeName.equals(JComponentFactory.TYPE_NAME)) {
+        if (typeName.equals(JComponentFactory.TYPE_NAME)) {
             types = new UIFactoryTypes( Collections.singleton(JComponentFactory.TYPE_NAME));
             factory = new MarshalledObject<>(new UIComponentFactory(urls, className));
             desc.toolkit = JComponentFactory.TOOLKIT;
-        } else if(typeName.equals(JDialogFactory.TYPE_NAME)) {
+        } else if (typeName.equals(JDialogFactory.TYPE_NAME)) {
             types = new UIFactoryTypes(
                 Collections.singleton(JDialogFactory.TYPE_NAME));
             factory = new MarshalledObject<>(new UIDialogFactory(urls, className));
             desc.toolkit = JDialogFactory.TOOLKIT;
-        } else if(typeName.equals(JFrameFactory.TYPE_NAME)) {
+        } else if (typeName.equals(JFrameFactory.TYPE_NAME)) {
             types = new UIFactoryTypes(
                 Collections.singleton(JFrameFactory.TYPE_NAME));
             factory = new MarshalledObject<>(new UIFrameFactory(urls, className));
             desc.toolkit = JFrameFactory.TOOLKIT;
-        } else if(typeName.equals(JWindowFactory.TYPE_NAME)) {
+        } else if (typeName.equals(JWindowFactory.TYPE_NAME)) {
             types = new UIFactoryTypes(
                 Collections.singleton(JWindowFactory.TYPE_NAME));
             factory = new MarshalledObject<>(new UIWindowFactory(urls, className));
@@ -192,7 +192,7 @@ public class UIDescriptorFactory {
         }
         desc.attributes = Collections.singleton(types);
         desc.factory = factory;
-        return (desc);
+        return desc;
     }
     
     /**
@@ -206,16 +206,16 @@ public class UIDescriptorFactory {
      * @throws IOException if the MarshalledObject cannot be created
      */
     public static UIDescriptor getUIDescriptor(String role, JComponentFactory factory) throws IOException {
-        if(role==null)
+        if (role == null)
             throw new IllegalArgumentException("role is null");
-        if(factory==null)
+        if (factory == null)
             throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JComponentFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JComponentFactory.TYPE_NAME)));
         desc.factory = new MarshalledObject<>(factory);
-        return (desc);
+        return desc;
     }
 
     /**
@@ -229,16 +229,16 @@ public class UIDescriptorFactory {
      * @throws IOException if the MarshalledObject cannot be created
      */
     public static UIDescriptor getUIDescriptor(String role, JDialogFactory factory) throws IOException {
-        if(role==null)
+        if (role == null)
             throw new IllegalArgumentException("role is null");
-        if(factory==null)
+        if (factory == null)
             throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JDialogFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JDialogFactory.TYPE_NAME)));
         desc.factory = new MarshalledObject<>(factory);
-        return (desc);
+        return desc;
     }
 
     /**
@@ -251,28 +251,28 @@ public class UIDescriptorFactory {
      * @throws IOException if the MarshalledObject cannot be created
      */
     public static UIDescriptor getUIDescriptor(String role, JFrameFactory factory) throws IOException {
-        if(role==null)
+        if (role == null)
             throw new IllegalArgumentException("role is null");
-        if(factory==null)
+        if (factory == null)
             throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JFrameFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JFrameFactory.TYPE_NAME)));
         desc.factory = new MarshalledObject<>(factory);
-        return (desc);
+        return desc;
     }
 
     public static UIDescriptor getUIDescriptor(String role, JWindowFactory factory) throws IOException {
-        if(role==null)
+        if (role == null)
             throw new IllegalArgumentException("role is null");
-        if(factory==null)
+        if (factory == null)
             throw new IllegalArgumentException("factory is null");
         UIDescriptor desc = new UIDescriptor();
         desc.role = role;
         desc.toolkit = JWindowFactory.TOOLKIT;
         desc.attributes = Collections.singleton(new UIFactoryTypes(Collections.singleton(JWindowFactory.TYPE_NAME)));
         desc.factory = new MarshalledObject<>(factory);
-        return (desc);
+        return desc;
     }
 }
